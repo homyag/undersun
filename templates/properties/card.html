@@ -1,0 +1,97 @@
+{% load static %}
+{% load i18n %}
+
+<div class="property-card">
+    <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 h-full flex flex-col overflow-hidden group border border-gray-100 hover:border-accent">
+        <div class="relative">
+            {% if property.main_image %}
+                <img src="{{ property.main_image.medium.url }}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" alt="{{ property.title }}" loading="lazy">
+            {% else %}
+                <img src="{% static 'images/no-image.svg' %}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" alt="Изображение недоступно" loading="lazy">
+            {% endif %}
+
+            <!-- Property Status Badge -->
+            <div class="absolute top-2 left-2">
+                {% if property.deal_type == 'sale' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent text-gray-900 shadow-sm">{% trans "Продажа" %}</span>
+                {% elif property.deal_type == 'rent' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary text-white shadow-sm">{% trans "Аренда" %}</span>
+                {% else %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-tertiary text-white shadow-sm">{% trans "Продажа/Аренда" %}</span>
+                {% endif %}
+            </div>
+
+            <!-- Featured Badge -->
+            {% if property.is_featured %}
+                <div class="absolute top-2 right-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent text-gray-900 shadow-sm">
+                        <i class="fas fa-star mr-1"></i> {% trans "Рекомендуем" %}
+                    </span>
+                </div>
+            {% endif %}
+
+            <!-- Favorite Button -->
+            {% if user.is_authenticated %}
+                <div class="absolute {% if property.is_featured %}top-12{% else %}top-2{% endif %} right-2">
+                    <button class="bg-white hover:bg-gray-50 text-gray-600 p-2 rounded-full shadow-sm favorite-btn" data-property-id="{{ property.id }}">
+                        <i class="{% if is_favorite %}fas text-red-500{% else %}far{% endif %} fa-heart"></i>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="p-6 flex-1 flex flex-col">
+            <h6 class="font-bold text-lg text-primary mb-3 leading-tight">
+                <a href="{{ property.get_absolute_url }}" class="hover:text-accent transition-colors">
+                    {{ property.title|truncatechars:50 }}
+                </a>
+            </h6>
+
+            <div class="text-tertiary mb-4 flex items-center font-medium">
+                <i class="fas fa-map-marker-alt mr-2 text-accent"></i>
+                {{ property.district.name }}{% if property.location %}, {{ property.location.name }}{% endif %}
+            </div>
+
+            <div class="mb-6 flex-1">
+                <div class="flex flex-wrap gap-3 justify-center">
+                    {% if property.bedrooms %}
+                        <div class="flex items-center bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-2 rounded-full">
+                            <i class="fas fa-bed text-blue-500 mr-2"></i>
+                            <span class="text-sm font-semibold text-blue-700">{{ property.bedrooms }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if property.bathrooms %}
+                        <div class="flex items-center bg-gradient-to-r from-green-50 to-green-100 px-4 py-2 rounded-full">
+                            <i class="fas fa-bath text-green-500 mr-2"></i>
+                            <span class="text-sm font-semibold text-green-700">{{ property.bathrooms }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if property.area_total %}
+                        <div class="flex items-center bg-gradient-to-r from-purple-50 to-purple-100 px-4 py-2 rounded-full">
+                            <i class="fas fa-ruler-combined text-purple-500 mr-2"></i>
+                            <span class="text-sm font-semibold text-purple-700">{{ property.area_total }}м²</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-6">
+                <div class="property-price">
+                    <span class="text-2xl font-bold bg-gradient-to-r from-accent to-yellow-500 bg-clip-text text-transparent">{{ property.price_display }}</span>
+                </div>
+                <div class="property-type">
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-primary to-blue-600 text-white shadow-md">{{ property.property_type.name_display }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 pt-0">
+            <a href="{{ property.get_absolute_url }}" class="block w-full text-center bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 py-4 px-6 rounded-xl transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105">
+                <i class="fas fa-eye mr-2"></i>
+                {% trans "Подробнее" %}
+            </a>
+        </div>
+    </div>
+</div>

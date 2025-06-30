@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "О нас" %} - Undersun Estate{% endblock %}
+
+{% block content %}
+<!-- About Hero Section -->
+<section class="bg-gradient-to-r from-primary to-blue-800 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center">
+            <h1 class="text-4xl lg:text-6xl font-bold mb-6">
+                {% trans "О компании Undersun Estate" %}
+            </h1>
+            <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
+                {% trans "Профессиональное агентство недвижимости на Пхукете с 10-летним опытом работы" %}
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Company Story -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Наша история" %}</h2>
+                <div class="space-y-4 text-gray-600">
+                    <p>
+                        {% trans "Undersun Estate была основана в 2014 году с миссией помочь людям со всего мира найти дом мечты на прекрасном острове Пхукет. За годы работы мы помогли сотням клиентов приобрести недвижимость в Таиланде." %}
+                    </p>
+                    <p>
+                        {% trans "Наша команда состоит из опытных специалистов по недвижимости, юристов и консультантов, которые говорят на русском, английском и тайском языках. Мы обеспечиваем полное сопровождение сделок от поиска объекта до получения документов." %}
+                    </p>
+                    <p>
+                        {% trans "Мы специализируемся на продаже и аренде вилл, апартаментов, кондоминиумов и земельных участков в лучших районах Пхукета." %}
+                    </p>
+                </div>
+            </div>
+            <div>
+                <img src="{% static 'images/about-office.jpg' %}" alt="{% trans 'Офис Undersun Estate' %}" class="rounded-lg shadow-lg w-full">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши достижения" %}</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="text-4xl font-bold text-primary mb-2">500+</div>
+                <div class="text-gray-600">{% trans "Довольных клиентов" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-primary mb-2">1000+</div>
+                <div class="text-gray-600">{% trans "Объектов в портфолио" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-primary mb-2">10</div>
+                <div class="text-gray-600">{% trans "Лет опыта" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-primary mb-2">3</div>
+                <div class="text-gray-600">{% trans "Языка обслуживания" %}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наша команда" %}</h2>
+            <p class="text-xl text-gray-600">{% trans "Профессионалы с многолетним опытом работы на рынке недвижимости Пхукета" %}</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="text-center">
+                <img src="{% static 'images/team-1.jpg' %}" alt="{% trans 'Директор' %}" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Александр Иванов" %}</h3>
+                <p class="text-primary font-medium mb-2">{% trans "Директор" %}</p>
+                <p class="text-gray-600 text-sm">{% trans "15 лет опыта в сфере недвижимости" %}</p>
+            </div>
+            
+            <div class="text-center">
+                <img src="{% static 'images/team-2.jpg' %}" alt="{% trans 'Менеджер по продажам' %}" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Елена Петрова" %}</h3>
+                <p class="text-primary font-medium mb-2">{% trans "Старший менеджер" %}</p>
+                <p class="text-gray-600 text-sm">{% trans "Специалист по элитной недвижимости" %}</p>
+            </div>
+            
+            <div class="text-center">
+                <img src="{% static 'images/team-3.jpg' %}" alt="{% trans 'Юрист' %}" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Сомчай Танакул" %}</h3>
+                <p class="text-primary font-medium mb-2">{% trans "Юрисконсульт" %}</p>
+                <p class="text-gray-600 text-sm">{% trans "Эксперт по тайскому законодательству" %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши услуги" %}</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-primary text-3xl mb-4">
+                    <i class="fas fa-home"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Продажа недвижимости" %}</h3>
+                <p class="text-gray-600">{% trans "Помогаем найти и купить идеальную недвижимость на Пхукете" %}</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-primary text-3xl mb-4">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Аренда недвижимости" %}</h3>
+                <p class="text-gray-600">{% trans "Долгосрочная и краткосрочная аренда вилл и апартаментов" %}</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-primary text-3xl mb-4">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Юридическое сопровождение" %}</h3>
+                <p class="text-gray-600">{% trans "Полное оформление документов и юридическая поддержка" %}</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-primary text-3xl mb-4">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Инвестиционные консультации" %}</h3>
+                <p class="text-gray-600">{% trans "Помощь в выборе объектов для инвестиций" %}</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-primary text-3xl mb-4">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Управление недвижимостью" %}</h3>
+                <p class="text-gray-600">{% trans "Обслуживание и управление вашей недвижимостью" %}</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-primary text-3xl mb-4">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Сопровождение переезда" %}</h3>
+                <p class="text-gray-600">{% trans "Помощь в переезде и адаптации на Пхукете" %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact CTA -->
+<section class="py-16 bg-primary text-white">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">{% trans "Готовы найти дом мечты?" %}</h2>
+        <p class="text-xl mb-8 opacity-90">{% trans "Свяжитесь с нами сегодня для бесплатной консультации" %}</p>
+        <a href="{% url 'contact' %}" class="bg-accent hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+            {% trans "Связаться с нами" %}
+        </a>
+    </div>
+</section>
+{% endblock %}

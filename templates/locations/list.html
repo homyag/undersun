@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Районы Пхукета" %} - Undersun Estate{% endblock %}
+
+{% block content %}
+<!-- Districts Header -->
+<section class="bg-gradient-to-r from-green-600 to-teal-600 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <h1 class="text-4xl lg:text-6xl font-bold mb-6">
+            {% trans "Районы Пхукета" %}
+        </h1>
+        <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
+            {% trans "Выберите идеальное место для жизни или отдыха на прекрасном острове Пхукет" %}
+        </p>
+    </div>
+</section>
+
+<!-- Districts Grid -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for district in districts %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    {% if district.image %}
+                        <img src="{{ district.image.url }}" alt="{{ district.name }}" class="w-full h-48 object-cover">
+                    {% else %}
+                        <div class="w-full h-48 bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
+                            <span class="text-white text-2xl font-bold">{{ district.name|first }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ district.name }}</h3>
+                        
+                        {% if district.description %}
+                            <p class="text-gray-600 mb-4">{{ district.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm text-gray-500">
+                                <i class="fas fa-home mr-1"></i>
+                                {{ district.properties_count }} {% trans "объектов" %}
+                            </span>
+                            
+                            {% if district.avg_price %}
+                                <span class="text-sm font-medium text-primary">
+                                    {% trans "от" %} ${{ district.avg_price|floatformat:0 }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <a href="{% url 'district_detail' district.slug %}" 
+                           class="block w-full text-center bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                            {% trans "Подробнее" %}
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Phuket Map Overview -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Карта районов Пхукета" %}</h2>
+            <p class="text-gray-600">{% trans "Изучите расположение районов на интерактивной карте" %}</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div id="districts-map" class="w-full h-96"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Phuket -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Почему Пхукет?" %}</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-umbrella-beach text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Лучшие пляжи" %}</h3>
+                <p class="text-gray-600 text-sm">{% trans "Белоснежный песок и кристально чистая вода" %}</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-sun text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Тропический климат" %}</h3>
+                <p class="text-gray-600 text-sm">{% trans "Солнце круглый год, комфортная температура" %}</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-plane text-purple-600 text-2xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Удобная логистика" %}</h3>
+                <p class="text-gray-600 text-sm">{% trans "Международный аэропорт и развитая инфраструктура" %}</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-heart text-yellow-600 text-2xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Качество жизни" %}</h3>
+                <p class="text-gray-600 text-sm">{% trans "Безопасность, медицина, международное сообщество" %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize districts map
+document.addEventListener('DOMContentLoaded', function() {
+    const map = L.map('districts-map').setView([7.8804, 98.3923], 11);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Add district markers
+    const districts = [
+        {% for district in districts %}
+        {
+            name: "{{ district.name|escapejs }}",
+            lat: {{ district.latitude|default:"0" }},
+            lng: {{ district.longitude|default:"0" }},
+            properties_count: {{ district.properties_count }},
+            url: "{% url 'district_detail' district.slug %}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    districts.forEach(function(district) {
+        if (district.lat && district.lng && district.lat !== 0 && district.lng !== 0) {
+            const marker = L.marker([district.lat, district.lng]).addTo(map);
+            
+            const popupContent = `
+                <div class="text-center">
+                    <h3 class="font-semibold text-gray-900 mb-1">${district.name}</h3>
+                    <p class="text-sm text-gray-600 mb-2">${district.properties_count} {% trans "объектов" %}</p>
+                    <a href="${district.url}" class="text-primary hover:underline text-sm">{% trans "Подробнее" %}</a>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+        }
+    });
+});
+</script>
+{% endblock %}
