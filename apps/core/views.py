@@ -2,6 +2,7 @@ from django.views.generic import TemplateView
 from django.db.models import Q, Count
 from apps.properties.models import Property, PropertyType
 from apps.locations.models import District
+from .models import PromotionalBanner
 
 
 class HomeView(TemplateView):
@@ -32,6 +33,9 @@ class HomeView(TemplateView):
         context['districts'] = District.objects.annotate(
             properties_count=Count('property', filter=Q(property__is_active=True, property__status='available'))
         ).filter(properties_count__gt=0)
+
+        # Активный рекламный баннер
+        context['promotional_banner'] = PromotionalBanner.get_active_banner()
 
         return context
 

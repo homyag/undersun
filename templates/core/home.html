@@ -6,7 +6,11 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section relative min-h-screen flex items-center overflow-hidden">
+<section class="hero-section relative flex items-center overflow-hidden" style="min-height: calc(100vh - 189px); padding-top: 64px;" 
+         data-mobile-height="calc(100vh - 189px)" 
+         data-desktop-height="calc(100vh - 229px)" 
+         data-mobile-padding="64px" 
+         data-desktop-padding="104px">
     <!-- Background Slideshow -->
     <div class="absolute inset-0">
         <div id="hero-slide-1" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-100" style="background-image: url('{% static 'images/home_page/hero_section_1.webp' %}');"></div>
@@ -77,8 +81,117 @@
     </div>
 </section>
 
+<!-- Promotional Banner Section -->
+{% if promotional_banner %}
+<section class="promotional-banner-section relative overflow-hidden bg-gradient-to-r from-accent to-accent/80" style="min-height: 125px;">
+    <!-- Background Image -->
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ promotional_banner.image.url }}');"></div>
+        <div class="absolute inset-0 bg-black/20"></div>
+    </div>
+    
+    <!-- Content -->
+    <div class="relative z-10 h-full max-w-7xl mx-auto px-4 py-4">
+        <!-- Desktop Layout -->
+        <div class="hidden md:flex items-center justify-between h-full min-h-[100px]">
+            <!-- Left side - Text content -->
+            <div class="flex items-center space-x-6">
+                <!-- Title and description -->
+                <div>
+                    <h2 class="text-2xl font-bold text-white leading-tight">
+                        {{ promotional_banner.title }}
+                    </h2>
+                    {% if promotional_banner.description %}
+                    <p class="text-white/90 text-sm mt-1 max-w-md">
+                        {{ promotional_banner.description|truncatewords:10 }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Discount badge -->
+                {% if promotional_banner.discount_text %}
+                <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/30">
+                    <div class="text-white font-bold text-lg">
+                        {{ promotional_banner.discount_text }}
+                    </div>
+                    {% if promotional_banner.valid_until %}
+                    <div class="text-white/80 text-xs">
+                        {% trans "до" %} {{ promotional_banner.valid_until|date:"d.m.Y" }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Right side - Action button -->
+            <div>
+                {% if promotional_banner.button_text and promotional_banner.button_url %}
+                <a href="{{ promotional_banner.button_url }}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    {{ promotional_banner.button_text }}
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                {% else %}
+                <a href="{% url 'property_list' %}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    {% trans "Смотреть предложения" %}
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mobile Layout -->
+        <div class="md:hidden flex flex-col space-y-3 min-h-[100px] justify-center">
+            <!-- Title and discount in one row -->
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <h2 class="text-lg font-bold text-white leading-tight">
+                        {{ promotional_banner.title }}
+                    </h2>
+                    {% if promotional_banner.description %}
+                    <p class="text-white/90 text-xs mt-1">
+                        {{ promotional_banner.description|truncatewords:8 }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                {% if promotional_banner.discount_text %}
+                <div class="bg-white/20 backdrop-blur-sm rounded px-3 py-1 border border-white/30 ml-3">
+                    <div class="text-white font-bold text-sm">
+                        {{ promotional_banner.discount_text }}
+                    </div>
+                    {% if promotional_banner.valid_until %}
+                    <div class="text-white/80 text-xs">
+                        {% trans "до" %} {{ promotional_banner.valid_until|date:"d.m" }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Action button -->
+            <div class="flex justify-center">
+                {% if promotional_banner.button_text and promotional_banner.button_url %}
+                <a href="{{ promotional_banner.button_url }}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-lg transition-all duration-300 shadow-lg">
+                    {{ promotional_banner.button_text }}
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                {% else %}
+                <a href="{% url 'property_list' %}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-lg transition-all duration-300 shadow-lg">
+                    {% trans "Смотреть предложения" %}
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Subtle gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-r from-accent/10 to-primary/10 pointer-events-none"></div>
+</section>
+{% endif %}
+
 <!-- Property Types -->
-<section class="py-16 bg-gradient-to-br from-gray-50 to-white relative">
+<section class="pt-16 pb-16 bg-gradient-to-br from-gray-50 to-white relative">
     <div class="max-w-7xl mx-auto px-4">
         <!-- Header block with yellow corners -->
         <div class="text-center mb-12 lg:mb-16 relative">
@@ -649,8 +762,30 @@
 
 {% block extra_js %}
 <script>
+// Hero Section Responsive Height Adjustment
+function adjustHeroHeight() {
+    const heroSection = document.querySelector('.hero-section');
+    if (!heroSection) return;
+    
+    if (window.innerWidth >= 1024) {
+        // Desktop: account for contact bar + navigation (40px + 64px = 104px)
+        heroSection.style.minHeight = heroSection.dataset.desktopHeight;
+        heroSection.style.paddingTop = heroSection.dataset.desktopPadding;
+    } else {
+        // Mobile: only navigation (64px)
+        heroSection.style.minHeight = heroSection.dataset.mobileHeight;
+        heroSection.style.paddingTop = heroSection.dataset.mobilePadding;
+    }
+}
+
 // Hero Section Background Slideshow
 document.addEventListener('DOMContentLoaded', function() {
+    // Adjust height on load
+    adjustHeroHeight();
+    
+    // Adjust height on resize
+    window.addEventListener('resize', adjustHeroHeight);
+    
     const slides = document.querySelectorAll('.hero-slide');
     let currentSlide = 0;
     

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SEOPage, SEOTemplate
+from .models import SEOPage, SEOTemplate, PromotionalBanner
 
 
 @admin.register(SEOPage)
@@ -168,6 +168,107 @@ class SEOTemplateAdmin(admin.ModelAdmin):
         # Здесь можно добавить логику для тестирования шаблонов
         self.message_user(request, f"Тестирование {queryset.count()} шаблонов")
     test_template.short_description = "Тестировать выбранные шаблоны"
+    
+    class Media:
+        css = {
+            'all': ('admin/css/seo_admin.css',)
+        }
+        js = ('admin/js/seo_admin.js',)
+
+
+@admin.register(PromotionalBanner)
+class PromotionalBannerAdmin(admin.ModelAdmin):
+    list_display = ('title', 'discount_text', 'is_active', 'priority', 'valid_until', 'created_at')
+    list_filter = ('is_active', 'valid_until', 'created_at')
+    search_fields = ('title', 'description', 'discount_text', 'button_text')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_active', 'priority')
+    ordering = ['priority', '-created_at']
+    
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('title', 'description', 'image'),
+            'description': 'Основное содержимое рекламного баннера'
+        }),
+        ('Предложение и акция', {
+            'fields': ('discount_text', 'valid_until'),
+            'description': 'Информация о скидке или специальном предложении'
+        }),
+        ('Кнопка действия', {
+            'fields': ('button_text', 'button_url'),
+            'description': 'Настройки кнопки призыва к действию'
+        }),
+        ('Настройки отображения', {
+            'fields': ('is_active', 'priority'),
+            'description': 'Приоритет: чем меньше число, тем выше приоритет. Показывается только один активный баннер с наивысшим приоритетом'
+        }),
+        ('Системная информация', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_form(self, request, obj=None, **kwargs):
+        """Настройка формы с подсказками"""
+        form = super().get_form(request, obj, **kwargs)
+        
+        # Добавляем help_text для полей
+        help_texts = {
+            'title': 'Основной заголовок баннера (до 200 символов)',
+            'description': 'Описание предложения (до 500 символов)',
+            'image': 'Фоновое изображение баннера. Рекомендуемое разрешение: 1920x1080 пикселей',
+            'discount_text': 'Текст акции или скидки, например "Скидка 20%" или "Ограниченное предложение"',
+            'valid_until': 'Дата окончания действия предложения. Оставьте пустым для бессрочного предложения',
+            'button_text': 'Текст на кнопке призыва к действию',
+            'button_url': 'Ссылка для перехода при нажатии на кнопку (URL или Django URL pattern)',
+            'is_active': 'Показывать ли баннер на сайте',
+            'priority': 'Чем меньше число, тем выше приоритет (1 = самый высокий приоритет)',
+        }
+        
+        for field_name, help_text in help_texts.items():
+            if field_name in form.base_fields:
+                form.base_fields[field_name].help_text = help_text
+        
+        return form
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('priority', '-created_at')
+    
+    actions = ['activate_banners', 'deactivate_banners', 'duplicate_banners']
+    
+    def activate_banners(self, request, queryset):
+        """Активировать выбранные баннеры"""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"Активировано {updated} баннеров")
+    activate_banners.short_description = "Активировать выбранные баннеры"
+    
+    def deactivate_banners(self, request, queryset):
+        """Деактивировать выбранные баннеры"""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"Деактивировано {updated} баннеров")
+    deactivate_banners.short_description = "Деактивировать выбранные баннеры"
+    
+    def duplicate_banners(self, request, queryset):
+        """Дублировать выбранные баннеры"""
+        for banner in queryset:
+            banner.pk = None
+            banner.title = f"{banner.title} (копия)"
+            banner.is_active = False  # Копии создаются неактивными
+            banner.save()
+        self.message_user(request, f"Продублировано {queryset.count()} баннеров")
+    duplicate_banners.short_description = "Дублировать выбранные баннеры"
+    
+    def save_model(self, request, obj, form, change):
+        """Дополнительная логика при сохранении"""
+        super().save_model(request, obj, form, change)
+        
+        # Показываем предупреждение, если создается баннер с истекшим сроком действия
+        if obj.valid_until:
+            from django.utils import timezone
+            if obj.valid_until < timezone.now().date():
+                self.message_user(request, 
+                    f"Внимание: Дата окончания действия баннера '{obj.title}' уже прошла!", 
+                    level='WARNING')
     
     class Media:
         css = {
