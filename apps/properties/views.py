@@ -198,14 +198,8 @@ class PropertyDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Похожие объекты
-        similar_properties = Property.objects.filter(
-            property_type=self.object.property_type,
-            district=self.object.district,
-            is_active=True,
-            status='available'
-        ).exclude(id=self.object.id).select_related('district', 'property_type').prefetch_related('images')[:4]
-
+        # Похожие объекты с приоритетом по локации
+        similar_properties = self.get_similar_properties()
         context['similar_properties'] = similar_properties
 
         # Проверяем, добавлен ли объект в избранное
@@ -216,6 +210,72 @@ class PropertyDetailView(DetailView):
             ).exists()
 
         return context
+    
+    def get_similar_properties(self):
+        """
+        Получает похожие объекты с приоритетом по локации и типу недвижимости
+        Приоритет:
+        1. Тот же тип + та же конкретная локация (location)
+        2. Тот же тип + тот же район (district) 
+        3. Тот же тип + любая локация
+        """
+        base_filter = {
+            'property_type': self.object.property_type,
+            'is_active': True,
+            'status': 'available'
+        }
+        
+        similar_properties = []
+        
+        # 1. Приоритет: та же конкретная локация (если есть)
+        if self.object.location:
+            same_location = Property.objects.filter(
+                location=self.object.location,
+                **base_filter
+            ).exclude(id=self.object.id).select_related(
+                'district', 'location', 'property_type'
+            ).prefetch_related('images')[:2]
+            
+            similar_properties.extend(same_location)
+        
+        # 2. Тот же район (но другая локация или без локации)
+        if len(similar_properties) < 4:
+            same_district = Property.objects.filter(
+                district=self.object.district,
+                **base_filter
+            ).exclude(id=self.object.id)
+            
+            # Исключаем уже добавленные объекты
+            if similar_properties:
+                same_district = same_district.exclude(
+                    id__in=[prop.id for prop in similar_properties]
+                )
+            
+            same_district = same_district.select_related(
+                'district', 'location', 'property_type'
+            ).prefetch_related('images')[:(4 - len(similar_properties))]
+            
+            similar_properties.extend(same_district)
+        
+        # 3. Тот же тип недвижимости (любая локация)
+        if len(similar_properties) < 4:
+            same_type = Property.objects.filter(
+                **base_filter
+            ).exclude(id=self.object.id)
+            
+            # Исключаем уже добавленные объекты
+            if similar_properties:
+                same_type = same_type.exclude(
+                    id__in=[prop.id for prop in similar_properties]
+                )
+            
+            same_type = same_type.select_related(
+                'district', 'location', 'property_type'
+            ).prefetch_related('images')[:(4 - len(similar_properties))]
+            
+            similar_properties.extend(same_type)
+        
+        return similar_properties[:4]
 
 
 @require_POST

@@ -8,18 +8,30 @@
 
 {% block content %}
 <!-- Property Gallery -->
-<section class="py-8">
+<section class="py-8 mt-10">
     <div class="max-w-7xl mx-auto px-4">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
             <!-- Main Image -->
-            <div class="lg:col-span-3">
+            <div class="lg:col-span-3 relative group">
                 {% if property.main_image %}
                     <img src="{{ property.main_image.medium.url }}" alt="{{ property.title }}" 
-                         class="w-full h-96 lg:h-[500px] object-cover rounded-lg cursor-pointer"
+                         class="w-full h-96 lg:h-[500px] object-cover rounded-xl cursor-pointer transition-transform duration-300 group-hover:scale-105 shadow-lg"
                          onclick="openGallery(0)" loading="lazy">
+                    <!-- Overlay with Gallery Icon -->
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-xl flex items-center justify-center">
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white bg-opacity-90 p-3 rounded-full">
+                            <i class="fas fa-search-plus text-xl text-gray-800"></i>
+                        </div>
+                    </div>
+                    <!-- Photo Counter Badge -->
+                    {% if property.images.count > 1 %}
+                        <div class="absolute bottom-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-images mr-1"></i>{{ property.images.count }} {% trans "фото" %}
+                        </div>
+                    {% endif %}
                 {% else %}
                     <img src="{% static 'images/no-image.svg' %}" alt="Изображение недоступно"
-                         class="w-full h-96 lg:h-[500px] object-cover rounded-lg" loading="lazy">
+                         class="w-full h-96 lg:h-[500px] object-cover rounded-xl shadow-lg" loading="lazy">
                 {% endif %}
             </div>
             
@@ -27,14 +39,22 @@
             <div class="lg:col-span-1">
                 <div class="grid grid-cols-4 lg:grid-cols-1 gap-2">
                     {% for image in property.images.all|slice:":4" %}
-                        <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}" 
-                             class="w-full h-20 lg:h-24 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity"
-                             onclick="openGallery({{ forloop.counter0 }})">
+                        <div class="relative group cursor-pointer" onclick="openGallery({{ forloop.counter0 }})">
+                            <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}" 
+                                 class="w-full h-20 lg:h-24 object-cover rounded-lg hover:opacity-75 transition-all duration-300 group-hover:scale-105 shadow-md border-2 border-transparent hover:border-accent">
+                            <!-- Hover Overlay -->
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-eye text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                            </div>
+                        </div>
                     {% endfor %}
                     {% if property.images.count > 4 %}
-                        <div class="w-full h-20 lg:h-24 bg-gray-800 bg-opacity-75 rounded flex items-center justify-center text-white font-semibold cursor-pointer"
+                        <div class="w-full h-20 lg:h-24 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center text-white font-semibold cursor-pointer hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-md border-2 border-transparent hover:border-accent"
                              onclick="openGallery(4)">
-                            +{{ property.images.count|add:"-4" }}
+                            <div class="text-center">
+                                <div class="text-lg">+{{ property.images.count|add:"-4" }}</div>
+                                <div class="text-xs">{% trans "ещё" %}</div>
+                            </div>
                         </div>
                     {% endif %}
                 </div>
@@ -101,34 +121,66 @@
                     <!-- Key Features -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         {% if property.bedrooms %}
-                            <div class="text-center p-3 bg-gray-50 rounded-lg">
-                                <i class="fas fa-bed text-primary text-xl mb-1"></i>
-                                <div class="font-semibold">{{ property.bedrooms }}</div>
-                                <div class="text-sm text-gray-600">{% trans "Спален" %}</div>
+                            <div class="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-300">
+                                <i class="fas fa-bed text-blue-600 text-2xl mb-2"></i>
+                                <div class="font-bold text-xl text-blue-900">{{ property.bedrooms }}</div>
+                                <div class="text-sm text-blue-700 font-medium">{% trans "Спален" %}</div>
                             </div>
                         {% endif %}
                         
                         {% if property.bathrooms %}
-                            <div class="text-center p-3 bg-gray-50 rounded-lg">
-                                <i class="fas fa-bath text-primary text-xl mb-1"></i>
-                                <div class="font-semibold">{{ property.bathrooms }}</div>
-                                <div class="text-sm text-gray-600">{% trans "Ванных" %}</div>
+                            <div class="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-300">
+                                <i class="fas fa-bath text-green-600 text-2xl mb-2"></i>
+                                <div class="font-bold text-xl text-green-900">{{ property.bathrooms }}</div>
+                                <div class="text-sm text-green-700 font-medium">{% trans "Ванных" %}</div>
                             </div>
                         {% endif %}
                         
                         {% if property.area_total %}
-                            <div class="text-center p-3 bg-gray-50 rounded-lg">
-                                <i class="fas fa-ruler-combined text-primary text-xl mb-1"></i>
-                                <div class="font-semibold">{{ property.area_total }}</div>
-                                <div class="text-sm text-gray-600">м²</div>
+                            <div class="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300">
+                                <i class="fas fa-ruler-combined text-purple-600 text-2xl mb-2"></i>
+                                <div class="font-bold text-xl text-purple-900">{{ property.area_total }}</div>
+                                <div class="text-sm text-purple-700 font-medium">м²</div>
                             </div>
                         {% endif %}
                         
                         {% if property.area_land %}
-                            <div class="text-center p-3 bg-gray-50 rounded-lg">
-                                <i class="fas fa-globe text-primary text-xl mb-1"></i>
-                                <div class="font-semibold">{{ property.area_land }}</div>
-                                <div class="text-sm text-gray-600">{% trans "Участок м²" %}</div>
+                            <div class="text-center p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 hover:from-amber-100 hover:to-amber-200 transition-all duration-300">
+                                <i class="fas fa-globe text-amber-600 text-2xl mb-2"></i>
+                                <div class="font-bold text-xl text-amber-900">{{ property.area_land }}</div>
+                                <div class="text-sm text-amber-700 font-medium">{% trans "Участок м²" %}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if property.floor %}
+                            <div class="text-center p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl border border-indigo-200 hover:from-indigo-100 hover:to-indigo-200 transition-all duration-300">
+                                <i class="fas fa-layer-group text-indigo-600 text-2xl mb-2"></i>
+                                <div class="font-bold text-xl text-indigo-900">{{ property.floor }}{% if property.floors_total %}/{{ property.floors_total }}{% endif %}</div>
+                                <div class="text-sm text-indigo-700 font-medium">{% trans "Этаж" %}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if property.year_built %}
+                            <div class="text-center p-4 bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl border border-rose-200 hover:from-rose-100 hover:to-rose-200 transition-all duration-300">
+                                <i class="fas fa-calendar-alt text-rose-600 text-2xl mb-2"></i>
+                                <div class="font-bold text-xl text-rose-900">{{ property.year_built }}</div>
+                                <div class="text-sm text-rose-700 font-medium">{% trans "Год" %}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if property.parking %}
+                            <div class="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 hover:from-gray-100 hover:to-gray-200 transition-all duration-300">
+                                <i class="fas fa-car text-gray-600 text-2xl mb-2"></i>
+                                <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
+                                <div class="text-sm text-gray-700 font-medium">{% trans "Парковка" %}</div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if property.pool %}
+                            <div class="text-center p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200 hover:from-cyan-100 hover:to-cyan-200 transition-all duration-300">
+                                <i class="fas fa-swimming-pool text-cyan-600 text-2xl mb-2"></i>
+                                <div class="font-bold text-xl text-cyan-900">{% trans "Есть" %}</div>
+                                <div class="text-sm text-cyan-700 font-medium">{% trans "Бассейн" %}</div>
                             </div>
                         {% endif %}
                     </div>
@@ -148,18 +200,19 @@
                         <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Особенности и удобства" %}</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {% for feature_relation in property.features.all %}
-                                <div class="flex items-center">
+                                <div class="flex items-center p-2 rounded-lg hover:bg-gray-50 transition-colors">
                                     {% if feature_relation.feature.icon %}
-                                        <i class="{{ feature_relation.feature.icon }} text-primary mr-2"></i>
+                                        <i class="{{ feature_relation.feature.icon }} text-primary mr-3 text-lg"></i>
                                     {% else %}
-                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <i class="fas fa-check text-green-500 mr-3 text-lg"></i>
                                     {% endif %}
-                                    <span>{{ feature_relation.feature.name }}{% if feature_relation.value %}: {{ feature_relation.value }}{% endif %}</span>
+                                    <span class="font-medium">{{ feature_relation.feature.name }}{% if feature_relation.value %}: <span class="text-gray-600">{{ feature_relation.value }}</span>{% endif %}</span>
                                 </div>
                             {% endfor %}
                         </div>
                     </div>
                 {% endif %}
+                
                 
                 <!-- Map -->
                 {% if property.latitude and property.longitude %}
@@ -222,14 +275,21 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Детали объекта" %}</h3>
                     
                     <div class="space-y-3 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">{% trans "ID объекта:" %}</span>
-                            <span class="font-medium">#{{ property.id }}</span>
-                        </div>
+                        {% if property.legacy_id %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">{% trans "ID объекта:" %}</span>
+                                <span class="font-medium">{{ property.legacy_id }}</span>
+                            </div>
+                        {% endif %}
                         
                         <div class="flex justify-between">
                             <span class="text-gray-600">{% trans "Тип:" %}</span>
                             <span class="font-medium">{{ property.property_type.name_display }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{% trans "Обновлено:" %}</span>
+                            <span class="font-medium">{{ property.updated_at|date:"d.m.Y" }}</span>
                         </div>
                         
                         {% if property.year_built %}
@@ -245,16 +305,6 @@
                                 <span class="font-medium">{{ property.floor }}</span>
                             </div>
                         {% endif %}
-                        
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">{% trans "Добавлено:" %}</span>
-                            <span class="font-medium">{{ property.created_at|date:"d.m.Y" }}</span>
-                        </div>
-                        
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">{% trans "Обновлено:" %}</span>
-                            <span class="font-medium">{{ property.updated_at|date:"d.m.Y" }}</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -278,30 +328,71 @@
 {% endif %}
 
 <!-- Gallery Modal -->
-<div id="gallery-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden">
+<div id="gallery-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
     <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="relative max-w-4xl w-full">
-            <button onclick="closeGallery()" class="absolute top-4 right-4 text-white text-2xl z-10">
-                <i class="fas fa-times"></i>
-            </button>
+        <div class="relative max-w-6xl w-full">
+            <!-- Header -->
+            <div class="absolute top-4 left-0 right-0 z-20 flex justify-between items-center px-6">
+                <div class="text-white text-lg font-medium bg-black bg-opacity-50 px-4 py-2 rounded-full">
+                    {{ property.title }}
+                </div>
+                <button onclick="closeGallery()" class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             
-            <img id="gallery-image" src="" alt="" class="w-full h-auto max-h-[80vh] object-contain">
+            <!-- Main Image -->
+            <div class="relative">
+                <img id="gallery-image" src="" alt="{{ property.title }}" 
+                     class="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl">
+                
+                <!-- Loading Indicator -->
+                <div id="gallery-loading" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-lg hidden">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                </div>
+            </div>
             
+            <!-- Navigation Buttons -->
             <div class="absolute inset-y-0 left-4 flex items-center">
-                <button onclick="previousImage()" class="text-white text-2xl bg-black bg-opacity-50 p-2 rounded-full">
+                <button onclick="previousImage()" class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm">
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
             
             <div class="absolute inset-y-0 right-4 flex items-center">
-                <button onclick="nextImage()" class="text-white text-2xl bg-black bg-opacity-50 p-2 rounded-full">
+                <button onclick="nextImage()" class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm">
                     <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
             
-            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm">
-                <span id="gallery-counter">1 / 1</span>
+            <!-- Footer Info -->
+            <div class="absolute bottom-4 left-0 right-0 z-20 flex justify-between items-center px-6">
+                <div class="text-white text-sm bg-black bg-opacity-50 px-4 py-2 rounded-full backdrop-blur-sm">
+                    <span id="gallery-counter">1 / 1</span>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="downloadImage()" class="text-white text-sm bg-black bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm">
+                        <i class="fas fa-download mr-2"></i>{% trans "Скачать" %}
+                    </button>
+                    <button onclick="shareImage()" class="text-white text-sm bg-black bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm">
+                        <i class="fas fa-share mr-2"></i>{% trans "Поделиться" %}
+                    </button>
+                </div>
             </div>
+            
+            <!-- Thumbnail Navigation -->
+            {% if property.images.count > 1 %}
+                <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
+                    <div class="flex space-x-2 bg-black bg-opacity-50 p-2 rounded-full backdrop-blur-sm overflow-x-auto max-w-xs md:max-w-md">
+                        {% for image in property.images.all %}
+                            <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}" 
+                                 class="w-12 h-12 object-cover rounded cursor-pointer border-2 border-transparent hover:border-white transition-all duration-200 gallery-thumb"
+                                 data-index="{{ forloop.counter0 }}"
+                                 onclick="openGallery({{ forloop.counter0 }})">
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -332,8 +423,67 @@ function closeGallery() {
 
 function updateGalleryImage() {
     if (images.length > 0) {
-        document.getElementById('gallery-image').src = images[currentImageIndex];
+        const galleryImage = document.getElementById('gallery-image');
+        const loading = document.getElementById('gallery-loading');
+        
+        // Show loading
+        loading.classList.remove('hidden');
+        
+        // Update image
+        galleryImage.onload = function() {
+            loading.classList.add('hidden');
+        };
+        
+        galleryImage.src = images[currentImageIndex];
         document.getElementById('gallery-counter').textContent = `${currentImageIndex + 1} / ${images.length}`;
+        
+        // Update thumbnail highlights
+        const thumbs = document.querySelectorAll('.gallery-thumb');
+        thumbs.forEach((thumb, index) => {
+            if (index === currentImageIndex) {
+                thumb.classList.add('border-accent', 'border-4');
+                thumb.classList.remove('border-transparent', 'border-2');
+            } else {
+                thumb.classList.remove('border-accent', 'border-4');
+                thumb.classList.add('border-transparent', 'border-2');
+            }
+        });
+    }
+}
+
+// Download image function
+function downloadImage() {
+    if (images.length > 0) {
+        const link = document.createElement('a');
+        link.href = images[currentImageIndex];
+        link.download = `{{ property.title|slugify }}-${currentImageIndex + 1}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// Share image function
+function shareImage() {
+    if (navigator.share && images.length > 0) {
+        navigator.share({
+            title: '{{ property.title|escapejs }}',
+            text: '{% trans "Посмотрите на эту недвижимость" %}',
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        // Fallback: copy URL to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            // Show notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            notification.textContent = '{% trans "Ссылка скопирована в буфер обмена" %}';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        });
     }
 }
 
