@@ -36,6 +36,9 @@ class HomeView(TemplateView):
 
         # Активный рекламный баннер
         context['promotional_banner'] = PromotionalBanner.get_active_banner()
+        
+        # Типы недвижимости для поиска
+        context['property_types'] = PropertyType.objects.all()
 
         return context
 
@@ -86,11 +89,30 @@ class SearchView(TemplateView):
         if deal_type:
             properties = properties.filter(deal_type=deal_type)
 
+        # Получаем текущую валюту (аналогично context_processor)
+        from apps.currency.services import CurrencyService
+        selected_currency_code = self.request.session.get('currency')
+        if not selected_currency_code:
+            language = getattr(self.request, 'LANGUAGE_CODE', 'en')
+            default_currency = CurrencyService.get_currency_for_language(language)
+            selected_currency_code = default_currency.code if default_currency else 'USD'
+        current_currency = CurrencyService.get_currency_by_code(selected_currency_code)
+        
         if min_price:
-            properties = properties.filter(price_sale_usd__gte=min_price)
+            if current_currency and current_currency.code == 'RUB':
+                properties = properties.filter(price_sale_rub__gte=min_price)
+            elif current_currency and current_currency.code == 'THB':
+                properties = properties.filter(price_sale_thb__gte=min_price)
+            else:
+                properties = properties.filter(price_sale_usd__gte=min_price)
 
         if max_price:
-            properties = properties.filter(price_sale_usd__lte=max_price)
+            if current_currency and current_currency.code == 'RUB':
+                properties = properties.filter(price_sale_rub__lte=max_price)
+            elif current_currency and current_currency.code == 'THB':
+                properties = properties.filter(price_sale_thb__lte=max_price)
+            else:
+                properties = properties.filter(price_sale_usd__lte=max_price)
 
         if bedrooms:
             properties = properties.filter(bedrooms=bedrooms)
@@ -102,8 +124,12 @@ class SearchView(TemplateView):
         page_obj = paginator.get_page(page_number)
 
         context['properties'] = page_obj
+        context['results'] = page_obj  # Добавляем для совместимости с шаблоном
+        context['page_obj'] = page_obj
+        context['is_paginated'] = page_obj.has_other_pages()
         context['property_types'] = PropertyType.objects.all()
         context['districts'] = District.objects.all()
+        context['query'] = query
         context['search_params'] = {
             'q': query,
             'type': property_type,

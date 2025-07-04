@@ -8,7 +8,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'undersunestate_full',
+        'NAME': env('DB_NAME', default='undersunestate_full'),
         'USER': env('DB_USER', default=''),
         'PASSWORD': env('DB_PASSWORD', default=''),
         'HOST': env('DB_HOST', default='localhost'),

@@ -19,10 +19,10 @@ class PropertyFeatureInline(admin.TabularInline):
 
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
-    list_display = (
-    'title', 'property_type', 'district', 'deal_type', 'status', 'price_sale_usd', 'is_featured', 'created_at')
-    list_filter = ('property_type', 'district', 'deal_type', 'status', 'is_featured', 'furnished')
-    search_fields = ('title', 'description', 'address')
+    list_display = ('legacy_id',
+    'title', 'property_type', 'location', 'deal_type', 'status', 'price_sale_usd', 'is_featured', 'created_at')
+    list_filter = ('property_type', 'location', 'deal_type', 'status', 'is_featured', 'furnished')
+    search_fields = ('legacy_id', 'title', 'description', 'address')
     prepopulated_fields = {'slug': ('title',)}
     inlines = [PropertyImageInline, PropertyFeatureInline]
 
@@ -34,7 +34,7 @@ class PropertyAdmin(admin.ModelAdmin):
             'fields': ('description', 'short_description')
         }),
         ('Локация', {
-            'fields': ('district', 'location', 'address', 'latitude', 'longitude')
+            'fields': ('location', 'address', 'latitude', 'longitude')
         }),
         ('Характеристики', {
             'fields': ('bedrooms', 'bathrooms', 'area_total', 'area_living', 'area_land', 'floor', 'floors_total')

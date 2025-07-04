@@ -48,6 +48,7 @@ LOCAL_APPS = [
     'apps.properties.apps.PropertiesConfig',
     'apps.locations.apps.LocationsConfig',
     'apps.users.apps.UsersConfig',
+    'apps.currency.apps.CurrencyConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -76,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.currency.context_processors.currency_context',
                 'django.template.context_processors.i18n',
                 'apps.core.context_processors.site_context',
                 'apps.core.context_processors.seo_context',

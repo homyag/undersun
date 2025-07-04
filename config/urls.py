@@ -9,6 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')),  # Интерфейс для переводов
     path('i18n/', include('django.conf.urls.i18n')),  # URLs для смены языка
+    path('currency/', include('apps.currency.urls')),  # URLs для валют
     path('', RedirectView.as_view(url='/ru/', permanent=True)),  # Редирект на русскую версию
 ]
 

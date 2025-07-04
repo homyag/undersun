@@ -93,8 +93,11 @@ class Property(models.Model):
     # Цены
     price_sale_usd = models.DecimalField(_('Цена продажи, USD'), max_digits=12, decimal_places=2, blank=True, null=True)
     price_sale_thb = models.DecimalField(_('Цена продажи, THB'), max_digits=15, decimal_places=2, blank=True, null=True)
+    price_sale_rub = models.DecimalField(_('Цена продажи, RUB'), max_digits=15, decimal_places=2, blank=True, null=True)
     price_rent_monthly = models.DecimalField(_('Аренда в месяц, USD'), max_digits=10, decimal_places=2, blank=True,
                                              null=True)
+    price_rent_monthly_thb = models.DecimalField(_('Аренда в месяц, THB'), max_digits=12, decimal_places=2, blank=True, null=True)
+    price_rent_monthly_rub = models.DecimalField(_('Аренда в месяц, RUB'), max_digits=12, decimal_places=2, blank=True, null=True)
 
     # Дополнительная информация
     developer = models.ForeignKey(Developer, on_delete=models.SET_NULL, blank=True, null=True,
@@ -106,7 +109,7 @@ class Property(models.Model):
     security = models.BooleanField(_('Охрана'), default=False)
     gym = models.BooleanField(_('Спортзал'), default=False)
 
-    # Новые поля для совместимости со старой БД
+    # Поля для совместимости со старой БД
     legacy_id = models.CharField(_('ID старой системы'), max_length=20, blank=True, null=True, unique=True,
                                 help_text=_('Идентификатор из старой Joomla системы (например: VS82)'))
     complex_name = models.CharField(_('Название комплекса'), max_length=100, blank=True,
@@ -198,6 +201,70 @@ class Property(models.Model):
         elif self.deal_type == 'rent' and self.price_rent_monthly:
             return f"${self.price_rent_monthly:,.0f}/мес"
         return "Цена по запросу"
+    
+    def get_price_in_currency(self, currency_code, deal_type='sale'):
+        """Получить цену в указанной валюте"""
+        from apps.currency.models import Currency, ExchangeRate
+        from decimal import Decimal
+        
+        # Получаем базовую цену (всегда храним в USD)
+        if deal_type == 'sale':
+            base_price = self.price_sale_usd
+        else:
+            base_price = self.price_rent_monthly
+            
+        if not base_price:
+            return None
+            
+        # Если нужная валюта USD, возвращаем как есть
+        if currency_code == 'USD':
+            return base_price
+            
+        # Если есть уже сохраненная цена в нужной валюте, возвращаем ее
+        if currency_code == 'THB':
+            if deal_type == 'sale' and self.price_sale_thb:
+                return self.price_sale_thb
+            elif deal_type == 'rent' and self.price_rent_monthly_thb:
+                return self.price_rent_monthly_thb
+        elif currency_code == 'RUB':
+            if deal_type == 'sale' and self.price_sale_rub:
+                return self.price_sale_rub
+            elif deal_type == 'rent' and self.price_rent_monthly_rub:
+                return self.price_rent_monthly_rub
+        
+        # Конвертируем через курс валют
+        try:
+            usd_currency = Currency.objects.get(code='USD')
+            target_currency = Currency.objects.get(code=currency_code)
+            converted_amount = ExchangeRate.convert_amount(base_price, usd_currency, target_currency)
+            return converted_amount
+        except Currency.DoesNotExist:
+            return None
+    
+    def get_formatted_price(self, currency_code='USD', deal_type='sale'):
+        """Получить отформатированную цену в указанной валюте"""
+        from apps.currency.models import Currency
+        
+        price = self.get_price_in_currency(currency_code, deal_type)
+        if not price:
+            return "Цена по запросу"
+            
+        try:
+            currency = Currency.objects.get(code=currency_code)
+            symbol = currency.symbol
+            decimal_places = currency.decimal_places
+            
+            if decimal_places == 0:
+                price_str = f"{symbol}{price:,.0f}"
+            else:
+                price_str = f"{symbol}{price:,.{decimal_places}f}"
+                
+            if deal_type == 'rent':
+                price_str += "/мес"
+                
+            return price_str
+        except Currency.DoesNotExist:
+            return f"{price:,.0f} {currency_code}"
     
     @property
     def total_area(self):

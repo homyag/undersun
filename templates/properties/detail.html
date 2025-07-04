@@ -2,6 +2,7 @@
 {% load static %}
 {% load i18n %}
 {% load l10n %}
+{% load currency_tags %}
 
 {% block title %}{{ property.title }} - Undersun Estate{% endblock %}
 
@@ -87,7 +88,7 @@
                         </div>
                         
                         <div class="text-right">
-                            <div class="text-3xl font-bold text-primary mb-2">{{ property.price_display }}</div>
+                            <div class="text-3xl font-bold text-primary mb-2">{% price_in_currency property property.deal_type %}</div>
                             {% if user.is_authenticated %}
                                 <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-full transition-colors favorite-btn" 
                                         data-property-id="{{ property.id }}">

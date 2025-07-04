@@ -51,3 +51,31 @@ Thumbs.db
 # Misc
 docs/
 .claude/
+.gitignore_migration
+update_rates.sh
+
+# Данные миграции
+data/backups/*.json
+data/reports/*.json
+data/reports/*.html
+data/mappings/*.json
+data/mappings/*.csv
+
+# Временные файлы скриптов
+migration_stats.json
+deletion_analysis.json
+smart_cleanup_plan.json
+cleanup_report_*.json
+backup_safe_cleanup_*.json
+
+# Большие файлы данных
+joomla_base.json
+real_estate_images_analysis.json
+photo_mapping.json
+joomla_django_comparison.json
+
+# Логи скриптов
+migration.log
+cleanup.log
+/node_modules/
+/update_rates.sh

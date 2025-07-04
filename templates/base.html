@@ -40,6 +40,9 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    <!-- CSRF Token for AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -190,6 +193,10 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Currency Switcher -->
+                        {% load currency_tags %}
+                        {% currency_selector %}
                     </div>
                 </div>
 
@@ -310,11 +317,32 @@
                             <a href="/en{{ request.get_full_path|slice:'3:' }}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">English</a>
                             <a href="/th{{ request.get_full_path|slice:'3:' }}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">ไทย</a>
                         </div>
+
+                        <!-- Mobile Currency Switcher -->
+                        <button onclick="toggleMobileSubmenu('currency-submenu')" class="w-full flex justify-between items-center px-3 py-2 mt-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <span><i class="fas fa-dollar-sign mr-2"></i>{% trans "Валюта" %} ({{ selected_currency.symbol }}{{ selected_currency.code }})</span>
+                            <svg class="w-4 h-4 transform transition-transform" id="currency-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="currency-submenu" class="hidden ml-6 mt-1 space-y-1">
+                            {% for currency in available_currencies %}
+                                <button type="button" 
+                                        class="mobile-currency-option block w-full text-left px-3 py-1 text-tertiary hover:text-accent transition-colors {% if selected_currency.code == currency.code %}font-semibold text-accent{% endif %}" 
+                                        data-currency="{{ currency.code }}"
+                                        data-symbol="{{ currency.symbol }}">
+                                    {{ currency.symbol }} {{ currency.code }}
+                                </button>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- CSRF Token for AJAX -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
     <!-- Main Content -->
     <main class="pt-16 lg:pt-26">
@@ -473,6 +501,46 @@
                     mainNav.style.top = '';
                 }
             }
+        });
+    
+        // Обработчик для мобильного селектора валют
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileCurrencyOptions = document.querySelectorAll('.mobile-currency-option');
+            
+            mobileCurrencyOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const currency = this.dataset.currency;
+                    const symbol = this.dataset.symbol;
+                    
+                    // Отправляем запрос на смену валюты
+                    const formData = new FormData();
+                    formData.append('currency', currency);
+                    formData.append('next', window.location.href);
+                    
+                    fetch('/currency/change/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Перезагружаем страницу для обновления цен
+                            window.location.reload();
+                        } else {
+                            console.error('Error changing currency:', data.error);
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        window.location.reload();
+                    });
+                });
+            });
         });
     </script>
 
