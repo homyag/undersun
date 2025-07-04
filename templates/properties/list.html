@@ -6,43 +6,44 @@
 {% block title %}{% trans "Недвижимость на Пхукете" %} - Undersun Estate{% endblock %}
 
 {% block content %}
-<!-- Dynamic Page Header -->
-<section class="bg-gradient-to-r {% if deal_type == 'sale' %}from-green-600 to-green-800{% elif deal_type == 'rent' %}from-blue-600 to-blue-800{% elif property_type %}from-purple-600 to-purple-800{% else %}from-primary to-blue-800{% endif %} text-white py-16 relative overflow-hidden">
-    <div class="absolute inset-0 bg-black bg-opacity-20"></div>
-    <div class="relative max-w-7xl mx-auto px-4">
-        <div class="text-center">
-            <div class="inline-flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2 mb-4">
-                <i class="fas fa-map-marker-alt mr-2"></i>
-                <span class="text-sm font-medium">{% trans "Пхукет, Таиланд" %}</span>
+<!-- Compact Header Banner -->
+<section class="bg-white border-b border-gray-200 pt-20 lg:pt-28">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-2xl lg:text-3xl font-bold text-primary mb-2">
+                    {% if deal_type == 'sale' %}
+                        {% trans "Недвижимость на продажу" %}
+                    {% elif deal_type == 'rent' %}
+                        {% trans "Недвижимость в аренду" %}
+                    {% elif property_type %}
+                        {{ property_type.name_display }}
+                    {% else %}
+                        {% trans "Каталог недвижимости" %}
+                    {% endif %}
+                </h1>
+                <div class="flex items-center text-tertiary">
+                    <i class="fas fa-map-marker-alt mr-2 text-accent"></i>
+                    <span class="text-sm">{% trans "Пхукет, Таиланд" %}</span>
+                </div>
             </div>
-            <h1 class="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-                {% if deal_type == 'sale' %}
-                    {% trans "Недвижимость на продажу" %}
-                {% elif deal_type == 'rent' %}
-                    {% trans "Недвижимость в аренду" %}
-                {% elif property_type %}
-                    {{ property_type.name_display }}
-                {% else %}
-                    {% trans "Недвижимость на Пхукете" %}
-                {% endif %}
-            </h1>
-            <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
-                {% if deal_type == 'sale' %}
-                    {% trans "Инвестируйте в райский уголок земли" %}
-                {% elif deal_type == 'rent' %}
-                    {% trans "Ваш дом вдали от дома" %}
-                {% elif property_type %}
-                    {% trans "Лучшие предложения" %} {{ property_type.name_display|lower }} {% trans "на острове" %}
-                {% else %}
-                    {% trans "Откройте для себя лучшие объекты недвижимости в тропическом раю" %}
-                {% endif %}
-            </p>
+            
+            <div class="mt-4 md:mt-0 flex items-center space-x-6 text-sm text-tertiary">
+                <div class="flex items-center">
+                    <span class="font-semibold text-primary">500+</span>
+                    <span class="ml-1">{% trans "объектов" %}</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="font-semibold text-primary">15+</span>
+                    <span class="ml-1">{% trans "районов" %}</span>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Filters & Content -->
-<section class="py-12 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+<!-- Main Content -->
+<section class="py-8 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4">
         <!-- Mobile Filters Toggle -->
         <div class="lg:hidden mb-6">

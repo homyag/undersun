@@ -5,56 +5,78 @@
 {% block title %}{% trans "Районы Пхукета" %} - Undersun Estate{% endblock %}
 
 {% block content %}
-<!-- Districts Header -->
-<section class="bg-gradient-to-r from-green-600 to-teal-600 text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 text-center">
-        <h1 class="text-4xl lg:text-6xl font-bold mb-6">
-            {% trans "Районы Пхукета" %}
-        </h1>
-        <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
-            {% trans "Выберите идеальное место для жизни или отдыха на прекрасном острове Пхукет" %}
-        </p>
+<!-- Compact Header Banner -->
+<section class="bg-white border-b border-gray-200 pt-20 lg:pt-28">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-2xl lg:text-3xl font-bold text-primary mb-2">
+                    {% trans "Районы Пхукета" %}
+                </h1>
+                <div class="flex items-center text-tertiary">
+                    <i class="fas fa-map-marker-alt mr-2 text-accent"></i>
+                    <span class="text-sm">{% trans "Выберите идеальное место для жизни" %}</span>
+                </div>
+            </div>
+            
+            <div class="mt-4 md:mt-0 flex items-center space-x-6 text-sm text-tertiary">
+                <div class="flex items-center">
+                    <span class="font-semibold text-primary">{{ districts|length }}</span>
+                    <span class="ml-1">{% trans "районов" %}</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="font-semibold text-primary">25+</span>
+                    <span class="ml-1">{% trans "пляжей" %}</span>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
 <!-- Districts Grid -->
-<section class="py-16">
+<section class="py-12 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for district in districts %}
-                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                    {% if district.image %}
-                        <img src="{{ district.image.url }}" alt="{{ district.name }}" class="w-full h-48 object-cover">
-                    {% else %}
-                        <div class="w-full h-48 bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-                            <span class="text-white text-2xl font-bold">{{ district.name|first }}</span>
-                        </div>
-                    {% endif %}
-                    
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ district.name }}</h3>
-                        
-                        {% if district.description %}
-                            <p class="text-gray-600 mb-4">{{ district.description|truncatewords:20 }}</p>
+                <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 h-full flex flex-col overflow-hidden group border border-gray-100 hover:border-accent">
+                    <div class="relative">
+                        {% if district.image %}
+                            <img src="{{ district.image.url }}" alt="{{ district.name }}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300">
+                        {% else %}
+                            <div class="w-full h-56 bg-gradient-to-br from-primary to-tertiary flex items-center justify-center">
+                                <span class="text-white text-3xl font-bold">{{ district.name|first }}</span>
+                            </div>
                         {% endif %}
                         
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-sm text-gray-500">
-                                <i class="fas fa-home mr-1"></i>
-                                {{ district.properties_count }} {% trans "объектов" %}
-                            </span>
-                            
-                            {% if district.avg_price %}
-                                <span class="text-sm font-medium text-primary">
-                                    {% trans "от" %} ${{ district.avg_price|floatformat:0 }}
-                                </span>
-                            {% endif %}
+                        <!-- Properties Count Badge -->
+                        <div class="absolute top-4 right-4">
+                            <div class="bg-white bg-opacity-90 text-primary px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+                                <i class="fas fa-home mr-1"></i>{{ district.properties_count }}
+                            </div>
                         </div>
+                    </div>
+                    
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-primary mb-3">{{ district.name }}</h3>
                         
-                        <a href="{% url 'district_detail' district.slug %}" 
-                           class="block w-full text-center bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
-                            {% trans "Подробнее" %}
-                        </a>
+                        {% if district.description %}
+                            <p class="text-tertiary mb-4 flex-1">{{ district.description|truncatewords:15 }}</p>
+                        {% endif %}
+                        
+                        <div class="space-y-3">
+                            {% if district.avg_price %}
+                                <div class="flex justify-between items-center p-3 bg-gradient-to-r from-accent to-yellow-500 bg-opacity-10 rounded-lg border border-accent border-opacity-20">
+                                    <span class="text-sm font-medium text-gray-700">{% trans "Цены от:" %}</span>
+                                    <span class="text-lg font-bold text-primary">${{ district.avg_price|floatformat:0 }}</span>
+                                </div>
+                            {% endif %}
+                            
+                            <a href="{% url 'district_detail' district.slug %}" 
+                               class="block w-full text-center bg-primary hover:bg-accent text-white hover:text-gray-900 font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <i class="fas fa-map-marked-alt mr-2"></i>
+                                {% trans "Исследовать район" %}
+                            </a>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
