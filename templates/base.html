@@ -35,15 +35,9 @@
     {% load i18n %}
     {% get_current_language as current_lang %}
     {% with base_url=request.build_absolute_uri|slice:':-4' current_path=request.get_full_path|slice:'3:' %}
-        {% if current_lang != 'ru' %}
-            <link rel="alternate" hreflang="ru" href="{{ base_url }}/ru{{ current_path }}">
-        {% endif %}
-        {% if current_lang != 'en' %}
-            <link rel="alternate" hreflang="en" href="{{ base_url }}/en{{ current_path }}">
-        {% endif %}
-        {% if current_lang != 'th' %}
-            <link rel="alternate" hreflang="th" href="{{ base_url }}/th{{ current_path }}">
-        {% endif %}
+        <link rel="alternate" hreflang="ru" href="{{ base_url }}/ru{{ current_path }}">
+        <link rel="alternate" hreflang="en" href="{{ base_url }}/en{{ current_path }}">
+        <link rel="alternate" hreflang="th" href="{{ base_url }}/th{{ current_path }}">
         <link rel="alternate" hreflang="x-default" href="{{ base_url }}/en{{ current_path }}">
     {% endwith %}
 
@@ -76,6 +70,9 @@
 
     <!-- Structured Data -->
     {% block structured_data %}{% endblock %}
+
+    <!-- Extra Meta Tags -->
+    {% block extra_meta %}{% endblock %}
 
     {% block extra_css %}{% endblock %}
 </head>

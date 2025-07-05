@@ -5,6 +5,10 @@
 
 {% block title %}{% trans "Поиск недвижимости" %}{% if query %} - "{{ query }}"{% endif %} - Undersun Estate{% endblock %}
 
+{% block extra_meta %}
+    <meta name="robots" content="noindex,nofollow">
+{% endblock %}
+
 {% block content %}
 <!-- Search Header -->
 <section class="bg-gray-50 py-8">
