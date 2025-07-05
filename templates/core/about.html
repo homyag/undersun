@@ -13,7 +13,7 @@
                 {% trans "О компании Undersun Estate" %}
             </h1>
             <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
-                {% trans "Профессиональное агентство недвижимости на Пхукете с 10-летним опытом работы" %}
+                {% trans "Молодая и энергичная команда экспертов рынка недвижимости Таиланда" %}
             </p>
         </div>
     </div>
@@ -27,18 +27,18 @@
                 <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Наша история" %}</h2>
                 <div class="space-y-4 text-gray-600">
                     <p>
-                        {% trans "Undersun Estate была основана в 2014 году с миссией помочь людям со всего мира найти дом мечты на прекрасном острове Пхукет. За годы работы мы помогли сотням клиентов приобрести недвижимость в Таиланде." %}
+                        {% trans "Undersun Estate - это молодая и энергичная команда экспертов рынка недвижимости Таиланда с 3-летним опытом работы. Мы предлагаем разнообразные варианты недвижимости: от доступного жилья до роскошных вилл." %}
                     </p>
                     <p>
-                        {% trans "Наша команда состоит из опытных специалистов по недвижимости, юристов и консультантов, которые говорят на русском, английском и тайском языках. Мы обеспечиваем полное сопровождение сделок от поиска объекта до получения документов." %}
+                        {% trans "Наша команда предоставляет комплексную и бесплатную поддержку на всех этапах сделки. Мы тщательно отбираем объекты недвижимости, ориентируясь на потребности и пожелания клиентов." %}
                     </p>
                     <p>
-                        {% trans "Мы специализируемся на продаже и аренде вилл, апартаментов, кондоминиумов и земельных участков в лучших районах Пхукета." %}
+                        {% trans "Мы специализируемся на продаже и аренде вилл, таунхаусов, кондоминиумов и земельных участков в различных районах Пхукета: Муанг Пхукет, Катху и Таланг." %}
                     </p>
                 </div>
             </div>
             <div>
-                <img src="{% static 'images/about-office.jpg' %}" alt="{% trans 'Офис Undersun Estate' %}" class="rounded-lg shadow-lg w-full">
+                <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="rounded-lg shadow-lg w-full">
             </div>
         </div>
     </div>
@@ -61,8 +61,8 @@
                 <div class="text-gray-600">{% trans "Объектов в портфолио" %}</div>
             </div>
             <div class="text-center">
-                <div class="text-4xl font-bold text-primary mb-2">10</div>
-                <div class="text-gray-600">{% trans "Лет опыта" %}</div>
+                <div class="text-4xl font-bold text-primary mb-2">3</div>
+                <div class="text-gray-600">{% trans "Года опыта" %}</div>
             </div>
             <div class="text-center">
                 <div class="text-4xl font-bold text-primary mb-2">3</div>
@@ -77,29 +77,16 @@
     <div class="max-w-7xl mx-auto px-4">
         <div class="text-center mb-12">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наша команда" %}</h2>
-            <p class="text-xl text-gray-600">{% trans "Профессионалы с многолетним опытом работы на рынке недвижимости Пхукета" %}</p>
+            <p class="text-xl text-gray-600">{% trans "Молодые и энергичные специалисты рынка недвижимости Пхукета" %}</p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="text-center">
-                <img src="{% static 'images/team-1.jpg' %}" alt="{% trans 'Директор' %}" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Александр Иванов" %}</h3>
-                <p class="text-primary font-medium mb-2">{% trans "Директор" %}</p>
-                <p class="text-gray-600 text-sm">{% trans "15 лет опыта в сфере недвижимости" %}</p>
-            </div>
-            
-            <div class="text-center">
-                <img src="{% static 'images/team-2.jpg' %}" alt="{% trans 'Менеджер по продажам' %}" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Елена Петрова" %}</h3>
-                <p class="text-primary font-medium mb-2">{% trans "Старший менеджер" %}</p>
-                <p class="text-gray-600 text-sm">{% trans "Специалист по элитной недвижимости" %}</p>
-            </div>
-            
-            <div class="text-center">
-                <img src="{% static 'images/team-3.jpg' %}" alt="{% trans 'Юрист' %}" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-                <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Сомчай Танакул" %}</h3>
-                <p class="text-primary font-medium mb-2">{% trans "Юрисконсульт" %}</p>
-                <p class="text-gray-600 text-sm">{% trans "Эксперт по тайскому законодательству" %}</p>
+        <div class="flex justify-center">
+            <div class="max-w-2xl">
+                <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="rounded-lg shadow-lg w-full">
+                <div class="text-center mt-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Команда Undersun Estate" %}</h3>
+                    <p class="text-gray-600">{% trans "Наша дружная команда всегда готова помочь вам найти идеальную недвижимость" %}</p>
+                </div>
             </div>
         </div>
     </div>

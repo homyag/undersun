@@ -1839,3 +1839,27 @@ msgstr ""
 
 #~ msgid "Кондо"
 #~ msgstr "Condo"
+
+msgid "Молодая и энергичная команда экспертов рынка недвижимости Таиланда"
+msgstr "Young and energetic team of real estate experts in Thailand"
+
+msgid "Undersun Estate - это молодая и энергичная команда экспертов рынка недвижимости Таиланда с 3-летним опытом работы. Мы предлагаем разнообразные варианты недвижимости: от доступного жилья до роскошных вилл."
+msgstr "Undersun Estate is a young and energetic team of real estate experts in Thailand with 3 years of experience. We offer diverse property options: from affordable housing to luxury villas."
+
+msgid "Наша команда предоставляет комплексную и бесплатную поддержку на всех этапах сделки. Мы тщательно отбираем объекты недвижимости, ориентируясь на потребности и пожелания клиентов."
+msgstr "Our team provides comprehensive and free support at all stages of the transaction. We carefully select real estate objects, focusing on the needs and wishes of clients."
+
+msgid "Мы специализируемся на продаже и аренде вилл, таунхаусов, кондоминиумов и земельных участков в различных районах Пхукета: Муанг Пхукет, Катху и Таланг."
+msgstr "We specialize in the sale and rental of villas, townhouses, condominiums and land plots in various districts of Phuket: Mueang Phuket, Kathu and Thalang."
+
+msgid "Года опыта"
+msgstr "Years of experience"
+
+msgid "Молодые и энергичные специалисты рынка недвижимости Пхукета"
+msgstr "Young and energetic real estate specialists in Phuket"
+
+msgid "Команда Undersun Estate"
+msgstr "Undersun Estate Team"
+
+msgid "Наша дружная команда всегда готова помочь вам найти идеальную недвижимость"
+msgstr "Our friendly team is always ready to help you find the perfect property"
