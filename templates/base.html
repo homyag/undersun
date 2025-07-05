@@ -16,6 +16,36 @@
     <meta property="og:description" content="{% block og_description %}{{ page_description }}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{% static 'images/og-image.jpg' %}{% endblock %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:locale" content="{% if LANGUAGE_CODE == 'ru' %}ru_RU{% elif LANGUAGE_CODE == 'en' %}en_US{% elif LANGUAGE_CODE == 'th' %}th_TH{% endif %}">
+    {% if LANGUAGE_CODE == 'ru' %}
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:locale:alternate" content="th_TH">
+    {% elif LANGUAGE_CODE == 'en' %}
+    <meta property="og:locale:alternate" content="ru_RU">
+    <meta property="og:locale:alternate" content="th_TH">
+    {% elif LANGUAGE_CODE == 'th' %}
+    <meta property="og:locale:alternate" content="ru_RU">
+    <meta property="og:locale:alternate" content="en_US">
+    {% endif %}
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    <!-- Hreflang Tags -->
+    {% load i18n %}
+    {% get_current_language as current_lang %}
+    {% with base_url=request.build_absolute_uri|slice:':-4' current_path=request.get_full_path|slice:'3:' %}
+        {% if current_lang != 'ru' %}
+            <link rel="alternate" hreflang="ru" href="{{ base_url }}/ru{{ current_path }}">
+        {% endif %}
+        {% if current_lang != 'en' %}
+            <link rel="alternate" hreflang="en" href="{{ base_url }}/en{{ current_path }}">
+        {% endif %}
+        {% if current_lang != 'th' %}
+            <link rel="alternate" hreflang="th" href="{{ base_url }}/th{{ current_path }}">
+        {% endif %}
+        <link rel="alternate" hreflang="x-default" href="{{ base_url }}/en{{ current_path }}">
+    {% endwith %}
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -43,6 +73,9 @@
     
     <!-- CSRF Token for AJAX -->
     <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <!-- Structured Data -->
+    {% block structured_data %}{% endblock %}
 
     {% block extra_css %}{% endblock %}
 </head>
