@@ -60,15 +60,15 @@ msgstr ""
 
 #: apps/core/models.py:28 apps/core/models.py:113 apps/properties/models.py:112
 msgid "Активно"
-msgstr ""
+msgstr "ใช้งาน"
 
 #: apps/core/models.py:29 apps/core/models.py:114 apps/properties/models.py:137
 msgid "Создано"
-msgstr ""
+msgstr "สร้าง"
 
 #: apps/core/models.py:30 apps/core/models.py:115 apps/properties/models.py:138
 msgid "Обновлено"
-msgstr ""
+msgstr "อัปเดต"
 
 #: apps/core/models.py:33
 msgid "SEO страница"
@@ -270,18 +270,18 @@ msgstr ""
 #: apps/properties/models.py:37 apps/properties/models.py:72
 #: templates/properties/detail.html:138
 msgid "Описание"
-msgstr ""
+msgstr "คำอธิบาย"
 
 #: apps/locations/models.py:12 apps/properties/models.py:76
 #: templates/core/home.html:51 templates/core/search.html:52
 #: templates/properties/list.html:132
 msgid "Район"
-msgstr ""
+msgstr "เขต"
 
 #: apps/locations/models.py:13 templates/base.html:123 templates/base.html:233
 #: templates/base.html:342
 msgid "Районы"
-msgstr ""
+msgstr "เขตต่างๆ"
 
 #: apps/locations/models.py:27 apps/properties/models.py:77
 msgid "Локация"
