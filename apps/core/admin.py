@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SEOPage, SEOTemplate, PromotionalBanner, Service
+from .models import SEOPage, SEOTemplate, PromotionalBanner, PromotionalBannerTranslation, Service
 
 
 @admin.register(SEOPage)
@@ -176,27 +176,42 @@ class SEOTemplateAdmin(admin.ModelAdmin):
         js = ('admin/js/seo_admin.js',)
 
 
+class PromotionalBannerTranslationInline(admin.TabularInline):
+    """Inline для редактирования переводов баннера"""
+    model = PromotionalBannerTranslation
+    extra = 0
+    min_num = 1
+    max_num = 3
+    
+    fields = ('language_code', 'title', 'description', 'discount_text', 'button_text')
+    
+    def get_queryset(self, request):
+        """Предзагружаем переводы для всех языков"""
+        qs = super().get_queryset(request)
+        return qs.order_by('language_code')
+    
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        """Настройка поля выбора языка"""
+        from django import forms
+        if db_field.name == 'language_code':
+            kwargs['widget'] = forms.Select(attrs={'style': 'width: 80px;'})
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
+
+
 @admin.register(PromotionalBanner)
 class PromotionalBannerAdmin(admin.ModelAdmin):
-    list_display = ('title', 'discount_text', 'is_active', 'priority', 'valid_until', 'created_at')
+    list_display = ('get_title', 'is_active', 'priority', 'valid_until', 'get_languages', 'created_at')
     list_filter = ('is_active', 'valid_until', 'created_at')
-    search_fields = ('title', 'description', 'discount_text', 'button_text')
+    search_fields = ('translations__title', 'translations__description', 'translations__discount_text', 'translations__button_text')
     readonly_fields = ('created_at', 'updated_at')
     list_editable = ('is_active', 'priority')
     ordering = ['priority', '-created_at']
+    inlines = [PromotionalBannerTranslationInline]
     
     fieldsets = (
-        ('Основная информация', {
-            'fields': ('title', 'description', 'image'),
-            'description': 'Основное содержимое рекламного баннера'
-        }),
-        ('Предложение и акция', {
-            'fields': ('discount_text', 'valid_until'),
-            'description': 'Информация о скидке или специальном предложении'
-        }),
-        ('Кнопка действия', {
-            'fields': ('button_text', 'button_url'),
-            'description': 'Настройки кнопки призыва к действию'
+        ('Основные настройки', {
+            'fields': ('image', 'button_url', 'valid_until'),
+            'description': 'Общие настройки баннера. Тексты редактируются в разделе "Переводы" ниже.'
         }),
         ('Настройки отображения', {
             'fields': ('is_active', 'priority'),
@@ -208,18 +223,28 @@ class PromotionalBannerAdmin(admin.ModelAdmin):
         }),
     )
     
+    def get_title(self, obj):
+        """Получить заголовок для отображения в списке"""
+        translation = obj.get_translation('ru')
+        if translation:
+            return translation.title
+        return f"Баннер #{obj.pk}"
+    get_title.short_description = 'Заголовок'
+    
+    def get_languages(self, obj):
+        """Показать доступные языки"""
+        languages = obj.translations.values_list('language_code', flat=True)
+        return ', '.join(languages) if languages else 'Нет переводов'
+    get_languages.short_description = 'Языки'
+    
     def get_form(self, request, obj=None, **kwargs):
         """Настройка формы с подсказками"""
         form = super().get_form(request, obj, **kwargs)
         
         # Добавляем help_text для полей
         help_texts = {
-            'title': 'Основной заголовок баннера (до 200 символов)',
-            'description': 'Описание предложения (до 500 символов)',
             'image': 'Фоновое изображение баннера. Рекомендуемое разрешение: 1920x1080 пикселей',
-            'discount_text': 'Текст акции или скидки, например "Скидка 20%" или "Ограниченное предложение"',
             'valid_until': 'Дата окончания действия предложения. Оставьте пустым для бессрочного предложения',
-            'button_text': 'Текст на кнопке призыва к действию',
             'button_url': 'Ссылка для перехода при нажатии на кнопку (URL или Django URL pattern)',
             'is_active': 'Показывать ли баннер на сайте',
             'priority': 'Чем меньше число, тем выше приоритет (1 = самый высокий приоритет)',
@@ -232,9 +257,40 @@ class PromotionalBannerAdmin(admin.ModelAdmin):
         return form
     
     def get_queryset(self, request):
-        return super().get_queryset(request).order_by('priority', '-created_at')
+        return super().get_queryset(request).prefetch_related('translations').order_by('priority', '-created_at')
     
-    actions = ['activate_banners', 'deactivate_banners', 'duplicate_banners']
+    def save_model(self, request, obj, form, change):
+        """Дополнительная логика при сохранении"""
+        super().save_model(request, obj, form, change)
+        
+        # Показываем предупреждение, если создается баннер с истекшим сроком действия
+        if obj.valid_until:
+            from django.utils import timezone
+            if obj.valid_until < timezone.now().date():
+                self.message_user(request, 
+                    f"Внимание: Дата окончания действия баннера уже прошла!", 
+                    level='WARNING')
+        
+        # Проверяем наличие русского перевода
+        if not obj.translations.filter(language_code='ru').exists():
+            self.message_user(request, 
+                "Рекомендуется добавить русский перевод баннера!", 
+                level='WARNING')
+    
+    def save_formset(self, request, form, formset, change):
+        """Сохранение формсета переводов"""
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if instance.banner_id is None:
+                instance.banner = form.instance
+            instance.save()
+        formset.save_m2m()
+        
+        # Удаляем объекты, помеченные для удаления
+        for obj in formset.deleted_objects:
+            obj.delete()
+    
+    actions = ['activate_banners', 'deactivate_banners', 'duplicate_banners', 'create_missing_translations']
     
     def activate_banners(self, request, queryset):
         """Активировать выбранные баннеры"""
@@ -251,24 +307,49 @@ class PromotionalBannerAdmin(admin.ModelAdmin):
     def duplicate_banners(self, request, queryset):
         """Дублировать выбранные баннеры"""
         for banner in queryset:
+            # Сохраняем переводы
+            translations = list(banner.translations.all())
+            
+            # Дублируем баннер
             banner.pk = None
-            banner.title = f"{banner.title} (копия)"
             banner.is_active = False  # Копии создаются неактивными
             banner.save()
-        self.message_user(request, f"Продублировано {queryset.count()} баннеров")
+            
+            # Дублируем переводы
+            for translation in translations:
+                translation.pk = None
+                translation.banner = banner
+                translation.title = f"{translation.title} (копия)"
+                translation.save()
+                
+        self.message_user(request, f"Продублировано {queryset.count()} баннеров с переводами")
     duplicate_banners.short_description = "Дублировать выбранные баннеры"
     
-    def save_model(self, request, obj, form, change):
-        """Дополнительная логика при сохранении"""
-        super().save_model(request, obj, form, change)
+    def create_missing_translations(self, request, queryset):
+        """Создать недостающие переводы"""
+        languages = ['ru', 'en', 'th']
+        created_count = 0
         
-        # Показываем предупреждение, если создается баннер с истекшим сроком действия
-        if obj.valid_until:
-            from django.utils import timezone
-            if obj.valid_until < timezone.now().date():
-                self.message_user(request, 
-                    f"Внимание: Дата окончания действия баннера '{obj.title}' уже прошла!", 
-                    level='WARNING')
+        for banner in queryset:
+            existing_languages = set(banner.translations.values_list('language_code', flat=True))
+            
+            for lang in languages:
+                if lang not in existing_languages:
+                    # Берем русский перевод как основу
+                    base_translation = banner.translations.filter(language_code='ru').first()
+                    if base_translation:
+                        PromotionalBannerTranslation.objects.create(
+                            banner=banner,
+                            language_code=lang,
+                            title=f"{base_translation.title} ({lang.upper()})",
+                            description=base_translation.description,
+                            discount_text=base_translation.discount_text,
+                            button_text=base_translation.button_text
+                        )
+                        created_count += 1
+        
+        self.message_user(request, f"Создано {created_count} переводов")
+    create_missing_translations.short_description = "Создать недостающие переводы"
     
     class Media:
         css = {

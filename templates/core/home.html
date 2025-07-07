@@ -343,11 +343,20 @@
             
             <!-- Right side - Action button -->
             <div>
-                {% if promotional_banner.button_text and promotional_banner.button_url %}
-                <a href="{{ promotional_banner.button_url }}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                    {{ promotional_banner.button_text }}
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                {% if promotional_banner.button_text %}
+                    {% with banner_url=promotional_banner.get_language_aware_url %}
+                        {% if banner_url %}
+                        <a href="{{ banner_url }}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            {{ promotional_banner.button_text }}
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'property_list' %}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            {{ promotional_banner.button_text }}
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        {% endif %}
+                    {% endwith %}
                 {% else %}
                 <a href="{% url 'property_list' %}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                     {% trans "Смотреть предложения" %}
@@ -388,11 +397,20 @@
             
             <!-- Action button -->
             <div class="flex justify-center">
-                {% if promotional_banner.button_text and promotional_banner.button_url %}
-                <a href="{{ promotional_banner.button_url }}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-lg transition-all duration-300 shadow-lg">
-                    {{ promotional_banner.button_text }}
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                {% if promotional_banner.button_text %}
+                    {% with banner_url=promotional_banner.get_language_aware_url %}
+                        {% if banner_url %}
+                        <a href="{{ banner_url }}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-lg transition-all duration-300 shadow-lg">
+                            {{ promotional_banner.button_text }}
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'property_list' %}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-lg transition-all duration-300 shadow-lg">
+                            {{ promotional_banner.button_text }}
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        {% endif %}
+                    {% endwith %}
                 {% else %}
                 <a href="{% url 'property_list' %}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-lg transition-all duration-300 shadow-lg">
                     {% trans "Смотреть предложения" %}
