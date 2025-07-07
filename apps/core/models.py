@@ -245,3 +245,69 @@ class SEOTemplate(models.Model):
             'description': self.render_template(self.get_template('description', language_code), property_obj, language_code),
             'keywords': self.render_template(self.get_template('keywords', language_code), property_obj, language_code),
         }
+
+
+class Service(models.Model):
+    """Модель для статичных страниц услуг агентства"""
+    
+    # Slug для URL
+    slug = models.SlugField(_('URL-адрес'), max_length=100, unique=True,
+                           help_text=_('Уникальный URL адрес страницы (например: buying-property)'))
+    
+    # Основная информация (многоязычные поля будут добавлены через modeltranslation)
+    title = models.CharField(_('Заголовок'), max_length=200)
+    description = models.TextField(_('Краткое описание'), max_length=500,
+                                 help_text=_('Краткое описание услуги для превью'))
+    content = models.TextField(_('Основной контент'),
+                             help_text=_('Подробное описание услуги'))
+    
+    # SEO поля
+    meta_title = models.CharField(_('SEO заголовок'), max_length=200, blank=True,
+                                help_text=_('Если пустое, будет использоваться основной заголовок'))
+    meta_description = models.TextField(_('SEO описание'), max_length=300, blank=True,
+                                      help_text=_('Если пустое, будет использоваться краткое описание'))
+    meta_keywords = models.TextField(_('SEO ключевые слова'), blank=True)
+    
+    # Изображение для страницы
+    image = models.ImageField(_('Изображение'), upload_to='services/', blank=True,
+                            help_text=_('Основное изображение для страницы услуги'))
+    
+    # Иконка для меню
+    icon_class = models.CharField(_('CSS класс иконки'), max_length=100, blank=True,
+                                help_text=_('CSS класс для иконки в меню (например: fas fa-home)'))
+    
+    # Настройки отображения
+    is_active = models.BooleanField(_('Активно'), default=True)
+    show_in_menu = models.BooleanField(_('Показывать в меню'), default=True)
+    menu_order = models.IntegerField(_('Порядок в меню'), default=100,
+                                   help_text=_('Порядок отображения в меню (меньше = выше)'))
+    
+    # Даты
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Обновлено'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Услуга')
+        verbose_name_plural = _('Услуги')
+        ordering = ['menu_order', 'title']
+        
+    def __str__(self):
+        return self.title
+        
+    def get_absolute_url(self):
+        """Получить URL страницы услуги"""
+        from django.urls import reverse
+        return reverse('core:service_detail', kwargs={'slug': self.slug})
+        
+    def get_meta_title(self):
+        """Получить SEO заголовок или основной заголовок"""
+        return self.meta_title if self.meta_title else self.title
+        
+    def get_meta_description(self):
+        """Получить SEO описание или краткое описание"""
+        return self.meta_description if self.meta_description else self.description
+        
+    @classmethod
+    def get_menu_services(cls):
+        """Получить услуги для отображения в меню"""
+        return cls.objects.filter(is_active=True, show_in_menu=True).order_by('menu_order', 'title')

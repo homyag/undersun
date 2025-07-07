@@ -93,7 +93,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <!-- Search Form in contact bar -->
-                    <form class="flex" method="get" action="{% url 'search' %}">
+                    <form class="flex" method="get" action="{% url 'core:search' %}">
                         <input type="search" name="q" placeholder="{% trans 'Поиск...' %}" class="px-3 py-1.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors w-40">
                         <button type="submit" class="px-2 py-1.5 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
                             <i class="fas fa-search text-xs"></i>
@@ -127,7 +127,7 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="{% url 'home' %}" class="flex items-center">
+                    <a href="{% url 'core:home' %}" class="flex items-center">
                         <!-- Desktop Logo -->
                         <img src="{% static 'images/logo_fullscreen.svg' %}" alt="Undersun Estate" class="h-6 hidden sm:block">
                         <!-- Mobile Logo -->
@@ -160,7 +160,29 @@
                             </div>
                         </div>
 
-                        <a href="{% url 'map' %}" class="text-primary hover:text-accent transition-colors font-medium whitespace-nowrap">{% trans "Карта" %}</a>
+                        <a href="{% url 'core:map' %}" class="text-primary hover:text-accent transition-colors font-medium whitespace-nowrap">{% trans "Карта" %}</a>
+                        
+                        <!-- Services Dropdown -->
+                        <div class="relative group">
+                            <button class="text-primary hover:text-accent transition-colors flex items-center font-medium whitespace-nowrap">
+                                {% trans "Услуги" %}
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-56 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                <div class="py-1">
+                                    {% for service in menu_services %}
+                                        <a href="{{ service.get_absolute_url }}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200">
+                                            {{ service.title }}
+                                        </a>
+                                    {% endfor %}
+                                    {% if not menu_services %}
+                                        <div class="px-4 py-2 text-gray-500">{% trans "Услуги скоро появятся" %}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- About Dropdown -->
                         <div class="relative group">
@@ -172,8 +194,8 @@
                             </button>
                             <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                                 <div class="py-1">
-                                    <a href="{% url 'about' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "О компании" %}</a>
-                                    <a href="{% url 'contact' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Контакты" %}</a>
+                                    <a href="{% url 'core:about' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "О компании" %}</a>
+                                    <a href="{% url 'core:contact' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Контакты" %}</a>
                                 </div>
                             </div>
                         </div>
@@ -249,7 +271,7 @@
                 
                 <!-- Mobile Search Form -->
                 <div id="mobile-search" class="xl:hidden hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-200 p-4 z-40">
-                    <form class="flex" method="get" action="{% url 'search' %}">
+                    <form class="flex" method="get" action="{% url 'core:search' %}">
                         <input type="search" name="q" placeholder="{% trans 'Поиск...' %}" class="flex-1 px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors">
                         <button type="submit" class="px-4 py-2 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
                             <i class="fas fa-search"></i>
@@ -281,7 +303,27 @@
                         </div>
                     </div>
                     
-                    <a href="{% url 'map' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">{% trans "Карта" %}</a>
+                    <a href="{% url 'core:map' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">{% trans "Карта" %}</a>
+                    
+                    <!-- Services dropdown -->
+                    <div>
+                        <button onclick="toggleMobileSubmenu('services-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <span>{% trans "Услуги" %}</span>
+                            <svg class="w-4 h-4 transform transition-transform" id="services-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="services-submenu" class="hidden ml-4 mt-1 space-y-1">
+                            {% for service in menu_services %}
+                                <a href="{{ service.get_absolute_url }}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                                    {{ service.title }}
+                                </a>
+                            {% endfor %}
+                            {% if not menu_services %}
+                                <div class="px-3 py-1 text-gray-500">{% trans "Услуги скоро появятся" %}</div>
+                            {% endif %}
+                        </div>
+                    </div>
                     
                     <!-- About dropdown -->
                     <div>
@@ -292,8 +334,8 @@
                             </svg>
                         </button>
                         <div id="about-submenu" class="hidden ml-4 mt-1 space-y-1">
-                            <a href="{% url 'about' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "О компании" %}</a>
-                            <a href="{% url 'contact' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Контакты" %}</a>
+                            <a href="{% url 'core:about' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "О компании" %}</a>
+                            <a href="{% url 'core:contact' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Контакты" %}</a>
                         </div>
                     </div>
                     
@@ -422,10 +464,10 @@
                 </div>
 
                 <div>
-                    <h6 class="text-lg font-semibold mb-4">{% trans "Районы" %}</h6>
+                    <h6 class="text-lg font-semibold mb-4">{% trans "Услуги" %}</h6>
                     <ul class="space-y-2">
-                        {% for district in districts %}
-                            <li><a href="{% url 'district_detail' district.slug %}" class="text-gray-300 hover:text-white transition-colors">{{ district.name }}</a></li>
+                        {% for service in menu_services %}
+                            <li><a href="{{ service.get_absolute_url }}" class="text-gray-300 hover:text-white transition-colors">{{ service.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>

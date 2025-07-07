@@ -1,8 +1,9 @@
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DetailView
 from django.db.models import Q, Count
+from django.shortcuts import get_object_or_404
 from apps.properties.models import Property, PropertyType
 from apps.locations.models import District
-from .models import PromotionalBanner
+from .models import PromotionalBanner, Service
 
 
 class HomeView(TemplateView):
@@ -172,4 +173,31 @@ class MapView(TemplateView):
             ))
         ).filter(properties_count__gt=0).count()
 
+        return context
+
+
+class ServiceDetailView(DetailView):
+    """Детальная страница услуги"""
+    model = Service
+    template_name = 'core/service_detail.html'
+    context_object_name = 'service'
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
+
+    def get_queryset(self):
+        """Получить только активные услуги"""
+        return Service.objects.filter(is_active=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Добавляем все услуги для меню
+        context['all_services'] = Service.get_menu_services()
+        
+        # SEO данные
+        service = self.get_object()
+        context['page_title'] = service.get_meta_title()
+        context['page_description'] = service.get_meta_description()
+        context['page_keywords'] = service.meta_keywords
+        
         return context

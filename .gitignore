@@ -79,3 +79,4 @@ migration.log
 cleanup.log
 /node_modules/
 /update_rates.sh
+/undersun_data.json

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SEOPage, SEOTemplate, PromotionalBanner
+from .models import SEOPage, SEOTemplate, PromotionalBanner, Service
 
 
 @admin.register(SEOPage)
@@ -269,6 +269,124 @@ class PromotionalBannerAdmin(admin.ModelAdmin):
                 self.message_user(request, 
                     f"Внимание: Дата окончания действия баннера '{obj.title}' уже прошла!", 
                     level='WARNING')
+    
+    class Media:
+        css = {
+            'all': ('admin/css/seo_admin.css',)
+        }
+        js = ('admin/js/seo_admin.js',)
+
+
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slug', 'is_active', 'show_in_menu', 'menu_order', 'updated_at')
+    list_filter = ('is_active', 'show_in_menu', 'created_at', 'updated_at')
+    search_fields = ('title', 'slug', 'description', 'content')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_active', 'show_in_menu', 'menu_order')
+    ordering = ['menu_order', 'title']
+    prepopulated_fields = {'slug': ('title',)}
+    
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('title', 'slug', 'description', 'content'),
+            'description': 'Основное содержимое страницы услуги'
+        }),
+        ('SEO настройки', {
+            'fields': ('meta_title', 'meta_description', 'meta_keywords'),
+            'classes': ('collapse',),
+            'description': 'SEO метатеги для страницы. Если поля пустые, будут использоваться основные данные'
+        }),
+        ('Визуальное оформление', {
+            'fields': ('image', 'icon_class'),
+            'classes': ('collapse',),
+            'description': 'Изображение для страницы и иконка для меню'
+        }),
+        ('Настройки отображения', {
+            'fields': ('is_active', 'show_in_menu', 'menu_order'),
+            'description': 'Настройки видимости и порядка отображения'
+        }),
+        ('Системная информация', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_form(self, request, obj=None, **kwargs):
+        """Настройка формы с подсказками"""
+        form = super().get_form(request, obj, **kwargs)
+        
+        # Добавляем help_text для полей
+        help_texts = {
+            'title': 'Заголовок страницы услуги (до 200 символов)',
+            'slug': 'URL-адрес страницы (автоматически генерируется из заголовка)',
+            'description': 'Краткое описание услуги для превью (до 500 символов)',
+            'content': 'Подробное описание услуги с HTML разметкой',
+            'meta_title': 'SEO заголовок (если пустое, используется основной заголовок)',
+            'meta_description': 'SEO описание (если пустое, используется краткое описание)',
+            'meta_keywords': 'SEO ключевые слова через запятую',
+            'image': 'Основное изображение для страницы услуги',
+            'icon_class': 'CSS класс иконки для меню (например: fas fa-home, fas fa-building)',
+            'is_active': 'Отображать ли страницу на сайте',
+            'show_in_menu': 'Показывать ли услугу в меню навигации',
+            'menu_order': 'Порядок отображения в меню (меньше = выше)',
+        }
+        
+        for field_name, help_text in help_texts.items():
+            if field_name in form.base_fields:
+                form.base_fields[field_name].help_text = help_text
+        
+        return form
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('menu_order', 'title')
+    
+    actions = ['activate_services', 'deactivate_services', 'add_to_menu', 'remove_from_menu', 'duplicate_services']
+    
+    def activate_services(self, request, queryset):
+        """Активировать выбранные услуги"""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"Активировано {updated} услуг")
+    activate_services.short_description = "Активировать выбранные услуги"
+    
+    def deactivate_services(self, request, queryset):
+        """Деактивировать выбранные услуги"""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"Деактивировано {updated} услуг")
+    deactivate_services.short_description = "Деактивировать выбранные услуги"
+    
+    def add_to_menu(self, request, queryset):
+        """Добавить в меню"""
+        updated = queryset.update(show_in_menu=True)
+        self.message_user(request, f"Добавлено в меню {updated} услуг")
+    add_to_menu.short_description = "Добавить в меню навигации"
+    
+    def remove_from_menu(self, request, queryset):
+        """Убрать из меню"""
+        updated = queryset.update(show_in_menu=False)
+        self.message_user(request, f"Убрано из меню {updated} услуг")
+    remove_from_menu.short_description = "Убрать из меню навигации"
+    
+    def duplicate_services(self, request, queryset):
+        """Дублировать выбранные услуги"""
+        for service in queryset:
+            service.pk = None
+            service.title = f"{service.title} (копия)"
+            service.slug = f"{service.slug}-copy"
+            service.is_active = False  # Копии создаются неактивными
+            service.save()
+        self.message_user(request, f"Продублировано {queryset.count()} услуг")
+    duplicate_services.short_description = "Дублировать выбранные услуги"
+    
+    def save_model(self, request, obj, form, change):
+        """Дополнительная логика при сохранении"""
+        super().save_model(request, obj, form, change)
+        
+        # Проверяем уникальность slug
+        if Service.objects.filter(slug=obj.slug).exclude(pk=obj.pk).exists():
+            self.message_user(request, 
+                f"Внимание: Slug '{obj.slug}' уже используется другой услугой!", 
+                level='WARNING')
     
     class Media:
         css = {

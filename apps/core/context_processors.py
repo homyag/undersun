@@ -1,6 +1,6 @@
 from apps.properties.models import PropertyType, Property
 from apps.locations.models import District
-from apps.core.models import SEOPage
+from apps.core.models import SEOPage, Service
 import re
 
 def site_context(request):
@@ -9,6 +9,7 @@ def site_context(request):
         'property_types': PropertyType.objects.all(),
         'districts': District.objects.all(),
         'current_language': request.LANGUAGE_CODE,
+        'menu_services': Service.get_menu_services(),
     }
 
 def seo_context(request):
