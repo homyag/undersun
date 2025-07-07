@@ -200,4 +200,41 @@ class ServiceDetailView(DetailView):
         context['page_description'] = service.get_meta_description()
         context['page_keywords'] = service.meta_keywords
         
+        # Добавляем рекомендуемые объекты в зависимости от типа услуги
+        context['featured_properties'] = self._get_featured_properties_for_service(service)
+        
         return context
+    
+    def _get_featured_properties_for_service(self, service):
+        """Получить рекомендуемые объекты для конкретного типа услуги"""
+        from apps.properties.models import Property, PropertyType
+        
+        # Базовый queryset для рекомендуемых объектов
+        base_queryset = Property.objects.filter(
+            is_featured=True,
+            is_active=True,
+            status='available'
+        ).select_related('district', 'property_type').prefetch_related('images')
+        
+        # Фильтруем по типу услуги
+        if service.slug == 'buying-property':
+            # Покупка недвижимости: объекты для покупки
+            return base_queryset.filter(deal_type__in=['sale', 'both'])
+        elif service.slug == 'selling-property':
+            # Продажа недвижимости: не показывать блок
+            return Property.objects.none()
+        elif service.slug == 'renting-property':
+            # Аренда недвижимости: объекты для аренды
+            return base_queryset.filter(deal_type__in=['rent', 'both'])
+        elif service.slug == 'commercial-real-estate':
+            # Коммерческая недвижимость: готовый бизнес
+            return base_queryset.filter(property_type__name='business')
+        elif service.slug == 'legal-services':
+            # Юридические услуги: не показывать блок
+            return Property.objects.none()
+        elif service.slug == 'land-sale':
+            # Продажа земли: земельные участки
+            return base_queryset.filter(property_type__name='land')
+        else:
+            # Для остальных услуг показываем все рекомендуемые объекты
+            return base_queryset

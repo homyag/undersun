@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% load static %}
+{% load currency_tags %}
 
 {% block title %}{{ service.get_meta_title }}{% endblock %}
 
@@ -111,7 +112,7 @@
                         {% trans "Наши услуги" %}
                     </h3>
                     <nav class="space-y-2">
-                        {% for menu_service in menu_services %}
+                        {% for menu_service in all_services %}
                         <a href="{{ menu_service.get_absolute_url }}" 
                            class="group block px-4 py-3 rounded-lg transition-all duration-200 {% if menu_service.slug == service.slug %}bg-primary text-white shadow-md{% else %}text-tertiary hover:bg-white hover:shadow-sm hover:text-primary{% endif %}">
                             <div class="flex items-center">
@@ -175,6 +176,7 @@
 </section>
 
 <!-- Related Properties Section -->
+{% if featured_properties %}
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4">
         <div class="text-center mb-12">
@@ -188,7 +190,10 @@
             <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
                 <div class="relative">
                     {% if property.main_image %}
-                    <img src="{{ property.main_image.url }}" alt="{{ property.title }}" 
+                    <img src="{{ property.main_image.image.url }}" alt="{{ property.title }}" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    {% elif property.images.first %}
+                    <img src="{{ property.images.first.image.url }}" alt="{{ property.title }}" 
                          class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                     {% else %}
                     <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
@@ -197,11 +202,9 @@
                     {% endif %}
                     
                     <!-- Price Badge -->
-                    {% if property.price_sale_usd %}
                     <div class="absolute top-4 right-4 bg-accent text-gray-900 px-3 py-1 rounded-full font-bold text-sm">
-                        ${{ property.price_sale_usd|floatformat:0 }}
+                        {% price_in_currency property property.deal_type %}
                     </div>
-                    {% endif %}
                 </div>
                 
                 <div class="p-6">
@@ -226,18 +229,10 @@
                     </a>
                 </div>
             </div>
-            {% empty %}
-            <div class="col-span-3 text-center py-12">
-                <div class="text-tertiary">
-                    <i class="fas fa-home text-4xl mb-4"></i>
-                    <p>{% trans "Нет доступных объектов" %}</p>
-                </div>
-            </div>
             {% endfor %}
         </div>
 
         <!-- View All Properties Button -->
-        {% if featured_properties %}
         <div class="text-center mt-12">
             <a href="{% url 'property_list' %}" 
                class="inline-flex items-center bg-primary hover:bg-yellow-500 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200">
@@ -245,9 +240,9 @@
                 <i class="fas fa-arrow-right ml-2"></i>
             </a>
         </div>
-        {% endif %}
     </div>
 </section>
+{% endif %}
 
 <!-- CTA Section -->
 <section class="py-16 bg-gradient-to-r from-primary to-tertiary text-white relative overflow-hidden">
