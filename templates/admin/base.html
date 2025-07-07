@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% load static %}{% static 'admin/css/language_selector.css' %}">
+{% endblock %}
+
+{% block usertools %}
+<div id="language-selector">
+    <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <select name="language" onchange="this.form.submit()" title="{% trans 'Выберите язык' %}">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            {% for language in languages %}
+                <option value="{{ language.code }}"
+                    {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                    {{ language.name_local }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+{{ block.super }}
+{% endblock %}

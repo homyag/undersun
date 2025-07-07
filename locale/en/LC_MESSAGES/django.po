@@ -106,43 +106,43 @@ msgstr "Main Image"
 
 #: apps/core/models.py:64
 msgid "Рекомендуемое разрешение: 1248x125 пикселей"
-msgstr ""
+msgstr "Recommended resolution: 1248x125 pixels"
 
 #: apps/core/models.py:67
 msgid "Текст скидки/предложения"
-msgstr ""
+msgstr "Discount/offer text"
 
 #: apps/core/models.py:68
 msgid "Например: \"Скидка 20%\" или \"Ограниченное предложение\""
-msgstr ""
+msgstr "For example: \"20% discount\" or \"Limited Offer\""
 
 #: apps/core/models.py:69
 msgid "Действительно до"
-msgstr ""
+msgstr "Valid until"
 
 #: apps/core/models.py:70
 msgid "Дата окончания действия предложения"
-msgstr ""
+msgstr "Offer expiration date"
 
 #: apps/core/models.py:73
 msgid "Текст кнопки"
-msgstr ""
+msgstr "Button text"
 
 #: apps/core/models.py:74
 msgid "Например: \"Узнать подробнее\" или \"Связаться с нами\""
-msgstr ""
+msgstr "For example: \"Learn more\" or \"Contact us\""
 
 #: apps/core/models.py:75
 msgid "Ссылка кнопки"
-msgstr ""
+msgstr "Button Link"
 
 #: apps/core/models.py:76
 msgid "URL или имя Django URL pattern"
-msgstr ""
+msgstr "Django URL or name URL pattern"
 
 #: apps/core/models.py:80
 msgid "Показывать ли баннер на сайте"
-msgstr ""
+msgstr "Whether to display the banner on the website"
 
 #: apps/core/models.py:81 apps/core/models.py:181
 msgid "Приоритет"
@@ -164,31 +164,31 @@ msgstr "Ready Business"
 
 #: apps/core/models.py:90
 msgid "Рекламные баннеры"
-msgstr ""
+msgstr "Advertising banners"
 
 #: apps/core/models.py:94
 #, fuzzy
 #| msgid "Активно"
 msgid "Активный"
-msgstr "Actively"
+msgstr "Active"
 
 #: apps/core/models.py:94
 #, fuzzy
 #| msgid "Активно"
 msgid "Неактивный"
-msgstr "Actively"
+msgstr "Inactive"
 
 #: apps/core/models.py:129
 #, fuzzy
 #| msgid "Типы недвижимости"
 msgid "Карточка недвижимости"
-msgstr "Property Types"
+msgstr "Real Estate card"
 
 #: apps/core/models.py:130
 #, fuzzy
 #| msgid "Типы недвижимости"
 msgid "Список по типу недвижимости"
-msgstr "Property Types"
+msgstr "List by property type"
 
 #: apps/core/models.py:131
 msgid "Список по локации"
@@ -263,13 +263,13 @@ msgstr "Sale/Rent"
 #, fuzzy
 #| msgid "Название"
 msgid "Название шаблона"
-msgstr "Title"
+msgstr "Template Name"
 
 #: apps/core/models.py:154
 #, fuzzy
 #| msgid "Тип сделки"
 msgid "Тип шаблона"
-msgstr "Type of transaction"
+msgstr "Template Type"
 
 #: apps/core/models.py:155 apps/properties/models.py:26
 #: templates/properties/list.html:97
@@ -280,7 +280,7 @@ msgstr "Property Type"
 #, fuzzy
 #| msgid "Выберите подходящий тип недвижимости для ваших потребностей"
 msgid "Выберите тип недвижимости или оставьте пустым для всех типов"
-msgstr "Choose the right type of property for your needs"
+msgstr "Choose the type of property or leave it blank for all types"
 
 #: apps/core/models.py:158 apps/properties/models.py:68
 #: templates/properties/list.html:76
