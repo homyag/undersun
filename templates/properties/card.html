@@ -3,120 +3,126 @@
 {% load currency_tags %}
 
 <div class="property-card">
-    <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden max-w-sm mx-auto">
- <!-- Image Section -->
+    <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden max-w-sm mx-auto transform hover:-translate-y-2 hover:scale-[1.02] group">
+        <!-- Image Section -->
         <div class="relative h-48">
             {% if property.main_image %}
                 <img src="{{ property.main_image.medium.url }}"
-{#                     class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"#}
                      class="w-full h-full object-cover"
                      alt="{{ property.title }}"
                      loading="lazy">
             {% else %}
                 <img src="{% static 'images/no-image.svg' %}"
-{#                     class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300" #}
                      class="w-full h-full object-cover"
-                     alt="{% trans 'Изображение недоступно' %}" loading="lazy">
+                     alt="{% trans 'Изображение недоступно' %}"
+                     loading="lazy">
             {% endif %}
 
-        <!-- Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
 
-
-
-{#            <!-- Property Status Badge -->#}
-{#            <div class="absolute top-2 left-2">#}
-{#                {% if property.deal_type == 'sale' %}#}
-{#                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent text-gray-900 shadow-sm">{% trans "Продажа" %}</span>#}
-{#                {% elif property.deal_type == 'rent' %}#}
-{#                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary text-white shadow-sm">{% trans "Аренда" %}</span>#}
-{#                {% else %}#}
-{#                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-tertiary text-white shadow-sm">{% trans "Продажа/Аренда" %}</span>#}
-{#                {% endif %}#}
-{#            </div>#}
-
-            <!-- Featured Badge -->
-        <!-- Popular Badge -->
+            <!-- Popular Badge -->
             {% if property.is_featured %}
-{#                <div class="absolute top-2 right-2">#}
                 <div class="absolute top-3 left-3">
-{#                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent text-gray-900 shadow-sm">#}
-                    <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center">
-                    <i class="fas fa-star mr-1 text-xs"></i> {% trans "Рекомендуем" %}
+                    <span class="bg-gradient-to-r from-accent to-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-semibold flex items-center shadow-lg">
+                        <i class="fas fa-star mr-1 text-xs"></i>
+                        {% trans "Рекомендуем" %}
                     </span>
                 </div>
             {% endif %}
 
             <!-- Favorite Button -->
             {% if user.is_authenticated %}
-{#                <div class="absolute {% if property.is_featured %}top-12{% else %}top-2{% endif %} right-2">#}
                 <div class="absolute top-3 right-3">
-{#                    <button class="bg-white hover:bg-gray-50 text-gray-600 p-2 rounded-full shadow-sm favorite-btn" data-property-id="{{ property.id }}">#}
-                    <button class="bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 group favorite-btn" data-property-id="{{ property.id }}">
-                    <i class="{% if is_favorite %}fas text-red-500{% else %}far{% endif %} fa-heart"></i>
+                    <button class="bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110"
+                            data-property-id="{{ property.id }}">
+                        <i class="{% if is_favorite %}fas text-red-500{% else %}far text-gray-600 group-hover:text-red-500{% endif %} fa-heart transition-all duration-200"></i>
                     </button>
                 </div>
             {% endif %}
+
+            <!-- Updated Badge -->
+            <div class="absolute bottom-3 right-3">
+                <span class="bg-white/90 text-gray-700 px-2 py-1 rounded-md text-xs flex items-center">
+                    <i class="fas fa-clock mr-1"></i>
+                    {% trans "Обновлено" %}: {{ property.updated_at|date:"d/m/y" }}
+                </span>
+            </div>
         </div>
 
-        <div class="p-6 flex-1 flex flex-col">
-            <h6 class="font-bold text-lg text-primary mb-3 leading-tight">
-                <a href="{{ property.get_absolute_url }}" class="hover:text-accent transition-colors">
-                    {{ property.title|truncatechars:50 }}
+        <!-- Content Section -->
+        <div class="p-5">
+            <!-- Title -->
+            <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight">
+                <a href="{{ property.get_absolute_url }}"
+                   class="hover:text-primary transition-colors group-hover:text-accent">
+                    {{ property.title|truncatechars:60 }}
                 </a>
-            </h6>
+            </h3>
 
-            <div class="text-tertiary mb-4 flex items-center font-medium">
-                <i class="fas fa-map-marker-alt mr-2 text-accent"></i>
-                {{ property.district.name }}{% if property.location %}, {{ property.location.name }}{% endif %}
+            <!-- Location -->
+            <div class="flex items-center text-gray-600 mb-4">
+                <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                <span class="text-sm group-hover:text-primary transition-colors">
+                    {{ property.district.name }}{% if property.location %}, {{ property.location.name }}{% endif %}
+                </span>
             </div>
 
-            <div class="mb-6 flex-1">
-                <div class="flex flex-wrap gap-3 justify-center">
+            <!-- Property Details -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
                     {% if property.bedrooms %}
-                        <div class="flex items-center bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-2 rounded-full">
-                            <i class="fas fa-bed text-blue-500 mr-2"></i>
-                            <span class="text-sm font-semibold text-blue-700">{{ property.bedrooms }}</span>
+                        <div class="flex items-center text-gray-600 group-hover:text-primary transition-colors">
+                            <i class="fas fa-bed mr-1 text-primary"></i>
+                            <span class="text-sm font-medium">{{ property.bedrooms }}</span>
                         </div>
                     {% endif %}
 
                     {% if property.bathrooms %}
-                        <div class="flex items-center bg-gradient-to-r from-green-50 to-green-100 px-4 py-2 rounded-full">
-                            <i class="fas fa-bath text-green-500 mr-2"></i>
-                            <span class="text-sm font-semibold text-green-700">{{ property.bathrooms }}</span>
+                        <div class="flex items-center text-gray-600 group-hover:text-primary transition-colors">
+                            <i class="fas fa-bath mr-1 text-primary"></i>
+                            <span class="text-sm font-medium">{{ property.bathrooms }}</span>
                         </div>
                     {% endif %}
 
                     {% if property.area_total %}
-                        <div class="flex items-center bg-gradient-to-r from-purple-50 to-purple-100 px-4 py-2 rounded-full">
-                            <i class="fas fa-ruler-combined text-purple-500 mr-2"></i>
-                            <span class="text-sm font-semibold text-purple-700">{{ property.area_total }}м²</span>
+                        <div class="flex items-center text-gray-600 group-hover:text-primary transition-colors">
+                            <i class="fas fa-ruler-combined mr-1 text-primary"></i>
+                            <span class="text-sm font-medium">{{ property.area_total }} м²</span>
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="flex justify-between items-center mb-6">
-                <div class="property-price flex flex-col">
-                    <span class="text-2xl font-bold bg-gradient-to-r from-accent to-yellow-500 bg-clip-text text-transparent card-price-{{ property.id }}">{% price_in_currency property property.deal_type %}</span>
-                    <!-- Currency Toggle Button -->
-                    <div class="relative mt-2">
-                        <button class="currency-toggle-btn flex items-center text-xs text-gray-600 hover:text-primary transition-colors px-2 py-1 rounded-md border border-gray-200 hover:border-primary bg-white shadow-sm"
+            <!-- Price Section -->
+            <div class="mb-4">
+                <!-- Price and Currency in one line -->
+                <div class="flex items-center justify-center space-x-3">
+                    <!-- Price -->
+                    <span class="text-3xl font-bold text-primary group-hover:text-accent transition-colors card-price-{{ property.id }}">
+                        {% price_number_only property property.deal_type %}
+                    </span>
+                    
+                    <!-- Currency Dropdown -->
+                    <div class="relative">
+                        <button class="currency-toggle-btn bg-gray-100 hover:bg-primary hover:text-white text-gray-500 transition-all duration-200 px-3 py-1.5 rounded-md text-sm border border-gray-200 hover:border-primary flex items-center"
                                 data-property-id="{{ property.id }}"
-                                data-deal-type="{{ property.deal_type }}">
-                            <i class="fas fa-exchange-alt mr-1"></i>
-                            <span class="current-currency-{{ property.id }}">{{ selected_currency.code|default:"USD" }}</span>
-                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                                data-deal-type="{{ property.deal_type }}"
+                                title="{% trans 'Изменить валюту' %}">
+                            <span class="current-currency-{{ property.id }} font-mono mr-1">{{ selected_currency.symbol|default:"$" }}</span>
+                            <span class="current-currency-code-{{ property.id }} font-medium mr-1">{{ selected_currency.code|default:"USD" }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div class="currency-dropdown absolute bottom-full left-0 mb-1 w-40 bg-white rounded-md shadow-lg border border-gray-200 z-50 opacity-0 invisible transform scale-95 transition-all duration-200"
-                             id="currency-dropdown-{{ property.id }}">
+                        <div class="currency-dropdown absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 w-32 bg-white rounded-lg shadow-xl border border-gray-200 z-[60] opacity-0 invisible transform scale-95 transition-all duration-200"
+                             id="currency-dropdown-{{ property.id }}"
+                             style="box-shadow: 0 -10px 25px -3px rgba(0, 0, 0, 0.1), 0 -4px 6px -2px rgba(0, 0, 0, 0.05);">
                             <div class="py-1">
                                 {% if available_currencies %}
                                     {% for currency in available_currencies %}
                                     <button type="button"
-                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"
+                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center first:rounded-t-lg last:rounded-b-lg"
                                             data-currency="{{ currency.code }}"
                                             data-symbol="{{ currency.symbol }}"
                                             data-property-id="{{ property.id }}"
@@ -126,75 +132,77 @@
                                     </button>
                                     {% endfor %}
                                 {% else %}
-                                    <!-- Fallback currencies if context not available -->
+                                    <!-- Fallback currencies -->
                                     <button type="button"
-                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"
-                                            data-currency="USD"
-                                            data-symbol="$"
+                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-t-lg"
+                                            data-currency="USD" data-symbol="$"
                                             data-property-id="{{ property.id }}"
                                             data-deal-type="{{ property.deal_type }}">
                                         <span class="font-mono mr-2 w-4">$</span>
                                         <span class="font-medium">USD</span>
                                     </button>
                                     <button type="button"
-                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"
-                                            data-currency="THB"
-                                            data-symbol="฿"
+                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center"
+                                            data-currency="THB" data-symbol="฿"
                                             data-property-id="{{ property.id }}"
                                             data-deal-type="{{ property.deal_type }}">
                                         <span class="font-mono mr-2 w-4">฿</span>
                                         <span class="font-medium">THB</span>
                                     </button>
                                     <button type="button"
-                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"
-                                            data-currency="RUB"
-                                            data-symbol="₽"
+                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-b-lg"
+                                            data-currency="RUB" data-symbol="₽"
                                             data-property-id="{{ property.id }}"
                                             data-deal-type="{{ property.deal_type }}">
                                         <span class="font-mono mr-2 w-4">₽</span>
                                         <span class="font-medium">RUB</span>
-                                    </button>
-                                    <button type="button"
-                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"
-                                            data-currency="EUR"
-                                            data-symbol="€"
-                                            data-property-id="{{ property.id }}"
-                                            data-deal-type="{{ property.deal_type }}">
-                                        <span class="font-mono mr-2 w-4">€</span>
-                                        <span class="font-medium">EUR</span>
                                     </button>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="property-type">
-                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-primary to-blue-600 text-white shadow-md">{{ property.property_type.name_display }}</span>
-                </div>
             </div>
-        </div>
 
-        <div class="p-6 pt-0">
-            <a href="{{ property.get_absolute_url }}" class="block w-full text-center bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 py-4 px-6 rounded-xl transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105">
-                <i class="fas fa-eye mr-2"></i>
+            <!-- Action Button - Full Width -->
+            <a href="{{ property.get_absolute_url }}" class="block w-full bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-center text-sm group-hover:shadow-xl">
                 {% trans "Подробнее" %}
+                <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-200"></i>
             </a>
         </div>
     </div>
 </div>
 
+<!-- Status and Type badges (if needed) -->
+{% comment %}
+<!-- Optional: Add these badges somewhere if needed -->
+<div class="hidden">
+    <!-- Property Status Badge -->
+    {% if property.deal_type == 'sale' %}
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">{% trans "Продажа" %}</span>
+    {% elif property.deal_type == 'rent' %}
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{% trans "Аренда" %}</span>
+    {% endif %}
+
+    <!-- Property Type -->
+    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+        {{ property.property_type.name_display }}
+    </span>
+</div>
+{% endcomment %}
+
 <script>
 (function() {
-    // Encapsulate code for property {{ property.id }}
+    // Currency conversion functionality for property {{ property.id }}
     const propertyId = {{ property.id }};
     const toggleBtn = document.querySelector(`[data-property-id="${propertyId}"].currency-toggle-btn`);
     const dropdown = document.getElementById(`currency-dropdown-${propertyId}`);
 
-    if (!toggleBtn || !dropdown) return; // Safety check
+    if (!toggleBtn || !dropdown) return;
 
     const currencyOptions = dropdown.querySelectorAll('.card-currency-option');
 
-    // Property data for this card
+    // Property data
     const propertyData = {
         property_id: propertyId,
         price_sale_usd: {{ property.price_sale_usd|default:0|floatformat:0 }},
@@ -203,15 +211,20 @@
         price_rent_thb: {{ property.price_rent_thb|default:0|floatformat:0 }},
     };
 
-    // Local functions for this property card
-    function formatPrice(amount, symbol) {
-        return symbol + Math.round(amount).toLocaleString();
+    function formatPrice(amount) {
+        return Math.round(amount).toLocaleString('en-US').replace(/,/g, ' ');
+    }
+    
+    function updateCurrencyButton(symbol, code) {
+        const currencySymbol = document.querySelector(`.current-currency-${propertyId}`);
+        const currencyCode = document.querySelector(`.current-currency-code-${propertyId}`);
+        if (currencySymbol) currencySymbol.textContent = symbol;
+        if (currencyCode) currencyCode.textContent = code;
     }
 
     function convertAndUpdatePrice(toCurrency, symbol, dealType) {
         const priceElement = document.querySelector(`.card-price-${propertyId}`);
 
-        // Get base price in USD or THB
         let basePrice = 0;
         let fromCurrency = 'USD';
 
@@ -228,40 +241,39 @@
             return;
         }
 
-        // If same currency, just format
         if (fromCurrency === toCurrency) {
-            priceElement.textContent = formatPrice(basePrice, symbol);
+            priceElement.textContent = formatPrice(basePrice);
+            updateCurrencyButton(symbol, toCurrency);
             return;
         }
 
-        // Get exchange rate from API
+        // Get exchange rate
         const rateKey = `${fromCurrency}_${toCurrency}`;
 
-        // Check if we have cached rates
         if (window.exchangeRates && window.exchangeRates[rateKey]) {
             const rate = window.exchangeRates[rateKey];
             const convertedPrice = basePrice * rate;
-            priceElement.textContent = formatPrice(convertedPrice, symbol);
+            priceElement.textContent = formatPrice(convertedPrice);
+            updateCurrencyButton(symbol, toCurrency);
         } else {
-            // Fetch rates from API
             fetch('/currency/rates/')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Cache rates for other cards
                         window.exchangeRates = data.rates;
-
                         const rate = data.rates[rateKey] || 1;
                         const convertedPrice = basePrice * rate;
-                        priceElement.textContent = formatPrice(convertedPrice, symbol);
+                        priceElement.textContent = formatPrice(convertedPrice);
+                        updateCurrencyButton(symbol, toCurrency);
                     } else {
-                        console.error('Error fetching exchange rates:', data.error);
-                        priceElement.textContent = formatPrice(basePrice, symbol);
+                        priceElement.textContent = formatPrice(basePrice);
+                        updateCurrencyButton(symbol, toCurrency);
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching exchange rates:', error);
-                    priceElement.textContent = formatPrice(basePrice, symbol);
+                    priceElement.textContent = formatPrice(basePrice);
+                    updateCurrencyButton(symbol, toCurrency);
                 });
         }
     }
@@ -296,10 +308,6 @@
             const symbol = this.dataset.symbol;
             const dealType = this.dataset.dealType;
 
-            // Update current currency display
-            document.querySelector(`.current-currency-${propertyId}`).textContent = currency;
-
-            // Convert and update price for this card only
             convertAndUpdatePrice(currency, symbol, dealType);
             
             // Close dropdown
