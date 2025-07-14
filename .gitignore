@@ -80,3 +80,4 @@ cleanup.log
 /node_modules/
 /update_rates.sh
 /undersun_data.json
+/underson_bd_dump.json

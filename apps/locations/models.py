@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 
 
 class District(models.Model):
@@ -14,6 +15,9 @@ class District(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return reverse('district_detail', kwargs={'district_slug': self.slug})
 
 
 class Location(models.Model):
@@ -30,3 +34,9 @@ class Location(models.Model):
 
     def __str__(self):
         return f"{self.name}, {self.district.name}"
+    
+    def get_absolute_url(self):
+        return reverse('location_detail', kwargs={
+            'district_slug': self.district.slug,
+            'location_slug': self.slug
+        })

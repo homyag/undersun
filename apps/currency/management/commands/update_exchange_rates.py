@@ -13,8 +13,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--base-currency',
             type=str,
-            default='USD',
-            help='Базовая валюта для получения курсов (по умолчанию USD)'
+            default='THB',
+            help='Базовая валюта для получения курсов (по умолчанию THB)'
         )
         parser.add_argument(
             '--api-url',
@@ -118,36 +118,37 @@ class Command(BaseCommand):
             )
             return
 
-        properties = Property.objects.filter(price_sale_usd__isnull=False)
+        # Теперь базовая валюта THB, поэтому ищем объекты с ценами в THB
+        properties = Property.objects.filter(price_sale_thb__isnull=False)
         updated_properties = 0
 
         for prop in properties:
             updated = False
             
-            # Обновляем цены продажи
-            if prop.price_sale_usd:
-                # Обновляем цену в THB
-                thb_price = ExchangeRate.convert_amount(prop.price_sale_usd, usd_currency, thb_currency)
-                if thb_price:
-                    prop.price_sale_thb = thb_price
+            # Обновляем цены продажи (THB -> USD, RUB)
+            if prop.price_sale_thb:
+                # Обновляем цену в USD
+                usd_price = ExchangeRate.convert_amount(prop.price_sale_thb, thb_currency, usd_currency)
+                if usd_price:
+                    prop.price_sale_usd = usd_price
                     updated = True
                 
                 # Обновляем цену в RUB
-                rub_price = ExchangeRate.convert_amount(prop.price_sale_usd, usd_currency, rub_currency)
+                rub_price = ExchangeRate.convert_amount(prop.price_sale_thb, thb_currency, rub_currency)
                 if rub_price:
                     prop.price_sale_rub = rub_price
                     updated = True
 
-            # Обновляем цены аренды
-            if prop.price_rent_monthly:
-                # Обновляем цену аренды в THB
-                thb_rent = ExchangeRate.convert_amount(prop.price_rent_monthly, usd_currency, thb_currency)
-                if thb_rent:
-                    prop.price_rent_monthly_thb = thb_rent
+            # Обновляем цены аренды (THB -> USD, RUB)
+            if prop.price_rent_monthly_thb:
+                # Обновляем цену аренды в USD
+                usd_rent = ExchangeRate.convert_amount(prop.price_rent_monthly_thb, thb_currency, usd_currency)
+                if usd_rent:
+                    prop.price_rent_monthly = usd_rent
                     updated = True
                 
                 # Обновляем цену аренды в RUB
-                rub_rent = ExchangeRate.convert_amount(prop.price_rent_monthly, usd_currency, rub_currency)
+                rub_rent = ExchangeRate.convert_amount(prop.price_rent_monthly_thb, thb_currency, rub_currency)
                 if rub_rent:
                     prop.price_rent_monthly_rub = rub_rent
                     updated = True

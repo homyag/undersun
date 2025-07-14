@@ -1,0 +1,6 @@
+{% extends 'blog/blog_list.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Статьи с тегом" %} {{ tag.name }} - {% trans "Недвижимость в Таиланде" %}{% endblock %}
+
+{% block meta_description %}{% trans "Все статьи с тегом" %} {{ tag.name }}{% endblock %}

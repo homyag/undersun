@@ -64,7 +64,9 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    
+    {% block extra_css %}
+
+    {% endblock %}
     <!-- CSRF Token for AJAX -->
     <meta name="csrf-token" content="{{ csrf_token }}">
 
@@ -72,9 +74,9 @@
     {% block structured_data %}{% endblock %}
 
     <!-- Extra Meta Tags -->
-    {% block extra_meta %}{% endblock %}
+    {% block extra_meta %}
 
-    {% block extra_css %}{% endblock %}
+    {% endblock %}
 </head>
 <body>
     <!-- Top Contact Bar -->
@@ -617,8 +619,8 @@
     </script>
 
     <!-- Custom JS -->
+    {% block extra_js %}
     <script src="{% static 'js/main.js' %}"></script>
-
-    {% block extra_js %}{% endblock %}
+    {% endblock %}
 </body>
 </html>

@@ -17,7 +17,7 @@ class Command(BaseCommand):
                 'name_en': 'US Dollar',
                 'name_th': 'ดอลลาร์สหรัฐ',
                 'symbol': '$',
-                'is_base': True,
+                'is_base': False,
                 'decimal_places': 2
             },
             {
@@ -27,7 +27,7 @@ class Command(BaseCommand):
                 'name_en': 'Thai Baht', 
                 'name_th': 'บาทไทย',
                 'symbol': '฿',
-                'is_base': False,
+                'is_base': True,
                 'decimal_places': 0  # Обычно баты считают без копеек
             },
             {
@@ -67,7 +67,7 @@ class Command(BaseCommand):
             rub = Currency.objects.get(code='RUB')
             
             preferences = [
-                {'language': 'en', 'default_currency': usd},
+                {'language': 'en', 'default_currency': thb},
                 {'language': 'th', 'default_currency': thb},
                 {'language': 'ru', 'default_currency': rub},
             ]

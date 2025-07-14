@@ -10,6 +10,7 @@ urlpatterns = [
     path('rosetta/', include('rosetta.urls')),  # Интерфейс для переводов
     path('i18n/', include('django.conf.urls.i18n')),  # URLs для смены языка
     path('currency/', include('apps.currency.urls')),  # URLs для валют
+    path('tinymce/', include('tinymce.urls')),  # URLs для TinyMCE
     path('', RedirectView.as_view(url='/ru/', permanent=True)),  # Редирект на русскую версию
 ]
 
@@ -19,6 +20,7 @@ urlpatterns += i18n_patterns(
     path('property/', include('apps.properties.urls')),
     path('locations/', include('apps.locations.urls')),
     path('users/', include('apps.users.urls')),
+    path('blog/', include('apps.blog.urls')),
     prefix_default_language=True
 )
 

@@ -59,7 +59,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <!-- Filters Sidebar -->
             <div class="lg:col-span-1">
-                <div id="filters-sidebar" class="bg-white rounded-lg shadow-md border border-gray-200 hidden lg:block max-h-screen overflow-y-auto">
+                <div id="filters-sidebar" class="bg-white rounded-lg shadow-md border border-gray-200 hidden lg:block">
                     <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900">
                             {% trans "Фильтры" %}
@@ -133,11 +133,26 @@
                             <h4 class="font-semibold text-gray-900 mb-3">
                                 {% trans "Район" %}
                             </h4>
-                            <select name="district" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                            <select name="district" id="district-select" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
                                 <option value="">{% trans "Все районы" %}</option>
                                 {% for district in districts %}
                                 <option value="{{ district.slug }}" {% if request.GET.district == district.slug %}selected{% endif %}>
                                     {{ district.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Locations -->
+                        <div class="mb-6" id="location-filter">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {% trans "Локация" %}
+                            </h4>
+                            <select name="location" id="location-select" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="">{% trans "Все локации" %}</option>
+                                {% for location in locations %}
+                                <option value="{{ location.slug }}" {% if request.GET.location == location.slug %}selected{% endif %}>
+                                    {{ location.name }}
                                 </option>
                                 {% endfor %}
                             </select>
@@ -166,18 +181,19 @@
                                 {% trans "Удобства" %}
                             </h4>
                             <div class="space-y-2">
+                                {% for amenity in amenities %}
                                 <label class="flex items-center">
-                                    <input type="checkbox" name="pool" value="1" {% if request.GET.pool %}checked{% endif %} class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
-                                    <span class="ml-3 text-sm text-gray-700">{% trans "Бассейн" %}</span>
+                                    <input type="checkbox" name="amenities" value="{{ amenity.id }}" 
+                                           {% if amenity.id|stringformat:"s" in current_filters.amenities %}checked{% endif %} 
+                                           class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
+                                    <span class="ml-3 text-sm text-gray-700 flex items-center">
+                                        {% if amenity.icon %}
+                                            <i class="{{ amenity.icon }} mr-2 text-accent"></i>
+                                        {% endif %}
+                                        {{ amenity.name }}
+                                    </span>
                                 </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="parking" value="1" {% if request.GET.parking %}checked{% endif %} class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
-                                    <span class="ml-3 text-sm text-gray-700">{% trans "Парковка" %}</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="sea_view" value="1" {% if request.GET.sea_view %}checked{% endif %} class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
-                                    <span class="ml-3 text-sm text-gray-700">{% trans "Вид на море" %}</span>
-                                </label>
+                                {% endfor %}
                             </div>
                         </div>
                         
@@ -462,6 +478,65 @@ document.addEventListener('DOMContentLoaded', function() {
                 filtersSidebar.classList.remove('mobile-open');
                 mobileFiltersArrow.style.transform = 'rotate(0deg)';
             }
+        });
+    }
+    
+    // Dynamic location updates based on district selection
+    const districtSelect = document.getElementById('district-select');
+    const locationSelect = document.getElementById('location-select');
+    
+    if (districtSelect && locationSelect) {
+        districtSelect.addEventListener('change', function() {
+            const districtSlug = this.value;
+            
+            // Clear current location selection
+            locationSelect.innerHTML = '<option value="">{% trans "Все локации" %}</option>';
+            
+            if (districtSlug) {
+                // Fetch locations for the selected district
+                fetch(`{% url 'get_locations_for_district' %}?district=${districtSlug}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            data.locations.forEach(location => {
+                                const option = document.createElement('option');
+                                option.value = location.slug;
+                                option.textContent = location.name;
+                                locationSelect.appendChild(option);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching locations:', error);
+                    });
+            }
+            
+            // Auto-submit form after updating locations
+            setTimeout(() => {
+                document.getElementById('filter-form').submit();
+            }, 100);
+        });
+    }
+    
+    // Auto-submit form when any filter changes
+    const form = document.getElementById('filter-form');
+    if (form) {
+        // Get all form inputs
+        const inputs = form.querySelectorAll('input, select');
+        
+        inputs.forEach(input => {
+            if (input.name === 'sort') return; // Skip sort field
+            
+            const eventType = input.type === 'checkbox' || input.type === 'radio' ? 'change' : 
+                            input.tagName === 'SELECT' ? 'change' : 'input';
+            
+            input.addEventListener(eventType, function() {
+                // Add a small delay to allow multiple quick changes
+                clearTimeout(window.filterTimeout);
+                window.filterTimeout = setTimeout(() => {
+                    form.submit();
+                }, 300);
+            });
         });
     }
     

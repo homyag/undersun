@@ -199,7 +199,7 @@ var properties = [
         bedrooms: {{ property.bedrooms|default:"0" }},
         bathrooms: {{ property.bathrooms|default:"0" }},
         area: {{ property.area_total|default:"0"|unlocalize }},
-        image: "{% if property.main_image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}",
+        image: "{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}",
         url: "{{ property.get_absolute_url }}"
     }{% if not forloop.last %},{% endif %}
     {% endfor %}

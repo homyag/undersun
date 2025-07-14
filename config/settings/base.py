@@ -34,12 +34,12 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    'modeltranslation',
     'rosetta',
     'imagekit',
     'django_filters',
     'crispy_forms',
     'crispy_tailwind',
+    'tinymce',
     # 'leaflet',  # Закомментировано до установки GDAL
 ]
 
@@ -49,6 +49,8 @@ LOCAL_APPS = [
     'apps.locations.apps.LocationsConfig',
     'apps.users.apps.UsersConfig',
     'apps.currency.apps.CurrencyConfig',
+    'apps.blog.apps.BlogConfig',
+    'modeltranslation',  # Перемещаем после наших приложений
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -224,4 +226,47 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+# TinyMCE Configuration
+TINYMCE_DEFAULT_CONFIG = {
+    'height': 400,
+    'width': 'auto',
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 20,
+    'selector': '.tinymce-content',  # Используем класс вместо всех textarea
+    'theme': 'silver',
+    'plugins': '''
+        textcolor save link image media preview codesample contextmenu
+        table code lists fullscreen insertdatetime nonbreaking
+        contextmenu directionality searchreplace wordcount visualblocks
+        visualchars code fullscreen autolink lists charmap print hr
+        anchor pagebreak paste
+    ''',
+    'toolbar1': '''
+        fullscreen preview bold italic underline | fontselect,
+        fontsizeselect | forecolor backcolor | alignleft aligncenter
+        alignright alignjustify | indent outdent | bullist numlist
+    ''',
+    'toolbar2': '''
+        visualblocks visualchars |
+        charmap hr pagebreak nonbreaking anchor | code |
+        link unlink | image media | table | codesample |
+        searchreplace | undo redo
+    ''',
+    'contextmenu': 'formats | link image',
+    'menubar': True,
+    'statusbar': True,
+    'content_css': [
+        '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i',
+        '//www.tinymce.com/css/codepen.min.css'
+    ],
+    'language': 'ru',
+    'directionality': 'ltr',
+    'paste_data_images': True,
+    'image_advtab': True,
+    'image_title': True,
+    'automatic_uploads': True,
+    'file_picker_types': 'image',
+    'images_upload_url': '/tinymce/upload/',
 }

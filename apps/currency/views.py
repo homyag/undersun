@@ -4,6 +4,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .services import CurrencyService
+from .models import ExchangeRate, Currency
 
 
 class ChangeCurrencyView(View):
@@ -32,3 +33,29 @@ class ChangeCurrencyView(View):
                 })
         
         return redirect(next_url)
+
+
+class ExchangeRatesView(View):
+    """API для получения курсов валют"""
+    
+    def get(self, request):
+        try:
+            rates = {}
+            currencies = Currency.objects.filter(is_active=True)
+            
+            for from_currency in currencies:
+                for to_currency in currencies:
+                    if from_currency != to_currency:
+                        rate = ExchangeRate.get_latest_rate(from_currency, to_currency)
+                        if rate:
+                            rates[f"{from_currency.code}_{to_currency.code}"] = float(rate)
+            
+            return JsonResponse({
+                'success': True,
+                'rates': rates
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })

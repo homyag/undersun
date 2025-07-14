@@ -11,3 +11,4 @@ crispy-bootstrap5==2024.2
 django-leaflet==0.30.1
 requests==2.31.0
 crispy-tailwind==1.0.3
+django-tinymce==4.0.0

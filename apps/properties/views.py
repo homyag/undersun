@@ -1,11 +1,12 @@
 from django.views.generic import ListView, DetailView
-from django.shortcuts import get_object_or_404, render
-from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
+from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
+from django.urls import reverse
 from .models import Property, PropertyType
 from apps.locations.models import District
 from apps.users.models import PropertyFavorite, PropertyInquiry
@@ -59,6 +60,11 @@ class PropertyListView(ListView):
         if district:
             queryset = queryset.filter(district__slug=district)
         
+        # Локация
+        location = self.request.GET.get('location')
+        if location:
+            queryset = queryset.filter(location__slug=location)
+        
         # Цена в USD (учитываем и продажу и аренду)
         min_price = self.request.GET.get('min_price')
         max_price = self.request.GET.get('max_price')
@@ -94,13 +100,15 @@ class PropertyListView(ListView):
             if bedroom_filters:
                 queryset = queryset.filter(bedroom_filters)
         
-        # Удобства/особенности
-        if self.request.GET.get('pool'):
-            queryset = queryset.filter(features__feature__name_en__icontains='pool')
-        if self.request.GET.get('parking'):
-            queryset = queryset.filter(features__feature__name_en__icontains='parking')
-        if self.request.GET.get('sea_view'):
-            queryset = queryset.filter(features__feature__name_en__icontains='sea view')
+        # Удобства/особенности (динамические)
+        amenities = self.request.GET.getlist('amenities')
+        if amenities:
+            for amenity_id in amenities:
+                try:
+                    amenity_id = int(amenity_id)
+                    queryset = queryset.filter(features__feature__id=amenity_id)
+                except ValueError:
+                    pass
         
         # Поиск по тексту
         query = self.request.GET.get('q')
@@ -117,21 +125,35 @@ class PropertyListView(ListView):
         return queryset.distinct()
 
     def get_context_data(self, **kwargs):
+        from apps.locations.models import Location
+        from .models import PropertyFeature
+        
         context = super().get_context_data(**kwargs)
         context['property_types'] = PropertyType.objects.all()
         context['districts'] = District.objects.all()
+        
+        # Добавляем локации для выбранного района
+        selected_district = self.request.GET.get('district')
+        if selected_district:
+            context['locations'] = Location.objects.filter(district__slug=selected_district)
+        else:
+            context['locations'] = Location.objects.all()
+        
+        # Добавляем популярные amenities (с количеством > 10 объектов)
+        context['amenities'] = PropertyFeature.objects.annotate(
+            property_count=Count('propertyfeaturerelation')
+        ).filter(property_count__gte=10).order_by('-property_count')[:12]
         
         # Передаем текущие фильтры в контекст для сохранения состояния формы
         context['current_filters'] = {
             'deal_type': self.request.GET.get('deal_type', ''),
             'property_type': self.request.GET.getlist('property_type'),
             'district': self.request.GET.get('district', ''),
+            'location': self.request.GET.get('location', ''),
             'min_price': self.request.GET.get('min_price', ''),
             'max_price': self.request.GET.get('max_price', ''),
             'bedrooms': self.request.GET.getlist('bedrooms'),
-            'pool': self.request.GET.get('pool', ''),
-            'parking': self.request.GET.get('parking', ''),
-            'sea_view': self.request.GET.get('sea_view', ''),
+            'amenities': self.request.GET.getlist('amenities'),
             'q': self.request.GET.get('q', ''),
             'sort': self.request.GET.get('sort', '-created_at'),
         }
@@ -167,7 +189,14 @@ class PropertyByTypeView(PropertyListView):
     template_name = 'properties/list.html'
 
     def get_queryset(self):
-        self.property_type = get_object_or_404(PropertyType, name=self.kwargs['type_name'])
+        type_name = self.kwargs['type_name']
+        
+        # Проверяем существование типа недвижимости
+        try:
+            self.property_type = PropertyType.objects.get(name=type_name)
+        except PropertyType.DoesNotExist:
+            raise Http404(f"Property type '{type_name}' not found")
+        
         return super().get_queryset().filter(property_type=self.property_type)
 
     def get_context_data(self, **kwargs):
@@ -182,18 +211,84 @@ class PropertyDetailView(DetailView):
     context_object_name = 'property'
 
     def get_queryset(self):
-        return Property.objects.filter(
-            is_active=True
-        ).select_related('district', 'location', 'property_type', 'developer').prefetch_related(
-            'images', 'features__feature'
-        )
+        # Возвращаем ВСЕ объекты, не фильтруем по is_active здесь
+        return Property.objects.select_related(
+            'district', 'location', 'property_type', 'developer'
+        ).prefetch_related('images', 'features__feature')
 
     def get_object(self):
-        obj = super().get_object()
-        # Увеличиваем счетчик просмотров
-        obj.views_count += 1
-        obj.save(update_fields=['views_count'])
+        try:
+            obj = super().get_object()
+        except Http404:
+            # Если объект не найден вообще, возвращаем 404
+            raise Http404("Недвижимость не найдена")
+        
+        # Увеличиваем счетчик просмотров только для активных объектов
+        if obj.is_active:
+            obj.views_count += 1
+            obj.save(update_fields=['views_count'])
+        
         return obj
+    
+    def handle_inactive_property(self, property_obj):
+        """
+        Обрабатывает неактивную недвижимость и определяет куда редиректить
+        Приоритет редиректов:
+        1. Тип недвижимости + район + тип сделки
+        2. Тип недвижимости + тип сделки  
+        3. Тип недвижимости
+        4. Главная страница недвижимости
+        """
+        redirect_url = None
+        
+        # 1. Пытаемся редиректить на тип недвижимости + тип сделки
+        if property_obj.property_type and property_obj.deal_type:
+            # Формируем URL вида /properties/sale/ или /properties/rent/
+            if property_obj.deal_type in ['sale', 'both']:
+                redirect_url = reverse('property_sale')
+            elif property_obj.deal_type == 'rent':
+                redirect_url = reverse('property_rent')
+            
+            # Добавляем фильтры в query params
+            if redirect_url:
+                params = []
+                # Добавляем тип недвижимости
+                params.append(f'property_type={property_obj.property_type.name}')
+                # Добавляем район если есть
+                if property_obj.district:
+                    params.append(f'district={property_obj.district.slug}')
+                
+                if params:
+                    redirect_url = f"{redirect_url}?{'&'.join(params)}"
+        
+        # 2. Fallback: редиректим на общий список недвижимости
+        if not redirect_url:
+            redirect_url = reverse('property_list')
+            if property_obj.property_type:
+                redirect_url = f"{redirect_url}?property_type={property_obj.property_type.name}"
+        
+        # 3. Финальный fallback: главная страница недвижимости
+        if not redirect_url:
+            redirect_url = reverse('property_list')
+        
+        # Выполняем 301 редирект
+        from django.http import HttpResponsePermanentRedirect
+        return HttpResponsePermanentRedirect(redirect_url)
+    
+    def get(self, request, *args, **kwargs):
+        """Переопределяем get метод для обработки редиректов"""
+        try:
+            self.object = self.get_object()
+        except Http404:
+            raise
+        
+        # Если объект найден, но неактивен - делаем редирект
+        if not self.object.is_active:
+            return self.handle_inactive_property(self.object)
+        
+        # Иначе продолжаем как обычно
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -418,4 +513,21 @@ def property_list_ajax(request):
             'next_page': properties.next_page_number() if properties.has_next() else None,
             'total_count': paginator.count,
         }
+    })
+
+
+def get_locations_for_district(request):
+    """AJAX endpoint для получения локаций по району"""
+    from apps.locations.models import Location
+    
+    district_slug = request.GET.get('district')
+    
+    if district_slug:
+        locations = Location.objects.filter(district__slug=district_slug).values('slug', 'name')
+    else:
+        locations = Location.objects.all().values('slug', 'name')
+    
+    return JsonResponse({
+        'success': True,
+        'locations': list(locations)
     })

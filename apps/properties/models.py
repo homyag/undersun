@@ -11,7 +11,7 @@ class PropertyType(models.Model):
     """Типы недвижимости"""
     PROPERTY_TYPES = [
         ('villa', _('Вилла')),
-        ('apartment', _('Апартаменты')),
+        ('condo', _('Кондоминиум')),
         ('townhouse', _('Таунхаус')),
         ('land', _('Земельный участок')),
         ('investment', _('Инвестиции')),
@@ -19,7 +19,7 @@ class PropertyType(models.Model):
     ]
 
     name = models.CharField(_('Тип'), max_length=20, choices=PROPERTY_TYPES, unique=True)
-    name_display = models.CharField(_('Отображаемое название'), max_length=50)
+    name_display = models.CharField(_('Отображаемое название'), max_length=100)
     icon = models.CharField(_('Иконка'), max_length=50, blank=True)
 
     class Meta:
@@ -63,7 +63,7 @@ class Property(models.Model):
 
     # Основная информация
     title = models.CharField(_('Название'), max_length=200)
-    slug = models.SlugField(_('URL'), unique=True)
+    slug = models.SlugField(_('URL'), unique=True, max_length=150)
     property_type = models.ForeignKey(PropertyType, on_delete=models.CASCADE, verbose_name=_('Тип'))
     deal_type = models.CharField(_('Тип сделки'), max_length=10, choices=DEAL_TYPES, default='sale')
     status = models.CharField(_('Статус'), max_length=10, choices=STATUS_CHOICES, default='available')
@@ -77,9 +77,9 @@ class Property(models.Model):
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name=_('Локация'), blank=True, null=True)
     address = models.CharField(_('Адрес'), max_length=200, blank=True)
 
-    # Координаты для карты
-    latitude = models.DecimalField(_('Широта'), max_digits=10, decimal_places=8, blank=True, null=True)
-    longitude = models.DecimalField(_('Долгота'), max_digits=11, decimal_places=8, blank=True, null=True)
+    # Координаты для карты (увеличена точность для сохранения данных из дампа)
+    latitude = models.DecimalField(_('Широта'), max_digits=18, decimal_places=15, blank=True, null=True)
+    longitude = models.DecimalField(_('Долгота'), max_digits=19, decimal_places=15, blank=True, null=True)
 
     # Характеристики
     bedrooms = models.PositiveIntegerField(_('Спальни'), blank=True, null=True)
@@ -108,9 +108,11 @@ class Property(models.Model):
     parking = models.BooleanField(_('Парковка'), default=False)
     security = models.BooleanField(_('Охрана'), default=False)
     gym = models.BooleanField(_('Спортзал'), default=False)
+    
+    # Удобства (amenities) теперь через PropertyFeature и PropertyFeatureRelation
 
     # Поля для совместимости со старой БД
-    legacy_id = models.CharField(_('ID старой системы'), max_length=20, blank=True, null=True, unique=True,
+    legacy_id = models.CharField(_('ID старой системы'), max_length=20, blank=True, null=True,
                                 help_text=_('Идентификатор из старой Joomla системы (например: VS82)'))
     complex_name = models.CharField(_('Название комплекса'), max_length=100, blank=True,
                                    help_text=_('Название жилого комплекса или проекта'))
@@ -139,6 +141,25 @@ class Property(models.Model):
     distance_to_beach = models.PositiveIntegerField(_('До пляжа, мин'), blank=True, null=True)
     distance_to_airport = models.PositiveIntegerField(_('До аэропорта, мин'), blank=True, null=True)
     distance_to_school = models.PositiveIntegerField(_('До школы, мин'), blank=True, null=True)
+
+    # Типы кроватей (из дампа Joomla field_id=60-62)
+    double_beds = models.PositiveIntegerField(_('Двуспальные кровати'), blank=True, null=True,
+                                            help_text=_('Количество двуспальных кроватей'))
+    single_beds = models.PositiveIntegerField(_('Односпальные кровати'), blank=True, null=True,
+                                            help_text=_('Количество односпальных кроватей'))
+    sofa_beds = models.PositiveIntegerField(_('Диван-кровати'), blank=True, null=True,
+                                          help_text=_('Количество диван-кроватей'))
+    
+    # Связь с агентом (из дампа Joomla field_id=26)
+    agent = models.ForeignKey('Agent', on_delete=models.SET_NULL, null=True, blank=True,
+                             verbose_name=_('Агент по недвижимости'),
+                             help_text=_('Ответственный агент'))
+    
+    # Дополнительные изображения
+    floorplan = models.ImageField(_('План этажа'), upload_to='properties/floorplans/', blank=True,
+                                 help_text=_('План планировки этажей'))
+    intro_image = models.ImageField(_('Интро изображение'), upload_to='properties/intro/', blank=True,
+                                   help_text=_('Дополнительное изображение для анонса'))
 
     # Мета-информация
     views_count = models.PositiveIntegerField(_('Просмотры'), default=0)
@@ -190,16 +211,16 @@ class Property(models.Model):
     @property
     def price_display(self):
         """Отформатированная цена для отображения"""
-        if self.deal_type == 'sale' and self.price_sale_usd:
-            price_str = f"${self.price_sale_usd:,.0f}"
+        if self.deal_type == 'sale' and self.price_sale_thb:
+            price_str = f"฿{self.price_sale_thb:,.0f}"
             if self.is_urgent_sale and self.original_price_thb and self.price_sale_thb:
                 # Показываем скидку если это срочная продажа
                 discount_percent = ((self.original_price_thb - self.price_sale_thb) / self.original_price_thb) * 100
                 if discount_percent > 0:
                     price_str += f" (скидка {discount_percent:.0f}%)"
             return price_str
-        elif self.deal_type == 'rent' and self.price_rent_monthly:
-            return f"${self.price_rent_monthly:,.0f}/мес"
+        elif self.deal_type == 'rent' and self.price_rent_monthly_thb:
+            return f"฿{self.price_rent_monthly_thb:,.0f}/мес"
         return "Цена по запросу"
     
     def get_price_in_currency(self, currency_code, deal_type='sale'):
@@ -207,25 +228,25 @@ class Property(models.Model):
         from apps.currency.models import Currency, ExchangeRate
         from decimal import Decimal
         
-        # Получаем базовую цену (всегда храним в USD)
+        # Получаем базовую цену (теперь храним в THB)
         if deal_type == 'sale':
-            base_price = self.price_sale_usd
+            base_price = self.price_sale_thb
         else:
-            base_price = self.price_rent_monthly
+            base_price = self.price_rent_monthly_thb
             
         if not base_price:
             return None
             
-        # Если нужная валюта USD, возвращаем как есть
-        if currency_code == 'USD':
+        # Если нужная валюта THB, возвращаем как есть
+        if currency_code == 'THB':
             return base_price
             
         # Если есть уже сохраненная цена в нужной валюте, возвращаем ее
-        if currency_code == 'THB':
-            if deal_type == 'sale' and self.price_sale_thb:
-                return self.price_sale_thb
-            elif deal_type == 'rent' and self.price_rent_monthly_thb:
-                return self.price_rent_monthly_thb
+        if currency_code == 'USD':
+            if deal_type == 'sale' and self.price_sale_usd:
+                return self.price_sale_usd
+            elif deal_type == 'rent' and self.price_rent_monthly:
+                return self.price_rent_monthly
         elif currency_code == 'RUB':
             if deal_type == 'sale' and self.price_sale_rub:
                 return self.price_sale_rub
@@ -234,9 +255,9 @@ class Property(models.Model):
         
         # Конвертируем через курс валют
         try:
-            usd_currency = Currency.objects.get(code='USD')
+            thb_currency = Currency.objects.get(code='THB')
             target_currency = Currency.objects.get(code=currency_code)
-            converted_amount = ExchangeRate.convert_amount(base_price, usd_currency, target_currency)
+            converted_amount = ExchangeRate.convert_amount(base_price, thb_currency, target_currency)
             return converted_amount
         except Currency.DoesNotExist:
             return None
@@ -442,13 +463,54 @@ class Property(models.Model):
         return self.generate_auto_seo(language_code)
 
 
+class Agent(models.Model):
+    """Агенты по недвижимости"""
+    name = models.CharField(_('Имя'), max_length=100)
+    email = models.EmailField(_('Email'), blank=True)
+    phone = models.CharField(_('Телефон'), max_length=20, blank=True)
+    whatsapp = models.CharField(_('WhatsApp'), max_length=20, blank=True)
+    telegram = models.CharField(_('Telegram'), max_length=50, blank=True)
+    bio = models.TextField(_('Биография'), blank=True)
+    photo = models.ImageField(_('Фото'), upload_to='agents/', blank=True)
+    is_active = models.BooleanField(_('Активен'), default=True)
+    
+    # Из старой системы Joomla (field_id=26)
+    legacy_id = models.CharField(_('ID из Joomla'), max_length=20, blank=True, unique=True,
+                                help_text=_('Идентификатор из старой Joomla системы'))
+    
+    # Временные метки
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Обновлено'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Агент')
+        verbose_name_plural = _('Агенты')
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+
 class PropertyImage(models.Model):
     """Изображения недвижимости"""
+    IMAGE_TYPES = [
+        ('main', _('Основная галерея')),
+        ('intro', _('Интро изображение')),
+        ('floorplan', _('План этажа')),
+        ('teaser', _('Тизер')),
+    ]
+    
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(_('Изображение'), upload_to='properties/')
     title = models.CharField(_('Название'), max_length=100, blank=True)
     is_main = models.BooleanField(_('Главное изображение'), default=False)
     order = models.PositiveIntegerField(_('Порядок'), default=0)
+    
+    # Дополнительные поля для разных типов изображений (из дампа Joomla)
+    image_type = models.CharField(_('Тип изображения'), max_length=20, choices=IMAGE_TYPES, 
+                                 default='main', help_text=_('Тип изображения для категоризации'))
+    alt_text = models.CharField(_('Alt текст'), max_length=200, blank=True,
+                               help_text=_('Альтернативный текст для SEO и доступности'))
 
     # Автоматическое создание thumbnails
     thumbnail = ImageSpecField(
@@ -499,7 +561,6 @@ class PropertyFeatureRelation(models.Model):
     """Связь недвижимости с характеристиками"""
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='features')
     feature = models.ForeignKey(PropertyFeature, on_delete=models.CASCADE)
-    value = models.CharField(_('Значение'), max_length=100, blank=True)
 
     class Meta:
         unique_together = ['property', 'feature']

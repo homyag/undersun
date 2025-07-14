@@ -146,7 +146,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
         "name": "อพาร์ทเมนท์",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'apartment' %}"
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'condo' %}"
       },
       {
         "@type": "OfferCatalog",
@@ -464,12 +464,12 @@
             <div class="lg:hidden space-y-4 max-w-md mx-auto px-4">
                 <!-- Large tiles for main property types -->
                 <div class="group">
-                    <a href="{% url 'property_by_type' 'apartment' %}" class="block relative overflow-hidden rounded-lg transition-all duration-300 transform group-hover:scale-105 shadow-lg hover:shadow-xl">
+                    <a href="{% url 'property_by_type' 'condo' %}" class="block relative overflow-hidden rounded-lg transition-all duration-300 transform group-hover:scale-105 shadow-lg hover:shadow-xl">
                         <div class="relative h-40 bg-gradient-to-br from-primary/80 to-tertiary/80">
                             <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{% static 'images/home_page/property_types_section_condo.jpeg' %}');"></div>
                             <div class="absolute inset-0 bg-gradient-to-br from-primary/60 to-tertiary/60"></div>
                             <div class="absolute top-4 left-4">
-                                <h3 class="text-white text-xl font-bold">{% trans "Апартаменты" %}</h3>
+                                <h3 class="text-white text-xl font-bold">{% trans "Кондоминиумы" %}</h3>
                             </div>
                         </div>
                     </a>
@@ -547,14 +547,14 @@
                     <div class="space-y-4">
                         <!-- Large image tile - Apartments -->
                         <div class="group">
-                            <a href="{% url 'property_by_type' 'apartment' %}" class="block relative overflow-hidden rounded-lg transition-all duration-300 transform group-hover:scale-105 shadow-lg hover:shadow-xl">
+                            <a href="{% url 'property_by_type' 'condo' %}" class="block relative overflow-hidden rounded-lg transition-all duration-300 transform group-hover:scale-105 shadow-lg hover:shadow-xl">
                                 <div class="relative h-80 bg-gradient-to-br from-primary/80 to-tertiary/80">
                                     <!-- Background image placeholder -->
                                     <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{% static 'images/home_page/property_types_section_condo.jpeg' %}');"></div>
                                     <div class="absolute inset-0 bg-gradient-to-br from-primary/60 to-tertiary/60"></div>
                                     
                                     <div class="absolute top-6 left-6">
-                                        <h3 class="text-white text-2xl font-bold">{% trans "Апартаменты" %}</h3>
+                                        <h3 class="text-white text-2xl font-bold">{% trans "Кондоминиумы" %}</h3>
                                     </div>
                                 </div>
                             </a>
