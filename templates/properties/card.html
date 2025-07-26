@@ -32,14 +32,12 @@
             {% endif %}
 
             <!-- Favorite Button -->
-            {% if user.is_authenticated %}
-                <div class="absolute top-3 right-3">
-                    <button class="bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110"
-                            data-property-id="{{ property.id }}">
-                        <i class="{% if is_favorite %}fas text-red-500{% else %}far text-gray-600 group-hover:text-red-500{% endif %} fa-heart transition-all duration-200"></i>
-                    </button>
-                </div>
-            {% endif %}
+            <div class="absolute top-3 right-3">
+                <button class="bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110"
+                        data-property-id="{{ property.id }}">
+                    <i class="far text-gray-600 group-hover:text-red-500 fa-heart transition-all duration-200"></i>
+                </button>
+            </div>
 
             <!-- Updated Badge -->
             <div class="absolute bottom-3 right-3">

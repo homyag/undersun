@@ -26,15 +26,20 @@ from apps.properties.models import Property, PropertyImage
 
 def load_photo_mapping():
     """Загружает маппинг фотографий из JSON файла"""
-    try:
-        with open('photo_mapping.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print("Файл photo_mapping.json не найден")
-        return None
-    except json.JSONDecodeError:
-        print("Ошибка чтения JSON файла")
-        return None
+    # Сначала пытаемся загрузить улучшенную версию
+    for filename in ['photo_mapping_improved.json', 'photo_mapping.json']:
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                print(f"Загружен файл маппинга: {filename}")
+                return json.load(f)
+        except FileNotFoundError:
+            continue
+        except json.JSONDecodeError:
+            print(f"Ошибка чтения JSON файла {filename}")
+            continue
+    
+    print("Не найден ни один файл маппинга (photo_mapping_improved.json или photo_mapping.json)")
+    return None
 
 
 def copy_and_optimize_image(source_path, destination_path):

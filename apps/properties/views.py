@@ -1,15 +1,16 @@
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, Http404
-from django.contrib.auth.decorators import login_required
+# login_required decorator removed
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.urls import reverse
 from .models import Property, PropertyType
 from apps.locations.models import District
-from apps.users.models import PropertyFavorite, PropertyInquiry
+from apps.users.models import PropertyInquiry
 
 
 class PropertyListView(ListView):
@@ -297,12 +298,8 @@ class PropertyDetailView(DetailView):
         similar_properties = self.get_similar_properties()
         context['similar_properties'] = similar_properties
 
-        # Проверяем, добавлен ли объект в избранное
-        if self.request.user.is_authenticated:
-            context['is_favorite'] = PropertyFavorite.objects.filter(
-                user=self.request.user,
-                property=self.object
-            ).exists()
+        # Favorite functionality removed
+        context['is_favorite'] = False
 
         return context
     
@@ -374,28 +371,66 @@ class PropertyDetailView(DetailView):
 
 
 @require_POST
-@login_required
 def toggle_favorite(request):
-    """AJAX добавление/удаление из избранного"""
-    property_id = request.POST.get('property_id')
-    property_obj = get_object_or_404(Property, id=property_id)
+    # Функция избранного отключена - используется LocalStorage
+    return JsonResponse({'success': False, 'message': 'Функция избранного отключена'})
 
-    favorite, created = PropertyFavorite.objects.get_or_create(
-        user=request.user,
-        property=property_obj
-    )
+def favorites_view(request):
+    """Страница избранного"""
+    return render(request, 'properties/favorites.html')
 
-    if not created:
-        favorite.delete()
-        is_favorite = False
-    else:
-        is_favorite = True
-
-    return JsonResponse({
-        'success': True,
-        'is_favorite': is_favorite,
-        'message': 'Добавлено в избранное' if is_favorite else 'Удалено из избранного'
-    })
+@require_POST
+def get_favorite_properties(request):
+    """AJAX endpoint для получения данных избранных объектов"""
+    property_ids = request.POST.getlist('property_ids[]')
+    
+    if not property_ids:
+        return JsonResponse({'success': False, 'message': 'Не переданы ID объектов'})
+    
+    try:
+        # Преобразуем в integers
+        ids = [int(id) for id in property_ids if id.isdigit()]
+        
+        # Получаем объекты
+        properties = Property.objects.filter(id__in=ids).select_related(
+            'district', 'property_type'
+        ).prefetch_related('images')
+        
+        # Формируем данные для ответа
+        properties_data = []
+        for prop in properties:
+            main_image_url = ''
+            if prop.main_image:
+                main_image_url = prop.main_image.thumbnail.url
+            
+            # Формируем цену для отображения
+            price_display = 'Цена по запросу'
+            if prop.deal_type == 'rent' and prop.price_rent_monthly:
+                price_display = f'${prop.price_rent_monthly:,.0f}/мес'
+            elif prop.deal_type in ['sale', 'both'] and prop.price_sale_usd:
+                price_display = f'${prop.price_sale_usd:,.0f}'
+            
+            properties_data.append({
+                'id': prop.id,
+                'title': prop.title,
+                'slug': prop.slug,
+                'district_name': prop.district.name if prop.district else '',
+                'property_type_name': prop.property_type.name if prop.property_type else '',
+                'deal_type': prop.deal_type,
+                'price_display': price_display,
+                'main_image_url': main_image_url,
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'properties': properties_data
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False, 
+            'message': f'Ошибка при получении объектов: {str(e)}'
+        })
 
 
 @require_POST

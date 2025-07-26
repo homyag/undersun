@@ -204,31 +204,14 @@
                     </div>
 
 
-                    <!-- User Menu -->
+                    <!-- Favorites Menu -->
                     <div class="flex items-center space-x-2 xl:space-x-4">
-                        {% if user.is_authenticated %}
-                            <div class="relative group">
-                                <button class="text-primary hover:text-accent transition-colors flex items-center font-medium">
-                                    <i class="fas fa-user mr-1"></i> {{ user.get_full_name|default:user.username }}
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </button>
-                                <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                                    <div class="py-1">
-                                        <a href="{% url 'profile' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Профиль" %}</a>
-                                        <a href="{% url 'favorites' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                                            {% trans "Избранное" %} <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary text-white ml-2">{{ user.favorites.count }}</span>
-                                        </a>
-                                        <div class="border-t border-gray-200"></div>
-                                        <a href="{% url 'logout' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Выход" %}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        {% else %}
-                            <a href="{% url 'login' %}" class="text-primary hover:text-accent transition-colors font-medium">{% trans "Вход" %}</a>
-                            <a href="{% url 'register' %}" class="bg-accent text-white px-4 py-2 rounded-md hover:bg-yellow-500 transition-colors font-medium">{% trans "Регистрация" %}</a>
-                        {% endif %}
+                        <a href="{% url 'property_favorites' %}" class="text-primary hover:text-accent transition-colors flex items-center font-medium relative">
+                            <i class="fas fa-heart mr-1"></i> 
+                            {% trans "Избранное" %}
+                            <span class="favorites-count ml-2 bg-accent text-gray-900 rounded-full px-2 py-1 text-xs font-bold hidden">0</span>
+                        </a>
+                    </div>
 
                         <!-- Language Switcher -->
                         <div class="relative group">
@@ -355,27 +338,13 @@
                         </div>
                     </div>
 
-                    <!-- Mobile User Menu -->
-                    {% if user.is_authenticated %}
-                        <div class="border-t border-gray-200 pt-2 mt-2">
-                            <button onclick="toggleMobileSubmenu('user-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                                <span><i class="fas fa-user mr-2"></i>{{ user.get_full_name|default:user.username }}</span>
-                                <svg class="w-4 h-4 transform transition-transform" id="user-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-                            <div id="user-submenu" class="hidden ml-6 mt-1 space-y-1">
-                                <a href="{% url 'profile' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Профиль" %}</a>
-                                <a href="{% url 'favorites' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Избранное" %}</a>
-                                <a href="{% url 'logout' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Выход" %}</a>
-                            </div>
-                        </div>
-                    {% else %}
-                        <div class="border-t border-gray-200 pt-2 mt-2">
-                            <a href="{% url 'login' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">{% trans "Вход" %}</a>
-                            <a href="{% url 'register' %}" class="block px-3 py-2 bg-accent text-white rounded-md mx-3 text-center font-medium hover:bg-yellow-500 transition-colors">{% trans "Регистрация" %}</a>
-                        </div>
-                    {% endif %}
+                    <!-- Mobile Favorites Menu -->
+                    <div class="border-t border-gray-200 pt-2 mt-2">
+                        <a href="{% url 'property_favorites' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <i class="fas fa-heart mr-2"></i>{% trans "Избранное" %} 
+                            <span class="favorites-count ml-2 bg-accent text-gray-900 rounded-full px-2 py-1 text-xs font-bold hidden">0</span>
+                        </a>
+                    </div>
                     
 
                     <!-- Mobile Language Switcher -->
@@ -618,9 +587,11 @@
         });
     </script>
 
-    <!-- Custom JS -->
-    {% block extra_js %}
+    <!-- Custom JS - Main Script -->
     <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Extra JS Block for page-specific scripts -->
+    {% block extra_js %}
     {% endblock %}
 </body>
 </html>

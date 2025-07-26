@@ -42,47 +42,26 @@ $(document).ready(function() {
         setInterval(nextSlide, 5000);
     }
 
-    // ===== ИЗБРАННОЕ =====
-    $('.favorite-btn').on('click', function(e) {
+    // ===== ИЗБРАННОЕ НА ОСНОВЕ LOCAL STORAGE =====
+    
+    // Инициализация избранного при загрузке страницы
+    initializeFavorites();
+    
+    // Обработчик кнопок избранного с делегированием
+    $(document).on('click', '.favorite-btn', function(e) {
         e.preventDefault();
         e.stopPropagation();
-
+        
         const btn = $(this);
         const propertyId = btn.data('property-id');
         const icon = btn.find('i');
-
-        // Проверяем авторизацию
-        if (!$('body').hasClass('authenticated')) {
-            window.location.href = '/users/login/';
-            return;
-        }
-
-        $.ajax({
-            url: '/property/ajax/favorite/',
-            method: 'POST',
-            data: {
-                'property_id': propertyId
-            },
-            success: function(response) {
-                if (response.success) {
-                    if (response.is_favorite) {
-                        icon.removeClass('far').addClass('fas text-danger');
-                    } else {
-                        icon.removeClass('fas text-danger').addClass('far');
-                    }
-
-                    // Показать уведомление
-                    showNotification(response.message, 'success');
-
-                    // Обновить счетчик в навигации
-                    updateFavoritesCount();
-                }
-            },
-            error: function() {
-                showNotification('Произошла ошибка. Попробуйте позже.', 'error');
-            }
-        });
+        
+        
+        toggleFavorite(propertyId, icon);
     });
+    
+    // Обновляем счетчик при загрузке страницы
+    updateFavoritesCounter();
 
     // ===== ФОРМА ЗАПРОСА ПО НЕДВИЖИМОСТИ =====
     $('#inquiryForm').on('submit', function(e) {
@@ -226,29 +205,114 @@ $(document).ready(function() {
 // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 
 function showNotification(message, type = 'info') {
-    const alertClass = type === 'success' ? 'alert-success' :
-                      type === 'error' ? 'alert-danger' : 'alert-info';
+    
+    const colorClass = type === 'success' ? 'bg-green-500' :
+                      type === 'error' ? 'bg-red-500' : 
+                      type === 'info' ? 'bg-blue-500' : 'bg-gray-500';
 
     const notification = $(`
-        <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
-             style="top: 100px; right: 20px; z-index: 1050; min-width: 300px;">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="fixed top-20 right-4 ${colorClass} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300" 
+             style="min-width: 250px;">
+            <div class="flex items-center justify-between">
+                <span>${message}</span>
+                <button type="button" class="ml-4 text-white hover:text-gray-200" onclick="$(this).parent().parent().remove()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     `);
 
     $('body').append(notification);
 
-    // Автоматически скрыть через 5 секунд
+    // Автоматически скрыть через 3 секунды
     setTimeout(() => {
-        notification.alert('close');
-    }, 5000);
+        notification.fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 3000);
+}
+
+// ===== ФУНКЦИИ УПРАВЛЕНИЯ ИЗБРАННЫМ =====
+
+// Получить список избранного из LocalStorage
+function getFavorites() {
+    const favorites = localStorage.getItem('favorites');
+    return favorites ? JSON.parse(favorites) : [];
+}
+
+// Сохранить список избранного в LocalStorage
+function saveFavorites(favorites) {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+// Проверить, находится ли объект в избранном
+function isFavorite(propertyId) {
+    const favorites = getFavorites();
+    return favorites.includes(parseInt(propertyId));
+}
+
+// Добавить/удалить объект из избранного
+function toggleFavorite(propertyId, icon = null) {
+    
+    const favorites = getFavorites();
+    const id = parseInt(propertyId);
+    const index = favorites.indexOf(id);
+    
+    if (index > -1) {
+        // Удаляем из избранного
+        favorites.splice(index, 1);
+        if (icon) {
+            icon.removeClass('fas text-red-500').addClass('far text-gray-600');
+        }
+        showNotification('Удалено из избранного', 'info');
+    } else {
+        // Добавляем в избранное
+        favorites.push(id);
+        if (icon) {
+            icon.removeClass('far text-gray-600').addClass('fas text-red-500');
+        }
+        showNotification('Добавлено в избранное', 'success');
+    }
+    
+    saveFavorites(favorites);
+    updateFavoritesCounter();
+    
+    return !isFavorite(propertyId);
+}
+
+// Обновить счетчик избранного
+function updateFavoritesCounter() {
+    const count = getFavorites().length;
+    $('.favorites-count').text(count);
+    
+    // Обновляем видимость счетчика
+    if (count > 0) {
+        $('.favorites-count').show();
+    } else {
+        $('.favorites-count').hide();
+    }
+}
+
+// Инициализация состояния кнопок избранного на странице
+function initializeFavorites() {
+    
+    $('.favorite-btn').each(function() {
+        const btn = $(this);
+        const propertyId = btn.data('property-id');
+        const icon = btn.find('i');
+        
+        if (isFavorite(propertyId)) {
+            icon.removeClass('far text-gray-600').addClass('fas text-red-500');
+        } else {
+            icon.removeClass('fas text-red-500').addClass('far text-gray-600');
+        }
+    });
 }
 
 function updateFavoritesCount() {
-    $.get('/users/favorites-count/', function(data) {
-        $('.favorites-count').text(data.count);
-    });
+    updateFavoritesCounter();
 }
 
 function updatePropertyFilters() {
@@ -348,6 +412,10 @@ function createPropertyCard(property) {
         dealTypeBadge = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-tertiary text-white shadow-sm">Продажа/Аренда</span>';
     }
     
+    // Определяем состояние кнопки избранного
+    const isFav = isFavorite(property.id);
+    const heartClass = isFav ? 'fas text-red-500' : 'far text-gray-600';
+    
     // Featured badge
     const featuredBadge = property.is_featured ? 
         '<div class="absolute top-2 right-2"><span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent text-gray-900 shadow-sm"><i class="fas fa-star mr-1"></i> Рекомендуем</span></div>' : '';
@@ -409,6 +477,14 @@ function createPropertyCard(property) {
                     <!-- Property Status Badge -->
                     <div class="absolute top-2 left-2">
                         ${dealTypeBadge}
+                    </div>
+                    
+                    <!-- Favorite Button -->
+                    <div class="absolute top-3 right-3">
+                        <button class="bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110"
+                                data-property-id="${property.id}">
+                            <i class="${heartClass} group-hover:text-red-500 fa-heart transition-all duration-200"></i>
+                        </button>
                     </div>
                     
                     <!-- Featured Badge -->
@@ -541,11 +617,19 @@ function updatePropertyFiltersWithParams(params) {
 
 function initPropertyCards() {
     // Переинициализируем обработчики для новых карточек недвижимости
-    // Например, для кнопок избранного, если они есть
     $('.favorite-btn').off('click').on('click', function(e) {
         e.preventDefault();
-        toggleFavorite($(this).data('property-id'));
+        e.stopPropagation();
+        
+        const btn = $(this);
+        const propertyId = btn.data('property-id');
+        const icon = btn.find('i');
+        
+        toggleFavorite(propertyId, icon);
     });
+    
+    // Инициализируем состояние кнопок избранного
+    initializeFavorites();
 }
 
 function initPropertyMap() {

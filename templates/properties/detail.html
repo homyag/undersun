@@ -121,12 +121,10 @@
                         
                         <div class="text-right">
                             <div class="text-3xl font-bold text-primary mb-2">{% price_in_currency property property.deal_type %}</div>
-                            {% if user.is_authenticated %}
-                                <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-full transition-colors favorite-btn" 
-                                        data-property-id="{{ property.id }}">
-                                    <i class="{% if is_favorite %}fas text-red-500{% else %}far{% endif %} fa-heart"></i>
-                                </button>
-                            {% endif %}
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-full transition-colors favorite-btn" 
+                                    data-property-id="{{ property.id }}">
+                                <i class="far text-gray-600 fa-heart"></i>
+                            </button>
                         </div>
                     </div>
                     
