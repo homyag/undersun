@@ -63,6 +63,21 @@ class BlogPostAdmin(admin.ModelAdmin):
         (_('Основная информация (Русский)'), {
             'fields': ('title', 'slug', 'excerpt', 'content', 'category', 'author')
         }),
+        (_('Дополнительные поля для событий'), {
+            'fields': ('event_date', 'event_location', 'event_price'),
+            'classes': ('collapse',),
+            'description': _('Заполняется только для мероприятий')
+        }),
+        (_('Дополнительные поля для кейсов и обзоров'), {
+            'fields': ('project_url', 'rating'),
+            'classes': ('collapse',),
+            'description': _('Заполняется для кейсов (ссылка) и обзоров (рейтинг 1-5)')
+        }),
+        (_('Поля миграции'), {
+            'fields': ('original_url', 'original_id'),
+            'classes': ('collapse',),
+            'description': _('Автоматически заполняется при импорте')
+        }),
         (_('Переводы - English'), {
             'fields': ('title_en', 'excerpt_en', 'content_en'),
             'classes': ('collapse',)
@@ -93,6 +108,7 @@ class BlogPostAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ('views_count',)
+    
     
     def save_model(self, request, obj, form, change):
         if not change:  # Если это новый объект

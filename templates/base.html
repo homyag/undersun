@@ -201,6 +201,10 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <a href="{% url 'blog:list' %}" class="text-primary hover:text-accent transition-colors font-medium whitespace-nowrap">
+                            {% trans "Блог" %}
+                        </a>
                     </div>
 
 
@@ -336,6 +340,13 @@
                                 <span class="text-sm">info@undersunestate.com</span>
                             </a>
                         </div>
+                    </div>
+                    
+                    <!-- Mobile Blog Link -->
+                    <div class="border-t border-gray-200 pt-2 mt-2">
+                        <a href="{% url 'blog:list' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            {% trans "Блог" %}
+                        </a>
                     </div>
 
                     <!-- Mobile Favorites Menu -->

@@ -232,7 +232,7 @@ function clearAllFavorites() {
     localStorage.removeItem('favorites');
     updateFavoritesCounter();
     loadFavoritesPage();
-    showNotification('{% trans "Избранное очищено" %}', 'info');
+    showNotification('{% trans "Избранное очищено" %}', 'favorite-removed');
 }
 </script>
 {% endblock %}

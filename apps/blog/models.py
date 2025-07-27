@@ -49,6 +49,7 @@ class BlogPost(models.Model):
         ('archived', _('В архиве')),
     ]
     
+    
     # Основная информация
     title = models.CharField(_('Заголовок'), max_length=200)
     slug = models.SlugField(_('URL-адрес'), max_length=200, unique=True)
@@ -66,6 +67,26 @@ class BlogPost(models.Model):
     featured_image = models.ImageField(_('Главное изображение'), upload_to='blog/featured/', 
                                      blank=True, help_text=_('Главное изображение статьи'))
     featured_image_alt = models.CharField(_('Alt текст изображения'), max_length=200, blank=True)
+    
+    # Дополнительные поля для событий
+    event_date = models.DateTimeField(_('Дата события'), blank=True, null=True,
+                                    help_text=_('Для мероприятий - дата проведения'))
+    event_location = models.CharField(_('Место проведения'), max_length=200, blank=True,
+                                    help_text=_('Для мероприятий - место проведения'))
+    event_price = models.CharField(_('Стоимость участия'), max_length=100, blank=True,
+                                 help_text=_('Для мероприятий - стоимость участия'))
+    
+    # Дополнительные поля для кейсов и обзоров
+    project_url = models.URLField(_('Ссылка на проект'), blank=True,
+                                help_text=_('Для кейсов - ссылка на проект'))
+    rating = models.PositiveIntegerField(_('Рейтинг'), blank=True, null=True,
+                                       help_text=_('Для обзоров - рейтинг от 1 до 5'))
+    
+    # Поля миграции из внешнего сайта
+    original_url = models.URLField(_('Оригинальный URL'), blank=True,
+                                 help_text=_('URL статьи на исходном сайте'))
+    original_id = models.CharField(_('Оригинальный ID'), max_length=50, blank=True,
+                                 help_text=_('ID статьи на исходном сайте'))
     
     # SEO поля
     meta_title = models.CharField(_('SEO заголовок'), max_length=200, blank=True)
@@ -125,6 +146,29 @@ class BlogPost(models.Model):
     def get_featured(cls, limit=3):
         """Получить рекомендуемые статьи"""
         return cls.get_published().filter(is_featured=True)[:limit]
+    
+    @classmethod
+    def get_by_content_type(cls, content_type):
+        """Получить статьи по типу контента"""
+        return cls.get_published().filter(content_type=content_type)
+    
+    @classmethod
+    def get_upcoming_events(cls):
+        """Получить будущие мероприятия"""
+        from django.utils import timezone
+        return cls.get_published().filter(
+            content_type='upcoming_event',
+            event_date__gte=timezone.now()
+        ).order_by('event_date')
+    
+    @classmethod
+    def get_past_events(cls):
+        """Получить прошедшие мероприятия"""
+        from django.utils import timezone
+        return cls.get_published().filter(
+            content_type='past_event',
+            event_date__lt=timezone.now()
+        ).order_by('-event_date')
         
     def increment_views(self):
         """Увеличить счетчик просмотров"""
@@ -137,6 +181,37 @@ class BlogPost(models.Model):
         word_count = len(self.content.split())
         reading_time = max(1, round(word_count / words_per_minute))
         return reading_time
+    
+    def get_content_type_display_with_icon(self):
+        """Получить отображение типа контента с иконкой"""
+        icons = {
+            'article': '<i class="fas fa-file-alt mr-2"></i>',
+            'news': '<i class="fas fa-newspaper mr-2"></i>',
+            'case': '<i class="fas fa-briefcase mr-2"></i>',
+            'review': '<i class="fas fa-star mr-2"></i>',
+            'place_activity': '<i class="fas fa-map-marker-alt mr-2"></i>',
+            'upcoming_event': '<i class="fas fa-calendar-plus mr-2"></i>',
+            'past_event': '<i class="fas fa-calendar-check mr-2"></i>',
+        }
+        icon = icons.get(self.content_type, '<i class="fas fa-file mr-2"></i>')
+        return f"{icon}{self.get_content_type_display()}"
+    
+    def get_content_type_color(self):
+        """Получить цвет для типа контента"""
+        colors = {
+            'article': 'primary',
+            'news': 'accent', 
+            'case': 'green-600',
+            'review': 'yellow-500',
+            'place_activity': 'blue-500',
+            'upcoming_event': 'purple-600',
+            'past_event': 'gray-500',
+        }
+        return colors.get(self.content_type, 'primary')
+    
+    def is_event(self):
+        """Проверить, является ли контент мероприятием"""
+        return self.content_type in ['upcoming_event', 'past_event']
 
 
 class BlogTag(models.Model):

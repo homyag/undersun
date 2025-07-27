@@ -268,5 +268,5 @@ TINYMCE_DEFAULT_CONFIG = {
     'image_title': True,
     'automatic_uploads': True,
     'file_picker_types': 'image',
-    'images_upload_url': '/tinymce/upload/',
+    'images_upload_url': '/ru/blog/tinymce-upload/',
 }

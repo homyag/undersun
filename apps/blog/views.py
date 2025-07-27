@@ -1,7 +1,15 @@
+import json
+import os
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.utils.text import slugify
 from .models import BlogPost, BlogCategory, BlogTag
 
 
@@ -24,6 +32,7 @@ def blog_list(request):
         posts = posts.filter(tags=tag)
     else:
         tag = None
+    
     
     # Поиск
     search_query = request.GET.get('search')
@@ -144,3 +153,53 @@ def blog_tag(request, slug):
     }
     
     return render(request, 'blog/blog_tag.html', context)
+
+
+@csrf_exempt
+@require_POST
+def tinymce_upload(request):
+    """
+    Загрузка изображений для TinyMCE редактора
+    """
+    if 'file' not in request.FILES:
+        return JsonResponse({'error': 'No file provided'}, status=400)
+    
+    file = request.FILES['file']
+    
+    # Проверяем тип файла
+    allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+    file_extension = os.path.splitext(file.name)[1].lower()
+    
+    if file_extension not in allowed_extensions:
+        return JsonResponse({
+            'error': 'Invalid file type. Allowed: JPG, PNG, GIF, WebP'
+        }, status=400)
+    
+    # Проверяем размер файла (максимум 5MB)
+    if file.size > 5 * 1024 * 1024:
+        return JsonResponse({
+            'error': 'File too large. Maximum size: 5MB'
+        }, status=400)
+    
+    try:
+        # Создаем безопасное имя файла
+        name, ext = os.path.splitext(file.name)
+        safe_name = slugify(name) + ext
+        
+        # Путь для сохранения
+        upload_path = f'blog/editor/{safe_name}'
+        
+        # Сохраняем файл
+        file_path = default_storage.save(upload_path, ContentFile(file.read()))
+        
+        # Возвращаем URL для TinyMCE
+        file_url = request.build_absolute_uri(settings.MEDIA_URL + file_path)
+        
+        return JsonResponse({
+            'location': file_url
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Upload failed: {str(e)}'
+        }, status=500)

@@ -206,17 +206,53 @@ $(document).ready(function() {
 
 function showNotification(message, type = 'info') {
     
-    const colorClass = type === 'success' ? 'bg-green-500' :
-                      type === 'error' ? 'bg-red-500' : 
-                      type === 'info' ? 'bg-blue-500' : 'bg-gray-500';
+    // Используем цвета брендбука проекта
+    let bgClass, textClass, iconClass, icon;
+    
+    switch(type) {
+        case 'success':
+            bgClass = 'bg-accent'; // Желтый/золотой из брендбука
+            textClass = 'text-gray-900'; // Темный текст для контраста с желтым
+            iconClass = 'text-gray-900';
+            icon = '<i class="fas fa-check-circle mr-2"></i>';
+            break;
+        case 'favorite-added':
+            bgClass = 'bg-primary'; // Темно-синий из брендбука
+            textClass = 'text-white';
+            iconClass = 'text-accent'; // Желтая иконка на синем фоне
+            icon = '<i class="fas fa-heart mr-2"></i>';
+            break;
+        case 'favorite-removed':
+            bgClass = 'bg-secondary border border-gray-300'; // Светло-серый из брендбука
+            textClass = 'text-gray-700';
+            iconClass = 'text-gray-500';
+            icon = '<i class="far fa-heart mr-2"></i>';
+            break;
+        case 'error':
+            bgClass = 'bg-red-500';
+            textClass = 'text-white';
+            iconClass = 'text-white';
+            icon = '<i class="fas fa-exclamation-triangle mr-2"></i>';
+            break;
+        case 'info':
+        default:
+            bgClass = 'bg-primary'; // Темно-синий из брендбука
+            textClass = 'text-white';
+            iconClass = 'text-accent'; // Желтая иконка
+            icon = '<i class="fas fa-info-circle mr-2"></i>';
+            break;
+    }
 
     const notification = $(`
-        <div class="fixed top-20 right-4 ${colorClass} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300" 
-             style="min-width: 250px;">
+        <div class="fixed top-20 right-4 ${bgClass} ${textClass} px-6 py-4 rounded-xl shadow-2xl z-50 transition-all duration-500 transform translate-x-full opacity-0" 
+             style="min-width: 280px; max-width: 400px;">
             <div class="flex items-center justify-between">
-                <span>${message}</span>
-                <button type="button" class="ml-4 text-white hover:text-gray-200" onclick="$(this).parent().parent().remove()">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-center">
+                    <span class="${iconClass}">${icon}</span>
+                    <span class="font-medium">${message}</span>
+                </div>
+                <button type="button" class="ml-4 ${iconClass} hover:opacity-70 transition-opacity duration-200" onclick="$(this).parent().parent().fadeOut(300, function() { $(this).remove(); })">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
@@ -226,12 +262,18 @@ function showNotification(message, type = 'info') {
 
     $('body').append(notification);
 
-    // Автоматически скрыть через 3 секунды
+    // Анимация появления
     setTimeout(() => {
-        notification.fadeOut(300, function() {
-            $(this).remove();
-        });
-    }, 3000);
+        notification.removeClass('translate-x-full opacity-0').addClass('translate-x-0 opacity-100');
+    }, 10);
+
+    // Автоматически скрыть через 4 секунды
+    setTimeout(() => {
+        notification.addClass('translate-x-full opacity-0');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 4000);
 }
 
 // ===== ФУНКЦИИ УПРАВЛЕНИЯ ИЗБРАННЫМ =====
@@ -266,14 +308,14 @@ function toggleFavorite(propertyId, icon = null) {
         if (icon) {
             icon.removeClass('fas text-red-500').addClass('far text-gray-600');
         }
-        showNotification('Удалено из избранного', 'info');
+        showNotification('Удалено из избранного', 'favorite-removed');
     } else {
         // Добавляем в избранное
         favorites.push(id);
         if (icon) {
             icon.removeClass('far text-gray-600').addClass('fas text-red-500');
         }
-        showNotification('Добавлено в избранное', 'success');
+        showNotification('Добавлено в избранное', 'favorite-added');
     }
     
     saveFavorites(favorites);
