@@ -1,9 +1,12 @@
 from django.contrib import admin
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 # from modeltranslation.admin import TranslationAdmin  # Временно отключено
 from .models import (
     Property, PropertyImage, PropertyType, Developer,
     PropertyFeature, PropertyFeatureRelation
 )
+from .services import translate_property, translate_property_type, translate_developer, translate_property_feature
 
 
 class PropertyImageInline(admin.TabularInline):
@@ -29,7 +32,7 @@ class PropertyAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     ordering = ('-created_at',)
     
-    actions = ['make_active', 'make_inactive', 'make_featured', 'make_not_featured']
+    actions = ['make_active', 'make_inactive', 'make_featured', 'make_not_featured', 'auto_translate', 'force_retranslate']
     
     def make_active(self, request, queryset):
         """Сделать недвижимость активной (опубликованной)"""
@@ -54,6 +57,65 @@ class PropertyAdmin(admin.ModelAdmin):
         updated = queryset.update(is_featured=False)
         self.message_user(request, f'{updated} объектов недвижимости убрано из рекомендуемых.')
     make_not_featured.short_description = "⚪ Убрать из рекомендуемых"
+    
+    def auto_translate(self, request, queryset):
+        """Автоматически переводит выбранные объекты недвижимости на английский и тайский (только пустые поля)"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        skipped_count = 0
+        
+        for property_obj in queryset:
+            try:
+                translate_property(property_obj, force_retranslate=False)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода объекта "{property_obj.title}": {e}', level=messages.ERROR)
+                skipped_count += 1
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, 
+                f'Успешно переведено {translated_count} объектов недвижимости через {service_name.upper()}. '
+                f'Пропущено: {skipped_count} (уже переведены или ошибки).')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одного объекта.', level=messages.WARNING)
+    
+    auto_translate.short_description = "🌐 Перевести на EN и TH (только пустые поля)"
+    
+    def force_retranslate(self, request, queryset):
+        """Принудительно переводит выбранные объекты недвижимости, перезаписывая существующие переводы"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        
+        for property_obj in queryset:
+            try:
+                translate_property(property_obj, force_retranslate=True)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода объекта "{property_obj.title}": {e}', level=messages.ERROR)
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, 
+                f'Принудительно переведено {translated_count} объектов недвижимости через {service_name.upper()}.')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одного объекта.', level=messages.WARNING)
+    
+    force_retranslate.short_description = "🔄 Перевести заново (перезаписать все переводы)"
     
     def get_queryset(self, request):
         """Переопределяем queryset для отображения количества просмотров"""
@@ -93,14 +155,179 @@ class PropertyAdmin(admin.ModelAdmin):
 @admin.register(PropertyType)
 class PropertyTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'name_display', 'icon')
+    actions = ['auto_translate', 'force_retranslate']
+    
+    def auto_translate(self, request, queryset):
+        """Автоматически переводит выбранные типы недвижимости"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        
+        for obj in queryset:
+            try:
+                translate_property_type(obj, force_retranslate=False)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода типа "{obj.name_display}": {e}', level=messages.ERROR)
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, f'Успешно переведено {translated_count} типов недвижимости через {service_name.upper()}.')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одного типа.', level=messages.WARNING)
+    
+    auto_translate.short_description = "🌐 Перевести на EN и TH"
+    
+    def force_retranslate(self, request, queryset):
+        """Принудительно переводит выбранные типы недвижимости"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        
+        for obj in queryset:
+            try:
+                translate_property_type(obj, force_retranslate=True)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода типа "{obj.name_display}": {e}', level=messages.ERROR)
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, f'Принудительно переведено {translated_count} типов недвижимости через {service_name.upper()}.')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одного типа.', level=messages.WARNING)
+    
+    force_retranslate.short_description = "🔄 Перевести заново"
 
 
 @admin.register(Developer)
 class DeveloperAdmin(admin.ModelAdmin):
     list_display = ('name', 'website')
     prepopulated_fields = {'slug': ('name',)}
+    actions = ['auto_translate', 'force_retranslate']
+    
+    def auto_translate(self, request, queryset):
+        """Автоматически переводит выбранных застройщиков"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        
+        for obj in queryset:
+            try:
+                translate_developer(obj, force_retranslate=False)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода застройщика "{obj.name}": {e}', level=messages.ERROR)
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, f'Успешно переведено {translated_count} застройщиков через {service_name.upper()}.')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одного застройщика.', level=messages.WARNING)
+    
+    auto_translate.short_description = "🌐 Перевести на EN и TH"
+    
+    def force_retranslate(self, request, queryset):
+        """Принудительно переводит выбранных застройщиков"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        
+        for obj in queryset:
+            try:
+                translate_developer(obj, force_retranslate=True)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода застройщика "{obj.name}": {e}', level=messages.ERROR)
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, f'Принудительно переведено {translated_count} застройщиков через {service_name.upper()}.')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одного застройщика.', level=messages.WARNING)
+    
+    force_retranslate.short_description = "🔄 Перевести заново"
 
 
 @admin.register(PropertyFeature)
 class PropertyFeatureAdmin(admin.ModelAdmin):
     list_display = ('name', 'icon')
+    actions = ['auto_translate', 'force_retranslate']
+    
+    def auto_translate(self, request, queryset):
+        """Автоматически переводит выбранные характеристики"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        
+        for obj in queryset:
+            try:
+                translate_property_feature(obj, force_retranslate=False)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода характеристики "{obj.name}": {e}', level=messages.ERROR)
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, f'Успешно переведено {translated_count} характеристик через {service_name.upper()}.')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одной характеристики.', level=messages.WARNING)
+    
+    auto_translate.short_description = "🌐 Перевести на EN и TH"
+    
+    def force_retranslate(self, request, queryset):
+        """Принудительно переводит выбранные характеристики"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        
+        for obj in queryset:
+            try:
+                translate_property_feature(obj, force_retranslate=True)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода характеристики "{obj.name}": {e}', level=messages.ERROR)
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, f'Принудительно переведено {translated_count} характеристик через {service_name.upper()}.')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одной характеристики.', level=messages.WARNING)
+    
+    force_retranslate.short_description = "🔄 Перевести заново"

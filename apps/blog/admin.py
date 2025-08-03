@@ -119,7 +119,7 @@ class BlogPostAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         return qs.select_related('category', 'author')
     
-    actions = ['make_published', 'make_draft', 'make_featured', 'auto_translate']
+    actions = ['make_published', 'make_draft', 'make_featured', 'auto_translate', 'force_retranslate']
     
     def make_published(self, request, queryset):
         updated = queryset.update(status='published')
@@ -137,21 +137,63 @@ class BlogPostAdmin(admin.ModelAdmin):
     make_featured.short_description = _('Отметить как рекомендуемые')
     
     def auto_translate(self, request, queryset):
-        """Автоматически переводит выбранные статьи на английский и тайский"""
+        """Автоматически переводит выбранные статьи на английский и тайский (только пустые поля)"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
         translated_count = 0
+        skipped_count = 0
+        
         for post in queryset:
             try:
-                translate_blog_post(post)
+                translate_blog_post(post, force_retranslate=False)
+                translated_count += 1
+            except Exception as e:
+                self.message_user(request, f'Ошибка перевода статьи "{post.title}": {e}', level=messages.ERROR)
+                skipped_count += 1
+        
+        if translated_count > 0:
+            service_name = translation_service.get_available_service()
+            self.message_user(request, 
+                f'Успешно переведено {translated_count} статей через {service_name.upper()}. '
+                f'Пропущено: {skipped_count} (уже переведены или ошибки).')
+        else:
+            self.message_user(request, 'Не удалось перевести ни одной статьи.', level=messages.WARNING)
+    
+    auto_translate.short_description = _('🌐 Перевести на EN и TH (только пустые поля)')
+    
+    def force_retranslate(self, request, queryset):
+        """Принудительно переводит выбранные статьи, перезаписывая существующие переводы"""
+        from apps.core.services import translation_service
+        
+        if not translation_service.is_configured():
+            self.message_user(request, 
+                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                level=messages.ERROR)
+            return
+        
+        translated_count = 0
+        
+        for post in queryset:
+            try:
+                translate_blog_post(post, force_retranslate=True)
                 translated_count += 1
             except Exception as e:
                 self.message_user(request, f'Ошибка перевода статьи "{post.title}": {e}', level=messages.ERROR)
         
         if translated_count > 0:
-            self.message_user(request, f'Успешно переведено {translated_count} статей на английский и тайский языки.')
+            service_name = translation_service.get_available_service()
+            self.message_user(request, 
+                f'Принудительно переведено {translated_count} статей через {service_name.upper()}.')
         else:
-            self.message_user(request, 'Не удалось перевести ни одной статьи. Убедитесь, что установлен пакет googletrans.', level=messages.WARNING)
+            self.message_user(request, 'Не удалось перевести ни одной статьи.', level=messages.WARNING)
     
-    auto_translate.short_description = _('🌐 Автоматически перевести на EN и TH')
+    force_retranslate.short_description = _('🔄 Перевести заново (перезаписать все переводы)')
     
     def get_urls(self):
         """Добавляем кастомные URL для отдельных объектов"""
@@ -164,10 +206,26 @@ class BlogPostAdmin(admin.ModelAdmin):
     
     def translate_single_post(self, request, object_id):
         """Переводит отдельную статью"""
+        from apps.core.services import translation_service
+        
         try:
             post = BlogPost.objects.get(pk=object_id)
-            translate_blog_post(post)
-            messages.success(request, f'Статья "{post.title}" успешно переведена на английский и тайский языки.')
+            
+            if not translation_service.is_configured():
+                messages.error(request, 
+                    'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.')
+                return HttpResponseRedirect(f"/admin/blog/blogpost/{object_id}/change/")
+            
+            # Проверяем параметр force из GET-запроса
+            force_retranslate = request.GET.get('force', 'false').lower() == 'true'
+            
+            translate_blog_post(post, force_retranslate=force_retranslate)
+            
+            service_name = translation_service.get_available_service()
+            action_text = "принудительно переведена заново" if force_retranslate else "переведена"
+            messages.success(request, 
+                f'Статья "{post.title}" успешно {action_text} через {service_name.upper()}.')
+                
         except BlogPost.DoesNotExist:
             messages.error(request, 'Статья не найдена.')
         except Exception as e:

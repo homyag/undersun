@@ -50,6 +50,7 @@ LOCAL_APPS = [
     'apps.users.apps.UsersConfig',
     'apps.currency.apps.CurrencyConfig',
     'apps.blog.apps.BlogConfig',
+    'data_import',
     'modeltranslation',  # Перемещаем после наших приложений
 ]
 
@@ -269,4 +270,18 @@ TINYMCE_DEFAULT_CONFIG = {
     'automatic_uploads': True,
     'file_picker_types': 'image',
     'images_upload_url': '/ru/blog/tinymce-upload/',
+}
+
+# Translation API Settings
+GOOGLE_TRANSLATE_API_KEY = env('GOOGLE_TRANSLATE_API_KEY', default='')
+DEEPL_API_KEY = env('DEEPL_API_KEY', default='')
+
+# Preferred translation service ('google' or 'deepl')
+TRANSLATION_SERVICE = env('TRANSLATION_SERVICE', default='google')
+
+# Translation settings
+TRANSLATION_SETTINGS = {
+    'source_language': 'ru',
+    'target_languages': ['en', 'th'],
+    'chunk_size': 5000,  # Max characters per translation request
 }

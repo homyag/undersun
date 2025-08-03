@@ -46,6 +46,14 @@ class HomeView(TemplateView):
 
 class AboutView(TemplateView):
     template_name = 'core/about.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Добавляем услуги для меню
+        context['menu_services'] = Service.get_menu_services()
+        
+        return context
 
 
 class ContactView(TemplateView):
