@@ -34,6 +34,7 @@ def serialize_properties_for_js(properties):
             'main_image_url': main_image_url,
             'price_formatted': price_formatted,
             'district_name': prop.district.name if prop.district else 'Пхукет',
+            'location_name': prop.location.name if prop.location else '',
             'property_type': prop.property_type.name_display if prop.property_type else '',
             'property_type_name': prop.property_type.name_display if prop.property_type else '',
             'deal_type': prop.deal_type,
@@ -47,6 +48,10 @@ def serialize_properties_for_js(properties):
             'price_rent_usd': float(prop.price_rent_monthly) if prop.price_rent_monthly else 0,
             'price_rent_thb': float(prop.price_rent_monthly_thb) if prop.price_rent_monthly_thb else 0,
             'price_rent_rub': float(prop.price_rent_monthly_rub) if prop.price_rent_monthly_rub else 0,
+            # Цены за квадратный метр
+            'price_per_sqm_thb': prop.get_formatted_price_per_sqm('THB', prop.deal_type),
+            'price_per_sqm_usd': prop.get_formatted_price_per_sqm('USD', prop.deal_type), 
+            'price_per_sqm_rub': prop.get_formatted_price_per_sqm('RUB', prop.deal_type),
         })
     return json.dumps(result)
 

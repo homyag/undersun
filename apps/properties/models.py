@@ -225,6 +225,36 @@ class Property(models.Model):
             return f"฿{self.price_rent_monthly_thb:,.0f}/мес"
         return "Цена по запросу"
     
+    def get_price_per_sqm_in_currency(self, currency_code, deal_type='sale'):
+        """Получить цену за квадратный метр в указанной валюте"""
+        from decimal import Decimal
+        
+        if not self.area_total or self.area_total <= 0 or deal_type != 'sale':
+            return None
+            
+        price = self.get_price_in_currency(currency_code, deal_type)
+        if not price:
+            return None
+            
+        # Приводим к Decimal для корректного деления
+        price_decimal = Decimal(str(price))
+        area_decimal = Decimal(str(self.area_total))
+        
+        return float(price_decimal / area_decimal)
+    
+    def get_formatted_price_per_sqm(self, currency_code='THB', deal_type='sale'):
+        """Получить отформатированную цену за квадратный метр"""
+        price_per_sqm = self.get_price_per_sqm_in_currency(currency_code, deal_type)
+        if not price_per_sqm:
+            return None
+            
+        symbols = {'USD': '$', 'THB': '฿', 'RUB': '₽'}
+        symbol = symbols.get(currency_code, currency_code)
+        
+        # Форматируем с пробелами
+        formatted_price = f"{int(price_per_sqm):,}".replace(',', ' ')
+        return f"{symbol}{formatted_price}/м²"
+
     def get_price_in_currency(self, currency_code, deal_type='sale'):
         """Получить цену в указанной валюте"""
         from apps.currency.models import Currency, ExchangeRate
