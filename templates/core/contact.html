@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Контакты" %} - Undersun Estate{% endblock %}
+
+{% block content %}
+<!-- Contact Hero -->
+<section class="bg-gradient-to-r from-primary to-blue-800 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center">
+            <h1 class="text-4xl lg:text-6xl font-bold mb-6">
+                {% trans "Свяжитесь с нами" %}
+            </h1>
+            <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
+                {% trans "Мы готовы ответить на все ваши вопросы о недвижимости на Пхукете" %}
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form & Info -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Contact Form -->
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Отправьте нам сообщение" %}</h2>
+                
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Имя" %}</label>
+                            <input type="text" id="name" name="name" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Email" %}</label>
+                            <input type="email" id="email" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Телефон" %}</label>
+                            <input type="tel" id="phone" name="phone" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Тема" %}</label>
+                            <select id="subject" name="subject" class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">{% trans "Выберите тему" %}</option>
+                                <option value="buy">{% trans "Покупка недвижимости" %}</option>
+                                <option value="rent">{% trans "Аренда недвижимости" %}</option>
+                                <option value="sell">{% trans "Продажа недвижимости" %}</option>
+                                <option value="invest">{% trans "Инвестиции" %}</option>
+                                <option value="other">{% trans "Другое" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Сообщение" %}</label>
+                        <textarea id="message" name="message" rows="6" required class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md transition-colors">
+                        {% trans "Отправить сообщение" %}
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Contact Information -->
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Наши контакты" %}</h2>
+                
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="text-primary text-2xl mr-4 mt-1">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">{% trans "Адрес" %}</h3>
+                            <p class="text-gray-600">221/7 Koktanod Rd, Karon, Phuket 83100, Thailand</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="text-primary text-2xl mr-4 mt-1">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">{% trans "Телефон" %}</h3>
+                            <p class="text-gray-600">+66 63 303 3133</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="text-primary text-2xl mr-4 mt-1">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">{% trans "Email" %}</h3>
+                            <p class="text-gray-600">info@undersunestate.com</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="text-primary text-2xl mr-4 mt-1">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1">{% trans "Часы работы" %}</h3>
+                            <p class="text-gray-600">{% trans "Пн-Вс: 9:00 - 21:00" %}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Social Links -->
+                <div class="mt-8">
+                    <h3 class="font-semibold text-gray-900 mb-4">{% trans "Следите за нами" %}</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="bg-pink-600 hover:bg-pink-700 text-white p-3 rounded-full transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-colors">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="https://wa.me/6663303313" target="_blank" class="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full transition-colors">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наше расположение" %}</h2>
+            <p class="text-gray-600">{% trans "Мы находимся в самом сердце Карона, Пхукет" %}</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div id="contact-map" class="w-full h-96">
+                <!-- Map will be loaded here -->
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3952.4736398394434!2d98.29553041477457!3d7.841958994382532!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30503a9f8f8f8f8f%3A0x8f8f8f8f8f8f8f8f!2sKaron%20Beach%2C%20Mueang%20Phuket%20District%2C%20Phuket%2C%20Thailand!5e0!3m2!1sen!2s!4v1635000000000!5m2!1sen!2s" 
+                    width="100%" 
+                    height="384" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-16">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Часто задаваемые вопросы" %}</h2>
+        </div>
+        
+        <div class="space-y-6">
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Могу ли я как иностранец купить недвижимость в Таиланде?" %}</h3>
+                <p class="text-gray-600">{% trans "Да, иностранцы могут покупать кондоминиумы (до 49% от общей площади здания) и дома в лизинг. Мы поможем вам разобраться во всех юридических аспектах." %}</p>
+            </div>
+            
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Какие дополнительные расходы при покупке?" %}</h3>
+                <p class="text-gray-600">{% trans "Обычно это 6-8% от стоимости недвижимости: трансферный налог (2%), гербовый сбор (0.5%), регистрационные сборы, услуги юриста и агентская комиссия." %}</p>
+            </div>
+            
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Сколько времени занимает сделка?" %}</h3>
+                <p class="text-gray-600">{% trans "От 2 до 6 недель в зависимости от сложности сделки. Мы ведем весь процесс от начала до конца." %}</p>
+            </div>
+            
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Предоставляете ли вы услуги управления недвижимостью?" %}</h3>
+                <p class="text-gray-600">{% trans "Да, мы предлагаем полный спектр услуг по управлению недвижимостью: уборка, ремонт, сдача в аренду и многое другое." %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

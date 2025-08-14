@@ -1,0 +1,57 @@
+[
+{
+  "model": "core.promotionalbanner",
+  "pk": 2,
+  "fields": {
+    "image": "promotional_banners/заглушка_баннера.webp",
+    "valid_until": "2025-07-31",
+    "button_url": "/property/sale/",
+    "is_active": true,
+    "priority": 100,
+    "created_at": "2025-07-02T13:20:59.266Z",
+    "updated_at": "2025-07-07T14:18:12.196Z"
+  }
+},
+{
+  "model": "core.promotionalbannertranslation",
+  "pk": 1,
+  "fields": {
+    "banner": 2,
+    "language_code": "ru",
+    "title": "Продажи недвижимости!",
+    "description": "предложениепредложениепредложениепредложениепредложениепредложениепредложениепредложениепредложениепредложениепредложениепредложениепредложение",
+    "discount_text": "Скидка 20%",
+    "button_text": "Купить",
+    "created_at": "2025-07-07T13:59:27.923Z",
+    "updated_at": "2025-07-07T14:18:12.198Z"
+  }
+},
+{
+  "model": "core.promotionalbannertranslation",
+  "pk": 2,
+  "fields": {
+    "banner": 2,
+    "language_code": "en",
+    "title": "Real Estate for Sale!",
+    "description": "offer offer offer",
+    "discount_text": "20% discount",
+    "button_text": "Buy",
+    "created_at": "2025-07-07T14:07:30.158Z",
+    "updated_at": "2025-07-07T14:07:30.158Z"
+  }
+},
+{
+  "model": "core.promotionalbannertranslation",
+  "pk": 3,
+  "fields": {
+    "banner": 2,
+    "language_code": "th",
+    "title": "การขายอสังหาริมทรัพย์",
+    "description": "ซื้อตอนนี้",
+    "discount_text": "ส่วนลด 20%",
+    "button_text": "ซื้อ",
+    "created_at": "2025-07-07T14:18:12.199Z",
+    "updated_at": "2025-07-07T14:18:12.199Z"
+  }
+}
+]

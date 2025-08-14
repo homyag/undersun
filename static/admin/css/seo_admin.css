@@ -1,0 +1,77 @@
+/* SEO Admin Styles */
+
+.fieldset h2 {
+    background: #f8f9fa;
+    padding: 10px 15px;
+    margin: 0 0 10px 0;
+    border-left: 4px solid #007cba;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Styling for different language sections */
+.fieldset:has([name*="_ru"]) h2 {
+    border-left-color: #0073aa;
+    background: #f0f8ff;
+}
+
+.fieldset:has([name*="_en"]) h2 {
+    border-left-color: #d63638;
+    background: #fff5f5;
+}
+
+.fieldset:has([name*="_th"]) h2 {
+    border-left-color: #00a32a;
+    background: #f0fff4;
+}
+
+/* Description fields styling */
+textarea[name*="description"] {
+    height: 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Keywords fields styling */
+textarea[name*="keywords"] {
+    height: 60px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Title fields styling */
+input[name*="title"] {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Character count helpers */
+.form-row .help {
+    font-size: 11px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Add some spacing between language sections */
+.collapse {
+    margin-bottom: 20px;
+}
+
+/* Page name field emphasis */
+input[name="page_name"] {
+    font-family: monospace;
+    font-weight: bold;
+    background: #f8f9fa;
+}
+
+/* List display improvements */
+.admin .result_list th,
+.admin .result_list td {
+    vertical-align: top;
+}
+
+.admin .result_list .field-title_ru,
+.admin .result_list .field-title_en,
+.admin .result_list .field-title_th {
+    max-width: 200px;
+    word-wrap: break-word;
+    font-size: 12px;
+}

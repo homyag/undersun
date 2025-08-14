@@ -1,0 +1,61 @@
+#language-selector {
+    display: inline-block;
+    margin-right: 15px;
+    margin-top: 2px;
+}
+
+#language-selector form {
+    display: inline;
+    margin: 0;
+}
+
+#language-selector select {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 12px;
+    color: #333;
+    min-width: 120px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#language-selector select:hover {
+    border-color: #999;
+    background-color: #f8f9fa;
+}
+
+#language-selector select:focus {
+    outline: none;
+    border-color: #417690;
+    box-shadow: 0 0 0 2px rgba(65, 118, 144, 0.2);
+}
+
+/* Адаптация для темной темы Django Admin */
+@media (prefers-color-scheme: dark) {
+    #language-selector select {
+        background-color: #2b2b2b;
+        color: #fff;
+        border-color: #444;
+    }
+    
+    #language-selector select:hover {
+        background-color: #3c3c3c;
+        border-color: #666;
+    }
+    
+    #language-selector select:focus {
+        border-color: #79aec8;
+        box-shadow: 0 0 0 2px rgba(121, 174, 200, 0.2);
+    }
+}
+
+/* Адаптация под мобильные устройства */
+@media (max-width: 768px) {
+    #language-selector {
+        position: static;
+        float: right;
+        margin: 10px;
+    }
+}
