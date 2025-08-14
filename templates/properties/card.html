@@ -1,0 +1,325 @@
+{% load static %}
+{% load i18n %}
+{% load currency_tags %}
+
+<div class="property-card">
+    <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden max-w-sm mx-auto transform hover:-translate-y-2 hover:scale-[1.02] group">
+        <!-- Image Section -->
+        <div class="relative h-48">
+            {% if property.main_image %}
+                <img src="{{ property.main_image.medium.url }}"
+                     class="w-full h-full object-cover"
+                     alt="{{ property.title }}"
+                     loading="lazy">
+            {% else %}
+                <img src="{% static 'images/no-image.svg' %}"
+                     class="w-full h-full object-cover"
+                     alt="{% trans 'Изображение недоступно' %}"
+                     loading="lazy">
+            {% endif %}
+
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
+
+            <!-- Popular Badge -->
+            {% if property.is_featured %}
+                <div class="absolute top-3 left-3">
+                    <span class="bg-gradient-to-r from-accent to-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-semibold flex items-center shadow-lg">
+                        <i class="fas fa-star mr-1 text-xs"></i>
+                        {% trans "Рекомендуем" %}
+                    </span>
+                </div>
+            {% endif %}
+
+            <!-- Favorite Button -->
+            <div class="absolute top-3 right-3">
+                <button class="bg-white/90 hover:bg-white w-10 h-10 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center"
+                        data-property-id="{{ property.id }}">
+                    <i class="far text-gray-600 group-hover:text-red-500 fa-heart transition-all duration-200"></i>
+                </button>
+            </div>
+
+            <!-- Updated Badge -->
+            <div class="absolute bottom-3 right-3">
+                <span class="bg-white/90 text-gray-700 px-2 py-1 rounded-md text-xs flex items-center">
+                    <i class="fas fa-clock mr-1"></i>
+                    {% trans "Обновлено" %}: {{ property.updated_at|date:"d/m/y" }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="p-5">
+            <!-- Title -->
+            <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight">
+                <a href="{{ property.get_absolute_url }}"
+                   class="hover:text-primary transition-colors group-hover:text-accent">
+                    {{ property.title|truncatechars:60 }}
+                </a>
+            </h3>
+
+            <!-- Location -->
+            <div class="flex items-center text-gray-600 mb-4">
+                <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                <span class="text-sm group-hover:text-primary transition-colors">
+                    {{ property.district.name }}{% if property.location %}, {{ property.location.name }}{% endif %}
+                </span>
+            </div>
+
+            <!-- Property Details -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
+                    {% if property.bedrooms %}
+                        <div class="flex items-center text-gray-600 group-hover:text-primary transition-colors">
+                            <i class="fas fa-bed mr-1 text-primary"></i>
+                            <span class="text-sm font-medium">{{ property.bedrooms }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if property.bathrooms %}
+                        <div class="flex items-center text-gray-600 group-hover:text-primary transition-colors">
+                            <i class="fas fa-bath mr-1 text-primary"></i>
+                            <span class="text-sm font-medium">{{ property.bathrooms }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if property.area_total %}
+                        <div class="flex items-center text-gray-600 group-hover:text-primary transition-colors">
+                            <i class="fas fa-ruler-combined mr-1 text-primary"></i>
+                            <span class="text-sm font-medium">{{ property.area_total }} м²</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Price Section -->
+            <div class="mb-4">
+                <!-- Price and Currency in one line -->
+                <div class="flex items-center justify-center space-x-3">
+                    <!-- Price -->
+                    <span class="text-2xl font-bold text-primary group-hover:text-accent transition-colors card-price-{{ property.id }}">
+                        {% price_number_only property property.deal_type %}
+                    </span>
+                    
+                    <!-- Currency Dropdown -->
+                    <div class="relative">
+                        <button class="currency-toggle-btn bg-gray-100 hover:bg-primary hover:text-white text-gray-500 transition-all duration-200 px-3 py-1.5 rounded-md text-sm border border-gray-200 hover:border-primary flex items-center"
+                                data-property-id="{{ property.id }}"
+                                data-deal-type="{{ property.deal_type }}"
+                                title="{% trans 'Изменить валюту' %}">
+                            <span class="current-currency-{{ property.id }} font-mono mr-1">{{ selected_currency.symbol|default:"$" }}</span>
+                            <span class="current-currency-code-{{ property.id }} font-medium mr-1">{{ selected_currency.code|default:"USD" }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="currency-dropdown absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 w-32 bg-white rounded-lg shadow-xl border border-gray-200 z-[60] opacity-0 invisible transform scale-95 transition-all duration-200"
+                             id="currency-dropdown-{{ property.id }}"
+                             style="box-shadow: 0 -10px 25px -3px rgba(0, 0, 0, 0.1), 0 -4px 6px -2px rgba(0, 0, 0, 0.05);">
+                            <div class="py-1">
+                                {% if available_currencies %}
+                                    {% for currency in available_currencies %}
+                                    <button type="button"
+                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center first:rounded-t-lg last:rounded-b-lg"
+                                            data-currency="{{ currency.code }}"
+                                            data-symbol="{{ currency.symbol }}"
+                                            data-property-id="{{ property.id }}"
+                                            data-deal-type="{{ property.deal_type }}">
+                                        <span class="font-mono mr-2 w-4">{{ currency.symbol }}</span>
+                                        <span class="font-medium">{{ currency.code }}</span>
+                                    </button>
+                                    {% endfor %}
+                                {% else %}
+                                    <!-- Fallback currencies -->
+                                    <button type="button"
+                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-t-lg"
+                                            data-currency="USD" data-symbol="$"
+                                            data-property-id="{{ property.id }}"
+                                            data-deal-type="{{ property.deal_type }}">
+                                        <span class="font-mono mr-2 w-4">$</span>
+                                        <span class="font-medium">USD</span>
+                                    </button>
+                                    <button type="button"
+                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center"
+                                            data-currency="THB" data-symbol="฿"
+                                            data-property-id="{{ property.id }}"
+                                            data-deal-type="{{ property.deal_type }}">
+                                        <span class="font-mono mr-2 w-4">฿</span>
+                                        <span class="font-medium">THB</span>
+                                    </button>
+                                    <button type="button"
+                                            class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-b-lg"
+                                            data-currency="RUB" data-symbol="₽"
+                                            data-property-id="{{ property.id }}"
+                                            data-deal-type="{{ property.deal_type }}">
+                                        <span class="font-mono mr-2 w-4">₽</span>
+                                        <span class="font-medium">RUB</span>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button - Full Width -->
+            <a href="{{ property.get_absolute_url }}" class="block w-full bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-center text-sm group-hover:shadow-xl">
+                {% trans "Подробнее" %}
+                <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-200"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Status and Type badges (if needed) -->
+{% comment %}
+<!-- Optional: Add these badges somewhere if needed -->
+<div class="hidden">
+    <!-- Property Status Badge -->
+    {% if property.deal_type == 'sale' %}
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">{% trans "Продажа" %}</span>
+    {% elif property.deal_type == 'rent' %}
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{% trans "Аренда" %}</span>
+    {% endif %}
+
+    <!-- Property Type -->
+    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+        {{ property.property_type.name_display }}
+    </span>
+</div>
+{% endcomment %}
+
+<script>
+(function() {
+    // Currency conversion functionality for property {{ property.id }}
+    const propertyId = {{ property.id }};
+    const toggleBtn = document.querySelector(`[data-property-id="${propertyId}"].currency-toggle-btn`);
+    const dropdown = document.getElementById(`currency-dropdown-${propertyId}`);
+
+    if (!toggleBtn || !dropdown) return;
+
+    const currencyOptions = dropdown.querySelectorAll('.card-currency-option');
+
+    // Property data
+    const propertyData = {
+        property_id: propertyId,
+        price_sale_usd: {{ property.price_sale_usd|default:0|floatformat:0 }},
+        price_rent_usd: {{ property.price_rent_usd|default:0|floatformat:0 }},
+        price_sale_thb: {{ property.price_sale_thb|default:0|floatformat:0 }},
+        price_rent_thb: {{ property.price_rent_thb|default:0|floatformat:0 }},
+    };
+
+    function formatPrice(amount) {
+        return Math.round(amount).toLocaleString('en-US').replace(/,/g, ' ');
+    }
+    
+    function updateCurrencyButton(symbol, code) {
+        const currencySymbol = document.querySelector(`.current-currency-${propertyId}`);
+        const currencyCode = document.querySelector(`.current-currency-code-${propertyId}`);
+        if (currencySymbol) currencySymbol.textContent = symbol;
+        if (currencyCode) currencyCode.textContent = code;
+    }
+
+    function convertAndUpdatePrice(toCurrency, symbol, dealType) {
+        const priceElement = document.querySelector(`.card-price-${propertyId}`);
+
+        let basePrice = 0;
+        let fromCurrency = 'USD';
+
+        if (dealType === 'sale') {
+            basePrice = propertyData.price_sale_usd || propertyData.price_sale_thb;
+            fromCurrency = propertyData.price_sale_usd ? 'USD' : 'THB';
+        } else {
+            basePrice = propertyData.price_rent_usd || propertyData.price_rent_thb;
+            fromCurrency = propertyData.price_rent_usd ? 'USD' : 'THB';
+        }
+
+        if (!basePrice) {
+            priceElement.textContent = '{% trans "Цена по запросу" %}';
+            return;
+        }
+
+        if (fromCurrency === toCurrency) {
+            priceElement.textContent = formatPrice(basePrice);
+            updateCurrencyButton(symbol, toCurrency);
+            return;
+        }
+
+        // Get exchange rate
+        const rateKey = `${fromCurrency}_${toCurrency}`;
+
+        if (window.exchangeRates && window.exchangeRates[rateKey]) {
+            const rate = window.exchangeRates[rateKey];
+            const convertedPrice = basePrice * rate;
+            priceElement.textContent = formatPrice(convertedPrice);
+            updateCurrencyButton(symbol, toCurrency);
+        } else {
+            fetch('/currency/rates/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.exchangeRates = data.rates;
+                        const rate = data.rates[rateKey] || 1;
+                        const convertedPrice = basePrice * rate;
+                        priceElement.textContent = formatPrice(convertedPrice);
+                        updateCurrencyButton(symbol, toCurrency);
+                    } else {
+                        priceElement.textContent = formatPrice(basePrice);
+                        updateCurrencyButton(symbol, toCurrency);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching exchange rates:', error);
+                    priceElement.textContent = formatPrice(basePrice);
+                    updateCurrencyButton(symbol, toCurrency);
+                });
+        }
+    }
+
+    // Toggle dropdown
+    toggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Close other dropdowns
+        document.querySelectorAll('.currency-dropdown').forEach(d => {
+            if (d !== dropdown) {
+                d.classList.add('opacity-0', 'invisible');
+                d.classList.remove('opacity-100', 'visible');
+            }
+        });
+
+        // Toggle current dropdown
+        dropdown.classList.toggle('opacity-0');
+        dropdown.classList.toggle('invisible');
+        dropdown.classList.toggle('opacity-100');
+        dropdown.classList.toggle('visible');
+    });
+
+    // Handle currency selection
+    currencyOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
+            const dealType = this.dataset.dealType;
+
+            convertAndUpdatePrice(currency, symbol, dealType);
+            
+            // Close dropdown
+            dropdown.classList.add('opacity-0', 'invisible');
+            dropdown.classList.remove('opacity-100', 'visible');
+        });
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!toggleBtn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('opacity-0', 'invisible');
+            dropdown.classList.remove('opacity-100', 'visible');
+        }
+    });
+})();
+</script>

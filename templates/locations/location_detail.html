@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ location.name }} - {% trans "Локации" %} - Undersun Estate{% endblock %}
+
+{% block content %}
+<!-- Location Header -->
+<section class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center">
+            <h1 class="text-4xl lg:text-5xl font-bold mb-4">{{ location.name }}</h1>
+            <p class="text-xl opacity-90">{{ location.district.name }}, {% trans "Пхукет" %}</p>
+        </div>
+    </div>
+</section>
+
+<!-- Location Content -->
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div>
+                {% if location.description %}
+                    <div class="prose lg:prose-lg max-w-none mb-8">
+                        {{ location.description|linebreaks }}
+                    </div>
+                {% endif %}
+                
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Информация о локации" %}</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{% trans "Район:" %}</span>
+                            <span class="font-medium">{{ location.district.name }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{% trans "Объектов:" %}</span>
+                            <span class="font-medium">{{ location.properties_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                {% if location.image %}
+                    <img src="{{ location.image.url }}" alt="{{ location.name }}" class="w-full h-80 object-cover rounded-lg shadow-lg">
+                {% elif location.latitude and location.longitude %}
+                    <div id="location-map" class="w-full h-80 rounded-lg shadow-lg"></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Properties in Location -->
+{% if properties %}
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">{% trans "Недвижимость в" %} {{ location.name }}</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for property in properties %}
+                    {% include 'properties/card.html' %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if location.latitude and location.longitude %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const map = L.map('location-map').setView([{{ location.latitude }}, {{ location.longitude }}], 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    L.marker([{{ location.latitude }}, {{ location.longitude }}])
+        .addTo(map)
+        .bindPopup('{{ location.name|escapejs }}');
+});
+</script>
+{% endif %}
+{% endblock %}

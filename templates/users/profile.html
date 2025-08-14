@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Профиль" %} - Undersun Estate{% endblock %}
+
+{% block content %}
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Profile Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="text-center">
+                        <div class="w-24 h-24 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                            {{ user.first_name|first|default:user.username|first }}
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">
+                            {{ user.get_full_name|default:user.username }}
+                        </h3>
+                        <p class="text-sm text-gray-500">{{ user.email }}</p>
+                    </div>
+                    
+                    <nav class="mt-6">
+                        <a href="#profile" class="block px-3 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-md mb-1">
+                            {% trans "Профиль" %}
+                        </a>
+                        <a href="{% url 'favorites' %}" class="block px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md mb-1">
+                            {% trans "Избранное" %}
+                        </a>
+                        <a href="#settings" class="block px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md mb-1">
+                            {% trans "Настройки" %}
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Profile Content -->
+            <div class="lg:col-span-3">
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-medium text-gray-900">{% trans "Информация профиля" %}</h2>
+                    </div>
+                    
+                    <div class="p-6">
+                        <form method="post" class="space-y-6">
+                            {% csrf_token %}
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">{% trans "Имя" %}</label>
+                                    <input type="text" name="first_name" value="{{ user.first_name }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">{% trans "Фамилия" %}</label>
+                                    <input type="text" name="last_name" value="{{ user.last_name }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">{% trans "Email" %}</label>
+                                <input type="email" name="email" value="{{ user.email }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">{% trans "Телефон" %}</label>
+                                <input type="tel" name="phone" value="{{ user.profile.phone|default:'' }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                            </div>
+                            
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                                    {% trans "Сохранить изменения" %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Change Password -->
+                <div class="bg-white shadow rounded-lg mt-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-medium text-gray-900">{% trans "Смена пароля" %}</h2>
+                    </div>
+                    
+                    <div class="p-6">
+                        <form method="post" action="{% url 'password_change' %}" class="space-y-6">
+                            {% csrf_token %}
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">{% trans "Текущий пароль" %}</label>
+                                <input type="password" name="old_password" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">{% trans "Новый пароль" %}</label>
+                                <input type="password" name="new_password1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">{% trans "Подтвердите новый пароль" %}</label>
+                                <input type="password" name="new_password2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                            </div>
+                            
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                                    {% trans "Изменить пароль" %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

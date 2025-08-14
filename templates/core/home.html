@@ -1,0 +1,1823 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load currency_tags %}
+
+{% block title %}Undersun Estate - Недвижимость на Пхукете, Таиланд{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": "Undersun Estate",
+  {% if LANGUAGE_CODE == 'ru' %}
+  "alternateName": "Undersun Estate - Недвижимость на Пхукете",
+  "description": "Агентство недвижимости на Пхукете с 10-летним опытом. Продажа, покупка и аренда эксклюзивной недвижимости: виллы, апартаменты, земля, коммерческая недвижимость.",
+  {% elif LANGUAGE_CODE == 'en' %}
+  "alternateName": "Undersun Estate - Real Estate in Phuket",
+  "description": "Real estate agency in Phuket with 10 years of experience. Sale, purchase and rental of exclusive real estate: villas, apartments, land, commercial real estate.",
+  {% elif LANGUAGE_CODE == 'th' %}
+  "alternateName": "Undersun Estate - อสังหาริมทรัพย์ในภูเก็ต",
+  "description": "บริษัทนายหน้าอสังหาริมทรัพย์ในภูเก็ตที่มีประสบการณ์ 10 ปี ขาย ซื้อ และเช่าอสังหาริมทรัพย์เอ็กซ์คลูซีฟ: วิลลา คอนโด ที่ดิน อสังหาริมทรัพย์เชิงพาณิชย์",
+  {% endif %}
+  "url": "{{ request.build_absolute_uri }}",
+  "logo": "{{ request.build_absolute_uri }}{% static 'images/logo.png' %}",
+  "image": "{{ request.build_absolute_uri }}{% static 'images/og-image.jpg' %}",
+  "telephone": "+66 63 303 3133",
+  "email": "info@undersunestate.com",
+  "address": {
+    "@type": "PostalAddress",
+    {% if LANGUAGE_CODE == 'ru' %}
+    "streetAddress": "Пляж Камала",
+    "addressLocality": "Камала",
+    "addressRegion": "Пхукет",
+    {% elif LANGUAGE_CODE == 'en' %}
+    "streetAddress": "Kamala Beach",
+    "addressLocality": "Kamala",
+    "addressRegion": "Phuket",
+    {% elif LANGUAGE_CODE == 'th' %}
+    "streetAddress": "หาดกมลา",
+    "addressLocality": "กมลา",
+    "addressRegion": "ภูเก็ต",
+    {% endif %}
+    "addressCountry": "TH"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "7.9519",
+    "longitude": "98.3381"
+  },
+  "areaServed": {
+    "@type": "Place",
+    {% if LANGUAGE_CODE == 'ru' %}
+    "name": "Пхукет, Таиланд"
+    {% elif LANGUAGE_CODE == 'en' %}
+    "name": "Phuket, Thailand"
+    {% elif LANGUAGE_CODE == 'th' %}
+    "name": "ภูเก็ต ประเทศไทย"
+    {% endif %}
+  },
+  "serviceArea": {
+    "@type": "GeoCircle",
+    "geoMidpoint": {
+      "@type": "GeoCoordinates",
+      "latitude": "7.9519",
+      "longitude": "98.3381"
+    },
+    "geoRadius": "50000"
+  },
+  "makesOffer": [
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Покупка недвижимости",
+        "description": "Полное сопровождение сделки. Проведем экспертизу, индивидуально подберем объекты для вас, решим юридические вопросы."
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Real Estate Purchase",
+        "description": "Full transaction support. We will conduct expertise, individually select properties for you, solve legal issues."
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "การซื้ออสังหาริมทรัพย์",
+        "description": "การสนับสนุนการทำธุรกรรมอย่างครบถ้วน เราจะทำการตรวจสอบ เลือกสรรทรัพย์สินให้คุณเป็นรายบุคคล แก้ไขปัญหาทางกฎหมาย"
+        {% endif %}
+      }
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Продажа недвижимости",
+        "description": "Доверьте нам продажу вашей недвижимости. Найдем покупателя быстро и выгодно, избавив от лишних хлопот."
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Real Estate Sale",
+        "description": "Trust us to sell your real estate. We will find a buyer quickly and profitably, saving you from unnecessary hassle."
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "การขายอสังหาริมทรัพย์",
+        "description": "มอบหมายให้เราขายอสังหาริมทรัพย์ของคุณ เราจะหาผู้ซื้ออย่างรวดเร็วและคุ้มค่า ช่วยให้คุณไม่ต้องยุ่งยาก"
+        {% endif %}
+      }
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Аренда недвижимости",
+        "description": "Подберем жилье для средне- и долгосрочной аренды, чтобы ваше пребывание на Пхукете было максимально комфортным."
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Real Estate Rental",
+        "description": "We will select housing for medium- and long-term rental to make your stay in Phuket as comfortable as possible."
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "การเช่าอสังหาริมทรัพย์",
+        "description": "เราจะเลือกที่อยู่อาศัยสำหรับการเช่าระยะกลางและระยะยาว เพื่อให้การพำนักของคุณในภูเก็ตสะดวกสบายที่สุด"
+        {% endif %}
+      }
+    }
+  ],
+  "sameAs": [
+    "https://www.facebook.com/undersunestate",
+    "https://www.instagram.com/undersunestate",
+    "https://www.youtube.com/undersunestate",
+    "https://t.me/undersunestate",
+    "https://linkedin.com/company/undersunestate"
+  ],
+  "foundingDate": "2014",
+  "priceRange": "$$",
+  "openingHours": "Mo-Su 09:00-18:00",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    {% if LANGUAGE_CODE == 'ru' %}
+    "name": "Каталог недвижимости",
+    {% elif LANGUAGE_CODE == 'en' %}
+    "name": "Real Estate Catalog",
+    {% elif LANGUAGE_CODE == 'th' %}
+    "name": "แคตตาล็อกอสังหาริมทรัพย์",
+    {% endif %}
+    "itemListElement": [
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Апартаменты",
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Apartments",
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "อพาร์ทเมนท์",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'condo' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Виллы",
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Villas",
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "วิลลา",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'villa' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Земельные участки",
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Land Plots",
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "ที่ดิน",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'land' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Коммерческая недвижимость",
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Commercial Real Estate",
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "อสังหาริมทรัพย์เชิงพาณิชย์",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'business' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Таунхаус",
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Townhouse",
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "ทาวน์เฮาส์",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'townhouse' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+        "name": "Инвестиции",
+        {% elif LANGUAGE_CODE == 'en' %}
+        "name": "Investment",
+        {% elif LANGUAGE_CODE == 'th' %}
+        "name": "การลงทุน",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'investment' %}"
+      }
+    ]
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+66 63 303 3133",
+    "contactType": "customer service",
+    {% if LANGUAGE_CODE == 'ru' %}
+    "availableLanguage": ["Russian", "English", "Thai"]
+    {% elif LANGUAGE_CODE == 'en' %}
+    "availableLanguage": ["English", "Russian", "Thai"]
+    {% elif LANGUAGE_CODE == 'th' %}
+    "availableLanguage": ["Thai", "English", "Russian"]
+    {% endif %}
+  }
+}
+</script>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        height: 100vh !important;
+        padding-top: 64px !important;
+        box-sizing: border-box !important;
+    }
+    
+    @media (max-width: 767px) {
+        .hero-section {
+            height: 100vh !important;
+            padding-top: 64px !important;
+        }
+        
+        .hero-content {
+            height: calc(100vh - 64px) !important;
+            padding: 8px 0 !important;
+        }
+        
+        .hero-content .space-y-4 > * + * {
+            margin-top: 12px !important;
+        }
+    }
+    
+    @media (min-width: 1024px) {
+        .hero-section {
+            height: 100vh !important;
+            padding-top: 80px !important;
+        }
+    }
+    
+    /* Компактная компоновка hero контента */
+    .hero-content {
+        height: calc(100vh - 64px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    @media (min-width: 1024px) {
+        .hero-content {
+            height: calc(100vh - 80px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section relative flex items-center overflow-hidden">
+    <!-- Background Slideshow -->
+    <div class="absolute inset-0">
+        <div id="hero-slide-1" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-100" style="background-image: url('{% static 'images/home_page/hero_section_1.webp' %}');"></div>
+        <div id="hero-slide-2" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-0" style="background-image: url('{% static 'images/home_page/hero_section_2.webp' %}');"></div>
+        <div id="hero-slide-3" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-0" style="background-image: url('{% static 'images/home_page/hero_section_3.webp' %}');"></div>
+    </div>
+    <!-- Brand-consistent overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/60 via-primary/50 to-tertiary/60"></div>
+    <div class="absolute inset-0 bg-black/20"></div>
+    <!-- Dark gradient at bottom -->
+    <div class="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+    <div class="relative z-10 w-full hero-content">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="space-y-4 lg:space-y-6">
+                <!-- Заголовок -->
+                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white font-extrabold leading-tight">
+                    <span class="block">{% trans "Весь рынок недвижимости" %}</span>
+                    <span class="block text-accent">{% trans "Пхукета в одном месте" %}</span>
+                </h1>
+                
+                <!-- Описание - скрыто на мобильных -->
+                <p class="hidden sm:block text-base md:text-base lg:text-lg text-white font-bold max-w-4xl mx-auto">
+                    {% trans "Undersun Estate — ваш ориентир на рынке недвижимости Пхукета. Мы знаем весь рынок и подберём только те варианты, которые соответствуют вашим целям и ожиданиям. Без фейков, без давления." %}
+                </p>
+                
+                <!-- Catalog Button -->
+                <div class="py-1">
+                    <a href="{% url 'property_list' %}" class="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-accent hover:bg-yellow-500 text-gray-900 font-bold text-sm sm:text-base lg:text-lg rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        {% trans "Смотреть все объекты" %}
+                    </a>
+                </div>
+                    
+                <!-- Поисковая форма -->
+                <div class="hero-search bg-white/95 backdrop-blur-md rounded-lg p-2 sm:p-4 lg:p-6 shadow-2xl border border-white/20 w-full max-w-none lg:max-w-6xl mx-auto">
+                        <form method="get" action="{% url 'core:search' %}" class="grid grid-cols-1 md:grid-cols-5 gap-2 sm:gap-4">
+                            <div class="md:col-span-1">
+                                <label class="block text-xs lg:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">{% trans "Тип" %}</label>
+                                <select name="type" class="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md border border-gray-200 text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent bg-white shadow-sm transition-all hover:border-gray-300 h-8 sm:h-10 text-xs sm:text-sm">
+                                    <option value="">{% trans "Все типы" %}</option>
+                                    {% for type in property_types %}
+                                        <option value="{{ type.name }}">{{ type.name_display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs lg:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">{% trans "Район" %}</label>
+                                <select name="district" class="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md border border-gray-200 text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent bg-white shadow-sm transition-all hover:border-gray-300 h-8 sm:h-10 text-xs sm:text-sm">
+                                    <option value="">{% trans "Все районы" %}</option>
+                                    {% for district in districts %}
+                                        <option value="{{ district.slug }}">{{ district.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs lg:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">{% trans "Мин. цена" %}</label>
+                                <input type="number" name="min_price" class="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md border border-gray-200 text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent bg-white shadow-sm transition-all hover:border-gray-300 h-8 sm:h-10 text-xs sm:text-sm" placeholder="{{ selected_currency.code|default:'USD' }}">
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs lg:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">{% trans "Макс. цена" %}</label>
+                                <input type="number" name="max_price" class="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md border border-gray-200 text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent bg-white shadow-sm transition-all hover:border-gray-300 h-8 sm:h-10 text-xs sm:text-sm" placeholder="{{ selected_currency.code|default:'USD' }}">
+                            </div>
+                            <div class="md:col-span-1 flex flex-col justify-end">
+                                <button type="submit" class="w-full bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-1.5 px-3 sm:py-2 sm:px-4 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center h-8 sm:h-10 text-xs sm:text-sm">
+                                    <i class="fas fa-search mr-2"></i>{% trans "Поиск" %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                <!-- Sales Points -->
+                <div class="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-4 lg:gap-6 text-white text-center">
+                    <div>
+                        <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">5 лет</div>
+                        <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">опыта в недвижимости</div>
+                    </div>
+                    <div>
+                        <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">600+</div>
+                        <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">актуальных объектов</div>
+                    </div>
+                    <div>
+                        <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">0%</div>
+                        <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">рассрочка от застройщиков</div>
+                    </div>
+                </div>
+                
+                <!-- Подробные описания - только на планшетах и десктопах -->
+                <div class="hidden md:grid md:grid-cols-3 gap-4 lg:gap-6 text-white text-center text-xs lg:text-sm font-normal" style="margin-top: 6px;">
+                    <div>Понимаем рынок и видим возможности, которые другие пропускают.</div>
+                    <div>Весь рынок в одном месте — от бюджетных студий до элитных вилл.</div>
+                    <div>Покупка без переплат с гибкими условиями платежа.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Promotional Banner Section -->
+{% if promotional_banner %}
+<section class="promotional-banner-section relative overflow-hidden bg-gradient-to-r from-accent to-accent/80" style="min-height: 125px;">
+    <!-- Background Image -->
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ promotional_banner.image.url }}');"></div>
+        <div class="absolute inset-0 bg-black/20"></div>
+    </div>
+    
+    <!-- Content -->
+    <div class="relative z-10 h-full max-w-7xl mx-auto px-4 py-4">
+        <!-- Desktop Layout -->
+        <div class="hidden md:flex items-center justify-between h-full min-h-[100px]">
+            <!-- Left side - Text content -->
+            <div class="flex items-center space-x-6">
+                <!-- Title and description -->
+                <div>
+                    <h2 class="text-2xl font-bold text-white leading-tight">
+                        {{ promotional_banner.title }}
+                    </h2>
+                    {% if promotional_banner.description %}
+                    <p class="text-white/90 text-sm mt-1 max-w-md">
+                        {{ promotional_banner.description|truncatewords:10 }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Discount badge -->
+                {% if promotional_banner.discount_text %}
+                <div class="bg-white/20 backdrop-blur-sm rounded-md px-4 py-2 border border-white/30">
+                    <div class="text-white font-bold text-lg">
+                        {{ promotional_banner.discount_text }}
+                    </div>
+                    {% if promotional_banner.valid_until %}
+                    <div class="text-white/80 text-xs">
+                        {% trans "до" %} {{ promotional_banner.valid_until|date:"d.m.Y" }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Right side - Action button -->
+            <div>
+                {% if promotional_banner.button_text %}
+                    {% with banner_url=promotional_banner.get_language_aware_url %}
+                        {% if banner_url %}
+                        <a href="{{ banner_url }}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            {{ promotional_banner.button_text }}
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'property_list' %}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            {{ promotional_banner.button_text }}
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                <a href="{% url 'property_list' %}" class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    {% trans "Смотреть предложения" %}
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mobile Layout -->
+        <div class="md:hidden flex flex-col space-y-3 min-h-[100px] justify-center">
+            <!-- Title and discount in one row -->
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <h2 class="text-lg font-bold text-white leading-tight">
+                        {{ promotional_banner.title }}
+                    </h2>
+                    {% if promotional_banner.description %}
+                    <p class="text-white/90 text-xs mt-1">
+                        {{ promotional_banner.description|truncatewords:8 }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                {% if promotional_banner.discount_text %}
+                <div class="bg-white/20 backdrop-blur-sm rounded px-3 py-1 border border-white/30 ml-3">
+                    <div class="text-white font-bold text-sm">
+                        {{ promotional_banner.discount_text }}
+                    </div>
+                    {% if promotional_banner.valid_until %}
+                    <div class="text-white/80 text-xs">
+                        {% trans "до" %} {{ promotional_banner.valid_until|date:"d.m" }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Action button -->
+            <div class="flex justify-center">
+                {% if promotional_banner.button_text %}
+                    {% with banner_url=promotional_banner.get_language_aware_url %}
+                        {% if banner_url %}
+                        <a href="{{ banner_url }}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
+                            {{ promotional_banner.button_text }}
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'property_list' %}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
+                            {{ promotional_banner.button_text }}
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                <a href="{% url 'property_list' %}" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
+                    {% trans "Смотреть предложения" %}
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Subtle gradient overlay -->
+    <div class="absolute inset-0 bg-gradient-to-r from-accent/10 to-primary/10 pointer-events-none"></div>
+</section>
+{% endif %}
+<!-- Featured Properties -->
+<section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши избранные объекты недвижимости" %}</h2>
+            
+            <!-- Property Type Tabs -->
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex bg-white rounded-lg p-1 shadow-md">
+                    <button onclick="switchPropertyType('villa')" id="tab-villa" class="px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 property-tab active">
+                        <i class="fas fa-home mr-2"></i>{% trans "Виллы" %}
+                    </button>
+                    <button onclick="switchPropertyType('condo')" id="tab-condo" class="px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 property-tab">
+                        <i class="fas fa-building mr-2"></i>{% trans "Кондоминиумы" %}
+                    </button>
+                    <button onclick="switchPropertyType('townhouse')" id="tab-townhouse" class="px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 property-tab">
+                        <i class="fas fa-city mr-2"></i>{% trans "Таунхаусы" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Carousel Container -->
+        <div class="relative overflow-hidden">
+            <!-- Navigation Buttons -->
+            <button id="featured-prev" class="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-primary hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="featured-next" class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-primary hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- Carousel Track -->
+            <div class="carousel-track-container">
+                <div id="properties-carousel" class="carousel-track flex gap-6 md:gap-6 gap-4 transition-transform duration-1000 ease-in-out">
+                    <!-- Properties will be loaded here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <a href="{% url 'property_list' %}" class="bg-primary hover:bg-yellow-500 text-white font-bold py-3 px-8 rounded-md text-lg transition-colors">
+                {% trans "Смотреть каталог" %}
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Districts -->
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Популярные районы" %}</h2>
+            <p class="text-xl text-gray-600">{% trans "Изучите лучшие локации Пхукета" %}</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for district in districts %}
+                <div class="bg-white rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div class="p-6">
+                        <h5 class="text-xl font-semibold text-gray-900 mb-3">{{ district.name }}</h5>
+                        <p class="text-gray-600 mb-4">{{ district.description|truncatewords:15 }}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-primary font-medium">
+                                <i class="fas fa-home mr-1"></i> {{ district.properties_count }} {% trans "объектов" %}
+                            </span>
+                            <a href="{% url 'district_detail' district.slug %}" class="border border-primary text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-sm transition-colors text-sm font-medium">
+                                {% trans "Подробнее" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+<!-- What we do for you -->
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900">{% trans "Что мы предлагаем" %}</h2>
+            <p class="text-xl text-gray-600 mt-4">{% trans "Услуги агентства недвижимости Undersun Estate" %}</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Real Estate Purchase -->
+            <div class="bg-white p-6 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="text-center mb-4">
+                    <i class="fas fa-home text-3xl text-primary mb-4"></i>
+                </div>
+                <h5 class="text-xl font-semibold text-gray-900 mb-3 text-center">{% trans "Покупка недвижимости онлайн и офлайн" %}</h5>
+                <p class="text-gray-600 mb-4 text-center">{% trans "Полное сопровождение сделки. Проведем экспертизу, индивидуально подберем объекты для вас, решим юридические вопросы." %}</p>
+                <div class="text-center">
+                    <a href="#" class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                </div>
+            </div>
+
+            <!-- Property Sale -->
+            <div class="bg-white p-6 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="text-center mb-4">
+                    <i class="fas fa-building text-3xl text-primary mb-4"></i>
+                </div>
+                <h5 class="text-xl font-semibold text-gray-900 mb-3 text-center">{% trans "Продажа недвижимости" %}</h5>
+                <p class="text-gray-600 mb-4 text-center">{% trans "Доверьте нам продажу вашей недвижимости. Найдем покупателя быстро и выгодно, избавив от лишних хлопот." %}</p>
+                <div class="text-center">
+                    <a href="#" class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                </div>
+            </div>
+
+            <!-- Property Rental -->
+            <div class="bg-white p-6 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="text-center mb-4">
+                    <i class="fas fa-key text-3xl text-primary mb-4"></i>
+                </div>
+                <h5 class="text-xl font-semibold text-gray-900 mb-3 text-center">{% trans "Аренда недвижимости" %}</h5>
+                <p class="text-gray-600 mb-4 text-center">{% trans "Подберем жилье для средне- и долгосрочной аренды, чтобы ваше пребывание на Пхукете было максимально комфортным." %}</p>
+                <div class="text-center">
+                    <a href="#" class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                </div>
+            </div>
+
+            <!-- Legal Advice -->
+            <div class="bg-white p-6 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="text-center mb-4">
+                    <i class="fas fa-balance-scale text-3xl text-primary mb-4"></i>
+                </div>
+                <h5 class="text-xl font-semibold text-gray-900 mb-3 text-center">{% trans "Юридические консультации" %}</h5>
+                <p class="text-gray-600 mb-4 text-center">{% trans "Опытные юристы с отличным знанием тайского права помогут вам в любом правовом вопросе." %}</p>
+                <div class="text-center">
+                    <a href="#" class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                </div>
+            </div>
+
+            <!-- Commercial Real Estate -->
+            <div class="bg-white p-6 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="text-center mb-4">
+                    <i class="fas fa-store text-3xl text-primary mb-4"></i>
+                </div>
+                <h5 class="text-xl font-semibold text-gray-900 mb-3 text-center">{% trans "Коммерческая недвижимость" %}</h5>
+                <p class="text-gray-600 mb-4 text-center">{% trans "У нас есть выгодные предложения по продаже коммерческих помещений на острове." %}</p>
+                <div class="text-center">
+                    <a href="#" class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                </div>
+            </div>
+
+            <!-- Land Sale -->
+            <div class="bg-white p-6 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="text-center mb-4">
+                    <i class="fas fa-map text-3xl text-primary mb-4"></i>
+                </div>
+                <h5 class="text-xl font-semibold text-gray-900 mb-3 text-center">{% trans "Продажа земли" %}</h5>
+                <p class="text-gray-600 mb-4 text-center">{% trans "Предоставляем услуги по продаже земельных участков на острове Пхукет. У нас есть подборка земли разного назначения и размеров в нескольких районах острова." %}</p>
+                <div class="text-center">
+                    <a href="#" class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Team -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">{% trans "Наша команда" %}</h2>
+            <p class="text-xl text-gray-600">{% trans "Профессионалы с многолетним опытом работы на рынке недвижимости Пхукета" %}</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Team Member 1: Bogdan Dyachuk -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="relative mb-6">
+                    <img src="{% static 'images/team/bogdan_dyachuk.jpeg' %}" alt="Bogdan Dyachuk" class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Bogdan Dyachuk</h3>
+                <p class="text-primary font-medium mb-3">Sales Director</p>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-phone text-primary mr-2"></i>
+                        <a href="tel:+66827268615" class="hover:text-primary transition-colors">+66 82 726 8615</a>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-envelope text-primary mr-2"></i>
+                        <a href="mailto:bd@undersunestate.com" class="hover:text-primary transition-colors">bd@undersunestate.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Member 2: Ilya Ordovskii-Tanaevskii -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="relative mb-6">
+                    <img src="{% static 'images/team/ilya_ordovskii.jpeg' %}" alt="Ilya Ordovskii-Tanaevskii" class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Ilya Ordovskii-Tanaevskii</h3>
+                <p class="text-primary font-medium mb-3">Chief Art Officer (CAO)</p>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-phone text-primary mr-2"></i>
+                        <a href="tel:+66994402232" class="hover:text-primary transition-colors">+66 99 440 2232</a>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-envelope text-primary mr-2"></i>
+                        <a href="mailto:iot@undersunestate.com" class="hover:text-primary transition-colors">iot@undersunestate.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Member 3: Tatiana Korostyleva -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="relative mb-6">
+                    <img src="{% static 'images/team/tatiana_korostyleva.jpeg' %}" alt="Tatiana Korostyleva" class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Tatiana Korostyleva</h3>
+                <p class="text-primary font-medium mb-3">Chief Marketing Officer (CMO)</p>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-phone text-primary mr-2"></i>
+                        <a href="tel:+79177188313" class="hover:text-primary transition-colors">+7 917 718 8313</a>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-envelope text-primary mr-2"></i>
+                        <a href="mailto:tatyanak@undersun-estate.com" class="hover:text-primary transition-colors">tatyanak@undersunestate.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Member 4: Aleksei Kljujev -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="relative mb-6">
+                    <img src="{% static 'images/team/aleksei_kljujev.jpeg' %}" alt="Aleksei Kljujev" class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Aleksei Kljujev</h3>
+                <p class="text-primary font-medium mb-3">Chief Financial Officer (CFO)</p>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-phone text-primary mr-2"></i>
+                        <a href="tel:+66945955257" class="hover:text-primary transition-colors">+66 94 595 5257</a>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-envelope text-primary mr-2"></i>
+                        <a href="mailto:alex@undersunestate.com" class="hover:text-primary transition-colors">alex@undersunestate.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Member 5: Kirill Dedyugin -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="relative mb-6">
+                    <img src="{% static 'images/team/kirill_dedyugin.jpeg' %}" alt="Kirill Dedyugin" class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Kirill Dedyugin</h3>
+                <p class="text-primary font-medium mb-3">Senior Manager for International Client Relations</p>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-phone text-primary mr-2"></i>
+                        <a href="tel:+66625392970" class="hover:text-primary transition-colors">+66 62 539 2970</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Member 6: Vitalii Savchuk -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="relative mb-6">
+                    <img src="{% static 'images/team/vitalii_savchuk.jpeg' %}" alt="Vitalii Savchuk" class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Vitalii Savchuk</h3>
+                <p class="text-primary font-medium mb-3">Manager for International Client Relations</p>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-phone text-primary mr-2"></i>
+                        <a href="tel:+66836087179" class="hover:text-primary transition-colors">+66 83 608 7179</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Member 7: Withanyu Satchaphan -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
+                <div class="relative mb-6">
+                    <img src="{% static 'images/team/withanyu_satchaphan.jpeg' %}" alt="Withanyu Satchaphan" class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Withanyu Satchaphan</h3>
+                <p class="text-primary font-medium mb-3">Office Manager</p>
+            </div>
+        </div>
+
+        <!-- Call to action -->
+        <div class="text-center mt-12">
+            <div class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-accent to-yellow-400 rounded-md shadow-lg">
+                <i class="fas fa-phone text-gray-900 mr-2"></i>
+                <span class="text-gray-900 font-medium">{% trans "Свяжитесь с нашей командой для консультации" %}</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Property Purchase Process Steps -->
+<section class="py-16 bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
+    <!-- Background decorative elements -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-10 left-10 w-20 h-20 bg-accent/10 rounded-full blur-xl"></div>
+        <div class="absolute top-32 right-20 w-32 h-32 bg-primary/10 rounded-full blur-xl"></div>
+        <div class="absolute bottom-20 left-1/4 w-24 h-24 bg-purple-200/30 rounded-full blur-xl"></div>
+        <div class="absolute bottom-10 right-10 w-28 h-28 bg-blue-200/30 rounded-full blur-xl"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 relative z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">{% trans "Этапы сделки по покупке недвижимости" %}</h2>
+            <p class="text-xl text-gray-600">{% trans "Нажмите на этап, чтобы узнать подробности" %}</p>
+        </div>
+
+        <!-- Interactive Process Steps -->
+        <div class="flex flex-wrap justify-center gap-6 mb-12 relative">
+            <!-- Step 1 -->
+            <button onclick="toggleStep(1)" class="process-step-cloud bg-gradient-to-r from-accent to-yellow-400 hover:from-yellow-400 hover:to-accent text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30" id="step-cloud-1">
+                <span class="text-sm">1.</span> {% trans "Выбор объекта" %}
+            </button>
+            
+            <!-- Step 2 -->
+            <button onclick="toggleStep(2)" class="process-step-cloud bg-gradient-to-r from-primary to-tertiary hover:from-tertiary hover:to-primary text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30" id="step-cloud-2">
+                <span class="text-sm">2.</span> {% trans "Тур по объектам" %}
+            </button>
+            
+            <!-- Step 3 -->
+            <button onclick="toggleStep(3)" class="process-step-cloud bg-gradient-to-r from-accent/80 to-accent hover:from-accent hover:to-accent/80 text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30" id="step-cloud-3">
+                <span class="text-sm">3.</span> {% trans "Переговоры" %}
+            </button>
+            
+            <!-- Step 4 -->
+            <button onclick="toggleStep(4)" class="process-step-cloud bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90 text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30" id="step-cloud-4">
+                <span class="text-sm">4.</span> {% trans "Договор" %}
+            </button>
+            
+            <!-- Step 5 -->
+            <button onclick="toggleStep(5)" class="process-step-cloud bg-gradient-to-r from-tertiary to-gray-600 hover:from-gray-600 hover:to-tertiary text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-tertiary/30" id="step-cloud-5">
+                <span class="text-sm">5.</span> {% trans "Оплата" %}
+            </button>
+            
+            <!-- Step 6 -->
+            <button onclick="toggleStep(6)" class="process-step-cloud bg-gradient-to-r from-accent/70 to-yellow-500 hover:from-yellow-500 hover:to-accent/70 text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30" id="step-cloud-6">
+                <span class="text-sm">6.</span> {% trans "Приемка" %}
+            </button>
+            
+            <!-- Step 7 -->
+            <button onclick="toggleStep(7)" class="process-step-cloud bg-gradient-to-r from-primary/80 to-tertiary/80 hover:from-tertiary/80 hover:to-primary/80 text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30" id="step-cloud-7">
+                <span class="text-sm">7.</span> {% trans "Регистрация" %}
+            </button>
+        </div>
+
+        <!-- Step Details Container -->
+        <div class="max-w-4xl mx-auto">
+            <!-- Step 1 Details -->
+            <div id="step-details-1" class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-accent to-yellow-400 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-search text-2xl text-gray-900"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Выбор объекта" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Подбираем несколько проектов, соответствующих вашим критериям. Собираем и предоставляем вам всю необходимую информацию по ним." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 Details -->
+            <div id="step-details-2" class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary to-tertiary rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-eye text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Тур по объектам" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Организуем и проводим для вас встречу с застройщиком / продавцом и показ выбранных объектов. Онлайн и оффлайн." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 Details -->
+            <div id="step-details-3" class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-accent to-yellow-400 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-handshake text-2xl text-gray-900"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Переговоры с продавцом и бронирование объекта" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Согласовываем максимально выгодные для вас условия сделки с продавцом выбранного объекта. Далее составляется резервационное соглашение." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 Details -->
+            <div id="step-details-4" class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-file-contract text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Подготовка и заключение основного договора" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Представители продавца готовят основной договор. Наши юристы проверяют его и отправляют вам на согласование." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 Details -->
+            <div id="step-details-5" class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-tertiary to-gray-600 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-credit-card text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Оплата по договору" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Оплата производится согласно утвержденному в контракте графику из любой точки." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 Details -->
+            <div id="step-details-6" class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-accent/70 to-yellow-500 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-key text-2xl text-gray-900"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Приемка объекта" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "При заключении сделки со строящимися объектами, после окончания строительства застройщик присылает приглашение для приемки вашей собственности." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7 Details -->
+            <div id="step-details-7" class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary/80 to-tertiary/80 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-certificate text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Регистрация прав собственности" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Оформляем все необходимые документы для регистрации прав собственности на приобретенную недвижимость." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Hero Section Responsive Height Adjustment
+function adjustHeroHeight() {
+    const heroSection = document.querySelector('.hero-section');
+    if (!heroSection) return;
+    
+    if (window.innerWidth >= 1440) {
+        // Large desktop (1440px+): Full viewport height
+        heroSection.style.minHeight = '100vh';
+        heroSection.style.paddingTop = '0px';
+    } else if (window.innerWidth >= 1024) {
+        // Desktop: account for contact bar + navigation
+        heroSection.style.minHeight = 'calc(100vh - 120px)';
+        heroSection.style.paddingTop = '120px';
+    } else {
+        // Mobile: only navigation
+        heroSection.style.minHeight = 'calc(100vh - 64px)';
+        heroSection.style.paddingTop = '64px';
+    }
+}
+
+// Hero Section Background Slideshow
+document.addEventListener('DOMContentLoaded', function() {
+    // Adjust height on load
+    adjustHeroHeight();
+    
+    // Adjust height on resize
+    window.addEventListener('resize', adjustHeroHeight);
+    
+    const slides = document.querySelectorAll('.hero-slide');
+    let currentSlide = 0;
+    
+    function nextSlide() {
+        // Hide current slide
+        slides[currentSlide].style.opacity = '0';
+        
+        // Move to next slide
+        currentSlide = (currentSlide + 1) % slides.length;
+        
+        // Show next slide
+        slides[currentSlide].style.opacity = '1';
+    }
+    
+    // Auto change slides every 10 seconds
+    setInterval(nextSlide, 10000);
+    
+    // Preload images for smoother transitions
+    slides.forEach(function(slide) {
+        const bgImage = slide.style.backgroundImage;
+        if (bgImage) {
+            const imageUrl = bgImage.match(/url\(['"]?(.*?)['"]?\)/)[1];
+            const img = new Image();
+            img.src = imageUrl;
+        }
+    });
+});
+
+// Process Steps Interactive Functionality
+function toggleStep(stepNumber) {
+    // Hide all step details
+    const allStepDetails = document.querySelectorAll('.step-details');
+    allStepDetails.forEach(function(detail) {
+        detail.classList.add('hidden');
+    });
+    
+    // Reset all cloud button styles
+    const allClouds = document.querySelectorAll('.process-step-cloud');
+    allClouds.forEach(function(cloud) {
+        cloud.classList.remove('ring-4', 'scale-110');
+    });
+    
+    // Show the selected step details with animation
+    const targetDetail = document.getElementById('step-details-' + stepNumber);
+    const targetCloud = document.getElementById('step-cloud-' + stepNumber);
+    
+    if (targetDetail && targetCloud) {
+        // Add active state to clicked cloud
+        targetCloud.classList.add('ring-4', 'scale-110');
+        
+        // Show details with fade-in effect
+        targetDetail.classList.remove('hidden');
+        
+        // Smooth scroll to the details
+        targetDetail.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest' 
+        });
+        
+        // Add a subtle bounce animation
+        targetDetail.style.animation = 'fadeInUp 0.5s ease-out';
+    }
+}
+
+// Add CSS animation keyframes
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .step-details {
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    /* Consultation form tabs */
+    .consultation-tab {
+        background-color: transparent;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .consultation-tab.active {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        backdrop-filter: blur(4px);
+        font-weight: 600;
+    }
+    
+    .consultation-tab:hover {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+    
+    .consultation-content {
+        display: block;
+    }
+    
+    .consultation-content.hidden {
+        display: none;
+    }
+    
+    .consultation-content.active {
+        display: block;
+    }
+    
+    /* Consultation form enhancements */
+    .consultation-icon-circle {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .consultation-card:hover .consultation-icon-circle {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.4);
+    }
+    
+    .consultation-expert-icon {
+        transition: color 0.3s ease;
+    }
+    
+    .consultation-card:hover .consultation-expert-icon {
+        color: #1f2937 !important;
+    }
+    
+    /* Enhanced styling for form inputs */
+    .consultation-form-input:focus {
+        ring-color: #ffc107 !important;
+        border-color: #ffc107 !important;
+        box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1) !important;
+    }
+    
+    /* Tab icons animation */
+    .consultation-tab.active i {
+        animation: tabIconPulse 2s infinite;
+    }
+    
+    @keyframes tabIconPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    /* Additional branding emphasis */
+    .text-accent {
+        color: #ffc107 !important;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+    }
+`;
+document.head.appendChild(style);
+
+
+// Featured Properties Carousel
+(function() {
+    console.log('Featured Properties script loaded!'); // Test if script loads
+    
+    function initFeaturedProperties() {
+        console.log('Featured Properties Carousel: DOM Content Loaded');
+        
+        let currentPropertyType = 'villa';
+        
+        // Data from Django context
+        const featuredProperties = {
+            villa: {{ featured_properties_villa|safe }},
+            condo: {{ featured_properties_condo|safe }},
+            townhouse: {{ featured_properties_townhouse|safe }}
+        };
+        
+        console.log('Featured Properties loaded:', featuredProperties);
+        
+        // Switch property type
+        window.switchPropertyType = function(type) {
+            console.log('switchPropertyType called with:', type);
+            currentPropertyType = type;
+            
+            // Update tab buttons
+            document.querySelectorAll('.property-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            const activeTab = document.getElementById('tab-' + type);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+            
+            // Render properties for selected type
+            renderProperties(featuredProperties[type] || []);
+            
+            // Update all prices to current header currency after rendering new properties
+            setTimeout(() => {
+                updateAllPricesToHeaderCurrency();
+            }, 100);
+        }
+        
+        // Carousel state
+        let currentIndex = 0;
+        let isTransitioning = false;
+        let autoplayInterval;
+        
+        // Render properties with consultation forms
+        function renderProperties(properties) {
+            console.log('renderProperties called with:', properties);
+            const container = document.getElementById('properties-carousel');
+            console.log('Container found:', container);
+            
+            if (!container) {
+                console.error('properties-carousel container not found!');
+                return;
+            }
+            
+            // Reset carousel state
+            currentIndex = 0;
+            
+            let items = [];
+            
+            properties.forEach((property, index) => {
+                // Add consultation form every 4th position (after 3rd, 7th, 11th, etc.)
+                if ((index + 1) % 4 === 0) {
+                    items.push(createConsultationCard());
+                }
+                
+                items.push(createPropertyCard(property));
+            });
+            
+            // Create infinite carousel by duplicating items
+            const allItems = [...items, ...items, ...items]; // Triple the items for smooth infinite scroll
+            
+            let html = '';
+            allItems.forEach(item => {
+                html += `<div class="carousel-item flex-shrink-0" style="width: 100%; max-width: 350px; height: 450px; min-width: 280px;">${item}</div>`;
+            });
+            
+            console.log('Generated HTML for', allItems.length, 'items');
+            container.innerHTML = html;
+            
+            // Start from the middle set to allow backward scrolling
+            currentIndex = items.length;
+            updateCarouselPosition(false);
+            
+            // Initialize carousel controls
+            initializeCarouselControls();
+            
+            // Update all prices to current header currency
+            updateAllPricesToHeaderCurrency();
+            
+            // Reinitialize property cards
+            console.log('Checking for initPropertyCards function');
+            if (typeof window.initPropertyCards === 'function') {
+                console.log('Calling initPropertyCards');
+                window.initPropertyCards();
+            } else if (typeof initPropertyCards === 'function') {
+                console.log('Calling global initPropertyCards');
+                initPropertyCards();
+            } else {
+                console.log('initPropertyCards function not found, skipping');
+            }
+        }
+        
+        // Update carousel position
+        function updateCarouselPosition(animate = true) {
+            const container = document.getElementById('properties-carousel');
+            if (!container) return;
+            
+            const carouselItems = container.querySelectorAll('.carousel-item');
+            if (carouselItems.length === 0) return;
+            
+            // Calculate actual slide width based on first item
+            const firstItem = carouselItems[0];
+            const itemRect = firstItem.getBoundingClientRect();
+            const itemStyle = window.getComputedStyle(firstItem);
+            const marginRight = parseInt(itemStyle.marginRight) || 0;
+            
+            // Calculate slide width based on screen size
+            const isMobile = window.innerWidth < 768;
+            let slideWidth;
+            
+            if (isMobile) {
+                // Mobile: use almost full viewport width minus padding
+                slideWidth = Math.min(window.innerWidth - 48, 350); // 48px for padding
+            } else {
+                // Desktop: fixed width plus gap
+                slideWidth = itemRect.width + 24; // 24px gap
+            }
+            
+            const translateX = -(currentIndex * slideWidth);
+            
+            if (animate) {
+                container.style.transition = 'transform 1s ease-in-out';
+            } else {
+                container.style.transition = 'none';
+            }
+            
+            container.style.transform = `translateX(${translateX}px)`;
+        }
+        
+        // Move to next slide
+        function nextSlide() {
+            if (isTransitioning) return;
+            
+            isTransitioning = true;
+            currentIndex++;
+            updateCarouselPosition();
+            
+            setTimeout(() => {
+                checkInfiniteScroll();
+                isTransitioning = false;
+            }, 1000);
+        }
+        
+        // Move to previous slide
+        function prevSlide() {
+            if (isTransitioning) return;
+            
+            isTransitioning = true;
+            currentIndex--;
+            updateCarouselPosition();
+            
+            setTimeout(() => {
+                checkInfiniteScroll();
+                isTransitioning = false;
+            }, 1000);
+        }
+        
+        // Check and handle infinite scroll
+        function checkInfiniteScroll() {
+            const container = document.getElementById('properties-carousel');
+            if (!container) return;
+            
+            const items = container.querySelectorAll('.carousel-item');
+            const totalItems = items.length;
+            const itemsPerSet = totalItems / 3;
+            
+            // If we're at the end of the last set, jump to the beginning of the middle set
+            if (currentIndex >= itemsPerSet * 2) {
+                currentIndex = itemsPerSet;
+                updateCarouselPosition(false);
+            }
+            // If we're at the beginning of the first set, jump to the end of the middle set
+            else if (currentIndex < itemsPerSet) {
+                currentIndex = itemsPerSet * 2 - 1;
+                updateCarouselPosition(false);
+            }
+        }
+        
+        // Initialize carousel controls
+        function initializeCarouselControls() {
+            const prevBtn = document.getElementById('featured-prev');
+            const nextBtn = document.getElementById('featured-next');
+            
+            if (prevBtn) {
+                prevBtn.onclick = () => {
+                    prevSlide();
+                    resetAutoplay();
+                };
+            }
+            
+            if (nextBtn) {
+                nextBtn.onclick = () => {
+                    nextSlide();
+                    resetAutoplay();
+                };
+            }
+            
+            startAutoplay();
+        }
+        
+        // Autoplay functions
+        function startAutoplay() {
+            autoplayInterval = setInterval(() => {
+                nextSlide();
+            }, 8000); // Slower autoplay - every 8 seconds
+        }
+        
+        function resetAutoplay() {
+            clearInterval(autoplayInterval);
+            startAutoplay();
+        }
+        
+        // Update all prices to current header currency
+        function updateAllPricesToHeaderCurrency() {
+            // Get current currency from session/header
+            const headerCurrency = getHeaderCurrency();
+            
+            // Find all price elements in the carousel
+            const carouselContainer = document.getElementById('properties-carousel');
+            if (!carouselContainer) return;
+            
+            carouselContainer.querySelectorAll('[class*="card-price-"]').forEach(priceElement => {
+                const propertyId = priceElement.dataset.propertyId;
+                const dealType = priceElement.dataset.dealType;
+                
+                if (propertyId) {
+                    updatePropertyPrice(propertyId, headerCurrency.code, headerCurrency.symbol, dealType, priceElement);
+                }
+            });
+        }
+        
+        // Get header currency from HTML or session
+        function getHeaderCurrency() {
+            // Try to get from currency switcher button in header
+            const headerCurrencyElement = document.getElementById('currency-menu-button');
+            if (headerCurrencyElement) {
+                // Extract currency info from button text (format: "₽ RUB" or "$ USD")
+                const buttonText = headerCurrencyElement.textContent?.trim() || '';
+                const parts = buttonText.split(' ');
+                
+                if (parts.length >= 2) {
+                    const symbol = parts[0];
+                    const code = parts[1];
+                    return { code, symbol };
+                }
+            }
+            
+            // Fallback: try to get from mobile currency button
+            const mobileButton = document.querySelector('[onclick="toggleMobileSubmenu(\'currency-submenu\')"] span');
+            if (mobileButton) {
+                const buttonText = mobileButton.textContent || '';
+                // Format: "Валюта (₽RUB)" or "Currency ($USD)"
+                const match = buttonText.match(/\(([^\w])(\w+)\)/);
+                if (match) {
+                    return { code: match[2], symbol: match[1] };
+                }
+            }
+            
+            // Default fallback to THB (base currency)
+            return { code: 'THB', symbol: '฿' };
+        }
+        
+        // Get currency symbol by code
+        function getCurrencySymbol(code) {
+            const symbols = {
+                'USD': '$',
+                'THB': '฿',
+                'RUB': '₽'
+            };
+            return symbols[code] || '฿';
+        }
+        
+        // Update single property price
+        function updatePropertyPrice(propertyId, toCurrency, symbol, dealType, priceElement) {
+            if (!priceElement) {
+                priceElement = document.querySelector(`.card-price-${propertyId}`);
+            }
+            if (!priceElement) return;
+            
+            // Find property data
+            const currentData = featuredProperties[currentPropertyType] || [];
+            const propertyData = currentData.find(p => p.id == propertyId);
+            
+            if (!propertyData) return;
+            
+            let basePrice = 0;
+            let fromCurrency = 'THB';
+            
+            // Determine base price and currency (THB is base currency, but check all available)
+            if (dealType === 'rent') {
+                if (propertyData.price_rent_thb) {
+                    basePrice = propertyData.price_rent_thb;
+                    fromCurrency = 'THB';
+                } else if (propertyData.price_rent_rub) {
+                    basePrice = propertyData.price_rent_rub;
+                    fromCurrency = 'RUB';
+                } else if (propertyData.price_rent_usd) {
+                    basePrice = propertyData.price_rent_usd;
+                    fromCurrency = 'USD';
+                }
+            } else {
+                if (propertyData.price_sale_thb) {
+                    basePrice = propertyData.price_sale_thb;
+                    fromCurrency = 'THB';
+                } else if (propertyData.price_sale_rub) {
+                    basePrice = propertyData.price_sale_rub;
+                    fromCurrency = 'RUB';
+                } else if (propertyData.price_sale_usd) {
+                    basePrice = propertyData.price_sale_usd;
+                    fromCurrency = 'USD';
+                }
+            }
+            
+            if (!basePrice) {
+                priceElement.innerHTML = 'Цена по запросу';
+                return;
+            }
+            
+            if (fromCurrency === toCurrency) {
+                const displayPrice = dealType === 'rent' ? 
+                    `${symbol}${formatPrice(basePrice)}/мес` : 
+                    `${symbol}${formatPrice(basePrice)}`;
+                priceElement.innerHTML = displayPrice;
+                return;
+            }
+            
+            // Convert currency using real exchange rates
+            const rateKey = `${fromCurrency}_${toCurrency}`;
+            
+            // Use global exchange rates if available, otherwise fetch them
+            if (window.exchangeRates && window.exchangeRates[rateKey]) {
+                const convertedPrice = basePrice * window.exchangeRates[rateKey];
+                const displayPrice = dealType === 'rent' ? 
+                    `${symbol}${formatPrice(convertedPrice)}/мес` : 
+                    `${symbol}${formatPrice(convertedPrice)}`;
+                priceElement.innerHTML = displayPrice;
+            } else {
+                // Fetch exchange rates from server
+                fetch('/currency/rates/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.exchangeRates = data.rates;
+                            const rate = data.rates[rateKey] || 1;
+                            const convertedPrice = basePrice * rate;
+                            
+                            const displayPrice = dealType === 'rent' ? 
+                                `${symbol}${formatPrice(convertedPrice)}/мес` : 
+                                `${symbol}${formatPrice(convertedPrice)}`;
+                            priceElement.innerHTML = displayPrice;
+                        } else {
+                            // Fallback to original price
+                            const displayPrice = dealType === 'rent' ? 
+                                `${symbol}${formatPrice(basePrice)}/мес` : 
+                                `${symbol}${formatPrice(basePrice)}`;
+                            priceElement.innerHTML = displayPrice;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching exchange rates:', error);
+                        // Fallback to original price
+                        const displayPrice = dealType === 'rent' ? 
+                            `${symbol}${formatPrice(basePrice)}/мес` : 
+                            `${symbol}${formatPrice(basePrice)}`;
+                        priceElement.innerHTML = displayPrice;
+                    });
+            }
+        }
+        
+        // Format price helper
+        function formatPrice(amount) {
+            return Math.round(amount).toLocaleString('en-US').replace(/,/g, ' ');
+        }
+        
+        // Create consultation form card
+        function createConsultationCard() {
+            const consultationId = Math.random().toString(36).substr(2, 9); // Unique ID for each card
+            return `
+                <div class="consultation-card bg-gradient-to-br from-primary to-tertiary rounded-lg p-4 text-white shadow-lg w-full h-full flex flex-col">
+                    <div class="text-center mb-4">
+                        <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-3 consultation-icon-circle">
+                            <i class="fas fa-user-tie text-gray-900 text-lg consultation-expert-icon"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-2 leading-tight text-white">Получить консультацию эксперта <span class="text-accent">Undersun</span></h3>
+                        <p class="text-white/90 mb-4 text-sm">Где вам удобнее общаться</p>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <div class="flex mb-3 bg-white/10 rounded-md p-1">
+                        <button onclick="switchConsultationTab('${consultationId}', 'phone')" 
+                                class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200 active" 
+                                data-tab="phone" data-consultation-id="${consultationId}">
+                            <i class="fas fa-phone text-xs mr-1"></i>Звонок
+                        </button>
+                        <button onclick="switchConsultationTab('${consultationId}', 'whatsapp')" 
+                                class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200" 
+                                data-tab="whatsapp" data-consultation-id="${consultationId}">
+                            <i class="fab fa-whatsapp text-xs mr-1"></i>WhatsApp
+                        </button>
+                        <button onclick="switchConsultationTab('${consultationId}', 'telegram')" 
+                                class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200" 
+                                data-tab="telegram" data-consultation-id="${consultationId}">
+                            <i class="fab fa-telegram text-xs mr-1"></i>Telegram
+                        </button>
+                    </div>
+                    
+                    <!-- Tab Content -->
+                    <div class="flex-1">
+                        <!-- Phone Tab -->
+                        <div class="consultation-content active" data-tab="phone" data-consultation-id="${consultationId}">
+                            <form onsubmit="handlePhoneCallback(event, '${consultationId}')" class="space-y-3">
+                                <div>
+                                    <input type="tel" 
+                                           placeholder="+66 XXX XXX XXX" 
+                                           class="consultation-form-input w-full px-3 py-2 rounded-md bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                                           required>
+                                </div>
+                                <button type="submit" 
+                                        class="w-full bg-accent hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
+                                    Заказать звонок
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- WhatsApp Tab -->
+                        <div class="consultation-content hidden" data-tab="whatsapp" data-consultation-id="${consultationId}">
+                            <div class="text-center py-4">
+                                <p class="text-white/90 mb-4 text-sm">Напишите нам в WhatsApp для быстрой консультации</p>
+                                <a href="https://wa.me/66633033133?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9C%D0%B5%D0%BD%D1%8F%20%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%B5%D1%81%D1%83%D0%B5%D1%82%20%D0%BA%D0%BE%D0%BD%D1%81%D1%83%D0%BB%D1%8C%D1%82%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%20%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D0%B8" 
+                                   target="_blank" 
+                                   class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
+                                    <i class="fab fa-whatsapp mr-2"></i>Написать в WhatsApp
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Telegram Tab -->
+                        <div class="consultation-content hidden" data-tab="telegram" data-consultation-id="${consultationId}">
+                            <div class="text-center py-4">
+                                <p class="text-white/90 mb-4 text-sm">Напишите нам в Telegram для получения консультации</p>
+                                <a href="https://t.me/undersunestate" 
+                                   target="_blank" 
+                                   class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
+                                    <i class="fab fa-telegram mr-2"></i>Написать в Telegram
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Create property card
+        function createPropertyCard(property) {
+            const imageUrl = property.main_image_url || '/static/images/no-image.svg';
+            const priceDisplay = property.price_formatted || 'Цена по запросу';
+            
+            // Safely check favorites - use window.isFavorite if available
+            let isFav = false;
+            try {
+                if (typeof window.isFavorite === 'function') {
+                    isFav = window.isFavorite(property.id);
+                } else if (typeof isFavorite === 'function') {
+                    isFav = isFavorite(property.id);
+                }
+            } catch (e) {
+                console.log('isFavorite function not available yet');
+            }
+            
+            const heartClass = isFav ? 'fas text-red-500' : 'far text-gray-600';
+            
+            return `
+                <div class="property-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden w-full h-full">
+                    <div class="relative h-48">
+                        <img src="${imageUrl}" class="w-full h-full object-cover" alt="${property.title}" loading="lazy">
+                        
+                        <!-- Deal Type Badge -->
+                        <div class="absolute top-2 left-2">
+                            ${property.deal_type === 'sale' ? 
+                                '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Продажа</span>' : 
+                                property.deal_type === 'rent' ? 
+                                '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">Аренда</span>' : 
+                                '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">Продажа/Аренда</span>'
+                            }
+                        </div>
+                        
+                        <div class="absolute top-3 right-3">
+                            <button class="bg-white/90 hover:bg-white w-10 h-10 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center"
+                                    data-property-id="${property.id}">
+                                <i class="${heartClass} group-hover:text-red-500 fa-heart transition-all duration-200"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 flex flex-col justify-between flex-1">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900 mb-2 leading-tight line-clamp-2" style="min-height: 2.5rem;">
+                                <a href="${property.url}" class="hover:text-primary transition-colors">
+                                    ${property.title.length > 40 ? property.title.substring(0, 40) + '...' : property.title}
+                                </a>
+                            </h3>
+                            
+                            <div class="flex items-center text-gray-600 mb-3">
+                                <i class="fas fa-map-marker-alt mr-1 text-primary text-xs"></i>
+                                <span class="text-xs">${property.district_name || 'Пхукет'}</span>
+                            </div>
+                            
+                            <!-- Property Details -->
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    ${property.bedrooms > 0 ? `
+                                        <div class="flex items-center text-gray-600">
+                                            <i class="fas fa-bed mr-1 text-primary text-xs"></i>
+                                            <span class="text-xs font-medium">${property.bedrooms}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${property.bathrooms > 0 ? `
+                                        <div class="flex items-center text-gray-600">
+                                            <i class="fas fa-bath mr-1 text-primary text-xs"></i>
+                                            <span class="text-xs font-medium">${property.bathrooms}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${property.area > 0 ? `
+                                        <div class="flex items-center text-gray-600">
+                                            <i class="fas fa-ruler-combined mr-1 text-primary text-xs"></i>
+                                            <span class="text-xs font-medium">${property.area} м²</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <!-- Price Section -->
+                            <div class="mb-3">
+                                <div class="text-center">
+                                    <span class="text-lg font-bold text-primary card-price-${property.id}" data-property-id="${property.id}" data-deal-type="${property.deal_type}">
+                                        ${priceDisplay}
+                                    </span>
+                                </div>
+                                
+                                <!-- Property Type Badge -->
+                                <div class="text-center">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                                        ${property.property_type_name || 'Недвижимость'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="${property.url}" class="block w-full bg-accent hover:bg-yellow-500 text-gray-900 py-2 px-4 rounded-md font-semibold transition-all duration-300 text-center text-sm">
+                            Узнать подробнее
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Initialize with villa properties  
+        console.log('Featured Properties Data:', featuredProperties);
+        console.log('Initializing with villa properties:', featuredProperties.villa);
+        renderProperties(featuredProperties.villa || []);
+        
+        // Handle window resize for mobile adaptation
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                updateCarouselPosition(false); // Update position without animation
+            }, 100);
+        });
+    }
+    
+    // Initialize when DOM is ready or immediately if already ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFeaturedProperties);
+    } else {
+        initFeaturedProperties();
+    }
+})();
+
+// Global functions for consultation form tabs
+window.switchConsultationTab = function(consultationId, tabName) {
+    // Update tab buttons
+    document.querySelectorAll(`[data-consultation-id="${consultationId}"].consultation-tab`).forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('data-tab') === tabName) {
+            tab.classList.add('active');
+        }
+    });
+    
+    // Update tab content
+    document.querySelectorAll(`[data-consultation-id="${consultationId}"].consultation-content`).forEach(content => {
+        content.classList.add('hidden');
+        content.classList.remove('active');
+        if (content.getAttribute('data-tab') === tabName) {
+            content.classList.remove('hidden');
+            content.classList.add('active');
+        }
+    });
+};
+
+// Handle phone callback form submission
+window.handlePhoneCallback = function(event, consultationId) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const phoneInput = form.querySelector('input[type="tel"]');
+    const phone = phoneInput.value.trim();
+    
+    if (!phone) {
+        alert('Пожалуйста, введите номер телефона');
+        return;
+    }
+    
+    // Basic phone validation
+    const phoneRegex = /^\+?[\d\s\-\(\)]{10,15}$/;
+    if (!phoneRegex.test(phone)) {
+        alert('Пожалуйста, введите корректный номер телефона');
+        return;
+    }
+    
+    const button = form.querySelector('button[type="submit"]');
+    const originalText = button.textContent;
+    
+    // Show loading state
+    button.textContent = 'Отправляем...';
+    button.disabled = true;
+    
+    // Simulate form submission (replace with actual API call)
+    setTimeout(() => {
+        alert('Спасибо! Мы свяжемся с вами в ближайшее время.');
+        phoneInput.value = '';
+        button.textContent = originalText;
+        button.disabled = false;
+        
+        // Switch to WhatsApp tab as alternative
+        switchConsultationTab(consultationId, 'whatsapp');
+    }, 1500);
+    
+    // TODO: Replace with actual API call to backend
+    // fetch('/api/callback-request/', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value
+    //     },
+    //     body: JSON.stringify({ phone: phone })
+    // }).then(response => response.json())
+    // .then(data => {
+    //     if (data.success) {
+    //         alert('Спасибо! Мы свяжемся с вами в ближайшее время.');
+    //         phoneInput.value = '';
+    //     } else {
+    //         alert('Произошла ошибка. Попробуйте еще раз.');
+    //     }
+    // }).catch(error => {
+    //     console.error('Error:', error);
+    //     alert('Произошла ошибка. Попробуйте еще раз.');
+    // }).finally(() => {
+    //     button.textContent = originalText;
+    //     button.disabled = false;
+    // });
+};
+</script>
+{% endblock %}

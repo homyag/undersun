@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "О нас" %} - Undersun Estate{% endblock %}
+
+{% block content %}
+<!-- About Hero Section -->
+<section class="bg-gradient-to-r from-primary to-blue-800 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center">
+            <h1 class="text-4xl lg:text-6xl font-bold mb-6">
+                {% trans "О компании Undersun Estate" %}
+            </h1>
+            <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
+                {% trans "Молодая и энергичная команда экспертов рынка недвижимости Таиланда" %}
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Company Story -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Наша история" %}</h2>
+                <div class="space-y-4 text-gray-600">
+                    <p>
+                        {% trans "Undersun Estate - это молодая и энергичная команда экспертов рынка недвижимости Таиланда с 3-летним опытом работы. Мы предлагаем разнообразные варианты недвижимости: от доступного жилья до роскошных вилл." %}
+                    </p>
+                    <p>
+                        {% trans "Наша команда предоставляет комплексную и бесплатную поддержку на всех этапах сделки. Мы тщательно отбираем объекты недвижимости, ориентируясь на потребности и пожелания клиентов." %}
+                    </p>
+                    <p>
+                        {% trans "Мы специализируемся на продаже и аренде вилл, таунхаусов, кондоминиумов и земельных участков в различных районах Пхукета: Муанг Пхукет, Катху и Таланг." %}
+                    </p>
+                </div>
+            </div>
+            <div>
+                <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="rounded-lg shadow-lg w-full">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши достижения" %}</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="text-4xl font-bold text-primary mb-2">500+</div>
+                <div class="text-gray-600">{% trans "Довольных клиентов" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-primary mb-2">1000+</div>
+                <div class="text-gray-600">{% trans "Объектов в портфолио" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-primary mb-2">3</div>
+                <div class="text-gray-600">{% trans "Года опыта" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl font-bold text-primary mb-2">3</div>
+                <div class="text-gray-600">{% trans "Языка обслуживания" %}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наша команда" %}</h2>
+            <p class="text-xl text-gray-600">{% trans "Молодые и энергичные специалисты рынка недвижимости Пхукета" %}</p>
+        </div>
+        
+        <div class="flex justify-center">
+            <div class="max-w-2xl">
+                <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="rounded-lg shadow-lg w-full">
+                <div class="text-center mt-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Команда Undersun Estate" %}</h3>
+                    <p class="text-gray-600">{% trans "Наша дружная команда всегда готова помочь вам найти идеальную недвижимость" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши услуги" %}</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for service in menu_services %}
+            <a href="{{ service.get_absolute_url }}" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 group">
+                <div class="text-primary text-3xl mb-4 group-hover:text-accent transition-colors duration-300">
+                    {% if service.icon_class %}
+                    <i class="{{ service.icon_class }}"></i>
+                    {% else %}
+                    <i class="fas fa-home"></i>
+                    {% endif %}
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3 group-hover:text-primary transition-colors duration-300">{{ service.title }}</h3>
+                <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">{{ service.description }}</p>
+                <div class="mt-4 text-accent font-medium group-hover:underline transition-all duration-300">
+                    {% trans "Подробнее" %} →
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Contact CTA -->
+<section class="py-16 bg-primary text-white">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">{% trans "Готовы найти дом мечты?" %}</h2>
+        <p class="text-xl mb-8 opacity-90">{% trans "Свяжитесь с нами сегодня для бесплатной консультации" %}</p>
+        <a href="{% url 'core:contact' %}" class="bg-accent hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+            {% trans "Связаться с нами" %}
+        </a>
+    </div>
+</section>
+{% endblock %}

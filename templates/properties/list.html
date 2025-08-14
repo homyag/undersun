@@ -1,0 +1,582 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load currency_tags %}
+
+{% block title %}{% trans "Недвижимость на Пхукете" %} - Undersun Estate{% endblock %}
+
+{% block content %}
+<!-- Compact Header Banner -->
+<section class="bg-white border-b border-gray-200 pt-20 lg:pt-28">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-2xl lg:text-3xl font-bold text-primary mb-2">
+                    {% if deal_type == 'sale' %}
+                        {% trans "Недвижимость на продажу" %}
+                    {% elif deal_type == 'rent' %}
+                        {% trans "Недвижимость в аренду" %}
+                    {% elif property_type %}
+                        {{ property_type.name_display }}
+                    {% else %}
+                        {% trans "Каталог недвижимости" %}
+                    {% endif %}
+                </h1>
+                <div class="flex items-center text-tertiary">
+                    <i class="fas fa-map-marker-alt mr-2 text-accent"></i>
+                    <span class="text-sm">{% trans "Пхукет, Таиланд" %}</span>
+                </div>
+            </div>
+            
+            <div class="mt-4 md:mt-0 flex items-center space-x-6 text-sm text-tertiary">
+                <div class="flex items-center">
+                    <span class="font-semibold text-primary">500+</span>
+                    <span class="ml-1">{% trans "объектов" %}</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="font-semibold text-primary">15+</span>
+                    <span class="ml-1">{% trans "районов" %}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-8 bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Mobile Filters Toggle -->
+        <div class="lg:hidden mb-6">
+            <button id="mobile-filters-toggle" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-filter text-primary mr-3"></i>
+                    <span class="font-medium text-gray-900">{% trans "Фильтры" %}</span>
+                </div>
+                <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200" id="mobile-filters-arrow"></i>
+            </button>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Filters Sidebar -->
+            <div class="lg:col-span-1">
+                <div id="filters-sidebar" class="bg-white rounded-lg shadow-md border border-gray-200 hidden lg:block">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            {% trans "Фильтры" %}
+                        </h3>
+                    </div>
+                    
+                    <form method="get" action="" id="filter-form" class="p-6">
+                        <!-- Hidden sort field -->
+                        <input type="hidden" name="sort" value="{{ request.GET.sort|default:'-created_at' }}">
+                        
+                        <!-- Deal Type -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {% trans "Тип сделки" %}
+                            </h4>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="deal_type" value="" {% if not request.GET.deal_type %}checked{% endif %} class="w-4 h-4 text-accent border-gray-300 focus:ring-accent">
+                                    <span class="ml-3 text-sm text-gray-700">{% trans "Все объекты" %}</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="deal_type" value="sale" {% if request.GET.deal_type == 'sale' %}checked{% endif %} class="w-4 h-4 text-accent border-gray-300 focus:ring-accent">
+                                    <span class="ml-3 text-sm text-gray-700">{% trans "Продажа" %}</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="deal_type" value="rent" {% if request.GET.deal_type == 'rent' %}checked{% endif %} class="w-4 h-4 text-accent border-gray-300 focus:ring-accent">
+                                    <span class="ml-3 text-sm text-gray-700">{% trans "Аренда" %}</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Property Type -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {% trans "Тип недвижимости" %}
+                            </h4>
+                            <div class="space-y-2">
+                                {% for property_type in property_types %}
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="property_type" value="{{ property_type.name }}" 
+                                           {% if property_type.name in request.GET.property_type %}checked{% endif %} 
+                                           class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
+                                    <span class="ml-3 text-sm text-gray-700">{{ property_type.name_display }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Price Range -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {% trans "Бюджет" %}, {{ selected_currency.code|default:'USD' }}
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" name="min_price" value="{{ request.GET.min_price }}" 
+                                           placeholder="От" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                                    <input type="number" name="max_price" value="{{ request.GET.max_price }}" 
+                                           placeholder="До" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    {% trans "Укажите бюджет в" %} {{ selected_currency.code|default:'USD' }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Districts -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {% trans "Район" %}
+                            </h4>
+                            <select name="district" id="district-select" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="">{% trans "Все районы" %}</option>
+                                {% for district in districts %}
+                                <option value="{{ district.slug }}" {% if request.GET.district == district.slug %}selected{% endif %}>
+                                    {{ district.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Locations -->
+                        <div class="mb-6" id="location-filter">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {% trans "Локация" %}
+                            </h4>
+                            <select name="location" id="location-select" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                                <option value="">{% trans "Все локации" %}</option>
+                                {% for location in locations %}
+                                <option value="{{ location.slug }}" {% if request.GET.location == location.slug %}selected{% endif %}>
+                                    {{ location.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Bedrooms -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {% trans "Количество спален" %}
+                            </h4>
+                            <div class="space-y-2">
+                                {% for i in "1234" %}
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="bedrooms" value="{{ i }}" 
+                                           {% if i in request.GET.bedrooms %}checked{% endif %} 
+                                           class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
+                                    <span class="ml-3 text-sm text-gray-700">{{ i }}{% if i == "4" %}+{% endif %} {% trans "спальня" %}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Amenities -->
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {% trans "Удобства" %}
+                            </h4>
+                            <div class="space-y-2">
+                                {% for amenity in amenities %}
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="amenities" value="{{ amenity.id }}" 
+                                           {% if amenity.id|stringformat:"s" in current_filters.amenities %}checked{% endif %} 
+                                           class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
+                                    <span class="ml-3 text-sm text-gray-700 flex items-center">
+                                        {% if amenity.icon %}
+                                            <i class="{{ amenity.icon }} mr-2 text-accent"></i>
+                                        {% endif %}
+                                        {{ amenity.name }}
+                                    </span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Filter Actions -->
+                        <div class="border-t border-gray-200 pt-4 mt-4">
+                            <div class="space-y-2">
+                                <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                                    {% trans "Применить" %}
+                                </button>
+                                <a href="{% url 'property_list' %}" class="w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors block">
+                                    {% trans "Очистить" %}
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Properties Grid -->
+            <div class="lg:col-span-3 properties-container">
+                <!-- Sort & Results Count -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <div class="mb-4 sm:mb-0">
+                        <h2 class="text-xl font-semibold text-gray-900 results-count">
+                            {% if properties %}
+                                {% if is_paginated %}
+                                    {% blocktrans count counter=paginator.count %}
+                                        Найден {{ counter }} объект
+                                    {% plural %}
+                                        Найдено {{ counter }} объектов
+                                    {% endblocktrans %}
+                                {% else %}
+                                    {% blocktrans count counter=properties|length %}
+                                        Найден {{ counter }} объект
+                                    {% plural %}
+                                        Найдено {{ counter }} объектов
+                                    {% endblocktrans %}
+                                {% endif %}
+                            {% else %}
+                                {% trans "Объекты не найдены" %}
+                            {% endif %}
+                        </h2>
+                    </div>
+                    
+                    {% if properties %}
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600">{% trans "Сортировка:" %}</span>
+                        <select onchange="updateSort(this.value)" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-accent focus:border-accent">
+                            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>{% trans "По дате" %}</option>
+                            <option value="price_sale_usd" {% if request.GET.sort == 'price_sale_usd' %}selected{% endif %}>{% trans "Цена ↑" %}</option>
+                            <option value="-price_sale_usd" {% if request.GET.sort == '-price_sale_usd' %}selected{% endif %}>{% trans "Цена ↓" %}</option>
+                            <option value="-area_total" {% if request.GET.sort == '-area_total' %}selected{% endif %}>{% trans "Площадь ↓" %}</option>
+                        </select>
+                        
+                        <div class="flex border border-gray-300 rounded-md">
+                            <button onclick="setView('grid')" id="grid-view" class="p-2 text-gray-600 hover:text-primary border-r border-gray-300">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button onclick="setView('list')" id="list-view" class="p-2 text-gray-600 hover:text-primary">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if properties %}
+                    <!-- Properties Grid -->
+                    <div id="properties-grid" class="properties-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {% for property in properties %}
+                            {% include 'properties/card.html' %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                        <div class="pagination-container flex justify-center mt-12">
+                            <nav class="flex items-center space-x-2">
+                                {% if page_obj.has_previous %}
+                                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                                        {% trans "Первая" %}
+                                    </a>
+                                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                                        {% trans "‹ Пред" %}
+                                    </a>
+                                {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <span class="px-3 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-md">
+                                            {{ num }}
+                                        </span>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                                            {{ num }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                                        {% trans "След ›" %}
+                                    </a>
+                                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                                        {% trans "Последняя" %}
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    {% endif %}
+                    
+                {% else %}
+                    <!-- No Results -->
+                    <div class="no-results text-center py-12">
+                        <div class="text-gray-400 text-6xl mb-4">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Объекты не найдены" %}</h3>
+                        <p class="text-gray-600 mb-6">{% trans "Попробуйте изменить параметры поиска или сбросить фильтры" %}</p>
+                        <a href="{% url 'property_list' %}" class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-colors">
+                            {% trans "Сбросить фильтры" %}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Loading Animation */
+.properties-container.loading {
+    @apply relative;
+}
+
+.loading-overlay {
+    @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg;
+}
+
+.spinner {
+    @apply w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin;
+}
+
+/* Mobile Filters */
+#filters-sidebar.mobile-open {
+    @apply block;
+}
+
+/* Smooth Transitions */
+.properties-grid .property-card {
+    @apply transition-all duration-300 hover:transform hover:scale-105;
+}
+
+/* View Toggle */
+.view-toggle button.active {
+    @apply bg-primary text-white;
+}
+
+/* Custom Checkbox and Radio Styles */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    @apply bg-primary border-primary;
+}
+
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+    @apply ring-2 ring-primary ring-opacity-50;
+}
+
+/* Responsive Filters */
+@media (max-width: 1024px) {
+    #filters-sidebar {
+        @apply max-h-96 overflow-y-auto;
+    }
+}
+
+/* Pagination Styles */
+.pagination-container {
+    @apply flex justify-center mt-12;
+}
+
+.pagination-container nav {
+    @apply flex items-center space-x-2;
+}
+
+.pagination-container a {
+    @apply px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors cursor-pointer;
+}
+
+.pagination-container a:hover {
+    @apply bg-primary/10;
+}
+
+.pagination-container span {
+    @apply px-3 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-md;
+}
+
+/* Ensure pagination is visible */
+.pagination-container .disabled {
+    @apply text-gray-400 cursor-not-allowed;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Price presets function
+function setPriceRange(min, max) {
+    const minInput = document.querySelector('input[name="min_price"]');
+    const maxInput = document.querySelector('input[name="max_price"]');
+    
+    if (minInput) minInput.value = min || '';
+    if (maxInput) maxInput.value = max || '';
+    
+    // Trigger filter update
+    if (typeof updatePropertyFilters === 'function') {
+        updatePropertyFilters();
+    }
+}
+
+function updateSort(value) {
+    // Update sort field in form
+    const form = document.getElementById('filter-form');
+    const sortInput = form.querySelector('input[name="sort"]');
+    
+    if (sortInput) {
+        sortInput.value = value;
+    }
+    
+    // Submit the form directly
+    form.submit();
+}
+
+function setView(viewType) {
+    // Update button states
+    document.querySelectorAll('#grid-view, #list-view').forEach(btn => {
+        btn.classList.remove('text-primary', 'bg-primary/10');
+        btn.classList.add('text-gray-600');
+    });
+    
+    const activeBtn = document.getElementById(viewType + '-view');
+    activeBtn.classList.add('text-primary', 'bg-primary/10');
+    activeBtn.classList.remove('text-gray-600');
+    
+    // Update grid classes
+    const grid = document.getElementById('properties-grid');
+    if (viewType === 'list') {
+        grid.className = 'grid grid-cols-1 gap-4';
+        // Add list-specific styling to cards if needed
+    } else {
+        grid.className = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6';
+    }
+    
+    // Save preference
+    localStorage.setItem('propertyViewType', viewType);
+}
+
+// Load saved view preference
+document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem('propertyViewType') || 'grid';
+    setView(savedView);
+});
+
+// Mobile filters toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileFiltersToggle = document.getElementById('mobile-filters-toggle');
+    const mobileFiltersArrow = document.getElementById('mobile-filters-arrow');
+    const filtersSidebar = document.getElementById('filters-sidebar');
+    
+    if (mobileFiltersToggle) {
+        mobileFiltersToggle.addEventListener('click', function() {
+            const isHidden = filtersSidebar.classList.contains('hidden');
+            
+            if (isHidden) {
+                filtersSidebar.classList.remove('hidden');
+                filtersSidebar.classList.add('mobile-open');
+                mobileFiltersArrow.style.transform = 'rotate(180deg)';
+            } else {
+                filtersSidebar.classList.add('hidden');
+                filtersSidebar.classList.remove('mobile-open');
+                mobileFiltersArrow.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
+    
+    // Dynamic location updates based on district selection
+    const districtSelect = document.getElementById('district-select');
+    const locationSelect = document.getElementById('location-select');
+    
+    if (districtSelect && locationSelect) {
+        districtSelect.addEventListener('change', function() {
+            const districtSlug = this.value;
+            
+            // Clear current location selection
+            locationSelect.innerHTML = '<option value="">{% trans "Все локации" %}</option>';
+            
+            if (districtSlug) {
+                // Fetch locations for the selected district
+                fetch(`{% url 'get_locations_for_district' %}?district=${districtSlug}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            data.locations.forEach(location => {
+                                const option = document.createElement('option');
+                                option.value = location.slug;
+                                option.textContent = location.name;
+                                locationSelect.appendChild(option);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching locations:', error);
+                    });
+            }
+            
+            // Auto-submit form after updating locations
+            setTimeout(() => {
+                document.getElementById('filter-form').submit();
+            }, 100);
+        });
+    }
+    
+    // Auto-submit form when any filter changes
+    const form = document.getElementById('filter-form');
+    if (form) {
+        // Get all form inputs
+        const inputs = form.querySelectorAll('input, select');
+        
+        inputs.forEach(input => {
+            if (input.name === 'sort') return; // Skip sort field
+            
+            const eventType = input.type === 'checkbox' || input.type === 'radio' ? 'change' : 
+                            input.tagName === 'SELECT' ? 'change' : 'input';
+            
+            input.addEventListener(eventType, function() {
+                // Add a small delay to allow multiple quick changes
+                clearTimeout(window.filterTimeout);
+                window.filterTimeout = setTimeout(() => {
+                    form.submit();
+                }, 300);
+            });
+        });
+    }
+    
+    // Fix pagination to work with filters using event delegation  
+    document.addEventListener('click', function(e) {
+        // Check if clicked element is a pagination link
+        if (e.target.closest('.pagination-container a')) {
+            e.preventDefault();
+            
+            const link = e.target.closest('.pagination-container a');
+            
+            // Check if this is an AJAX-generated pagination link (has data-page)
+            if (link.hasAttribute('data-page')) {
+                // Let AJAX handler from main.js handle this
+                return;
+            }
+            
+            // Handle Django-generated pagination links
+            const url = new URL(link.href);
+            const page = url.searchParams.get('page');
+            
+            // Get current form data
+            const form = document.getElementById('filter-form');
+            const formData = new FormData(form);
+            
+            // Convert FormData to URLSearchParams
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (typeof value === 'string') {
+                    params.append(key, value);
+                }
+            }
+            
+            // Add/update page parameter
+            params.set('page', page);
+            
+            // Navigate to new URL with all parameters
+            window.location.href = '?' + params.toString();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% load i18n %}
+
+<div class="relative group text-left">
+    <div>
+        <button type="button" 
+                class="text-primary hover:text-accent transition-colors flex items-center font-medium" 
+                id="currency-menu-button" 
+                aria-expanded="true" 
+                aria-haspopup="true">
+            {% if selected_currency %}
+                {{ selected_currency.symbol }} {{ selected_currency.code }}
+            {% else %}
+                $ USD
+            {% endif %}
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300" 
+         role="menu" 
+         aria-orientation="vertical" 
+         aria-labelledby="currency-menu-button" 
+         tabindex="-1" 
+         id="currency-menu">
+        <div class="py-1" role="none">
+            {% for currency in available_currencies %}
+                <button type="button" 
+                        class="currency-option flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left {% if selected_currency.code == currency.code %}bg-gray-100 font-semibold{% endif %}" 
+                        role="menuitem" 
+                        data-currency="{{ currency.code }}"
+                        data-symbol="{{ currency.symbol }}">
+                    <span class="font-mono mr-3">{{ currency.symbol }}</span>
+                    <div>
+                        <div class="font-medium">{{ currency.code }}</div>
+                        <div class="text-xs text-gray-500">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% if LANGUAGE_CODE == 'ru' and currency.name_ru %}
+                                {{ currency.name_ru }}
+                            {% elif LANGUAGE_CODE == 'th' and currency.name_th %}
+                                {{ currency.name_th }}
+                            {% else %}
+                                {{ currency.name_en|default:currency.name }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const options = document.querySelectorAll('.currency-option');
+
+    // Обработка выбора валюты
+    options.forEach(option => {
+        option.addEventListener('click', function() {
+            const currency = this.dataset.currency;
+            const symbol = this.dataset.symbol;
+            
+            // Отправляем запрос на смену валюты
+            const formData = new FormData();
+            formData.append('currency', currency);
+            formData.append('next', window.location.href);
+            
+            fetch('/currency/change/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the currency display in header
+                    const currencyButton = document.getElementById('currency-menu-button');
+                    if (currencyButton) {
+                        currencyButton.innerHTML = `${symbol} ${currency}<svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    }
+                    
+                    // Update Featured Properties prices if function exists (only on home page)
+                    if (typeof updateAllPricesToHeaderCurrency === 'function') {
+                        updateAllPricesToHeaderCurrency();
+                        // Trigger custom event for other components that might need to update
+                        window.dispatchEvent(new CustomEvent('currencyChanged', {
+                            detail: { currency: currency, symbol: symbol }
+                        }));
+                    } else {
+                        // On other pages (like property details), reload to update prices
+                        // This ensures all template tags get updated with new currency
+                        window.location.reload();
+                    }
+                } else {
+                    console.error('Error changing currency:', data.error);
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Если AJAX не работает, перезагружаем страницу
+                window.location.reload();
+            });
+        });
+    });
+});
+</script>

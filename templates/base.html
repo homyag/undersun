@@ -1,0 +1,705 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title }}{% endblock %}</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block description %}{{ page_description }}{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}{{ page_keywords }}{% endblock %}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}{{ page_title }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ page_description }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'images/og-image.jpg' %}{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:locale" content="{% if LANGUAGE_CODE == 'ru' %}ru_RU{% elif LANGUAGE_CODE == 'en' %}en_US{% elif LANGUAGE_CODE == 'th' %}th_TH{% endif %}">
+    {% if LANGUAGE_CODE == 'ru' %}
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:locale:alternate" content="th_TH">
+    {% elif LANGUAGE_CODE == 'en' %}
+    <meta property="og:locale:alternate" content="ru_RU">
+    <meta property="og:locale:alternate" content="th_TH">
+    {% elif LANGUAGE_CODE == 'th' %}
+    <meta property="og:locale:alternate" content="ru_RU">
+    <meta property="og:locale:alternate" content="en_US">
+    {% endif %}
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    <!-- Hreflang Tags -->
+    {% load i18n %}
+    {% get_current_language as current_lang %}
+    {% with base_url=request.build_absolute_uri|slice:':-4' current_path=request.get_full_path|slice:'3:' %}
+        <link rel="alternate" hreflang="ru" href="{{ base_url }}/ru{{ current_path }}">
+        <link rel="alternate" hreflang="en" href="{{ base_url }}/en{{ current_path }}">
+        <link rel="alternate" hreflang="th" href="{{ base_url }}/th{{ current_path }}">
+        <link rel="alternate" hreflang="x-default" href="{{ base_url }}/en{{ current_path }}">
+    {% endwith %}
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#474B57',
+                        'secondary': '#f8f9fa',
+                        'accent': '#F1B400',
+                        'tertiary': '#616677',
+                    },
+                    fontFamily: {
+                        'sans': ['Gilroy', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                        'gilroy': ['Gilroy', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    <!-- Responsive Navigation CSS -->
+    <style>
+        @media (min-width: 768px) and (max-width: 860px) {
+            /* Уменьшаем размер шрифта навигации для экранов 768px-860px */
+            .nav-menu-item {
+                font-size: 0.875rem !important; /* text-sm */
+            }
+            
+            /* Уменьшаем отступы между пунктами меню */
+            .nav-menu-container {
+                gap: 0.5rem !important; /* space-x-2 */
+            }
+            
+            /* Уменьшаем размер шрифта для селектора языка и валюты */
+            .nav-controls {
+                font-size: 0.875rem !important;
+            }
+        }
+        
+        /* Property Tabs Styles */
+        .property-tab {
+            color: #6b7280;
+            background-color: transparent;
+        }
+        
+        .property-tab:hover {
+            color: #374151;
+            background-color: #f3f4f6;
+        }
+        
+        .property-tab.active {
+            color: #1f2937;
+            background-color: #F1B400;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    {% block extra_css %}
+
+    {% endblock %}
+    <!-- CSRF Token for AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <!-- Structured Data -->
+    {% block structured_data %}{% endblock %}
+
+    <!-- Extra Meta Tags -->
+    {% block extra_meta %}
+
+    {% endblock %}
+</head>
+<body>
+    <!-- Top Contact Bar -->
+    <div id="contact-bar" class="bg-primary text-white py-2 hidden md:block fixed top-0 w-full z-50 transition-transform duration-300">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center text-sm">
+                <div class="flex items-center space-x-6">
+                    <a href="https://wa.me/66633033133" class="flex items-center hover:text-accent transition-colors" target="_blank">
+                        <i class="fab fa-whatsapp mr-2"></i>
+                        +66 63 303 3133
+                    </a>
+                    <a href="mailto:info@undersunestate.com" class="flex items-center hover:text-accent transition-colors">
+                        <i class="fas fa-envelope mr-2"></i>
+                        info@undersunestate.com
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Search Form in contact bar -->
+                    <form class="flex" method="get" action="{% url 'core:search' %}">
+                        <input type="search" name="q" placeholder="{% trans 'Поиск...' %}" class="px-3 py-1.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors w-40">
+                        <button type="submit" class="px-2 py-1.5 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
+                            <i class="fas fa-search text-xs"></i>
+                        </button>
+                    </form>
+                    <div class="flex items-center space-x-3">
+                        <a href="https://facebook.com/undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://instagram.com/undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://youtube.com/@undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a href="https://t.me/undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="https://linkedin.com/company/undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="main-nav" class="bg-white text-gray-900 fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 md:top-10 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16 md:h-20">
+                <!-- Logo -->
+                <div class="flex items-center flex-shrink-0">
+                    <a href="{% url 'core:home' %}" class="flex items-center">
+                        <!-- Desktop Logo -->
+                        <img src="{% static 'images/logo_fullscreen.svg' %}" alt="Undersun Estate" class="h-6 hidden sm:block">
+                        <!-- Mobile Logo -->
+                        <img src="{% static 'images/logo_mobile.svg' %}" alt="Undersun Estate" class="h-6 sm:hidden">
+                    </a>
+                </div>
+
+                <!-- Desktop Menu - Centered -->
+                <div class="hidden md:flex items-center justify-center flex-1">
+                    <div class="flex space-x-3 xl:space-x-6 nav-menu-container">
+                        <!-- Property Dropdown -->
+                        <div class="relative group">
+                            <button class="{% if request.resolver_match.url_name in 'property_sale,property_rent,property_list,property_detail' or 'property' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
+                                {% trans "Недвижимость" %}
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                                <div class="py-1">
+                                    <a href="{% url 'property_sale' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Продажа" %}</a>
+                                    <a href="{% url 'property_rent' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Аренда" %}</a>
+                                    <div class="border-t border-gray-200"></div>
+                                    <a href="{% url 'location_list' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Районы" %}</a>
+                                    <div class="border-t border-gray-200"></div>
+                                    {% for type in property_types %}
+                                        <a href="{% url 'property_by_type' type.name %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{{ type.name_display }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'core:map' %}" class="{% if request.resolver_match.url_name == 'core:map' or 'map' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">{% trans "Карта" %}</a>
+                        
+                        <!-- Services Dropdown -->
+                        <div class="relative group">
+                            <button class="{% if 'services' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
+                                {% trans "Услуги" %}
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-56 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                <div class="py-1">
+                                    {% for service in menu_services %}
+                                        <a href="{{ service.get_absolute_url }}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200">
+                                            {{ service.title }}
+                                        </a>
+                                    {% endfor %}
+                                    {% if not menu_services %}
+                                        <div class="px-4 py-2 text-gray-500">{% trans "Услуги скоро появятся" %}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- About Dropdown -->
+                        <div class="relative group">
+                            <button class="{% if request.resolver_match.url_name in 'core:about,core:contact' or 'about' in request.path or 'contact' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
+                                {% trans "О нас" %}
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                                <div class="py-1">
+                                    <a href="{% url 'core:about' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "О компании" %}</a>
+                                    <a href="{% url 'core:contact' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Контакты" %}</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'blog:list' %}" class="{% if request.resolver_match.url_name in 'blog:list,blog:detail' or 'blog' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">
+                            {% trans "Блог" %}
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right side controls -->
+                <div class="hidden md:flex items-center space-x-2 xl:space-x-4 nav-controls">
+                    <!-- Favorites Menu -->
+                    <a href="{% url 'property_favorites' %}" class="relative" title="{% trans 'Избранное' %}">
+                        <div class="bg-white w-10 h-10 rounded-full transition-all duration-200 group shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center border border-gray-200 hover:border-red-200">
+                            <i id="nav-favorites-heart" class="far fa-heart text-gray-600 transition-all duration-200"></i>
+                        </div>
+                        <span id="nav-favorites-count" class="favorites-count absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold hidden min-w-[20px] text-center">0</span>
+                    </a>
+
+                    <!-- Language Switcher -->
+                    <div class="relative group">
+                        <button class="text-primary hover:text-accent transition-colors flex items-center font-medium text-lg nav-menu-item">
+                            {% if LANGUAGE_CODE == 'ru' %}
+                                <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 mr-1 object-cover">
+                                RU
+                            {% elif LANGUAGE_CODE == 'en' %}
+                                <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 mr-1 object-cover">
+                                EN
+                            {% elif LANGUAGE_CODE == 'th' %}
+                                <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 mr-1 object-cover">
+                                TH
+                            {% endif %}
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                            <div class="py-1">
+                                <a href="/ru{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
+                                    <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 mr-2 object-cover">
+                                    Русский
+                                </a>
+                                <a href="/en{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
+                                    <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 mr-2 object-cover">
+                                    English
+                                </a>
+                                <a href="/th{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
+                                    <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 mr-2 object-cover">
+                                    ไทย
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Currency Switcher -->
+                    {% load currency_tags %}
+                    {% currency_selector %}
+                </div>
+
+                <!-- Mobile menu button and search -->
+                <div class="md:hidden flex items-center space-x-3 flex-shrink-0">
+                    <!-- Mobile Search Button -->
+                    <button onclick="toggleMobileSearch()" class="text-primary hover:text-accent transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Menu Button -->
+                    <button id="mobile-menu-button" class="text-primary hover:text-accent transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+                </div>
+                
+                <!-- Mobile Search Form -->
+                <div id="mobile-search" class="md:hidden hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-200 p-4 z-40">
+                    <form class="flex" method="get" action="{% url 'core:search' %}">
+                        <input type="search" name="q" placeholder="{% trans 'Поиск...' %}" class="flex-1 px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors">
+                        <button type="submit" class="px-4 py-2 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200 max-h-screen overflow-y-auto">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <!-- Property dropdown -->
+                    <div>
+                        <button onclick="toggleMobileSubmenu('property-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <span>{% trans "Недвижимость" %}</span>
+                            <svg class="w-4 h-4 transform transition-transform" id="property-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="property-submenu" class="hidden ml-4 mt-1 space-y-1">
+                            <a href="{% url 'property_sale' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Продажа" %}</a>
+                            <a href="{% url 'property_rent' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Аренда" %}</a>
+                            <div class="border-t border-gray-200 my-1"></div>
+                            <a href="{% url 'location_list' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Районы" %}</a>
+                            <div class="border-t border-gray-200 my-1"></div>
+                            {% for type in property_types %}
+                                <a href="{% url 'property_by_type' type.name %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{{ type.name_display }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'core:map' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">{% trans "Карта" %}</a>
+                    
+                    <!-- Services dropdown -->
+                    <div>
+                        <button onclick="toggleMobileSubmenu('services-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <span>{% trans "Услуги" %}</span>
+                            <svg class="w-4 h-4 transform transition-transform" id="services-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="services-submenu" class="hidden ml-4 mt-1 space-y-1">
+                            {% for service in menu_services %}
+                                <a href="{{ service.get_absolute_url }}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                                    {{ service.title }}
+                                </a>
+                            {% endfor %}
+                            {% if not menu_services %}
+                                <div class="px-3 py-1 text-gray-500">{% trans "Услуги скоро появятся" %}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- About dropdown -->
+                    <div>
+                        <button onclick="toggleMobileSubmenu('about-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <span>{% trans "О нас" %}</span>
+                            <svg class="w-4 h-4 transform transition-transform" id="about-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="about-submenu" class="hidden ml-4 mt-1 space-y-1">
+                            <a href="{% url 'core:about' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "О компании" %}</a>
+                            <a href="{% url 'core:contact' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Контакты" %}</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Blog Link -->
+                    <a href="{% url 'blog:list' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                        {% trans "Блог" %}
+                    </a>
+                    
+                    <!-- Mobile Contact Info -->
+                    <div class="border-t border-gray-200 pt-2 mt-2">
+                        <div class="px-3 py-2 space-y-2">
+                            <a href="https://wa.me/66633033133" class="flex items-center text-primary hover:text-accent transition-colors" target="_blank">
+                                <i class="fab fa-whatsapp mr-3 text-green-500"></i>
+                                <span class="text-sm">+66 63 303 3133</span>
+                            </a>
+                            <a href="mailto:info@undersunestate.com" class="flex items-center text-primary hover:text-accent transition-colors">
+                                <i class="fas fa-envelope mr-3"></i>
+                                <span class="text-sm">info@undersunestate.com</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Favorites Menu -->
+                    <div class="border-t border-gray-200 pt-2 mt-2">
+                        <a href="{% url 'property_favorites' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <i id="mobile-nav-favorites-heart" class="far fa-heart mr-2 text-gray-600"></i>{% trans "Избранное" %} 
+                            <span id="mobile-nav-favorites-count" class="favorites-count ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold hidden">0</span>
+                        </a>
+                    </div>
+                    
+
+                    <!-- Mobile Language Switcher -->
+                    <div class="border-t border-gray-200 pt-2 mt-2">
+                        <button onclick="toggleMobileSubmenu('language-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <span><i class="fas fa-globe mr-2"></i>{% trans "Язык" %}</span>
+                            <svg class="w-4 h-4 transform transition-transform" id="language-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="language-submenu" class="hidden ml-6 mt-1 space-y-1">
+                            <a href="/ru{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                                <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 mr-2 object-cover">
+                                Русский
+                            </a>
+                            <a href="/en{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                                <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 mr-2 object-cover">
+                                English
+                            </a>
+                            <a href="/th{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                                <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 mr-2 object-cover">
+                                ไทย
+                            </a>
+                        </div>
+
+                        <!-- Mobile Currency Switcher -->
+                        <button onclick="toggleMobileSubmenu('currency-submenu')" class="w-full flex justify-between items-center px-3 py-2 mt-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                            <span><i class="fas fa-dollar-sign mr-2"></i>{% trans "Валюта" %} ({{ selected_currency.symbol }}{{ selected_currency.code }})</span>
+                            <svg class="w-4 h-4 transform transition-transform" id="currency-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="currency-submenu" class="hidden ml-6 mt-1 space-y-1">
+                            {% for currency in available_currencies %}
+                                <button type="button" 
+                                        class="mobile-currency-option block w-full text-left px-3 py-1 text-tertiary hover:text-accent transition-colors {% if selected_currency.code == currency.code %}font-semibold text-accent{% endif %}" 
+                                        data-currency="{{ currency.code }}"
+                                        data-symbol="{{ currency.symbol }}">
+                                    {{ currency.symbol }} {{ currency.code }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CSRF Token for AJAX -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+    <!-- Main Content -->
+    <main class="pt-16 md:pt-30">
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4">
+                {% for message in messages %}
+                    <div class="mt-4 p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 border border-green-400 text-green-700{% elif message.tags == 'error' %}bg-red-100 border border-red-400 text-red-700{% elif message.tags == 'warning' %}bg-yellow-100 border border-yellow-400 text-yellow-700{% else %}bg-blue-100 border border-blue-400 text-blue-700{% endif %}">
+                        <div class="flex justify-between items-center">
+                            <span>{{ message }}</span>
+                            <button type="button" class="ml-4 text-gray-500 hover:text-gray-700" onclick="this.parentElement.parentElement.remove()">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-12">
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="lg:col-span-1">
+                    <h5 class="text-xl font-bold mb-4">Undersun Estate</h5>
+                    <p class="text-gray-300 mb-4">{% trans "Профессиональное агентство недвижимости на Пхукете. Помогаем найти дом мечты в Таиланде." %}</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-telegram"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h6 class="text-lg font-semibold mb-4">{% trans "Недвижимость" %}</h6>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'property_by_type' 'villa' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Виллы" %}</a></li>
+                        <li><a href="{% url 'property_by_type' 'apartment' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Апартаменты" %}</a></li>
+                        <li><a href="{% url 'property_by_type' 'townhouse' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Таунхаус" %}</a></li>
+                        <li><a href="{% url 'property_by_type' 'land' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Земельный участок" %}</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h6 class="text-lg font-semibold mb-4">{% trans "Услуги" %}</h6>
+                    <ul class="space-y-2">
+                        {% for service in menu_services %}
+                            <li><a href="{{ service.get_absolute_url }}" class="text-gray-300 hover:text-white transition-colors">{{ service.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div>
+                    <h6 class="text-lg font-semibold mb-4">{% trans "Контакты" %}</h6>
+                    <div class="space-y-2 text-gray-300">
+                        <p><i class="fas fa-map-marker-alt mr-2"></i> 221/7 Koktanod Rd, Karon, Phuket 83100</p>
+                        <p><i class="fas fa-phone mr-2"></i> +66 63 303 3133</p>
+                        <p><i class="fas fa-envelope mr-2"></i> info@undersunestate.com</p>
+                        <p><i class="fas fa-clock mr-2"></i> {% trans "Пн-Вс: 9:00 - 21:00" %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-gray-700 my-8">
+
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-300 mb-4 md:mb-0">&copy; 2024 Undersun Estate. {% trans "Все права защищены." %}</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors">{% trans "Политика конфиденциальности" %}</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors">{% trans "Условия использования" %}</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/66633033133" class="whatsapp-btn" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Mobile Menu Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            } else {
+                console.error('Mobile menu elements not found:', { button: !!mobileMenuButton, menu: !!mobileMenu });
+            }
+
+            // Mobile submenu toggle function
+            window.toggleMobileSubmenu = function(submenuId) {
+                const submenu = document.getElementById(submenuId);
+                const arrow = document.getElementById(submenuId.replace('-submenu', '-arrow'));
+                
+                if (submenu) {
+                    submenu.classList.toggle('hidden');
+                }
+                
+                if (arrow) {
+                    arrow.classList.toggle('rotate-180');
+                }
+            }
+
+            // Mobile search toggle function
+            window.toggleMobileSearch = function() {
+                const mobileSearch = document.getElementById('mobile-search');
+                if (mobileSearch) {
+                    mobileSearch.classList.toggle('hidden');
+                }
+            }
+        });
+
+        // Scroll behavior for contact bar and navigation
+        let lastScrollTop = 0;
+        const contactBar = document.getElementById('contact-bar');
+        const mainNav = document.getElementById('main-nav');
+        
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Only apply scroll behavior on medium screens and up where contact bar is visible
+            if (window.innerWidth >= 768) {
+                if (scrollTop > 50) {
+                    // Hide contact bar and move nav to top
+                    if (contactBar) {
+                        contactBar.style.transform = 'translateY(-100%)';
+                    }
+                    if (mainNav) {
+                        mainNav.style.top = '0';
+                    }
+                } else {
+                    // Show contact bar and move nav back down
+                    if (contactBar) {
+                        contactBar.style.transform = 'translateY(0)';
+                    }
+                    if (mainNav) {
+                        mainNav.style.top = '2.5rem'; // 10px in rem
+                    }
+                }
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth < 1024) {
+                // Reset styles for mobile
+                if (contactBar) {
+                    contactBar.style.transform = '';
+                }
+                if (mainNav) {
+                    mainNav.style.top = '';
+                }
+            }
+        });
+    
+        // Обработчик для мобильного селектора валют
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileCurrencyOptions = document.querySelectorAll('.mobile-currency-option');
+            
+            mobileCurrencyOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const currency = this.dataset.currency;
+                    const symbol = this.dataset.symbol;
+                    
+                    // Отправляем запрос на смену валюты
+                    const formData = new FormData();
+                    formData.append('currency', currency);
+                    formData.append('next', window.location.href);
+                    
+                    fetch('/currency/change/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update mobile currency button text
+                            const mobileButton = document.querySelector('[onclick="toggleMobileSubmenu(\'currency-submenu\')"] span');
+                            if (mobileButton) {
+                                mobileButton.innerHTML = `<i class="fas fa-dollar-sign mr-2"></i>{% trans "Валюта" %} (${symbol}${currency})`;
+                            }
+                            
+                            // Close mobile menu
+                            document.getElementById('currency-submenu').classList.add('hidden');
+                            
+                            // Update Featured Properties prices if function exists (only on home page)
+                            if (typeof updateAllPricesToHeaderCurrency === 'function') {
+                                updateAllPricesToHeaderCurrency();
+                                // Trigger custom event for other components that might need to update
+                                window.dispatchEvent(new CustomEvent('currencyChanged', {
+                                    detail: { currency: currency, symbol: symbol }
+                                }));
+                            } else {
+                                // On other pages (like property details), reload to update prices
+                                window.location.reload();
+                            }
+                        } else {
+                            console.error('Error changing currency:', data.error);
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        window.location.reload();
+                    });
+                });
+            });
+        });
+    </script>
+
+    <!-- Custom JS - Main Script -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Extra JS Block for page-specific scripts -->
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

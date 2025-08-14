@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+
+{% block title %}{% trans "Карта недвижимости" %} - Undersun Estate{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+<style>
+    .leaflet-container {
+        height: calc(100vh - 120px);
+        width: 100%;
+    }
+    .property-popup {
+        font-size: 14px;
+        min-width: 250px;
+    }
+    .property-popup img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 6px;
+        margin-bottom: 8px;
+    }
+    .popup-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #1f2937;
+    }
+    .popup-price {
+        color: #F1B400;
+        font-weight: 700;
+        font-size: 16px;
+        margin: 4px 0;
+    }
+    .popup-details {
+        font-size: 12px;
+        color: #616677;
+        margin: 4px 0;
+    }
+    .popup-button {
+        background: #474B57;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 8px;
+        transition: all 0.3s ease;
+    }
+    .popup-button:hover {
+        background: #616677;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Map Header -->
+<section class="bg-primary text-white py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">{% trans "Карта недвижимости Пхукета" %}</h1>
+                <p class="text-blue-100">{% trans "Найдите идеальное расположение для вашей недвижимости" %}</p>
+            </div>
+            
+            <!-- Map Filters -->
+            <div class="mt-4 md:mt-0">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="filterProperties('all')" class="filter-btn active bg-white text-primary px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="all">
+                        {% trans "Все" %}
+                    </button>
+                    <button onclick="filterProperties('sale')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="sale">
+                        {% trans "Продажа" %}
+                    </button>
+                    <button onclick="filterProperties('rent')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="rent">
+                        {% trans "Аренда" %}
+                    </button>
+                    <button onclick="filterProperties('villa')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="villa">
+                        {% trans "Виллы" %}
+                    </button>
+                    <button onclick="filterProperties('apartment')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="apartment">
+                        {% trans "Апартаменты" %}
+                    </button>
+                    <button onclick="filterProperties('investment')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="investment">
+                        {% trans "Инвестиции" %}
+                    </button>
+                    <button onclick="filterProperties('townhouse')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="townhouse">
+                        {% trans "Таунхаусы" %}
+                    </button>
+                    <button onclick="filterProperties('land')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="land">
+                        {% trans "Земля" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="relative">
+    <div id="property-map" class="w-full"></div>
+    
+    <!-- Map Legend -->
+    <div class="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg z-1000">
+        <h3 class="font-semibold text-gray-900 mb-3">{% trans "Легенда" %}</h3>
+        <div class="space-y-2 text-sm">
+            <div class="flex items-center">
+                <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                <span>{% trans "Продажа" %}</span>
+            </div>
+            <div class="flex items-center">
+                <div class="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
+                <span>{% trans "Аренда" %}</span>
+            </div>
+            <div class="flex items-center">
+                <div class="w-4 h-4 bg-purple-500 rounded-full mr-2"></div>
+                <span>{% trans "Продажа/Аренда" %}</span>
+            </div>
+        </div>
+        
+        <div class="mt-4 pt-3 border-t border-gray-200">
+            <div class="text-xs text-gray-600">
+                <div>{% trans "Всего объектов" %}: <span id="total-count">{{ properties.count }}</span></div>
+                <div>{% trans "Показано" %}: <span id="visible-count">{{ properties.count }}</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="map-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-1000">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p class="text-gray-600">{% trans "Загружаем карту..." %}</p>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats -->
+<section class="bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-primary mb-1">{{ total_properties }}</div>
+                <div class="text-gray-600 text-sm">{% trans "Всего объектов" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600 mb-1">{{ sale_properties }}</div>
+                <div class="text-gray-600 text-sm">{% trans "На продажу" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600 mb-1">{{ rent_properties }}</div>
+                <div class="text-gray-600 text-sm">{% trans "В аренду" %}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600 mb-1">{{ districts_count }}</div>
+                <div class="text-gray-600 text-sm">{% trans "Районов" %}</div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script>
+// Initialize the map
+var map = L.map('property-map').setView([7.8804, 98.3923], 11);
+
+// Add tile layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+// Properties data
+var properties = [
+    // This will be populated from Django context
+    {% for property in properties %}
+    {
+        id: {{ property.id }},
+        title: "{{ property.title|escapejs }}",
+        lat: {{ property.latitude|default:"0"|unlocalize }},
+        lng: {{ property.longitude|default:"0"|unlocalize }},
+        price: "{{ property.price_display|escapejs }}",
+        deal_type: "{{ property.deal_type|escapejs }}",
+        property_type: "{{ property.property_type.name|escapejs }}",
+        district: "{{ property.district.name|escapejs }}",
+        bedrooms: {{ property.bedrooms|default:"0" }},
+        bathrooms: {{ property.bathrooms|default:"0" }},
+        area: {{ property.area_total|default:"0"|unlocalize }},
+        image: "{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}",
+        url: "{{ property.get_absolute_url }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+// Create marker cluster group
+var markers = L.markerClusterGroup();
+var allMarkers = [];
+
+// Function to get marker color based on deal type
+function getMarkerColor(dealType) {
+    switch(dealType) {
+        case 'sale': return '#10b981'; // green
+        case 'rent': return '#3b82f6'; // blue
+        case 'both': return '#8b5cf6'; // purple
+        default: return '#6b7280'; // gray
+    }
+}
+
+// Function to create custom marker
+function createMarker(property) {
+    var marker = L.circleMarker([property.lat, property.lng], {
+        color: '#ffffff',
+        fillColor: getMarkerColor(property.deal_type),
+        fillOpacity: 0.8,
+        radius: 8,
+        weight: 2
+    });
+    
+    // Create popup content
+    var popupContent = `
+        <div class="property-popup">
+            <img src="${property.image}" alt="${property.title}" />
+            <div class="popup-title">${property.title}</div>
+            <div class="popup-price">${property.price}</div>
+            <div class="popup-details">
+                <i class="fas fa-map-marker-alt"></i> ${property.district}
+            </div>
+            ${property.bedrooms > 0 ? `<div class="popup-details"><i class="fas fa-bed"></i> ${property.bedrooms} {% trans "спален" %}</div>` : ''}
+            ${property.bathrooms > 0 ? `<div class="popup-details"><i class="fas fa-bath"></i> ${property.bathrooms} {% trans "ванных" %}</div>` : ''}
+            ${property.area > 0 ? `<div class="popup-details"><i class="fas fa-ruler-combined"></i> ${property.area} м²</div>` : ''}
+            <a href="${property.url}" class="popup-button">{% trans "Подробнее" %}</a>
+        </div>
+    `;
+    
+    marker.bindPopup(popupContent);
+    marker.propertyData = property;
+    
+    return marker;
+}
+
+// Add all properties to map
+properties.forEach(function(property) {
+    if (property.lat && property.lng && property.lat !== 0 && property.lng !== 0) {
+        var marker = createMarker(property);
+        allMarkers.push(marker);
+        markers.addLayer(marker);
+    }
+});
+
+// Add markers to map
+map.addLayer(markers);
+
+// Filter functions
+function filterProperties(type) {
+    // Update button states
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-white', 'text-primary');
+        btn.classList.add('bg-primary', 'hover:bg-tertiary', 'text-white');
+    });
+    
+    var activeBtn = document.querySelector(`[data-type="${type}"]`);
+    activeBtn.classList.add('active', 'bg-white', 'text-primary');
+    activeBtn.classList.remove('bg-primary', 'hover:bg-tertiary', 'text-white');
+    
+    // Clear existing markers
+    markers.clearLayers();
+    
+    // Filter and add markers
+    var visibleCount = 0;
+    allMarkers.forEach(function(marker) {
+        var property = marker.propertyData;
+        var show = false;
+        
+        if (type === 'all') {
+            show = true;
+        } else if (type === 'sale' || type === 'rent') {
+            show = property.deal_type === type || property.deal_type === 'both';
+        } else {
+            show = property.property_type === type;
+        }
+        
+        if (show) {
+            markers.addLayer(marker);
+            visibleCount++;
+        }
+    });
+    
+    // Update counter
+    document.getElementById('visible-count').textContent = visibleCount;
+}
+
+// Hide loading indicator when map is ready
+map.whenReady(function() {
+    document.getElementById('map-loading').style.display = 'none';
+});
+
+// Handle map resize
+window.addEventListener('resize', function() {
+    map.invalidateSize();
+});
+</script>
+{% endblock %}

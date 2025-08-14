@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Избранное" %} - Undersun Estate{% endblock %}
+
+{% block content %}
+
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-primary mb-4">
+                <i class="fas fa-heart text-accent mr-3"></i>
+                {% trans "Избранные объекты" %}
+            </h1>
+            <p class="text-xl text-tertiary max-w-3xl mx-auto">
+                {% trans "Здесь собраны все объекты недвижимости, которые вы добавили в избранное" %}
+            </p>
+        </div>
+
+        <!-- Favorites Counter -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-list-ul text-accent text-2xl mr-3"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-primary">{% trans "Количество избранных объектов" %}</h3>
+                        <p class="text-tertiary">{% trans "Обновляется автоматически" %}</p>
+                    </div>
+                </div>
+                <div class="bg-accent text-gray-900 rounded-full px-4 py-2 font-bold text-xl">
+                    <span id="total-favorites-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favorites Grid -->
+        <div id="favorites-container">
+            <!-- Будет заполнено JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-favorites" class="text-center py-16 hidden">
+            <div class="bg-gray-50 rounded-lg p-12">
+                <i class="fas fa-heart-broken text-gray-400 text-6xl mb-6"></i>
+                <h3 class="text-2xl font-semibold text-gray-600 mb-4">
+                    {% trans "Пока нет избранных объектов" %}
+                </h3>
+                <p class="text-gray-500 mb-8 max-w-md mx-auto">
+                    {% trans "Добавляйте понравившиеся объекты в избранное, нажимая на иконку сердца" %}
+                </p>
+                <a href="{% url 'property_sale' %}" class="inline-flex items-center bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-6 rounded-lg transition-colors">
+                    <i class="fas fa-search mr-2"></i>
+                    {% trans "Посмотреть объекты" %}
+                </a>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-8 text-center">
+            <button id="clear-favorites" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mr-4 hidden">
+                <i class="fas fa-trash mr-2"></i>
+                {% trans "Очистить избранное" %}
+            </button>
+            <a href="{% url 'property_sale' %}" class="bg-primary hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                {% trans "Продолжить просмотр" %}
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    loadFavoritesPage();
+    
+    // Обработчик очистки избранного
+    $('#clear-favorites').on('click', function() {
+        if (confirm('{% trans "Вы уверены, что хотите удалить все избранные объекты?" %}')) {
+            clearAllFavorites();
+        }
+    });
+    
+    // Обработчик удаления отдельных объектов
+    $(document).on('click', '.remove-favorite', function() {
+        const propertyId = $(this).data('property-id');
+        toggleFavorite(propertyId);
+        loadFavoritesPage(); // Перезагружаем страницу
+    });
+});
+
+function loadFavoritesPage() {
+    const favorites = getFavorites();
+    const container = $('#favorites-container');
+    const emptyState = $('#empty-favorites');
+    const clearButton = $('#clear-favorites');
+    const totalCount = $('#total-favorites-count');
+    
+    totalCount.text(favorites.length);
+    
+    if (favorites.length === 0) {
+        container.hide();
+        emptyState.show();
+        clearButton.hide();
+        return;
+    }
+    
+    container.show();
+    emptyState.hide();
+    clearButton.show();
+    
+    // Загружаем данные об объектах
+    loadFavoriteProperties(favorites);
+}
+
+function loadFavoriteProperties(favoriteIds) {
+    if (favoriteIds.length === 0) return;
+    
+    // Показываем загрузку
+    $('#favorites-container').html(`
+        <div class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+            <p class="mt-2 text-gray-600">{% trans "Загрузка избранных объектов..." %}</p>
+        </div>
+    `);
+    
+    // AJAX запрос для получения данных объектов
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    
+    $.ajax({
+        url: '{% url "get_favorite_properties" %}',
+        type: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        data: {
+            'property_ids[]': favoriteIds
+        },
+        success: function(response) {
+            if (response.success) {
+                displayFavoriteProperties(response.properties);
+            } else {
+                showError();
+            }
+        },
+        error: function(xhr, status, error) {
+            showError();
+        }
+    });
+}
+
+function displayFavoriteProperties(properties) {
+    const container = $('#favorites-container');
+    
+    if (properties.length === 0) {
+        container.html('<div class="text-center py-8"><p class="text-gray-600">{% trans "Избранные объекты не найдены" %}</p></div>');
+        return;
+    }
+    
+    let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">';
+    
+    properties.forEach(property => {
+        html += `
+            <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+                <div class="relative">
+                    <img src="${property.main_image_url || '/static/images/no-image.jpg'}" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" 
+                         alt="${property.title}" loading="lazy">
+                    
+                    <!-- Remove Button -->
+                    <button class="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-all duration-200 remove-favorite shadow-lg"
+                            data-property-id="${property.id}" title="{% trans 'Удалить из избранного' %}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    
+                    <!-- Deal Type Badge -->
+                    <div class="absolute top-3 left-3">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${property.deal_type === 'sale' ? 'bg-accent text-gray-900' : 'bg-primary text-white'} shadow-sm">
+                            ${property.deal_type === 'sale' ? '{% trans "Продажа" %}' : '{% trans "Аренда" %}'}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <h3 class="font-bold text-lg text-primary mb-3 leading-tight">
+                        <a href="/property/${property.slug}/" class="hover:text-accent transition-colors">
+                            ${property.title.length > 50 ? property.title.substring(0, 50) + '...' : property.title}
+                        </a>
+                    </h3>
+                    
+                    <div class="text-tertiary mb-4 flex items-center font-medium">
+                        <i class="fas fa-map-marker-alt mr-2 text-accent"></i>
+                        ${property.district_name}
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-2xl font-bold text-accent">
+                            ${property.price_display}
+                        </div>
+                        <div>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary text-white">
+                                ${property.property_type_name}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <a href="/property/${property.slug}/" class="block w-full text-center bg-accent hover:bg-yellow-500 text-gray-900 py-3 px-6 rounded-lg transition-colors font-bold shadow-md hover:shadow-lg">
+                        {% trans "Подробнее" %}
+                    </a>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.html(html);
+}
+
+function showError() {
+    $('#favorites-container').html(`
+        <div class="text-center py-8">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <p class="text-gray-600">{% trans "Ошибка при загрузке избранных объектов" %}</p>
+        </div>
+    `);
+}
+
+function clearAllFavorites() {
+    localStorage.removeItem('favorites');
+    updateFavoritesCounter();
+    loadFavoritesPage();
+    showNotification('{% trans "Избранное очищено" %}', 'favorite-removed');
+}
+</script>
+{% endblock %}
