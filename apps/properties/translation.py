@@ -3,7 +3,7 @@ from .models import Property, PropertyType, Developer, PropertyFeature
 
 @register(Property)
 class PropertyTranslationOptions(TranslationOptions):
-    fields = ('title', 'description', 'short_description', 'address')
+    fields = ('title', 'description', 'short_description', 'address', 'special_offer')
 
 @register(PropertyType)
 class PropertyTypeTranslationOptions(TranslationOptions):
