@@ -28,6 +28,7 @@ db.sqlite3-journal
 
 # Environment
 .env
+.env.save
 .env.local
 .env.dev
 .env.prod
