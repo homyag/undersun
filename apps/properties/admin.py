@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-# from modeltranslation.admin import TranslationAdmin  # Временно отключено
+# from modeltranslation.admin import TranslationAdmin
 from .models import (
     Property, PropertyImage, PropertyType, Developer,
     PropertyFeature, PropertyFeatureRelation
@@ -23,7 +23,7 @@ class PropertyFeatureInline(admin.TabularInline):
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
     list_display = ('legacy_id', 'title', 'property_type', 'district', 'deal_type', 'status', 
-                   'price_sale_usd', 'is_active', 'is_featured', 'views_count', 'created_at')
+                   'price_sale_usd', 'special_offer', 'is_active', 'is_featured', 'views_count', 'created_at')
     list_filter = ('is_active', 'property_type', 'district', 'deal_type', 'status', 'is_featured', 'furnished')
     search_fields = ('legacy_id', 'title', 'description', 'address')
     prepopulated_fields = {'slug': ('title',)}
@@ -126,7 +126,11 @@ class PropertyAdmin(admin.ModelAdmin):
             'fields': ('title', 'slug', 'property_type', 'deal_type', 'status', 'is_featured', 'is_active')
         }),
         ('Описание', {
-            'fields': ('description', 'short_description')
+            'fields': ('description', 'short_description', 'special_offer')
+        }),
+        ('Переводы специального предложения', {
+            'fields': ('special_offer_en', 'special_offer_th'),
+            'classes': ('collapse',),
         }),
         ('Локация', {
             'fields': ('location', 'address', 'latitude', 'longitude')

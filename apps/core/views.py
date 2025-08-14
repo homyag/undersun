@@ -52,6 +52,8 @@ def serialize_properties_for_js(properties):
             'price_per_sqm_thb': prop.get_formatted_price_per_sqm('THB', prop.deal_type),
             'price_per_sqm_usd': prop.get_formatted_price_per_sqm('USD', prop.deal_type), 
             'price_per_sqm_rub': prop.get_formatted_price_per_sqm('RUB', prop.deal_type),
+            # Специальное предложение
+            'special_offer': prop.special_offer or '',
         })
     return json.dumps(result)
 
