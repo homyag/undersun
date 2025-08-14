@@ -1146,10 +1146,8 @@ document.head.appendChild(style);
 
 // Featured Properties Carousel
 (function() {
-    console.log('Featured Properties script loaded!'); // Test if script loads
     
     function initFeaturedProperties() {
-        console.log('Featured Properties Carousel: DOM Content Loaded');
         
         let currentPropertyType = 'villa';
         
@@ -1160,11 +1158,9 @@ document.head.appendChild(style);
             townhouse: {{ featured_properties_townhouse|safe }}
         };
         
-        console.log('Featured Properties loaded:', featuredProperties);
         
         // Switch property type
         window.switchPropertyType = function(type) {
-            console.log('switchPropertyType called with:', type);
             currentPropertyType = type;
             
             // Update tab buttons
@@ -1192,9 +1188,7 @@ document.head.appendChild(style);
         
         // Render properties with consultation forms
         function renderProperties(properties) {
-            console.log('renderProperties called with:', properties);
             const container = document.getElementById('properties-carousel');
-            console.log('Container found:', container);
             
             if (!container) {
                 console.error('properties-carousel container not found!');
@@ -1223,7 +1217,6 @@ document.head.appendChild(style);
                 html += `<div class="carousel-item flex-shrink-0" style="width: 100%; max-width: 350px; height: 450px; min-width: 280px;">${item}</div>`;
             });
             
-            console.log('Generated HTML for', allItems.length, 'items');
             container.innerHTML = html;
             
             // Start from the middle set to allow backward scrolling
@@ -1236,17 +1229,25 @@ document.head.appendChild(style);
             // Update all prices to current header currency
             updateAllPricesToHeaderCurrency();
             
-            // Reinitialize property cards
-            console.log('Checking for initPropertyCards function');
+            // Reinitialize property cards  
             if (typeof window.initPropertyCards === 'function') {
-                console.log('Calling initPropertyCards');
                 window.initPropertyCards();
             } else if (typeof initPropertyCards === 'function') {
-                console.log('Calling global initPropertyCards');
                 initPropertyCards();
             } else {
-                console.log('initPropertyCards function not found, skipping');
             }
+            
+            // Force update price per sqm after everything else
+            setTimeout(() => {
+                const headerCurrency = getHeaderCurrency();
+                const currentData = featuredProperties[currentPropertyType] || [];
+                
+                currentData.forEach(property => {
+                    if (property.area > 0 && property.deal_type === 'sale') {
+                        updatePricePerSqmFromData(property, headerCurrency.code);
+                    }
+                });
+            }, 500);
         }
         
         // Update carousel position
@@ -1442,6 +1443,9 @@ document.head.appendChild(style);
             
             if (!propertyData) return;
             
+            // Get price per sqm element
+            const pricePerSqmElement = document.querySelector(`.card-price-per-sqm-${propertyId}`);
+            
             let basePrice = 0;
             let fromCurrency = 'THB';
             
@@ -1472,6 +1476,9 @@ document.head.appendChild(style);
             
             if (!basePrice) {
                 priceElement.innerHTML = 'Цена по запросу';
+                if (pricePerSqmElement) {
+                    pricePerSqmElement.innerHTML = '';
+                }
                 return;
             }
             
@@ -1480,6 +1487,9 @@ document.head.appendChild(style);
                     `${symbol}${formatPrice(basePrice)}/мес` : 
                     `${symbol}${formatPrice(basePrice)}`;
                 priceElement.innerHTML = displayPrice;
+                
+                // Update price per sqm for sale properties
+                updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
                 return;
             }
             
@@ -1493,6 +1503,9 @@ document.head.appendChild(style);
                     `${symbol}${formatPrice(convertedPrice)}/мес` : 
                     `${symbol}${formatPrice(convertedPrice)}`;
                 priceElement.innerHTML = displayPrice;
+                
+                // Update price per sqm for sale properties
+                updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
             } else {
                 // Fetch exchange rates from server
                 fetch('/currency/rates/')
@@ -1507,12 +1520,18 @@ document.head.appendChild(style);
                                 `${symbol}${formatPrice(convertedPrice)}/мес` : 
                                 `${symbol}${formatPrice(convertedPrice)}`;
                             priceElement.innerHTML = displayPrice;
+                            
+                            // Update price per sqm for sale properties
+                            updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
                         } else {
                             // Fallback to original price
                             const displayPrice = dealType === 'rent' ? 
                                 `${symbol}${formatPrice(basePrice)}/мес` : 
                                 `${symbol}${formatPrice(basePrice)}`;
                             priceElement.innerHTML = displayPrice;
+                            
+                            // Update price per sqm for sale properties
+                            updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
                         }
                     })
                     .catch(error => {
@@ -1522,8 +1541,49 @@ document.head.appendChild(style);
                             `${symbol}${formatPrice(basePrice)}/мес` : 
                             `${symbol}${formatPrice(basePrice)}`;
                         priceElement.innerHTML = displayPrice;
+                        
+                        // Update price per sqm for sale properties
+                        updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
                     });
             }
+        }
+        
+        // Update price per square meter using pre-calculated data from model
+        function updatePricePerSqmFromData(propertyData, currency, pricePerSqmElement) {
+            if (!propertyData.area || propertyData.area <= 0 || propertyData.deal_type !== 'sale') {
+                return;
+            }
+            
+            // Find ALL elements for this property (since carousel has multiple copies)
+            const allPricePerSqmElements = document.querySelectorAll(`.card-price-per-sqm-${propertyData.id}`);
+            
+            // Use pre-calculated price from model based on currency
+            let pricePerSqm = '';
+            if (currency === 'RUB' && propertyData.price_per_sqm_rub) {
+                pricePerSqm = propertyData.price_per_sqm_rub;
+            } else if (currency === 'THB' && propertyData.price_per_sqm_thb) {
+                pricePerSqm = propertyData.price_per_sqm_thb;
+            } else if (currency === 'USD' && propertyData.price_per_sqm_usd) {
+                pricePerSqm = propertyData.price_per_sqm_usd;
+            }
+            
+            if (pricePerSqm) {
+                // Update ALL copies of the element
+                allPricePerSqmElements.forEach((element) => {
+                    element.innerHTML = pricePerSqm;
+                });
+            }
+        }
+        
+        // Update price per square meter (legacy function)
+        function updatePricePerSqm(propertyData, price, symbol, pricePerSqmElement) {
+            if (!pricePerSqmElement || !propertyData.area || propertyData.area <= 0 || propertyData.deal_type !== 'sale') {
+                return;
+            }
+            
+            const pricePerSqm = price / propertyData.area;
+            const formattedPrice = `${symbol}${formatPrice(pricePerSqm)}/м²`;
+            pricePerSqmElement.innerHTML = formattedPrice;
         }
         
         // Format price helper
@@ -1623,7 +1683,6 @@ document.head.appendChild(style);
                     isFav = isFavorite(property.id);
                 }
             } catch (e) {
-                console.log('isFavorite function not available yet');
             }
             
             const heartClass = isFav ? 'fas text-red-500' : 'far text-gray-600';
@@ -1653,15 +1712,15 @@ document.head.appendChild(style);
                     
                     <div class="p-4 flex flex-col justify-between flex-1">
                         <div>
-                            <h3 class="text-base font-bold text-gray-900 mb-2 leading-tight line-clamp-2" style="min-height: 2.5rem;">
+                            <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight line-clamp-2">
                                 <a href="${property.url}" class="hover:text-primary transition-colors">
-                                    ${property.title.length > 40 ? property.title.substring(0, 40) + '...' : property.title}
+                                    ${property.title.length > 60 ? property.title.substring(0, 60) + '...' : property.title}
                                 </a>
                             </h3>
                             
                             <div class="flex items-center text-gray-600 mb-3">
-                                <i class="fas fa-map-marker-alt mr-1 text-primary text-xs"></i>
-                                <span class="text-xs">${property.district_name || 'Пхукет'}</span>
+                                <i class="fas fa-map-marker-alt mr-2 text-primary text-sm"></i>
+                                <span class="text-sm font-medium">${property.district_name || 'Пхукет'}${property.location_name ? ', ' + property.location_name : ''}</span>
                             </div>
                             
                             <!-- Property Details -->
@@ -1669,39 +1728,39 @@ document.head.appendChild(style);
                                 <div class="flex items-center space-x-3">
                                     ${property.bedrooms > 0 ? `
                                         <div class="flex items-center text-gray-600">
-                                            <i class="fas fa-bed mr-1 text-primary text-xs"></i>
-                                            <span class="text-xs font-medium">${property.bedrooms}</span>
+                                            <i class="fas fa-bed mr-1 text-primary text-sm"></i>
+                                            <span class="text-sm font-medium">${property.bedrooms}</span>
                                         </div>
                                     ` : ''}
                                     ${property.bathrooms > 0 ? `
                                         <div class="flex items-center text-gray-600">
-                                            <i class="fas fa-bath mr-1 text-primary text-xs"></i>
-                                            <span class="text-xs font-medium">${property.bathrooms}</span>
+                                            <i class="fas fa-bath mr-1 text-primary text-sm"></i>
+                                            <span class="text-sm font-medium">${property.bathrooms}</span>
                                         </div>
                                     ` : ''}
                                     ${property.area > 0 ? `
                                         <div class="flex items-center text-gray-600">
-                                            <i class="fas fa-ruler-combined mr-1 text-primary text-xs"></i>
-                                            <span class="text-xs font-medium">${property.area} м²</span>
+                                            <i class="fas fa-ruler-combined mr-1 text-primary text-sm"></i>
+                                            <span class="text-sm font-medium">${property.area} м²</span>
                                         </div>
                                     ` : ''}
                                 </div>
                             </div>
                             
                             <!-- Price Section -->
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <div class="text-center">
-                                    <span class="text-lg font-bold text-primary card-price-${property.id}" data-property-id="${property.id}" data-deal-type="${property.deal_type}">
+                                    <span class="text-2xl font-bold text-primary card-price-${property.id}" data-property-id="${property.id}" data-deal-type="${property.deal_type}">
                                         ${priceDisplay}
                                     </span>
                                 </div>
-                                
-                                <!-- Property Type Badge -->
-                                <div class="text-center">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
-                                        ${property.property_type_name || 'Недвижимость'}
-                                    </span>
-                                </div>
+                                ${property.area > 0 && property.deal_type === 'sale' ? `
+                                    <div class="text-center mt-2">
+                                        <div class="text-base text-gray-600 font-medium card-price-per-sqm-${property.id}">
+                                            ${property.price_per_sqm_thb || property.price_per_sqm_rub || property.price_per_sqm_usd || ''}
+                                        </div>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                         
@@ -1714,8 +1773,6 @@ document.head.appendChild(style);
         }
         
         // Initialize with villa properties  
-        console.log('Featured Properties Data:', featuredProperties);
-        console.log('Initializing with villa properties:', featuredProperties.villa);
         renderProperties(featuredProperties.villa || []);
         
         // Handle window resize for mobile adaptation
