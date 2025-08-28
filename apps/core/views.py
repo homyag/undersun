@@ -104,6 +104,12 @@ class HomeView(TemplateView):
         
         # Типы недвижимости для поиска
         context['property_types'] = PropertyType.objects.all()
+        
+        # Новые поступления (до 4 объектов)
+        context['recent_properties'] = Property.objects.filter(
+            is_active=True,
+            status='available'
+        ).select_related('district', 'location', 'property_type').prefetch_related('images').order_by('-created_at')[:4]
 
         return context
 

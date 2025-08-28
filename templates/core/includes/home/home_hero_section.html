@@ -1,0 +1,98 @@
+{% load static %}
+{% load i18n %}
+<section class="hero-section relative flex items-center overflow-hidden">
+    <!-- Background Slideshow -->
+    <div class="absolute inset-0">
+        <div id="hero-slide-1" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-100" style="background-image: url('{% static 'images/home_page/hero_section_1.webp' %}');"></div>
+        <div id="hero-slide-2" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-0" style="background-image: url('{% static 'images/home_page/hero_section_2.webp' %}');"></div>
+        <div id="hero-slide-3" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-0" style="background-image: url('{% static 'images/home_page/hero_section_3.webp' %}');"></div>
+    </div>
+    <!-- Brand-consistent overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/60 via-primary/50 to-tertiary/60"></div>
+    <div class="absolute inset-0 bg-black/20"></div>
+    <!-- Dark gradient at bottom -->
+    <div class="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+    <div class="relative z-10 w-full hero-content">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="space-y-4 lg:space-y-6">
+                <!-- Заголовок -->
+                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white font-extrabold leading-tight">
+                    <span class="block">{% trans "Весь рынок недвижимости" %}</span>
+                    <span class="block text-accent">{% trans "Пхукета в одном месте" %}</span>
+                </h1>
+
+                <!-- Описание - скрыто на мобильных -->
+                <p class="hidden sm:block text-base md:text-base lg:text-lg text-white font-bold max-w-4xl mx-auto">
+                    {% trans "Undersun Estate — ваш ориентир на рынке недвижимости Пхукета. Мы знаем весь рынок и подберём только те варианты, которые соответствуют вашим целям и ожиданиям. Без фейков, без давления." %}
+                </p>
+
+                <!-- Catalog Button -->
+                <div class="py-1">
+                    <a href="{% url 'property_list' %}" class="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-accent hover:bg-yellow-500 text-gray-900 font-bold text-sm sm:text-base lg:text-lg rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        {% trans "Смотреть все объекты" %}
+                    </a>
+                </div>
+
+                <!-- Поисковая форма -->
+                <div class="hero-search bg-white/95 backdrop-blur-md rounded-lg p-2 sm:p-4 lg:p-6 shadow-2xl border border-white/20 w-full max-w-none lg:max-w-6xl mx-auto">
+                        <form method="get" action="{% url 'core:search' %}" class="grid grid-cols-1 md:grid-cols-5 gap-2 sm:gap-4">
+                            <div class="md:col-span-1">
+                                <label class="block text-xs lg:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">{% trans "Тип" %}</label>
+                                <select name="type" class="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md border border-gray-200 text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent bg-white shadow-sm transition-all hover:border-gray-300 h-8 sm:h-10 text-xs sm:text-sm">
+                                    <option value="">{% trans "Все типы" %}</option>
+                                    {% for type in property_types %}
+                                        <option value="{{ type.name }}">{{ type.name_display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs lg:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">{% trans "Район" %}</label>
+                                <select name="district" class="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md border border-gray-200 text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent bg-white shadow-sm transition-all hover:border-gray-300 h-8 sm:h-10 text-xs sm:text-sm">
+                                    <option value="">{% trans "Все районы" %}</option>
+                                    {% for district in districts %}
+                                        <option value="{{ district.slug }}">{{ district.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs lg:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">{% trans "Мин. цена" %}</label>
+                                <input type="number" name="min_price" class="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md border border-gray-200 text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent bg-white shadow-sm transition-all hover:border-gray-300 h-8 sm:h-10 text-xs sm:text-sm" placeholder="{{ selected_currency.code|default:'USD' }}">
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-xs lg:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">{% trans "Макс. цена" %}</label>
+                                <input type="number" name="max_price" class="w-full px-2 py-1.5 sm:px-3 sm:py-2 rounded-md border border-gray-200 text-gray-900 focus:ring-2 focus:ring-accent focus:border-accent bg-white shadow-sm transition-all hover:border-gray-300 h-8 sm:h-10 text-xs sm:text-sm" placeholder="{{ selected_currency.code|default:'USD' }}">
+                            </div>
+                            <div class="md:col-span-1 flex flex-col justify-end">
+                                <button type="submit" class="w-full bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-1.5 px-3 sm:py-2 sm:px-4 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center h-8 sm:h-10 text-xs sm:text-sm">
+                                    <i class="fas fa-search mr-2"></i>{% trans "Поиск" %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                <!-- Sales Points -->
+                <div class="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-4 lg:gap-6 text-white text-center">
+                    <div>
+                        <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">5 лет</div>
+                        <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">опыта в недвижимости Пхукета</div>
+                    </div>
+                    <div>
+                        <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">600+</div>
+                        <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">актуальных объектов</div>
+                    </div>
+                    <div>
+                        <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">0%</div>
+                        <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">рассрочка от застройщиков</div>
+                    </div>
+                </div>
+
+                <!-- Подробные описания - только на планшетах и десктопах -->
+                <div class="hidden md:grid md:grid-cols-3 gap-4 lg:gap-6 text-white text-center text-xs lg:text-sm font-normal" style="margin-top: 6px;">
+                    <div>Понимаем рынок и видим возможности, которые другие пропускают.</div>
+                    <div>От бюджетных студий до элитных вилл.</div>
+                    <div>Покупка без переплат с гибкими условиями платежа.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

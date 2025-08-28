@@ -1,0 +1,185 @@
+{% load static %}
+{% load i18n %}
+<section class="py-16 bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
+    <!-- Background decorative elements -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-10 left-10 w-20 h-20 bg-accent/10 rounded-full blur-xl"></div>
+        <div class="absolute top-32 right-20 w-32 h-32 bg-primary/10 rounded-full blur-xl"></div>
+        <div class="absolute bottom-20 left-1/4 w-24 h-24 bg-purple-200/30 rounded-full blur-xl"></div>
+        <div class="absolute bottom-10 right-10 w-28 h-28 bg-blue-200/30 rounded-full blur-xl"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 relative z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">{% trans "Этапы сделки по покупке недвижимости" %}</h2>
+            <p class="text-xl text-gray-600">{% trans "Нажмите на этап, чтобы узнать подробности" %}</p>
+        </div>
+
+        <!-- Interactive Process Steps -->
+        <div class="flex flex-wrap justify-center gap-6 mb-12 relative">
+            <!-- Step 1 -->
+            <button onclick="toggleStep(1)"
+                    class="process-step-cloud bg-gradient-to-r from-accent to-yellow-400 hover:from-yellow-400 hover:to-accent text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30"
+                    id="step-cloud-1">
+                <span class="text-sm">1.</span> {% trans "Выбор объекта" %}
+            </button>
+
+            <!-- Step 2 -->
+            <button onclick="toggleStep(2)"
+                    class="process-step-cloud bg-gradient-to-r from-primary to-tertiary hover:from-tertiary hover:to-primary text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30"
+                    id="step-cloud-2">
+                <span class="text-sm">2.</span> {% trans "Тур по объектам" %}
+            </button>
+
+            <!-- Step 3 -->
+            <button onclick="toggleStep(3)"
+                    class="process-step-cloud bg-gradient-to-r from-accent/80 to-accent hover:from-accent hover:to-accent/80 text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30"
+                    id="step-cloud-3">
+                <span class="text-sm">3.</span> {% trans "Переговоры" %}
+            </button>
+
+            <!-- Step 4 -->
+            <button onclick="toggleStep(4)"
+                    class="process-step-cloud bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90 text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30"
+                    id="step-cloud-4">
+                <span class="text-sm">4.</span> {% trans "Договор" %}
+            </button>
+
+            <!-- Step 5 -->
+            <button onclick="toggleStep(5)"
+                    class="process-step-cloud bg-gradient-to-r from-tertiary to-gray-600 hover:from-gray-600 hover:to-tertiary text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-tertiary/30"
+                    id="step-cloud-5">
+                <span class="text-sm">5.</span> {% trans "Оплата" %}
+            </button>
+
+            <!-- Step 6 -->
+            <button onclick="toggleStep(6)"
+                    class="process-step-cloud bg-gradient-to-r from-accent/70 to-yellow-500 hover:from-yellow-500 hover:to-accent/70 text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30"
+                    id="step-cloud-6">
+                <span class="text-sm">6.</span> {% trans "Приемка" %}
+            </button>
+
+            <!-- Step 7 -->
+            <button onclick="toggleStep(7)"
+                    class="process-step-cloud bg-gradient-to-r from-primary/80 to-tertiary/80 hover:from-tertiary/80 hover:to-primary/80 text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30"
+                    id="step-cloud-7">
+                <span class="text-sm">7.</span> {% trans "Регистрация" %}
+            </button>
+        </div>
+
+        <!-- Step Details Container -->
+        <div class="max-w-4xl mx-auto">
+            <!-- Step 1 Details -->
+            <div id="step-details-1"
+                 class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-accent to-yellow-400 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-search text-2xl text-gray-900"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Выбор объекта" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Подбираем несколько проектов, соответствующих вашим критериям. Собираем и предоставляем вам всю необходимую информацию по ним." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 Details -->
+            <div id="step-details-2"
+                 class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary to-tertiary rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-eye text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Тур по объектам" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Организуем и проводим для вас встречу с застройщиком / продавцом и показ выбранных объектов. Онлайн и оффлайн." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 Details -->
+            <div id="step-details-3"
+                 class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-accent to-yellow-400 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-handshake text-2xl text-gray-900"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Переговоры с продавцом и бронирование объекта" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Согласовываем максимально выгодные для вас условия сделки с продавцом выбранного объекта. Далее составляется резервационное соглашение." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 Details -->
+            <div id="step-details-4"
+                 class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-file-contract text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Подготовка и заключение основного договора" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Представители продавца готовят основной договор. Наши юристы проверяют его и отправляют вам на согласование." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 Details -->
+            <div id="step-details-5"
+                 class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-tertiary to-gray-600 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-credit-card text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Оплата по договору" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Оплата производится согласно утвержденному в контракте графику из любой точки." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 Details -->
+            <div id="step-details-6"
+                 class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-accent/70 to-yellow-500 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-key text-2xl text-gray-900"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Приемка объекта" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "При заключении сделки со строящимися объектами, после окончания строительства застройщик присылает приглашение для приемки вашей собственности." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7 Details -->
+            <div id="step-details-7"
+                 class="step-details hidden bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-xl border border-white/20 mb-6">
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary/80 to-tertiary/80 rounded-lg flex items-center justify-center shadow-lg">
+                            <i class="fas fa-certificate text-2xl text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Регистрация прав собственности" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Оформляем все необходимые документы для регистрации прав собственности на приобретенную недвижимость." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

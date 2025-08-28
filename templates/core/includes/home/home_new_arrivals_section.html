@@ -1,0 +1,33 @@
+{% load static %}
+{% load i18n %}
+<section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Новые поступления" %}</h2>
+                <p class="text-xl text-gray-600">{% trans "Свежие предложения недвижимости" %}</p>
+            </div>
+
+            {% if recent_properties %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {% for property in recent_properties %}
+                        {% include 'properties/card.html' %}
+                    {% endfor %}
+                </div>
+
+                <div class="text-center mt-8">
+                    <a href="{% url 'property_list' %}?ordering=-created_at"
+                       class="bg-primary hover:bg-yellow-500 text-white font-bold py-3 px-8 rounded-md text-lg transition-colors">
+                        {% trans "Посмотреть все новинки" %}
+                    </a>
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <div class="text-gray-500 mb-4">
+                        <i class="fas fa-home text-4xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">{% trans "Новые объекты скоро появятся" %}</h3>
+                    <p class="text-gray-500">{% trans "Следите за обновлениями" %}</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>

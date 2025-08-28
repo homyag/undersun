@@ -1,0 +1,91 @@
+<style>
+    .hero-section {
+        height: 100vh !important;
+        padding-top: 64px !important;
+        box-sizing: border-box !important;
+    }
+
+    @media (max-width: 767px) {
+        .hero-section {
+            height: 100vh !important;
+            padding-top: 64px !important;
+        }
+
+        .hero-content {
+            height: calc(100vh - 64px) !important;
+            padding: 8px 0 !important;
+        }
+
+        .hero-content .space-y-4 > * + * {
+            margin-top: 12px !important;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .hero-section {
+            height: 100vh !important;
+            padding-top: 80px !important;
+        }
+    }
+
+    /* Компактная компоновка hero контента */
+    .hero-content {
+        height: calc(100vh - 64px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    @media (min-width: 1024px) {
+        .hero-content {
+            height: calc(100vh - 80px);
+        }
+    }
+
+    /* Special Offer Ribbon Styles */
+    .special-offer-ribbon {
+        position: absolute;
+        top: 16px;
+        left: 0;
+        z-index: 10;
+    }
+
+    .ribbon-content {
+        position: relative;
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 6px 16px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Left fold triangle - ровно по краю карточки */
+    .ribbon-content::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 0;
+        height: 0;
+        border-top: 20px solid transparent;
+        border-bottom: 20px solid transparent;
+        border-right: 8px solid #991b1b;
+        transform: translateX(-100%);
+    }
+
+    /* Bottom shadow fold */
+    .ribbon-content::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        bottom: 0;
+        width: calc(100% + 8px);
+        height: 4px;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
+        transform: translateY(100%);
+    }
+</style>

@@ -1,0 +1,215 @@
+{% load static %}
+{% load i18n %}
+<script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "RealEstateAgent",
+          "name": "Undersun Estate",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "alternateName": "Undersun Estate - Недвижимость на Пхукете",
+            "description": "Агентство недвижимости на Пхукете с 10-летним опытом. Продажа, покупка и аренда эксклюзивной недвижимости: виллы, апартаменты, земля, коммерческая недвижимость.",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "alternateName": "Undersun Estate - Real Estate in Phuket",
+            "description": "Real estate agency in Phuket with 10 years of experience. Sale, purchase and rental of exclusive real estate: villas, apartments, land, commercial real estate.",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "alternateName": "Undersun Estate - อสังหาริมทรัพย์ในภูเก็ต",
+            "description": "บริษัทนายหน้าอสังหาริมทรัพย์ในภูเก็ตที่มีประสบการณ์ 10 ปี ขาย ซื้อ และเช่าอสังหาริมทรัพย์เอ็กซ์คลูซีฟ: วิลลา คอนโด ที่ดิน อสังหาริมทรัพย์เชิงพาณิชย์",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}",
+  "logo": "{{ request.build_absolute_uri }}{% static 'images/logo.png' %}",
+  "image": "{{ request.build_absolute_uri }}{% static 'images/og-image.jpg' %}",
+  "telephone": "+66 63 303 3133",
+  "email": "info@undersunestate.com",
+  "address": {
+    "@type": "PostalAddress",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "streetAddress": "Пляж Камала",
+            "addressLocality": "Камала",
+            "addressRegion": "Пхукет",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "streetAddress": "Kamala Beach",
+            "addressLocality": "Kamala",
+            "addressRegion": "Phuket",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "streetAddress": "หาดกมลา",
+            "addressLocality": "กมลา",
+            "addressRegion": "ภูเก็ต",
+        {% endif %}
+        "addressCountry": "TH"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "7.9519",
+        "longitude": "98.3381"
+      },
+      "areaServed": {
+        "@type": "Place",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Пхукет, Таиланд"
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Phuket, Thailand"
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "ภูเก็ต ประเทศไทย"
+        {% endif %}
+        },
+        "serviceArea": {
+          "@type": "GeoCircle",
+          "geoMidpoint": {
+            "@type": "GeoCoordinates",
+            "latitude": "7.9519",
+            "longitude": "98.3381"
+          },
+          "geoRadius": "50000"
+        },
+        "makesOffer": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Покупка недвижимости",
+            "description": "Полное сопровождение сделки. Проведем экспертизу, индивидуально подберем объекты для вас, решим юридические вопросы."
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Real Estate Purchase",
+            "description": "Full transaction support. We will conduct expertise, individually select properties for you, solve legal issues."
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "การซื้ออสังหาริมทรัพย์",
+            "description": "การสนับสนุนการทำธุรกรรมอย่างครบถ้วน เราจะทำการตรวจสอบ เลือกสรรทรัพย์สินให้คุณเป็นรายบุคคล แก้ไขปัญหาทางกฎหมาย"
+        {% endif %}
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Продажа недвижимости",
+            "description": "Доверьте нам продажу вашей недвижимости. Найдем покупателя быстро и выгодно, избавив от лишних хлопот."
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Real Estate Sale",
+            "description": "Trust us to sell your real estate. We will find a buyer quickly and profitably, saving you from unnecessary hassle."
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "การขายอสังหาริมทรัพย์",
+            "description": "มอบหมายให้เราขายอสังหาริมทรัพย์ของคุณ เราจะหาผู้ซื้ออย่างรวดเร็วและคุ้มค่า ช่วยให้คุณไม่ต้องยุ่งยาก"
+        {% endif %}
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Аренда недвижимости",
+            "description": "Подберем жилье для средне- и долгосрочной аренды, чтобы ваше пребывание на Пхукете было максимально комфортным."
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Real Estate Rental",
+            "description": "We will select housing for medium- and long-term rental to make your stay in Phuket as comfortable as possible."
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "การเช่าอสังหาริมทรัพย์",
+            "description": "เราจะเลือกที่อยู่อาศัยสำหรับการเช่าระยะกลางและระยะยาว เพื่อให้การพำนักของคุณในภูเก็ตสะดวกสบายที่สุด"
+        {% endif %}
+        }
+      }
+    ],
+    "sameAs": [
+      "https://www.facebook.com/undersunestate",
+      "https://www.instagram.com/undersunestate",
+      "https://www.youtube.com/undersunestate",
+      "https://t.me/undersunestate",
+      "https://linkedin.com/company/undersunestate"
+    ],
+    "foundingDate": "2014",
+    "priceRange": "$$",
+    "openingHours": "Mo-Su 09:00-18:00",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Каталог недвижимости",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Real Estate Catalog",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "แคตตาล็อกอสังหาริมทรัพย์",
+        {% endif %}
+        "itemListElement": [
+          {
+            "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Апартаменты",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Apartments",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "อพาร์ทเมนท์",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'condo' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Виллы",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Villas",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "วิลลา",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'villa' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Земельные участки",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Land Plots",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "ที่ดิน",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'land' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Коммерческая недвижимость",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Commercial Real Estate",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "อสังหาริมทรัพย์เชิงพาณิชย์",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'business' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Таунхаус",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Townhouse",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "ทาวน์เฮาส์",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'townhouse' %}"
+      },
+      {
+        "@type": "OfferCatalog",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "name": "Инвестиции",
+        {% elif LANGUAGE_CODE == 'en' %}
+            "name": "Investment",
+        {% elif LANGUAGE_CODE == 'th' %}
+            "name": "การลงทุน",
+        {% endif %}
+        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'investment' %}"
+      }
+    ]
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+66 63 303 3133",
+    "contactType": "customer service",
+        {% if LANGUAGE_CODE == 'ru' %}
+            "availableLanguage": ["Russian", "English", "Thai"]
+        {% elif LANGUAGE_CODE == 'en' %}
+            "availableLanguage": ["English", "Russian", "Thai"]
+        {% elif LANGUAGE_CODE == 'th' %}
+            "availableLanguage": ["Thai", "English", "Russian"]
+        {% endif %}
+        }
+      }
+</script>
