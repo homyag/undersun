@@ -1,0 +1,30 @@
+{% load static %}
+{% load i18n %}
+<section class="py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Популярные районы" %}</h2>
+                <p class="text-xl text-gray-600">{% trans "Изучите лучшие локации Пхукета" %}</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for district in districts %}
+                    <div class="bg-white rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div class="p-6">
+                            <h5 class="text-xl font-semibold text-gray-900 mb-3">{{ district.name }}</h5>
+                            <p class="text-gray-600 mb-4">{{ district.description|truncatewords:15 }}</p>
+                            <div class="flex justify-between items-center">
+                            <span class="text-primary font-medium">
+                                <i class="fas fa-home mr-1"></i> {{ district.properties_count }} {% trans "объектов" %}
+                            </span>
+                                <a href="{% url 'district_detail' district.slug %}"
+                                   class="border border-primary text-primary hover:bg-primary hover:text-white px-4 py-2 rounded-sm transition-colors text-sm font-medium">
+                                    {% trans "Подробнее" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>

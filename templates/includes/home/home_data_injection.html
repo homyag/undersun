@@ -1,0 +1,31 @@
+{% load currency_tags %}
+<!-- Django data injection for JavaScript -->
+{{ featured_properties_villa|json_script:"featured-properties-villa" }}
+{{ featured_properties_condo|json_script:"featured-properties-condo" }}
+{{ featured_properties_townhouse|json_script:"featured-properties-townhouse" }}
+
+<script>
+// Global data object for home page
+try {
+    const villaData = JSON.parse(document.getElementById('featured-properties-villa').textContent);
+    const condoData = JSON.parse(document.getElementById('featured-properties-condo').textContent);
+    const townhouseData = JSON.parse(document.getElementById('featured-properties-townhouse').textContent);
+    
+    window.homePageData = {
+        featuredProperties: {
+            villa: Array.isArray(villaData) ? villaData : JSON.parse(villaData),
+            condo: Array.isArray(condoData) ? condoData : JSON.parse(condoData),
+            townhouse: Array.isArray(townhouseData) ? townhouseData : JSON.parse(townhouseData)
+        }
+    };
+} catch (error) {
+    console.error('Error loading home page data:', error);
+    window.homePageData = {
+        featuredProperties: {
+            villa: [],
+            condo: [],
+            townhouse: []
+        }
+    };
+}
+</script>

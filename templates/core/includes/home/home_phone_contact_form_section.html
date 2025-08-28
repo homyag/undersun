@@ -1,0 +1,47 @@
+{% load static %}
+{% load i18n %}
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <!-- Form Side -->
+            <div class="lg:order-1">
+                <div class="max-w-lg mx-auto lg:mx-0">
+                    <h2 class="text-5xl font-bold text-gray-900 mb-4 whitespace-nowrap">{% trans "Нет времени искать?" %}</h2>
+                    <p class="text-gray-600 mb-8">{% trans "Отправьте заявку, и мы подберем 3 лучших объекта за 24 часа" %}</p>
+
+                    <form id="phoneConsultationForm" class="space-y-6">
+                        <div>
+                            <div class="flex gap-3">
+                                <input type="tel"
+                                       id="phone"
+                                       name="phone"
+                                       placeholder="+7 (999) 123-45-67"
+                                       class="flex-1 px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-accent focus:border-accent transition-colors text-lg"
+                                       required>
+                                <button type="submit"
+                                        class="bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-6 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 whitespace-nowrap">
+                                    {% trans "Получить подборку" %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <p class="text-xs text-gray-500 mt-4">
+                        {% trans "Нажимая кнопку, вы соглашаетесь с" %}
+                        <a href="#"
+                           class="text-primary hover:underline">{% trans "политикой конфиденциальности" %}</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Image Side -->
+            <div class="lg:order-2">
+                <div class="relative">
+                    <img src="{% static 'images/home_page/homepage_callbacksection_house.webp' %}"
+                         alt="{% trans 'Современная недвижимость' %}"
+                         class="w-full h-[400px] object-cover rounded-lg shadow-lg">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
