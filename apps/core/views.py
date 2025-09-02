@@ -105,6 +105,12 @@ class HomeView(TemplateView):
         # Типы недвижимости для поиска
         context['property_types'] = PropertyType.objects.all()
         
+        # Общее количество активных объектов
+        context['total_properties_count'] = Property.objects.filter(
+            is_active=True,
+            status='available'
+        ).count()
+        
         # Новые поступления (до 4 объектов)
         context['recent_properties'] = Property.objects.filter(
             is_active=True,
