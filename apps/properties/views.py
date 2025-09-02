@@ -566,3 +566,102 @@ def get_locations_for_district(request):
         'success': True,
         'locations': list(locations)
     })
+
+
+def ajax_search_count(request):
+    """AJAX endpoint для подсчета количества объектов по фильтрам"""
+    try:
+        # Получаем базовый queryset
+        queryset = Property.objects.filter(
+            is_active=True,
+            status='available'
+        )
+        
+        # Применяем фильтры (используем POST или GET данные)
+        filters = request.POST if request.method == 'POST' else request.GET
+        queryset = apply_search_filters(queryset, filters)
+        
+        # Возвращаем количество
+        count = queryset.count()
+        
+        return JsonResponse({
+            'success': True,
+            'count': count
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+
+def apply_search_filters(queryset, filters):
+    """Применяет поисковые фильтры к queryset (работает с POST и GET данными)"""
+    
+    # Тип недвижимости
+    property_type = filters.get('type')
+    if property_type:
+        queryset = queryset.filter(property_type__name=property_type)
+    
+    # Район  
+    district = filters.get('district')
+    if district:
+        queryset = queryset.filter(district__slug=district)
+    
+    # Локация
+    location = filters.get('location')  
+    if location:
+        queryset = queryset.filter(location__slug=location)
+    
+    # Ценовые фильтры (в USD по умолчанию)
+    min_price = filters.get('min_price')
+    max_price = filters.get('max_price')
+    
+    if min_price:
+        try:
+            min_val = int(min_price)
+            queryset = queryset.filter(
+                Q(price_sale_usd__gte=min_val) | Q(price_rent_monthly__gte=min_val)
+            )
+        except ValueError:
+            pass
+            
+    if max_price:
+        try:
+            max_val = int(max_price)
+            queryset = queryset.filter(
+                Q(price_sale_usd__lte=max_val) | Q(price_rent_monthly__lte=max_val)
+            )
+        except ValueError:
+            pass
+    
+    # Количество спален
+    bedrooms = filters.get('bedrooms')
+    if bedrooms:
+        try:
+            if bedrooms == '4+':
+                queryset = queryset.filter(bedrooms__gte=4)
+            else:
+                queryset = queryset.filter(bedrooms=int(bedrooms))
+        except ValueError:
+            pass
+    
+    # Тип сделки
+    deal_type = filters.get('deal_type')
+    if deal_type and deal_type in ['sale', 'rent']:
+        queryset = queryset.filter(deal_type__in=[deal_type, 'both'])
+    
+    # Текстовый поиск
+    query = filters.get('q')
+    if query:
+        queryset = queryset.filter(
+            Q(title_ru__icontains=query) |
+            Q(title_en__icontains=query) |
+            Q(description_ru__icontains=query) |
+            Q(description_en__icontains=query) |
+            Q(district__name_ru__icontains=query) |
+            Q(district__name_en__icontains=query)
+        )
+    
+    return queryset.distinct()
