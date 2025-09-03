@@ -47,21 +47,21 @@
 
             <!-- Step 5 -->
             <button onclick="toggleStep(5)"
-                    class="process-step-cloud bg-gradient-to-r from-tertiary to-gray-600 hover:from-gray-600 hover:to-tertiary text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-tertiary/30"
+                    class="process-step-cloud bg-gradient-to-r from-accent to-yellow-400 hover:from-yellow-400 hover:to-accent text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30"
                     id="step-cloud-5">
                 <span class="text-sm">5.</span> {% trans "Оплата" %}
             </button>
 
             <!-- Step 6 -->
             <button onclick="toggleStep(6)"
-                    class="process-step-cloud bg-gradient-to-r from-accent/70 to-yellow-500 hover:from-yellow-500 hover:to-accent/70 text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30"
+                    class="process-step-cloud bg-gradient-to-r from-primary/90 to-primary hover:from-primary hover:to-primary/90 text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30"
                     id="step-cloud-6">
                 <span class="text-sm">6.</span> {% trans "Приемка" %}
             </button>
 
             <!-- Step 7 -->
             <button onclick="toggleStep(7)"
-                    class="process-step-cloud bg-gradient-to-r from-primary/80 to-tertiary/80 hover:from-tertiary/80 hover:to-primary/80 text-white font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30"
+                    class="process-step-cloud bg-gradient-to-r bg-gradient-to-r from-accent to-yellow-400 hover:from-yellow-400 hover:to-accent text-gray-900 font-bold py-4 px-6 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-accent/30"
                     id="step-cloud-7">
                 <span class="text-sm">7.</span> {% trans "Регистрация" %}
             </button>
@@ -80,7 +80,7 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Выбор объекта" %}</h3>
-                        <p class="text-gray-700 leading-relaxed">{% trans "Подбираем несколько проектов, соответствующих вашим критериям. Собираем и предоставляем вам всю необходимую информацию по ним." %}</p>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Формируем короткий список по вашим критериям и целям. Даём досье по каждому варианту: вид собственности, способы и график оплаты, наличие программ аренды, расходы и риски." %}</p>
                     </div>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Тур по объектам" %}</h3>
-                        <p class="text-gray-700 leading-relaxed">{% trans "Организуем и проводим для вас встречу с застройщиком / продавцом и показ выбранных объектов. Онлайн и оффлайн." %}</p>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Организуем показы с застройщиком/продавцом — онлайн (видеотур) или офлайн. Берём на себя логистику и фиксируем ответы на все вопросы." %}</p>
                     </div>
                 </div>
             </div>
@@ -111,8 +111,8 @@
                         </div>
                     </div>
                     <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Переговоры с продавцом и бронирование объекта" %}</h3>
-                        <p class="text-gray-700 leading-relaxed">{% trans "Согласовываем максимально выгодные для вас условия сделки с продавцом выбранного объекта. Далее составляется резервационное соглашение." %}</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Переговоры и бронирование" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Согласуем цену, рассрочку и условия сделки. Оформляем Reservation Agreement и вносится депозит (обычно около 1% стоимости; условия у застройщика могут отличаться) — объект снимается с продажи." %}</p>
                     </div>
                 </div>
             </div>
@@ -127,8 +127,8 @@
                         </div>
                     </div>
                     <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Подготовка и заключение основного договора" %}</h3>
-                        <p class="text-gray-700 leading-relaxed">{% trans "Представители продавца готовят основной договор. Наши юристы проверяют его и отправляют вам на согласование." %}</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Договор и проверка" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Продавец готовит основной договор; наш менеджер проводит его предварительную проверку. При необходимости подключаем партнёрских юристов для детальной экспертизы и внесения корректировок. После этого вместе с вами обсуждаем правки, при желании переводим ключевые разделы договора и подписываем его — лично или дистанционно по доверенности." %}</p>
                     </div>
                 </div>
             </div>
@@ -143,8 +143,8 @@
                         </div>
                     </div>
                     <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Оплата по договору" %}</h3>
-                        <p class="text-gray-700 leading-relaxed">{% trans "Оплата производится согласно утвержденному в контракте графику из любой точки." %}</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Оплата по графику" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Платежи вносятся согласно контракту из любой страны. Мы контролируем сроки, подтверждения зачислений и соответствие этапов строительной готовности (если новостройка)." %}</p>
                     </div>
                 </div>
             </div>
@@ -160,7 +160,7 @@
                     </div>
                     <div class="flex-1">
                         <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Приемка объекта" %}</h3>
-                        <p class="text-gray-700 leading-relaxed">{% trans "При заключении сделки со строящимися объектами, после окончания строительства застройщик присылает приглашение для приемки вашей собственности." %}</p>
+                        <p class="text-gray-700 leading-relaxed">{% trans "После готовности — техническая приёмка, чек‑лист замечаний и контроль их устранения. По доверенности можем принять объект от вашего имени." %}</p>
                     </div>
                 </div>
             </div>
@@ -175,8 +175,8 @@
                         </div>
                     </div>
                     <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Регистрация прав собственности" %}</h3>
-                        <p class="text-gray-700 leading-relaxed">{% trans "Оформляем все необходимые документы для регистрации прав собственности на приобретенную недвижимость." %}</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "Регистрация права" %}</h3>
+                        <p class="text-gray-700 leading-relaxed">{% trans "Регистрация недвижимости на ваше имя осуществляется в Земельном департаменте Пхукета и проводится застройщиком совместно с вами либо с вашим уполномоченным представителем. Вы получаете Blue Book — основной документ в Таиланде, подтверждающий право собственности на недвижимость. После этого мы подключаем послепродажную поддержку." %}</p>
                     </div>
                 </div>
             </div>
