@@ -1,0 +1,117 @@
+{% load static %}
+{% load i18n %}
+
+<section class="py-16 bg-gray-50">
+  <div class="max-w-6xl mx-auto px-4">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6 mb-12">
+      <h2 class="bg-gradient-to-r from-accent to-yellow-400 text-transparent bg-clip-text text-4xl font-bold">
+        {% trans "Новости" %}
+      </h2>
+      
+      <a href="{% url 'blog:list' %}" 
+         class="inline-flex items-center px-8 py-3 border-2 border-accent text-accent hover:bg-accent hover:text-white font-bold rounded-md transition-all duration-300 transform hover:scale-105">
+        <i class="fas fa-newspaper mr-2"></i>
+        <span>{% trans "Все новости" %}</span>
+      </a>
+    </div>
+
+    <!-- News Cards -->
+    {% if latest_news %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        {% for news in latest_news %}
+          <article class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+            <!-- News Image with Link -->
+            <div class="relative overflow-hidden h-64">
+              <a href="{{ news.get_absolute_url }}" class="block w-full h-full">
+                {% if news.featured_image %}
+                  <img src="{{ news.featured_image.url }}" 
+                       alt="{{ news.title }}"
+                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                {% else %}
+                  <div class="w-full h-full bg-gradient-to-br from-accent/20 to-yellow-100 flex items-center justify-center">
+                    <i class="fas fa-newspaper text-4xl text-accent/60"></i>
+                  </div>
+                {% endif %}
+              </a>
+              
+              <!-- Date Badge -->
+              <div class="absolute top-4 right-4">
+                <div class="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg">
+                  <div class="text-xs font-medium text-gray-600">
+                    {% if news.published_at %}
+                      {{ news.published_at|date:"d.m.Y" }}
+                    {% else %}
+                      {{ news.created_at|date:"d.m.Y" }}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- News Content -->
+            <div class="p-6">
+              <h3 class="text-lg font-bold text-primary mb-3 line-clamp-2">
+                <a href="{{ news.get_absolute_url }}" class="hover:text-accent transition-colors duration-300">
+                  {{ news.title }}
+                </a>
+              </h3>
+              
+              {% if news.excerpt %}
+                <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+                  {{ news.excerpt }}
+                </p>
+              {% endif %}
+              
+              <!-- Category Badge -->
+              <div class="flex items-center justify-between">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent">
+                  {{ news.category.name }}
+                </span>
+                
+                <!-- Read More Link -->
+                <a href="{{ news.get_absolute_url }}" 
+                   class="inline-flex items-center text-accent hover:text-yellow-500 font-medium text-sm transition-colors duration-300">
+                  {% trans "Читать далее" %}
+                  <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+                </a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <!-- No News State -->
+      <div class="text-center py-12">
+        <div class="text-gray-400 mb-4">
+          <i class="fas fa-newspaper text-5xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">
+          {% trans "Новости скоро появятся" %}
+        </h3>
+        <p class="text-gray-500">
+          {% trans "Следите за обновлениями" %}
+        </p>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>
