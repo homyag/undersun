@@ -87,18 +87,72 @@ class Command(BaseCommand):
         self.stdout.write(f"Всего обработано: {len(article_urls)}")
 
     def get_category_articles(self, category):
-        """Получить все URL статей из определенной категории блога"""
-        category_url = f"{self.base_url}/ru/blog/{category}"
-        self.stdout.write(f"Загружаем категорию: {category_url}")
+        """Получить все URL статей из определенной категории блога с поддержкой пагинации"""
+        article_urls = []
+        page_number = 1
+        start_param = 0
         
-        response = self.session.get(category_url)
-        if response.status_code != 200:
-            self.stdout.write(self.style.ERROR(f"Ошибка загрузки категории: {response.status_code}"))
-            return []
+        while True:
+            # Формируем URL для текущей страницы
+            if page_number == 1:
+                page_url = f"{self.base_url}/ru/blog/{category}"
+            else:
+                page_url = f"{self.base_url}/ru/blog/{category}?start={start_param}"
             
-        soup = BeautifulSoup(response.content, 'html.parser')
+            self.stdout.write(f"Загружаем страницу {page_number}: {page_url}")
+            
+            response = self.session.get(page_url)
+            if response.status_code != 200:
+                self.stdout.write(self.style.ERROR(f"Ошибка загрузки страницы {page_number}: {response.status_code}"))
+                break
+                
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Ищем ссылки на статьи на текущей странице
+            page_articles = self.extract_articles_from_page(soup, category)
+            
+            # Если статей на странице не найдено - прекращаем
+            if not page_articles:
+                if page_number == 1:
+                    self.stdout.write(self.style.WARNING(f"На первой странице не найдено статей"))
+                break
+            
+            # Добавляем найденные статьи
+            new_articles = 0
+            for article_url in page_articles:
+                if article_url not in article_urls:
+                    article_urls.append(article_url)
+                    new_articles += 1
+            
+            self.stdout.write(f"Найдено {new_articles} новых статей на странице {page_number}")
+            
+            # Ищем ссылку на следующую страницу
+            next_page_url = self.get_next_page_url(soup, category, start_param)
+            if not next_page_url:
+                self.stdout.write(f"Достигнута последняя страница")
+                break
+            
+            # Извлекаем параметр start для следующей страницы
+            start_match = re.search(r'start=(\d+)', next_page_url)
+            if start_match:
+                new_start_param = int(start_match.group(1))
+                # Проверяем, что мы действительно переходим на следующую страницу
+                if new_start_param <= start_param:
+                    self.stdout.write(f"Не удалось найти следующую страницу (start={new_start_param} <= {start_param})")
+                    break
+                start_param = new_start_param
+                page_number += 1
+            else:
+                break
+            
+            # Пауза между запросами страниц
+            time.sleep(0.5)
         
-        # Ищем ссылки на статьи
+        self.stdout.write(f"Всего найдено {len(article_urls)} статей на {page_number} страницах")
+        return article_urls
+
+    def extract_articles_from_page(self, soup, category):
+        """Извлечение ссылок на статьи с одной страницы"""
         article_urls = []
         
         # Пробуем разные селекторы для ссылок на статьи
@@ -106,7 +160,8 @@ class Command(BaseCommand):
             f'a[href*="/ru/blog/{category}/"]',
             f'a[href^="/ru/blog/{category}/"]',
             '.el-item a',
-            'article a'
+            'article a',
+            '.uk-article a'
         ]
         
         for selector in selectors:
@@ -118,9 +173,77 @@ class Command(BaseCommand):
                         full_url = urljoin(self.base_url, href)
                         if full_url not in article_urls:
                             article_urls.append(full_url)
-                break
+                
+                # Если нашли статьи с первым селектором - используем только их
+                if article_urls:
+                    break
         
         return article_urls
+    
+    def get_next_page_url(self, soup, category, current_start=0):
+        """Получить URL следующей страницы пагинации"""
+        # Ищем различные варианты ссылок на следующую страницу
+        next_selectors = [
+            # Классические ссылки пагинации
+            f'a[href*="/ru/blog/{category}?start="]',
+            f'a[href*="blog/{category}?start="]',
+            
+            # Ссылки со словом "Далее", "Next", ">"
+            'a:contains("Далее")',
+            'a:contains("Next")',
+            'a:contains(">")',
+            
+            # По классам пагинации
+            '.pagination a[href*="start="]',
+            '.uk-pagination a[href*="start="]',
+            '.page-nav a[href*="start="]',
+            
+            # Все ссылки с параметром start
+            'a[href*="start="]'
+        ]
+        
+        for selector in next_selectors:
+            try:
+                if selector.startswith('a:contains('):
+                    # BeautifulSoup не поддерживает :contains, используем find()
+                    text_to_find = selector.split('"')[1]
+                    links = soup.find_all('a', string=re.compile(text_to_find))
+                else:
+                    links = soup.select(selector)
+                
+                for link in links:
+                    href = link.get('href', '')
+                    if href and 'start=' in href:
+                        # Проверяем что это действительно пагинация для нашей категории
+                        if f'/blog/{category}' in href or f'blog/{category}' in href:
+                            # Извлекаем start параметр из ссылки
+                            start_match = re.search(r'start=(\d+)', href)
+                            if start_match:
+                                link_start = int(start_match.group(1))
+                                # Ищем ссылку с start больше текущего
+                                if link_start > current_start:
+                                    full_url = urljoin(self.base_url, href)
+                                    return full_url
+                            
+            except Exception as e:
+                if self.verbose:
+                    self.stdout.write(f"Ошибка в селекторе {selector}: {e}")
+                continue
+        
+        # Дополнительно: ищем числовые ссылки пагинации (2, 3, 4, ...)
+        number_links = soup.find_all('a', href=True)
+        for link in number_links:
+            href = link.get('href', '')
+            link_text = link.get_text().strip()
+            
+            # Если ссылка содержит число и start параметр
+            if (link_text.isdigit() and 
+                int(link_text) > 1 and 
+                'start=' in href and 
+                f'blog/{category}' in href):
+                return urljoin(self.base_url, href)
+        
+        return None
 
     def is_valid_article_url(self, url, category):
         """Проверка, является ли URL действительной статьей"""
@@ -191,8 +314,8 @@ class Command(BaseCommand):
         else:
             data['title'] = 'Без названия'
         
-        # Генерируем slug
-        data['slug'] = slugify(data['title'])[:200]  # Ограничиваем длину
+        # Генерируем slug из URL (более надёжно) или из заголовка
+        data['slug'] = self.generate_slug(url, data['title'])
         
         # Дата публикации - ищем в различных местах
         data['published_at'] = self.extract_publication_date(soup, url)
@@ -220,6 +343,30 @@ class Command(BaseCommand):
             data['content'] += video_html
         
         return data
+
+    def generate_slug(self, url, title):
+        """Генерация slug из URL или заголовка"""
+        # Сначала пробуем извлечь slug из URL (после ID)
+        # URL формат: /ru/blog/news/1094-the-first-podcast-about-the-phuket-property-association-bohdan-dyachuk-on-sid-consultancy
+        url_match = re.search(r'/(\d+)-(.+?)(?:/|$)', url)
+        if url_match:
+            url_slug = url_match.group(2)
+            # Очищаем и валидируем slug из URL
+            cleaned_slug = slugify(url_slug)
+            if cleaned_slug and len(cleaned_slug) > 3:  # Минимум 4 символа
+                return cleaned_slug[:200]  # Ограничиваем длину
+        
+        # Если не удалось извлечь из URL, генерируем из заголовка
+        title_slug = slugify(title)
+        if title_slug:
+            return title_slug[:200]
+        
+        # В крайнем случае используем ID статьи
+        original_id_match = re.search(r'/(\d+)-', url)
+        if original_id_match:
+            return f"article-{original_id_match.group(1)}"
+        
+        return "no-slug"
 
     def extract_publication_date(self, soup, url):
         """Извлечение даты публикации"""

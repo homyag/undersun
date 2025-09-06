@@ -52,7 +52,7 @@ class BlogPostAdminForm(forms.ModelForm):
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
     form = BlogPostAdminForm
-    list_display = ('title', 'category', 'author', 'status', 'is_featured', 'published_at', 'views_count')
+    list_display = ('title', 'slug', 'category', 'author', 'status', 'is_featured', 'published_at', 'views_count')
     list_filter = ('status', 'is_featured', 'category', 'created_at', 'published_at')
     search_fields = ('title', 'excerpt', 'content')
     prepopulated_fields = {'slug': ('title',)}
