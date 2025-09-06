@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 import json
 from apps.properties.models import Property, PropertyType
 from apps.locations.models import District
+from apps.blog.models import BlogPost
 from .models import PromotionalBanner, Service
 
 
@@ -116,6 +117,9 @@ class HomeView(TemplateView):
             is_active=True,
             status='available'
         ).select_related('district', 'location', 'property_type').prefetch_related('images').order_by('-created_at')[:4]
+        
+        # Последние новости (3 новости для главной страницы)
+        context['latest_news'] = BlogPost.get_published().select_related('category', 'author').order_by('-published_at')[:3]
 
         return context
 
