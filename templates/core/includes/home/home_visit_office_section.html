@@ -1,0 +1,229 @@
+{% load static %}
+{% load i18n %}
+
+<section class="bg-white py-12">
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center" style="min-height: 394px;">
+      
+      <!-- Left side - Image -->
+      <div class="relative">
+        <div class="rounded-lg overflow-hidden shadow-lg">
+          <img src="{% static 'images/home_page/homepage_visit_section/visit_section_pic.jpg' %}" 
+               alt="{% trans 'Undersun Estate офис' %}"
+               class="w-full h-80 lg:h-96 object-cover">
+        </div>
+      </div>
+
+      <!-- Right side - Content -->
+      <div class="text-gray-900">
+        <!-- Main heading with logo -->
+        <div class="mb-6">
+          <h2 class="text-3xl lg:text-4xl font-bold mb-3 flex items-center flex-wrap">
+            <span class="mr-3">{% trans "Посетите" %}</span>
+            <img src="{% static 'images/home_page/homepage_visit_section/undersun_yellow_black.svg' %}" 
+                 alt="Undersun Estate"
+                 class="h-10 lg:h-12 mr-3">
+            <span>{% trans "офис" %}</span>
+          </h2>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <!-- Address -->
+          <div class="flex items-center space-x-3">
+            <i class="fas fa-map-marker-alt text-accent text-lg flex-shrink-0"></i>
+            <div>
+              <p class="text-sm text-gray-700">
+                59/358 Moo.4 T.Kathu<br>
+                Kathu, Phuket, Thailand
+              </p>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="flex items-center space-x-3">
+            <i class="fas fa-phone text-accent text-lg flex-shrink-0"></i>
+            <div>
+              <a href="tel:+66827268615" class="text-gray-700 hover:text-accent transition-colors">
+                +66 82 726 8615
+              </a>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="flex items-center space-x-3">
+            <i class="fas fa-envelope text-accent text-lg flex-shrink-0"></i>
+            <div>
+              <a href="mailto:info@undersunestate.com" class="text-gray-700 hover:text-accent transition-colors">
+                info@undersunestate.com
+              </a>
+            </div>
+          </div>
+
+          <!-- Working Hours -->
+          <div class="flex items-center space-x-3">
+            <i class="fas fa-clock text-accent text-lg flex-shrink-0"></i>
+            <div>
+              <p class="text-sm text-gray-700">
+                {% trans "Пн-Пт: 9:00-18:00" %}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+          <button id="contact-meeting-btn"
+                  class="flex items-center justify-center px-8 py-3 bg-accent hover:bg-yellow-500 text-gray-900 font-bold rounded-md transition-all duration-300 transform hover:scale-105 shadow-lg">
+            <i class="fas fa-handshake mr-2"></i>
+            <span>{% trans "Связаться для встречи" %}</span>
+          </button>
+          
+          <button id="show-map-btn"
+                  class="flex items-center justify-center px-8 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold rounded-md transition-all duration-300 transform hover:scale-105">
+            <i class="fas fa-map mr-2"></i>
+            <span>{% trans "Показать на карте" %}</span>
+          </button>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Meeting Modal -->
+<div id="meeting-modal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 border border-gray-100">
+    <div class="p-8">
+      <div class="flex justify-between items-center mb-8">
+        <h3 class="text-2xl font-bold text-primary">
+          {% trans "Записаться на встречу" %}
+        </h3>
+        <button id="close-meeting-modal" class="text-gray-400 hover:text-accent hover:bg-accent/10 rounded-full p-2 transition-all duration-200">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      
+      <form id="meeting-form" class="space-y-6">
+        {% csrf_token %}
+        <div>
+          <label for="meeting-name" class="block text-sm font-medium text-gray-700 mb-2">{% trans 'Ваше имя' %}</label>
+          <input type="text" 
+                 id="meeting-name"
+                 name="name"
+                 placeholder="{% trans 'Иван Петров' %}"
+                 required
+                 class="w-full border-2 border-gray-200 focus:outline-none focus:border-accent rounded-lg px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200" />
+        </div>
+        
+        <div>
+          <label for="meeting-phone" class="block text-sm font-medium text-gray-700 mb-2">{% trans 'Ваш телефон' %}</label>
+          <input type="tel" 
+                 id="meeting-phone"
+                 name="phone"
+                 placeholder="{% trans '+7 (999) 123-45-67' %}"
+                 required
+                 class="w-full border-2 border-gray-200 focus:outline-none focus:border-accent rounded-lg px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200" />
+        </div>
+
+        <div>
+          <label for="meeting-date" class="block text-sm font-medium text-gray-700 mb-2">{% trans 'Предпочтительная дата' %}</label>
+          <input type="date" 
+                 id="meeting-date"
+                 name="preferred_date"
+                 required
+                 class="w-full border-2 border-gray-200 focus:outline-none focus:border-accent rounded-lg px-4 py-3 text-gray-900 transition-all duration-200" />
+        </div>
+        
+        <div>
+          <label for="meeting-message" class="block text-sm font-medium text-gray-700 mb-2">{% trans 'Дополнительная информация' %}</label>
+          <textarea id="meeting-message"
+                    placeholder="{% trans 'Расскажите о ваших интересах и предпочтениях...' %}" 
+                    name="message"
+                    rows="3"
+                    class="w-full border-2 border-gray-200 focus:outline-none focus:border-accent rounded-lg px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 resize-none"></textarea>
+        </div>
+
+        <div class="flex items-start space-x-3">
+          <input type="checkbox" 
+                 id="meeting_privacy_consent" 
+                 name="privacy_consent"
+                 required
+                 class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent mt-1" />
+          <label for="meeting_privacy_consent" class="text-sm text-gray-600 leading-relaxed">
+            {% trans "Я согласен(на) с" %} <a href="#" class="text-accent underline hover:text-yellow-500 transition-colors">{% trans "политикой конфиденциальности" %}</a>
+          </label>
+        </div>
+
+        <button type="submit" 
+                class="w-full bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-8 rounded-md transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
+          {% trans "Записаться на встречу" %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Meeting Modal functionality
+  const meetingModal = document.getElementById('meeting-modal');
+  const contactMeetingBtn = document.getElementById('contact-meeting-btn');
+  const closeMeetingBtn = document.getElementById('close-meeting-modal');
+  const meetingForm = document.getElementById('meeting-form');
+  
+  // Show Map Button functionality
+  const showMapBtn = document.getElementById('show-map-btn');
+  
+  // Open meeting modal
+  contactMeetingBtn.addEventListener('click', () => {
+    meetingModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  });
+  
+  // Close meeting modal
+  closeMeetingBtn.addEventListener('click', () => {
+    meetingModal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  });
+  
+  // Close modal when clicking outside
+  meetingModal.addEventListener('click', (e) => {
+    if (e.target === meetingModal) {
+      meetingModal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+  });
+  
+  // Close modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !meetingModal.classList.contains('hidden')) {
+      meetingModal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+  });
+  
+  // Show map functionality
+  showMapBtn.addEventListener('click', () => {
+    // You can integrate with Google Maps, Apple Maps, or your custom map
+    const mapUrl = 'https://www.google.com/maps/search/?api=1&query=59/358+Moo.4+T.Kathu+Kathu+Phuket+Thailand+Undersun+Estate';
+    window.open(mapUrl, '_blank');
+  });
+  
+  // Form submission
+  meetingForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // Here you can add form submission logic
+    alert('{% trans "Спасибо! Мы свяжемся с вами для подтверждения встречи." %}');
+    meetingModal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    meetingForm.reset();
+  });
+  
+  // Set minimum date to today
+  const dateInput = document.getElementById('meeting-date');
+  const today = new Date().toISOString().split('T')[0];
+  dateInput.setAttribute('min', today);
+});
+</script>

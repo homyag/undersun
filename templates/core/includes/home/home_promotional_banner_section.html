@@ -49,13 +49,13 @@
                             {% with banner_url=promotional_banner.get_language_aware_url %}
                                 {% if banner_url %}
                                     <a href="{{ banner_url }}"
-                                       class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                       class="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                                         {{ promotional_banner.button_text }}
                                         <i class="fas fa-arrow-right ml-2"></i>
                                     </a>
                                 {% else %}
                                     <a href="{% url 'property_list' %}"
-                                       class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                       class="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                                         {{ promotional_banner.button_text }}
                                         <i class="fas fa-arrow-right ml-2"></i>
                                     </a>
@@ -63,7 +63,7 @@
                             {% endwith %}
                         {% else %}
                             <a href="{% url 'property_list' %}"
-                               class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                               class="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-100 text-primary font-bold rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                                 {% trans "Смотреть предложения" %}
                                 <i class="fas fa-arrow-right ml-2"></i>
                             </a>
@@ -106,13 +106,13 @@
                             {% with banner_url=promotional_banner.get_language_aware_url %}
                                 {% if banner_url %}
                                     <a href="{{ banner_url }}"
-                                       class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
+                                       class="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
                                         {{ promotional_banner.button_text }}
                                         <i class="fas fa-arrow-right ml-2"></i>
                                     </a>
                                 {% else %}
                                     <a href="{% url 'property_list' %}"
-                                       class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
+                                       class="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
                                         {{ promotional_banner.button_text }}
                                         <i class="fas fa-arrow-right ml-2"></i>
                                     </a>
@@ -120,7 +120,7 @@
                             {% endwith %}
                         {% else %}
                             <a href="{% url 'property_list' %}"
-                               class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
+                               class="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-100 text-primary font-bold text-sm rounded-md transition-all duration-300 shadow-lg">
                                 {% trans "Смотреть предложения" %}
                                 <i class="fas fa-arrow-right ml-2"></i>
                             </a>
