@@ -205,7 +205,7 @@ class Property(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('property_detail', kwargs={'slug': self.slug})
+        return reverse('properties:property_detail', kwargs={'slug': self.slug})
 
     @property
     def main_image(self):

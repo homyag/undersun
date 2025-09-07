@@ -140,7 +140,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "อพาร์ทเมนท์",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'condo' %}"
+        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'condo' %}"
       },
       {
         "@type": "OfferCatalog",
@@ -151,7 +151,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "วิลลา",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'villa' %}"
+        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'villa' %}"
       },
       {
         "@type": "OfferCatalog",
@@ -162,7 +162,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "ที่ดิน",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'land' %}"
+        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'land' %}"
       },
       {
         "@type": "OfferCatalog",
@@ -173,7 +173,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "อสังหาริมทรัพย์เชิงพาณิชย์",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'business' %}"
+        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'business' %}"
       },
       {
         "@type": "OfferCatalog",
@@ -184,7 +184,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "ทาวน์เฮาส์",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'townhouse' %}"
+        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'townhouse' %}"
       },
       {
         "@type": "OfferCatalog",
@@ -195,7 +195,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "การลงทุน",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'property_by_type' 'investment' %}"
+        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'investment' %}"
       }
     ]
   },

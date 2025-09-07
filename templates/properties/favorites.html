@@ -50,7 +50,7 @@
                 <p class="text-gray-500 mb-8 max-w-md mx-auto">
                     {% trans "Добавляйте понравившиеся объекты в избранное, нажимая на иконку сердца" %}
                 </p>
-                <a href="{% url 'property_sale' %}" class="inline-flex items-center bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-6 rounded-lg transition-colors">
+                <a href="{% url 'properties:property_sale' %}" class="inline-flex items-center bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-6 rounded-lg transition-colors">
                     <i class="fas fa-search mr-2"></i>
                     {% trans "Посмотреть объекты" %}
                 </a>
@@ -63,7 +63,7 @@
                 <i class="fas fa-trash mr-2"></i>
                 {% trans "Очистить избранное" %}
             </button>
-            <a href="{% url 'property_sale' %}" class="bg-primary hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+            <a href="{% url 'properties:property_sale' %}" class="bg-primary hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>
                 {% trans "Продолжить просмотр" %}
             </a>
@@ -131,7 +131,7 @@ function loadFavoriteProperties(favoriteIds) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
     
     $.ajax({
-        url: '{% url "get_favorite_properties" %}',
+        url: '{% url "properties:get_favorite_properties" %}',
         type: 'POST',
         headers: {
             'X-CSRFToken': csrfToken
