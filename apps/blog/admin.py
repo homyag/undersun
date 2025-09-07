@@ -10,8 +10,29 @@ from .models import BlogCategory, BlogPost, BlogTag
 from .services import translate_blog_post, translate_blog_category
 
 
+class BaseAdminWithRequiredFields(admin.ModelAdmin):
+    """Базовый класс админ-панели с подключением стилей для обязательных полей"""
+    
+    class Media:
+        css = {
+            'all': ('admin/css/required_fields.css',)
+        }
+        js = ('admin/js/required_fields.js',)
+    
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        """Добавляем CSS класс 'required' для обязательных полей"""
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        
+        # Проверяем, является ли поле обязательным
+        if formfield and not db_field.blank and not db_field.null:
+            if hasattr(formfield.widget, 'attrs'):
+                formfield.widget.attrs['class'] = formfield.widget.attrs.get('class', '') + ' required-field'
+        
+        return formfield
+
+
 @admin.register(BlogCategory)
-class BlogCategoryAdmin(admin.ModelAdmin):
+class BlogCategoryAdmin(BaseAdminWithRequiredFields):
     list_display = ('name', 'slug', 'color_preview', 'is_active', 'order', 'posts_count')
     list_filter = ('is_active',)
     search_fields = ('name', 'description')
@@ -50,7 +71,7 @@ class BlogPostAdminForm(forms.ModelForm):
 
 
 @admin.register(BlogPost)
-class BlogPostAdmin(admin.ModelAdmin):
+class BlogPostAdmin(BaseAdminWithRequiredFields):
     form = BlogPostAdminForm
     list_display = ('title', 'slug', 'category', 'author', 'status', 'is_featured', 'published_at', 'views_count')
     list_filter = ('status', 'is_featured', 'category', 'created_at', 'published_at')
@@ -243,7 +264,7 @@ class BlogPostAdmin(admin.ModelAdmin):
 
 
 @admin.register(BlogTag)
-class BlogTagAdmin(admin.ModelAdmin):
+class BlogTagAdmin(BaseAdminWithRequiredFields):
     list_display = ('name', 'slug', 'posts_count', 'created_at')
     search_fields = ('name',)
     prepopulated_fields = {'slug': ('name',)}

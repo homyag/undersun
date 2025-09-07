@@ -1,12 +1,34 @@
 from django.contrib import admin
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django.forms import ModelForm
 # from modeltranslation.admin import TranslationAdmin
 from .models import (
     Property, PropertyImage, PropertyType, Developer,
     PropertyFeature, PropertyFeatureRelation
 )
 from .services import translate_property, translate_property_type, translate_developer, translate_property_feature
+
+
+class BaseAdminWithRequiredFields(admin.ModelAdmin):
+    """Базовый класс админ-панели с подключением стилей для обязательных полей"""
+    
+    class Media:
+        css = {
+            'all': ('admin/css/required_fields.css',)
+        }
+        js = ('admin/js/required_fields.js',)
+    
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        """Добавляем CSS класс 'required' для обязательных полей"""
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        
+        # Проверяем, является ли поле обязательным
+        if formfield and not db_field.blank and not db_field.null:
+            if hasattr(formfield.widget, 'attrs'):
+                formfield.widget.attrs['class'] = formfield.widget.attrs.get('class', '') + ' required-field'
+        
+        return formfield
 
 
 class PropertyImageInline(admin.TabularInline):
@@ -21,7 +43,7 @@ class PropertyFeatureInline(admin.TabularInline):
 
 
 @admin.register(Property)
-class PropertyAdmin(admin.ModelAdmin):
+class PropertyAdmin(BaseAdminWithRequiredFields):
     list_display = ('legacy_id', 'title', 'property_type', 'district', 'deal_type', 'status', 
                    'price_sale_usd', 'special_offer', 'is_active', 'is_featured', 'views_count', 'created_at')
     list_filter = ('is_active', 'property_type', 'district', 'deal_type', 'status', 'is_featured', 'furnished')
@@ -157,7 +179,7 @@ class PropertyAdmin(admin.ModelAdmin):
 
 
 @admin.register(PropertyType)
-class PropertyTypeAdmin(admin.ModelAdmin):
+class PropertyTypeAdmin(BaseAdminWithRequiredFields):
     list_display = ('name', 'name_display', 'icon')
     actions = ['auto_translate', 'force_retranslate']
     
@@ -217,7 +239,7 @@ class PropertyTypeAdmin(admin.ModelAdmin):
 
 
 @admin.register(Developer)
-class DeveloperAdmin(admin.ModelAdmin):
+class DeveloperAdmin(BaseAdminWithRequiredFields):
     list_display = ('name', 'website')
     prepopulated_fields = {'slug': ('name',)}
     actions = ['auto_translate', 'force_retranslate']
@@ -278,7 +300,7 @@ class DeveloperAdmin(admin.ModelAdmin):
 
 
 @admin.register(PropertyFeature)
-class PropertyFeatureAdmin(admin.ModelAdmin):
+class PropertyFeatureAdmin(BaseAdminWithRequiredFields):
     list_display = ('name', 'icon')
     actions = ['auto_translate', 'force_retranslate']
     
