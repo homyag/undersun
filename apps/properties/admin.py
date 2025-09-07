@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.contrib import messages
 from django.http import HttpResponseRedirect
+from django import forms
 from django.forms import ModelForm
+from tinymce.widgets import TinyMCE
 # from modeltranslation.admin import TranslationAdmin
 from .models import (
     Property, PropertyImage, PropertyType, Developer,
@@ -42,8 +44,21 @@ class PropertyFeatureInline(admin.TabularInline):
     extra = 1
 
 
+class PropertyAdminForm(forms.ModelForm):
+    """Форма для Property с кастомными виджетами"""
+    
+    class Meta:
+        model = Property
+        fields = '__all__'
+        widgets = {
+            # Поле description использует TinyMCE
+            'description': TinyMCE(attrs={'class': 'tinymce-content'}),
+        }
+
+
 @admin.register(Property)
 class PropertyAdmin(BaseAdminWithRequiredFields):
+    form = PropertyAdminForm
     list_display = ('legacy_id', 'title', 'property_type', 'district', 'deal_type', 'status', 
                    'price_sale_usd', 'special_offer', 'is_active', 'is_featured', 'views_count', 'created_at')
     list_filter = ('is_active', 'property_type', 'district', 'deal_type', 'status', 'is_featured', 'furnished')

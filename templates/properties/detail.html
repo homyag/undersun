@@ -199,7 +199,7 @@
                     {% if property.description %}
                         <div class="prose max-w-none">
                             <h2 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Описание" %}</h2>
-                            {{ property.description|linebreaks }}
+                            {{ property.description|safe }}
                         </div>
                     {% endif %}
                 </div>

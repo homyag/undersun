@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill, ResizeToFit
+from tinymce.models import HTMLField
 from apps.locations.models import District, Location
 
 
@@ -69,7 +70,7 @@ class Property(models.Model):
     status = models.CharField(_('Статус'), max_length=10, choices=STATUS_CHOICES, default='available')
 
     # Описание
-    description = models.TextField(_('Описание'))
+    description = HTMLField(_('Описание'))
     short_description = models.CharField(_('Краткое описание'), max_length=300, blank=True)
     special_offer = models.CharField(_('Специальное предложение'), max_length=50, blank=True)
 
