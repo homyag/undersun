@@ -1,0 +1,142 @@
+/* Стили для обязательных полей в админ-панели Django */
+
+/* Добавляем красную звездочку для обязательных полей с автоматическим определением */
+.form-row label:after {
+    content: "";
+    color: #dc2626;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Обязательные поля для основных моделей Property и Blog */
+/* Title поля */
+.form-row.field-title label:after {
+    content: " *";
+}
+
+/* Slug поля */
+.form-row.field-slug label:after {
+    content: " *";
+}
+
+/* Property type и category */
+.form-row.field-property_type label:after,
+.form-row.field-category label:after {
+    content: " *";
+}
+
+/* District field */
+.form-row.field-district label:after {
+    content: " *";
+}
+
+/* Description fields */
+.form-row.field-description label:after {
+    content: " *";
+}
+
+/* Name fields */
+.form-row.field-name label:after,
+.form-row.field-name_display label:after {
+    content: " *";
+}
+
+/* Author field */
+.form-row.field-author label:after {
+    content: " *";
+}
+
+/* Excerpt field */
+.form-row.field-excerpt label:after {
+    content: " *";
+}
+
+/* Content field */
+.form-row.field-content label:after {
+    content: " *";
+}
+
+/* Стилизация для inline формы изображений недвижимости */
+.inline-group .form-row.field-image.required label:after {
+    content: " *";
+    color: #dc2626;
+    font-weight: bold;
+}
+
+/* Дополнительные стили для улучшения читаемости */
+.required {
+    position: relative;
+}
+
+/* Стиль для error-ов в обязательных полях */
+.required .errorlist {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Подсветка границы обязательных полей при ошибке */
+.required input.error,
+.required select.error,
+.required textarea.error {
+    border: 1px solid #dc2626 !important;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Стиль для help-text у обязательных полей */
+.required .help {
+    color: #666;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+/* Особые стили для TinyMCE полей */
+.form-row.field-content.required .help,
+.form-row.field-content_en.required .help,
+.form-row.field-content_th.required .help {
+    margin-bottom: 5px;
+}
+
+/* Стили для табличных inline форм */
+.tabular .form-row .required label:after {
+    content: " *";
+    color: #dc2626;
+    font-weight: bold;
+}
+
+/* Стили для stacked inline форм */
+.inline-group .form-row.required label:after {
+    content: " *";
+    color: #dc2626;
+    font-weight: bold;
+}
+
+/* Общие стили для улучшения визуального восприятия */
+fieldset.module h2 {
+    background: #f8f9fa;
+    color: #417690;
+    font-weight: bold;
+    padding: 10px 15px;
+    margin: 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Подсветка fieldset-ов с обязательными полями */
+fieldset.module:has(.required) h2 {
+    border-left: 4px solid #fbbf24;
+}
+
+/* Стили для улучшения контрастности в тёмной теме Django */
+@media (prefers-color-scheme: dark) {
+    .required label:after,
+    .field-box.required label:after {
+        color: #ef4444;
+    }
+    
+    .required input.error,
+    .required select.error,
+    .required textarea.error {
+        border: 1px solid #ef4444 !important;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+    }
+}
