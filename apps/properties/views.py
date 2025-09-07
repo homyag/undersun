@@ -246,9 +246,9 @@ class PropertyDetailView(DetailView):
         if property_obj.property_type and property_obj.deal_type:
             # Формируем URL вида /properties/sale/ или /properties/rent/
             if property_obj.deal_type in ['sale', 'both']:
-                redirect_url = reverse('property_sale')
+                redirect_url = reverse('properties:property_sale')
             elif property_obj.deal_type == 'rent':
-                redirect_url = reverse('property_rent')
+                redirect_url = reverse('properties:property_rent')
             
             # Добавляем фильтры в query params
             if redirect_url:
@@ -264,13 +264,13 @@ class PropertyDetailView(DetailView):
         
         # 2. Fallback: редиректим на общий список недвижимости
         if not redirect_url:
-            redirect_url = reverse('property_list')
+            redirect_url = reverse('properties:property_list')
             if property_obj.property_type:
                 redirect_url = f"{redirect_url}?property_type={property_obj.property_type.name}"
         
         # 3. Финальный fallback: главная страница недвижимости
         if not redirect_url:
-            redirect_url = reverse('property_list')
+            redirect_url = reverse('properties:property_list')
         
         # Выполняем 301 редирект
         from django.http import HttpResponsePermanentRedirect
@@ -665,3 +665,109 @@ def apply_search_filters(queryset, filters):
         )
     
     return queryset.distinct()
+
+
+@require_POST
+@csrf_exempt
+def bulk_upload_images(request):
+    """AJAX endpoint для массовой загрузки изображений для объекта недвижимости"""
+    from .models import PropertyImage
+    from django.db import models
+    
+    try:
+        property_id = request.POST.get('property_id')
+        if not property_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Property ID не указан'
+            })
+        
+        # Проверяем существование объекта недвижимости
+        try:
+            property_obj = Property.objects.get(id=property_id)
+        except Property.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Объект недвижимости не найден'
+            })
+        
+        # Получаем загруженные файлы
+        uploaded_files = request.FILES.getlist('images')
+        if not uploaded_files:
+            return JsonResponse({
+                'success': False,
+                'message': 'Файлы для загрузки не найдены'
+            })
+        
+        # Проверяем, что это изображения
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+        valid_files = []
+        errors = []
+        
+        for file in uploaded_files:
+            if file.content_type not in allowed_types:
+                errors.append(f'Файл {file.name} не является изображением')
+                continue
+            
+            # Проверяем размер файла (максимум 10MB)
+            if file.size > 10 * 1024 * 1024:
+                errors.append(f'Файл {file.name} слишком большой (максимум 10MB)')
+                continue
+                
+            valid_files.append(file)
+        
+        if not valid_files:
+            return JsonResponse({
+                'success': False,
+                'message': 'Нет допустимых файлов для загрузки',
+                'errors': errors
+            })
+        
+        # Определяем следующий порядковый номер
+        last_order = PropertyImage.objects.filter(
+            property=property_obj
+        ).aggregate(max_order=models.Max('order'))['max_order'] or 0
+        
+        # Создаем объекты PropertyImage
+        created_images = []
+        for i, file in enumerate(valid_files):
+            try:
+                # Определяем, является ли первое изображение главным
+                is_main = (i == 0) and not PropertyImage.objects.filter(
+                    property=property_obj, 
+                    is_main=True
+                ).exists()
+                
+                property_image = PropertyImage.objects.create(
+                    property=property_obj,
+                    image=file,
+                    title=file.name.split('.')[0],  # Используем имя файла без расширения как название
+                    is_main=is_main,
+                    order=last_order + i + 1,
+                    image_type='main'
+                )
+                
+                created_images.append({
+                    'id': property_image.id,
+                    'title': property_image.title,
+                    'image_url': property_image.image.url,
+                    'thumbnail_url': property_image.thumbnail.url if hasattr(property_image, 'thumbnail') else property_image.image.url,
+                    'is_main': property_image.is_main,
+                    'order': property_image.order
+                })
+                
+            except Exception as e:
+                errors.append(f'Ошибка при загрузке файла {file.name}: {str(e)}')
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Успешно загружено {len(created_images)} изображений',
+            'images': created_images,
+            'errors': errors if errors else None
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Произошла ошибка: {str(e)}'
+        })

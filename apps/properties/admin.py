@@ -10,6 +10,7 @@ from .models import (
     PropertyFeature, PropertyFeatureRelation
 )
 from .services import translate_property, translate_property_type, translate_developer, translate_property_feature
+from .widgets import BulkImageUploadWidget
 
 
 class BaseAdminWithRequiredFields(admin.ModelAdmin):
@@ -158,6 +159,193 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
         """Переопределяем queryset для отображения количества просмотров"""
         return super().get_queryset(request).select_related('property_type', 'district')
 
+    def bulk_image_upload_widget(self, obj=None):
+        """Виджет для массовой загрузки изображений"""
+        if obj and obj.pk:
+            from django.urls import reverse
+            from django.utils.safestring import mark_safe
+            
+            upload_url = reverse('properties:bulk_upload_images')
+            
+            html = f"""
+            <div id="bulk-image-upload-section">
+                <h3>📸 Массовая загрузка изображений</h3>
+                <div id="bulk-upload-area" style="border: 2px dashed #ccc; padding: 20px; text-align: center; margin: 15px 0; background: #f9f9f9;">
+                    <input type="file" id="bulk-images-input" multiple accept="image/*" style="display: none;">
+                    <div id="upload-prompt" onclick="document.getElementById('bulk-images-input').click();" style="cursor: pointer;">
+                        <div style="font-size: 36px; margin-bottom: 10px;">📸</div>
+                        <h4>Загрузить несколько изображений сразу</h4>
+                        <p>Нажмите здесь или перетащите файлы</p>
+                        <p><small>Поддерживаемые форматы: JPG, PNG, GIF (максимум 10MB на файл)</small></p>
+                    </div>
+                    <div id="selected-images-preview"></div>
+                    <div id="upload-progress" style="display: none;">
+                        <div style="background: #007cba; color: white; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                            <span id="progress-text">Загрузка...</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin: 15px 0;">
+                    <button type="button" id="upload-selected-btn" onclick="uploadSelectedImages()" 
+                            style="background: #007cba; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                        🚀 Загрузить выбранные изображения
+                    </button>
+                    <button type="button" onclick="clearSelectedImages()" 
+                            style="background: #666; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer;">
+                        🗑️ Очистить выбор
+                    </button>
+                </div>
+            </div>
+            
+            <script>
+                let selectedFiles = [];
+                const uploadArea = document.getElementById('bulk-upload-area');
+                const fileInput = document.getElementById('bulk-images-input');
+                const previewArea = document.getElementById('selected-images-preview');
+                const uploadBtn = document.getElementById('upload-selected-btn');
+                
+                // Drag & Drop функциональность
+                uploadArea.addEventListener('dragover', function(e) {{
+                    e.preventDefault();
+                    this.style.borderColor = '#007cba';
+                    this.style.backgroundColor = '#f0f8ff';
+                }});
+                
+                uploadArea.addEventListener('dragleave', function(e) {{
+                    e.preventDefault();
+                    this.style.borderColor = '#ccc';
+                    this.style.backgroundColor = '#f9f9f9';
+                }});
+                
+                uploadArea.addEventListener('drop', function(e) {{
+                    e.preventDefault();
+                    this.style.borderColor = '#ccc';
+                    this.style.backgroundColor = '#f9f9f9';
+                    const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+                    handleFileSelection(files);
+                }});
+                
+                // Обработка выбора файлов
+                fileInput.addEventListener('change', function(e) {{
+                    const files = Array.from(e.target.files);
+                    handleFileSelection(files);
+                }});
+                
+                function handleFileSelection(files) {{
+                    selectedFiles = files;
+                    displaySelectedImages();
+                    uploadBtn.style.display = files.length > 0 ? 'inline-block' : 'none';
+                }}
+                
+                function displaySelectedImages() {{
+                    previewArea.innerHTML = '';
+                    
+                    if (selectedFiles.length > 0) {{
+                        const header = document.createElement('h4');
+                        header.textContent = `Выбрано изображений: ${{selectedFiles.length}}`;
+                        header.style.color = '#007cba';
+                        previewArea.appendChild(header);
+                        
+                        const imageGrid = document.createElement('div');
+                        imageGrid.style.display = 'grid';
+                        imageGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+                        imageGrid.style.gap = '10px';
+                        imageGrid.style.marginTop = '15px';
+                        
+                        selectedFiles.forEach((file, index) => {{
+                            const reader = new FileReader();
+                            reader.onload = function(e) {{
+                                const imageItem = document.createElement('div');
+                                imageItem.style.border = '1px solid #ddd';
+                                imageItem.style.borderRadius = '4px';
+                                imageItem.style.padding = '8px';
+                                imageItem.style.background = 'white';
+                                imageItem.style.textAlign = 'center';
+                                imageItem.innerHTML = `
+                                    <img src="${{e.target.result}}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 4px;">
+                                    <div style="font-size: 10px; margin-top: 5px; word-break: break-all;">
+                                        <strong>${{file.name.substring(0, 15)}}${{file.name.length > 15 ? '...' : ''}}</strong><br>
+                                        ${{(file.size / 1024 / 1024).toFixed(1)}} MB
+                                    </div>
+                                    <button onclick="removeImage(${{index}})" 
+                                            style="background: #dc3545; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; margin-top: 5px;">×</button>
+                                `;
+                                imageGrid.appendChild(imageItem);
+                            }};
+                            reader.readAsDataURL(file);
+                        }});
+                        
+                        previewArea.appendChild(imageGrid);
+                    }}
+                }}
+                
+                function removeImage(index) {{
+                    selectedFiles.splice(index, 1);
+                    displaySelectedImages();
+                    uploadBtn.style.display = selectedFiles.length > 0 ? 'inline-block' : 'none';
+                }}
+                
+                function clearSelectedImages() {{
+                    selectedFiles = [];
+                    fileInput.value = '';
+                    displaySelectedImages();
+                    uploadBtn.style.display = 'none';
+                }}
+                
+                function uploadSelectedImages() {{
+                    if (selectedFiles.length === 0) {{
+                        alert('Пожалуйста, выберите изображения для загрузки');
+                        return;
+                    }}
+                    
+                    const formData = new FormData();
+                    formData.append('property_id', '{obj.pk}');
+                    
+                    selectedFiles.forEach(file => {{
+                        formData.append('images', file);
+                    }});
+                    
+                    // Показать прогресс
+                    document.getElementById('upload-progress').style.display = 'block';
+                    document.getElementById('progress-text').textContent = `Загружается ${{selectedFiles.length}} изображений...`;
+                    uploadBtn.disabled = true;
+                    
+                    fetch('{upload_url}', {{
+                        method: 'POST',
+                        body: formData,
+                        headers: {{
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }}
+                    }})
+                    .then(response => response.json())
+                    .then(data => {{
+                        document.getElementById('upload-progress').style.display = 'none';
+                        uploadBtn.disabled = false;
+                        
+                        if (data.success) {{
+                            alert(`Успешно загружено ${{data.images.length}} изображений!`);
+                            clearSelectedImages();
+                            // Перезагружаем страницу чтобы увидеть новые изображения в inline
+                            location.reload();
+                        }} else {{
+                            alert(`Ошибка: ${{data.message}}`);
+                        }}
+                    }})
+                    .catch(error => {{
+                        document.getElementById('upload-progress').style.display = 'none';
+                        uploadBtn.disabled = false;
+                        console.error('Error:', error);
+                        alert('Произошла ошибка при загрузке изображений');
+                    }});
+                }}
+            </script>
+            """
+            return mark_safe(html)
+        else:
+            return mark_safe('<p><em>Сохраните объект недвижимости, чтобы загружать изображения.</em></p>')
+    
+    bulk_image_upload_widget.short_description = 'Массовая загрузка изображений'
+
     fieldsets = (
         ('Основная информация', {
             'fields': ('title', 'slug', 'property_type', 'deal_type', 'status', 'is_featured', 'is_active')
@@ -191,6 +379,29 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
             'description': 'Оставьте поля пустыми для автоматической генерации SEO данных на основе шаблонов'
         }),
     )
+
+    # Добавляем readonly поля для отображения кастомного виджета
+    def get_readonly_fields(self, request, obj=None):
+        """Добавляем readonly поле только если объект уже существует"""
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+        if obj and obj.pk:
+            readonly_fields.append('bulk_image_upload_widget')
+        return readonly_fields
+    
+    def get_fieldsets(self, request, obj=None):
+        """Добавляем секцию массовой загрузки изображений только при редактировании существующего объекта"""
+        fieldsets = list(super().get_fieldsets(request, obj))
+        
+        # Добавляем секцию массовой загрузки только если объект уже существует
+        if obj and obj.pk:
+            fieldsets.insert(-1, (
+                'Массовая загрузка изображений', {
+                    'fields': ('bulk_image_upload_widget',),
+                    'description': 'Загрузите несколько изображений одновременно'
+                }
+            ))
+        
+        return fieldsets
 
 
 @admin.register(PropertyType)

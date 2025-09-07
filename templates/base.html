@@ -228,13 +228,13 @@
                             </button>
                             <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                                 <div class="py-1">
-                                    <a href="{% url 'property_sale' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Продажа" %}</a>
-                                    <a href="{% url 'property_rent' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Аренда" %}</a>
+                                    <a href="{% url 'properties:property_sale' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Продажа" %}</a>
+                                    <a href="{% url 'properties:property_rent' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Аренда" %}</a>
                                     <div class="border-t border-gray-200"></div>
                                     <a href="{% url 'location_list' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Районы" %}</a>
                                     <div class="border-t border-gray-200"></div>
                                     {% for type in property_types %}
-                                        <a href="{% url 'property_by_type' type.name %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{{ type.name_display }}</a>
+                                        <a href="{% url 'properties:property_by_type' type.name %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{{ type.name_display }}</a>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -289,7 +289,7 @@
                 <!-- Right side controls -->
                 <div class="hidden md:flex items-center space-x-2 xl:space-x-4 nav-controls">
                     <!-- Favorites Menu -->
-                    <a href="{% url 'property_favorites' %}" class="relative" title="{% trans 'Избранное' %}">
+                    <a href="{% url 'properties:property_favorites' %}" class="relative" title="{% trans 'Избранное' %}">
                         <div class="bg-white w-10 h-10 rounded-full transition-all duration-200 group shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center border border-gray-200 hover:border-red-200">
                             <i id="nav-favorites-heart" class="far fa-heart text-gray-600 transition-all duration-200"></i>
                         </div>
@@ -377,13 +377,13 @@
                             </svg>
                         </button>
                         <div id="property-submenu" class="hidden ml-4 mt-1 space-y-1">
-                            <a href="{% url 'property_sale' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Продажа" %}</a>
-                            <a href="{% url 'property_rent' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Аренда" %}</a>
+                            <a href="{% url 'properties:property_sale' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Продажа" %}</a>
+                            <a href="{% url 'properties:property_rent' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Аренда" %}</a>
                             <div class="border-t border-gray-200 my-1"></div>
                             <a href="{% url 'location_list' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Районы" %}</a>
                             <div class="border-t border-gray-200 my-1"></div>
                             {% for type in property_types %}
-                                <a href="{% url 'property_by_type' type.name %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{{ type.name_display }}</a>
+                                <a href="{% url 'properties:property_by_type' type.name %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{{ type.name_display }}</a>
                             {% endfor %}
                         </div>
                     </div>
@@ -445,7 +445,7 @@
 
                     <!-- Mobile Favorites Menu -->
                     <div class="border-t border-gray-200 pt-2 mt-2">
-                        <a href="{% url 'property_favorites' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                        <a href="{% url 'properties:property_favorites' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
                             <i id="mobile-nav-favorites-heart" class="far fa-heart mr-2 text-gray-600"></i>{% trans "Избранное" %} 
                             <span id="mobile-nav-favorites-count" class="favorites-count ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold hidden">0</span>
                         </a>
@@ -541,10 +541,10 @@
                 <div>
                     <h6 class="text-lg font-semibold mb-4">{% trans "Недвижимость" %}</h6>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'property_by_type' 'villa' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Виллы" %}</a></li>
-                        <li><a href="{% url 'property_by_type' 'apartment' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Апартаменты" %}</a></li>
-                        <li><a href="{% url 'property_by_type' 'townhouse' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Таунхаус" %}</a></li>
-                        <li><a href="{% url 'property_by_type' 'land' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Земельный участок" %}</a></li>
+                        <li><a href="{% url 'properties:property_by_type' 'villa' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Виллы" %}</a></li>
+                        <li><a href="{% url 'properties:property_by_type' 'apartment' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Апартаменты" %}</a></li>
+                        <li><a href="{% url 'properties:property_by_type' 'townhouse' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Таунхаус" %}</a></li>
+                        <li><a href="{% url 'properties:property_by_type' 'land' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Земельный участок" %}</a></li>
                     </ul>
                 </div>
 

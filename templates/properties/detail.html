@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             submitBtn.textContent = '{% trans "Отправляем..." %}';
             
-            fetch(`{% url 'property_inquiry' property.pk %}`, {
+            fetch(`{% url 'properties:property_inquiry' property.pk %}`, {
                 method: 'POST',
                 body: formData,
                 headers: {

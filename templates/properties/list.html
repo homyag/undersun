@@ -203,7 +203,7 @@
                                 <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
                                     {% trans "Применить" %}
                                 </button>
-                                <a href="{% url 'property_list' %}" class="w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors block">
+                                <a href="{% url 'properties:property_list' %}" class="w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors block">
                                     {% trans "Очистить" %}
                                 </a>
                             </div>
@@ -313,7 +313,7 @@
                         </div>
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Объекты не найдены" %}</h3>
                         <p class="text-gray-600 mb-6">{% trans "Попробуйте изменить параметры поиска или сбросить фильтры" %}</p>
-                        <a href="{% url 'property_list' %}" class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-colors">
+                        <a href="{% url 'properties:property_list' %}" class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-colors">
                             {% trans "Сбросить фильтры" %}
                         </a>
                     </div>
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (districtSlug) {
                 // Fetch locations for the selected district
-                fetch(`{% url 'get_locations_for_district' %}?district=${districtSlug}`)
+                fetch(`{% url 'properties:get_locations_for_district' %}?district=${districtSlug}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {

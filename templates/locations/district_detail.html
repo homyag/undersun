@@ -63,7 +63,7 @@
             
             {% if properties.count > 6 %}
                 <div class="text-center mt-8">
-                    <a href="{% url 'property_list' %}?district={{ district.slug }}" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                    <a href="{% url 'properties:property_list' %}?district={{ district.slug }}" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">
                         {% trans "Посмотреть все объекты" %}
                     </a>
                 </div>
