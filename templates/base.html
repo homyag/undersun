@@ -121,10 +121,13 @@
     {% endblock %}
 </head>
 <body>
-    <!-- Top Contact Bar -->
-    <div id="contact-bar" class="bg-primary text-white py-2 hidden md:block fixed top-0 w-full z-50 transition-transform duration-300">
+    <!-- Top Contact Bar - Desktop: top, Mobile: bottom -->
+    <div id="contact-bar" class="bg-primary text-white py-2 fixed w-full z-50 transition-transform duration-300
+                                 md:top-0 md:bottom-auto
+                                 bottom-0 md:left-auto md:right-auto left-0 right-0">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center text-sm">
+            <!-- Desktop layout -->
+            <div class="hidden md:flex justify-between items-center text-sm">
                 <div class="flex items-center space-x-6">
                     <a href="https://wa.me/66633033133" class="flex items-center hover:text-accent transition-colors" target="_blank">
                         <i class="fab fa-whatsapp mr-2"></i>
@@ -162,13 +165,46 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Mobile layout - icons left, phone right -->
+            <div class="md:hidden flex justify-between items-center text-xs py-2">
+                <!-- Social Icons - Left -->
+                <div class="flex items-center space-x-3">
+                    <a href="https://youtube.com/@undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-youtube text-base"></i>
+                    </a>
+                    <a href="https://t.me/undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-telegram text-base"></i>
+                    </a>
+                    <a href="https://wa.me/66633033133" class="text-green-400 hover:text-green-300 transition-colors" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-whatsapp text-base"></i>
+                    </a>
+                    <a href="https://instagram.com/undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-instagram text-base"></i>
+                    </a>
+                    <a href="https://linkedin.com/company/undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-linkedin-in text-base"></i>
+                    </a>
+                    <a href="https://facebook.com/undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-facebook-f text-base"></i>
+                    </a>
+                </div>
+                
+                <!-- Phone Number - Right -->
+                <div class="flex items-center">
+                    <a href="tel:+66633033133" class="flex items-center hover:text-accent transition-colors font-medium">
+                        <i class="fas fa-phone mr-2 text-sm"></i>
+                        <span class="text-sm">+66 63 303 3133</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Navigation -->
     <nav id="main-nav" class="bg-white text-gray-900 fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 md:top-10 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center h-16 md:h-20">
+            <div class="flex justify-between items-center h-14 md:h-14">
                 <!-- Logo -->
                 <div class="flex items-center flex-shrink-0">
                     <a href="{% url 'core:home' %}" class="flex items-center">
@@ -301,7 +337,7 @@
                 </div>
 
                 <!-- Mobile menu button and search -->
-                <div class="md:hidden flex items-center space-x-3 flex-shrink-0">
+                <div class="md:hidden flex items-center space-x-3 flex-shrink-0 mobile-menu-exception">
                     <!-- Mobile Search Button -->
                     <button onclick="toggleMobileSearch()" class="text-primary hover:text-accent transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,7 +355,7 @@
                 </div>
                 
                 <!-- Mobile Search Form -->
-                <div id="mobile-search" class="md:hidden hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-200 p-4 z-40">
+                <div id="mobile-search" class="md:hidden hidden absolute top-14 left-0 right-0 bg-white border-b border-gray-200 p-4 z-40">
                     <form class="flex" method="get" action="{% url 'core:search' %}">
                         <input type="search" name="q" placeholder="{% trans 'Поиск...' %}" class="flex-1 px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors">
                         <button type="submit" class="px-4 py-2 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
@@ -466,7 +502,7 @@
     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
     <!-- Main Content -->
-    <main class="pt-16 md:pt-30">
+    <main class="pt-14 md:pt-24 pb-16 md:pb-0">
         {% if messages %}
             <div class="max-w-7xl mx-auto px-4">
                 {% for message in messages %}
@@ -545,9 +581,32 @@
     </footer>
 
     <!-- WhatsApp Button -->
-    <a href="https://wa.me/66633033133" class="whatsapp-btn" target="_blank">
+    <a href="https://wa.me/66633033133" class="whatsapp-btn" target="_blank" style="position: fixed; right: 15px; bottom: 85px; z-index: 1000; width: 50px; height: 50px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; text-decoration: none; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);">
         <i class="fab fa-whatsapp"></i>
     </a>
+    
+    <!-- CSS Override for Mobile WhatsApp Button -->
+    <style>
+        @media (min-width: 768px) {
+            .whatsapp-btn {
+                bottom: 20px !important;
+                width: 60px !important;
+                height: 60px !important;
+                font-size: 24px !important;
+                right: 20px !important;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .whatsapp-btn {
+                bottom: 85px !important;
+                width: 50px !important;
+                height: 50px !important;
+                font-size: 20px !important;
+                right: 15px !important;
+            }
+        }
+    </style>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>

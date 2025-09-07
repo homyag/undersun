@@ -35,8 +35,9 @@
                 </div>
 
                 <!-- Поисковая форма -->
-                <div class="w-full flex justify-center">
-                    <form method="get" action="{% url 'core:search' %}" class="bg-white flex" style="width: 1000px; height: 72px; border-radius: 3px; box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25); overflow: hidden; max-width: 100%;">
+                <div class="w-full flex justify-center px-4">
+                    <!-- Desktop форма -->
+                    <form method="get" action="{% url 'core:search' %}" class="hidden lg:flex bg-white rounded-md shadow-lg overflow-hidden w-full max-w-5xl h-18">
                         <!-- Поле "Тип" -->
                         <div class="border-r border-[#F2F5F8] flex items-center flex-shrink-0" style="width: 140px; height: 72px;">
                             <select name="type" class="w-full bg-transparent border-none outline-none text-gray-900 text-sm cursor-pointer appearance-none" style="height: 72px; padding-left: 12px; padding-right: 40px; background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e'); background-position: right 12px center; background-repeat: no-repeat; background-size: 16px 16px;">
@@ -78,32 +79,63 @@
                             </button>
                         </div>
                     </form>
-                </div>
 
-                <!-- Sales Points -->
-                <div class="flex justify-center">
-                    <div class="flex text-white" style="width: 1000px;">
-                        <div class="text-left" style="width: 333px;">
-                            <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">5 лет</div>
-                            <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">в недвижимости Пхукета</div>
-                        </div>
-                        <div class="text-left" style="width: 333px;">
-                            <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">600+</div>
-                            <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">актуальных объектов</div>
-                        </div>
-                        <div class="text-left" style="width: 334px;">
-                            <div class="text-lg sm:text-2xl lg:text-2xl font-bold text-accent">0%</div>
-                            <div class="text-xs sm:text-sm lg:text-sm font-bold leading-tight text-accent">рассрочка от застройщиков</div>
-                        </div>
+                    <!-- Mobile форма -->
+                    <div class="lg:hidden w-full max-w-md">
+                        <form method="get" action="{% url 'core:search' %}" class="bg-white rounded-lg shadow-lg p-4 space-y-4">
+                            <!-- Поле "Тип" -->
+                            <div>
+                                <select name="type" class="w-full h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm cursor-pointer focus:ring-2 focus:ring-accent focus:border-accent">
+                                    <option value="">{% trans "Все типы" %}</option>
+                                    {% for type in property_types %}
+                                        <option value="{{ type.name }}">{{ type.name_display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Поле "Район" -->
+                            <div>
+                                <select name="district" class="w-full h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm cursor-pointer focus:ring-2 focus:ring-accent focus:border-accent">
+                                    <option value="">{% trans "Все районы" %}</option>
+                                    {% for district in districts %}
+                                        <option value="{{ district.slug }}">{{ district.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Поля цены в одной строке -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="number" name="min_price" class="h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm placeholder-gray-500 focus:ring-2 focus:ring-accent focus:border-accent" placeholder="{% trans 'Мин. цена' %}">
+                                <input type="number" name="max_price" class="h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm placeholder-gray-500 focus:ring-2 focus:ring-accent focus:border-accent" placeholder="{% trans 'Макс. цена' %}">
+                            </div>
+                            
+                            <!-- Кнопка поиска -->
+                            <button type="submit" class="w-full h-12 bg-accent hover:bg-yellow-500 text-white font-bold rounded-md transition-colors duration-300 flex items-center justify-center">
+                                <span class="mr-2">{% trans "Найти" %} {{ total_properties_count|default:"0" }} {% trans "объектов" %}</span>
+                                <img src="{% static 'images/home_page/homepage_hero_section/hero_section_find_button_arrow.svg' %}" alt="Search" class="w-5 h-5">
+                            </button>
+                        </form>
                     </div>
                 </div>
 
-                <!-- Подробные описания - только на планшетах и десктопах -->
-                <div class="flex justify-center">
-                    <div class="hidden md:flex text-white text-xs lg:text-sm font-normal" style="width: 1000px; margin-top: 6px;">
-                        <div class="text-left" style="width: 333px;">Понимаем рынок и видим возможности, которые другие пропускают.</div>
-                        <div class="text-left" style="width: 333px;">От бюджетных студий до элитных вилл.</div>
-                        <div class="text-left" style="width: 334px;">Покупка без переплат с гибкими условиями платежа.</div>
+                <!-- Sales Points -->
+                <div class="px-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 text-center sm:text-left text-white max-w-5xl mx-auto">
+                        <div>
+                            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">5 лет</div>
+                            <div class="text-sm sm:text-base lg:text-lg font-bold leading-tight text-accent">в недвижимости Пхукета</div>
+                            <div class="hidden md:block text-white text-xs lg:text-sm font-normal mt-2">Понимаем рынок и видим возможности, которые другие пропускают.</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">600+</div>
+                            <div class="text-sm sm:text-base lg:text-lg font-bold leading-tight text-accent">актуальных объектов</div>
+                            <div class="hidden md:block text-white text-xs lg:text-sm font-normal mt-2">От бюджетных студий до элитных вилл.</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">0%</div>
+                            <div class="text-sm sm:text-base lg:text-lg font-bold leading-tight text-accent">рассрочка от застройщиков</div>
+                            <div class="hidden md:block text-white text-xs lg:text-sm font-normal mt-2">Покупка без переплат с гибкими условиями платежа.</div>
+                        </div>
                     </div>
                 </div>
             </div>

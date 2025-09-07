@@ -73,7 +73,8 @@
       <div class="relative h-96">
         <div class="flex gap-6 h-full">
           <!-- Большой отзыв (активный) - 329x392 в Figma -->
-          <div id="main-review" class="w-80 h-96 bg-white rounded shadow-lg transition-all duration-500 transform p-10 flex flex-col">
+          <!-- На мобильных: полная ширина, на десктопе: фиксированная ширина -->
+          <div id="main-review" class="w-full md:w-80 h-96 bg-white rounded shadow-lg transition-all duration-500 transform p-6 md:p-10 flex flex-col">
             <div class="flex items-center space-x-4 mb-6">
               <div id="main-avatar" class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-base">
                 А
@@ -99,7 +100,8 @@
           </div>
 
           <!-- Маленький отзыв (следующий) - 270x285 в Figma -->
-          <div id="next-review" class="w-64 h-72 bg-gray-100 rounded-lg shadow-md transition-all duration-500 transform cursor-pointer hover:bg-gray-200 p-6 flex flex-col mt-14">
+          <!-- Скрыт на мобильных, показан только на десктопе -->
+          <div id="next-review" class="hidden md:flex w-64 h-72 bg-gray-100 rounded-lg shadow-md transition-all duration-500 transform cursor-pointer hover:bg-gray-200 p-6 flex-col mt-14">
             <div class="flex items-center space-x-3 mb-4">
               <div id="next-avatar" class="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                 M
@@ -225,12 +227,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('main-avatar').textContent = currentReview.avatar;
     document.getElementById('main-avatar').className = `w-12 h-12 bg-gradient-to-br ${currentReview.avatarColor} rounded-full flex items-center justify-center text-white font-bold text-base`;
 
-    // Обновляем следующий отзыв
-    document.getElementById('next-name').textContent = nextReview.name;
-    document.getElementById('next-type').textContent = nextReview.type;
-    document.getElementById('next-text').textContent = nextReview.shortText;
-    document.getElementById('next-avatar').textContent = nextReview.avatar;
-    document.getElementById('next-avatar').className = `w-10 h-10 bg-gradient-to-br ${nextReview.avatarColor} rounded-full flex items-center justify-center text-white font-bold text-sm`;
+    // Обновляем следующий отзыв (только если он виден на десктопе)
+    const nextNameElement = document.getElementById('next-name');
+    if (nextNameElement) {
+      document.getElementById('next-name').textContent = nextReview.name;
+      document.getElementById('next-type').textContent = nextReview.type;
+      document.getElementById('next-text').textContent = nextReview.shortText;
+      document.getElementById('next-avatar').textContent = nextReview.avatar;
+      document.getElementById('next-avatar').className = `w-10 h-10 bg-gradient-to-br ${nextReview.avatarColor} rounded-full flex items-center justify-center text-white font-bold text-sm`;
+    }
   }
 
   function nextReview() {
@@ -247,8 +252,11 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('next-btn').addEventListener('click', nextReview);
   document.getElementById('prev-btn').addEventListener('click', prevReview);
 
-  // Клик по маленькому отзыву для переключения
-  document.getElementById('next-review').addEventListener('click', nextReview);
+  // Клик по маленькому отзыву для переключения (только на десктопе)
+  const nextReviewElement = document.getElementById('next-review');
+  if (nextReviewElement) {
+    nextReviewElement.addEventListener('click', nextReview);
+  }
 
   // Автопрокрутка
   setInterval(nextReview, 5000);
