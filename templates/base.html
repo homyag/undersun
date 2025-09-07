@@ -660,26 +660,39 @@
             
             // Only apply scroll behavior on medium screens and up where contact bar is visible
             if (window.innerWidth >= 768) {
-                if (scrollTop > 50) {
-                    // Hide contact bar and move nav to top
+                // Determine scroll direction
+                const scrollingDown = scrollTop > lastScrollTop;
+                const scrollingUp = scrollTop < lastScrollTop;
+                
+                if (scrollTop <= 50) {
+                    // Always show contact bar when near the top
+                    if (contactBar) {
+                        contactBar.style.transform = 'translateY(0)';
+                    }
+                    if (mainNav) {
+                        mainNav.style.top = '40px'; // Height of contact bar
+                    }
+                } else if (scrollingUp && scrollTop > 100) {
+                    // Show contact bar when scrolling up (but not immediately from the top)
+                    if (contactBar) {
+                        contactBar.style.transform = 'translateY(0)';
+                    }
+                    if (mainNav) {
+                        mainNav.style.top = '40px'; // Height of contact bar
+                    }
+                } else if (scrollingDown && scrollTop > 100) {
+                    // Hide contact bar when scrolling down
                     if (contactBar) {
                         contactBar.style.transform = 'translateY(-100%)';
                     }
                     if (mainNav) {
                         mainNav.style.top = '0';
                     }
-                } else {
-                    // Show contact bar and move nav back down
-                    if (contactBar) {
-                        contactBar.style.transform = 'translateY(0)';
-                    }
-                    if (mainNav) {
-                        mainNav.style.top = '2.5rem'; // 10px in rem
-                    }
                 }
+                
+                // Update last scroll position for next comparison
+                lastScrollTop = scrollTop;
             }
-            
-            lastScrollTop = scrollTop;
         });
 
         // Handle window resize
