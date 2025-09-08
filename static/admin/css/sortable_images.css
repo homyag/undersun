@@ -1,0 +1,118 @@
+/* Стили для drag & drop сортировки изображений в админке */
+
+/* Основной контейнер для inline изображений */
+.inline-group .tabular tr.form-row.has_original {
+    transition: all 0.3s ease;
+    cursor: move;
+}
+
+/* Стили для ручки перетаскивания */
+.drag-handle {
+    display: inline-block;
+    cursor: grab;
+    padding: 5px;
+    color: #666;
+    font-size: 18px;
+    user-select: none;
+    vertical-align: middle;
+    transition: color 0.2s ease;
+}
+
+.drag-handle:hover {
+    color: #007cba;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+    color: #005a8b;
+}
+
+/* Стили во время перетаскивания */
+.sortable-ghost {
+    opacity: 0.5;
+    background-color: #f0f8ff !important;
+    border: 2px dashed #007cba !important;
+}
+
+.sortable-chosen {
+    background-color: #fff3cd !important;
+    border: 2px solid #ffc107 !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: scale(1.02);
+}
+
+.sortable-drag {
+    opacity: 0.8;
+    background-color: white !important;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    transform: rotate(2deg);
+}
+
+/* Анимация для строк */
+.inline-group .tabular tr.form-row {
+    transition: all 0.3s ease;
+}
+
+/* Стили для успешного сохранения порядка */
+.order-updated {
+    background-color: #d4edda !important;
+    animation: highlight 2s ease-in-out;
+}
+
+@keyframes highlight {
+    0% {
+        background-color: #28a745 !important;
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Улучшение видимости превью изображений */
+.field-image_preview {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 8px !important;
+}
+
+/* Стили для поля order при сортировке */
+.field-order input {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    font-weight: bold;
+    text-align: center;
+    width: 60px;
+}
+
+/* Индикатор загрузки при сохранении порядка */
+.saving-order {
+    position: relative;
+}
+
+.saving-order::after {
+    content: "💾 Сохранение...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 124, 186, 0.9);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 1000;
+}
+
+/* Responsive стили */
+@media (max-width: 768px) {
+    .drag-handle {
+        font-size: 16px;
+        padding: 3px;
+    }
+    
+    .field-image_preview img {
+        width: 80px !important;
+        height: 60px !important;
+    }
+}

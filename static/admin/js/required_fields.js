@@ -16,14 +16,20 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         }
         
+        // Найдем родительский .form-row элемент
+        const formRow = input.closest('.form-row');
+        if (!formRow) {
+            return false; // Если нет родительского .form-row, пропускаем
+        }
+        
         // Для Django - проверяем наличие звездочки в label
-        const label = input.closest('.form-row').querySelector('label');
+        const label = formRow.querySelector('label');
         if (label && label.textContent.includes('*')) {
             return true;
         }
         
         // Для Django - проверяем наличие класса 'required' в контейнере
-        if (input.closest('.form-row').classList.contains('required')) {
+        if (formRow.classList.contains('required')) {
             return true;
         }
         
@@ -95,12 +101,16 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
         
         specificRequiredFields.forEach(function(selector) {
-            const field = document.querySelector(selector);
-            if (field) {
-                const formRow = field.closest('.form-row');
-                if (formRow) {
-                    markRequiredField(formRow);
+            try {
+                const field = document.querySelector(selector);
+                if (field) {
+                    const formRow = field.closest('.form-row');
+                    if (formRow) {
+                        markRequiredField(formRow);
+                    }
                 }
+            } catch (error) {
+                // Тихо игнорируем ошибки селекторов - поле может не существовать
             }
         });
     }
@@ -132,6 +142,4 @@ document.addEventListener('DOMContentLoaded', function() {
         childList: true,
         subtree: true
     });
-    
-    console.log('Required fields processor initialized');
 });

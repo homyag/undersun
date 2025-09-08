@@ -771,3 +771,54 @@ def bulk_upload_images(request):
             'success': False,
             'message': f'Произошла ошибка: {str(e)}'
         })
+
+
+@require_POST
+@csrf_exempt
+def update_image_order(request):
+    """AJAX endpoint для обновления порядка изображений"""
+    import json
+    from .models import PropertyImage
+    
+    try:
+        # Получаем JSON данные
+        data = json.loads(request.body)
+        images_data = data.get('images', [])
+        
+        if not images_data:
+            return JsonResponse({
+                'success': False,
+                'message': 'Нет данных для обновления'
+            })
+        
+        # Обновляем порядок изображений
+        updated_count = 0
+        for image_data in images_data:
+            image_id = image_data.get('id')
+            new_order = image_data.get('order')
+            
+            if image_id and new_order is not None:
+                try:
+                    property_image = PropertyImage.objects.get(id=image_id)
+                    property_image.order = new_order
+                    property_image.save(update_fields=['order'])
+                    updated_count += 1
+                except PropertyImage.DoesNotExist:
+                    continue
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Обновлен порядок {updated_count} изображений',
+            'updated_count': updated_count
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Неверный формат JSON данных'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Произошла ошибка: {str(e)}'
+        })
