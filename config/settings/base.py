@@ -65,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.core.middleware.PermissionsPolicyMiddleware',  # Fix for admin permissions policy
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -238,11 +239,11 @@ TINYMCE_DEFAULT_CONFIG = {
     'selector': '.tinymce-content',  # Используем класс вместо всех textarea
     'theme': 'silver',
     'plugins': '''
-        textcolor save link image media preview codesample contextmenu
+        save link image media preview codesample
         table code lists fullscreen insertdatetime nonbreaking
-        contextmenu directionality searchreplace wordcount visualblocks
-        visualchars code fullscreen autolink lists charmap print hr
-        anchor pagebreak paste
+        directionality searchreplace wordcount visualblocks
+        visualchars code fullscreen autolink lists charmap
+        anchor pagebreak
     ''',
     'toolbar1': '''
         fullscreen preview bold italic underline | fontselect,
@@ -251,11 +252,10 @@ TINYMCE_DEFAULT_CONFIG = {
     ''',
     'toolbar2': '''
         visualblocks visualchars |
-        charmap hr pagebreak nonbreaking anchor | code |
+        charmap pagebreak nonbreaking anchor | code |
         link unlink | image media | table | codesample |
         searchreplace | undo redo
     ''',
-    'contextmenu': 'formats | link image',
     'menubar': True,
     'statusbar': True,
     'content_css': [

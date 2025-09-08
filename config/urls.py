@@ -12,6 +12,7 @@ urlpatterns = [
     path('currency/', include('apps.currency.urls')),  # URLs для валют
     path('tinymce/', include('tinymce.urls')),  # URLs для TinyMCE
     path('data-import/', include('data_import.urls')),  # URLs для импорта данных
+    path('admin-ajax/', include('apps.properties.admin_urls')),  # Admin AJAX endpoints без i18n
     path('', RedirectView.as_view(url='/ru/', permanent=True)),  # Редирект на русскую версию
 ]
 

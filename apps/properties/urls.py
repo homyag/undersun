@@ -15,6 +15,7 @@ urlpatterns = [
     path('ajax/inquiry/<int:property_id>/', views.property_inquiry, name='property_inquiry'),
     path('ajax/search-count/', views.ajax_search_count, name='ajax_search_count'),
     path('ajax/bulk-upload-images/', views.bulk_upload_images, name='bulk_upload_images'),
+    path('ajax/update-image-order/', views.update_image_order, name='update_image_order'),
     path('<slug:slug>/', views.PropertyDetailView.as_view(), name='property_detail'),
     path('type/<str:type_name>/', views.PropertyByTypeView.as_view(), name='property_by_type'),
 ]

@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django import forms
 from django.forms import ModelForm
+from django.utils.html import format_html
 from tinymce.widgets import TinyMCE
 # from modeltranslation.admin import TranslationAdmin
 from .models import (
@@ -37,7 +38,60 @@ class BaseAdminWithRequiredFields(admin.ModelAdmin):
 class PropertyImageInline(admin.TabularInline):
     model = PropertyImage
     extra = 1
-    fields = ('image', 'title', 'is_main', 'order')
+    fields = ('drag_handle', 'image_preview', 'image', 'title', 'is_main', 'order')
+    readonly_fields = ('drag_handle', 'image_preview')
+    
+    class Media:
+        css = {
+            'all': ('admin/css/sortable_images.css',)
+        }
+        js = ('https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js', 'admin/js/sortable_images.js')
+    
+    def drag_handle(self, obj):
+        """Ручка для перетаскивания"""
+        return format_html(
+            '<span class="drag-handle" style="cursor: grab; font-size: 18px; color: #666; user-select: none;">⋮⋮</span>'
+        )
+    drag_handle.short_description = '↕️'
+    
+    def image_preview(self, obj):
+        """Отображение превью изображения в админке"""
+        if obj.image:
+            # Определяем стили для главного изображения
+            border_style = 'border: 3px solid #28a745;' if obj.is_main else 'border: 1px solid #ddd;'
+            
+            # Создаем звездочку для главного изображения отдельно
+            star_html = format_html(
+                '<span style="position: absolute; top: -5px; right: -5px; background: #28a745; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">★</span>'
+            ) if obj.is_main else format_html('')
+            
+            return format_html(
+                '''
+                <div style="position: relative;">
+                    <a href="{}" target="_blank">
+                        <img src="{}" alt="{}" 
+                             style="width: 100px; height: 75px; object-fit: cover; border-radius: 4px; {}" />
+                    </a>
+                    {}
+                    <div style="font-size: 10px; margin-top: 2px; color: #666;">
+                        Порядок: {} {}
+                    </div>
+                </div>
+                ''',
+                obj.image.url,
+                obj.image.url,
+                obj.title or 'Изображение',
+                border_style,
+                star_html,
+                obj.order,
+                '| ГЛАВНОЕ' if obj.is_main else ''
+            )
+        return format_html('<div style="color: #999; font-style: italic;">Нет изображения</div>')
+    image_preview.short_description = '📷 Превью'
+    
+    class Meta:
+        verbose_name = 'Изображение'
+        verbose_name_plural = 'Изображения'
 
 
 class PropertyFeatureInline(admin.TabularInline):

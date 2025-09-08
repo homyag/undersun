@@ -4,6 +4,18 @@
 {% block extrahead %}
 {{ block.super }}
 <link rel="stylesheet" type="text/css" href="{% load static %}{% static 'admin/css/language_selector.css' %}">
+
+<!-- Fix for permissions policy violations in Django admin -->
+<script src="{% static 'admin/js/fixes/permissions-policy-fix.js' %}"></script>
+
+<!-- Required fields indicator -->
+<script src="{% static 'admin/js/required_fields.js' %}"></script>
+<link rel="stylesheet" href="{% static 'admin/css/required_fields.css' %}">
+
+<!-- Include SortableJS for drag & drop functionality -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="{% static 'admin/js/sortable_images.js' %}"></script>
+<link rel="stylesheet" href="{% static 'admin/css/sortable_images.css' %}">
 {% endblock %}
 
 {% block usertools %}
