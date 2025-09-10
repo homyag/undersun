@@ -26,8 +26,8 @@ function initializeSearchCounter() {
     const typeSelect = searchForm.querySelector('select[name="type"]') || 
                       document.querySelector('select[name="type"]');
     
-    const districtSelect = searchForm.querySelector('select[name="district"]') ||
-                          document.querySelector('select[name="district"]');
+    const locationSelect = searchForm.querySelector('select[name="location"]') ||
+                          document.querySelector('select[name="location"]');
     
     const minPriceInput = searchForm.querySelector('input[name="min_price"]') ||
                          document.querySelector('input[name="min_price"]');
@@ -44,7 +44,7 @@ function initializeSearchCounter() {
             // Create URL params for GET request
             const params = new URLSearchParams();
             if (typeSelect && typeSelect.value) params.append('type', typeSelect.value);
-            if (districtSelect && districtSelect.value) params.append('district', districtSelect.value);
+            if (locationSelect && locationSelect.value) params.append('location', locationSelect.value);
             if (minPriceInput && minPriceInput.value) params.append('min_price', minPriceInput.value);
             if (maxPriceInput && maxPriceInput.value) params.append('max_price', maxPriceInput.value);
             
@@ -105,8 +105,8 @@ function initializeSearchCounter() {
     if (typeSelect) {
         typeSelect.addEventListener('change', updateSearchCount);
     }
-    if (districtSelect) {
-        districtSelect.addEventListener('change', updateSearchCount);
+    if (locationSelect) {
+        locationSelect.addEventListener('change', updateSearchCount);
     }
     if (minPriceInput) {
         minPriceInput.addEventListener('input', updateSearchCount);

@@ -612,7 +612,7 @@ def apply_search_filters(queryset, filters):
     # Локация
     location = filters.get('location')  
     if location:
-        queryset = queryset.filter(location__slug=location)
+        queryset = queryset.filter(location__id=location)
     
     # Ценовые фильтры (в USD по умолчанию)
     min_price = filters.get('min_price')
