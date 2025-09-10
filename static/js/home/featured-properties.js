@@ -458,12 +458,28 @@
             return Math.round(amount).toLocaleString('en-US').replace(/,/g, ' ');
         }
 
-        // Get initial price for a property based on available data
+        // Get initial price for a property based on current header currency
         function getInitialPrice(property) {
+            // Get current currency from header first
+            const headerCurrency = getHeaderCurrency();
+            const currentCode = headerCurrency.code;
+            
             if (property.deal_type === 'rent') {
-                return property.price_rent_thb || property.price_rent_usd || property.price_rent_rub || 0;
+                // Try to get price in current header currency first
+                if (currentCode === 'RUB' && property.price_rent_rub) return property.price_rent_rub;
+                if (currentCode === 'USD' && property.price_rent_usd) return property.price_rent_usd;
+                if (currentCode === 'THB' && property.price_rent_thb) return property.price_rent_thb;
+                
+                // Fallback to any available price
+                return property.price_rent_thb || property.price_rent_rub || property.price_rent_usd || 0;
             } else {
-                return property.price_sale_thb || property.price_sale_usd || property.price_sale_rub || 0;
+                // Try to get price in current header currency first
+                if (currentCode === 'RUB' && property.price_sale_rub) return property.price_sale_rub;
+                if (currentCode === 'USD' && property.price_sale_usd) return property.price_sale_usd;
+                if (currentCode === 'THB' && property.price_sale_thb) return property.price_sale_thb;
+                
+                // Fallback to any available price
+                return property.price_sale_thb || property.price_sale_rub || property.price_sale_usd || 0;
             }
         }
 
@@ -472,19 +488,20 @@
             // Get current currency from header first
             const headerCurrency = getHeaderCurrency();
             
-            // Check if property has price in current currency
+            // Check if property has price in current currency from header
             const currentCode = headerCurrency.code;
             if (property.deal_type === 'rent') {
-                if (currentCode === 'THB' && property.price_rent_thb) return {code: 'THB', symbol: '฿'};
-                if (currentCode === 'USD' && property.price_rent_usd) return {code: 'USD', symbol: '$'};
                 if (currentCode === 'RUB' && property.price_rent_rub) return {code: 'RUB', symbol: '₽'};
+                if (currentCode === 'USD' && property.price_rent_usd) return {code: 'USD', symbol: '$'};
+                if (currentCode === 'THB' && property.price_rent_thb) return {code: 'THB', symbol: '฿'};
             } else {
-                if (currentCode === 'THB' && property.price_sale_thb) return {code: 'THB', symbol: '฿'};
-                if (currentCode === 'USD' && property.price_sale_usd) return {code: 'USD', symbol: '$'};
                 if (currentCode === 'RUB' && property.price_sale_rub) return {code: 'RUB', symbol: '₽'};
+                if (currentCode === 'USD' && property.price_sale_usd) return {code: 'USD', symbol: '$'};
+                if (currentCode === 'THB' && property.price_sale_thb) return {code: 'THB', symbol: '฿'};
             }
             
-            // Fallback to header currency
+            // If property doesn't have price in header currency, use header currency anyway
+            // The price conversion will happen in updatePropertyPrice function
             return headerCurrency;
         }
 
@@ -902,6 +919,28 @@
 
         // Initialize with villa properties
         renderProperties(featuredProperties.villa || []);
+
+        // Listen for currency changes from header
+        window.addEventListener('currencyChanged', function(event) {
+            const { currency, symbol } = event.detail;
+            
+            // Update all property currency buttons and prices
+            setTimeout(() => {
+                updateAllPricesToHeaderCurrency();
+                
+                // Also update all currency dropdown buttons to show new currency
+                const carouselContainer = document.getElementById('properties-carousel');
+                if (carouselContainer) {
+                    carouselContainer.querySelectorAll('.currency-toggle-btn').forEach(toggleBtn => {
+                        const propertyId = toggleBtn.dataset.propertyId;
+                        const currencySymbol = toggleBtn.querySelector(`.current-currency-${propertyId}`);
+                        const currencyCode = toggleBtn.querySelector(`.current-currency-code-${propertyId}`);
+                        if (currencySymbol) currencySymbol.textContent = symbol;
+                        if (currencyCode) currencyCode.textContent = currency;
+                    });
+                }
+            }, 100);
+        });
 
         // Handle window resize for mobile adaptation
         let resizeTimeout;
