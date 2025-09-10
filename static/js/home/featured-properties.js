@@ -505,6 +505,18 @@
             return headerCurrency;
         }
 
+        // Create dropdown container outside carousel
+        function createDropdownContainer() {
+            let dropdownContainer = document.getElementById('currency-dropdowns-container');
+            if (!dropdownContainer) {
+                dropdownContainer = document.createElement('div');
+                dropdownContainer.id = 'currency-dropdowns-container';
+                dropdownContainer.style.cssText = 'position: fixed; top: 0; left: 0; z-index: 99999; pointer-events: none;';
+                document.body.appendChild(dropdownContainer);
+            }
+            return dropdownContainer;
+        }
+
         // Initialize currency dropdowns for all property cards
         function initializeCurrencyDropdowns() {
             const carouselContainer = document.getElementById('properties-carousel');
@@ -512,47 +524,122 @@
                 return;
             }
 
+            // Create or get dropdown container
+            const dropdownContainer = createDropdownContainer();
+            dropdownContainer.innerHTML = ''; // Clear existing dropdowns
+
             // Find all currency toggle buttons
             const toggleButtons = carouselContainer.querySelectorAll('.currency-toggle-btn');
             
-            toggleButtons.forEach(toggleBtn => {
+            toggleButtons.forEach((toggleBtn, index) => {
                 const propertyId = toggleBtn.dataset.propertyId;
+                const dealType = toggleBtn.dataset.dealType;
+                
+                // Create dropdown HTML
+                const dropdownHTML = `
+                    <div class="currency-dropdown absolute w-32 bg-white rounded-lg shadow-xl border border-gray-200 transition-all duration-200"
+                         id="currency-dropdown-${propertyId}"
+                         style="display: none; opacity: 0; visibility: hidden; transform: scale(0.95); pointer-events: auto; box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
+                        <div class="py-1">
+                            <button type="button"
+                                    class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-t-lg"
+                                    data-currency="USD" data-symbol="$"
+                                    data-property-id="${propertyId}"
+                                    data-deal-type="${dealType}">
+                                <span class="font-mono mr-2 w-4">$</span>
+                                <span class="font-medium">USD</span>
+                            </button>
+                            <button type="button"
+                                    class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center"
+                                    data-currency="THB" data-symbol="฿"
+                                    data-property-id="${propertyId}"
+                                    data-deal-type="${dealType}">
+                                <span class="font-mono mr-2 w-4">฿</span>
+                                <span class="font-medium">THB</span>
+                            </button>
+                            <button type="button"
+                                    class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-b-lg"
+                                    data-currency="RUB" data-symbol="₽"
+                                    data-property-id="${propertyId}"
+                                    data-deal-type="${dealType}">
+                                <span class="font-mono mr-2 w-4">₽</span>
+                                <span class="font-medium">RUB</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                dropdownContainer.insertAdjacentHTML('beforeend', dropdownHTML);
                 const dropdown = document.getElementById(`currency-dropdown-${propertyId}`);
                 
                 if (!dropdown) {
                     return;
                 }
 
+                // Function to position dropdown relative to button
+                const positionDropdown = function() {
+                    const buttonRect = toggleBtn.getBoundingClientRect();
+                    
+                    // Position dropdown below button, centered
+                    // Since container is position: fixed, use viewport coordinates directly
+                    const left = buttonRect.left + (buttonRect.width / 2) - 64; // 64 is half of dropdown width (128px / 2)
+                    const top = buttonRect.bottom + 4; // 4px gap below button
+                    
+                    // Ensure dropdown doesn't go off screen
+                    const maxLeft = window.innerWidth - 128; // 128px dropdown width
+                    const finalLeft = Math.max(0, Math.min(left, maxLeft));
+                    
+                    dropdown.style.left = finalLeft + 'px';
+                    dropdown.style.top = top + 'px';
+                    dropdown.style.position = 'fixed';
+                };
+
                 // Create specific handlers for each button to avoid closure issues
                 const handleToggle = function(e) {
+                    
                     e.preventDefault();
                     e.stopPropagation();
 
                     // Close other dropdowns first
                     document.querySelectorAll('.currency-dropdown').forEach(d => {
                         if (d !== dropdown) {
-                            d.classList.add('opacity-0', 'invisible');
-                            d.classList.remove('opacity-100', 'visible');
+                            d.style.display = 'none';
+                            d.style.opacity = '0';
+                            d.style.visibility = 'hidden';
+                            d.style.transform = 'scale(0.95)';
                         }
                     });
 
                     // Toggle current dropdown
-                    const isVisible = dropdown.classList.contains('opacity-100');
+                    const isVisible = dropdown.style.display === 'block';
                     
                     if (isVisible) {
-                        dropdown.classList.add('opacity-0', 'invisible');
-                        dropdown.classList.remove('opacity-100', 'visible');
+                        // Hide dropdown
+                        dropdown.style.opacity = '0';
+                        dropdown.style.visibility = 'hidden';
+                        dropdown.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            dropdown.style.display = 'none';
+                        }, 200);
                     } else {
-                        dropdown.classList.remove('opacity-0', 'invisible');
-                        dropdown.classList.add('opacity-100', 'visible');
+                        // Position dropdown relative to button
+                        positionDropdown();
                         
-                        // Also set inline styles as backup
-                        dropdown.style.opacity = '1';
-                        dropdown.style.visibility = 'visible';
+                        // Show dropdown
                         dropdown.style.display = 'block';
+                        dropdown.style.opacity = '0';
+                        dropdown.style.visibility = 'hidden';
+                        dropdown.style.transform = 'scale(0.95)';
                         
-                        // Force repaint to ensure visibility
+                        // Force repaint
                         dropdown.offsetHeight;
+                        
+                        // Animate in
+                        requestAnimationFrame(() => {
+                            dropdown.style.opacity = '1';
+                            dropdown.style.visibility = 'visible';
+                            dropdown.style.transform = 'scale(1)';
+                        });
                     }
                 };
 
@@ -582,8 +669,12 @@
                         convertAndUpdateCardPrice(propertyId, currency, symbol, dealType);
 
                         // Close dropdown
-                        dropdown.classList.add('opacity-0', 'invisible');
-                        dropdown.classList.remove('opacity-100', 'visible');
+                        dropdown.style.opacity = '0';
+                        dropdown.style.visibility = 'hidden';
+                        dropdown.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            dropdown.style.display = 'none';
+                        }, 200);
                     };
 
                     // Remove old listeners and add new one
@@ -597,8 +688,12 @@
             const handleGlobalClick = function(e) {
                 if (!e.target.closest('.currency-dropdown') && !e.target.closest('.currency-toggle-btn')) {
                     document.querySelectorAll('.currency-dropdown').forEach(dropdown => {
-                        dropdown.classList.add('opacity-0', 'invisible');
-                        dropdown.classList.remove('opacity-100', 'visible');
+                        dropdown.style.opacity = '0';
+                        dropdown.style.visibility = 'hidden';
+                        dropdown.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            dropdown.style.display = 'none';
+                        }, 200);
                     });
                 }
             };
@@ -653,7 +748,10 @@
             }
 
             if (fromCurrency === toCurrency) {
-                priceElement.textContent = formatPrice(basePrice);
+                const displayPrice = dealType === 'rent' ?
+                    `${symbol}${formatPrice(basePrice)}/мес` :
+                    `${symbol}${formatPrice(basePrice)}`;
+                priceElement.innerHTML = displayPrice;
                 updatePricePerSqmFromData(propertyData, toCurrency);
                 return;
             }
@@ -664,7 +762,10 @@
             if (window.exchangeRates && window.exchangeRates[rateKey]) {
                 const rate = window.exchangeRates[rateKey];
                 const convertedPrice = basePrice * rate;
-                priceElement.textContent = formatPrice(convertedPrice);
+                const displayPrice = dealType === 'rent' ?
+                    `${symbol}${formatPrice(convertedPrice)}/мес` :
+                    `${symbol}${formatPrice(convertedPrice)}`;
+                priceElement.innerHTML = displayPrice;
                 updatePricePerSqmFromData(propertyData, toCurrency);
             } else {
                 fetch('/currency/rates/')
@@ -674,16 +775,25 @@
                             window.exchangeRates = data.rates;
                             const rate = data.rates[rateKey] || 1;
                             const convertedPrice = basePrice * rate;
-                            priceElement.textContent = formatPrice(convertedPrice);
+                            const displayPrice = dealType === 'rent' ?
+                                `${symbol}${formatPrice(convertedPrice)}/мес` :
+                                `${symbol}${formatPrice(convertedPrice)}`;
+                            priceElement.innerHTML = displayPrice;
                             updatePricePerSqmFromData(propertyData, toCurrency);
                         } else {
-                            priceElement.textContent = formatPrice(basePrice);
+                            const displayPrice = dealType === 'rent' ?
+                                `${symbol}${formatPrice(basePrice)}/мес` :
+                                `${symbol}${formatPrice(basePrice)}`;
+                            priceElement.innerHTML = displayPrice;
                             updatePricePerSqmFromData(propertyData, toCurrency);
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching exchange rates:', error);
-                        priceElement.textContent = formatPrice(basePrice);
+                        const displayPrice = dealType === 'rent' ?
+                            `${symbol}${formatPrice(basePrice)}/мес` :
+                            `${symbol}${formatPrice(basePrice)}`;
+                        priceElement.innerHTML = displayPrice;
                         updatePricePerSqmFromData(propertyData, toCurrency);
                     });
             }
@@ -865,37 +975,6 @@
                                         <i class="fas fa-chevron-down text-xs"></i>
                                     </button>
 
-                                    <!-- Dropdown Menu -->
-                                    <div class="currency-dropdown absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-32 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible transform scale-95 transition-all duration-200"
-                                         id="currency-dropdown-${property.id}"
-                                         style="z-index: 99999 !important; position: absolute !important; box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
-                                        <div class="py-1">
-                                            <button type="button"
-                                                    class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-t-lg"
-                                                    data-currency="USD" data-symbol="$"
-                                                    data-property-id="${property.id}"
-                                                    data-deal-type="${property.deal_type}">
-                                                <span class="font-mono mr-2 w-4">$</span>
-                                                <span class="font-medium">USD</span>
-                                            </button>
-                                            <button type="button"
-                                                    class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center"
-                                                    data-currency="THB" data-symbol="฿"
-                                                    data-property-id="${property.id}"
-                                                    data-deal-type="${property.deal_type}">
-                                                <span class="font-mono mr-2 w-4">฿</span>
-                                                <span class="font-medium">THB</span>
-                                            </button>
-                                            <button type="button"
-                                                    class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-b-lg"
-                                                    data-currency="RUB" data-symbol="₽"
-                                                    data-property-id="${property.id}"
-                                                    data-deal-type="${property.deal_type}">
-                                                <span class="font-mono mr-2 w-4">₽</span>
-                                                <span class="font-medium">RUB</span>
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             
@@ -958,4 +1037,31 @@
     } else {
         initFeaturedProperties();
     }
+    
+    // Test function for debugging
+    window.testCurrencyDropdown = function() {
+        console.log('=== Testing Currency Dropdown ===');
+        const buttons = document.querySelectorAll('.currency-toggle-btn');
+        const dropdowns = document.querySelectorAll('.currency-dropdown');
+        
+        console.log('Found buttons:', buttons.length);
+        console.log('Found dropdowns:', dropdowns.length);
+        
+        buttons.forEach((btn, i) => {
+            console.log(`Button ${i}:`, {
+                propertyId: btn.dataset.propertyId,
+                hasHandler: !!btn.currencyToggleHandler
+            });
+        });
+        
+        dropdowns.forEach((dropdown, i) => {
+            console.log(`Dropdown ${i}:`, {
+                id: dropdown.id,
+                display: dropdown.style.display,
+                opacity: dropdown.style.opacity,
+                visibility: dropdown.style.visibility
+            });
+        });
+    };
+    
 })();
