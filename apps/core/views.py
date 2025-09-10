@@ -150,6 +150,7 @@ class SearchView(TemplateView):
         query = self.request.GET.get('q', '')
         property_type = self.request.GET.get('type', '')
         district = self.request.GET.get('district', '')
+        location = self.request.GET.get('location', '')
         deal_type = self.request.GET.get('deal_type', '')
         min_price = self.request.GET.get('min_price', '')
         max_price = self.request.GET.get('max_price', '')
@@ -174,6 +175,9 @@ class SearchView(TemplateView):
 
         if district:
             properties = properties.filter(district__slug=district)
+        
+        if location:
+            properties = properties.filter(location__id=location)
 
         if deal_type:
             properties = properties.filter(deal_type=deal_type)
@@ -223,6 +227,7 @@ class SearchView(TemplateView):
             'q': query,
             'type': property_type,
             'district': district,
+            'location': location,
             'deal_type': deal_type,
             'min_price': min_price,
             'max_price': max_price,

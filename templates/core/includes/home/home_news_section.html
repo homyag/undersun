@@ -64,13 +64,8 @@
                 </p>
               {% endif %}
               
-              <!-- Category Badge -->
-              <div class="flex items-center justify-between">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent">
-                  {{ news.category.name }}
-                </span>
-                
-                <!-- Read More Link -->
+              <!-- Read More Link (Right-aligned) -->
+              <div class="flex justify-end">
                 <a href="{{ news.get_absolute_url }}" 
                    class="inline-flex items-center text-accent hover:text-yellow-500 font-medium text-sm transition-colors duration-300">
                   {% trans "Читать далее" %}

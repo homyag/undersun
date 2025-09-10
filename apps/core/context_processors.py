@@ -1,5 +1,5 @@
 from apps.properties.models import PropertyType, Property
-from apps.locations.models import District
+from apps.locations.models import District, Location
 from apps.core.models import SEOPage, Service
 import re
 
@@ -7,7 +7,7 @@ def site_context(request):
     """Глобальный контекст для всех шаблонов"""
     return {
         'property_types': PropertyType.objects.all(),
-        'districts': District.objects.all(),
+        'districts': District.objects.prefetch_related('locations').all(),
         'current_language': request.LANGUAGE_CODE,
         'menu_services': Service.get_menu_services(),
     }

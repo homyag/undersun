@@ -20,7 +20,7 @@
     <div class="space-y-4 mb-12">
       
       <!-- FAQ Item 1 -->
-      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300" style="min-height: 162px;">
+      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
         <button class="faq-question w-full text-left p-8 flex justify-between items-center hover:bg-gradient-to-r hover:from-accent/5 hover:to-yellow-100/50 rounded-xl transition-all duration-300">
           <span class="text-lg font-bold text-primary pr-4">
             {% trans "Можно ли купить недвижимость удалённо?" %}
@@ -39,7 +39,7 @@
       </div>
 
       <!-- FAQ Item 2 -->
-      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300" style="min-height: 162px;">
+      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"">
         <button class="faq-question w-full text-left p-8 flex justify-between items-center hover:bg-gradient-to-r hover:from-accent/5 hover:to-yellow-100/50 rounded-xl transition-all duration-300">
           <span class="text-lg font-bold text-primary pr-4">
             {% trans "Можно ли иностранцу купить недвижимость в собственность?" %}
@@ -62,7 +62,7 @@
       </div>
 
       <!-- FAQ Item 3 -->
-      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300" style="min-height: 162px;">
+      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
         <button class="faq-question w-full text-left p-8 flex justify-between items-center hover:bg-gradient-to-r hover:from-accent/5 hover:to-yellow-100/50 rounded-xl transition-all duration-300">
           <span class="text-lg font-bold text-primary pr-4">
             {% trans "Есть ли рассрочка?" %}
@@ -81,7 +81,7 @@
       </div>
 
       <!-- FAQ Item 4 -->
-      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300" style="min-height: 162px;">
+      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
         <button class="faq-question w-full text-left p-8 flex justify-between items-center hover:bg-gradient-to-r hover:from-accent/5 hover:to-yellow-100/50 rounded-xl transition-all duration-300">
           <span class="text-lg font-bold text-primary pr-4">
             {% trans "Сколько стоят услуги агента?" %}
@@ -100,7 +100,7 @@
       </div>
 
       <!-- FAQ Item 5 -->
-      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300" style="min-height: 162px;">
+      <div class="faq-item bg-white border-2 border-gray-100 hover:border-accent/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
         <button class="faq-question w-full text-left p-8 flex justify-between items-center hover:bg-gradient-to-r hover:from-accent/5 hover:to-yellow-100/50 rounded-xl transition-all duration-300">
           <span class="text-lg font-bold text-primary pr-4">
             {% trans "Какие налоги есть при покупке недвижимости?" %}
@@ -220,7 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
           const otherIcon = otherItem.querySelector('.faq-icon i');
           otherAnswer.style.maxHeight = '0px';
           otherIcon.className = 'fas fa-plus';
-          otherItem.style.minHeight = '162px';
           otherItem.classList.remove('border-accent/20');
           otherItem.classList.add('border-gray-100');
         }
@@ -230,13 +229,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if (isOpen) {
         answer.style.maxHeight = '0px';
         icon.className = 'fas fa-plus';
-        item.style.minHeight = '162px';
         item.classList.remove('border-accent/20');
         item.classList.add('border-gray-100');
       } else {
         answer.style.maxHeight = answer.scrollHeight + 'px';
         icon.className = 'fas fa-minus';
-        item.style.minHeight = '263px';
         item.classList.remove('border-gray-100');
         item.classList.add('border-accent/20');
       }

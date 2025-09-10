@@ -202,7 +202,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav id="main-nav" class="bg-white text-gray-900 fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 md:top-10 transition-all duration-300">
+    <nav id="main-nav" class="bg-white text-gray-900 fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 md:top-12 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-14 md:h-14">
                 <!-- Logo -->
@@ -670,7 +670,7 @@
                         contactBar.style.transform = 'translateY(0)';
                     }
                     if (mainNav) {
-                        mainNav.style.top = '40px'; // Height of contact bar
+                        mainNav.style.top = '48px'; // Height of contact bar (12 * 4px = 48px)
                     }
                 } else if (scrollingUp && scrollTop > 100) {
                     // Show contact bar when scrolling up (but not immediately from the top)
@@ -678,7 +678,7 @@
                         contactBar.style.transform = 'translateY(0)';
                     }
                     if (mainNav) {
-                        mainNav.style.top = '40px'; // Height of contact bar
+                        mainNav.style.top = '48px'; // Height of contact bar (12 * 4px = 48px)
                     }
                 } else if (scrollingDown && scrollTop > 100) {
                     // Hide contact bar when scrolling down

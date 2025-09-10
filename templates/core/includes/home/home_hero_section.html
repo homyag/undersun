@@ -48,12 +48,18 @@
                             </select>
                         </div>
                         
-                        <!-- Поле "Район" -->
+                        <!-- Поле "Локация" -->
                         <div class="border-r border-[#F2F5F8] flex items-center" style="width: 200px; height: 72px;">
-                            <select name="district" class="w-full bg-transparent border-none outline-none text-gray-900 text-sm cursor-pointer appearance-none" style="height: 72px; padding-left: 12px; padding-right: 40px; background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e'); background-position: right 12px center; background-repeat: no-repeat; background-size: 16px 16px;">
-                                <option value="">{% trans "Все районы" %}</option>
+                            <select name="location" class="w-full bg-transparent border-none outline-none text-gray-900 text-sm cursor-pointer appearance-none" style="height: 72px; padding-left: 12px; padding-right: 40px; background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e'); background-position: right 12px center; background-repeat: no-repeat; background-size: 16px 16px;">
+                                <option value="">{% trans "Все локации" %}</option>
                                 {% for district in districts %}
-                                    <option value="{{ district.slug }}">{{ district.name }}</option>
+                                    {% if district.locations.all %}
+                                        <optgroup label="{{ district.name }}">
+                                            {% for location in district.locations.all %}
+                                                <option value="{{ location.id }}">{{ location.name }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
@@ -93,12 +99,18 @@
                                 </select>
                             </div>
                             
-                            <!-- Поле "Район" -->
+                            <!-- Поле "Локация" -->
                             <div>
-                                <select name="district" class="w-full h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm cursor-pointer focus:ring-2 focus:ring-accent focus:border-accent">
-                                    <option value="">{% trans "Все районы" %}</option>
+                                <select name="location" class="w-full h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm cursor-pointer focus:ring-2 focus:ring-accent focus:border-accent">
+                                    <option value="">{% trans "Все локации" %}</option>
                                     {% for district in districts %}
-                                        <option value="{{ district.slug }}">{{ district.name }}</option>
+                                        {% if district.locations.all %}
+                                            <optgroup label="{{ district.name }}">
+                                                {% for location in district.locations.all %}
+                                                    <option value="{{ location.id }}">{{ location.name }}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
