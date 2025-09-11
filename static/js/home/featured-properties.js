@@ -362,8 +362,8 @@
 
             if (fromCurrency === toCurrency) {
                 const displayPrice = dealType === 'rent' ?
-                    `${symbol}${formatPrice(basePrice)}/мес` :
-                    `${symbol}${formatPrice(basePrice)}`;
+                    `${formatPrice(basePrice)}/мес` :
+                    `${formatPrice(basePrice)}`;
                 priceElement.innerHTML = displayPrice;
 
                 // Update price per sqm for sale properties
@@ -378,8 +378,8 @@
             if (window.exchangeRates && window.exchangeRates[rateKey]) {
                 const convertedPrice = basePrice * window.exchangeRates[rateKey];
                 const displayPrice = dealType === 'rent' ?
-                    `${symbol}${formatPrice(convertedPrice)}/мес` :
-                    `${symbol}${formatPrice(convertedPrice)}`;
+                    `${formatPrice(convertedPrice)}/мес` :
+                    `${formatPrice(convertedPrice)}`;
                 priceElement.innerHTML = displayPrice;
 
                 // Update price per sqm for sale properties
@@ -395,8 +395,8 @@
                             const convertedPrice = basePrice * rate;
 
                             const displayPrice = dealType === 'rent' ?
-                                `${symbol}${formatPrice(convertedPrice)}/мес` :
-                                `${symbol}${formatPrice(convertedPrice)}`;
+                                `${formatPrice(convertedPrice)}/мес` :
+                                `${formatPrice(convertedPrice)}`;
                             priceElement.innerHTML = displayPrice;
 
                             // Update price per sqm for sale properties
@@ -404,8 +404,8 @@
                         } else {
                             // Fallback to original price
                             const displayPrice = dealType === 'rent' ?
-                                `${symbol}${formatPrice(basePrice)}/мес` :
-                                `${symbol}${formatPrice(basePrice)}`;
+                                `${formatPrice(basePrice)}/мес` :
+                                `${formatPrice(basePrice)}`;
                             priceElement.innerHTML = displayPrice;
 
                             // Update price per sqm for sale properties
@@ -416,8 +416,8 @@
                         console.error('Error fetching exchange rates:', error);
                         // Fallback to original price
                         const displayPrice = dealType === 'rent' ?
-                            `${symbol}${formatPrice(basePrice)}/мес` :
-                            `${symbol}${formatPrice(basePrice)}`;
+                            `${formatPrice(basePrice)}/мес` :
+                            `${formatPrice(basePrice)}`;
                         priceElement.innerHTML = displayPrice;
 
                         // Update price per sqm for sale properties
@@ -659,11 +659,14 @@
                         const symbol = option.dataset.symbol;
                         const dealType = option.dataset.dealType;
 
-                        // Update currency button display
-                        const currencySymbol = toggleBtn.querySelector(`.current-currency-${propertyId}`);
-                        const currencyCode = toggleBtn.querySelector(`.current-currency-code-${propertyId}`);
-                        if (currencySymbol) currencySymbol.textContent = symbol;
-                        if (currencyCode) currencyCode.textContent = currency;
+                        // Update ALL currency button displays for this property (since carousel has multiple copies)
+                        const allCurrencyButtons = document.querySelectorAll(`[data-property-id="${propertyId}"].currency-toggle-btn`);
+                        allCurrencyButtons.forEach(btn => {
+                            const currencySymbol = btn.querySelector(`.current-currency-${propertyId}`);
+                            const currencyCode = btn.querySelector(`.current-currency-code-${propertyId}`);
+                            if (currencySymbol) currencySymbol.textContent = symbol;
+                            if (currencyCode) currencyCode.textContent = currency;
+                        });
 
                         // Update price
                         convertAndUpdateCardPrice(propertyId, currency, symbol, dealType);
@@ -706,8 +709,12 @@
 
         // Convert and update price for a specific card
         function convertAndUpdateCardPrice(propertyId, toCurrency, symbol, dealType) {
-            const priceElement = document.querySelector(`.card-price-${propertyId}`);
-            if (!priceElement) return;
+            // Find ALL price elements for this property (since carousel has multiple copies)
+            const allPriceElements = document.querySelectorAll(`.card-price-${propertyId}`);
+            if (allPriceElements.length === 0) {
+                console.warn(`No price elements found for property ${propertyId}`);
+                return;
+            }
 
             // Find property data
             const currentData = featuredProperties[currentPropertyType] || [];
@@ -743,15 +750,21 @@
             }
 
             if (!basePrice) {
-                priceElement.textContent = 'Цена по запросу';
+                allPriceElements.forEach(priceElement => {
+                    priceElement.textContent = 'Цена по запросу';
+                });
                 return;
             }
 
             if (fromCurrency === toCurrency) {
                 const displayPrice = dealType === 'rent' ?
-                    `${symbol}${formatPrice(basePrice)}/мес` :
-                    `${symbol}${formatPrice(basePrice)}`;
-                priceElement.innerHTML = displayPrice;
+                    `${formatPrice(basePrice)}/мес` :
+                    `${formatPrice(basePrice)}`;
+                
+                // Update ALL price elements for this property
+                allPriceElements.forEach(priceElement => {
+                    priceElement.innerHTML = displayPrice;
+                });
                 updatePricePerSqmFromData(propertyData, toCurrency);
                 return;
             }
@@ -763,9 +776,13 @@
                 const rate = window.exchangeRates[rateKey];
                 const convertedPrice = basePrice * rate;
                 const displayPrice = dealType === 'rent' ?
-                    `${symbol}${formatPrice(convertedPrice)}/мес` :
-                    `${symbol}${formatPrice(convertedPrice)}`;
-                priceElement.innerHTML = displayPrice;
+                    `${formatPrice(convertedPrice)}/мес` :
+                    `${formatPrice(convertedPrice)}`;
+                
+                // Update ALL price elements for this property
+                allPriceElements.forEach(priceElement => {
+                    priceElement.innerHTML = displayPrice;
+                });
                 updatePricePerSqmFromData(propertyData, toCurrency);
             } else {
                 fetch('/currency/rates/')
@@ -776,24 +793,36 @@
                             const rate = data.rates[rateKey] || 1;
                             const convertedPrice = basePrice * rate;
                             const displayPrice = dealType === 'rent' ?
-                                `${symbol}${formatPrice(convertedPrice)}/мес` :
-                                `${symbol}${formatPrice(convertedPrice)}`;
-                            priceElement.innerHTML = displayPrice;
+                                `${formatPrice(convertedPrice)}/мес` :
+                                `${formatPrice(convertedPrice)}`;
+                            
+                            // Update ALL price elements for this property
+                            allPriceElements.forEach(priceElement => {
+                                priceElement.innerHTML = displayPrice;
+                            });
                             updatePricePerSqmFromData(propertyData, toCurrency);
                         } else {
                             const displayPrice = dealType === 'rent' ?
-                                `${symbol}${formatPrice(basePrice)}/мес` :
-                                `${symbol}${formatPrice(basePrice)}`;
-                            priceElement.innerHTML = displayPrice;
+                                `${formatPrice(basePrice)}/мес` :
+                                `${formatPrice(basePrice)}`;
+                            
+                            // Update ALL price elements for this property
+                            allPriceElements.forEach(priceElement => {
+                                priceElement.innerHTML = displayPrice;
+                            });
                             updatePricePerSqmFromData(propertyData, toCurrency);
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching exchange rates:', error);
                         const displayPrice = dealType === 'rent' ?
-                            `${symbol}${formatPrice(basePrice)}/мес` :
-                            `${symbol}${formatPrice(basePrice)}`;
-                        priceElement.innerHTML = displayPrice;
+                            `${formatPrice(basePrice)}/мес` :
+                            `${formatPrice(basePrice)}`;
+                        
+                        // Update ALL price elements for this property
+                        allPriceElements.forEach(priceElement => {
+                            priceElement.innerHTML = displayPrice;
+                        });
                         updatePricePerSqmFromData(propertyData, toCurrency);
                     });
             }
