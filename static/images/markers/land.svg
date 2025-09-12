@@ -1,0 +1,27 @@
+<svg width="32" height="40" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Marker background -->
+  <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="currentColor"/>
+  
+  <!-- Land plot icon -->
+  <g transform="translate(5, 6)">
+    <!-- Plot boundary -->
+    <rect x="1" y="2" width="18" height="14" fill="none" stroke="white" stroke-width="1.5" stroke-dasharray="2,1"/>
+    
+    <!-- Trees -->
+    <circle cx="6" cy="8" r="3" fill="white"/>
+    <rect x="5.5" y="11" width="1" height="3" fill="white"/>
+    
+    <circle cx="14" cy="6" r="2.5" fill="white"/>
+    <rect x="13.5" y="8.5" width="1" height="2.5" fill="white"/>
+    
+    <!-- Small bushes -->
+    <circle cx="4" cy="13" r="1.5" fill="white"/>
+    <circle cx="16" cy="12" r="1.5" fill="white"/>
+    
+    <!-- Corner markers -->
+    <circle cx="2" cy="3" r="1" fill="white"/>
+    <circle cx="18" cy="3" r="1" fill="white"/>
+    <circle cx="2" cy="15" r="1" fill="white"/>
+    <circle cx="18" cy="15" r="1" fill="white"/>
+  </g>
+</svg>
