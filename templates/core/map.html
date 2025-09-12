@@ -60,6 +60,103 @@
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
+    
+    /* Custom Marker Styles */
+    .property-marker-wrapper {
+        background: none !important;
+        border: none !important;
+    }
+    
+    .property-marker-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+    
+    .property-marker-container:hover {
+        transform: scale(1.05);
+    }
+    
+    .custom-marker {
+        position: relative;
+        transition: all 0.2s ease;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    
+    .custom-marker:hover {
+        transform: scale(1.1);
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+    
+    .custom-marker svg {
+        display: block;
+    }
+    
+    /* Price Indicator Styles (like Booking.com) */
+    .price-indicator {
+        position: relative;
+        background: #10b981;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        margin-bottom: 2px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        border: 2px solid white;
+        transition: all 0.2s ease;
+    }
+    
+    .price-indicator:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .price-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    
+    .price-arrow {
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 6px solid inherit;
+    }
+    
+    .price-arrow::before {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: -4px;
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 4px solid white;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .price-indicator {
+            font-size: 10px;
+            padding: 3px 6px;
+        }
+        
+        .price-text {
+            font-size: 9px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -199,6 +296,12 @@ var properties = [
         bedrooms: {{ property.bedrooms|default:"0" }},
         bathrooms: {{ property.bathrooms|default:"0" }},
         area: {{ property.area_total|default:"0"|unlocalize }},
+        price_sale_usd: {{ property.price_sale_usd|default:"0"|unlocalize }},
+        price_sale_thb: {{ property.price_sale_thb|default:"0"|unlocalize }},
+        price_sale_rub: {{ property.price_sale_rub|default:"0"|unlocalize }},
+        price_rent_usd: {{ property.price_rent_monthly_usd|default:"0"|unlocalize }},
+        price_rent_thb: {{ property.price_rent_monthly_thb|default:"0"|unlocalize }},
+        price_rent_rub: {{ property.price_rent_monthly_rub|default:"0"|unlocalize }},
         image: "{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}",
         url: "{{ property.get_absolute_url }}"
     }{% if not forloop.last %},{% endif %}
@@ -219,14 +322,195 @@ function getMarkerColor(dealType) {
     }
 }
 
+// Function to get property type icon SVG content
+function getPropertyIconSVG(propertyType) {
+    const iconSVGs = {
+        'villa': `
+            <g transform="translate(6, 6)">
+                <path d="M10 4L2 10h2v8h12v-8h2L10 4z" fill="white"/>
+                <rect x="4" y="10" width="12" height="8" fill="white"/>
+                <rect x="8.5" y="14" width="3" height="4" fill="currentColor"/>
+                <rect x="5.5" y="12" width="2" height="2" fill="currentColor"/>
+                <rect x="12.5" y="12" width="2" height="2" fill="currentColor"/>
+                <rect x="13" y="6" width="1.5" height="4" fill="white"/>
+            </g>
+        `,
+        'apartment': `
+            <g transform="translate(6, 4)">
+                <rect x="2" y="4" width="16" height="16" fill="white"/>
+                <polygon points="1,4 10,1 19,4" fill="white"/>
+                <rect x="4" y="7" width="2" height="2" fill="currentColor"/>
+                <rect x="7" y="7" width="2" height="2" fill="currentColor"/>
+                <rect x="11" y="7" width="2" height="2" fill="currentColor"/>
+                <rect x="14" y="7" width="2" height="2" fill="currentColor"/>
+                <rect x="4" y="11" width="2" height="2" fill="currentColor"/>
+                <rect x="7" y="11" width="2" height="2" fill="currentColor"/>
+                <rect x="11" y="11" width="2" height="2" fill="currentColor"/>
+                <rect x="14" y="11" width="2" height="2" fill="currentColor"/>
+                <rect x="4" y="15" width="2" height="2" fill="currentColor"/>
+                <rect x="14" y="15" width="2" height="2" fill="currentColor"/>
+                <rect x="8" y="15" width="4" height="5" fill="currentColor"/>
+            </g>
+        `,
+        'condominium': `
+            <g transform="translate(6, 4)">
+                <rect x="2" y="4" width="16" height="16" fill="white"/>
+                <polygon points="1,4 10,1 19,4" fill="white"/>
+                <rect x="4" y="7" width="2" height="2" fill="currentColor"/>
+                <rect x="7" y="7" width="2" height="2" fill="currentColor"/>
+                <rect x="11" y="7" width="2" height="2" fill="currentColor"/>
+                <rect x="14" y="7" width="2" height="2" fill="currentColor"/>
+                <rect x="4" y="11" width="2" height="2" fill="currentColor"/>
+                <rect x="7" y="11" width="2" height="2" fill="currentColor"/>
+                <rect x="11" y="11" width="2" height="2" fill="currentColor"/>
+                <rect x="14" y="11" width="2" height="2" fill="currentColor"/>
+                <rect x="4" y="15" width="2" height="2" fill="currentColor"/>
+                <rect x="14" y="15" width="2" height="2" fill="currentColor"/>
+                <rect x="8" y="15" width="4" height="5" fill="currentColor"/>
+            </g>
+        `,
+        'townhouse': `
+            <g transform="translate(4, 5)">
+                <rect x="0" y="8" width="7" height="10" fill="white"/>
+                <polygon points="0,8 3.5,4 7,8" fill="white"/>
+                <rect x="6" y="6" width="7" height="12" fill="white"/>
+                <polygon points="6,6 9.5,2 13,6" fill="white"/>
+                <rect x="12" y="9" width="7" height="9" fill="white"/>
+                <polygon points="12,9 15.5,5 19,9" fill="white"/>
+                <rect x="2" y="14" width="2" height="4" fill="currentColor"/>
+                <rect x="8" y="14" width="2" height="4" fill="currentColor"/>
+                <rect x="14" y="14" width="2" height="4" fill="currentColor"/>
+                <rect x="1" y="11" width="1.5" height="1.5" fill="currentColor"/>
+                <rect x="4.5" y="11" width="1.5" height="1.5" fill="currentColor"/>
+                <rect x="7" y="9" width="1.5" height="1.5" fill="currentColor"/>
+                <rect x="10.5" y="9" width="1.5" height="1.5" fill="currentColor"/>
+                <rect x="13" y="12" width="1.5" height="1.5" fill="currentColor"/>
+                <rect x="16.5" y="12" width="1.5" height="1.5" fill="currentColor"/>
+            </g>
+        `,
+        'land': `
+            <g transform="translate(5, 6)">
+                <rect x="1" y="2" width="18" height="14" fill="none" stroke="white" stroke-width="1.5" stroke-dasharray="2,1"/>
+                <circle cx="6" cy="8" r="3" fill="white"/>
+                <rect x="5.5" y="11" width="1" height="3" fill="white"/>
+                <circle cx="14" cy="6" r="2.5" fill="white"/>
+                <rect x="13.5" y="8.5" width="1" height="2.5" fill="white"/>
+                <circle cx="4" cy="13" r="1.5" fill="white"/>
+                <circle cx="16" cy="12" r="1.5" fill="white"/>
+                <circle cx="2" cy="3" r="1" fill="white"/>
+                <circle cx="18" cy="3" r="1" fill="white"/>
+                <circle cx="2" cy="15" r="1" fill="white"/>
+                <circle cx="18" cy="15" r="1" fill="white"/>
+            </g>
+        `,
+        'business': `
+            <g transform="translate(6, 5)">
+                <rect x="2" y="6" width="16" height="12" fill="white"/>
+                <polygon points="1,6 10,3 19,6" fill="white"/>
+                <rect x="3" y="14" width="6" height="4" fill="currentColor"/>
+                <rect x="11" y="14" width="6" height="4" fill="currentColor"/>
+                <rect x="4" y="9" width="2" height="2" fill="currentColor"/>
+                <rect x="7" y="9" width="2" height="2" fill="currentColor"/>
+                <rect x="11" y="9" width="2" height="2" fill="currentColor"/>
+                <rect x="14" y="9" width="2" height="2" fill="currentColor"/>
+                <rect x="3" y="12" width="14" height="1" fill="white"/>
+                <rect x="9" y="15" width="2" height="3" fill="white"/>
+            </g>
+        `
+    };
+    
+    return iconSVGs[propertyType.toLowerCase()] || `
+        <g transform="translate(7, 6)">
+            <rect x="2" y="10" width="14" height="10" fill="white"/>
+            <polygon points="1,10 9,4 17,10" fill="white"/>
+            <rect x="7" y="15" width="4" height="5" fill="currentColor"/>
+            <rect x="4" y="13" width="2.5" height="2" fill="currentColor"/>
+            <rect x="11.5" y="13" width="2.5" height="2" fill="currentColor"/>
+        </g>
+    `;
+}
+
+// Function to format price for display
+function formatPriceForMarker(property) {
+    // Get the best available price
+    let price = null;
+    let currency = 'USD';
+    
+    if (property.deal_type === 'sale' || property.deal_type === 'both') {
+        if (property.price_sale_usd && property.price_sale_usd > 0) {
+            price = property.price_sale_usd;
+            currency = 'USD';
+        } else if (property.price_sale_thb && property.price_sale_thb > 0) {
+            price = property.price_sale_thb;
+            currency = 'THB';
+        } else if (property.price_sale_rub && property.price_sale_rub > 0) {
+            price = property.price_sale_rub;
+            currency = 'RUB';
+        }
+    } else if (property.deal_type === 'rent') {
+        if (property.price_rent_usd && property.price_rent_usd > 0) {
+            price = property.price_rent_usd;
+            currency = 'USD';
+        } else if (property.price_rent_thb && property.price_rent_thb > 0) {
+            price = property.price_rent_thb;
+            currency = 'THB';
+        } else if (property.price_rent_rub && property.price_rent_rub > 0) {
+            price = property.price_rent_rub;
+            currency = 'RUB';
+        }
+    }
+    
+    if (!price || price <= 0) return null;
+    
+    // Format price for display
+    const currencySymbols = { USD: '$', THB: '฿', RUB: '₽' };
+    const symbol = currencySymbols[currency] || '$';
+    
+    // Format large numbers
+    if (price >= 1000000) {
+        return `${symbol}${(price / 1000000).toFixed(1)}M`;
+    } else if (price >= 1000) {
+        return `${symbol}${Math.round(price / 1000)}K`;
+    } else {
+        return `${symbol}${Math.round(price)}`;
+    }
+}
+
 // Function to create custom marker
 function createMarker(property) {
-    var marker = L.circleMarker([property.lat, property.lng], {
-        color: '#ffffff',
-        fillColor: getMarkerColor(property.deal_type),
-        fillOpacity: 0.8,
-        radius: 8,
-        weight: 2
+    const iconUrl = `/static/images/markers/${getPropertyIcon(property.property_type)}`;
+    const markerColor = getMarkerColor(property.deal_type);
+    const priceDisplay = formatPriceForMarker(property);
+    
+    // Create marker with price indicator
+    const customIcon = L.divIcon({
+        html: `
+            <div class="property-marker-container">
+                <!-- Price indicator (like Booking.com) -->
+                ${priceDisplay ? `
+                <div class="price-indicator" style="background: ${markerColor};">
+                    <span class="price-text">${priceDisplay}</span>
+                    <div class="price-arrow"></div>
+                </div>
+                ` : ''}
+                
+                <!-- Property icon marker -->
+                <div class="custom-marker" style="color: ${markerColor};">
+                    <svg width="32" height="40" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="${markerColor}"/>
+                        ${getPropertyIconSVG(property.property_type)}
+                    </svg>
+                </div>
+            </div>
+        `,
+        className: 'property-marker-wrapper',
+        iconSize: [140, 60], // Увеличиваем размер для размещения цены
+        iconAnchor: [70, 60], // Центрируем по горизонтали, привязка к низу
+        popupAnchor: [0, -60]
+    });
+    
+    var marker = L.marker([property.lat, property.lng], {
+        icon: customIcon
     });
     
     // Create popup content

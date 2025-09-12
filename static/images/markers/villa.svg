@@ -1,0 +1,19 @@
+<svg width="32" height="40" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Marker background -->
+  <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="currentColor"/>
+  
+  <!-- Villa icon -->
+  <g transform="translate(6, 6)">
+    <!-- Roof -->
+    <path d="M10 4L2 10h2v8h12v-8h2L10 4z" fill="white"/>
+    <!-- Main house -->
+    <rect x="4" y="10" width="12" height="8" fill="white"/>
+    <!-- Door -->
+    <rect x="8.5" y="14" width="3" height="4" fill="currentColor"/>
+    <!-- Windows -->
+    <rect x="5.5" y="12" width="2" height="2" fill="currentColor"/>
+    <rect x="12.5" y="12" width="2" height="2" fill="currentColor"/>
+    <!-- Chimney -->
+    <rect x="13" y="6" width="1.5" height="4" fill="white"/>
+  </g>
+</svg>
