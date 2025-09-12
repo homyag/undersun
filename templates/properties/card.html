@@ -1,8 +1,26 @@
 {% load static %}
 {% load i18n %}
+{% load l10n %}
 {% load currency_tags %}
 
-<div class="property-card">
+<div class="property-card" 
+     data-property-id="{{ property.id }}"
+     data-latitude="{{ property.latitude|unlocalize }}"
+     data-longitude="{{ property.longitude|unlocalize }}"
+     data-property-type="{{ property.property_type.name }}"
+     data-deal-type="{{ property.deal_type }}"
+     data-title="{{ property.title }}"
+     data-price-sale-usd="{{ property.price_sale_usd|default:0 }}"
+     data-price-rent-usd="{{ property.price_rent_usd|default:0 }}"
+     data-price-sale-thb="{{ property.price_sale_thb|default:0 }}"
+     data-price-rent-thb="{{ property.price_rent_thb|default:0 }}"
+     data-price-sale-rub="{{ property.price_sale_rub|default:0 }}"
+     data-price-rent-rub="{{ property.price_rent_rub|default:0 }}"
+     data-location="{{ property.district.name }}{% if property.location %}, {{ property.location.name }}{% endif %}"
+     data-url="{{ property.get_absolute_url }}"
+     data-bedrooms="{{ property.bedrooms|default:'' }}"
+     data-bathrooms="{{ property.bathrooms|default:'' }}"
+     data-area="{{ property.area_total|default:'' }}">
     <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden max-w-sm mx-auto transform hover:-translate-y-2 hover:scale-[1.02] group">
         <!-- Image Section -->
         <div class="relative h-48">

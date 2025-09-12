@@ -227,7 +227,7 @@
                 <!-- Sort & Results Count -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                     <div class="mb-4 sm:mb-0">
-                        <h2 class="text-xl font-semibold text-gray-900 results-count">
+                        <h2 class="text-xl font-semibold text-gray-900 results-count" data-heading-tag="H2" data-total-count="{% if properties %}{% if is_paginated %}{{ paginator.count }}{% else %}{{ properties|length }}{% endif %}{% else %}0{% endif %}">
                             {% if properties %}
                                 {% if is_paginated %}
                                     {% blocktrans count counter=paginator.count %}
@@ -259,11 +259,11 @@
                         </select>
                         
                         <div class="flex border border-gray-300 rounded-md">
-                            <button onclick="setView('grid')" id="grid-view" class="p-2 text-gray-600 hover:text-primary border-r border-gray-300">
+                            <button onclick="setView('grid')" id="grid-view" class="p-2 text-gray-600 hover:text-primary border-r border-gray-300" title="{% trans 'Сетка' %}">
                                 <i class="fas fa-th-large"></i>
                             </button>
-                            <button onclick="setView('list')" id="list-view" class="p-2 text-gray-600 hover:text-primary">
-                                <i class="fas fa-list"></i>
+                            <button onclick="setView('map')" id="map-view" class="p-2 text-gray-600 hover:text-primary" title="{% trans 'Карта' %}">
+                                <i class="fas fa-map-marker-alt"></i>
                             </button>
                         </div>
                     </div>
@@ -276,6 +276,11 @@
                         {% for property in properties %}
                             {% include 'properties/card.html' %}
                         {% endfor %}
+                    </div>
+                    
+                    <!-- Properties Map -->
+                    <div id="properties-map" class="hidden w-full h-96 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                        <div id="map-container" class="w-full h-full"></div>
                     </div>
                     
                     <!-- Pagination -->
@@ -335,6 +340,10 @@
 {% endblock %}
 
 {% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
 <style>
 /* Loading Animation */
 .properties-container.loading {
@@ -411,6 +420,10 @@ input[type="radio"]:focus {
 {% endblock %}
 
 {% block extra_js %}
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
 <script>
 // Price presets function
 function setPriceRange(min, max) {
@@ -439,9 +452,13 @@ function updateSort(value) {
     form.submit();
 }
 
+// Global map variable
+let propertiesMap = null;
+let markersGroup = null;
+
 function setView(viewType) {
     // Update button states
-    document.querySelectorAll('#grid-view, #list-view').forEach(btn => {
+    document.querySelectorAll('#grid-view, #map-view').forEach(btn => {
         btn.classList.remove('text-primary', 'bg-primary/10');
         btn.classList.add('text-gray-600');
     });
@@ -450,23 +467,291 @@ function setView(viewType) {
     activeBtn.classList.add('text-primary', 'bg-primary/10');
     activeBtn.classList.remove('text-gray-600');
     
-    // Update grid classes
+    // Show/hide views
     const grid = document.getElementById('properties-grid');
-    if (viewType === 'list') {
-        grid.className = 'grid grid-cols-1 gap-4';
-        // Add list-specific styling to cards if needed
+    const map = document.getElementById('properties-map');
+    const pagination = document.querySelector('.pagination-container');
+    
+    if (viewType === 'map') {
+        // Hide grid and pagination, show map
+        grid.classList.add('hidden');
+        if (pagination) pagination.classList.add('hidden');
+        map.classList.remove('hidden');
+        
+        // Initialize map if not already done
+        initializePropertiesMap();
     } else {
-        grid.className = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6';
+        // Show grid and pagination, hide map
+        grid.classList.remove('hidden');
+        if (pagination) pagination.classList.remove('hidden');
+        map.classList.add('hidden');
+        
+        // Set grid layout
+        grid.className = 'properties-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6';
     }
     
     // Save preference
     localStorage.setItem('propertyViewType', viewType);
 }
 
+// Initialize Properties Map
+function initializePropertiesMap() {
+    if (propertiesMap) {
+        // Map already exists, just refresh markers
+        updateMapMarkers();
+        return;
+    }
+    
+    const mapContainer = document.getElementById('map-container');
+    if (!mapContainer) return;
+    
+    // Initialize map centered on Phuket
+    propertiesMap = L.map('map-container').setView([7.9519, 98.3381], 11);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(propertiesMap);
+    
+    // Create marker group
+    markersGroup = L.layerGroup().addTo(propertiesMap);
+    
+    // Add markers for properties
+    updateMapMarkers();
+    
+    // Force map resize after container is visible
+    setTimeout(() => {
+        propertiesMap.invalidateSize();
+    }, 100);
+}
+
+// Update results counter 
+function updateResultsCounter() {
+    const resultsCountElement = document.querySelector('.results-count');
+    if (!resultsCountElement) return;
+    
+    // Get total count from data attribute (server-provided total count)
+    const totalCount = parseInt(resultsCountElement.dataset.totalCount) || 0;
+    
+    // Update counter text with proper Russian pluralization
+    let counterText;
+    if (totalCount === 0) {
+        counterText = 'Объекты не найдены';
+    } else if (totalCount === 1) {
+        counterText = 'Найден 1 объект';
+    } else if (totalCount >= 2 && totalCount <= 4) {
+        counterText = `Найдено ${totalCount} объекта`;
+    } else {
+        counterText = `Найдено ${totalCount} объектов`;
+    }
+    
+    resultsCountElement.textContent = counterText;
+    console.log(`Updated results counter: ${totalCount} total properties found (${document.querySelectorAll('.property-card').length} on current page)`);
+}
+
+// Update map markers based on all filtered properties (not just current page)
+function updateMapMarkers() {
+    if (!markersGroup) return;
+    
+    // Clear existing markers
+    markersGroup.clearLayers();
+    
+    console.log('Loading all properties for map view...');
+    
+    // Get current filter parameters
+    const form = document.getElementById('filter-form');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    // Convert FormData to URLSearchParams, excluding pagination
+    for (const [key, value] of formData.entries()) {
+        if (key !== 'page' && typeof value === 'string') {
+            params.append(key, value);
+        }
+    }
+    
+    // Add map-specific parameter to load all results
+    params.set('map_view', 'true');
+    
+    // Fetch all filtered properties
+    fetch(`${window.location.pathname}?${params.toString()}`)
+        .then(response => response.text())
+        .then(html => {
+            // Parse HTML response to extract property data
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            const propertyCards = tempDiv.querySelectorAll('.property-card');
+            const bounds = [];
+            
+            console.log(`Loaded ${propertyCards.length} total properties for map`);
+            
+            propertyCards.forEach((card, index) => {
+        // Extract property data from card attributes
+        const propertyId = card.dataset.propertyId;
+        let lat = parseFloat(card.dataset.latitude);
+        let lng = parseFloat(card.dataset.longitude);
+        
+        // Handle potential comma-separated decimals (localization issue)
+        if (isNaN(lat) || isNaN(lng)) {
+            lat = parseFloat(card.dataset.latitude.replace(',', '.'));
+            lng = parseFloat(card.dataset.longitude.replace(',', '.'));
+        }
+        
+        console.log(`Property ${index + 1}: ID=${propertyId}`);
+        console.log(`  - Raw data: lat="${card.dataset.latitude}", lng="${card.dataset.longitude}"`);
+        console.log(`  - Parsed: lat=${lat}, lng=${lng}`);
+        
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+            console.log(`Skipping property ${propertyId} - no valid coordinates (lat=${card.dataset.latitude}, lng=${card.dataset.longitude})`);
+            return; // Skip if no coordinates
+        }
+        
+        // Get property details from data attributes and elements
+        const title = card.dataset.title || 'Property';
+        const propertyType = card.dataset.propertyType || '';
+        const dealType = card.dataset.dealType || '';
+        const location = card.dataset.location || '';
+        const link = card.dataset.url || '#';
+        
+        // Get current price from price element (respects currency conversion)
+        const priceElement = card.querySelector(`[class*="card-price-${propertyId}"]`);
+        const price = priceElement ? priceElement.textContent.trim() : '';
+        
+        // Get current currency
+        const currencyElement = card.querySelector(`[class*="current-currency-code-${propertyId}"]`);
+        const currency = currencyElement ? currencyElement.textContent.trim() : '';
+        
+        const formattedPrice = price && currency ? `${price} ${currency}` : price;
+        
+        // Check if coordinates are too simplified and add small jitter to avoid overlapping
+        let adjustedLat = lat;
+        let adjustedLng = lng;
+        
+        // If coordinates are whole numbers (like 7, 8, 98), they're likely simplified
+        if (lat % 1 === 0 && lng % 1 === 0) {
+            // Add small random offset to prevent markers from stacking
+            const jitter = 0.001; // ~100 meters
+            adjustedLat = lat + (Math.random() - 0.5) * jitter;
+            adjustedLng = lng + (Math.random() - 0.5) * jitter;
+            console.log(`Applied jitter to property ${propertyId}: [${lat}, ${lng}] -> [${adjustedLat.toFixed(6)}, ${adjustedLng.toFixed(6)}]`);
+        }
+        
+        console.log(`Adding marker for property ${propertyId}: ${title} at [${adjustedLat}, ${adjustedLng}]`);
+        
+        // Create marker with adjusted coordinates
+        const marker = L.marker([adjustedLat, adjustedLng]).addTo(markersGroup);
+        
+        // Create popup content
+        const popupContent = `
+            <div class="property-popup max-w-xs">
+                <h4 class="font-semibold text-sm mb-1">${title}</h4>
+                <p class="text-xs text-gray-600 mb-1">${propertyType} - ${dealType}</p>
+                <p class="text-xs text-gray-500 mb-1">${location}</p>
+                <p class="text-sm font-bold text-primary mb-2">${formattedPrice}</p>
+                <a href="${link}" class="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors">
+                    {% trans "Подробнее" %}
+                </a>
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+        bounds.push([adjustedLat, adjustedLng]);
+    });
+    
+            console.log(`Total markers added: ${bounds.length}`);
+            
+            // Fit map to bounds if we have markers
+            if (bounds.length > 0) {
+                const group = new L.featureGroup(markersGroup.getLayers());
+                propertiesMap.fitBounds(group.getBounds().pad(0.1));
+            } else {
+                console.log('No markers to display - keeping default Phuket view');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading properties for map:', error);
+            
+            // Fallback to current page properties if AJAX fails
+            console.log('Falling back to current page properties...');
+            const propertyCards = document.querySelectorAll('.property-card');
+            const bounds = [];
+            
+            propertyCards.forEach((card, index) => {
+                const propertyId = card.dataset.propertyId;
+                let lat = parseFloat(card.dataset.latitude);
+                let lng = parseFloat(card.dataset.longitude);
+                
+                if (isNaN(lat) || isNaN(lng)) {
+                    lat = parseFloat(card.dataset.latitude.replace(',', '.'));
+                    lng = parseFloat(card.dataset.longitude.replace(',', '.'));
+                }
+                
+                if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+                
+                const title = card.dataset.title || 'Property';
+                const propertyType = card.dataset.propertyType || '';
+                const dealType = card.dataset.dealType || '';
+                const location = card.dataset.location || '';
+                const link = card.dataset.url || '#';
+                
+                const priceElement = card.querySelector(`[class*="card-price-${propertyId}"]`);
+                const price = priceElement ? priceElement.textContent.trim() : '';
+                
+                const currencyElement = card.querySelector(`[class*="current-currency-code-${propertyId}"]`);
+                const currency = currencyElement ? currencyElement.textContent.trim() : '';
+                
+                const formattedPrice = price && currency ? `${price} ${currency}` : price;
+                
+                let adjustedLat = lat;
+                let adjustedLng = lng;
+                
+                if (lat % 1 === 0 && lng % 1 === 0) {
+                    const jitter = 0.001;
+                    adjustedLat = lat + (Math.random() - 0.5) * jitter;
+                    adjustedLng = lng + (Math.random() - 0.5) * jitter;
+                }
+                
+                const marker = L.marker([adjustedLat, adjustedLng]).addTo(markersGroup);
+                
+                const popupContent = `
+                    <div class="property-popup max-w-xs">
+                        <h4 class="font-semibold text-sm mb-1">${title}</h4>
+                        <p class="text-xs text-gray-600 mb-1">${propertyType} - ${dealType}</p>
+                        <p class="text-xs text-gray-500 mb-1">${location}</p>
+                        <p class="text-sm font-bold text-primary mb-2">${formattedPrice}</p>
+                        <a href="${link}" class="text-xs bg-primary text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors">
+                            {% trans "Подробнее" %}
+                        </a>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                bounds.push([adjustedLat, adjustedLng]);
+            });
+            
+            console.log(`Fallback: Added ${bounds.length} markers from current page`);
+            
+            if (bounds.length > 0) {
+                const group = new L.featureGroup(markersGroup.getLayers());
+                propertiesMap.fitBounds(group.getBounds().pad(0.1));
+            }
+        });
+}
+
 // Load saved view preference
 document.addEventListener('DOMContentLoaded', function() {
-    const savedView = localStorage.getItem('propertyViewType') || 'grid';
-    setView(savedView);
+    // Update results counter on page load
+    updateResultsCounter();
+    
+    // Check if we need to return to map view after filter changes
+    if (localStorage.getItem('returnToMapView') === 'true') {
+        localStorage.removeItem('returnToMapView');
+        setView('map');
+    } else {
+        const savedView = localStorage.getItem('propertyViewType') || 'grid';
+        setView(savedView);
+    }
 });
 
 // Mobile filters toggle
@@ -570,6 +855,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             indicator.classList.add('hidden');
                         }
                     }
+                    
+                    // Check if we're in map view and need to preserve it after page reload
+                    const currentView = localStorage.getItem('propertyViewType') || 'grid';
+                    if (currentView === 'map') {
+                        // Store that we want to return to map view after form submission
+                        localStorage.setItem('returnToMapView', 'true');
+                    }
+                    
                     form.submit();
                 }, delay);
             });
