@@ -18,6 +18,12 @@ class PropertyListView(ListView):
     template_name = 'properties/list.html'
     context_object_name = 'properties'
     paginate_by = 12
+    
+    def get_paginate_by(self, queryset):
+        """Отключить пагинацию для карты"""
+        if self.request.GET.get('map_view') == 'true':
+            return None  # Отключить пагинацию для карты
+        return self.paginate_by
 
     def get_queryset(self):
         queryset = Property.objects.filter(
