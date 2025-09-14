@@ -20,7 +20,9 @@
      data-url="{{ property.get_absolute_url }}"
      data-bedrooms="{{ property.bedrooms|default:'' }}"
      data-bathrooms="{{ property.bathrooms|default:'' }}"
-     data-area="{{ property.area_total|default:'' }}">
+     data-area="{{ property.area_total|default:'' }}"
+     data-main-image="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}"
+     data-images="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}{% for image in property.images.all|slice:":2" %},{{ image.medium.url }}{% endfor %}">
     <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden max-w-sm mx-auto transform hover:-translate-y-2 hover:scale-[1.02] group">
         <!-- Image Section -->
         <div class="relative h-48">

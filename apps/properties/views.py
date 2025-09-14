@@ -574,6 +574,79 @@ def get_locations_for_district(request):
     })
 
 
+def map_properties_json(request):
+    """Optimized AJAX endpoint для получения всех отфильтрованных объектов для карты"""
+    try:
+        # Создаем временный объект view для использования фильтров
+        view = PropertyListView()
+        view.request = request
+        
+        # Получаем базовый queryset с минимальными данными для карты
+        queryset = Property.objects.filter(
+            is_active=True,
+            status='available'
+        ).select_related('district', 'location', 'property_type').prefetch_related('images')
+        
+        # Применяем все фильтры
+        queryset = view.apply_filters(queryset)
+        
+        # Ограничиваем количество для производительности (максимум 1000 объектов)
+        queryset = queryset[:1000]
+        
+        # Подготавливаем минимальные данные для маркеров карты
+        properties_data = []
+        for prop in queryset:
+            # Пропускаем объекты без координат
+            if not prop.latitude or not prop.longitude:
+                continue
+                
+            # Получаем главное изображение
+            main_image = prop.images.filter(is_main=True).first()
+            if not main_image:
+                main_image = prop.images.first()
+            
+            image_url = ''
+            if main_image and hasattr(main_image, 'thumbnail'):
+                image_url = main_image.thumbnail.url
+            elif main_image:
+                image_url = main_image.image.url
+                
+            # Определяем цену для отображения
+            price_display = ''
+            if prop.deal_type == 'rent' and prop.price_rent_monthly:
+                price_display = f"${prop.price_rent_monthly:,.0f}/мес"
+            elif prop.deal_type in ['sale', 'both'] and prop.price_sale_usd:
+                price_display = f"${prop.price_sale_usd:,.0f}"
+            else:
+                price_display = "Цена по запросу"
+            
+            properties_data.append({
+                'id': prop.id,
+                'title': prop.title,
+                'slug': prop.slug,
+                'lat': float(prop.latitude),
+                'lng': float(prop.longitude),
+                'property_type': prop.property_type.name if prop.property_type else '',
+                'deal_type': prop.deal_type,
+                'price': price_display,
+                'location': prop.location.name if prop.location else (prop.district.name if prop.district else ''),
+                'url': f'/properties/{prop.slug}/',
+                'image_url': image_url
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'properties': properties_data,
+            'total_count': len(properties_data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+
 def ajax_search_count(request):
     """AJAX endpoint для подсчета количества объектов по фильтрам"""
     try:

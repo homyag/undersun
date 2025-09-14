@@ -9,6 +9,7 @@ urlpatterns = [
     path('rent/', views.PropertyRentView.as_view(), name='property_rent'),
     path('favorites/', views.favorites_view, name='property_favorites'),
     path('ajax/list/', views.property_list_ajax, name='property_list_ajax'),
+    path('ajax/map/', views.map_properties_json, name='map_properties_json'),
     path('ajax/locations/', views.get_locations_for_district, name='get_locations_for_district'),
     path('ajax/favorite/', views.toggle_favorite, name='toggle_favorite'),
     path('ajax/favorites/', views.get_favorite_properties, name='get_favorite_properties'),

@@ -15,50 +15,287 @@
         height: calc(100vh - 120px);
         width: 100%;
     }
+    
+    /* Enhanced Popup Styles */
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+        border: none !important;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+    }
+    
+    .leaflet-popup-tip {
+        background: white !important;
+        box-shadow: 0 3px 14px rgba(0, 0, 0, 0.1) !important;
+    }
+    
     .property-popup {
-        font-size: 14px;
-        min-width: 250px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        width: 300px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    .property-popup img {
+    
+    /* Image Carousel */
+    .popup-image-container {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+        background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+    }
+    
+    .popup-image {
         width: 100%;
-        height: 120px;
+        height: 100%;
         object-fit: cover;
-        border-radius: 6px;
-        margin-bottom: 8px;
+        transition: transform 0.3s ease;
     }
-    .popup-title {
-        font-weight: 600;
-        margin-bottom: 4px;
-        color: #1f2937;
+    
+    .popup-image:hover {
+        transform: scale(1.05);
     }
-    .popup-price {
+    
+    .image-carousel-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        color: #474B57;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .image-carousel-nav:hover {
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-50%) scale(1.1);
         color: #F1B400;
+    }
+    
+    .image-carousel-nav.prev {
+        left: 8px;
+    }
+    
+    .image-carousel-nav.next {
+        right: 8px;
+    }
+    
+    .image-indicators {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+    }
+    
+    .image-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .image-indicator.active {
+        background: #F1B400;
+        box-shadow: 0 0 0 2px rgba(241, 180, 0, 0.3);
+    }
+    
+    /* Content Area */
+    .popup-content {
+        padding: 20px;
+        background: white;
+    }
+    
+    .popup-title {
         font-weight: 700;
         font-size: 16px;
-        margin: 4px 0;
+        color: #474B57;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
-    .popup-details {
+    
+    .popup-price {
+        color: #F1B400;
+        font-weight: 800;
+        font-size: 18px;
+        margin-bottom: 12px;
+        text-shadow: 0 1px 2px rgba(241, 180, 0, 0.1);
+    }
+    
+    .popup-location {
+        display: flex;
+        align-items: center;
+        color: #616677;
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+    
+    .popup-location i {
+        color: #F1B400;
+        margin-right: 6px;
+        font-size: 12px;
+    }
+    
+    /* Property Details Grid */
+    .popup-details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .popup-detail-item {
+        display: flex;
+        align-items: center;
         font-size: 12px;
         color: #616677;
-        margin: 4px 0;
-    }
-    .popup-button {
-        background: #474B57;
-        color: white;
-        padding: 8px 16px;
+        background: rgba(71, 75, 87, 0.05);
+        padding: 6px 8px;
         border-radius: 6px;
+        border: 1px solid rgba(71, 75, 87, 0.1);
+    }
+    
+    .popup-detail-item i {
+        color: #F1B400;
+        margin-right: 6px;
+        font-size: 11px;
+        min-width: 12px;
+    }
+    
+    /* Agent Info */
+    .popup-agent {
+        background: linear-gradient(135deg, #474B57 0%, #616677 100%);
+        color: white;
+        padding: 12px 16px;
+        margin: -20px -20px 16px -20px;
+        border-bottom: 3px solid #F1B400;
+    }
+    
+    .popup-agent-name {
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+    
+    .popup-agent-title {
+        font-size: 11px;
+        opacity: 0.8;
+    }
+    
+    /* Action Buttons */
+    .popup-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .popup-button {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 8px;
         text-decoration: none;
         font-size: 12px;
         font-weight: 600;
-        display: inline-block;
-        margin-top: 8px;
+        text-align: center;
         transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
-    .popup-button:hover {
-        background: #616677;
+    
+    .popup-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .popup-button:hover::before {
+        left: 100%;
+    }
+    
+    .popup-button-primary {
+        background: linear-gradient(135deg, #474B57 0%, #616677 100%);
         color: white;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 15px rgba(71, 75, 87, 0.3);
+    }
+    
+    .popup-button-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(71, 75, 87, 0.4);
+        color: white;
+    }
+    
+    .popup-button-secondary {
+        background: linear-gradient(135deg, #F1B400 0%, #e6a300 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(241, 180, 0, 0.3);
+    }
+    
+    .popup-button-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(241, 180, 0, 0.4);
+        color: white;
+    }
+    
+    .popup-button-icon {
+        background: rgba(241, 180, 0, 0.1);
+        color: #F1B400;
+        border: 2px solid rgba(241, 180, 0, 0.2);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+    
+    .popup-button-icon:hover {
+        background: #F1B400;
+        color: white;
+        transform: translateY(-2px) scale(1.1);
+        box-shadow: 0 8px 25px rgba(241, 180, 0, 0.4);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .property-popup {
+            width: 280px;
+        }
+        
+        .popup-content {
+            padding: 16px;
+        }
+        
+        .popup-details-grid {
+            grid-template-columns: 1fr;
+        }
     }
     
     /* Custom Marker Styles */
@@ -303,6 +540,17 @@ var properties = [
         price_rent_thb: {{ property.price_rent_monthly_thb|default:"0"|unlocalize }},
         price_rent_rub: {{ property.price_rent_monthly_rub|default:"0"|unlocalize }},
         image: "{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}",
+        images: [
+            {% if property.main_image and property.main_image.image %}"{{ property.main_image.medium.url }}"{% else %}"{% static 'images/no-image.jpg' %}"{% endif %}
+            {% for image in property.images.all|slice:":2" %},
+            "{{ image.medium.url }}"
+            {% endfor %}
+        ],
+        floors: {{ property.floors_total|default:"0" }},
+        current_floor: {{ property.floor|default:"0" }},
+        agent_name: "{% if property.agent %}{{ property.agent.name|escapejs }}{% else %}Undersun Estate{% endif %}",
+        agent_phone: "{% if property.agent %}{{ property.agent.phone|escapejs }}{% else %}+66 12 345 6789{% endif %}",
+        location_name: "{% if property.location %}{{ property.location.name|escapejs }}{% else %}{{ property.district.name|escapejs }}{% endif %}",
         url: "{{ property.get_absolute_url }}"
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
@@ -513,23 +761,107 @@ function createMarker(property) {
         icon: customIcon
     });
     
-    // Create popup content
+    // Create enhanced popup content
+    const hasMultipleImages = property.images && property.images.length > 1;
+    const currentImageIndex = 0;
+    
     var popupContent = `
         <div class="property-popup">
-            <img src="${property.image}" alt="${property.title}" />
-            <div class="popup-title">${property.title}</div>
-            <div class="popup-price">${property.price}</div>
-            <div class="popup-details">
-                <i class="fas fa-map-marker-alt"></i> ${property.district}
+            <!-- Image Carousel -->
+            <div class="popup-image-container" data-property-id="${property.id}">
+                <img src="${property.images ? property.images[0] : property.image}" 
+                     alt="${property.title}" 
+                     class="popup-image" 
+                     data-image-index="0" />
+                
+                ${hasMultipleImages ? `
+                    <button class="image-carousel-nav prev" onclick="changePopupImage(${property.id}, -1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="image-carousel-nav next" onclick="changePopupImage(${property.id}, 1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    
+                    <div class="image-indicators">
+                        ${property.images.map((img, index) => `
+                            <div class="image-indicator ${index === 0 ? 'active' : ''}" 
+                                 onclick="setPopupImage(${property.id}, ${index})" 
+                                 data-index="${index}"></div>
+                        `).join('')}
+                    </div>
+                ` : ''}
             </div>
-            ${property.bedrooms > 0 ? `<div class="popup-details"><i class="fas fa-bed"></i> ${property.bedrooms} {% trans "спален" %}</div>` : ''}
-            ${property.bathrooms > 0 ? `<div class="popup-details"><i class="fas fa-bath"></i> ${property.bathrooms} {% trans "ванных" %}</div>` : ''}
-            ${property.area > 0 ? `<div class="popup-details"><i class="fas fa-ruler-combined"></i> ${property.area} м²</div>` : ''}
-            <a href="${property.url}" class="popup-button">{% trans "Подробнее" %}</a>
+            
+            <!-- Content -->
+            <div class="popup-content">
+                <!-- Agent Info -->
+                <div class="popup-agent">
+                    <div class="popup-agent-name">${property.agent_name}</div>
+                    <div class="popup-agent-title">{% trans "Агент по недвижимости" %}</div>
+                </div>
+                
+                <!-- Title and Price -->
+                <div class="popup-title">${property.title}</div>
+                <div class="popup-price">${property.price}</div>
+                
+                <!-- Location -->
+                <div class="popup-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    ${property.location_name || property.district}
+                </div>
+                
+                <!-- Property Details Grid -->
+                <div class="popup-details-grid">
+                    ${property.bedrooms > 0 ? `
+                        <div class="popup-detail-item">
+                            <i class="fas fa-bed"></i>
+                            <span>${property.bedrooms} {% trans "спален" %}</span>
+                        </div>
+                    ` : ''}
+                    ${property.bathrooms > 0 ? `
+                        <div class="popup-detail-item">
+                            <i class="fas fa-bath"></i>
+                            <span>${property.bathrooms} {% trans "ванных" %}</span>
+                        </div>
+                    ` : ''}
+                    ${property.area > 0 ? `
+                        <div class="popup-detail-item">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>${property.area} м²</span>
+                        </div>
+                    ` : ''}
+                    ${property.current_floor > 0 ? `
+                        <div class="popup-detail-item">
+                            <i class="fas fa-building"></i>
+                            <span>${property.current_floor}/${property.floors} {% trans "этаж" %}</span>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="popup-actions">
+                    <button class="popup-button-icon" onclick="toggleFavorite(${property.id})" title="{% trans 'В избранное' %}">
+                        <i class="far fa-heart" id="favorite-${property.id}"></i>
+                    </button>
+                    
+                    <a href="https://wa.me/${property.agent_phone.replace(/[^0-9]/g, '')}?text={% trans 'Здравствуйте! Меня интересует объект' %}: ${encodeURIComponent(property.title)}" 
+                       class="popup-button popup-button-secondary" 
+                       target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                    
+                    <a href="${property.url}" class="popup-button popup-button-primary">
+                        {% trans "Подробнее" %}
+                    </a>
+                </div>
+            </div>
         </div>
     `;
     
-    marker.bindPopup(popupContent);
+    marker.bindPopup(popupContent, {
+        maxWidth: 320,
+        className: 'enhanced-popup'
+    });
     marker.propertyData = property;
     
     return marker;
@@ -595,5 +927,113 @@ map.whenReady(function() {
 window.addEventListener('resize', function() {
     map.invalidateSize();
 });
+
+// Image carousel functionality
+function changePopupImage(propertyId, direction) {
+    const container = document.querySelector(`[data-property-id="${propertyId}"]`);
+    if (!container) return;
+    
+    const img = container.querySelector('.popup-image');
+    const indicators = container.querySelectorAll('.image-indicator');
+    
+    if (!img || indicators.length === 0) return;
+    
+    const currentIndex = parseInt(img.dataset.imageIndex);
+    let newIndex = currentIndex + direction;
+    
+    // Wrap around
+    if (newIndex < 0) newIndex = indicators.length - 1;
+    if (newIndex >= indicators.length) newIndex = 0;
+    
+    setPopupImage(propertyId, newIndex);
+}
+
+function setPopupImage(propertyId, index) {
+    const container = document.querySelector(`[data-property-id="${propertyId}"]`);
+    if (!container) return;
+    
+    const img = container.querySelector('.popup-image');
+    const indicators = container.querySelectorAll('.image-indicator');
+    
+    if (!img || !indicators[index]) return;
+    
+    // Find the property data
+    const property = properties.find(p => p.id == propertyId);
+    if (!property || !property.images) return;
+    
+    // Update image
+    img.src = property.images[index];
+    img.dataset.imageIndex = index;
+    
+    // Update indicators
+    indicators.forEach((indicator, i) => {
+        indicator.classList.toggle('active', i === index);
+    });
+}
+
+// Favorites functionality
+function toggleFavorite(propertyId) {
+    const icon = document.getElementById(`favorite-${propertyId}`);
+    if (!icon) return;
+    
+    // Get current favorites from localStorage
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    
+    if (favorites.includes(propertyId)) {
+        // Remove from favorites
+        favorites = favorites.filter(id => id !== propertyId);
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+    } else {
+        // Add to favorites
+        favorites.push(propertyId);
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    
+    // Optional: Show notification
+    showNotification(favorites.includes(propertyId) ? 
+        '{% trans "Добавлено в избранное" %}' : 
+        '{% trans "Удалено из избранного" %}'
+    );
+}
+
+// Initialize favorites on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    favorites.forEach(propertyId => {
+        const icon = document.getElementById(`favorite-${propertyId}`);
+        if (icon) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+        }
+    });
+});
+
+// Simple notification function
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full';
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Slide in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
 </script>
 {% endblock %}
