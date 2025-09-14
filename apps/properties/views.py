@@ -620,6 +620,13 @@ def map_properties_json(request):
             else:
                 price_display = "Цена по запросу"
             
+            # Generate language-aware URL
+            from django.utils.translation import get_language
+            
+            current_language = get_language() or 'ru'
+            # Всегда используем языковой префикс, так как prefix_default_language=True
+            property_url = f'/{current_language}/property/{prop.slug}/'
+            
             properties_data.append({
                 'id': prop.id,
                 'title': prop.title,
@@ -630,7 +637,7 @@ def map_properties_json(request):
                 'deal_type': prop.deal_type,
                 'price': price_display,
                 'location': prop.location.name if prop.location else (prop.district.name if prop.district else ''),
-                'url': f'/properties/{prop.slug}/',
+                'url': property_url,
                 'image_url': image_url
             })
         
