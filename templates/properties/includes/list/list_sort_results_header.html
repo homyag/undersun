@@ -1,0 +1,47 @@
+{% load i18n %}
+
+<!-- Sort & Results Count -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+    <div class="mb-4 sm:mb-0">
+        <h2 class="text-xl font-semibold text-gray-900 results-count" data-heading-tag="H2" data-total-count="{% if properties %}{% if is_paginated %}{{ paginator.count }}{% else %}{{ properties|length }}{% endif %}{% else %}0{% endif %}">
+            {% if properties %}
+                {% if is_paginated %}
+                    {% blocktrans count counter=paginator.count %}
+                        Найден {{ counter }} объект
+                    {% plural %}
+                        Найдено {{ counter }} объектов
+                    {% endblocktrans %}
+                {% else %}
+                    {% blocktrans count counter=properties|length %}
+                        Найден {{ counter }} объект
+                    {% plural %}
+                        Найдено {{ counter }} объектов
+                    {% endblocktrans %}
+                {% endif %}
+            {% else %}
+                {% trans "Объекты не найдены" %}
+            {% endif %}
+        </h2>
+    </div>
+    
+    {% if properties %}
+    <div class="flex items-center space-x-4">
+        <span class="text-sm text-gray-600">{% trans "Сортировка:" %}</span>
+        <select onchange="updateSort(this.value)" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-accent focus:border-accent">
+            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>{% trans "По дате" %}</option>
+            <option value="price_sale_usd" {% if request.GET.sort == 'price_sale_usd' %}selected{% endif %}>{% trans "Цена ↑" %}</option>
+            <option value="-price_sale_usd" {% if request.GET.sort == '-price_sale_usd' %}selected{% endif %}>{% trans "Цена ↓" %}</option>
+            <option value="-area_total" {% if request.GET.sort == '-area_total' %}selected{% endif %}>{% trans "Площадь ↓" %}</option>
+        </select>
+        
+        <div class="flex border border-gray-300 rounded-md">
+            <button onclick="setView('grid')" id="grid-view" class="p-2 text-gray-600 hover:text-primary border-r border-gray-300" title="{% trans 'Сетка' %}">
+                <i class="fas fa-th-large"></i>
+            </button>
+            <button onclick="setView('map')" id="map-view" class="p-2 text-gray-600 hover:text-primary" title="{% trans 'Карта' %}">
+                <i class="fas fa-map-marker-alt"></i>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>

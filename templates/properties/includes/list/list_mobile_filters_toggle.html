@@ -1,0 +1,12 @@
+{% load i18n %}
+
+<!-- Mobile Filters Toggle -->
+<div class="lg:hidden mb-6">
+    <button id="mobile-filters-toggle" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+            <i class="fas fa-filter text-primary mr-3"></i>
+            <span class="font-medium text-gray-900">{% trans "Фильтры" %}</span>
+        </div>
+        <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200" id="mobile-filters-arrow"></i>
+    </button>
+</div>
