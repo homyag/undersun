@@ -1,0 +1,17 @@
+{% load static %}
+
+<!-- Inject Django data for JavaScript -->
+{% include 'includes/list/list_data_injection.html' %}
+
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<!-- List JavaScript Files -->
+<script src="{% static 'js/list/list_utility_functions.js' %}"></script>
+<script src="{% static 'js/list/list_map_functions.js' %}"></script>
+<script src="{% static 'js/list/list_map_data_loader.js' %}"></script>
+<script src="{% static 'js/list/list_view_toggle.js' %}"></script>
+<script src="{% static 'js/list/list_favorites.js' %}"></script>
+<script src="{% static 'js/list/list_main_init.js' %}"></script>

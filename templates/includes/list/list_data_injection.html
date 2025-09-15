@@ -1,0 +1,21 @@
+{% load static i18n %}
+
+<script>
+// Inject Django URLs into JavaScript
+window.djangoUrls = {
+    mapPropertiesJson: "{% url 'properties:map_properties_json' %}",
+    getLocationsForDistrict: "{% url 'properties:get_locations_for_district' %}",
+    staticImages: "{% static 'images/' %}",
+    noImageSvg: "{% static 'images/no-image.svg' %}"
+};
+
+// Inject Django translations
+window.djangoTranslations = {
+    favoriteAdded: "{% trans 'Добавлено в избранное' %}",
+    favoriteRemoved: "{% trans 'Удалено из избранного' %}",
+    whatsappText: "{% trans 'Здравствуйте! Меня интересует объект' %}",
+    moreDetails: "{% trans 'Подробнее' %}",
+    addToFavorites: "{% trans 'В избранное' %}",
+    allLocations: "{% trans 'Все локации' %}"
+};
+</script>

@@ -1,0 +1,6 @@
+<!-- Properties Grid -->
+<div id="properties-grid" class="properties-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    {% for property in properties %}
+        {% include 'properties/card.html' %}
+    {% endfor %}
+</div>

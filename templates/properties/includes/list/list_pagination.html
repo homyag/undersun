@@ -1,0 +1,38 @@
+{% load i18n %}
+
+<!-- Pagination -->
+{% if is_paginated %}
+    <div class="pagination-container flex justify-center mt-12">
+        <nav class="flex items-center space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                    {% trans "Первая" %}
+                </a>
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                    {% trans "‹ Пред" %}
+                </a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="px-3 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-md">
+                        {{ num }}
+                    </span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                        {{ num }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                    {% trans "След ›" %}
+                </a>
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors hover:bg-primary/10">
+                    {% trans "Последняя" %}
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+{% endif %}
