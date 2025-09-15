@@ -7,59 +7,108 @@
 {% block title %}{{ property.title }} - Undersun Estate{% endblock %}
 
 {% block content %}
-<!-- Property Gallery -->
+<!-- Property Gallery Carousel -->
 <section class="py-8 mt-10">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <!-- Main Image -->
-            <div class="lg:col-span-3 relative group">
-                {% if property.main_image %}
-                    <img src="{{ property.main_image.medium.url }}" alt="{{ property.title }}" 
-                         class="w-full h-96 lg:h-[500px] object-cover rounded-xl cursor-pointer transition-transform duration-300 group-hover:scale-105 shadow-lg"
-                         onclick="openGallery(0)" loading="lazy">
-                    <!-- Overlay with Gallery Icon -->
-                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-xl flex items-center justify-center">
-                        <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white bg-opacity-90 p-3 rounded-full">
-                            <i class="fas fa-search-plus text-xl text-gray-800"></i>
+        <!-- Main Carousel Container -->
+        <div class="relative overflow-hidden rounded-xl shadow-2xl group">
+            {% if property.images.exists %}
+                <!-- Carousel Images -->
+                <div class="property-carousel relative h-96 lg:h-[500px]">
+                    {% for image in property.images.all %}
+                        <div class="property-slide absolute inset-0 transition-opacity duration-1000 {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}" 
+                             data-slide="{{ forloop.counter0 }}">
+                            <img src="{{ image.medium.url }}" alt="{{ property.title }}" 
+                                 class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                                 onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
                         </div>
-                    </div>
-                    <!-- Photo Counter Badge -->
+                    {% endfor %}
+                    
+                    <!-- Carousel Navigation -->
                     {% if property.images.count > 1 %}
-                        <div class="absolute bottom-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm font-medium">
-                            <i class="fas fa-images mr-1"></i>{{ property.images.count }} {% trans "фото" %}
+                        <!-- Previous Button -->
+                        <button onclick="previousSlide()" 
+                                class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-700 hover:text-gray-900 w-12 h-12 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg z-10 flex items-center justify-center">
+                            <i class="fas fa-chevron-left text-lg"></i>
+                        </button>
+                        
+                        <!-- Next Button -->
+                        <button onclick="nextSlide()" 
+                                class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-700 hover:text-gray-900 w-12 h-12 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg z-10 flex items-center justify-center">
+                            <i class="fas fa-chevron-right text-lg"></i>
+                        </button>
+                        
+                        <!-- Slide Indicators -->
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                            {% for image in property.images.all %}
+                                <button onclick="goToSlide({{ forloop.counter0 }})" 
+                                        class="property-indicator w-3 h-3 rounded-full transition-all duration-300 {% if forloop.first %}bg-accent shadow-lg{% else %}bg-white bg-opacity-60 hover:bg-opacity-100{% endif %}"
+                                        data-slide="{{ forloop.counter0 }}">
+                                </button>
+                            {% endfor %}
                         </div>
                     {% endif %}
-                {% else %}
-                    <img src="{% static 'images/no-image.svg' %}" alt="Изображение недоступно"
-                         class="w-full h-96 lg:h-[500px] object-cover rounded-xl shadow-lg" loading="lazy">
-                {% endif %}
-            </div>
-            
-            <!-- Thumbnail Images -->
-            <div class="lg:col-span-1">
-                <div class="grid grid-cols-4 lg:grid-cols-1 gap-2">
-                    {% for image in property.images.all|slice:":4" %}
-                        <div class="relative group cursor-pointer" onclick="openGallery({{ forloop.counter0 }})">
+                    
+                    
+                    <!-- Photo Counter Badge -->
+                    <div class="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-medium z-10">
+                        <i class="fas fa-images mr-2"></i>
+                        <span id="current-photo">1</span> / {{ property.images.count }} {% trans "фото" %}
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="absolute bottom-4 left-4 flex space-x-2 z-10">
+                        <!-- Share Button -->
+                        <button onclick="shareProperty()" class="bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-3 rounded-full text-sm transition-all duration-300 hover:scale-110">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        
+                        <!-- Favorite Button -->
+                        <button onclick="toggleFavorite({{ property.id }})" class="bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-3 rounded-full text-sm transition-all duration-300 hover:scale-110 carousel-favorite-btn">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    
+                </div>
+            {% else %}
+                <!-- No Images Fallback -->
+                <div class="h-96 lg:h-[500px] bg-gray-200 rounded-xl flex items-center justify-center">
+                    <div class="text-center text-gray-500">
+                        <i class="fas fa-image text-6xl mb-4"></i>
+                        <p class="text-xl">{% trans "Изображения недоступны" %}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Thumbnail Navigation -->
+        {% if property.images.count > 1 %}
+            <div class="mt-4 overflow-x-auto">
+                <div class="flex space-x-3 pb-2">
+                    {% for image in property.images.all %}
+                        <div class="flex-shrink-0 relative cursor-pointer group" onclick="goToSlide({{ forloop.counter0 }})">
                             <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}" 
-                                 class="w-full h-20 lg:h-24 object-cover rounded-lg hover:opacity-75 transition-all duration-300 group-hover:scale-105 shadow-md border-2 border-transparent hover:border-accent">
+                                 class="w-20 h-20 object-cover rounded-lg transition-all duration-300 border-2 {% if forloop.first %}border-accent shadow-lg{% else %}border-transparent hover:border-accent/50{% endif %}"
+                                 data-thumb="{{ forloop.counter0 }}">
                             <!-- Hover Overlay -->
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-eye text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
                             </div>
                         </div>
                     {% endfor %}
-                    {% if property.images.count > 4 %}
-                        <div class="w-full h-20 lg:h-24 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center text-white font-semibold cursor-pointer hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-md border-2 border-transparent hover:border-accent"
-                             onclick="openGallery(4)">
-                            <div class="text-center">
-                                <div class="text-lg">+{{ property.images.count|add:"-4" }}</div>
-                                <div class="text-xs">{% trans "ещё" %}</div>
-                            </div>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
-        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Back Navigation -->
+<section class="py-4">
+    <div class="max-w-7xl mx-auto px-4">
+        <button onclick="goBackToCatalog()" class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 font-medium rounded-lg transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md">
+            <i class="fas fa-arrow-left mr-3 text-lg"></i>
+            {% trans "Назад к каталогу" %}
+        </button>
     </div>
 </section>
 
@@ -418,6 +467,79 @@ const images = [
 ];
 
 let currentImageIndex = 0;
+let currentSlideIndex = 0;
+
+// Carousel functionality
+function nextSlide() {
+    if (images.length <= 1) return;
+    
+    const currentSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
+    currentSlideIndex = (currentSlideIndex + 1) % images.length;
+    const nextSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
+    
+    currentSlide.style.opacity = '0';
+    nextSlide.style.opacity = '1';
+    
+    updateCarouselUI();
+}
+
+function previousSlide() {
+    if (images.length <= 1) return;
+    
+    const currentSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
+    currentSlideIndex = (currentSlideIndex - 1 + images.length) % images.length;
+    const prevSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
+    
+    currentSlide.style.opacity = '0';
+    prevSlide.style.opacity = '1';
+    
+    updateCarouselUI();
+}
+
+function goToSlide(index) {
+    if (images.length <= 1 || index === currentSlideIndex) return;
+    
+    const currentSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
+    const targetSlide = document.querySelector('.property-slide[data-slide="' + index + '"]');
+    
+    currentSlide.style.opacity = '0';
+    targetSlide.style.opacity = '1';
+    
+    currentSlideIndex = index;
+    updateCarouselUI();
+}
+
+function updateCarouselUI() {
+    // Update photo counter
+    const counter = document.getElementById('current-photo');
+    if (counter) {
+        counter.textContent = currentSlideIndex + 1;
+    }
+    
+    // Update indicators
+    const indicators = document.querySelectorAll('.property-indicator');
+    indicators.forEach((indicator, index) => {
+        if (index === currentSlideIndex) {
+            indicator.classList.remove('bg-white', 'bg-opacity-60');
+            indicator.classList.add('bg-accent', 'shadow-lg');
+        } else {
+            indicator.classList.remove('bg-accent', 'shadow-lg');
+            indicator.classList.add('bg-white', 'bg-opacity-60');
+        }
+    });
+    
+    // Update thumbnails
+    const thumbs = document.querySelectorAll('img[data-thumb]');
+    thumbs.forEach((thumb, index) => {
+        if (index === currentSlideIndex) {
+            thumb.classList.remove('border-transparent', 'hover:border-accent/50');
+            thumb.classList.add('border-accent', 'shadow-lg');
+        } else {
+            thumb.classList.remove('border-accent', 'shadow-lg');
+            thumb.classList.add('border-transparent', 'hover:border-accent/50');
+        }
+    });
+}
 
 function openGallery(index) {
     currentImageIndex = index;
@@ -473,6 +595,97 @@ function downloadImage() {
     }
 }
 
+// Share property function (for carousel button)
+function shareProperty() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ property.title|escapejs }}',
+            text: '{% trans "Посмотрите на эту недвижимость" %}',
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        // Fallback: copy URL to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showNotification('{% trans "Ссылка скопирована в буфер обмена" %}', 'success');
+        }).catch(() => {
+            showNotification('{% trans "Ошибка при копировании ссылки" %}', 'error');
+        });
+    }
+}
+
+// Update favorites counter in header
+function updateFavoritesCounter(count) {
+    // Update desktop counter
+    const desktopCounter = document.getElementById('nav-favorites-count');
+    if (desktopCounter) {
+        desktopCounter.textContent = count;
+        if (count > 0) {
+            desktopCounter.classList.remove('hidden');
+        } else {
+            desktopCounter.classList.add('hidden');
+        }
+    }
+    
+    // Update mobile counter
+    const mobileCounter = document.getElementById('mobile-nav-favorites-count');
+    if (mobileCounter) {
+        mobileCounter.textContent = count;
+        if (count > 0) {
+            mobileCounter.classList.remove('hidden');
+        } else {
+            mobileCounter.classList.add('hidden');
+        }
+    }
+}
+
+// Toggle favorite function (for carousel button)
+function toggleFavorite(propertyId) {
+    const carouselBtn = document.querySelector('.carousel-favorite-btn i');
+    const sidebarBtn = document.querySelector('.favorite-btn i');
+    
+    // Get current favorites from localStorage
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const isFavorite = favorites.includes(propertyId);
+    
+    if (isFavorite) {
+        // Remove from favorites
+        favorites = favorites.filter(id => id !== propertyId);
+        carouselBtn.className = 'far fa-heart';
+        if (sidebarBtn) sidebarBtn.className = 'far text-gray-600 fa-heart';
+        showNotification('{% trans "Удалено из избранного" %}', 'info');
+    } else {
+        // Add to favorites
+        favorites.push(propertyId);
+        carouselBtn.className = 'fas fa-heart text-red-500';
+        if (sidebarBtn) sidebarBtn.className = 'fas text-red-500 fa-heart';
+        showNotification('{% trans "Добавлено в избранное" %}', 'success');
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    
+    // Update header counter
+    updateFavoritesCounter(favorites.length);
+}
+
+// Notification helper function
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+    notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => notification.style.transform = 'translateY(0)', 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateY(-100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
 // Share image function
 function shareImage() {
     if (navigator.share && images.length > 0) {
@@ -484,15 +697,7 @@ function shareImage() {
     } else {
         // Fallback: copy URL to clipboard
         navigator.clipboard.writeText(window.location.href).then(() => {
-            // Show notification
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-            notification.textContent = '{% trans "Ссылка скопирована в буфер обмена" %}';
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
+            showNotification('{% trans "Ссылка скопирована в буфер обмена" %}', 'success');
         });
     }
 }
@@ -531,28 +736,97 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 {% endif %}
 
+// Auto-carousel functionality
+let autoCarouselInterval;
+
+function startAutoCarousel() {
+    if (images.length > 1) {
+        autoCarouselInterval = setInterval(() => {
+            nextSlide();
+        }, 5000); // Change slide every 5 seconds
+    }
+}
+
+function stopAutoCarousel() {
+    if (autoCarouselInterval) {
+        clearInterval(autoCarouselInterval);
+        autoCarouselInterval = null;
+    }
+}
+
+// Go back to catalog with preserved filters
+function goBackToCatalog() {
+    // Get saved catalog state from localStorage or sessionStorage
+    const savedCatalogState = sessionStorage.getItem('catalogState') || localStorage.getItem('catalogState');
+    
+    if (savedCatalogState) {
+        // If we have saved catalog state, restore it
+        const catalogData = JSON.parse(savedCatalogState);
+        const catalogUrl = catalogData.url || '/property/sale/';
+        
+        // Navigate to the catalog with preserved filters
+        window.location.href = catalogUrl;
+    } else {
+        // Fallback to default catalog page
+        const dealType = '{{ property.deal_type }}';
+        if (dealType === 'sale') {
+            window.location.href = '/property/sale/';
+        } else if (dealType === 'rent') {
+            window.location.href = '/property/rent/';
+        } else {
+            // For 'both' type, go to sale catalog as default
+            window.location.href = '/property/sale/';
+        }
+    }
+}
+
+// Save current page referrer when coming from catalog
+function saveCatalogReferrer() {
+    const referrer = document.referrer;
+    if (referrer && (referrer.includes('/property/sale/') || referrer.includes('/property/rent/'))) {
+        const catalogState = {
+            url: referrer,
+            timestamp: Date.now()
+        };
+        sessionStorage.setItem('catalogState', JSON.stringify(catalogState));
+    }
+}
+
 // Favorite functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Save catalog referrer if coming from catalog
+    saveCatalogReferrer();
+    // Initialize carousel auto-play
+    startAutoCarousel();
+    
+    // Stop carousel on hover, restart on mouse leave
+    const carouselContainer = document.querySelector('.property-carousel');
+    if (carouselContainer) {
+        carouselContainer.addEventListener('mouseenter', stopAutoCarousel);
+        carouselContainer.addEventListener('mouseleave', startAutoCarousel);
+    }
+    
+    // Initialize favorite buttons state
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const propertyId = {{ property.id }};
+    const isFavorite = favorites.includes(propertyId);
+    
+    const carouselBtn = document.querySelector('.carousel-favorite-btn i');
+    const sidebarBtn = document.querySelector('.favorite-btn i');
+    
+    if (isFavorite) {
+        if (carouselBtn) carouselBtn.className = 'fas fa-heart text-red-500';
+        if (sidebarBtn) sidebarBtn.className = 'fas text-red-500 fa-heart';
+    }
+    
+    // Initialize header counter
+    updateFavoritesCounter(favorites.length);
+    
     const favoriteBtn = document.querySelector('.favorite-btn');
     if (favoriteBtn) {
         favoriteBtn.addEventListener('click', function() {
-            const propertyId = this.dataset.propertyId;
-            const icon = this.querySelector('i');
-            
-            fetch(`/properties/${propertyId}/toggle-favorite/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.is_favorite) {
-                    icon.className = 'fas text-red-500 fa-heart';
-                } else {
-                    icon.className = 'far fa-heart';
-                }
-            });
+            const propertyId = parseInt(this.dataset.propertyId);
+            toggleFavorite(propertyId);
         });
     }
     
