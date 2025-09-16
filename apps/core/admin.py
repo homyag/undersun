@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SEOPage, SEOTemplate, PromotionalBanner, PromotionalBannerTranslation, Service
+from .models import SEOPage, SEOTemplate, PromotionalBanner, PromotionalBannerTranslation, Service, Team
 
 
 @admin.register(SEOPage)
@@ -467,6 +467,140 @@ class ServiceAdmin(admin.ModelAdmin):
         if Service.objects.filter(slug=obj.slug).exclude(pk=obj.pk).exists():
             self.message_user(request, 
                 f"Внимание: Slug '{obj.slug}' уже используется другой услугой!", 
+                level='WARNING')
+    
+    class Media:
+        css = {
+            'all': ('admin/css/seo_admin.css',)
+        }
+        js = ('admin/js/seo_admin.js',)
+
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ('get_full_name', 'position', 'role', 'phone_display', 'email', 'is_active', 'show_on_homepage', 'display_order')
+    list_filter = ('role', 'is_active', 'show_on_homepage', 'hire_date', 'created_at')
+    search_fields = ('first_name', 'last_name', 'position', 'email', 'phone', 'languages', 'bio', 'specialization')
+    readonly_fields = ('created_at', 'updated_at')
+    list_editable = ('is_active', 'show_on_homepage', 'display_order')
+    ordering = ['display_order', 'last_name', 'first_name']
+    
+    fieldsets = (
+        ('Личная информация', {
+            'fields': ('first_name', 'last_name', 'photo'),
+            'description': 'Основная информация о сотруднике'
+        }),
+        ('Должность и роль', {
+            'fields': ('position', 'role', 'hire_date'),
+            'description': 'Профессиональная информация'
+        }),
+        ('Контактная информация', {
+            'fields': ('phone', 'email', 'whatsapp'),
+            'description': 'Способы связи с сотрудником'
+        }),
+        ('Дополнительная информация', {
+            'fields': ('bio', 'specialization', 'languages'),
+            'classes': ('collapse',),
+            'description': 'Подробная информация о сотруднике и его навыках'
+        }),
+        ('Настройки отображения', {
+            'fields': ('is_active', 'show_on_homepage', 'display_order'),
+            'description': 'Настройки видимости на сайте'
+        }),
+        ('Системная информация', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_full_name(self, obj):
+        """Полное имя для отображения в списке"""
+        return obj.full_name
+    get_full_name.short_description = 'ФИО'
+    get_full_name.admin_order_field = 'last_name'
+    
+    def get_form(self, request, obj=None, **kwargs):
+        """Настройка формы с подсказками"""
+        form = super().get_form(request, obj, **kwargs)
+        
+        help_texts = {
+            'first_name': 'Имя сотрудника',
+            'last_name': 'Фамилия сотрудника',
+            'position': 'Должность на английском языке (как указано в оригинале)',
+            'role': 'Выберите роль из предложенных вариантов',
+            'phone': 'Основной телефон в любом формате',
+            'email': 'Рабочий email адрес',
+            'whatsapp': 'Номер для WhatsApp (можно тот же, что и основной телефон)',
+            'photo': 'Фото сотрудника. Рекомендуемое разрешение: 300x300 пикселей',
+            'bio': 'Краткая биография или описание сотрудника',
+            'specialization': 'Основные направления работы и специализации',
+            'languages': 'Языки, которыми владеет сотрудник (через запятую)',
+            'hire_date': 'Дата приема на работу',
+            'is_active': 'Отображать ли сотрудника на сайте',
+            'show_on_homepage': 'Показывать в блоке "Наша команда" на главной странице',
+            'display_order': 'Порядок отображения (меньше = выше в списке)',
+        }
+        
+        for field_name, help_text in help_texts.items():
+            if field_name in form.base_fields:
+                form.base_fields[field_name].help_text = help_text
+        
+        return form
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('display_order', 'last_name', 'first_name')
+    
+    actions = ['activate_employees', 'deactivate_employees', 'add_to_homepage', 'remove_from_homepage', 'duplicate_employees']
+    
+    def activate_employees(self, request, queryset):
+        """Активировать выбранных сотрудников"""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"Активировано {updated} сотрудников")
+    activate_employees.short_description = "Активировать выбранных сотрудников"
+    
+    def deactivate_employees(self, request, queryset):
+        """Деактивировать выбранных сотрудников"""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"Деактивировано {updated} сотрудников")
+    deactivate_employees.short_description = "Деактивировать выбранных сотрудников"
+    
+    def add_to_homepage(self, request, queryset):
+        """Добавить на главную страницу"""
+        updated = queryset.update(show_on_homepage=True)
+        self.message_user(request, f"Добавлено на главную {updated} сотрудников")
+    add_to_homepage.short_description = "Показывать на главной странице"
+    
+    def remove_from_homepage(self, request, queryset):
+        """Убрать с главной страницы"""
+        updated = queryset.update(show_on_homepage=False)
+        self.message_user(request, f"Убрано с главной {updated} сотрудников")
+    remove_from_homepage.short_description = "Не показывать на главной странице"
+    
+    def duplicate_employees(self, request, queryset):
+        """Дублировать выбранных сотрудников"""
+        for employee in queryset:
+            employee.pk = None
+            employee.first_name = f"{employee.first_name} (копия)"
+            employee.is_active = False  # Копии создаются неактивными
+            employee.show_on_homepage = False
+            employee.save()
+        self.message_user(request, f"Продублировано {queryset.count()} сотрудников")
+    duplicate_employees.short_description = "Дублировать выбранных сотрудников"
+    
+    def save_model(self, request, obj, form, change):
+        """Дополнительная логика при сохранении"""
+        super().save_model(request, obj, form, change)
+        
+        # Проверяем корректность WhatsApp номера
+        if obj.whatsapp and obj.whatsapp == obj.phone:
+            self.message_user(request, 
+                "Номера телефона и WhatsApp одинаковые - это нормально если используется один номер", 
+                level='INFO')
+        
+        # Напоминание о заполнении фото
+        if not obj.photo:
+            self.message_user(request, 
+                "Рекомендуется добавить фото сотрудника для лучшего представления команды", 
                 level='WARNING')
     
     class Media:

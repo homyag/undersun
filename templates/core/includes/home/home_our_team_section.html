@@ -9,149 +9,112 @@
 
             <!-- Visible Sales Team -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                <!-- Team Member 1: Bogdan Dyachuk -->
-                <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-                    <div class="flex-grow">
-                        <div class="relative mb-6">
-                            <img src="{% static 'images/team/bogdan_dyachuk.jpeg' %}" alt="Bogdan Dyachuk"
-                                 class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                {% for member in homepage_team %}
+                    <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                        <div class="flex-grow">
+                            <div class="relative mb-6">
+                                {% if member.photo %}
+                                    <img src="{{ member.photo.url }}" alt="{{ member.full_name }}"
+                                         class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                                {% else %}
+                                    <div class="w-32 h-32 rounded-lg mx-auto bg-gray-300 flex items-center justify-center shadow-lg">
+                                        <i class="fas fa-user text-gray-500 text-4xl"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ member.full_name }}</h3>
+                            <p class="text-primary font-medium mb-3">{{ member.position }}</p>
+                            {% if member.bio %}
+                                <p class="text-sm text-gray-600 mb-3">{{ member.bio|truncatewords:15 }}</p>
+                            {% endif %}
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Bogdan Dyachuk</h3>
-                        <p class="text-primary font-medium mb-3">Sales Director</p>
-                    </div>
-                    <div class="space-y-2 text-sm text-gray-600 mt-auto">
-                        <div class="flex items-center justify-center">
-                            <i class="fas fa-phone text-primary mr-2"></i>
-                            <a href="tel:+66827268615" class="hover:text-primary transition-colors">+66 82 726 8615</a>
-                        </div>
-                        <div class="flex items-center justify-center">
-                            <i class="fas fa-envelope text-primary mr-2"></i>
-                            <a href="mailto:bd@undersunestate.com" class="hover:text-primary transition-colors break-all">bd@undersunestate.com</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Team Member 5: Kirill Dedyugin -->
-                <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-                    <div class="flex-grow">
-                        <div class="relative mb-6">
-                            <img src="{% static 'images/team/kirill_dedyugin.jpeg' %}" alt="Kirill Dedyugin"
-                                 class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Kirill Dedyugin</h3>
-                        <p class="text-primary font-medium mb-3">Senior Manager for International Client Relations</p>
-                    </div>
-                    <div class="space-y-2 text-sm text-gray-600 mt-auto">
-                        <div class="flex items-center justify-center">
-                            <i class="fas fa-phone text-primary mr-2"></i>
-                            <a href="tel:+66625392970" class="hover:text-primary transition-colors">+66 62 539 2970</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Team Member 6: Vitalii Savchuk -->
-                <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-                    <div class="flex-grow">
-                        <div class="relative mb-6">
-                            <img src="{% static 'images/team/vitalii_savchuk.jpeg' %}" alt="Vitalii Savchuk"
-                                 class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Vitalii Savchuk</h3>
-                        <p class="text-primary font-medium mb-3">Manager for International Client Relations</p>
-                    </div>
-                    <div class="space-y-2 text-sm text-gray-600 mt-auto">
-                        <div class="flex items-center justify-center">
-                            <i class="fas fa-phone text-primary mr-2"></i>
-                            <a href="tel:+66836087179" class="hover:text-primary transition-colors">+66 83 608 7179</a>
+                        <div class="space-y-2 text-sm text-gray-600 mt-auto">
+                            {% if member.phone %}
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-phone text-primary mr-2"></i>
+                                    <a href="tel:{{ member.phone }}" class="hover:text-primary transition-colors">{{ member.phone_display }}</a>
+                                </div>
+                            {% endif %}
+                            {% if member.email %}
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-envelope text-primary mr-2"></i>
+                                    <a href="mailto:{{ member.email }}" class="hover:text-primary transition-colors break-all">{{ member.email }}</a>
+                                </div>
+                            {% endif %}
+                            {% if member.whatsapp_url %}
+                                <div class="flex items-center justify-center">
+                                    <i class="fab fa-whatsapp text-green-500 mr-2"></i>
+                                    <a href="{{ member.whatsapp_url }}" target="_blank" class="hover:text-green-500 transition-colors">WhatsApp</a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                </div>
+                {% empty %}
+                    <!-- Fallback если нет сотрудников в БД -->
+                    <div class="col-span-3 text-center py-8">
+                        <p class="text-gray-600">{% trans "Команда обновляется..." %}</p>
+                    </div>
+                {% endfor %}
             </div>
 
             <!-- Show More Button -->
-            <div class="text-center mt-8">
-                <button id="show-more-team" 
-                        class="inline-flex items-center px-8 py-3 bg-primary hover:bg-gray-700 text-white font-medium rounded-md transition-colors duration-300">
-                    <i class="fas fa-users mr-2"></i>
-                    <span>{% trans "Команда Undersun Estate" %}</span>
-                    <i class="fas fa-chevron-down ml-2 transform transition-transform duration-300" id="chevron-icon"></i>
-                </button>
-            </div>
+            {% if hidden_team %}
+                <div class="text-center mt-8">
+                    <button id="show-more-team" 
+                            class="inline-flex items-center px-8 py-3 bg-primary hover:bg-gray-700 text-white font-medium rounded-md transition-colors duration-300">
+                        <i class="fas fa-users mr-2"></i>
+                        <span>{% trans "Команда Undersun Estate" %}</span>
+                        <i class="fas fa-chevron-down ml-2 transform transition-transform duration-300" id="chevron-icon"></i>
+                    </button>
+                </div>
+            {% endif %}
 
             <!-- Hidden Team Members -->
-            <div id="additional-team" class="hidden mt-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <!-- Team Member 2: Ilya Ordovskii-Tanaevskii -->
-                    <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                        <div class="relative mb-6">
-                            <img src="{% static 'images/team/ilya_ordovskii.jpeg' %}" alt="Ilya Ordovskii-Tanaevskii"
-                                 class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Ilya Ordovskii-Tanaevskii</h3>
-                        <p class="text-primary font-medium mb-3">Chief Art Officer (CAO)</p>
-                        <div class="space-y-2 text-sm text-gray-600">
-                            <div class="flex items-center justify-center">
-                                <i class="fas fa-phone text-primary mr-2"></i>
-                                <a href="tel:+66994402232" class="hover:text-primary transition-colors">+66 99 440 2232</a>
+            {% if hidden_team %}
+                <div id="additional-team" class="hidden mt-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {% for member in hidden_team %}
+                            <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
+                                <div class="relative mb-6">
+                                    {% if member.photo %}
+                                        <img src="{{ member.photo.url }}" alt="{{ member.full_name }}"
+                                             class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                                    {% else %}
+                                        <div class="w-32 h-32 rounded-lg mx-auto bg-gray-300 flex items-center justify-center shadow-lg">
+                                            <i class="fas fa-user text-gray-500 text-4xl"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ member.full_name }}</h3>
+                                <p class="text-primary font-medium mb-3">{{ member.position }}</p>
+                                {% if member.bio %}
+                                    <p class="text-sm text-gray-600 mb-3">{{ member.bio|truncatewords:10 }}</p>
+                                {% endif %}
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    {% if member.phone %}
+                                        <div class="flex items-center justify-center">
+                                            <i class="fas fa-phone text-primary mr-2"></i>
+                                            <a href="tel:{{ member.phone }}" class="hover:text-primary transition-colors">{{ member.phone_display }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if member.email %}
+                                        <div class="flex items-center justify-center">
+                                            <i class="fas fa-envelope text-primary mr-2"></i>
+                                            <a href="mailto:{{ member.email }}" class="hover:text-primary transition-colors break-all">{{ member.email }}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% if member.whatsapp_url %}
+                                        <div class="flex items-center justify-center">
+                                            <i class="fab fa-whatsapp text-green-500 mr-2"></i>
+                                            <a href="{{ member.whatsapp_url }}" target="_blank" class="hover:text-green-500 transition-colors">WhatsApp</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="flex items-center justify-center">
-                                <i class="fas fa-envelope text-primary mr-2"></i>
-                                <a href="mailto:iot@undersunestate.com" class="hover:text-primary transition-colors">iot@undersunestate.com</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Team Member 3: Tatiana Korostyleva -->
-                    <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                        <div class="relative mb-6">
-                            <img src="{% static 'images/team/tatiana_korostyleva.jpeg' %}" alt="Tatiana Korostyleva"
-                                 class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Tatiana Korostyleva</h3>
-                        <p class="text-primary font-medium mb-3">Chief Marketing Officer (CMO)</p>
-                        <div class="space-y-2 text-sm text-gray-600">
-                            <div class="flex items-center justify-center">
-                                <i class="fas fa-phone text-primary mr-2"></i>
-                                <a href="tel:+79177188313" class="hover:text-primary transition-colors">+7 917 718 8313</a>
-                            </div>
-                            <div class="flex items-center justify-center">
-                                <i class="fas fa-envelope text-primary mr-2"></i>
-                                <a href="mailto:tatyanak@undersun-estate.com" class="hover:text-primary transition-colors">tatyanak@undersunestate.com</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Team Member 4: Aleksei Kljujev -->
-                    <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                        <div class="relative mb-6">
-                            <img src="{% static 'images/team/aleksei_kljujev.jpeg' %}" alt="Aleksei Kljujev"
-                                 class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Aleksei Kljujev</h3>
-                        <p class="text-primary font-medium mb-3">Chief Financial Officer (CFO)</p>
-                        <div class="space-y-2 text-sm text-gray-600">
-                            <div class="flex items-center justify-center">
-                                <i class="fas fa-phone text-primary mr-2"></i>
-                                <a href="tel:+66945955257" class="hover:text-primary transition-colors">+66 94 595 5257</a>
-                            </div>
-                            <div class="flex items-center justify-center">
-                                <i class="fas fa-envelope text-primary mr-2"></i>
-                                <a href="mailto:alex@undersunestate.com" class="hover:text-primary transition-colors">alex@undersunestate.com</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Team Member 7: Withanyu Satchaphan -->
-                    <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
-                        <div class="relative mb-6">
-                            <img src="{% static 'images/team/withanyu_satchaphan.jpeg' %}" alt="Withanyu Satchaphan"
-                                 class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Withanyu Satchaphan</h3>
-                        <p class="text-primary font-medium mb-3">Office Manager</p>
+                        {% endfor %}
                     </div>
                 </div>
-            </div>
+            {% endif %}
 
             <!-- Call to action -->
             <div class="text-center mt-12">

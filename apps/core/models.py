@@ -424,3 +424,114 @@ class Service(models.Model):
     def get_menu_services(cls):
         """Получить услуги для отображения в меню"""
         return cls.objects.filter(is_active=True, show_in_menu=True).order_by('menu_order', 'title')
+
+
+class Team(models.Model):
+    """Модель сотрудников компании"""
+    
+    ROLE_CHOICES = [
+        ('sales_director', _('Sales Director')),
+        ('senior_manager', _('Senior Manager for International Client Relations')),
+        ('manager', _('Manager for International Client Relations')),
+        ('chief_art_officer', _('Chief Art Officer (CAO)')),
+        ('chief_marketing_officer', _('Chief Marketing Officer (CMO)')),
+        ('chief_financial_officer', _('Chief Financial Officer (CFO)')),
+        ('office_manager', _('Office Manager')),
+        ('agent', _('Агент по недвижимости')),
+        ('specialist', _('Специалист')),
+        ('other', _('Другое')),
+    ]
+    
+    # Основная информация
+    first_name = models.CharField(_('Имя'), max_length=100)
+    last_name = models.CharField(_('Фамилия'), max_length=100)
+    position = models.CharField(_('Должность'), max_length=200)
+    role = models.CharField(_('Роль'), max_length=50, choices=ROLE_CHOICES, default='specialist')
+    
+    # Контактная информация
+    phone = models.CharField(_('Телефон'), max_length=20, blank=True)
+    email = models.EmailField(_('Email'), blank=True)
+    whatsapp = models.CharField(_('WhatsApp'), max_length=20, blank=True,
+                               help_text=_('Номер телефона для WhatsApp'))
+    
+    # Фото сотрудника
+    photo = models.ImageField(_('Фото'), upload_to='team/', blank=True,
+                            help_text=_('Рекомендуемое разрешение: 300x300 пикселей'))
+    
+    # Описание и навыки
+    bio = models.TextField(_('Биография'), blank=True,
+                          help_text=_('Краткая информация о сотруднике'))
+    specialization = models.TextField(_('Специализация'), blank=True,
+                                    help_text=_('Основные направления работы'))
+    
+    # Языки
+    languages = models.CharField(_('Языки'), max_length=200, blank=True,
+                               help_text=_('Перечислите языки через запятую'))
+    
+    # Настройки отображения
+    is_active = models.BooleanField(_('Активный'), default=True,
+                                  help_text=_('Показывать ли сотрудника на сайте'))
+    show_on_homepage = models.BooleanField(_('Показывать на главной'), default=False,
+                                         help_text=_('Отображать в блоке "Наша команда" на главной странице'))
+    display_order = models.IntegerField(_('Порядок отображения'), default=100,
+                                      help_text=_('Порядок отображения в списке (меньше = выше)'))
+    
+    # Даты
+    hire_date = models.DateField(_('Дата приема на работу'), blank=True, null=True)
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Обновлено'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Сотрудник')
+        verbose_name_plural = _('Сотрудники')
+        ordering = ['display_order', 'last_name', 'first_name']
+    
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
+    
+    @property
+    def full_name(self):
+        """Полное имя сотрудника"""
+        return f"{self.first_name} {self.last_name}"
+    
+    @property 
+    def whatsapp_url(self):
+        """URL для WhatsApp ссылки"""
+        if self.whatsapp:
+            # Очищаем номер от лишних символов
+            phone_clean = ''.join(filter(str.isdigit, self.whatsapp))
+            if phone_clean.startswith('0'):
+                phone_clean = '66' + phone_clean[1:]  # Заменяем 0 на код Таиланда
+            elif not phone_clean.startswith('66'):
+                phone_clean = '66' + phone_clean
+            return f"https://wa.me/{phone_clean}"
+        return None
+    
+    @property
+    def phone_display(self):
+        """Форматированный телефон для отображения"""
+        if self.phone:
+            # Простое форматирование для тайских номеров
+            phone_clean = ''.join(filter(str.isdigit, self.phone))
+            if len(phone_clean) >= 10:
+                return f"+{phone_clean[:2]} {phone_clean[2:4]} {phone_clean[4:7]} {phone_clean[7:]}"
+        return self.phone
+    
+    @classmethod
+    def get_homepage_team(cls):
+        """Получить команду для отображения на главной странице"""
+        return cls.objects.filter(
+            is_active=True, 
+            show_on_homepage=True
+        ).order_by('display_order', 'last_name')
+    
+    @classmethod
+    def get_all_active(cls):
+        """Получить всех активных сотрудников"""
+        return cls.objects.filter(is_active=True).order_by('display_order', 'last_name')
+    
+    def get_languages_list(self):
+        """Получить список языков как массив"""
+        if self.languages:
+            return [lang.strip() for lang in self.languages.split(',') if lang.strip()]
+        return []

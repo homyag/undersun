@@ -6,7 +6,7 @@ import json
 from apps.properties.models import Property, PropertyType
 from apps.locations.models import District
 from apps.blog.models import BlogPost
-from .models import PromotionalBanner, Service
+from .models import PromotionalBanner, Service, Team
 
 
 def serialize_properties_for_js(properties):
@@ -120,6 +120,11 @@ class HomeView(TemplateView):
         
         # Последние новости (3 новости для главной страницы)
         context['latest_news'] = BlogPost.get_published().select_related('category', 'author').order_by('-published_at')[:3]
+        
+        # Команда для главной страницы
+        context['homepage_team'] = Team.get_homepage_team()
+        context['all_team'] = Team.get_all_active()
+        context['hidden_team'] = Team.objects.filter(is_active=True, show_on_homepage=False).order_by('display_order', 'last_name')
 
         return context
 
