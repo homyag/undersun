@@ -142,9 +142,10 @@
                                class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
                         <span class="ml-3 text-sm text-gray-700 flex items-center">
                             {% if amenity.icon %}
-                                <i class="{{ amenity.icon }} mr-2 text-accent"></i>
+                                <i class="{{ amenity.icon }} mr-2 text-accent text-sm"></i>
                             {% endif %}
                             {{ amenity.name }}
+{#                            <span class="text-xs text-gray-500 ml-2">({{ amenity.property_count }})</span>#}
                         </span>
                     </label>
                     {% endfor %}

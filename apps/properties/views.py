@@ -146,10 +146,10 @@ class PropertyListView(ListView):
         else:
             context['locations'] = Location.objects.all()
         
-        # Добавляем популярные amenities (с количеством > 10 объектов)
+        # Добавляем популярные amenities (с количеством > 0 объектов)
         context['amenities'] = PropertyFeature.objects.annotate(
             property_count=Count('propertyfeaturerelation')
-        ).filter(property_count__gte=10).order_by('-property_count')[:12]
+        ).filter(property_count__gte=1).order_by('-property_count')[:12]
         
         # Передаем текущие фильтры в контекст для сохранения состояния формы
         context['current_filters'] = {
@@ -737,6 +737,16 @@ def apply_search_filters(queryset, filters):
     deal_type = filters.get('deal_type')
     if deal_type and deal_type in ['sale', 'rent']:
         queryset = queryset.filter(deal_type__in=[deal_type, 'both'])
+    
+    # Удобства/особенности
+    amenities = filters.getlist('amenities') if hasattr(filters, 'getlist') else [filters.get('amenities')] if filters.get('amenities') else []
+    if amenities:
+        for amenity_id in amenities:
+            try:
+                amenity_id = int(amenity_id)
+                queryset = queryset.filter(features__feature__id=amenity_id)
+            except (ValueError, TypeError):
+                pass
     
     # Текстовый поиск
     query = filters.get('q')
