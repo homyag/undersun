@@ -193,8 +193,8 @@
                             <div class="space-y-2">
                                 {% for amenity in amenities %}
                                 <label class="flex items-center">
-                                    <input type="checkbox" name="amenities" value="{{ amenity.id }}" 
-                                           {% if amenity.id|stringformat:"s" in current_filters.amenities %}checked{% endif %} 
+                                    <input type="checkbox" name="amenities" value="{{ amenity.id }}"
+                                           {% if amenity.id|stringformat:"s" in current_filters.amenities %}checked{% endif %}
                                            class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded">
                                     <span class="ml-3 text-sm text-gray-700 flex items-center">
                                         {% if amenity.icon %}
