@@ -42,7 +42,7 @@
                             {{ post.published_at|date:'d F Y' }}
                         </time>
                         <span class="mr-4 mb-2">
-                            {% trans "Автор" %}: {{ post.author.get_full_name|default:post.author.username }}
+                            {% trans "Автор" %}: {{ post.get_author_display }}
                         </span>
                         <span class="mr-4 mb-2">{{ post.get_reading_time }} {% trans "мин чтения" %}</span>
                         <span class="mb-2">{{ post.views_count }} {% trans "просмотров" %}</span>
@@ -80,16 +80,51 @@
                     <!-- Информация об авторе -->
                     <div class="mt-8 pt-6 border-t border-gray-200">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-4">
-                                <span class="text-gray-600 font-bold">
-                                    {{ post.author.first_name.0|default:post.author.username.0|upper }}
-                                </span>
-                            </div>
-                            <div>
+                            {% if post.get_author_photo %}
+                                <img src="{{ post.get_author_photo.url }}" alt="{{ post.get_author_display }}"
+                                     class="w-12 h-12 rounded-full object-cover mr-4">
+                            {% else %}
+                                <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mr-4">
+                                    <span class="text-gray-600 font-bold">
+                                        {{ post.get_author_display.0|upper }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <div class="flex-1">
                                 <h3 class="font-medium text-gray-900">
-                                    {{ post.author.get_full_name|default:post.author.username }}
+                                    {{ post.get_author_display }}
                                 </h3>
-                                <p class="text-sm text-gray-600">{% trans "Автор статьи" %}</p>
+                                {% if post.team_author %}
+                                    <p class="text-sm text-gray-600 mb-2">{{ post.team_author.position }}</p>
+                                    {% if post.get_author_bio %}
+                                        <p class="text-sm text-gray-600 mb-3">{{ post.get_author_bio|truncatewords:20 }}</p>
+                                    {% endif %}
+                                    
+                                    <!-- Контакты автора -->
+                                    {% with post.get_author_contact as contacts %}
+                                        {% if contacts %}
+                                            <div class="flex items-center space-x-4 text-sm">
+                                                {% if contacts.phone %}
+                                                    <a href="tel:{{ contacts.phone }}" class="text-primary hover:opacity-80 transition-colors">
+                                                        <i class="fas fa-phone mr-1"></i>{{ contacts.phone }}
+                                                    </a>
+                                                {% endif %}
+                                                {% if contacts.email %}
+                                                    <a href="mailto:{{ contacts.email }}" class="text-primary hover:opacity-80 transition-colors">
+                                                        <i class="fas fa-envelope mr-1"></i>{% trans "Email" %}
+                                                    </a>
+                                                {% endif %}
+                                                {% if contacts.whatsapp_url %}
+                                                    <a href="{{ contacts.whatsapp_url }}" target="_blank" class="text-green-600 hover:opacity-80 transition-colors">
+                                                        <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <p class="text-sm text-gray-600">{% trans "Автор статьи" %}</p>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

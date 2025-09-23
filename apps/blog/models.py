@@ -60,8 +60,12 @@ class BlogPost(models.Model):
     # Связи
     category = models.ForeignKey(BlogCategory, on_delete=models.CASCADE, 
                                related_name='posts', verbose_name=_('Категория'))
+    team_author = models.ForeignKey('core.Team', on_delete=models.SET_NULL, null=True, blank=True,
+                                   default=5, related_name='blog_posts', verbose_name=_('Автор (сотрудник)'),
+                                   help_text=_('Сотрудник компании - автор статьи (по умолчанию: Tatiana)'))
     author = models.ForeignKey(User, on_delete=models.CASCADE,
-                             related_name='blog_posts', verbose_name=_('Автор'))
+                             related_name='blog_posts', verbose_name=_('Автор (legacy)'),
+                             help_text=_('Пользователь системы - автор статьи (устаревшее поле)'))
     
     # Изображения
     featured_image = models.ImageField(_('Главное изображение'), upload_to='blog/featured/', 
@@ -128,6 +132,36 @@ class BlogPost(models.Model):
         """Получить SEO описание или краткое описание"""
         return self.meta_description if self.meta_description else self.excerpt
         
+    def get_author_display(self):
+        """Получить автора для отображения (приоритет team_author > author)"""
+        if self.team_author:
+            return self.team_author.full_name
+        elif self.author:
+            return f"{self.author.first_name} {self.author.last_name}".strip() or self.author.username
+        return "Неизвестный автор"
+    
+    def get_author_photo(self):
+        """Получить фото автора"""
+        if self.team_author and self.team_author.photo:
+            return self.team_author.photo
+        return None
+    
+    def get_author_bio(self):
+        """Получить биографию автора"""
+        if self.team_author and self.team_author.bio:
+            return self.team_author.bio
+        return None
+    
+    def get_author_contact(self):
+        """Получить контактную информацию автора"""
+        if self.team_author:
+            return {
+                'phone': self.team_author.phone,
+                'email': self.team_author.email,
+                'whatsapp_url': self.team_author.whatsapp_url,
+            }
+        return None
+        
     def save(self, *args, **kwargs):
         """Автоматически устанавливаем дату публикации при смене статуса"""
         if self.status == 'published' and not self.published_at:
@@ -140,7 +174,7 @@ class BlogPost(models.Model):
     @classmethod
     def get_published(cls):
         """Получить опубликованные статьи"""
-        return cls.objects.filter(status='published').select_related('category', 'author')
+        return cls.objects.filter(status='published').select_related('category', 'author', 'team_author')
         
     @classmethod
     def get_featured(cls, limit=3):

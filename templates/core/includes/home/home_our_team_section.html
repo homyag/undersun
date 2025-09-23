@@ -47,6 +47,23 @@
                                     <a href="{{ member.whatsapp_url }}" target="_blank" class="hover:text-green-500 transition-colors">WhatsApp</a>
                                 </div>
                             {% endif %}
+                            
+                            <!-- Social Media Icons -->
+                            {% with member.get_social_media_list as social_media %}
+                                {% if social_media %}
+                                    <div class="flex items-center justify-center pt-2 space-x-2">
+                                        {% for social in social_media %}
+                                            <a href="{{ social.url }}" 
+                                               target="_blank" 
+                                               class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm hover:scale-110 transition-all duration-200"
+                                               style="background-color: {{ social.color }};"
+                                               title="{{ social.name }}">
+                                                <i class="{{ social.icon }}"></i>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
                         </div>
                     </div>
                 {% empty %}
@@ -109,6 +126,23 @@
                                             <a href="{{ member.whatsapp_url }}" target="_blank" class="hover:text-green-500 transition-colors">WhatsApp</a>
                                         </div>
                                     {% endif %}
+                                    
+                                    <!-- Social Media Icons -->
+                                    {% with member.get_social_media_list as social_media %}
+                                        {% if social_media %}
+                                            <div class="flex items-center justify-center pt-2 space-x-2">
+                                                {% for social in social_media %}
+                                                    <a href="{{ social.url }}" 
+                                                       target="_blank" 
+                                                       class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs hover:scale-110 transition-all duration-200"
+                                                       style="background-color: {{ social.color }};"
+                                                       title="{{ social.name }}">
+                                                        <i class="{{ social.icon }}"></i>
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
                                 </div>
                             </div>
                         {% endfor %}
