@@ -454,6 +454,22 @@ class Team(models.Model):
     whatsapp = models.CharField(_('WhatsApp'), max_length=20, blank=True,
                                help_text=_('Номер телефона для WhatsApp'))
     
+    # Социальные сети
+    facebook = models.URLField(_('Facebook'), blank=True,
+                              help_text=_('Ссылка на профиль в Facebook'))
+    instagram = models.URLField(_('Instagram'), blank=True,
+                               help_text=_('Ссылка на профиль в Instagram'))
+    linkedin = models.URLField(_('LinkedIn'), blank=True,
+                              help_text=_('Ссылка на профиль в LinkedIn'))
+    twitter = models.URLField(_('Twitter'), blank=True,
+                             help_text=_('Ссылка на профиль в Twitter'))
+    telegram = models.CharField(_('Telegram'), max_length=100, blank=True,
+                               help_text=_('Username в Telegram (без @)'))
+    youtube = models.URLField(_('YouTube'), blank=True,
+                             help_text=_('Ссылка на канал YouTube'))
+    tiktok = models.URLField(_('TikTok'), blank=True,
+                            help_text=_('Ссылка на профиль в TikTok'))
+    
     # Фото сотрудника
     photo = models.ImageField(_('Фото'), upload_to='team/', blank=True,
                             help_text=_('Рекомендуемое разрешение: 300x300 пикселей'))
@@ -535,3 +551,73 @@ class Team(models.Model):
         if self.languages:
             return [lang.strip() for lang in self.languages.split(',') if lang.strip()]
         return []
+    
+    @property
+    def telegram_url(self):
+        """URL для Telegram ссылки"""
+        if self.telegram:
+            username = self.telegram.lstrip('@')  # Убираем @ если есть
+            return f"https://t.me/{username}"
+        return None
+    
+    def get_social_media_list(self):
+        """Получить список всех социальных сетей с данными"""
+        social_media = []
+        
+        if self.facebook:
+            social_media.append({
+                'name': 'Facebook',
+                'url': self.facebook,
+                'icon': 'fab fa-facebook-f',
+                'color': '#1877F2'
+            })
+        
+        if self.instagram:
+            social_media.append({
+                'name': 'Instagram', 
+                'url': self.instagram,
+                'icon': 'fab fa-instagram',
+                'color': '#E4405F'
+            })
+        
+        if self.linkedin:
+            social_media.append({
+                'name': 'LinkedIn',
+                'url': self.linkedin,
+                'icon': 'fab fa-linkedin-in',
+                'color': '#0A66C2'
+            })
+        
+        if self.twitter:
+            social_media.append({
+                'name': 'Twitter',
+                'url': self.twitter,
+                'icon': 'fab fa-twitter',
+                'color': '#1DA1F2'
+            })
+        
+        if self.telegram_url:
+            social_media.append({
+                'name': 'Telegram',
+                'url': self.telegram_url,
+                'icon': 'fab fa-telegram-plane',
+                'color': '#0088CC'
+            })
+        
+        if self.youtube:
+            social_media.append({
+                'name': 'YouTube',
+                'url': self.youtube,
+                'icon': 'fab fa-youtube',
+                'color': '#FF0000'
+            })
+        
+        if self.tiktok:
+            social_media.append({
+                'name': 'TikTok',
+                'url': self.tiktok,
+                'icon': 'fab fa-tiktok',
+                'color': '#000000'
+            })
+        
+        return social_media

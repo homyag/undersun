@@ -209,9 +209,21 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     
     force_retranslate.short_description = "🔄 Перевести заново (перезаписать все переводы)"
     
+    def save_model(self, request, obj, form, change):
+        if not change:  # Если это новый объект
+            # Устанавливаем Богдана как контактное лицо по умолчанию, если contact_person не указан
+            if not obj.contact_person_id:
+                try:
+                    from apps.core.models import Team
+                    bogdan = Team.objects.get(id=1)  # Bogdan Dyachuk
+                    obj.contact_person = bogdan
+                except Team.DoesNotExist:
+                    pass  # Если Богдан не найден, оставляем пустым
+        super().save_model(request, obj, form, change)
+
     def get_queryset(self, request):
         """Переопределяем queryset для отображения количества просмотров"""
-        return super().get_queryset(request).select_related('property_type', 'district')
+        return super().get_queryset(request).select_related('property_type', 'district', 'contact_person')
 
     def bulk_image_upload_widget(self, obj=None):
         """Виджет для массовой загрузки изображений"""
@@ -421,7 +433,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
             'fields': ('price_sale_usd', 'price_sale_thb', 'price_rent_monthly')
         }),
         ('Дополнительно', {
-            'fields': ('developer', 'year_built', 'furnished', 'pool', 'parking', 'security', 'gym')
+            'fields': ('developer', 'contact_person', 'year_built', 'furnished', 'pool', 'parking', 'security', 'gym')
         }),
         ('SEO настройки (опционально)', {
             'fields': (

@@ -498,6 +498,11 @@ class TeamAdmin(admin.ModelAdmin):
             'fields': ('phone', 'email', 'whatsapp'),
             'description': 'Способы связи с сотрудником'
         }),
+        ('Социальные сети', {
+            'fields': ('facebook', 'instagram', 'linkedin', 'twitter', 'telegram', 'youtube', 'tiktok'),
+            'classes': ('collapse',),
+            'description': 'Профили в социальных сетях'
+        }),
         ('Дополнительная информация', {
             'fields': ('bio', 'specialization', 'languages'),
             'classes': ('collapse',),

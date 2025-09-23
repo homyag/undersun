@@ -131,7 +131,7 @@
                                         <span class="mr-4">{{ post.published_at|date:"d M Y" }}</span>
                                         
                                         <i class="fas fa-user mr-2"></i>
-                                        <span class="mr-4">{{ post.author.get_full_name|default:post.author.username }}</span>
+                                        <span class="mr-4">{{ post.get_author_display }}</span>
                                         
                                         <i class="fas fa-eye mr-2"></i>
                                         <span>{{ post.views_count }}</span>

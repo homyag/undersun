@@ -73,7 +73,7 @@ class BlogPostAdminForm(forms.ModelForm):
 @admin.register(BlogPost)
 class BlogPostAdmin(BaseAdminWithRequiredFields):
     form = BlogPostAdminForm
-    list_display = ('title', 'slug', 'category', 'author', 'status', 'is_featured', 'published_at', 'views_count')
+    list_display = ('title', 'slug', 'category', 'team_author', 'author', 'status', 'is_featured', 'published_at', 'views_count')
     list_filter = ('status', 'is_featured', 'category', 'created_at', 'published_at')
     search_fields = ('title', 'excerpt', 'content')
     prepopulated_fields = {'slug': ('title',)}
@@ -82,7 +82,7 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
     
     fieldsets = (
         (_('Основная информация (Русский)'), {
-            'fields': ('title', 'slug', 'excerpt', 'content', 'category', 'author')
+            'fields': ('title', 'slug', 'excerpt', 'content', 'category', 'team_author', 'author')
         }),
         (_('Дополнительные поля для событий'), {
             'fields': ('event_date', 'event_location', 'event_price'),
@@ -134,11 +134,19 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
     def save_model(self, request, obj, form, change):
         if not change:  # Если это новый объект
             obj.author = request.user
+            # Устанавливаем Татьяну как автора по умолчанию, если team_author не указан
+            if not obj.team_author_id:
+                try:
+                    from apps.core.models import Team
+                    tatiana = Team.objects.get(id=5)  # Tatiana Korostyleva
+                    obj.team_author = tatiana
+                except Team.DoesNotExist:
+                    pass  # Если Татьяна не найдена, оставляем пустым
         super().save_model(request, obj, form, change)
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.select_related('category', 'author')
+        return qs.select_related('category', 'author', 'team_author')
     
     actions = ['make_published', 'make_draft', 'make_featured', 'auto_translate', 'force_retranslate']
     
