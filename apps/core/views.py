@@ -336,3 +336,4 @@ class ServiceDetailView(DetailView):
         else:
             # Для остальных услуг показываем все рекомендуемые объекты
             return base_queryset
+
