@@ -13,15 +13,46 @@
         <!-- Main Carousel Container -->
         <div class="relative overflow-hidden rounded-xl shadow-2xl group">
             {% if property.images.exists %}
-                <!-- Carousel Images -->
+                <!-- Dual Image Carousel -->
                 <div class="property-carousel relative h-96 lg:h-[500px]">
                     {% for image in property.images.all %}
-                        <div class="property-slide absolute inset-0 transition-opacity duration-1000 {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}" 
-                             data-slide="{{ forloop.counter0 }}">
-                            <img src="{{ image.medium.url }}" alt="{{ property.title }}" 
-                                 class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                                 onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
-                        </div>
+                        {% if forloop.counter0|divisibleby:2 %}
+                            <div class="property-slide-pair absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100{% else %}opacity-0{% endif %}"
+                                 data-slide-pair="{{ forloop.counter0|floatformat:0|add:0|floatformat:0|floatformat:0 }}">
+                                <div class="flex h-full gap-2">
+                                    <!-- First Image -->
+                                    <div class="flex-1">
+                                        <img src="{{ image.medium.url }}" alt="{{ property.title }}"
+                                             class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-l-lg"
+                                             onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
+                                    </div>
+
+                                    <!-- Second Image (if exists) -->
+                                    {% if forloop.counter0|add:1 < property.images.count %}
+                                        {% with next_index=forloop.counter0|add:1 %}
+                                            <div class="flex-1">
+                                                {% for next_image in property.images.all %}
+                                                    {% if forloop.counter0 == next_index %}
+                                                        <img src="{{ next_image.medium.url }}" alt="{{ property.title }}"
+                                                             class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
+                                                             onclick="openGallery({{ next_index }})" loading="lazy">
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endwith %}
+                                    {% else %}
+                                        <!-- Show first image if we're at the last image (odd count) -->
+                                        <div class="flex-1">
+                                            {% with first_image=property.images.all|first %}
+                                                <img src="{{ first_image.medium.url }}" alt="{{ property.title }}"
+                                                     class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
+                                                     onclick="openGallery(0)" loading="lazy">
+                                            {% endwith %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endfor %}
                     
                     <!-- Carousel Navigation -->
@@ -38,13 +69,15 @@
                             <i class="fas fa-chevron-right text-lg"></i>
                         </button>
                         
-                        <!-- Slide Indicators -->
+                        <!-- Slide Indicators for Image Pairs -->
                         <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
                             {% for image in property.images.all %}
-                                <button onclick="goToSlide({{ forloop.counter0 }})" 
-                                        class="property-indicator w-3 h-3 rounded-full transition-all duration-300 {% if forloop.first %}bg-accent shadow-lg{% else %}bg-white bg-opacity-60 hover:bg-opacity-100{% endif %}"
-                                        data-slide="{{ forloop.counter0 }}">
-                                </button>
+                                {% if forloop.counter0|divisibleby:2 %}
+                                    <button onclick="goToSlidePair({{ forloop.counter0|floatformat:0 }})"
+                                            class="property-pair-indicator w-3 h-3 rounded-full transition-all duration-300 {% if forloop.counter0 == 0 %}bg-accent shadow-lg{% else %}bg-white bg-opacity-60 hover:bg-opacity-100{% endif %}"
+                                            data-slide-pair="{{ forloop.counter0|floatformat:0 }}">
+                                    </button>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -86,10 +119,16 @@
             <div class="mt-4 overflow-x-auto">
                 <div class="flex space-x-3 pb-2">
                     {% for image in property.images.all %}
-                        <div class="flex-shrink-0 relative cursor-pointer group" onclick="goToSlide({{ forloop.counter0 }})">
-                            <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}" 
-                                 class="w-20 h-20 object-cover rounded-lg transition-all duration-300 border-2 {% if forloop.first %}border-accent shadow-lg{% else %}border-transparent hover:border-accent/50{% endif %}"
+                        <div class="flex-shrink-0 relative cursor-pointer group" onclick="goToSlidePairByImage({{ forloop.counter0 }})">
+                            <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}"
+                                 class="w-20 h-20 object-cover rounded-lg transition-all duration-300 border-2 {% if forloop.counter0 == 0 or forloop.counter0 == 1 %}border-accent shadow-lg{% else %}border-transparent hover:border-accent/50{% endif %}"
                                  data-thumb="{{ forloop.counter0 }}">
+                            <!-- Special indicator for cycled display -->
+                            {% if property.images.count|divisibleby:2 == False and forloop.last %}
+                                <div class="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                    ↻
+                                </div>
+                            {% endif %}
                             <!-- Hover Overlay -->
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-eye text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
@@ -214,68 +253,100 @@
                     </div>
                     
                     <!-- Key Features -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                         {% if property.bedrooms %}
-                            <div class="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <i class="fas fa-bed text-primary text-2xl mb-2"></i>
-                                <div class="font-bold text-xl text-gray-900">{{ property.bedrooms }}</div>
-                                <div class="text-sm text-gray-600 font-medium">{% trans "Спален" %}</div>
+                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-bed text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-xl text-gray-900">{{ property.bedrooms }}</div>
+                                    <div class="text-sm text-gray-600 font-medium">{% trans "Спален" %}</div>
+                                </div>
                             </div>
                         {% endif %}
-                        
+
                         {% if property.bathrooms %}
-                            <div class="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <i class="fas fa-bath text-primary text-2xl mb-2"></i>
-                                <div class="font-bold text-xl text-gray-900">{{ property.bathrooms }}</div>
-                                <div class="text-sm text-gray-600 font-medium">{% trans "Ванных" %}</div>
+                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-bath text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-xl text-gray-900">{{ property.bathrooms }}</div>
+                                    <div class="text-sm text-gray-600 font-medium">{% trans "Ванных" %}</div>
+                                </div>
                             </div>
                         {% endif %}
-                        
+
                         {% if property.area_total %}
-                            <div class="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <i class="fas fa-ruler-combined text-primary text-2xl mb-2"></i>
-                                <div class="font-bold text-xl text-gray-900">{{ property.area_total }}</div>
-                                <div class="text-sm text-gray-600 font-medium">м²</div>
+                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-ruler-combined text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-xl text-gray-900">{{ property.area_total }}</div>
+                                    <div class="text-sm text-gray-600 font-medium">м²</div>
+                                </div>
                             </div>
                         {% endif %}
-                        
+
                         {% if property.area_land %}
-                            <div class="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <i class="fas fa-globe text-primary text-2xl mb-2"></i>
-                                <div class="font-bold text-xl text-gray-900">{{ property.area_land }}</div>
-                                <div class="text-sm text-gray-600 font-medium">{% trans "Участок м²" %}</div>
+                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-globe text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-xl text-gray-900">{{ property.area_land }}</div>
+                                    <div class="text-sm text-gray-600 font-medium">{% trans "Участок м²" %}</div>
+                                </div>
                             </div>
                         {% endif %}
-                        
+
                         {% if property.floor %}
-                            <div class="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <i class="fas fa-layer-group text-primary text-2xl mb-2"></i>
-                                <div class="font-bold text-xl text-gray-900">{{ property.floor }}{% if property.floors_total %}/{{ property.floors_total }}{% endif %}</div>
-                                <div class="text-sm text-gray-600 font-medium">{% trans "Этаж" %}</div>
+                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-layer-group text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-xl text-gray-900">{{ property.floor }}{% if property.floors_total %}/{{ property.floors_total }}{% endif %}</div>
+                                    <div class="text-sm text-gray-600 font-medium">{% trans "Этаж" %}</div>
+                                </div>
                             </div>
                         {% endif %}
-                        
+
                         {% if property.year_built %}
-                            <div class="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <i class="fas fa-calendar-alt text-primary text-2xl mb-2"></i>
-                                <div class="font-bold text-xl text-gray-900">{{ property.year_built }}</div>
-                                <div class="text-sm text-gray-600 font-medium">{% trans "Год" %}</div>
+                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-calendar-alt text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-xl text-gray-900">{{ property.year_built }}</div>
+                                    <div class="text-sm text-gray-600 font-medium">{% trans "Год" %}</div>
+                                </div>
                             </div>
                         {% endif %}
-                        
+
                         {% if property.parking %}
-                            <div class="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <i class="fas fa-car text-primary text-2xl mb-2"></i>
-                                <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
-                                <div class="text-sm text-gray-600 font-medium">{% trans "Парковка" %}</div>
+                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-car text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
+                                    <div class="text-sm text-gray-600 font-medium">{% trans "Парковка" %}</div>
+                                </div>
                             </div>
                         {% endif %}
-                        
+
                         {% if property.pool %}
-                            <div class="text-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <i class="fas fa-swimming-pool text-primary text-2xl mb-2"></i>
-                                <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
-                                <div class="text-sm text-gray-600 font-medium">{% trans "Бассейн" %}</div>
+                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-swimming-pool text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
+                                    <div class="text-sm text-gray-600 font-medium">{% trans "Бассейн" %}</div>
+                                </div>
                             </div>
                         {% endif %}
                     </div>
@@ -732,59 +803,93 @@ const images = [
 ];
 
 let currentImageIndex = 0;
-let currentSlideIndex = 0;
+let currentSlidePairIndex = 0;
+let totalSlidePairs = Math.ceil(images.length / 2);
 
-// Carousel functionality
+// Dual Carousel functionality
 function nextSlide() {
-    if (images.length <= 1) return;
-    
-    const currentSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
-    currentSlideIndex = (currentSlideIndex + 1) % images.length;
-    const nextSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
-    
-    currentSlide.style.opacity = '0';
-    nextSlide.style.opacity = '1';
-    
+    if (totalSlidePairs <= 1) return;
+
+    const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+    currentSlidePairIndex = (currentSlidePairIndex + 2) % images.length;
+    if (currentSlidePairIndex >= images.length) currentSlidePairIndex = 0;
+
+    const nextSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+
+    if (currentSlidePair && nextSlidePair) {
+        currentSlidePair.style.opacity = '0';
+        nextSlidePair.style.opacity = '1';
+    }
+
     updateCarouselUI();
 }
 
 function previousSlide() {
-    if (images.length <= 1) return;
-    
-    const currentSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
-    currentSlideIndex = (currentSlideIndex - 1 + images.length) % images.length;
-    const prevSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
-    
-    currentSlide.style.opacity = '0';
-    prevSlide.style.opacity = '1';
-    
+    if (totalSlidePairs <= 1) return;
+
+    const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+    currentSlidePairIndex = (currentSlidePairIndex - 2 + images.length);
+    while (currentSlidePairIndex >= images.length) currentSlidePairIndex -= 2;
+    if (currentSlidePairIndex < 0) currentSlidePairIndex = images.length - (images.length % 2 === 0 ? 2 : 1);
+
+    const prevSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+
+    if (currentSlidePair && prevSlidePair) {
+        currentSlidePair.style.opacity = '0';
+        prevSlidePair.style.opacity = '1';
+    }
+
     updateCarouselUI();
 }
 
-function goToSlide(index) {
-    if (images.length <= 1 || index === currentSlideIndex) return;
-    
-    const currentSlide = document.querySelector('.property-slide[data-slide="' + currentSlideIndex + '"]');
-    const targetSlide = document.querySelector('.property-slide[data-slide="' + index + '"]');
-    
-    currentSlide.style.opacity = '0';
-    targetSlide.style.opacity = '1';
-    
-    currentSlideIndex = index;
+function goToSlidePair(pairIndex) {
+    if (totalSlidePairs <= 1 || pairIndex === currentSlidePairIndex) return;
+
+    const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+    const targetSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + pairIndex + '"]');
+
+    if (currentSlidePair && targetSlidePair) {
+        currentSlidePair.style.opacity = '0';
+        targetSlidePair.style.opacity = '1';
+    }
+
+    currentSlidePairIndex = pairIndex;
     updateCarouselUI();
+}
+
+function goToSlidePairByImage(imageIndex) {
+    // Calculate which pair this image belongs to
+    const pairIndex = Math.floor(imageIndex / 2) * 2;
+    goToSlidePair(pairIndex);
 }
 
 function updateCarouselUI() {
-    // Update photo counter
+    // Update photo counter - show range of photos visible
     const counter = document.getElementById('current-photo');
     if (counter) {
-        counter.textContent = currentSlideIndex + 1;
+        const firstPhoto = currentSlidePairIndex + 1;
+        let secondPhoto;
+
+        // Handle the case where we're showing the last image paired with first image
+        if (currentSlidePairIndex + 1 >= images.length) {
+            // Show last image + first image
+            secondPhoto = 1;
+            counter.textContent = `${images.length}, 1`;
+        } else {
+            secondPhoto = Math.min(currentSlidePairIndex + 2, images.length);
+            if (firstPhoto === secondPhoto) {
+                counter.textContent = firstPhoto;
+            } else {
+                counter.textContent = `${firstPhoto}-${secondPhoto}`;
+            }
+        }
     }
-    
-    // Update indicators
-    const indicators = document.querySelectorAll('.property-indicator');
+
+    // Update pair indicators
+    const indicators = document.querySelectorAll('.property-pair-indicator');
     indicators.forEach((indicator, index) => {
-        if (index === currentSlideIndex) {
+        const pairIndex = index * 2;
+        if (pairIndex === currentSlidePairIndex) {
             indicator.classList.remove('bg-white', 'bg-opacity-60');
             indicator.classList.add('bg-accent', 'shadow-lg');
         } else {
@@ -792,11 +897,22 @@ function updateCarouselUI() {
             indicator.classList.add('bg-white', 'bg-opacity-60');
         }
     });
-    
+
     // Update thumbnails
     const thumbs = document.querySelectorAll('img[data-thumb]');
     thumbs.forEach((thumb, index) => {
-        if (index === currentSlideIndex) {
+        const isFirstInPair = index === currentSlidePairIndex;
+        let isSecondInPair;
+
+        // Handle zipped display for odd number of images
+        if (currentSlidePairIndex + 1 >= images.length && images.length % 2 === 1) {
+            // We're showing last image + first image
+            isSecondInPair = index === 0; // First image as second in pair
+        } else {
+            isSecondInPair = index === currentSlidePairIndex + 1 && index < images.length;
+        }
+
+        if (isFirstInPair || isSecondInPair) {
             thumb.classList.remove('border-transparent', 'hover:border-accent/50');
             thumb.classList.add('border-accent', 'shadow-lg');
         } else {
