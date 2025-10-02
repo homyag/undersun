@@ -443,11 +443,18 @@ def get_favorite_properties(request):
 def property_inquiry(request, property_id):
     """AJAX отправка запроса по недвижимости"""
     name = request.POST.get('name')
-    email = request.POST.get('email')
     phone = request.POST.get('phone', '')
-    message = request.POST.get('message')
+    email = request.POST.get('email', '')
+    message = request.POST.get('message', '')
+    inquiry_type = request.POST.get('inquiry_type', 'general')
 
-    if not all([name, email, message]):
+    # Дополнительные поля для разных типов запросов
+    preferred_date = request.POST.get('preferred_date', None)
+    consultation_topic = request.POST.get('consultation_topic', '')
+    preferred_contact = request.POST.get('preferred_contact', '')
+
+    # Проверяем обязательные поля (имя и телефон)
+    if not all([name, phone]):
         return JsonResponse({
             'success': False,
             'message': 'Заполните все обязательные поля'
@@ -455,13 +462,25 @@ def property_inquiry(request, property_id):
 
     property_obj = get_object_or_404(Property, id=property_id)
 
-    inquiry = PropertyInquiry.objects.create(
-        property=property_obj,
-        name=name,
-        email=email,
-        phone=phone,
-        message=message
-    )
+    # Создаем запрос с учетом всех полей
+    inquiry_data = {
+        'property': property_obj,
+        'name': name,
+        'phone': phone,
+        'email': email,
+        'message': message,
+        'inquiry_type': inquiry_type,
+    }
+
+    # Добавляем опциональные поля если они заполнены
+    if preferred_date:
+        inquiry_data['preferred_date'] = preferred_date
+    if consultation_topic:
+        inquiry_data['consultation_topic'] = consultation_topic
+    if preferred_contact:
+        inquiry_data['preferred_contact'] = preferred_contact
+
+    inquiry = PropertyInquiry.objects.create(**inquiry_data)
 
     # TODO: Отправка email уведомления
     # TODO: Интеграция с AmoCRM

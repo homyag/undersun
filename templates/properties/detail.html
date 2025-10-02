@@ -160,7 +160,7 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                 <button onclick="goBackToCatalog()"
-                        class="inline-flex items-center justify-center px-4 py-2 sm:px-3 sm:py-1 bg-accent hover:bg-yellow-600 text-white font-bold rounded-lg transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md uppercase text-base sm:text-lg">
+                        class="inline-flex items-center justify-center px-4 py-2 sm:px-3 sm:py-1 bg-accent hover:bg-yellow-600 text-white font-bold rounded-md transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md uppercase text-base sm:text-lg">
                     <i class="fas fa-arrow-left mr-2"></i>
                     {% trans "Назад" %}
                 </button>
@@ -279,6 +279,15 @@
                                     {% endif %}
                                 {% endif %}
                             </div>
+                        </div>
+
+                        <!-- Mobile Call Button -->
+                        <div class="lg:hidden mt-4">
+                            <button onclick="openViewingModal()"
+                                    class="w-full bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 shadow-md flex items-center justify-center">
+                                <i class="fas fa-phone mr-2"></i>
+                                {% trans "Заказать звонок" %}
+                            </button>
                         </div>
                     </div>
 
@@ -1662,7 +1671,6 @@
             const favoriteBtn = document.querySelector('.favorite-btn');
             if (favoriteBtn) {
                 favoriteBtn.addEventListener('click', function () {
-                    const propertyId = parseInt(this.dataset.propertyId);
                     toggleFavorite(propertyId);
                 });
             }
@@ -1726,7 +1734,7 @@
             // Note: Details modal functionality is handled by consultation modal form
 
             // Viewing modal form functionality
-            const viewingForm = document.getElementById('viewing-form');
+            const viewingForm = document.getElementById('viewingRequestForm');
             if (viewingForm) {
                 viewingForm.addEventListener('submit', function (e) {
                     e.preventDefault();
@@ -1743,7 +1751,7 @@
                         method: 'POST',
                         body: formData,
                         headers: {
-                            'X-CSRFToken': document.querySelector('#viewing-form [name=csrfmiddlewaretoken]').value,
+                            'X-CSRFToken': document.querySelector('#viewingRequestForm [name=csrfmiddlewaretoken]').value,
                         },
                     })
                         .then(response => response.json())
@@ -1787,7 +1795,7 @@
             }
 
             // Consultation modal form functionality
-            const consultationForm = document.getElementById('consultation-form');
+            const consultationForm = document.getElementById('consultationRequestForm');
             if (consultationForm) {
                 consultationForm.addEventListener('submit', function (e) {
                     e.preventDefault();
@@ -1804,7 +1812,7 @@
                         method: 'POST',
                         body: formData,
                         headers: {
-                            'X-CSRFToken': document.querySelector('#consultation-form [name=csrfmiddlewaretoken]').value,
+                            'X-CSRFToken': document.querySelector('#consultationRequestForm [name=csrfmiddlewaretoken]').value,
                         },
                     })
                         .then(response => response.json())
@@ -1894,7 +1902,7 @@
             document.body.style.overflow = 'auto';
 
             // Очищаем форму и скрываем сообщения
-            const form = document.getElementById('consultation-form');
+            const form = document.getElementById('consultationRequestForm');
             const message = document.getElementById('consultation-message');
             if (form) form.reset();
             if (message) message.classList.add('hidden');
@@ -1910,7 +1918,7 @@
             document.body.style.overflow = 'auto';
 
             // Очищаем форму и скрываем сообщения
-            const form = document.getElementById('viewing-form');
+            const form = document.getElementById('viewingRequestForm');
             const message = document.getElementById('viewing-message');
             if (form) form.reset();
             if (message) message.classList.add('hidden');
@@ -1926,7 +1934,7 @@
             document.body.style.overflow = 'auto';
 
             // Очищаем форму и скрываем сообщения
-            const form = document.getElementById('consultation-form');
+            const form = document.getElementById('consultationRequestForm');
             const message = document.getElementById('consultation-message');
             if (form) form.reset();
             if (message) message.classList.add('hidden');
