@@ -745,18 +745,25 @@
                             if (mobileButton) {
                                 mobileButton.innerHTML = `<i class="fas fa-dollar-sign mr-2"></i>{% trans "Валюта" %} (${symbol}${currency})`;
                             }
-                            
+
                             // Close mobile menu
                             document.getElementById('currency-submenu').classList.add('hidden');
-                            
+
+                            // Store currency in localStorage for persistence
+                            localStorage.setItem('selectedCurrency', currency);
+
                             // Update Featured Properties prices if function exists (only on home page)
                             if (typeof updateAllPricesToHeaderCurrency === 'function') {
                                 updateAllPricesToHeaderCurrency();
-                                // Trigger custom event for other components that might need to update
-                                window.dispatchEvent(new CustomEvent('currencyChanged', {
-                                    detail: { currency: currency, symbol: symbol }
-                                }));
-                            } else {
+                            }
+
+                            // Always trigger custom event for other components that might need to update
+                            window.dispatchEvent(new CustomEvent('currencyChanged', {
+                                detail: { currency: currency, symbol: symbol }
+                            }));
+
+                            // If no dynamic update handler exists, reload page
+                            if (typeof updateAllPricesToHeaderCurrency !== 'function' && typeof updatePricePerSqm !== 'function') {
                                 // On other pages (like property details), reload to update prices
                                 window.location.reload();
                             }
@@ -774,9 +781,48 @@
         });
     </script>
 
+    <!-- Success Popup Modal -->
+    <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-center text-gray-900 mb-2">{% trans "Спасибо!" %}</h3>
+                <p id="successPopupMessage" class="text-center text-gray-600 mb-6"></p>
+                <button id="successPopupClose" class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                    {% trans "Закрыть" %}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Popup Modal -->
+    <div id="errorPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-center text-gray-900 mb-2">{% trans "Ошибка" %}</h3>
+                <p id="errorPopupMessage" class="text-center text-gray-600 mb-6"></p>
+                <button id="errorPopupClose" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                    {% trans "Закрыть" %}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JS - Forms Handler (должен быть до main.js) -->
+    <script src="{% static 'js/forms.js' %}"></script>
+
     <!-- Custom JS - Main Script -->
     <script src="{% static 'js/main.js' %}"></script>
-    
+
     <!-- Extra JS Block for page-specific scripts -->
     {% block extra_js %}
     {% endblock %}

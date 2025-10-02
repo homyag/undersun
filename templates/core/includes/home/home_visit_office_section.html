@@ -105,7 +105,7 @@
         </button>
       </div>
       
-      <form id="meeting-form" class="space-y-6">
+      <form id="officeVisitForm" class="space-y-6">
         {% csrf_token %}
         <div>
           <label for="meeting-name" class="block text-sm font-medium text-gray-700 mb-2">{% trans 'Ваше имя' %}</label>
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const meetingModal = document.getElementById('meeting-modal');
   const contactMeetingBtn = document.getElementById('contact-meeting-btn');
   const closeMeetingBtn = document.getElementById('close-meeting-modal');
-  const meetingForm = document.getElementById('meeting-form');
+  const meetingForm = document.getElementById('officeVisitForm');
   
   // Show Map Button functionality
   const showMapBtn = document.getElementById('show-map-btn');
@@ -211,16 +211,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.open(mapUrl, '_blank');
   });
   
-  // Form submission
-  meetingForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    // Here you can add form submission logic
-    alert('{% trans "Спасибо! Мы свяжемся с вами для подтверждения встречи." %}');
-    meetingModal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    meetingForm.reset();
-  });
-  
+  // Form submission handled by forms.js
+
   // Set minimum date to today
   const dateInput = document.getElementById('meeting-date');
   const today = new Date().toISOString().split('T')[0];

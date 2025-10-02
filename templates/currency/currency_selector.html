@@ -83,16 +83,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         currencyButton.innerHTML = `${symbol} ${currency}<svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
                     }
                     
+                    // Store currency in localStorage for persistence
+                    localStorage.setItem('selectedCurrency', currency);
+
                     // Update Featured Properties prices if function exists (only on home page)
                     if (typeof updateAllPricesToHeaderCurrency === 'function') {
                         updateAllPricesToHeaderCurrency();
-                        // Trigger custom event for other components that might need to update
-                        window.dispatchEvent(new CustomEvent('currencyChanged', {
-                            detail: { currency: currency, symbol: symbol }
-                        }));
-                    } else {
-                        // On other pages (like property details), reload to update prices
-                        // This ensures all template tags get updated with new currency
+                    }
+
+                    // Always trigger custom event for other components that might need to update
+                    window.dispatchEvent(new CustomEvent('currencyChanged', {
+                        detail: { currency: currency, symbol: symbol }
+                    }));
+
+                    // If no dynamic update handler exists, reload page
+                    if (typeof updateAllPricesToHeaderCurrency !== 'function' && typeof updatePricePerSqm !== 'function') {
                         window.location.reload();
                     }
                 } else {

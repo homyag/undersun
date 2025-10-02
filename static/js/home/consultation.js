@@ -120,51 +120,19 @@ function initPhoneMask() {
 }
 
 // Phone consultation form submission
-function initPhoneConsultationForm() {
-    const form = document.getElementById('phoneConsultationForm');
-    if (!form) return;
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const phoneInput = document.getElementById('phone');
-        const submitButton = form.querySelector('button[type="submit"]');
-        const originalText = submitButton.textContent;
-
-        // Basic validation
-        if (!phoneInput.value.trim()) {
-            alert('Пожалуйста, введите номер телефона');
-            return;
-        }
-
-        // Visual feedback
-        submitButton.textContent = 'Отправка...';
-        submitButton.disabled = true;
-
-        // Simulate form submission (replace with actual API call)
-        setTimeout(() => {
-            alert('Спасибо! Мы свяжемся с вами в течение 15 минут.');
-            form.reset();
-            submitButton.textContent = originalText;
-            submitButton.disabled = false;
-        }, 1000);
-
-        // Here you would normally send data to your backend
-        // fetch('/api/consultation-request/', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'X-CSRFToken': getCookie('csrftoken')
-        //     },
-        //     body: JSON.stringify({
-        //         phone: phoneInput.value
-        //     })
-        // });
-    });
-}
+// REMOVED: Now handled by forms.js with quickConsultationForm ID
+// function initPhoneConsultationForm() {
+//     const form = document.getElementById('phoneConsultationForm');
+//     if (!form) return;
+//
+//     form.addEventListener('submit', function (e) {
+//         e.preventDefault();
+//         ...
+//     });
+// }
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
     initPhoneMask();
-    initPhoneConsultationForm();
+    // initPhoneConsultationForm(); // REMOVED: Now handled by forms.js
 });
