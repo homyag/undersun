@@ -7,1387 +7,1956 @@
 {% block title %}{{ property.title }} - Undersun Estate{% endblock %}
 
 {% block content %}
-<!-- Property Gallery Carousel -->
-<section class="py-8 mt-10">
-    <div class="max-w-7xl mx-auto px-4">
-        <!-- Main Carousel Container -->
-        <div class="relative overflow-hidden rounded-xl shadow-2xl group">
-            {% if property.images.exists %}
-                <!-- Dual Image Carousel -->
-                <div class="property-carousel relative h-96 lg:h-[500px]">
-                    {% for image in property.images.all %}
-                        {% if forloop.counter0|divisibleby:2 %}
-                            <div class="property-slide-pair absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100{% else %}opacity-0{% endif %}"
-                                 data-slide-pair="{{ forloop.counter0|floatformat:0|add:0|floatformat:0|floatformat:0 }}">
-                                <div class="flex h-full gap-2">
-                                    <!-- First Image -->
-                                    <div class="flex-1">
-                                        <img src="{{ image.medium.url }}" alt="{{ property.title }}"
-                                             class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-l-lg"
-                                             onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
-                                    </div>
-
-                                    <!-- Second Image (if exists) -->
-                                    {% if forloop.counter0|add:1 < property.images.count %}
-                                        {% with next_index=forloop.counter0|add:1 %}
-                                            <div class="flex-1">
-                                                {% for next_image in property.images.all %}
-                                                    {% if forloop.counter0 == next_index %}
-                                                        <img src="{{ next_image.medium.url }}" alt="{{ property.title }}"
-                                                             class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
-                                                             onclick="openGallery({{ next_index }})" loading="lazy">
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        {% endwith %}
-                                    {% else %}
-                                        <!-- Show first image if we're at the last image (odd count) -->
-                                        <div class="flex-1">
-                                            {% with first_image=property.images.all|first %}
-                                                <img src="{{ first_image.medium.url }}" alt="{{ property.title }}"
-                                                     class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
-                                                     onclick="openGallery(0)" loading="lazy">
-                                            {% endwith %}
-                                        </div>
-                                    {% endif %}
-                                </div>
+    <!-- Property Gallery Carousel -->
+    <section class="py-4 sm:py-8 mt-6 sm:mt-10">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4">
+            <!-- Main Carousel Container -->
+            <div class="relative overflow-hidden rounded-lg sm:rounded-xl shadow-lg sm:shadow-2xl group">
+                {% if property.images.exists %}
+                    <!-- Carousel with Single/Dual Image Display -->
+                    <div class="property-carousel relative h-64 sm:h-80 lg:h-[500px]">
+                        {% for image in property.images.all %}
+                            <!-- Mobile: Single Image Slides -->
+                            <div class="property-slide-single md:hidden absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100{% else %}opacity-0{% endif %}"
+                                 data-slide-single="{{ forloop.counter0 }}">
+                                <img src="{{ image.medium.url }}" alt="{{ property.title }}"
+                                     class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-lg"
+                                     onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
                             </div>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    <!-- Carousel Navigation -->
-                    {% if property.images.count > 1 %}
-                        <!-- Previous Button -->
-                        <button onclick="previousSlide()" 
-                                class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-700 hover:text-gray-900 w-12 h-12 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg z-10 flex items-center justify-center">
-                            <i class="fas fa-chevron-left text-lg"></i>
-                        </button>
-                        
-                        <!-- Next Button -->
-                        <button onclick="nextSlide()" 
-                                class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-700 hover:text-gray-900 w-12 h-12 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg z-10 flex items-center justify-center">
-                            <i class="fas fa-chevron-right text-lg"></i>
-                        </button>
-                        
-                        <!-- Slide Indicators for Image Pairs -->
-                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-                            {% for image in property.images.all %}
-                                {% if forloop.counter0|divisibleby:2 %}
-                                    <button onclick="goToSlidePair({{ forloop.counter0|floatformat:0 }})"
-                                            class="property-pair-indicator w-3 h-3 rounded-full transition-all duration-300 {% if forloop.counter0 == 0 %}bg-accent shadow-lg{% else %}bg-white bg-opacity-60 hover:bg-opacity-100{% endif %}"
-                                            data-slide-pair="{{ forloop.counter0|floatformat:0 }}">
-                                    </button>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    
-                    
-                    <!-- Photo Counter Badge -->
-                    <div class="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-medium z-10">
-                        <i class="fas fa-images mr-2"></i>
-                        <span id="current-photo">1</span> / {{ property.images.count }} {% trans "фото" %}
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="absolute bottom-4 left-4 flex space-x-2 z-10">
-                        <!-- Share Button -->
-                        <button onclick="shareProperty()" class="bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-3 rounded-full text-sm transition-all duration-300 hover:scale-110">
-                            <i class="fas fa-share-alt"></i>
-                        </button>
-                        
-                        <!-- Favorite Button -->
-                        <button onclick="toggleFavorite({{ property.id }})" class="bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-3 rounded-full text-sm transition-all duration-300 hover:scale-110 carousel-favorite-btn">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    
-                </div>
-            {% else %}
-                <!-- No Images Fallback -->
-                <div class="h-96 lg:h-[500px] bg-gray-200 rounded-xl flex items-center justify-center">
-                    <div class="text-center text-gray-500">
-                        <i class="fas fa-image text-6xl mb-4"></i>
-                        <p class="text-xl">{% trans "Изображения недоступны" %}</p>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-        
-        <!-- Thumbnail Navigation -->
-        {% if property.images.count > 1 %}
-            <div class="mt-4 overflow-x-auto">
-                <div class="flex space-x-3 pb-2">
-                    {% for image in property.images.all %}
-                        <div class="flex-shrink-0 relative cursor-pointer group" onclick="goToSlidePairByImage({{ forloop.counter0 }})">
-                            <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}"
-                                 class="w-20 h-20 object-cover rounded-lg transition-all duration-300 border-2 {% if forloop.counter0 == 0 or forloop.counter0 == 1 %}border-accent shadow-lg{% else %}border-transparent hover:border-accent/50{% endif %}"
-                                 data-thumb="{{ forloop.counter0 }}">
-                            <!-- Special indicator for cycled display -->
-                            {% if property.images.count|divisibleby:2 == False and forloop.last %}
-                                <div class="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                                    ↻
+
+                            <!-- Desktop: Dual Image Slides -->
+                            {% if forloop.counter0|divisibleby:2 %}
+                                <div class="property-slide-pair hidden md:block absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100{% else %}opacity-0{% endif %}"
+                                     data-slide-pair="{{ forloop.counter0|floatformat:0 }}">
+                                    <div class="flex h-full gap-2">
+                                        <!-- First Image -->
+                                        <div class="flex-1">
+                                            <img src="{{ image.medium.url }}" alt="{{ property.title }}"
+                                                 class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-l-lg"
+                                                 onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
+                                        </div>
+
+                                        <!-- Second Image (if exists) -->
+                                        {% if forloop.counter0|add:1 < property.images.count %}
+                                            {% with next_index=forloop.counter0|add:1 %}
+                                                <div class="flex-1">
+                                                    {% for next_image in property.images.all %}
+                                                        {% if forloop.counter0 == next_index %}
+                                                            <img src="{{ next_image.medium.url }}"
+                                                                 alt="{{ property.title }}"
+                                                                 class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
+                                                                 onclick="openGallery({{ next_index }})" loading="lazy">
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endwith %}
+                                        {% else %}
+                                            <!-- Show first image if we're at the last image (odd count) -->
+                                            <div class="flex-1">
+                                                {% with first_image=property.images.all|first %}
+                                                    <img src="{{ first_image.medium.url }}" alt="{{ property.title }}"
+                                                         class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
+                                                         onclick="openGallery(0)" loading="lazy">
+                                                {% endwith %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             {% endif %}
-                            <!-- Hover Overlay -->
-                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-eye text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-    </div>
-</section>
+                        {% endfor %}
 
-<!-- Back Navigation -->
-<section class="pb-4">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-center space-x-4">
-            <button onclick="goBackToCatalog()" class="inline-flex items-center justify-center px-3 py-1 bg-accent hover:bg-yellow-600 text-white font-bold rounded-lg transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md uppercase text-lg">
-                <i class="fas fa-arrow-left mr-2"></i>
-                {% trans "Назад" %}
-            </button>
-            
-            <a href="{% if property.deal_type == 'rent' %}{% url 'properties:property_rent' %}{% else %}{% url 'properties:property_sale' %}{% endif %}" 
-               class="text-accent hover:text-yellow-600 font-semibold text-lg transition-colors duration-300 hover:underline uppercase">
-                {{ property.property_type.name_display }}
-            </a>
-        </div>
-        
-        <!-- Breadcrumbs -->
-        <div class="mt-4">
-            <nav class="flex items-center space-x-2 text-sm text-gray-600">
-                <a href="{% if property.deal_type == 'rent' %}{% url 'properties:property_rent' %}{% else %}{% url 'properties:property_sale' %}{% endif %}" 
-                   class="hover:text-accent transition-colors duration-200">
-                    {% trans "Недвижимость" %}
-                </a>
-                <i class="fas fa-chevron-right text-xs text-gray-400"></i>
-                
-                <a href="{{ property.district.get_absolute_url }}" 
-                   class="hover:text-accent transition-colors duration-200">
-                    {{ property.district.name }}
-                </a>
-                
-                {% if property.location %}
-                    <i class="fas fa-chevron-right text-xs text-gray-400"></i>
-                    <a href="{{ property.location.get_absolute_url }}" 
-                       class="hover:text-accent transition-colors duration-200">
-                        {{ property.location.name }}
-                    </a>
-                {% endif %}
-                
-                <i class="fas fa-chevron-right text-xs text-gray-400"></i>
-                <span class="text-gray-900 font-medium">{{ property.title|truncatechars:50 }}</span>
-            </nav>
-        </div>
-    </div>
-</section>
+                        <!-- Carousel Navigation -->
+                        {% if property.images.count > 1 %}
+                            <!-- Previous Button -->
+                            <button onclick="previousSlide()"
+                                    class="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-700 hover:text-gray-900 w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all duration-300 opacity-70 sm:opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg z-10 flex items-center justify-center">
+                                <i class="fas fa-chevron-left text-base sm:text-lg"></i>
+                            </button>
 
-<!-- Property Information -->
-<section class="py-8">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Main Info -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <!-- Header -->
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                {% if property.deal_type == 'sale' %}
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent text-white">
-                                        {% trans "Продажа" %}
-                                    </span>
-                                {% elif property.deal_type == 'rent' %}
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary text-white">
-                                        {% trans "Аренда" %}
-                                    </span>
-                                {% else %}
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-600 text-white">
-                                        {% trans "Продажа/Аренда" %}
-                                    </span>
-                                {% endif %}
-                                {% if property.is_featured %}
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent text-white">
-                                        <i class="fas fa-star mr-1"></i>{% trans "Рекомендуем" %}
-                                    </span>
-                                {% endif %}
-                            </div>
-                            
-                            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ property.title }}</h1>
-                            
-                            <div class="flex items-center text-gray-600 mb-4">
-                                <a href="#property-map" class="flex items-center hover:text-primary transition-colors duration-200 mr-4">
-                                    <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
-                                    <span class="text-primary hover:text-accent font-medium">
-                                        {% trans "На карте" %}
-                                    </span>
-                                </a>
-                                
-                                {% if property.legacy_id %}
-                                    <span class="text-gray-500 mr-4">
-                                        ID: {{ property.legacy_id }}
-                                    </span>
-                                {% endif %}
-                                
-                                <a href="{% if property.location %}{{ property.location.get_absolute_url }}{% else %}{{ property.district.get_absolute_url }}{% endif %}" 
-                                   class="flex items-center space-x-1 text-primary hover:text-accent font-medium hover:underline transition-colors duration-200">
-                                    <span>{{ property.district.name }}</span>
-                                    {% if property.location %}
-                                        <span class="text-gray-400">,</span>
-                                        <span>{{ property.location.name }}</span>
+                            <!-- Next Button -->
+                            <button onclick="nextSlide()"
+                                    class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-700 hover:text-gray-900 w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all duration-300 opacity-70 sm:opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg z-10 flex items-center justify-center">
+                                <i class="fas fa-chevron-right text-base sm:text-lg"></i>
+                            </button>
+
+                            <!-- Slide Indicators for Image Pairs -->
+                            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                                {% for image in property.images.all %}
+                                    {% if forloop.counter0|divisibleby:2 %}
+                                        <button onclick="goToSlidePair({{ forloop.counter0|floatformat:0 }})"
+                                                class="property-pair-indicator w-3 h-3 rounded-full transition-all duration-300 {% if forloop.counter0 == 0 %}bg-accent shadow-lg{% else %}bg-white bg-opacity-60 hover:bg-opacity-100{% endif %}"
+                                                data-slide-pair="{{ forloop.counter0|floatformat:0 }}">
+                                        </button>
                                     {% endif %}
-                                </a>
+                                {% endfor %}
                             </div>
+                        {% endif %}
+
+
+                        <!-- Photo Counter Badge -->
+                        <div class="absolute top-2 sm:top-4 right-2 sm:right-4 bg-black bg-opacity-70 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium z-10">
+                            <i class="fas fa-images mr-1 sm:mr-2 text-xs sm:text-sm"></i>
+                            <span id="current-photo">1</span> / {{ property.images.count }} <span
+                                class="hidden sm:inline">{% trans "фото" %}</span>
                         </div>
-                        
-                        <div class="text-right">
-                            <div class="text-3xl font-bold text-primary mb-2">{% price_in_currency property property.deal_type %}</div>
-                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-full transition-colors favorite-btn" 
-                                    data-property-id="{{ property.id }}">
-                                <i class="far text-gray-600 fa-heart"></i>
+
+                        <!-- Action Buttons -->
+                        <div class="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 flex space-x-1 sm:space-x-2 z-10">
+                            <!-- Share Button -->
+                            <button onclick="shareProperty()"
+                                    class="bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-2 sm:p-3 rounded-full text-xs sm:text-sm transition-all duration-300 hover:scale-110">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+
+                            <!-- Favorite Button -->
+                            <button onclick="toggleFavorite({{ property.id }})"
+                                    class="bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-2 sm:p-3 rounded-full text-xs sm:text-sm transition-all duration-300 hover:scale-110 carousel-favorite-btn">
+                                <i class="far fa-heart"></i>
                             </button>
                         </div>
+
                     </div>
-                    
-                    <!-- Key Features -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                        {% if property.bedrooms %}
-                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                    <i class="fas fa-bed text-primary text-xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="font-bold text-xl text-gray-900">{{ property.bedrooms }}</div>
-                                    <div class="text-sm text-gray-600 font-medium">{% trans "Спален" %}</div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if property.bathrooms %}
-                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                    <i class="fas fa-bath text-primary text-xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="font-bold text-xl text-gray-900">{{ property.bathrooms }}</div>
-                                    <div class="text-sm text-gray-600 font-medium">{% trans "Ванных" %}</div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if property.area_total %}
-                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                    <i class="fas fa-ruler-combined text-primary text-xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="font-bold text-xl text-gray-900">{{ property.area_total }}</div>
-                                    <div class="text-sm text-gray-600 font-medium">м²</div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if property.area_land %}
-                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                    <i class="fas fa-globe text-primary text-xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="font-bold text-xl text-gray-900">{{ property.area_land }}</div>
-                                    <div class="text-sm text-gray-600 font-medium">{% trans "Участок м²" %}</div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if property.floor %}
-                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                    <i class="fas fa-layer-group text-primary text-xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="font-bold text-xl text-gray-900">{{ property.floor }}{% if property.floors_total %}/{{ property.floors_total }}{% endif %}</div>
-                                    <div class="text-sm text-gray-600 font-medium">{% trans "Этаж" %}</div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if property.year_built %}
-                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                    <i class="fas fa-calendar-alt text-primary text-xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="font-bold text-xl text-gray-900">{{ property.year_built }}</div>
-                                    <div class="text-sm text-gray-600 font-medium">{% trans "Год" %}</div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if property.parking %}
-                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                    <i class="fas fa-car text-primary text-xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
-                                    <div class="text-sm text-gray-600 font-medium">{% trans "Парковка" %}</div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if property.pool %}
-                            <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                    <i class="fas fa-swimming-pool text-primary text-xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
-                                    <div class="text-sm text-gray-600 font-medium">{% trans "Бассейн" %}</div>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Description -->
-                    {% if property.description %}
-                        <div class="prose max-w-none">
-                            <h2 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Описание" %}</h2>
-                            <div class="relative">
-                                <div id="description-content" class="description-content max-h-24 overflow-hidden transition-all duration-500 ease-in-out">
-                                    {{ property.description|safe }}
-                                </div>
-                                <!-- Gradient overlay -->
-                                <div id="description-gradient" class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none transition-opacity duration-300"></div>
-                                <!-- Expand button -->
-                                <button id="description-toggle" onclick="toggleDescription()" class="mt-3 text-primary hover:text-accent font-medium transition-colors duration-200 flex items-center">
-                                    <span id="toggle-text">{% trans "Показать полностью" %}</span>
-                                    <i id="toggle-icon" class="fas fa-chevron-down ml-2 transition-transform duration-300"></i>
-                                </button>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <!-- Features & Amenities -->
-                {% if property.features.exists %}
-                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Особенности и удобства" %}</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {% for feature_relation in property.features.all %}
-                                <div class="flex items-center p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                    {% if feature_relation.feature.icon %}
-                                        <i class="{{ feature_relation.feature.icon }} text-primary mr-3 text-lg"></i>
-                                    {% else %}
-                                        <i class="fas fa-check text-green-500 mr-3 text-lg"></i>
-                                    {% endif %}
-                                    <span class="font-medium">{{ feature_relation.feature.name }}{% if feature_relation.value %}: <span class="text-gray-600">{{ feature_relation.value }}</span>{% endif %}</span>
-                                </div>
-                            {% endfor %}
+                {% else %}
+                    <!-- No Images Fallback -->
+                    <div class="h-96 lg:h-[500px] bg-gray-200 rounded-xl flex items-center justify-center">
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-image text-6xl mb-4"></i>
+                            <p class="text-xl">{% trans "Изображения недоступны" %}</p>
                         </div>
                     </div>
                 {% endif %}
-                
-                
-                <!-- Map -->
-                {% if property.latitude and property.longitude %}
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Расположение" %}</h2>
-                        
-                        <!-- Location Details -->
-                        <div class="space-y-2 mb-4">
-                            <div class="flex items-center justify-between text-gray-700">
-                                <span class="font-medium">{% trans "Район" %}</span>
-                                <span class="flex-1 border-b border-dotted border-gray-300 mx-3"></span>
-                                <span class="text-primary font-medium">{{ property.district.name }}</span>
-                            </div>
-                            {% if property.location %}
-                                <div class="flex items-center justify-between text-gray-700">
-                                    <span class="font-medium">{% trans "Локация" %}</span>
-                                    <span class="flex-1 border-b border-dotted border-gray-300 mx-3"></span>
-                                    <span class="text-primary font-medium">{{ property.location.name }}</span>
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div id="property-map" class="w-full h-64 rounded-lg"></div>
-                    </div>
-                {% endif %}
-                
-                <!-- Additional Details CTA -->
-                <div class="bg-primary rounded-lg shadow-md p-8 text-center">
-                    <h2 class="text-2xl font-semibold text-white mb-4">{% trans "Не нашли интересующие Вас характеристики?" %}</h2>
-                    <button onclick="openDetailsModal()" class="bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg">
-                        {% trans "Уточнить детали" %}
-                    </button>
-                </div>
             </div>
-            
-            <!-- Sidebar -->
-            <div class="lg:col-span-1">
-                <!-- Contact Form -->
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Заинтересовались объектом?" %}</h3>
-                    
-                    <form id="inquiry-form" class="space-y-4">
-                        {% csrf_token %}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %}</label>
-                            <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %}</label>
-                            <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %}</label>
-                            <input type="tel" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Сообщение" %}</label>
-                            <textarea name="message" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="{% trans 'Расскажите о ваших потребностях...' %}"></textarea>
-                        </div>
-                        
-                        <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
-                            {% trans "Отправить запрос" %}
-                        </button>
-                        
-                        <div id="inquiry-message" class="hidden p-3 rounded-md text-sm"></div>
-                    </form>
-                    
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex space-x-2">
-                            <a href="tel:+6663303313" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-3 rounded-md transition-colors">
-                                <i class="fas fa-phone mr-1"></i>{% trans "Позвонить" %}
-                            </a>
-                            <a href="https://wa.me/6663303313" target="_blank" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-center py-2 px-3 rounded-md transition-colors">
-                                <i class="fab fa-whatsapp mr-1"></i>WhatsApp
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Property Details -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Детали объекта" %}</h3>
-                    
-                    <div class="space-y-3 text-sm">
-                        {% if property.legacy_id %}
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">{% trans "ID объекта:" %}</span>
-                                <span class="font-medium">{{ property.legacy_id }}</span>
-                            </div>
-                        {% endif %}
-                        
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">{% trans "Тип:" %}</span>
-                            <span class="font-medium">{{ property.property_type.name_display }}</span>
-                        </div>
-                        
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">{% trans "Обновлено:" %}</span>
-                            <span class="font-medium">{{ property.updated_at|date:"d.m.Y" }}</span>
-                        </div>
-                        
-                        {% if property.year_built %}
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">{% trans "Год постройки:" %}</span>
-                                <span class="font-medium">{{ property.year_built }}</span>
-                            </div>
-                        {% endif %}
-                        
-                        {% if property.floor %}
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">{% trans "Этаж:" %}</span>
-                                <span class="font-medium">{{ property.floor }}</span>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Similar Properties -->
-{% if similar_properties %}
-    <section class="py-16 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4">
-            <!-- Header -->
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Похожие объекты" %}</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                    {% trans "Рекомендуем также рассмотреть эти варианты в том же районе и с похожими характеристиками" %}
-                </p>
-                <div class="w-24 h-1 bg-accent mx-auto mt-6 rounded-full"></div>
-            </div>
-            
-            <!-- Properties Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-                {% for property in similar_properties %}
-                    {% include 'properties/card.html' %}
-                {% endfor %}
-            </div>
-            
-            <!-- Call to Action -->
-            <div class="text-center">
-                <div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
-                    <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
-                        <div class="text-left">
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">
-                                {% trans "Не нашли подходящий вариант?" %}
-                            </h3>
-                            <p class="text-gray-600">
-                                {% trans "Наши специалисты помогут подобрать недвижимость под ваши требования" %}
-                            </p>
-                        </div>
-                        <div class="flex space-x-4 flex-shrink-0">
-                            <a href="{% url 'properties:property_sale' %}" 
-                               class="bg-primary hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 hover:scale-105 transform">
-                                {% trans "Смотреть все" %}
-                            </a>
-                            <a href="{% url 'core:contact' %}" 
-                               class="bg-accent hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 hover:scale-105 transform">
-                                {% trans "Связаться с нами" %}
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Statistics -->
-            <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="text-center">
-                    <div class="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <div class="text-3xl font-bold text-primary mb-2">400+</div>
-                        <div class="text-sm text-gray-600">{% trans "Объектов в базе" %}</div>
-                    </div>
-                </div>
-                <div class="text-center">
-                    <div class="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <div class="text-3xl font-bold text-accent mb-2">15+</div>
-                        <div class="text-sm text-gray-600">{% trans "Районов Пхукета" %}</div>
-                    </div>
-                </div>
-                <div class="text-center">
-                    <div class="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <div class="text-3xl font-bold text-green-600 mb-2">5+</div>
-                        <div class="text-sm text-gray-600">{% trans "Лет опыта" %}</div>
-                    </div>
-                </div>
-                <div class="text-center">
-                    <div class="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <div class="text-3xl font-bold text-red-500 mb-2">24/7</div>
-                        <div class="text-sm text-gray-600">{% trans "Поддержка клиентов" %}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-{% else %}
-    <!-- No Similar Properties Available -->
-    <section class="py-16 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center">
-                <div class="bg-white rounded-xl shadow-lg p-12 max-w-2xl mx-auto">
-                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-search text-gray-400 text-2xl"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">
-                        {% trans "Похожие объекты не найдены" %}
-                    </h3>
-                    <p class="text-gray-600 mb-8">
-                        {% trans "К сожалению, в данный момент нет похожих объектов. Рекомендуем посмотреть другие варианты в нашем каталоге." %}
-                    </p>
-                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 justify-center">
-                        <a href="{% url 'properties:property_sale' %}" 
-                           class="bg-primary hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300 hover:scale-105 transform">
-                            {% trans "Посмотреть все объекты" %}
-                        </a>
-                        <a href="{% url 'core:contact' %}" 
-                           class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-medium transition-colors duration-300 hover:scale-105 transform">
-                            {% trans "Связаться с агентом" %}
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-{% endif %}
-
-<!-- Gallery Modal -->
-<div id="gallery-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
-    <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="relative max-w-6xl w-full">
-            <!-- Header -->
-            <div class="absolute top-4 left-0 right-0 z-20 flex justify-between items-center px-6">
-                <div class="text-white text-lg font-medium bg-black bg-opacity-50 px-4 py-2 rounded-full">
-                    {{ property.title }}
-                </div>
-                <button onclick="closeGallery()" class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <!-- Main Image -->
-            <div class="relative">
-                <img id="gallery-image" src="" alt="{{ property.title }}" 
-                     class="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl">
-                
-                <!-- Loading Indicator -->
-                <div id="gallery-loading" class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-lg hidden">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-                </div>
-            </div>
-            
-            <!-- Navigation Buttons -->
-            <div class="absolute inset-y-0 left-4 flex items-center">
-                <button onclick="previousImage()" class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            </div>
-            
-            <div class="absolute inset-y-0 right-4 flex items-center">
-                <button onclick="nextImage()" class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-            
-            <!-- Footer Info -->
-            <div class="absolute bottom-4 left-0 right-0 z-20 flex justify-between items-center px-6">
-                <div class="text-white text-sm bg-black bg-opacity-50 px-4 py-2 rounded-full backdrop-blur-sm">
-                    <span id="gallery-counter">1 / 1</span>
-                </div>
-                <div class="flex space-x-2">
-                    <button onclick="downloadImage()" class="text-white text-sm bg-black bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm">
-                        <i class="fas fa-download mr-2"></i>{% trans "Скачать" %}
-                    </button>
-                    <button onclick="shareImage()" class="text-white text-sm bg-black bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm">
-                        <i class="fas fa-share mr-2"></i>{% trans "Поделиться" %}
-                    </button>
-                </div>
-            </div>
-            
             <!-- Thumbnail Navigation -->
             {% if property.images.count > 1 %}
-                <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
-                    <div class="flex space-x-2 bg-black bg-opacity-50 p-2 rounded-full backdrop-blur-sm overflow-x-auto max-w-xs md:max-w-md">
+                <div class="mt-4 overflow-x-auto">
+                    <div class="flex space-x-3 pb-2">
                         {% for image in property.images.all %}
-                            <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}" 
-                                 class="w-12 h-12 object-cover rounded cursor-pointer border-2 border-transparent hover:border-white transition-all duration-200 gallery-thumb"
-                                 data-index="{{ forloop.counter0 }}"
-                                 onclick="openGallery({{ forloop.counter0 }})">
+                            <div class="flex-shrink-0 relative cursor-pointer group"
+                                 onclick="goToSlidePairByImage({{ forloop.counter0 }})">
+                                <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}"
+                                     class="w-20 h-20 object-cover rounded-lg transition-all duration-300 border-2 {% if forloop.counter0 == 0 or forloop.counter0 == 1 %}border-accent shadow-lg{% else %}border-transparent hover:border-accent/50{% endif %}"
+                                     data-thumb="{{ forloop.counter0 }}">
+                                <!-- Special indicator for cycled display -->
+                                {% if property.images.count|divisibleby:2 == False and forloop.last %}
+                                    <div class="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                        ↻
+                                    </div>
+                                {% endif %}
+                                <!-- Hover Overlay -->
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-eye text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                                </div>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
             {% endif %}
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- Details Modal -->
-<div id="details-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
-    <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="relative bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <!-- Header -->
-            <div class="flex justify-between items-center p-6 border-b border-gray-200">
-                <h3 class="text-xl font-bold text-gray-900">{% trans "Уточнить детали объекта" %}</h3>
-                <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
-                    <i class="fas fa-times text-xl"></i>
+    <!-- Back Navigation -->
+    <section class="pb-4">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                <button onclick="goBackToCatalog()"
+                        class="inline-flex items-center justify-center px-4 py-2 sm:px-3 sm:py-1 bg-accent hover:bg-yellow-600 text-white font-bold rounded-lg transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md uppercase text-base sm:text-lg">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    {% trans "Назад" %}
                 </button>
+
+                <a href="
+                        {% if property.deal_type == 'rent' %}{% url 'properties:property_rent' %}{% else %}{% url 'properties:property_sale' %}{% endif %}"
+                   class="text-accent hover:text-yellow-600 font-semibold text-base sm:text-lg transition-colors duration-300 hover:underline uppercase text-center sm:text-left">
+                    {{ property.property_type.name_display }}
+                </a>
             </div>
-            
-            <!-- Body -->
-            <div class="p-6">
-                <div class="mb-6">
-                    <h4 class="text-lg font-semibold text-gray-900 mb-2">{{ property.title }}</h4>
-                    <p class="text-gray-600">{% trans "Если у вас есть дополнительные вопросы об этом объекте недвижимости, заполните форму ниже, и наш специалист свяжется с вами." %}</p>
+
+            <!-- Breadcrumbs -->
+            <div class="mt-4">
+                <nav class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 overflow-x-auto pb-2">
+                    <a href="
+                            {% if property.deal_type == 'rent' %}{% url 'properties:property_rent' %}{% else %}{% url 'properties:property_sale' %}{% endif %}"
+                       class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
+                        {% trans "Недвижимость" %}
+                    </a>
+                    <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
+
+                    <a href="{{ property.district.get_absolute_url }}"
+                       class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
+                        {{ property.district.name }}
+                    </a>
+
+                    {% if property.location %}
+                        <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
+                        <a href="{{ property.location.get_absolute_url }}"
+                           class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
+                            {{ property.location.name }}
+                        </a>
+                    {% endif %}
+
+                    <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
+                    <span class="text-gray-900 font-medium whitespace-nowrap">{{ property.title|truncatechars:30 }}</span>
+                </nav>
+            </div>
+        </div>
+    </section>
+
+    <!-- Property Information -->
+    <section class="py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Main Info -->
+                <div class="lg:col-span-2">
+                    <!-- Header -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0">
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-3">
+                                    {% if property.deal_type == 'sale' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent text-white">
+                                        {% trans "Продажа" %}
+                                    </span>
+                                    {% elif property.deal_type == 'rent' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary text-white">
+                                        {% trans "Аренда" %}
+                                    </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-600 text-white">
+                                        {% trans "Продажа/Аренда" %}
+                                    </span>
+                                    {% endif %}
+                                    {% if property.is_featured %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-accent text-white">
+                                        <i class="fas fa-star mr-1"></i>{% trans "Рекомендуем" %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+
+                                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">{{ property.title }}</h1>
+
+                                <div class="flex flex-col sm:flex-row sm:items-center text-gray-600 mb-4 space-y-2 sm:space-y-0 sm:space-x-4">
+                                    {% if property.legacy_id %}
+                                        <span class="text-gray-500 text-sm">
+                                        ID: {{ property.legacy_id }}
+                                    </span>
+                                    {% endif %}
+                                    <a href="
+                                            {% if property.location %}{{ property.location.get_absolute_url }}{% else %}{{ property.district.get_absolute_url }}{% endif %}"
+                                       class="flex items-center space-x-1 text-primary hover:text-accent font-medium hover:underline transition-colors duration-200">
+                                        <span>{% trans "Адрес" %}:</span>
+                                        <span>{{ property.district.name }}</span>
+                                        {% if property.location %}
+                                            <span class="text-gray-400">,</span>
+                                            <span>{{ property.location.name }}</span>
+                                        {% endif %}
+                                    </a>
+                                                                    <a href="#property-map"
+                                       class="flex items-center hover:text-primary transition-colors duration-200">
+                                        <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                                        <span class="text-primary hover:text-accent font-medium">
+                                        {% trans "На карте" %}
+                                    </span>
+                                    </a>
+                                </div>
+                                <div class="text-sm text-gray-500 mt-2">
+                                    <i class="far fa-clock mr-2"></i>
+                                    <span>{% trans "Обновлено" %}: {{ property.updated_at|date:"d.m.Y" }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-end sm:text-right">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div id="main-price" class="text-2xl sm:text-3xl font-bold text-primary">{% price_in_currency property property.deal_type %}</div>
+                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 w-10 h-10 rounded-full transition-colors favorite-btn flex-shrink-0 flex items-center justify-center"
+                                            data-property-id="{{ property.id }}">
+                                        <i class="far text-gray-600 fa-heart text-lg"></i>
+                                    </button>
+                                </div>
+                                {% if property.deal_type == 'sale' or property.deal_type == 'both' %}
+                                    {% if property.area_total %}
+                                        <div id="price-per-sqm" class="text-sm text-gray-500"></div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Features -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Основные характеристики" %}</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {% if property.bedrooms %}
+                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-bed text-primary text-xl"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-xl text-gray-900">{{ property.bedrooms }}</div>
+                                        <div class="text-sm text-gray-600 font-medium">{% trans "Спален" %}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if property.bathrooms %}
+                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-bath text-primary text-xl"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-xl text-gray-900">{{ property.bathrooms }}</div>
+                                        <div class="text-sm text-gray-600 font-medium">{% trans "Ванных" %}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if property.area_total %}
+                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-ruler-combined text-primary text-xl"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-xl text-gray-900">{{ property.area_total }}</div>
+                                        <div class="text-sm text-gray-600 font-medium">м²</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if property.area_land %}
+                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-globe text-primary text-xl"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-xl text-gray-900">{{ property.area_land }}</div>
+                                        <div class="text-sm text-gray-600 font-medium">{% trans "Участок м²" %}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if property.floor %}
+                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-layer-group text-primary text-xl"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-xl text-gray-900">
+                                            {{ property.floor }}{% if property.floors_total %}/
+                                                {{ property.floors_total }}{% endif %}</div>
+                                        <div class="text-sm text-gray-600 font-medium">{% trans "Этаж" %}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if property.year_built %}
+                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-calendar-alt text-primary text-xl"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-xl text-gray-900">{{ property.year_built }}</div>
+                                        <div class="text-sm text-gray-600 font-medium">{% trans "Год" %}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if property.parking %}
+                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-car text-primary text-xl"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
+                                        <div class="text-sm text-gray-600 font-medium">{% trans "Парковка" %}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if property.pool %}
+                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fas fa-swimming-pool text-primary text-xl"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
+                                        <div class="text-sm text-gray-600 font-medium">{% trans "Бассейн" %}</div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    {% if property.description %}
+                        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                            <div class="prose max-w-none">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-3">{% trans "Описание" %}</h2>
+                                <div class="relative">
+                                    <div id="description-content"
+                                         class="description-content max-h-24 overflow-hidden transition-all duration-500 ease-in-out text-gray-700 leading-relaxed">
+                                        <div class="tinymce-content">
+                                            {{ property.description|safe }}
+                                        </div>
+                                    </div>
+                                    <!-- Gradient overlay -->
+                                    <div id="description-gradient"
+                                         class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none transition-opacity duration-300"></div>
+                                    <!-- Expand button -->
+                                    <button id="description-toggle" onclick="toggleDescription()"
+                                            class="mt-3 text-primary hover:text-accent font-medium transition-colors duration-200 flex items-center">
+                                        <span id="toggle-text">{% trans "Показать полностью" %}</span>
+                                        <i id="toggle-icon"
+                                           class="fas fa-chevron-down ml-2 transition-transform duration-300"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Features & Amenities -->
+                    {% if property.features.exists %}
+                        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Особенности и удобства" %}</h2>
+                            <div class="grid grid-cols-1 gap-3">
+                                {% for feature_relation in property.features.all %}
+                                    <div class="flex items-center p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                        {% if feature_relation.feature.icon %}
+                                            <i class="{{ feature_relation.feature.icon }} text-primary mr-3 text-lg"></i>
+                                        {% else %}
+                                            <i class="fas fa-check text-green-500 mr-3 text-lg"></i>
+                                        {% endif %}
+                                        <span class="font-medium">{{ feature_relation.feature.name }}
+                                                {% if feature_relation.value %}:
+                                                    <span class="text-gray-600">{{ feature_relation.value }}</span>{% endif %}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+
+                    <!-- Map -->
+                    {% if property.latitude and property.longitude %}
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Расположение" %}</h2>
+
+                            <!-- Location Details -->
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center justify-between text-gray-700">
+                                    <span class="font-medium">{% trans "Район" %}</span>
+                                    <span class="flex-1 border-b border-dotted border-gray-300 mx-3"></span>
+                                    <span class="text-primary font-medium">{{ property.district.name }}</span>
+                                </div>
+                                {% if property.location %}
+                                    <div class="flex items-center justify-between text-gray-700">
+                                        <span class="font-medium">{% trans "Локация" %}</span>
+                                        <span class="flex-1 border-b border-dotted border-gray-300 mx-3"></span>
+                                        <span class="text-primary font-medium">{{ property.location.name }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div id="property-map" class="w-full h-64 rounded-lg"></div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Additional Details CTA -->
+                    <div class="bg-primary rounded-lg shadow-md p-8 text-center">
+                        <h2 class="text-2xl font-semibold text-white mb-4">{% trans "Остались вопросы по объекту?" %}</h2>
+                        <button onclick="openDetailsModal()"
+                                class="bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg">
+                            {% trans "Уточнить детали" %}
+                        </button>
+                    </div>
                 </div>
-                
-                <form id="details-form" class="space-y-4">
-                    {% csrf_token %}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
-                        <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+
+                <!-- Sidebar -->
+                <div class="lg:col-span-1">
+                    <!-- Contact Form -->
+                    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-24">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6">{% trans "Заинтересовались объектом?" %}</h3>
+
+                        <!-- Manager Info -->
+                        <div class="border-b border-gray-200 pb-6 mb-6">
+                            {% if property.contact_person %}
+                                <div class="flex items-center space-x-4 mb-4">
+                                    <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                                        {% if property.contact_person.photo %}
+                                            <img src="{{ property.contact_person.photo.url }}"
+                                                 alt="{{ property.contact_person.first_name }} {{ property.contact_person.last_name }}"
+                                                 class="w-full h-full object-cover">
+                                        {% else %}
+                                            <div class="w-full h-full bg-primary bg-opacity-10 flex items-center justify-center text-primary text-2xl font-bold">
+                                                {{ property.contact_person.first_name|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 text-lg">{{ property.contact_person.first_name }} {{ property.contact_person.last_name }}</h4>
+                                        <p class="text-gray-600 text-sm">{{ property.contact_person.position }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 text-sm">
+                                    {% if property.contact_person.phone %}
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-phone text-primary w-4"></i>
+                                            <a href="tel:{{ property.contact_person.phone }}"
+                                               class="text-gray-700 hover:text-primary transition-colors">
+                                                {{ property.contact_person.phone }}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    {% if property.contact_person.email %}
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-envelope text-primary w-4"></i>
+                                            <a href="mailto:{{ property.contact_person.email }}"
+                                               class="text-gray-700 hover:text-primary transition-colors">
+                                                {{ property.contact_person.email }}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    {% if property.contact_person.whatsapp %}
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fab fa-whatsapp text-accent w-4"></i>
+                                            <a href="https://wa.me/{{ property.contact_person.whatsapp }}"
+                                               target="_blank"
+                                               class="text-gray-700 hover:text-accent transition-colors">
+                                                {% trans "Написать в WhatsApp" %}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <!-- Fallback if no agent assigned -->
+                                <div class="flex items-center space-x-4 mb-4">
+                                    <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                                        <div class="w-full h-full bg-primary bg-opacity-10 flex items-center justify-center text-primary text-2xl font-bold">
+                                            U
+                                        </div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-gray-900 text-lg">Undersun Estate</h4>
+                                        <p class="text-gray-600 text-sm">{% trans "Менеджер по недвижимости" %}</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-phone text-primary w-4"></i>
+                                        <a href="tel:+6663303313"
+                                           class="text-gray-700 hover:text-primary transition-colors">
+                                            +66 633 033 13
+                                        </a>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-envelope text-primary w-4"></i>
+                                        <a href="mailto:info@undersunestate.com"
+                                           class="text-gray-700 hover:text-primary transition-colors">
+                                            info@undersunestate.com
+                                        </a>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fab fa-whatsapp text-accent w-4"></i>
+                                        <a href="https://wa.me/6663303313" target="_blank"
+                                           class="text-gray-700 hover:text-accent transition-colors">
+                                            {% trans "Написать в WhatsApp" %}
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            <button onclick="openViewingModal()"
+                                    class="w-full bg-primary hover:bg-tertiary text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt mr-2"></i>
+                                {% trans "Записаться на просмотр" %}
+                            </button>
+                            <button onclick="openConsultationModal()"
+                                    class="w-full bg-accent hover:bg-yellow-500 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-comments mr-2"></i>
+                                {% trans "Получить консультацию" %}
+                            </button>
+                        </div>
+
+                        <!-- Quick Contact -->
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div class="grid grid-cols-2 gap-3">
+                                {% if property.contact_person and property.contact_person.phone %}
+                                    <a href="tel:{{ property.contact_person.phone }}"
+                                       class="flex items-center justify-center bg-primary hover:bg-tertiary text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium">
+                                        <i class="fas fa-phone mr-2"></i>{% trans "Позвонить" %}
+                                    </a>
+                                {% else %}
+                                    <a href="tel:+6663303313"
+                                       class="flex items-center justify-center bg-primary hover:bg-tertiary text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium">
+                                        <i class="fas fa-phone mr-2"></i>{% trans "Позвонить" %}
+                                    </a>
+                                {% endif %}
+                                {% if property.contact_person and property.contact_person.whatsapp %}
+                                    <a href="https://wa.me/{{ property.contact_person.whatsapp }}" target="_blank"
+                                       class="flex items-center justify-center bg-accent hover:bg-yellow-500 text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium">
+                                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                                    </a>
+                                {% else %}
+                                    <a href="https://wa.me/6663303313" target="_blank"
+                                       class="flex items-center justify-center bg-accent hover:bg-yellow-500 text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium">
+                                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %} *</label>
-                        <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Similar Properties -->
+    {% if similar_properties %}
+        <section class="py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4">
+                <!-- Header -->
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Похожие объекты" %}</h2>
+                    <div class="w-24 h-1 bg-accent mx-auto mt-6 rounded-full"></div>
+                </div>
+
+                <!-- Properties Grid -->
+                <div class="similar-properties-grid mb-12">
+                    {% for property in similar_properties %}
+                        {% include 'properties/card.html' %}
+                    {% endfor %}
+                </div>
+
+                <!-- Call to Action -->
+                <div class="text-center">
+                    <div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
+                        <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+                            <div class="text-left">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                    {% trans "Не нашли подходящий вариант?" %}
+                                </h3>
+                                <p class="text-gray-600">
+                                    {% trans "Наши специалисты помогут подобрать недвижимость под ваши требования" %}
+                                </p>
+                            </div>
+                            <div class="flex space-x-4 flex-shrink-0">
+                                <a href="{% url 'properties:property_sale' %}"
+                                   class="bg-primary hover:bg-tertiary text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 hover:scale-105 transform">
+                                    {% trans "Смотреть все" %}
+                                </a>
+                                <a href="{% url 'core:contact' %}"
+                                   class="bg-accent hover:bg-yellow-500 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 hover:scale-105 transform">
+                                    {% trans "Связаться с нами" %}
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %}</label>
-                        <input type="tel" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+
+                <!-- Statistics -->
+                <div class="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="text-center">
+                        <div class="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                            <div class="text-3xl font-bold text-primary mb-2">400+</div>
+                            <div class="text-sm text-gray-600">{% trans "Объектов в базе" %}</div>
+                        </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Какие детали вас интересуют?" %}</label>
-                        <textarea name="message" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="{% trans 'Например: планировка, документы, история объекта, инфраструктура района...' %}"></textarea>
+                    <div class="text-center">
+                        <div class="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                            <div class="text-3xl font-bold text-accent mb-2">15+</div>
+                            <div class="text-sm text-gray-600">{% trans "Районов Пхукета" %}</div>
+                        </div>
                     </div>
-                    
-                    <div class="flex space-x-3 pt-4">
-                        <button type="submit" class="flex-1 bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg">
-                            {% trans "Отправить запрос" %}
-                        </button>
-                        <button type="button" onclick="closeDetailsModal()" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                            {% trans "Отмена" %}
-                        </button>
+                    <div class="text-center">
+                        <div class="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                            <div class="text-3xl font-bold text-primary mb-2">5+</div>
+                            <div class="text-sm text-gray-600">{% trans "Лет опыта" %}</div>
+                        </div>
                     </div>
-                    
-                    <div id="details-message" class="hidden p-3 rounded-md text-sm"></div>
-                </form>
-                
-                <!-- Alternative Contact Methods -->
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <p class="text-sm text-gray-600 mb-4">{% trans "Или свяжитесь с нами напрямую:" %}</p>
+                    <div class="text-center">
+                        <div class="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                            <div class="text-3xl font-bold text-tertiary mb-2">24/7</div>
+                            <div class="text-sm text-gray-600">{% trans "Поддержка клиентов" %}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Newsletter Subscription -->
+                <div class="mt-16 bg-accent bg-opacity-10 rounded-2xl p-8 lg:p-12">
+                    <div class="flex flex-col lg:flex-row items-center gap-8">
+                        <!-- Content -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Подписка на новости" %}</h2>
+                            <p class="text-lg text-gray-600 mb-6">{% trans "Получить последние новости и интересные предложения о недвижимости" %}</p>
+
+                            <!-- Newsletter Form -->
+                            <form id="newsletterForm" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto lg:mx-0">
+                                {% csrf_token %}
+                                <input type="email"
+                                       name="email"
+                                       placeholder="{% trans 'Введите ваш email' %}"
+                                       required
+                                       class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent">
+                                <button type="submit"
+                                        class="bg-accent hover:bg-yellow-500 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300 hover:scale-105 transform">
+                                    {% trans "Подписаться" %}
+                                </button>
+                            </form>
+
+                            <div id="newsletter-message" class="hidden mt-4 p-3 rounded-md text-sm"></div>
+                        </div>
+
+                        <!-- Image -->
+                        <div class="flex-shrink-0">
+                            <img src="{% static 'images/detail_property/Tooltip container.png' %}"
+                                 alt="{% trans 'Подписка на новости' %}"
+                                 class="w-48 h-auto">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <!-- No Similar Properties Available -->
+        <section class="py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center">
+                    <div class="bg-white rounded-xl shadow-lg p-12 max-w-2xl mx-auto">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-search text-gray-400 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">
+                            {% trans "Похожие объекты не найдены" %}
+                        </h3>
+                        <p class="text-gray-600 mb-8">
+                            {% trans "К сожалению, в данный момент нет похожих объектов. Рекомендуем посмотреть другие варианты в нашем каталоге." %}
+                        </p>
+                        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 justify-center">
+                            <a href="{% url 'properties:property_sale' %}"
+                               class="bg-primary hover:bg-tertiary text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300 hover:scale-105 transform">
+                                {% trans "Посмотреть все объекты" %}
+                            </a>
+                            <a href="{% url 'core:contact' %}"
+                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-medium transition-colors duration-300 hover:scale-105 transform">
+                                {% trans "Связаться с агентом" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Gallery Modal -->
+    <div id="gallery-modal"
+         class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="relative max-w-6xl w-full">
+                <!-- Header -->
+                <div class="absolute top-4 left-0 right-0 z-20 flex justify-between items-center px-6">
+                    <div class="text-white text-lg font-medium bg-black bg-opacity-50 px-4 py-2 rounded-full">
+                        {{ property.title }}
+                    </div>
+                    <button onclick="closeGallery()"
+                            class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Main Image -->
+                <div class="relative">
+                    <img id="gallery-image" src="" alt="{{ property.title }}"
+                         class="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl">
+
+                    <!-- Loading Indicator -->
+                    <div id="gallery-loading"
+                         class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-lg hidden">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="absolute inset-y-0 left-4 flex items-center">
+                    <button onclick="previousImage()"
+                            class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+
+                <div class="absolute inset-y-0 right-4 flex items-center">
+                    <button onclick="nextImage()"
+                            class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Footer Info -->
+                <div class="absolute bottom-4 left-0 right-0 z-20 flex justify-between items-center px-6">
+                    <div class="text-white text-sm bg-black bg-opacity-50 px-4 py-2 rounded-full backdrop-blur-sm">
+                        <span id="gallery-counter">1 / 1</span>
+                    </div>
                     <div class="flex space-x-2">
-                        <a href="tel:+6663303313" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-3 rounded-md transition-colors text-sm">
-                            <i class="fas fa-phone mr-1"></i>{% trans "Позвонить" %}
-                        </a>
-                        <a href="https://wa.me/6663303313" target="_blank" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-center py-2 px-3 rounded-md transition-colors text-sm">
-                            <i class="fab fa-whatsapp mr-1"></i>WhatsApp
-                        </a>
+                        <button onclick="downloadImage()"
+                                class="text-white text-sm bg-black bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm">
+                            <i class="fas fa-download mr-2"></i>{% trans "Скачать" %}
+                        </button>
+                        <button onclick="shareImage()"
+                                class="text-white text-sm bg-black bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm">
+                            <i class="fas fa-share mr-2"></i>{% trans "Поделиться" %}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thumbnail Navigation -->
+                {% if property.images.count > 1 %}
+                    <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
+                        <div class="flex space-x-2 bg-black bg-opacity-50 p-2 rounded-full backdrop-blur-sm overflow-x-auto max-w-xs md:max-w-md">
+                            {% for image in property.images.all %}
+                                <img src="{{ image.thumbnail.url }}" alt="{{ property.title }}"
+                                     class="w-12 h-12 object-cover rounded cursor-pointer border-2 border-transparent hover:border-white transition-all duration-200 gallery-thumb"
+                                     data-index="{{ forloop.counter0 }}"
+                                     onclick="openGallery({{ forloop.counter0 }})">
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Viewing Modal -->
+    <div id="viewing-modal"
+         class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="relative bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+                <!-- Header -->
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-900">{% trans "Записаться на просмотр" %}</h3>
+                    <button onclick="closeViewingModal()"
+                            class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="p-6">
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{{ property.title }}</h4>
+                        <p class="text-gray-600">{% trans "Укажите удобное время для просмотра объекта. Наш менеджер свяжется с вами для подтверждения встречи." %}</p>
+                    </div>
+
+                    <form id="viewingRequestForm" data-property-id="{{ property.id }}" class="space-y-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="inquiry_type" value="viewing">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
+                            <input type="text" name="name" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %} *</label>
+                            <input type="tel" name="phone" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %}</label>
+                            <input type="email" name="email"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Желаемая дата и время" %}</label>
+                            <input type="datetime-local" name="preferred_date"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Дополнительные пожелания" %}</label>
+                            <textarea name="message" rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                                      placeholder="{% trans 'Укажите дополнительные пожелания к просмотру...' %}"></textarea>
+                        </div>
+
+                        <div class="flex space-x-3 pt-4">
+                            <button type="submit"
+                                    class="flex-1 bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg">
+                                {% trans "Записаться на просмотр" %}
+                            </button>
+                            <button type="button" onclick="closeViewingModal()"
+                                    class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                                {% trans "Отмена" %}
+                            </button>
+                        </div>
+
+                        <div id="viewing-message" class="hidden p-3 rounded-md text-sm"></div>
+                    </form>
+
+                    <!-- Alternative Contact Methods -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <p class="text-sm text-gray-600 mb-4">{% trans "Или свяжитесь с нами напрямую:" %}</p>
+                        <div class="flex space-x-2">
+                            <a href="tel:+6663303313"
+                               class="flex-1 bg-primary hover:bg-blue-700 text-white text-center py-2 px-3 rounded-md transition-colors text-sm">
+                                <i class="fas fa-phone mr-1"></i>{% trans "Позвонить" %}
+                            </a>
+                            <a href="https://wa.me/6663303313" target="_blank"
+                               class="flex-1 bg-accent hover:bg-yellow-500 text-white text-center py-2 px-3 rounded-md transition-colors text-sm">
+                                <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Consultation Modal -->
+    <div id="consultation-modal"
+         class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="relative bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+                <!-- Header -->
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-900">{% trans "Получить консультацию" %}</h3>
+                    <button onclick="closeConsultationModal()"
+                            class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="p-6">
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{{ property.title }}</h4>
+                        <p class="text-gray-600">{% trans "Получите профессиональную консультацию по этому объекту недвижимости. Наш эксперт ответит на все ваши вопросы." %}</p>
+                    </div>
+
+                    <form id="consultationRequestForm" data-property-id="{{ property.id }}" class="space-y-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="inquiry_type" value="consultation">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
+                            <input type="text" name="name" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %} *</label>
+                            <input type="tel" name="phone" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %}</label>
+                            <input type="email" name="email"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Что вас интересует?" %}</label>
+                            <select name="consultation_topic"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">{% trans "Выберите тему консультации" %}</option>
+                                <option value="price">{% trans "Цена и условия покупки" %}</option>
+                                <option value="investment">{% trans "Инвестиционный потенциал" %}</option>
+                                <option value="documents">{% trans "Документы и оформление" %}</option>
+                                <option value="area">{% trans "Район и инфраструктура" %}</option>
+                                <option value="financing">{% trans "Финансирование покупки" %}</option>
+                                <option value="rental">{% trans "Сдача в аренду" %}</option>
+                                <option value="other">{% trans "Другое" %}</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваши вопросы" %}</label>
+                            <textarea name="message" rows="4"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                                      placeholder="{% trans 'Опишите, что вас интересует об этом объекте...' %}"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Предпочтительный способ связи" %}</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="preferred_contact" value="phone"
+                                           class="text-primary focus:ring-primary">
+                                    <span class="ml-2 text-sm text-gray-700">{% trans "Телефонный звонок" %}</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="preferred_contact" value="whatsapp"
+                                           class="text-primary focus:ring-primary">
+                                    <span class="ml-2 text-sm text-gray-700">{% trans "WhatsApp" %}</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="preferred_contact" value="email"
+                                           class="text-primary focus:ring-primary">
+                                    <span class="ml-2 text-sm text-gray-700">{% trans "Email" %}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-3 pt-4">
+                            <button type="submit"
+                                    class="flex-1 bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg">
+                                {% trans "Получить консультацию" %}
+                            </button>
+                            <button type="button" onclick="closeConsultationModal()"
+                                    class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                                {% trans "Отмена" %}
+                            </button>
+                        </div>
+
+                        <div id="consultation-message" class="hidden p-3 rounded-md text-sm"></div>
+                    </form>
+
+                    <!-- Alternative Contact Methods -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <p class="text-sm text-gray-600 mb-4">{% trans "Или свяжитесь с нами напрямую:" %}</p>
+                        <div class="flex space-x-2">
+                            <a href="tel:+6663303313"
+                               class="flex-1 bg-primary hover:bg-blue-700 text-white text-center py-2 px-3 rounded-md transition-colors text-sm">
+                                <i class="fas fa-phone mr-1"></i>{% trans "Позвонить" %}
+                            </a>
+                            <a href="https://wa.me/6663303313" target="_blank"
+                               class="flex-1 bg-accent hover:bg-yellow-500 text-white text-center py-2 px-3 rounded-md transition-colors text-sm">
+                                <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_css %}
-<style>
-/* Fix z-index for property map to prevent overlap with navigation */
-#property-map {
-    position: relative;
-    z-index: 1;
-}
+    <style>
+        /* Fix z-index for property map to prevent overlap with navigation */
+        #property-map {
+            position: relative;
+            z-index: 1;
+        }
 
-#property-map .leaflet-container {
-    z-index: 1 !important;
-}
+        #property-map .leaflet-container {
+            z-index: 1 !important;
+        }
 
-#property-map .leaflet-control-container {
-    z-index: 10 !important;
-}
+        #property-map .leaflet-control-container {
+            z-index: 10 !important;
+        }
 
-#property-map .leaflet-popup-pane {
-    z-index: 15 !important;
-}
+        #property-map .leaflet-popup-pane {
+            z-index: 15 !important;
+        }
 
-/* Ensure map never goes above navigation (z-index: 40) */
-#property-map .leaflet-map-pane,
-#property-map .leaflet-tile-pane,
-#property-map .leaflet-objects-pane,
-#property-map .leaflet-marker-pane,
-#property-map .leaflet-shadow-pane,
-#property-map .leaflet-overlay-pane {
-    z-index: inherit !important;
-}
-</style>
+        /* Ensure map never goes above navigation (z-index: 40) */
+        #property-map .leaflet-map-pane,
+        #property-map .leaflet-tile-pane,
+        #property-map .leaflet-objects-pane,
+        #property-map .leaflet-marker-pane,
+        #property-map .leaflet-shadow-pane,
+        #property-map .leaflet-overlay-pane {
+            z-index: inherit !important;
+        }
+
+        /* Equal height cards for similar properties grid */
+        .similar-properties-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        @media (min-width: 768px) {
+            .similar-properties-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .similar-properties-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .similar-properties-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Ensure property cards fill full height */
+        .similar-properties-grid .property-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-// Gallery functionality
-const images = [
-    {% for image in property.images.all %}
-        "{{ image.medium.url }}"{% if not forloop.last %},{% endif %}
-    {% endfor %}
-];
+    <script>
+        // Gallery functionality
+        const images = [
+            {% for image in property.images.all %}
+                "{{ image.medium.url }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
 
-let currentImageIndex = 0;
-let currentSlidePairIndex = 0;
-let totalSlidePairs = Math.ceil(images.length / 2);
+        let currentImageIndex = 0;
+        let currentSlidePairIndex = 0;
+        let totalSlidePairs = Math.ceil(images.length / 2);
 
-// Dual Carousel functionality
-function nextSlide() {
-    if (totalSlidePairs <= 1) return;
-
-    const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
-    currentSlidePairIndex = (currentSlidePairIndex + 2) % images.length;
-    if (currentSlidePairIndex >= images.length) currentSlidePairIndex = 0;
-
-    const nextSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
-
-    if (currentSlidePair && nextSlidePair) {
-        currentSlidePair.style.opacity = '0';
-        nextSlidePair.style.opacity = '1';
-    }
-
-    updateCarouselUI();
-}
-
-function previousSlide() {
-    if (totalSlidePairs <= 1) return;
-
-    const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
-    currentSlidePairIndex = (currentSlidePairIndex - 2 + images.length);
-    while (currentSlidePairIndex >= images.length) currentSlidePairIndex -= 2;
-    if (currentSlidePairIndex < 0) currentSlidePairIndex = images.length - (images.length % 2 === 0 ? 2 : 1);
-
-    const prevSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
-
-    if (currentSlidePair && prevSlidePair) {
-        currentSlidePair.style.opacity = '0';
-        prevSlidePair.style.opacity = '1';
-    }
-
-    updateCarouselUI();
-}
-
-function goToSlidePair(pairIndex) {
-    if (totalSlidePairs <= 1 || pairIndex === currentSlidePairIndex) return;
-
-    const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
-    const targetSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + pairIndex + '"]');
-
-    if (currentSlidePair && targetSlidePair) {
-        currentSlidePair.style.opacity = '0';
-        targetSlidePair.style.opacity = '1';
-    }
-
-    currentSlidePairIndex = pairIndex;
-    updateCarouselUI();
-}
-
-function goToSlidePairByImage(imageIndex) {
-    // Calculate which pair this image belongs to
-    const pairIndex = Math.floor(imageIndex / 2) * 2;
-    goToSlidePair(pairIndex);
-}
-
-function updateCarouselUI() {
-    // Update photo counter - show range of photos visible
-    const counter = document.getElementById('current-photo');
-    if (counter) {
-        const firstPhoto = currentSlidePairIndex + 1;
-        let secondPhoto;
-
-        // Handle the case where we're showing the last image paired with first image
-        if (currentSlidePairIndex + 1 >= images.length) {
-            // Show last image + first image
-            secondPhoto = 1;
-            counter.textContent = `${images.length}, 1`;
-        } else {
-            secondPhoto = Math.min(currentSlidePairIndex + 2, images.length);
-            if (firstPhoto === secondPhoto) {
-                counter.textContent = firstPhoto;
-            } else {
-                counter.textContent = `${firstPhoto}-${secondPhoto}`;
-            }
-        }
-    }
-
-    // Update pair indicators
-    const indicators = document.querySelectorAll('.property-pair-indicator');
-    indicators.forEach((indicator, index) => {
-        const pairIndex = index * 2;
-        if (pairIndex === currentSlidePairIndex) {
-            indicator.classList.remove('bg-white', 'bg-opacity-60');
-            indicator.classList.add('bg-accent', 'shadow-lg');
-        } else {
-            indicator.classList.remove('bg-accent', 'shadow-lg');
-            indicator.classList.add('bg-white', 'bg-opacity-60');
-        }
-    });
-
-    // Update thumbnails
-    const thumbs = document.querySelectorAll('img[data-thumb]');
-    thumbs.forEach((thumb, index) => {
-        const isFirstInPair = index === currentSlidePairIndex;
-        let isSecondInPair;
-
-        // Handle zipped display for odd number of images
-        if (currentSlidePairIndex + 1 >= images.length && images.length % 2 === 1) {
-            // We're showing last image + first image
-            isSecondInPair = index === 0; // First image as second in pair
-        } else {
-            isSecondInPair = index === currentSlidePairIndex + 1 && index < images.length;
+        // Check if we're on mobile or desktop
+        function isMobile() {
+            return window.innerWidth < 768; // md breakpoint
         }
 
-        if (isFirstInPair || isSecondInPair) {
-            thumb.classList.remove('border-transparent', 'hover:border-accent/50');
-            thumb.classList.add('border-accent', 'shadow-lg');
-        } else {
-            thumb.classList.remove('border-accent', 'shadow-lg');
-            thumb.classList.add('border-transparent', 'hover:border-accent/50');
-        }
-    });
-}
+        // Carousel functionality (works for both mobile and desktop)
+        function nextSlide() {
+            if (isMobile()) {
+                // Mobile: single image navigation
+                if (images.length <= 1) return;
 
-function openGallery(index) {
-    currentImageIndex = index;
-    updateGalleryImage();
-    document.getElementById('gallery-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
+                const currentSlide = document.querySelector('.property-slide-single[data-slide-single="' + currentImageIndex + '"]');
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+                const nextSlide = document.querySelector('.property-slide-single[data-slide-single="' + currentImageIndex + '"]');
 
-function closeGallery() {
-    document.getElementById('gallery-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-}
-
-function updateGalleryImage() {
-    if (images.length > 0) {
-        const galleryImage = document.getElementById('gallery-image');
-        const loading = document.getElementById('gallery-loading');
-        
-        // Show loading
-        loading.classList.remove('hidden');
-        
-        // Update image
-        galleryImage.onload = function() {
-            loading.classList.add('hidden');
-        };
-        
-        galleryImage.src = images[currentImageIndex];
-        document.getElementById('gallery-counter').textContent = `${currentImageIndex + 1} / ${images.length}`;
-        
-        // Update thumbnail highlights
-        const thumbs = document.querySelectorAll('.gallery-thumb');
-        thumbs.forEach((thumb, index) => {
-            if (index === currentImageIndex) {
-                thumb.classList.add('border-accent', 'border-4');
-                thumb.classList.remove('border-transparent', 'border-2');
-            } else {
-                thumb.classList.remove('border-accent', 'border-4');
-                thumb.classList.add('border-transparent', 'border-2');
-            }
-        });
-    }
-}
-
-// Download image function
-function downloadImage() {
-    if (images.length > 0) {
-        const link = document.createElement('a');
-        link.href = images[currentImageIndex];
-        link.download = `{{ property.title|slugify }}-${currentImageIndex + 1}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-}
-
-// Share property function (for carousel button)
-function shareProperty() {
-    if (navigator.share) {
-        navigator.share({
-            title: '{{ property.title|escapejs }}',
-            text: '{% trans "Посмотрите на эту недвижимость" %}',
-            url: window.location.href
-        }).catch(console.error);
-    } else {
-        // Fallback: copy URL to clipboard
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            showNotification('{% trans "Ссылка скопирована в буфер обмена" %}', 'success');
-        }).catch(() => {
-            showNotification('{% trans "Ошибка при копировании ссылки" %}', 'error');
-        });
-    }
-}
-
-// Update favorites counter in header
-function updateFavoritesCounter(count) {
-    // Update desktop counter
-    const desktopCounter = document.getElementById('nav-favorites-count');
-    if (desktopCounter) {
-        desktopCounter.textContent = count;
-        if (count > 0) {
-            desktopCounter.classList.remove('hidden');
-        } else {
-            desktopCounter.classList.add('hidden');
-        }
-    }
-    
-    // Update mobile counter
-    const mobileCounter = document.getElementById('mobile-nav-favorites-count');
-    if (mobileCounter) {
-        mobileCounter.textContent = count;
-        if (count > 0) {
-            mobileCounter.classList.remove('hidden');
-        } else {
-            mobileCounter.classList.add('hidden');
-        }
-    }
-}
-
-// Toggle favorite function (for carousel button)
-function toggleFavorite(propertyId) {
-    const carouselBtn = document.querySelector('.carousel-favorite-btn i');
-    const sidebarBtn = document.querySelector('.favorite-btn i');
-    
-    // Get current favorites from localStorage
-    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const isFavorite = favorites.includes(propertyId);
-    
-    if (isFavorite) {
-        // Remove from favorites
-        favorites = favorites.filter(id => id !== propertyId);
-        carouselBtn.className = 'far fa-heart';
-        if (sidebarBtn) sidebarBtn.className = 'far text-gray-600 fa-heart';
-        showNotification('{% trans "Удалено из избранного" %}', 'info');
-    } else {
-        // Add to favorites
-        favorites.push(propertyId);
-        carouselBtn.className = 'fas fa-heart text-red-500';
-        if (sidebarBtn) sidebarBtn.className = 'fas text-red-500 fa-heart';
-        showNotification('{% trans "Добавлено в избранное" %}', 'success');
-    }
-    
-    // Save to localStorage
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    
-    // Update header counter
-    updateFavoritesCounter(favorites.length);
-}
-
-// Notification helper function
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
-    notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => notification.style.transform = 'translateY(0)', 10);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.style.transform = 'translateY(-100%)';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Share image function
-function shareImage() {
-    if (navigator.share && images.length > 0) {
-        navigator.share({
-            title: '{{ property.title|escapejs }}',
-            text: '{% trans "Посмотрите на эту недвижимость" %}',
-            url: window.location.href
-        }).catch(console.error);
-    } else {
-        // Fallback: copy URL to clipboard
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            showNotification('{% trans "Ссылка скопирована в буфер обмена" %}', 'success');
-        });
-    }
-}
-
-function nextImage() {
-    currentImageIndex = (currentImageIndex + 1) % images.length;
-    updateGalleryImage();
-}
-
-function previousImage() {
-    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
-    updateGalleryImage();
-}
-
-// Keyboard navigation
-document.addEventListener('keydown', function(e) {
-    if (!document.getElementById('gallery-modal').classList.contains('hidden')) {
-        if (e.key === 'ArrowRight') nextImage();
-        if (e.key === 'ArrowLeft') previousImage();
-        if (e.key === 'Escape') closeGallery();
-    }
-});
-
-// Map initialization
-{% if property.latitude and property.longitude %}
-document.addEventListener('DOMContentLoaded', function() {
-    const map = L.map('property-map').setView([{{ property.latitude|unlocalize }}, {{ property.longitude|unlocalize }}], 15);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    
-    L.marker([{{ property.latitude|unlocalize }}, {{ property.longitude|unlocalize }}])
-        .addTo(map)
-        .bindPopup('{{ property.title|escapejs }}');
-});
-{% endif %}
-
-// Auto-carousel functionality
-let autoCarouselInterval;
-
-function startAutoCarousel() {
-    if (images.length > 1) {
-        autoCarouselInterval = setInterval(() => {
-            nextSlide();
-        }, 5000); // Change slide every 5 seconds
-    }
-}
-
-function stopAutoCarousel() {
-    if (autoCarouselInterval) {
-        clearInterval(autoCarouselInterval);
-        autoCarouselInterval = null;
-    }
-}
-
-// Go back to catalog with preserved filters
-function goBackToCatalog() {
-    // Get saved catalog state from localStorage or sessionStorage
-    const savedCatalogState = sessionStorage.getItem('catalogState') || localStorage.getItem('catalogState');
-    
-    if (savedCatalogState) {
-        // If we have saved catalog state, restore it
-        const catalogData = JSON.parse(savedCatalogState);
-        const catalogUrl = catalogData.url || '/property/sale/';
-        
-        // Navigate to the catalog with preserved filters
-        window.location.href = catalogUrl;
-    } else {
-        // Fallback to default catalog page
-        const dealType = '{{ property.deal_type }}';
-        if (dealType === 'sale') {
-            window.location.href = '/property/sale/';
-        } else if (dealType === 'rent') {
-            window.location.href = '/property/rent/';
-        } else {
-            // For 'both' type, go to sale catalog as default
-            window.location.href = '/property/sale/';
-        }
-    }
-}
-
-// Save current page referrer when coming from catalog
-function saveCatalogReferrer() {
-    const referrer = document.referrer;
-    if (referrer && (referrer.includes('/property/sale/') || referrer.includes('/property/rent/'))) {
-        const catalogState = {
-            url: referrer,
-            timestamp: Date.now()
-        };
-        sessionStorage.setItem('catalogState', JSON.stringify(catalogState));
-    }
-}
-
-// Description toggle functionality
-function toggleDescription() {
-    const content = document.getElementById('description-content');
-    const gradient = document.getElementById('description-gradient');
-    const toggleText = document.getElementById('toggle-text');
-    const toggleIcon = document.getElementById('toggle-icon');
-    
-    if (content.classList.contains('max-h-24')) {
-        // Expand
-        content.classList.remove('max-h-24');
-        content.classList.add('max-h-full');
-        gradient.style.opacity = '0';
-        toggleText.textContent = '{% trans "Свернуть" %}';
-        toggleIcon.classList.remove('fa-chevron-down');
-        toggleIcon.classList.add('fa-chevron-up');
-    } else {
-        // Collapse
-        content.classList.remove('max-h-full');
-        content.classList.add('max-h-24');
-        gradient.style.opacity = '1';
-        toggleText.textContent = '{% trans "Показать полностью" %}';
-        toggleIcon.classList.remove('fa-chevron-up');
-        toggleIcon.classList.add('fa-chevron-down');
-    }
-}
-
-// Favorite functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Save catalog referrer if coming from catalog
-    saveCatalogReferrer();
-    // Initialize carousel auto-play
-    startAutoCarousel();
-    
-    // Stop carousel on hover, restart on mouse leave
-    const carouselContainer = document.querySelector('.property-carousel');
-    if (carouselContainer) {
-        carouselContainer.addEventListener('mouseenter', stopAutoCarousel);
-        carouselContainer.addEventListener('mouseleave', startAutoCarousel);
-    }
-    
-    // Initialize favorite buttons state
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const propertyId = {{ property.id }};
-    const isFavorite = favorites.includes(propertyId);
-    
-    const carouselBtn = document.querySelector('.carousel-favorite-btn i');
-    const sidebarBtn = document.querySelector('.favorite-btn i');
-    
-    if (isFavorite) {
-        if (carouselBtn) carouselBtn.className = 'fas fa-heart text-red-500';
-        if (sidebarBtn) sidebarBtn.className = 'fas text-red-500 fa-heart';
-    }
-    
-    // Initialize header counter
-    updateFavoritesCounter(favorites.length);
-    
-    const favoriteBtn = document.querySelector('.favorite-btn');
-    if (favoriteBtn) {
-        favoriteBtn.addEventListener('click', function() {
-            const propertyId = parseInt(this.dataset.propertyId);
-            toggleFavorite(propertyId);
-        });
-    }
-    
-    // Inquiry form functionality
-    const inquiryForm = document.getElementById('inquiry-form');
-    if (inquiryForm) {
-        inquiryForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const messageDiv = document.getElementById('inquiry-message');
-            
-            // Отключаем кнопку во время отправки
-            submitBtn.disabled = true;
-            submitBtn.textContent = '{% trans "Отправляем..." %}';
-            
-            fetch(`{% url 'properties:property_inquiry' property.pk %}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                messageDiv.classList.remove('hidden');
-                
-                if (data.success) {
-                    messageDiv.className = 'p-3 rounded-md text-sm bg-green-100 text-green-800';
-                    messageDiv.textContent = data.message;
-                    inquiryForm.reset(); // Очищаем форму
-                } else {
-                    messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
-                    messageDiv.textContent = data.message;
+                if (currentSlide && nextSlide) {
+                    currentSlide.style.opacity = '0';
+                    nextSlide.style.opacity = '1';
                 }
-                
-                // Восстанавливаем кнопку
-                submitBtn.disabled = false;
-                submitBtn.textContent = '{% trans "Отправить запрос" %}';
-                
-                // Скрываем сообщение через 5 секунд
-                setTimeout(() => {
-                    messageDiv.classList.add('hidden');
-                }, 5000);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                messageDiv.classList.remove('hidden');
-                messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
-                messageDiv.textContent = '{% trans "Произошла ошибка. Попробуйте еще раз." %}';
-                
-                // Восстанавливаем кнопку
-                submitBtn.disabled = false;
-                submitBtn.textContent = '{% trans "Отправить запрос" %}';
+            } else {
+                // Desktop: dual image navigation
+                if (totalSlidePairs <= 1) return;
+
+                const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+                currentSlidePairIndex = (currentSlidePairIndex + 2) % images.length;
+                if (currentSlidePairIndex >= images.length) currentSlidePairIndex = 0;
+
+                const nextSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+
+                if (currentSlidePair && nextSlidePair) {
+                    currentSlidePair.style.opacity = '0';
+                    nextSlidePair.style.opacity = '1';
+                }
+            }
+
+            updateCarouselUI();
+        }
+
+        function previousSlide() {
+            if (isMobile()) {
+                // Mobile: single image navigation
+                if (images.length <= 1) return;
+
+                const currentSlide = document.querySelector('.property-slide-single[data-slide-single="' + currentImageIndex + '"]');
+                currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                const prevSlide = document.querySelector('.property-slide-single[data-slide-single="' + currentImageIndex + '"]');
+
+                if (currentSlide && prevSlide) {
+                    currentSlide.style.opacity = '0';
+                    prevSlide.style.opacity = '1';
+                }
+            } else {
+                // Desktop: dual image navigation
+                if (totalSlidePairs <= 1) return;
+
+                const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+                currentSlidePairIndex = (currentSlidePairIndex - 2 + images.length);
+                while (currentSlidePairIndex >= images.length) currentSlidePairIndex -= 2;
+                if (currentSlidePairIndex < 0) currentSlidePairIndex = images.length - (images.length % 2 === 0 ? 2 : 1);
+
+                const prevSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+
+                if (currentSlidePair && prevSlidePair) {
+                    currentSlidePair.style.opacity = '0';
+                    prevSlidePair.style.opacity = '1';
+                }
+            }
+
+            updateCarouselUI();
+        }
+
+        function goToSlidePair(pairIndex) {
+            if (totalSlidePairs <= 1 || pairIndex === currentSlidePairIndex) return;
+
+            const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+            const targetSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + pairIndex + '"]');
+
+            if (currentSlidePair && targetSlidePair) {
+                currentSlidePair.style.opacity = '0';
+                targetSlidePair.style.opacity = '1';
+            }
+
+            currentSlidePairIndex = pairIndex;
+            updateCarouselUI();
+        }
+
+        function goToSlidePairByImage(imageIndex) {
+            // Calculate which pair this image belongs to
+            const pairIndex = Math.floor(imageIndex / 2) * 2;
+            goToSlidePair(pairIndex);
+        }
+
+        function updateCarouselUI() {
+            // Update photo counter - show range of photos visible
+            const counter = document.getElementById('current-photo');
+            if (counter) {
+                const firstPhoto = currentSlidePairIndex + 1;
+                let secondPhoto;
+
+                // Handle the case where we're showing the last image paired with first image
+                if (currentSlidePairIndex + 1 >= images.length) {
+                    // Show last image + first image
+                    secondPhoto = 1;
+                    counter.textContent = `${images.length}, 1`;
+                } else {
+                    secondPhoto = Math.min(currentSlidePairIndex + 2, images.length);
+                    if (firstPhoto === secondPhoto) {
+                        counter.textContent = firstPhoto;
+                    } else {
+                        counter.textContent = `${firstPhoto}-${secondPhoto}`;
+                    }
+                }
+            }
+
+            // Update pair indicators
+            const indicators = document.querySelectorAll('.property-pair-indicator');
+            indicators.forEach((indicator, index) => {
+                const pairIndex = index * 2;
+                if (pairIndex === currentSlidePairIndex) {
+                    indicator.classList.remove('bg-white', 'bg-opacity-60');
+                    indicator.classList.add('bg-accent', 'shadow-lg');
+                } else {
+                    indicator.classList.remove('bg-accent', 'shadow-lg');
+                    indicator.classList.add('bg-white', 'bg-opacity-60');
+                }
             });
+
+            // Update thumbnails
+            const thumbs = document.querySelectorAll('img[data-thumb]');
+            thumbs.forEach((thumb, index) => {
+                const isFirstInPair = index === currentSlidePairIndex;
+                let isSecondInPair;
+
+                // Handle zipped display for odd number of images
+                if (currentSlidePairIndex + 1 >= images.length && images.length % 2 === 1) {
+                    // We're showing last image + first image
+                    isSecondInPair = index === 0; // First image as second in pair
+                } else {
+                    isSecondInPair = index === currentSlidePairIndex + 1 && index < images.length;
+                }
+
+                if (isFirstInPair || isSecondInPair) {
+                    thumb.classList.remove('border-transparent', 'hover:border-accent/50');
+                    thumb.classList.add('border-accent', 'shadow-lg');
+                } else {
+                    thumb.classList.remove('border-accent', 'shadow-lg');
+                    thumb.classList.add('border-transparent', 'hover:border-accent/50');
+                }
+            });
+        }
+
+        function openGallery(index) {
+            currentImageIndex = index;
+            updateGalleryImage();
+            document.getElementById('gallery-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeGallery() {
+            document.getElementById('gallery-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateGalleryImage() {
+            if (images.length > 0) {
+                const galleryImage = document.getElementById('gallery-image');
+                const loading = document.getElementById('gallery-loading');
+
+                // Show loading
+                loading.classList.remove('hidden');
+
+                // Update image
+                galleryImage.onload = function () {
+                    loading.classList.add('hidden');
+                };
+
+                galleryImage.src = images[currentImageIndex];
+                document.getElementById('gallery-counter').textContent = `${currentImageIndex + 1} / ${images.length}`;
+
+                // Update thumbnail highlights
+                const thumbs = document.querySelectorAll('.gallery-thumb');
+                thumbs.forEach((thumb, index) => {
+                    if (index === currentImageIndex) {
+                        thumb.classList.add('border-accent', 'border-4');
+                        thumb.classList.remove('border-transparent', 'border-2');
+                    } else {
+                        thumb.classList.remove('border-accent', 'border-4');
+                        thumb.classList.add('border-transparent', 'border-2');
+                    }
+                });
+            }
+        }
+
+        // Download image function
+        function downloadImage() {
+            if (images.length > 0) {
+                const link = document.createElement('a');
+                link.href = images[currentImageIndex];
+                link.download = `{{ property.title|slugify }}-${currentImageIndex + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // Share property function (for carousel button)
+        function shareProperty() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ property.title|escapejs }}',
+                    text: '{% trans "Посмотрите на эту недвижимость" %}',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                // Fallback: copy URL to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showNotification('{% trans "Ссылка скопирована в буфер обмена" %}', 'success');
+                }).catch(() => {
+                    showNotification('{% trans "Ошибка при копировании ссылки" %}', 'error');
+                });
+            }
+        }
+
+        // Update favorites counter in header
+        function updateFavoritesCounter(count) {
+            // Update desktop counter
+            const desktopCounter = document.getElementById('nav-favorites-count');
+            if (desktopCounter) {
+                desktopCounter.textContent = count;
+                if (count > 0) {
+                    desktopCounter.classList.remove('hidden');
+                } else {
+                    desktopCounter.classList.add('hidden');
+                }
+            }
+
+            // Update mobile counter
+            const mobileCounter = document.getElementById('mobile-nav-favorites-count');
+            if (mobileCounter) {
+                mobileCounter.textContent = count;
+                if (count > 0) {
+                    mobileCounter.classList.remove('hidden');
+                } else {
+                    mobileCounter.classList.add('hidden');
+                }
+            }
+        }
+
+        // Toggle favorite function (for carousel button)
+        function toggleFavorite(propertyId) {
+            const carouselBtn = document.querySelector('.carousel-favorite-btn i');
+            const sidebarBtn = document.querySelector('.favorite-btn i');
+
+            // Get current favorites from localStorage
+            let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const isFavorite = favorites.includes(propertyId);
+
+            if (isFavorite) {
+                // Remove from favorites
+                favorites = favorites.filter(id => id !== propertyId);
+                carouselBtn.className = 'far fa-heart';
+                if (sidebarBtn) sidebarBtn.className = 'far text-gray-600 fa-heart';
+                showNotification('{% trans "Удалено из избранного" %}', 'info');
+            } else {
+                // Add to favorites
+                favorites.push(propertyId);
+                carouselBtn.className = 'fas fa-heart text-red-500';
+                if (sidebarBtn) sidebarBtn.className = 'fas text-red-500 fa-heart';
+                showNotification('{% trans "Добавлено в избранное" %}', 'success');
+            }
+
+            // Save to localStorage
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+
+            // Update header counter
+            updateFavoritesCounter(favorites.length);
+        }
+
+        // Notification helper function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+            notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => notification.style.transform = 'translateY(0)', 10);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateY(-100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Share image function
+        function shareImage() {
+            if (navigator.share && images.length > 0) {
+                navigator.share({
+                    title: '{{ property.title|escapejs }}',
+                    text: '{% trans "Посмотрите на эту недвижимость" %}',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                // Fallback: copy URL to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showNotification('{% trans "Ссылка скопирована в буфер обмена" %}', 'success');
+                });
+            }
+        }
+
+        function nextImage() {
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            updateGalleryImage();
+        }
+
+        function previousImage() {
+            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            updateGalleryImage();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function (e) {
+            if (!document.getElementById('gallery-modal').classList.contains('hidden')) {
+                if (e.key === 'ArrowRight') nextImage();
+                if (e.key === 'ArrowLeft') previousImage();
+                if (e.key === 'Escape') closeGallery();
+            }
         });
-    }
-    
-    // Details modal form functionality
-    const detailsForm = document.getElementById('details-form');
-    if (detailsForm) {
-        detailsForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const messageDiv = document.getElementById('details-message');
-            
-            // Отключаем кнопку во время отправки
-            submitBtn.disabled = true;
-            submitBtn.textContent = '{% trans "Отправляем..." %}';
-            
-            fetch(`{% url 'properties:property_inquiry' property.pk %}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('#details-form [name=csrfmiddlewaretoken]').value,
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                messageDiv.classList.remove('hidden');
-                
-                if (data.success) {
-                    messageDiv.className = 'p-3 rounded-md text-sm bg-green-100 text-green-800';
-                    messageDiv.textContent = data.message;
-                    detailsForm.reset(); // Очищаем форму
-                    
-                    // Закрываем модальное окно через 2 секунды
+
+        // Map initialization
+        {% if property.latitude and property.longitude %}
+            document.addEventListener('DOMContentLoaded', function () {
+                const map = L.map('property-map').setView([{{ property.latitude|unlocalize }}, {{ property.longitude|unlocalize }}], 15);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                L.marker([{{ property.latitude|unlocalize }}, {{ property.longitude|unlocalize }}])
+                    .addTo(map)
+                    .bindPopup('{{ property.title|escapejs }}');
+            });
+        {% endif %}
+
+        // Auto-carousel functionality
+        let autoCarouselInterval;
+
+        function startAutoCarousel() {
+            if (images.length > 1) {
+                autoCarouselInterval = setInterval(() => {
+                    nextSlide();
+                }, 5000); // Change slide every 5 seconds
+            }
+        }
+
+        function stopAutoCarousel() {
+            if (autoCarouselInterval) {
+                clearInterval(autoCarouselInterval);
+                autoCarouselInterval = null;
+            }
+        }
+
+        // Go back to catalog with preserved filters
+        function goBackToCatalog() {
+            // Get saved catalog state from localStorage or sessionStorage
+            const savedCatalogState = sessionStorage.getItem('catalogState') || localStorage.getItem('catalogState');
+
+            if (savedCatalogState) {
+                // If we have saved catalog state, restore it
+                const catalogData = JSON.parse(savedCatalogState);
+                const catalogUrl = catalogData.url || '/property/sale/';
+
+                // Navigate to the catalog with preserved filters
+                window.location.href = catalogUrl;
+            } else {
+                // Fallback to default catalog page
+                const dealType = '{{ property.deal_type }}';
+                if (dealType === 'sale') {
+                    window.location.href = '/property/sale/';
+                } else if (dealType === 'rent') {
+                    window.location.href = '/property/rent/';
+                } else {
+                    // For 'both' type, go to sale catalog as default
+                    window.location.href = '/property/sale/';
+                }
+            }
+        }
+
+        // Save current page referrer when coming from catalog
+        function saveCatalogReferrer() {
+            const referrer = document.referrer;
+            if (referrer && (referrer.includes('/property/sale/') || referrer.includes('/property/rent/'))) {
+                const catalogState = {
+                    url: referrer,
+                    timestamp: Date.now()
+                };
+                sessionStorage.setItem('catalogState', JSON.stringify(catalogState));
+            }
+        }
+
+        // Description toggle functionality
+        function toggleDescription() {
+            const content = document.getElementById('description-content');
+            const gradient = document.getElementById('description-gradient');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleIcon = document.getElementById('toggle-icon');
+
+            if (content.classList.contains('max-h-24')) {
+                // Expand
+                content.classList.remove('max-h-24');
+                content.classList.add('max-h-full');
+                gradient.style.opacity = '0';
+                toggleText.textContent = '{% trans "Свернуть" %}';
+                toggleIcon.classList.remove('fa-chevron-down');
+                toggleIcon.classList.add('fa-chevron-up');
+            } else {
+                // Collapse
+                content.classList.remove('max-h-full');
+                content.classList.add('max-h-24');
+                gradient.style.opacity = '1';
+                toggleText.textContent = '{% trans "Показать полностью" %}';
+                toggleIcon.classList.remove('fa-chevron-up');
+                toggleIcon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Price functionality - property data with currency conversion
+        const propertyData = {
+            // For sale properties - convert from THB base price to all currencies
+            price_sale_usd: {% if property.price_sale_thb %}{% convert_price property.price_sale_thb 'THB' 'USD' as sale_usd %}{% if sale_usd %}{{ sale_usd|unlocalize }}{% else %}null{% endif %}{% else %}null{% endif %},
+            price_sale_thb: {% if property.price_sale_thb %}{{ property.price_sale_thb|unlocalize }}{% else %}null{% endif %},
+            price_sale_rub: {% if property.price_sale_thb %}{% convert_price property.price_sale_thb 'THB' 'RUB' as sale_rub %}{% if sale_rub %}{{ sale_rub|unlocalize }}{% else %}null{% endif %}{% else %}null{% endif %},
+            // For rent properties - convert from THB base price to all currencies
+            price_rent_monthly_usd: {% if property.price_rent_monthly_thb %}{% convert_price property.price_rent_monthly_thb 'THB' 'USD' as rent_usd %}{% if rent_usd %}{{ rent_usd|unlocalize }}{% else %}null{% endif %}{% else %}null{% endif %},
+            price_rent_monthly_thb: {% if property.price_rent_monthly_thb %}{{ property.price_rent_monthly_thb|unlocalize }}{% else %}null{% endif %},
+            price_rent_monthly_rub: {% if property.price_rent_monthly_thb %}{% convert_price property.price_rent_monthly_thb 'THB' 'RUB' as rent_rub %}{% if rent_rub %}{{ rent_rub|unlocalize }}{% else %}null{% endif %}{% else %}null{% endif %},
+            area_total: {% if property.area_total %}{{ property.area_total|unlocalize }}{% else %}null{% endif %},
+            deal_type: '{{ property.deal_type }}'
+        };
+
+        function updatePrices() {
+            // Get current currency from localStorage
+            const currentCurrency = localStorage.getItem('selectedCurrency') || 'THB';
+
+            let salePrice = null;
+            let rentPrice = null;
+            let currencySymbol = '';
+
+            switch(currentCurrency) {
+                case 'USD':
+                    salePrice = propertyData.price_sale_usd;
+                    rentPrice = propertyData.price_rent_monthly_usd;
+                    currencySymbol = '$';
+                    break;
+                case 'THB':
+                    salePrice = propertyData.price_sale_thb;
+                    rentPrice = propertyData.price_rent_monthly_thb;
+                    currencySymbol = '฿';
+                    break;
+                case 'RUB':
+                    salePrice = propertyData.price_sale_rub;
+                    rentPrice = propertyData.price_rent_monthly_rub;
+                    currencySymbol = '₽';
+                    break;
+            }
+
+            // Update main price
+            const mainPriceEl = document.getElementById('main-price');
+            if (mainPriceEl) {
+                let priceText = '';
+
+                if (propertyData.deal_type === 'sale' && salePrice) {
+                    priceText = `${currencySymbol}${Math.round(salePrice).toLocaleString()}`;
+                } else if (propertyData.deal_type === 'rent' && rentPrice) {
+                    priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/мес`;
+                } else if (propertyData.deal_type === 'both') {
+                    if (salePrice) {
+                        priceText = `${currencySymbol}${Math.round(salePrice).toLocaleString()}`;
+                    } else if (rentPrice) {
+                        priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/мес`;
+                    }
+                }
+
+                if (priceText) {
+                    mainPriceEl.textContent = priceText;
+                } else {
+                    mainPriceEl.textContent = 'По запросу';
+                }
+            }
+
+            // Update price per square meter
+            const pricePerSqmEl = document.getElementById('price-per-sqm');
+
+            if (pricePerSqmEl && propertyData.area_total && salePrice) {
+                if (propertyData.deal_type !== 'rent') {
+                    const pricePerSqm = Math.round(salePrice / propertyData.area_total);
+                    const pricePerSqmText = `${pricePerSqm.toLocaleString()} ${currencySymbol}/м²`;
+                    pricePerSqmEl.textContent = pricePerSqmText;
+                } else {
+                    pricePerSqmEl.textContent = '';
+                }
+            } else if (pricePerSqmEl) {
+                pricePerSqmEl.textContent = '';
+            }
+        }
+
+        // Favorite functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            // Save catalog referrer if coming from catalog
+            saveCatalogReferrer();
+            // Initialize carousel auto-play
+            startAutoCarousel();
+
+            // Initialize prices
+            updatePrices();
+
+            // Listen for currency changes
+            window.addEventListener('currencyChanged', updatePrices);
+
+            // Stop carousel on hover, restart on mouse leave
+            const carouselContainer = document.querySelector('.property-carousel');
+            if (carouselContainer) {
+                carouselContainer.addEventListener('mouseenter', stopAutoCarousel);
+                carouselContainer.addEventListener('mouseleave', startAutoCarousel);
+            }
+
+            // Initialize favorite buttons state
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const propertyId = {{ property.id }};
+            const isFavorite = favorites.includes(propertyId);
+
+            const carouselBtn = document.querySelector('.carousel-favorite-btn i');
+            const sidebarBtn = document.querySelector('.favorite-btn i');
+
+            if (isFavorite) {
+                if (carouselBtn) carouselBtn.className = 'fas fa-heart text-red-500';
+                if (sidebarBtn) sidebarBtn.className = 'fas text-red-500 fa-heart';
+            }
+
+            // Initialize header counter
+            updateFavoritesCounter(favorites.length);
+
+            const favoriteBtn = document.querySelector('.favorite-btn');
+            if (favoriteBtn) {
+                favoriteBtn.addEventListener('click', function () {
+                    const propertyId = parseInt(this.dataset.propertyId);
+                    toggleFavorite(propertyId);
+                });
+            }
+
+            // Inquiry form functionality
+            const inquiryForm = document.getElementById('inquiry-form');
+            if (inquiryForm) {
+                inquiryForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const messageDiv = document.getElementById('inquiry-message');
+
+                    // Отключаем кнопку во время отправки
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '{% trans "Отправляем..." %}';
+
+                    fetch(`{% url 'properties:property_inquiry' property.pk %}`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            messageDiv.classList.remove('hidden');
+
+                            if (data.success) {
+                                messageDiv.className = 'p-3 rounded-md text-sm bg-green-100 text-green-800';
+                                messageDiv.textContent = data.message;
+                                inquiryForm.reset(); // Очищаем форму
+                            } else {
+                                messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
+                                messageDiv.textContent = data.message;
+                            }
+
+                            // Восстанавливаем кнопку
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '{% trans "Отправить запрос" %}';
+
+                            // Скрываем сообщение через 5 секунд
+                            setTimeout(() => {
+                                messageDiv.classList.add('hidden');
+                            }, 5000);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            messageDiv.classList.remove('hidden');
+                            messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
+                            messageDiv.textContent = '{% trans "Произошла ошибка. Попробуйте еще раз." %}';
+
+                            // Восстанавливаем кнопку
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '{% trans "Отправить запрос" %}';
+                        });
+                });
+            }
+
+            // Note: Details modal functionality is handled by consultation modal form
+
+            // Viewing modal form functionality
+            const viewingForm = document.getElementById('viewing-form');
+            if (viewingForm) {
+                viewingForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const messageDiv = document.getElementById('viewing-message');
+
+                    // Отключаем кнопку во время отправки
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '{% trans "Отправляем..." %}';
+
+                    fetch(`{% url 'properties:property_inquiry' property.pk %}`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('#viewing-form [name=csrfmiddlewaretoken]').value,
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            messageDiv.classList.remove('hidden');
+
+                            if (data.success) {
+                                messageDiv.className = 'p-3 rounded-md text-sm bg-green-100 text-green-800';
+                                messageDiv.textContent = data.message;
+                                viewingForm.reset(); // Очищаем форму
+
+                                // Закрываем модальное окно через 2 секунды
+                                setTimeout(() => {
+                                    closeViewingModal();
+                                }, 2000);
+                            } else {
+                                messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
+                                messageDiv.textContent = data.message;
+                            }
+
+                            // Восстанавливаем кнопку
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '{% trans "Записаться на просмотр" %}';
+
+                            // Скрываем сообщение через 5 секунд
+                            setTimeout(() => {
+                                messageDiv.classList.add('hidden');
+                            }, 5000);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            messageDiv.classList.remove('hidden');
+                            messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
+                            messageDiv.textContent = '{% trans "Произошла ошибка. Попробуйте еще раз." %}';
+
+                            // Восстанавливаем кнопку
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '{% trans "Записаться на просмотр" %}';
+                        });
+                });
+            }
+
+            // Consultation modal form functionality
+            const consultationForm = document.getElementById('consultation-form');
+            if (consultationForm) {
+                consultationForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const messageDiv = document.getElementById('consultation-message');
+
+                    // Отключаем кнопку во время отправки
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '{% trans "Отправляем..." %}';
+
+                    fetch(`{% url 'properties:property_inquiry' property.pk %}`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('#consultation-form [name=csrfmiddlewaretoken]').value,
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            messageDiv.classList.remove('hidden');
+
+                            if (data.success) {
+                                messageDiv.className = 'p-3 rounded-md text-sm bg-green-100 text-green-800';
+                                messageDiv.textContent = data.message;
+                                consultationForm.reset(); // Очищаем форму
+
+                                // Закрываем модальное окно через 2 секунды
+                                setTimeout(() => {
+                                    closeConsultationModal();
+                                }, 2000);
+                            } else {
+                                messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
+                                messageDiv.textContent = data.message;
+                            }
+
+                            // Восстанавливаем кнопку
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '{% trans "Получить консультацию" %}';
+
+                            // Скрываем сообщение через 5 секунд
+                            setTimeout(() => {
+                                messageDiv.classList.add('hidden');
+                            }, 5000);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            messageDiv.classList.remove('hidden');
+                            messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
+                            messageDiv.textContent = '{% trans "Произошла ошибка. Попробуйте еще раз." %}';
+
+                            // Восстанавливаем кнопку
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '{% trans "Получить консультацию" %}';
+                        });
+                });
+            }
+
+            // Newsletter form functionality
+            const newsletterForm = document.getElementById('newsletter-form');
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const messageDiv = document.getElementById('newsletter-message');
+
+                    // Отключаем кнопку во время отправки
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '{% trans "Подписываем..." %}';
+
+                    // Симуляция отправки формы (замените на реальный endpoint)
                     setTimeout(() => {
-                        closeDetailsModal();
-                    }, 2000);
-                } else {
-                    messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
-                    messageDiv.textContent = data.message;
-                }
-                
-                // Восстанавливаем кнопку
-                submitBtn.disabled = false;
-                submitBtn.textContent = '{% trans "Отправить запрос" %}';
-                
-                // Скрываем сообщение через 5 секунд
-                setTimeout(() => {
-                    messageDiv.classList.add('hidden');
-                }, 5000);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                messageDiv.classList.remove('hidden');
-                messageDiv.className = 'p-3 rounded-md text-sm bg-red-100 text-red-800';
-                messageDiv.textContent = '{% trans "Произошла ошибка. Попробуйте еще раз." %}';
-                
-                // Восстанавливаем кнопку
-                submitBtn.disabled = false;
-                submitBtn.textContent = '{% trans "Отправить запрос" %}';
-            });
+                        messageDiv.classList.remove('hidden');
+                        messageDiv.className = 'mt-4 p-3 rounded-md text-sm bg-green-100 text-green-800';
+                        messageDiv.textContent = '{% trans "Спасибо за подписку! Мы будем держать вас в курсе последних новостей." %}';
+
+                        // Очищаем форму
+                        newsletterForm.reset();
+
+                        // Восстанавливаем кнопку
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '{% trans "Подписаться" %}';
+
+                        // Скрываем сообщение через 5 секунд
+                        setTimeout(() => {
+                            messageDiv.classList.add('hidden');
+                        }, 5000);
+                    }, 1000);
+                });
+            }
         });
-    }
-});
 
-// Details modal functions
-function openDetailsModal() {
-    document.getElementById('details-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeDetailsModal() {
-    document.getElementById('details-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    
-    // Очищаем форму и скрываем сообщения
-    const form = document.getElementById('details-form');
-    const message = document.getElementById('details-message');
-    if (form) form.reset();
-    if (message) message.classList.add('hidden');
-}
-
-// Close modal on outside click
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('details-modal');
-    if (e.target === modal) {
-        closeDetailsModal();
-    }
-});
-
-// Close modal on escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('details-modal');
-        if (!modal.classList.contains('hidden')) {
-            closeDetailsModal();
+        // Modal functions
+        function openDetailsModal() {
+            document.getElementById('consultation-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
-    }
-});
-</script>
+
+        function closeDetailsModal() {
+            document.getElementById('consultation-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+
+            // Очищаем форму и скрываем сообщения
+            const form = document.getElementById('consultation-form');
+            const message = document.getElementById('consultation-message');
+            if (form) form.reset();
+            if (message) message.classList.add('hidden');
+        }
+
+        function openViewingModal() {
+            document.getElementById('viewing-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeViewingModal() {
+            document.getElementById('viewing-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+
+            // Очищаем форму и скрываем сообщения
+            const form = document.getElementById('viewing-form');
+            const message = document.getElementById('viewing-message');
+            if (form) form.reset();
+            if (message) message.classList.add('hidden');
+        }
+
+        function openConsultationModal() {
+            document.getElementById('consultation-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeConsultationModal() {
+            document.getElementById('consultation-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+
+            // Очищаем форму и скрываем сообщения
+            const form = document.getElementById('consultation-form');
+            const message = document.getElementById('consultation-message');
+            if (form) form.reset();
+            if (message) message.classList.add('hidden');
+        }
+
+        // Close modal on outside click
+        document.addEventListener('click', function (e) {
+            const viewingModal = document.getElementById('viewing-modal');
+            const consultationModal = document.getElementById('consultation-modal');
+
+            if (e.target === consultationModal) {
+                closeDetailsModal(); // Using closeDetailsModal for consultation modal
+            }
+            if (e.target === viewingModal) {
+                closeViewingModal();
+            }
+        });
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                const viewingModal = document.getElementById('viewing-modal');
+                const consultationModal = document.getElementById('consultation-modal');
+
+                if (!consultationModal.classList.contains('hidden')) {
+                    closeDetailsModal(); // Using closeDetailsModal for consultation modal
+                } else if (!viewingModal.classList.contains('hidden')) {
+                    closeViewingModal();
+                }
+            }
+        });
+    </script>
 {% endblock %}
