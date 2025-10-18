@@ -31,16 +31,22 @@ function toggleFavorite(propertyId) {
     );
 }
 
+function formatFavoritesCount(count) {
+    return count > 99 ? '99+' : count;
+}
+
 // Update favorites counter in header
 function updateFavoritesCounter(count) {
     const counters = document.querySelectorAll('.favorites-count');
     counters.forEach(counter => {
-        counter.textContent = count;
-        
-        // Show/hide counter based on count
+        counter.textContent = formatFavoritesCount(count);
+
         if (count > 0) {
-            counter.style.display = 'inline';
+            counter.classList.remove('hidden');
+            counter.classList.add('inline-flex');
+            counter.style.display = 'inline-flex';
         } else {
+            counter.classList.add('hidden');
             counter.style.display = 'none';
         }
     });

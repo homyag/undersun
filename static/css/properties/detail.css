@@ -1,0 +1,311 @@
+/* Property Detail Page Styles */
+
+/* Fix z-index for property map to prevent overlap with navigation */
+#property-map {
+    position: relative;
+    z-index: 1;
+}
+
+#property-map .leaflet-container {
+    z-index: 1 !important;
+}
+
+#property-map .leaflet-control-container {
+    z-index: 10 !important;
+}
+
+#property-map .leaflet-popup-pane {
+    z-index: 15 !important;
+}
+
+/* Ensure map never goes above navigation (z-index: 40) */
+#property-map .leaflet-map-pane,
+#property-map .leaflet-tile-pane,
+#property-map .leaflet-objects-pane,
+#property-map .leaflet-marker-pane,
+#property-map .leaflet-shadow-pane,
+#property-map .leaflet-overlay-pane {
+    z-index: inherit !important;
+}
+
+/* Equal height cards for similar properties grid */
+.similar-properties-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+@media (min-width: 768px) {
+    .similar-properties-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .similar-properties-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .similar-properties-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Ensure property cards fill full height */
+.similar-properties-grid .property-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* TinyMCE Content Styles - для корректного отображения HTML из редактора */
+.tinymce-content {
+    line-height: 1.75;
+    color: #374151;
+}
+
+/* Заголовки */
+.tinymce-content h1,
+.tinymce-content h2,
+.tinymce-content h3,
+.tinymce-content h4,
+.tinymce-content h5,
+.tinymce-content h6 {
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    line-height: 1.25;
+    color: #111827;
+}
+
+.tinymce-content h1 { font-size: 2em; }
+.tinymce-content h2 { font-size: 1.5em; }
+.tinymce-content h3 { font-size: 1.25em; }
+.tinymce-content h4 { font-size: 1.125em; }
+.tinymce-content h5 { font-size: 1em; }
+.tinymce-content h6 { font-size: 0.875em; }
+
+/* Первый заголовок без верхнего отступа */
+.tinymce-content > *:first-child {
+    margin-top: 0;
+}
+
+/* Параграфы */
+.tinymce-content p {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+.tinymce-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Списки */
+.tinymce-content ul,
+.tinymce-content ol {
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+    padding-left: 1.5em;
+}
+
+.tinymce-content ul {
+    list-style-type: disc;
+}
+
+.tinymce-content ol {
+    list-style-type: decimal;
+}
+
+.tinymce-content li {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+    padding-left: 0.25em;
+}
+
+.tinymce-content li > p {
+    margin-bottom: 0.5em;
+}
+
+/* Вложенные списки */
+.tinymce-content ul ul,
+.tinymce-content ul ol,
+.tinymce-content ol ul,
+.tinymce-content ol ol {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.tinymce-content ul ul {
+    list-style-type: circle;
+}
+
+.tinymce-content ul ul ul {
+    list-style-type: square;
+}
+
+/* Жирный и курсив */
+.tinymce-content strong,
+.tinymce-content b {
+    font-weight: 700;
+    color: #111827;
+}
+
+.tinymce-content em,
+.tinymce-content i {
+    font-style: italic;
+}
+
+/* Подчеркивание */
+.tinymce-content u {
+    text-decoration: underline;
+}
+
+/* Зачеркивание */
+.tinymce-content s,
+.tinymce-content strike {
+    text-decoration: line-through;
+}
+
+/* Ссылки */
+.tinymce-content a {
+    color: #F1B400;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.tinymce-content a:hover {
+    color: #d19f00;
+}
+
+/* Цитаты */
+.tinymce-content blockquote {
+    margin: 1.5em 0;
+    padding: 1em 1.5em;
+    border-left: 4px solid #F1B400;
+    background-color: #f9fafb;
+    font-style: italic;
+    color: #4b5563;
+}
+
+.tinymce-content blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+/* Код */
+.tinymce-content code {
+    background-color: #f3f4f6;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875em;
+    color: #dc2626;
+}
+
+.tinymce-content pre {
+    background-color: #1f2937;
+    color: #f3f4f6;
+    padding: 1em;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.tinymce-content pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+    font-size: 0.875em;
+}
+
+/* Горизонтальная линия */
+.tinymce-content hr {
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 2em 0;
+}
+
+/* Таблицы */
+.tinymce-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+}
+
+.tinymce-content table th,
+.tinymce-content table td {
+    padding: 0.75em 1em;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+.tinymce-content table th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #111827;
+}
+
+.tinymce-content table tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+/* Изображения */
+.tinymce-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1em 0;
+}
+
+.tinymce-content img.align-left {
+    float: left;
+    margin-right: 1em;
+    margin-bottom: 1em;
+}
+
+.tinymce-content img.align-right {
+    float: right;
+    margin-left: 1em;
+    margin-bottom: 1em;
+}
+
+.tinymce-content img.align-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Очистка float */
+.tinymce-content::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Отступы для абзацев с отступом (indent) */
+.tinymce-content .indent-1 { padding-left: 2em; }
+.tinymce-content .indent-2 { padding-left: 4em; }
+.tinymce-content .indent-3 { padding-left: 6em; }
+
+/* Выравнивание текста */
+.tinymce-content .text-left { text-align: left; }
+.tinymce-content .text-center { text-align: center; }
+.tinymce-content .text-right { text-align: right; }
+.tinymce-content .text-justify { text-align: justify; }
+
+/* Цвета текста (если используются в редакторе) */
+.tinymce-content .text-primary { color: #474B57; }
+.tinymce-content .text-accent { color: #F1B400; }
+.tinymce-content .text-success { color: #10b981; }
+.tinymce-content .text-danger { color: #ef4444; }
+.tinymce-content .text-warning { color: #f59e0b; }
+.tinymce-content .text-info { color: #3b82f6; }
+
+/* Фоновые цвета (если используются в редакторе) */
+.tinymce-content .bg-highlight {
+    background-color: #fef3c7;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+}

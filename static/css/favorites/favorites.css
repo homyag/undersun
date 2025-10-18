@@ -1,0 +1,125 @@
+/* Favorites Page Styles */
+
+/* Comparison table sticky column */
+.comparison-table th.sticky {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+}
+
+.comparison-table td.sticky {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+/* Smooth transitions for view switching */
+#favorites-container {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Loading state */
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Property card hover effects */
+.property-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.property-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Remove button hover effect */
+.remove-favorite {
+    transition: all 0.2s ease;
+}
+
+.remove-favorite:hover {
+    transform: scale(1.1);
+}
+
+/* View toggle buttons */
+.view-toggle-btn {
+    transition: all 0.2s ease;
+}
+
+.view-toggle-btn.active {
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+/* Mobile responsiveness for comparison table */
+@media (max-width: 768px) {
+    /* Compact view toggle buttons on mobile */
+    #grid-view-btn,
+    #table-view-btn {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    #grid-view-btn i,
+    #table-view-btn i {
+        margin-right: 0.25rem;
+        font-size: 0.7rem;
+    }
+
+    /* Reduce font sizes on mobile */
+    .comparison-table th,
+    .comparison-table td {
+        font-size: 0.75rem;
+        padding: 0.5rem !important;
+    }
+
+    /* Smaller sticky column on mobile */
+    .comparison-table th.sticky,
+    .comparison-table td.sticky {
+        font-size: 0.7rem;
+        padding: 0.4rem !important;
+        min-width: 80px;
+    }
+
+    /* Reduce column width on mobile */
+    .comparison-table th {
+        min-width: 150px !important;
+    }
+
+    /* Smaller images in table headers */
+    .comparison-table th img {
+        height: 80px !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* Smaller icons */
+    .comparison-table i {
+        font-size: 0.7rem;
+        margin-right: 0.25rem !important;
+    }
+
+    /* Adjust remove button */
+    .comparison-table .remove-favorite i {
+        font-size: 1rem;
+    }
+
+    /* Smaller action buttons */
+    .comparison-table td a {
+        font-size: 0.7rem !important;
+        padding: 0.4rem 0.6rem !important;
+    }
+
+    .comparison-table td a i {
+        font-size: 0.65rem;
+        margin-right: 0.25rem !important;
+    }
+}

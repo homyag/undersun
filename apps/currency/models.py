@@ -95,12 +95,19 @@ class ExchangeRate(models.Model):
         """Конвертировать сумму из одной валюты в другую"""
         if from_currency == to_currency:
             return amount
-        
+
         rate = cls.get_latest_rate(from_currency, to_currency)
         if rate is None:
             return None
-        
-        return amount * rate
+
+        # Конвертируем amount в Decimal для совместимости с rate
+        if isinstance(amount, float):
+            amount = Decimal(str(amount))
+        elif not isinstance(amount, Decimal):
+            amount = Decimal(amount)
+
+        # Возвращаем результат как float для удобства использования
+        return float(amount * rate)
 
 
 class CurrencyPreference(models.Model):

@@ -44,27 +44,21 @@ This document provides a comprehensive reference for all functions across the Un
   - **Usage**: SEO meta keywords generation
 
 **PromotionalBanner Model**
-- `get_translation(language_code='ru')` - Get banner translation for specified language
-  - **Parameters**: `language_code` (str) - Language code
-  - **Returns**: PromotionalBannerTranslation or None
-  - **Usage**: Multilingual banner content display
-
-- `get_active_banner()` - Class method to get currently active banner
-  - **Parameters**: None
+- `get_active_banner(language_code=None)` - Class method returning the banner configured for homepage use
+  - **Parameters**: `language_code` (str, optional) – two-letter language code
   - **Returns**: PromotionalBanner or None
-  - **Usage**: Homepage banner display
-  - **Side effects**: Filters by date validity and priority
+  - **Usage**: Homepage banner display per language (fallback to RU when localized banner is missing)
 
-- `get_language_aware_url(language_code=None)` - Get localized button URL
-  - **Parameters**: `language_code` (str, optional) - Target language
-  - **Returns**: str or None - Localized URL
-  - **Usage**: Banner button linking with language support
+- `get_language_aware_url(language_code=None)` - Build language-aware link for the banner
+  - **Parameters**: `language_code` (str, optional) - Target language code
+  - **Returns**: str or None - Prepared URL with language prefix when needed
+  - **Usage**: Banner click-throughs with localization
   - **Dependencies**: Django URL reversing, current language detection
 
-- `is_valid()` - Check if banner is currently valid
+- `image_disclaimer()` - Static helper describing required image characteristics
   - **Parameters**: None
-  - **Returns**: bool - Banner validity status
-  - **Usage**: Banner display validation
+  - **Returns**: str - Instruction text (i18n aware)
+  - **Usage**: Display in admin/UI to inform content managers about asset requirements
 
 **SEOTemplate Model**
 - `get_template(field_type, language_code='ru')` - Get template for field and language

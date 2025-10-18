@@ -1,36 +1,74 @@
 <style>
     .hero-section {
-        height: 100vh !important;
+        min-height: 100vh !important;
         padding-top: 64px !important;
+        padding-bottom: 32px !important;
         box-sizing: border-box !important;
+    }
+
+    .promotional-banner-section {
+        padding: 0 !important;
+    }
+
+    .featured-tabs {
+        gap: 0.5rem;
+        scrollbar-width: none;
+    }
+
+    .featured-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     @media (max-width: 767px) {
         .hero-section {
-            height: 100vh !important;
-            padding-top: 64px !important;
+            min-height: 100vh !important;
+            padding-top: 32px !important;
+            padding-bottom: 12px !important;
         }
 
         .hero-content {
-            height: calc(100vh - 64px) !important;
-            padding: 8px 0 !important;
+            justify-content: flex-start !important;
+            padding: 4px 0 16px !important;
         }
 
         .hero-content .space-y-4 > * + * {
             margin-top: 12px !important;
         }
+
+        .mobile-search-form select,
+        .mobile-search-form input {
+            text-align: center;
+        }
+
+        .mobile-search-form select {
+            text-align-last: center;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: none !important;
+        }
+
+        .mobile-search-form input::placeholder {
+            text-align: center;
+        }
+
+        .mobile-search-form select,
+        .mobile-search-form input,
+        .mobile-search-form button {
+            height: 48px !important;
+        }
     }
 
     @media (min-width: 1024px) {
         .hero-section {
-            height: 100vh !important;
-            padding-top: 80px !important;
+            min-height: 100vh !important;
+            padding-top: 120px !important;
+            padding-bottom: 48px !important;
         }
     }
 
     /* Компактная компоновка hero контента */
     .hero-content {
-        height: calc(100vh - 64px);
+        min-height: calc(100vh - 64px);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -39,7 +77,7 @@
 
     @media (min-width: 1024px) {
         .hero-content {
-            height: calc(100vh - 80px);
+            min-height: calc(100vh - 80px);
         }
     }
 
@@ -217,6 +255,23 @@
         /* Улучшенные отступы для мобильных */
         section {
             padding: 3rem 0;
+        }
+
+        .promotional-banner-section {
+            padding: 0 !important;
+        }
+
+        .featured-tabs {
+            width: 100%;
+            padding: 0.25rem;
+            justify-content: space-between;
+        }
+
+        .featured-tabs button {
+            flex: 1 1 auto;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.85rem;
+            border-radius: 0.65rem !important;
         }
         
         /* Адаптивная высота изображений */

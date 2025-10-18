@@ -1,8 +1,12 @@
+from decimal import Decimal, InvalidOperation
+import json
+
 from django.views.generic import TemplateView, DetailView
 from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
-import json
+
+from apps.currency.services import CurrencyService
 from apps.properties.models import Property, PropertyType
 from apps.locations.models import District
 from apps.blog.models import BlogPost
@@ -101,7 +105,8 @@ class HomeView(TemplateView):
         ).filter(properties_count__gt=0)
 
         # Активный рекламный баннер
-        context['promotional_banner'] = PromotionalBanner.get_active_banner()
+        current_language = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2] if hasattr(self.request, 'LANGUAGE_CODE') else 'ru'
+        context['promotional_banner'] = PromotionalBanner.get_active_banner(current_language)
         
         # Типы недвижимости для поиска
         context['property_types'] = PropertyType.objects.all()
@@ -188,29 +193,29 @@ class SearchView(TemplateView):
             properties = properties.filter(deal_type=deal_type)
 
         # Получаем текущую валюту (аналогично context_processor)
-        from apps.currency.services import CurrencyService
-        selected_currency_code = self.request.session.get('currency')
-        if not selected_currency_code:
-            language = getattr(self.request, 'LANGUAGE_CODE', 'en')
-            default_currency = CurrencyService.get_currency_for_language(language)
-            selected_currency_code = default_currency.code if default_currency else 'USD'
+        selected_currency_code = CurrencyService.get_selected_currency_code(self.request)
         current_currency = CurrencyService.get_currency_by_code(selected_currency_code)
-        
+        sale_field, rent_field = CurrencyService.get_price_field_names(selected_currency_code)
+
         if min_price:
-            if current_currency and current_currency.code == 'RUB':
-                properties = properties.filter(price_sale_rub__gte=min_price)
-            elif current_currency and current_currency.code == 'THB':
-                properties = properties.filter(price_sale_thb__gte=min_price)
-            else:
-                properties = properties.filter(price_sale_usd__gte=min_price)
+            try:
+                min_val = Decimal(min_price)
+                price_filter = Q(**{f"{sale_field}__gte": min_val})
+                if rent_field:
+                    price_filter |= Q(**{f"{rent_field}__gte": min_val})
+                properties = properties.filter(price_filter)
+            except (InvalidOperation, ValueError):
+                pass
 
         if max_price:
-            if current_currency and current_currency.code == 'RUB':
-                properties = properties.filter(price_sale_rub__lte=max_price)
-            elif current_currency and current_currency.code == 'THB':
-                properties = properties.filter(price_sale_thb__lte=max_price)
-            else:
-                properties = properties.filter(price_sale_usd__lte=max_price)
+            try:
+                max_val = Decimal(max_price)
+                price_filter = Q(**{f"{sale_field}__lte": max_val})
+                if rent_field:
+                    price_filter |= Q(**{f"{rent_field}__lte": max_val})
+                properties = properties.filter(price_filter)
+            except (InvalidOperation, ValueError):
+                pass
 
         if bedrooms:
             properties = properties.filter(bedrooms=bedrooms)
@@ -228,6 +233,8 @@ class SearchView(TemplateView):
         context['property_types'] = PropertyType.objects.all()
         context['districts'] = District.objects.all()
         context['query'] = query
+        context['selected_currency'] = current_currency
+        context['selected_currency_code'] = selected_currency_code
         context['search_params'] = {
             'q': query,
             'type': property_type,
@@ -336,4 +343,3 @@ class ServiceDetailView(DetailView):
         else:
             # Для остальных услуг показываем все рекомендуемые объекты
             return base_queryset
-

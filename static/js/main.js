@@ -325,19 +325,33 @@ function toggleFavorite(propertyId, icon = null) {
 }
 
 // Обновить счетчик избранного
+function formatFavoritesCount(count) {
+    return count > 99 ? '99+' : count;
+}
+
 function updateFavoritesCounter() {
     const count = getFavorites().length;
-    $('.favorites-count').text(count);
-    
-    // Обновляем видимость счетчика и состояние сердца
+    const displayValue = formatFavoritesCount(count);
+
+    $('.favorites-count').each(function() {
+        const el = $(this);
+        el.text(displayValue);
+
+        if (count > 0) {
+            el.removeClass('hidden');
+            el.addClass('inline-flex');
+            el.css('display', 'inline-flex');
+        } else {
+            el.addClass('hidden');
+            el.css('display', 'none');
+        }
+    });
+
+    // Обновляем состояние сердца
     if (count > 0) {
-        $('.favorites-count').show();
-        // Делаем сердце красным и закрашенным
         $('#nav-favorites-heart').removeClass('far text-gray-600').addClass('fas text-red-500');
         $('#mobile-nav-favorites-heart').removeClass('far text-gray-600').addClass('fas text-red-500');
     } else {
-        $('.favorites-count').hide();
-        // Делаем сердце серым и незакрашенным
         $('#nav-favorites-heart').removeClass('fas text-red-500').addClass('far text-gray-600');
         $('#mobile-nav-favorites-heart').removeClass('fas text-red-500').addClass('far text-gray-600');
     }

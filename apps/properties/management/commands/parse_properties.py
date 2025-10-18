@@ -25,6 +25,7 @@ class Command(BaseCommand):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         })
         self.base_url = 'https://undersunestate.com'
+        self.unknown_icons = {}  # Словарь для хранения неизвестных иконок: {icon_name: count}
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -103,87 +104,160 @@ class Command(BaseCommand):
 
     def get_property_urls(self, property_type, deal_type, max_pages):
         """Получить все URL объектов недвижимости"""
-        property_urls = []
+        catalog_urls = []
 
-        # Формируем базовый URL каталога
         if property_type == 'all':
             if deal_type == 'buy':
-                catalog_url = f"{self.base_url}/ru/real-estate/buy"
+                catalog_urls = [f"{self.base_url}/ru/real-estate/buy"]
             elif deal_type == 'rent':
-                catalog_url = f"{self.base_url}/ru/real-estate/rent"
+                catalog_urls = [f"{self.base_url}/ru/real-estate/rent"]
             else:
-                catalog_url = f"{self.base_url}/ru/real-estate"
+                catalog_urls = [f"{self.base_url}/ru/real-estate"]
         else:
-            # Карта типов недвижимости к URL
-            type_urls = {
-                'villa': 'villa',
-                'condo': 'condo',
-                'townhouse': 'townhouse',
-                'land': 'land',
-                'investment': 'for-investment',
-                'business': 'ready-made-business'
-            }
-            type_slug = type_urls.get(property_type, property_type)
-            catalog_url = f"{self.base_url}/ru/real-estate/{type_slug}"
+            slug_options = self.get_type_slug_options(property_type, deal_type)
+            catalog_urls = [f"{self.base_url}/ru/real-estate/{slug}".rstrip('/') for slug in slug_options]
 
+        collected_urls = []
+
+        for index, catalog_url in enumerate(catalog_urls):
+            urls = self.collect_catalog_properties(catalog_url, max_pages)
+            if urls:
+                if index > 0:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Основной URL каталога вернул 0 объектов. Переключаемся на '{catalog_url}'"
+                        )
+                    )
+                collected_urls = urls
+                break
+
+        if not collected_urls:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Не удалось найти объекты для типа '{property_type}' (тип сделки: {deal_type})"
+                )
+            )
+
+        return collected_urls
+
+    def get_type_slug_options(self, property_type, deal_type):
+        """Возвращает список возможных slug'ов для каталога по типу/сделке"""
+        type_slug_map = {
+            'villa': {
+                'all': ['villa', 'villas'],
+                'buy': ['villa', 'villas', 'villa-for-sale', 'villas-for-sale'],
+                'rent': ['villa-for-rent', 'villas-for-rent', 'villa', 'villas'],
+            },
+            'condo': {
+                'all': ['condo', 'condominium', 'apartments', 'apartment'],
+                'buy': ['condo', 'condominium', 'condo-for-sale', 'condominiums-for-sale'],
+                'rent': ['condo-for-rent', 'condominiums-for-rent', 'condo'],
+            },
+            'townhouse': {
+                'all': ['townhouse', 'townhouses'],
+                'buy': ['townhouse-for-sale', 'townhouses-for-sale', 'townhouse', 'townhouses'],
+                'rent': ['townhouse-for-rent', 'townhouses-for-rent', 'townhouse', 'townhouses'],
+            },
+            'land': {
+                'all': ['land', 'land-plot'],
+                'buy': ['land', 'land-plot', 'land-for-sale'],
+            },
+            'investment': {
+                'all': ['for-investment', 'investment'],
+                'buy': ['for-investment', 'investment'],
+            },
+            'business': {
+                'all': ['ready-made-business', 'business'],
+                'buy': ['ready-made-business', 'business'],
+                'rent': ['ready-made-business-for-rent', 'business-for-rent', 'ready-made-business'],
+            },
+        }
+
+        slug_config = type_slug_map.get(property_type, {})
+        if deal_type in slug_config:
+            slugs = slug_config[deal_type]
+        else:
+            slugs = slug_config.get('all', [property_type])
+
+        # Удаляем дубликаты, сохраняя порядок
+        unique_slugs = []
+        for slug in slugs:
+            if slug and slug not in unique_slugs:
+                unique_slugs.append(slug)
+
+        if not unique_slugs:
+            unique_slugs = [property_type]
+
+        return unique_slugs
+
+    def collect_catalog_properties(self, catalog_url, max_pages):
+        """Собирает URL объектов для конкретного каталога"""
+        property_urls = []
         page_number = 1
-        items_per_page = 20  # Количество объектов на странице
+        items_per_page = 20
         start_offset = 0
 
         while page_number <= max_pages:
-            # Формируем URL для текущей страницы с offset
-            if page_number == 1:
-                page_url = catalog_url
-            else:
-                page_url = f"{catalog_url}?start={start_offset}"
-
+            page_url = catalog_url if page_number == 1 else f"{catalog_url}?start={start_offset}"
             self.stdout.write(f"Загружаем страницу {page_number} (offset={start_offset}): {page_url}")
 
-            response = self.session.get(page_url)
+            try:
+                response = self.session.get(page_url)
+            except requests.RequestException as exc:
+                self.stdout.write(
+                    self.style.ERROR(f"Ошибка загрузки страницы {page_number}: {exc}")
+                )
+                break
+
             if response.status_code != 200:
-                self.stdout.write(self.style.ERROR(f"Ошибка загрузки страницы {page_number}: {response.status_code}"))
+                self.stdout.write(
+                    self.style.ERROR(f"Ошибка загрузки страницы {page_number}: {response.status_code}")
+                )
                 break
 
             soup = BeautifulSoup(response.content, 'html.parser')
-
-            # Ищем ссылки на объекты на текущей странице
             page_properties = self.extract_properties_from_page(soup)
 
-            # Если объектов на странице не найдено - прекращаем
             if not page_properties:
                 if page_number == 1:
-                    self.stdout.write(self.style.WARNING(f"На первой странице не найдено объектов"))
+                    self.stdout.write(self.style.WARNING("На первой странице не найдено объектов"))
                 else:
-                    self.stdout.write(f"Страница {page_number} пустая, достигнут конец каталога")
+                    self.stdout.write(
+                        f"Страница {page_number} пустая, достигнут конец каталога"
+                    )
                 break
 
-            # Добавляем найденные объекты
             new_properties = 0
             for property_url in page_properties:
                 if property_url not in property_urls:
                     property_urls.append(property_url)
                     new_properties += 1
 
-            self.stdout.write(f"Найдено {new_properties} новых объектов на странице {page_number}")
+            self.stdout.write(
+                f"Найдено {new_properties} новых объектов на странице {page_number}"
+            )
 
-            # Если на странице меньше объектов чем обычно - это последняя страница
             if len(page_properties) < items_per_page:
-                self.stdout.write(f"Найдено {len(page_properties)} объектов (меньше {items_per_page}), достигнута последняя страница")
+                self.stdout.write(
+                    f"Найдено {len(page_properties)} объектов (меньше {items_per_page}), достигнута последняя страница"
+                )
                 break
 
-            # Если не было новых объектов - прекращаем (все дубликаты)
             if new_properties == 0:
-                self.stdout.write(f"Все объекты на странице {page_number} уже были обработаны, прекращаем")
+                self.stdout.write(
+                    f"Все объекты на странице {page_number} уже были обработаны, прекращаем"
+                )
                 break
 
-            # Увеличиваем offset для следующей страницы
             start_offset += items_per_page
             page_number += 1
-
-            # Пауза между запросами страниц
             time.sleep(0.5)
 
-        self.stdout.write(f"Всего найдено {len(property_urls)} уникальных объектов на {page_number} страницах")
+        if property_urls:
+            self.stdout.write(
+                f"Всего найдено {len(property_urls)} уникальных объектов на {page_number} страницах"
+            )
+
         return property_urls
 
     def extract_properties_from_page(self, soup):
@@ -295,10 +369,24 @@ class Command(BaseCommand):
         """Извлечение данных объекта из HTML страницы"""
         data = {'original_url': url}
 
-        # Извлекаем ID из URL
-        original_id_match = re.search(r'/(\d+)-', url)
-        if original_id_match:
-            data['legacy_id'] = original_id_match.group(1)
+        # ВАЖНО: Удаляем блоки "Похожие предложения" ПЕРЕД извлечением данных
+        self.remove_similar_properties_blocks(soup)
+
+        # Извлекаем ID ТОЛЬКО из <span class="id-rea" itemprop="sku">CN63</span>
+        sku_element = soup.find('span', {'class': 'id-rea', 'itemprop': 'sku'})
+        if sku_element:
+            sku_text = sku_element.get_text().strip()
+            # Берем весь текст как есть (CN63, VL123, и т.д.)
+            if sku_text:
+                data['legacy_id'] = sku_text
+                if self.verbose:
+                    self.stdout.write(f"  ✅ Найден legacy_id в <span class='id-rea'>: {data['legacy_id']}")
+            else:
+                if self.verbose:
+                    self.stdout.write(f"  ⚠️  Элемент <span class='id-rea'> найден, но пустой")
+        else:
+            if self.verbose:
+                self.stdout.write(f"  ⚠️  Элемент <span class='id-rea'> не найден на странице")
 
         # Заголовок
         title_element = soup.find('h1') or soup.select_one('.property-title') or soup.find('title')
@@ -334,6 +422,66 @@ class Command(BaseCommand):
         self.extract_property_coordinates(soup, data)
 
         return data
+
+    def remove_similar_properties_blocks(self, soup):
+        """Удаление блоков 'Похожие предложения' из DOM"""
+        if self.verbose:
+            self.stdout.write(f"  Удаление блоков похожих предложений...")
+
+        removed_count = 0
+
+        # Ищем секцию с заголовком "Похожие предложения" или "Similar offers"
+        similar_headers = soup.find_all(['h2', 'h3', 'h4'], string=lambda text: text and ('похожие' in text.lower() or 'similar' in text.lower()))
+
+        for header in similar_headers:
+            # Ищем следующий блок ПОСЛЕ заголовка (обычно это сам блок с похожими)
+            next_sibling = header.find_next_sibling()
+            if next_sibling:
+                # Проверяем что это блок с несколькими объектами
+                property_links = next_sibling.select('a[href*="/real-estate/"]')
+                if len(property_links) > 1:
+                    if self.verbose:
+                        self.stdout.write(f"    Удаляем блок после заголовка: {len(property_links)} объектов")
+                    next_sibling.decompose()
+                    removed_count += 1
+
+            # Удаляем сам заголовок
+            header.decompose()
+
+        # Дополнительно удаляем блоки с классами, указывающими на похожие объекты
+        similar_selectors = [
+            '.similar-properties',
+            '.related-properties',
+            '[class*="similar"]',
+            '[class*="related"]'
+        ]
+
+        for selector in similar_selectors:
+            similar_blocks = soup.select(selector)
+            for block in similar_blocks:
+                # Проверяем что это действительно блок с несколькими объектами
+                property_links = block.select('a[href*="/real-estate/"]')
+                if len(property_links) > 1:  # Если есть ссылки на несколько объектов
+                    if self.verbose:
+                        self.stdout.write(f"    Удаляем блок '{selector}': {len(property_links)} объектов")
+                    block.decompose()
+                    removed_count += 1
+
+        # Удаляем все блоки с множественными ссылками на объекты (это явно похожие предложения)
+        all_divs = soup.find_all(['div', 'section', 'article'])
+        for div in all_divs:
+            property_links = div.find_all('a', href=lambda href: href and '/real-estate/' in href and re.search(r'/\d+-', href))
+            # Если в блоке больше 2 ссылок на разные объекты недвижимости - это похожие предложения
+            if len(property_links) > 2:
+                unique_links = set([link.get('href') for link in property_links])
+                if len(unique_links) > 2:
+                    if self.verbose:
+                        self.stdout.write(f"    Удаляем блок с множественными ссылками: {len(unique_links)} объектов")
+                    div.decompose()
+                    removed_count += 1
+
+        if self.verbose:
+            self.stdout.write(f"  Удалено блоков похожих предложений: {removed_count}")
 
     def extract_property_description(self, soup):
         """Извлечение описания объекта недвижимости с сохранением форматирования"""
@@ -435,41 +583,93 @@ class Command(BaseCommand):
         # Ищем спальни и ванные комнаты в тексте
         text = soup.get_text().lower()
 
-        # Спальни
-        bedroom_patterns = [
-            r'(\d+)\s*спальн',
-            r'(\d+)\s*bedroom',
-            r'(\d+)\s*bed\b'
-        ]
-        for pattern in bedroom_patterns:
-            match = re.search(pattern, text)
-            if match:
-                data['bedrooms'] = int(match.group(1))
-                break
+        # Спальни - сначала ищем в структурированных элементах
+        bedroom_element = soup.find('div', {'class': 'el-meta'}, string=lambda t: t and 'спальн' in t.lower() or 'bedroom' in t.lower())
+        if bedroom_element:
+            bedroom_match = re.search(r'(\d+)', bedroom_element.get_text())
+            if bedroom_match:
+                data['bedrooms'] = int(bedroom_match.group(1))
+                if self.verbose:
+                    self.stdout.write(f"  Спальни (из el-meta): {data['bedrooms']}")
 
-        # Ванные комнаты
-        bathroom_patterns = [
-            r'(\d+)\s*ванн',
-            r'(\d+)\s*bathroom',
-            r'(\d+)\s*bath\b'
-        ]
-        for pattern in bathroom_patterns:
-            match = re.search(pattern, text)
-            if match:
-                data['bathrooms'] = int(match.group(1))
-                break
+        # Если не нашли, ищем в тексте
+        if 'bedrooms' not in data:
+            bedroom_patterns = [
+                r'(\d+)\s*спальн',
+                r'(\d+)\s*bedroom',
+                r'(\d+)\s*bed\b'
+            ]
+            for pattern in bedroom_patterns:
+                match = re.search(pattern, text)
+                if match:
+                    data['bedrooms'] = int(match.group(1))
+                    if self.verbose:
+                        self.stdout.write(f"  Спальни (из текста): {data['bedrooms']}")
+                    break
 
-        # Площадь
-        area_patterns = [
-            r'(\d+(?:\.\d+)?)\s*м²',
-            r'(\d+(?:\.\d+)?)\s*m²',
-            r'(\d+(?:\.\d+)?)\s*кв\.?\s*м',
-            r'(\d+(?:\.\d+)?)\s*sqm'
+        # Ванные комнаты - ПРИОРИТЕТ структурированным элементам
+        bathroom_element = soup.find('div', {'class': 'el-meta'}, string=lambda t: t and ('ванн' in t.lower() or 'bathroom' in t.lower()))
+        if bathroom_element:
+            bathroom_match = re.search(r'(\d+)', bathroom_element.get_text())
+            if bathroom_match:
+                data['bathrooms'] = int(bathroom_match.group(1))
+                if self.verbose:
+                    self.stdout.write(f"  ✅ Ванные комнаты (из el-meta): {data['bathrooms']}")
+
+        # Если не нашли в el-meta, ищем в тексте (но это менее надежно)
+        if 'bathrooms' not in data:
+            bathroom_patterns = [
+                r'ванных комнат:\s*(\d+)',
+                r'(\d+)\s*ванн',
+                r'(\d+)\s*bathroom',
+                r'(\d+)\s*bath\b'
+            ]
+            for pattern in bathroom_patterns:
+                match = re.search(pattern, text)
+                if match:
+                    data['bathrooms'] = int(match.group(1))
+                    if self.verbose:
+                        self.stdout.write(f"  Ванные комнаты (из текста): {data['bathrooms']}")
+                    break
+
+        # Площадь общая - ищем жилую площадь
+        area_element = soup.find('div', {'class': 'el-meta'}, string=lambda t: t and ('площад' in t.lower() or 'area' in t.lower()) and 'участка' not in t.lower())
+        if area_element:
+            area_match = re.search(r'(\d+(?:\.\d+)?)', area_element.get_text())
+            if area_match:
+                data['area_total'] = Decimal(area_match.group(1))
+                if self.verbose:
+                    self.stdout.write(f"  Площадь общая (из el-meta): {data['area_total']} м²")
+
+        # Если не нашли, ищем в тексте
+        if 'area_total' not in data:
+            area_patterns = [
+                r'(\d+(?:\.\d+)?)\s*м²',
+                r'(\d+(?:\.\d+)?)\s*m²',
+                r'(\d+(?:\.\d+)?)\s*кв\.?\s*м',
+                r'(\d+(?:\.\d+)?)\s*sqm'
+            ]
+            for pattern in area_patterns:
+                match = re.search(pattern, text)
+                if match:
+                    data['area_total'] = Decimal(match.group(1))
+                    if self.verbose:
+                        self.stdout.write(f"  Площадь общая (из текста): {data['area_total']} м²")
+                    break
+
+        # Площадь участка - ищем в списках или тексте
+        land_patterns = [
+            r'площадь участка:\s*(\d+(?:\.\d+)?)\s*(?:кв\.?\s*м|м²|m²)',
+            r'land area:\s*(\d+(?:\.\d+)?)\s*(?:sq\.?\s*m|m²)',
+            r'участка:\s*(\d+(?:\.\d+)?)\s*(?:кв\.?\s*м|м²)',
         ]
-        for pattern in area_patterns:
-            match = re.search(pattern, text)
+
+        for pattern in land_patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
             if match:
-                data['area_total'] = Decimal(match.group(1))
+                data['area_land'] = Decimal(match.group(1))
+                if self.verbose:
+                    self.stdout.write(f"  ✅ Площадь участка: {data['area_land']} м²")
                 break
 
         # Дополнительные удобства
@@ -484,6 +684,50 @@ class Command(BaseCommand):
         """Извлечение удобств объекта из блоков с иконками"""
         features = []
 
+        # ПРИОРИТЕТ 1: Ищем удобства в <span class="amenity-entry">English==Русский==Thai==Chinese</span>
+        amenity_entries = soup.find_all('span', {'class': 'amenity-entry'})
+        if amenity_entries:
+            if self.verbose:
+                self.stdout.write(f"  Найдено amenity-entry элементов: {len(amenity_entries)}")
+
+            for entry in amenity_entries:
+                entry_text = entry.get_text().strip()
+                # Формат: "Air Conditioning==Кондиционер==เครื่องปรับอากาศ==空调"
+                # Берем русский вариант (второй после ==)
+                parts = entry_text.split('==')
+                if len(parts) >= 2:
+                    feature_name_ru = parts[1].strip()
+                    if feature_name_ru and feature_name_ru not in features:
+                        features.append(feature_name_ru)
+                        if self.verbose:
+                            self.stdout.write(f"    ✅ Добавлено из amenity-entry: {feature_name_ru}")
+                elif parts:  # Если нет разделителя ==, берем как есть
+                    feature_name = parts[0].strip()
+                    # Переводим на русский если нужно
+                    feature_mapping_simple = {
+                        'air conditioning': 'Кондиционер',
+                        'wifi': 'WiFi',
+                        'pool': 'Бассейн',
+                        'kitchen': 'Кухня',
+                        'free parking': 'Бесплатная парковка',
+                        'shower': 'Душ',
+                        'bathtub': 'Ванна',
+                        'fenced area': 'Огороженная территория',
+                        'video surveillance': 'Видеонаблюдение',
+                        'security': 'Охрана',
+                    }
+                    feature_name_ru = feature_mapping_simple.get(feature_name.lower(), feature_name)
+                    if feature_name_ru not in features:
+                        features.append(feature_name_ru)
+                        if self.verbose:
+                            self.stdout.write(f"    ✅ Добавлено (переведено): {feature_name_ru}")
+
+        # Если уже нашли удобства в amenity-entry, не ищем дальше
+        if features and self.verbose:
+            self.stdout.write(f"  ✅ Найдено {len(features)} удобств в amenity-entry, пропускаем поиск по иконкам")
+            return features
+
+        # ПРИОРИТЕТ 2: Ищем по иконкам (только если не нашли в amenity-entry)
         # Создаем маппинг alt-текстов иконок к названиям удобств
         feature_mapping = {
             # Английские названия
@@ -570,8 +814,24 @@ class Command(BaseCommand):
                     features.append(feature_name)
                     if self.verbose:
                         self.stdout.write(f"        ✓ Добавлено: {feature_name}")
-                elif not feature_name and (alt_text or 'icon-' in src or '/icons/' in src.lower()) and self.verbose:
-                    self.stdout.write(f"        ❌ Не найден маппинг для: alt='{alt_text}', src='{src}'")
+                elif not feature_name and 'icon-' in src and '/icons/' not in src.lower():
+                    # Автоматически определяем название удобства из имени файла иконки
+                    # Пример: icon-double-bed.svg -> icon-double-bed
+                    filename = os.path.basename(src).lower()
+                    if filename.startswith('icon-'):
+                        icon_name = filename.replace('icon-', '').replace('.svg', '').replace('.png', '')
+                        # Исключаем иконки, которые не являются удобствами
+                        exclude_icons = ['double-bed', 'bathtub', 'single-bed', 'sofa-bed']
+
+                        if icon_name not in exclude_icons:
+                            if self.verbose:
+                                self.stdout.write(f"        ⚠️  Найдена новая иконка: {icon_name} (src: {src})")
+                                self.stdout.write(f"        💡 Добавьте в src_mapping: '{icon_name}': 'Название удобства'")
+                        elif self.verbose:
+                            # Не выводим ошибку для известных исключений
+                            pass
+                    elif self.verbose and (alt_text or '/icons/' in src.lower()):
+                        self.stdout.write(f"        ❌ Не найден маппинг для: alt='{alt_text}', src='{src}'")
 
         # Дополнительный поиск по тексту для удобств, которые могут быть не в иконках
         text_content = soup.get_text().lower()
@@ -618,6 +878,22 @@ class Command(BaseCommand):
 
         if self.verbose:
             self.stdout.write(f"  Поиск цены в тексте...")
+
+        # Проверяем наличие "цена по запросу" или аналогичных фраз
+        price_on_request_patterns = [
+            'цена по запросу', 'price on request', 'по запросу', 'price upon request',
+            'contact for price', 'узнавайте цену', 'price: request', 'цена: запрос',
+            'обратитесь за ценой', 'ask for price'
+        ]
+
+        text_lower = text.lower()
+        for pattern in price_on_request_patterns:
+            if pattern in text_lower:
+                if self.verbose:
+                    self.stdout.write(f"    Обнаружено '{pattern}' - цена не указана, сохраняем объект без цены")
+                data['deal_type'] = 'sale'
+                # Не заполняем поля цены, но продолжаем обработку объекта
+                return
 
         # Сначала ищем основную цену объекта - точный селектор имеет высший приоритет
         main_price_elements = soup.select('.uk-text-lead.price, .uk-text-lead, .property-price, .price-main, h1, h2')
@@ -852,83 +1128,61 @@ class Command(BaseCommand):
     def extract_property_images(self, soup):
         """Извлечение изображений объекта"""
         images = []
-        image_variants = {}  # Храним варианты: {base_name: [(url, width_hint), ...]}
-        # width_hint - размер из srcset (например 1479 для "1479w") или 0 если неизвестен
+        image_variants = {}  # Храним варианты: {base_name: [{'url': str, 'width': int}]}
 
-        # Сначала удаляем блоки "похожие предложения" из DOM
-        # Ищем секцию с заголовком "Похожие предложения" или "Similar offers"
-        similar_headers = soup.find_all(['h2', 'h3', 'h4'], string=lambda text: text and ('похожие' in text.lower() or 'similar' in text.lower()))
-
-        for header in similar_headers:
-            # Ищем следующий блок ПОСЛЕ заголовка (обычно это сам блок с похожими)
-            next_sibling = header.find_next_sibling()
-            if next_sibling:
-                # Проверяем что это блок с несколькими объектами
-                property_links = next_sibling.select('a[href*="/real-estate/"]')
-                if len(property_links) > 1:
-                    if self.verbose:
-                        self.stdout.write(f"  Удаляем блок похожих предложений после заголовка: {len(next_sibling.select('img'))} изображений, {len(property_links)} объектов")
-                    next_sibling.decompose()
-
-            # Удаляем сам заголовок
-            header.decompose()
-
-        # Дополнительно удаляем блоки с классами, указывающими на похожие объекты
-        similar_selectors = [
-            '.similar-properties',
-            '.related-properties',
-            '[class*="similar"]',
-            '[class*="related"]'
-        ]
-
-        for selector in similar_selectors:
-            similar_blocks = soup.select(selector)
-            for block in similar_blocks:
-                # Проверяем что это действительно блок с несколькими объектами
-                property_links = block.select('a[href*="/real-estate/"]')
-                if len(property_links) > 1:  # Если есть ссылки на несколько объектов
-                    if self.verbose:
-                        self.stdout.write(f"  Удаляем блок с селектором '{selector}': {len(block.select('img'))} изображений, {len(property_links)} объектов")
-                    block.decompose()
-
-        # Удаляем все блоки с множественными ссылками на объекты (это явно похожие предложения)
-        all_divs = soup.find_all(['div', 'section', 'article'])
-        for div in all_divs:
-            property_links = div.find_all('a', href=lambda href: href and '/real-estate/' in href and re.search(r'/\d+-', href))
-            # Если в блоке больше 2 ссылок на разные объекты недвижимости - это похожие предложения
-            if len(property_links) > 2:
-                unique_links = set([link.get('href') for link in property_links])
-                if len(unique_links) > 2:
-                    if self.verbose:
-                        self.stdout.write(f"  Удаляем блок с множественными ссылками: {len(div.select('img'))} изображений, {len(unique_links)} уникальных объектов")
-                    div.decompose()
+        def store_variant(base_name, full_url, width_hint=0, source_desc=None):
+            """Сохраняет вариант изображения, группируя по базовому имени"""
+            if base_name:
+                variants = image_variants.setdefault(base_name, [])
+                if not any(v['url'] == full_url for v in variants):
+                    variants.append({'url': full_url, 'width': width_hint or 0})
+                    if self.verbose and source_desc:
+                        label = f"{full_url} ({width_hint}w)" if width_hint else full_url
+                        self.stdout.write(f"    Добавлено из {source_desc}: {label}")
+            else:
+                if full_url not in images:
+                    images.append(full_url)
+                    if self.verbose and source_desc:
+                        self.stdout.write(f"    Добавлено из {source_desc}: {full_url}")
 
         # Сначала парсим <picture><source> элементы (приоритет - здесь обычно лучшее качество!)
-        picture_sources = soup.select('picture source[srcset]')
+        picture_sources = soup.select('picture source[srcset], picture source[data-srcset]')
         if self.verbose:
             self.stdout.write(f"  Найдено <picture><source> элементов: {len(picture_sources)}")
 
         for source in picture_sources:
-            srcset = source.get('srcset', '')
-            if srcset:
+            srcset_values = []
+
+            for attr in ('srcset', 'data-srcset', 'data-src'):
+                val = source.get(attr)
+                if val:
+                    srcset_values.append(val)
+
+            for srcset in srcset_values:
+                if not srcset:
+                    continue
+
                 # Парсим srcset: "image1.webp 768w, image2.webp 1024w, image3.webp 1920w"
                 for srcset_item in srcset.split(','):
                     srcset_item = srcset_item.strip()
-                    # Извлекаем URL и размер
-                    parts = srcset_item.split()
-                    if parts:
-                        src = parts[0]
-                        if src and self.is_valid_property_image(src):
-                            full_url = urljoin(self.base_url, src)
-                            base_name = self.get_image_base_name(src)
+                    if not srcset_item:
+                        continue
 
-                            if base_name:
-                                if base_name not in image_variants:
-                                    image_variants[base_name] = []
-                                if full_url not in image_variants[base_name]:
-                                    image_variants[base_name].append(full_url)
-                                    if self.verbose:
-                                        self.stdout.write(f"    Добавлено из <source srcset>: {full_url}")
+                    parts = srcset_item.split()
+                    if not parts:
+                        continue
+
+                    src = parts[0]
+                    width_hint = 0
+                    for part in parts[1:]:
+                        if part.endswith('w') and part[:-1].isdigit():
+                            width_hint = int(part[:-1])
+                            break
+
+                    if src and self.is_valid_property_image(src):
+                        full_url = urljoin(self.base_url, src)
+                        base_name = self.get_image_base_name(src)
+                        store_variant(base_name, full_url, width_hint, source_desc='<source>')
 
         # Ищем изображения в различных местах - расширенный список селекторов
         image_selectors = [
@@ -969,64 +1223,78 @@ class Command(BaseCommand):
         for selector in image_selectors:
             img_elements = soup.select(selector)
             for img in img_elements:
-                # Собираем все возможные источники изображения
                 sources = []
 
-                # Основной src
                 if img.get('src'):
-                    sources.append(img.get('src'))
-
-                # data-src (lazy loading)
+                    sources.append((img.get('src'), 0, '<img src>'))
                 if img.get('data-src'):
-                    sources.append(img.get('data-src'))
-
-                # data-lazy
+                    sources.append((img.get('data-src'), 0, '<img data-src>'))
                 if img.get('data-lazy'):
-                    sources.append(img.get('data-lazy'))
-
-                # data-original
+                    sources.append((img.get('data-lazy'), 0, '<img data-lazy>'))
                 if img.get('data-original'):
-                    sources.append(img.get('data-original'))
+                    sources.append((img.get('data-original'), 0, '<img data-original>'))
 
-                # srcset - ВАЖНО: здесь могут быть версии в лучшем качестве!
-                if img.get('srcset'):
-                    srcset = img.get('srcset')
-                    # Парсим srcset: "image1.webp 800w, image2.webp 1200w, image3.webp 1920w"
-                    for srcset_item in srcset.split(','):
-                        srcset_item = srcset_item.strip()
-                        # Извлекаем URL (первая часть до пробела)
-                        url_parts = srcset_item.split()
-                        if url_parts:
-                            sources.append(url_parts[0])
+                for attr, label in (('srcset', '<img srcset>'), ('data-srcset', '<img data-srcset>')):
+                    srcset = img.get(attr)
+                    if srcset:
+                        for srcset_item in srcset.split(','):
+                            srcset_item = srcset_item.strip()
+                            if not srcset_item:
+                                continue
+                            url_parts = srcset_item.split()
+                            if not url_parts:
+                                continue
+                            url_value = url_parts[0]
+                            width_hint = 0
+                            for part in url_parts[1:]:
+                                if part.endswith('w') and part[:-1].isdigit():
+                                    width_hint = int(part[:-1])
+                                    break
+                            sources.append((url_value, width_hint, label))
 
-                # data-srcset
-                if img.get('data-srcset'):
-                    srcset = img.get('data-srcset')
-                    for srcset_item in srcset.split(','):
-                        srcset_item = srcset_item.strip()
-                        url_parts = srcset_item.split()
-                        if url_parts:
-                            sources.append(url_parts[0])
-
-                # Обрабатываем все найденные источники
-                for src in sources:
+                for src, width_hint, label in sources:
                     if src and self.is_valid_property_image(src):
                         full_url = urljoin(self.base_url, src)
-
-                        # Извлекаем базовое имя файла без кэш-хеша
-                        # Пример: /templates/yootheme/cache/d2/40_LIVING1-d201ddf5.webp -> 40_LIVING1
                         base_name = self.get_image_base_name(src)
+                        store_variant(base_name, full_url, width_hint, source_desc=label)
 
-                        if base_name:
-                            # Группируем варианты одного изображения
-                            if base_name not in image_variants:
-                                image_variants[base_name] = []
-                            if full_url not in image_variants[base_name]:  # Избегаем дубликатов
-                                image_variants[base_name].append(full_url)
-                        else:
-                            # Если не смогли определить базовое имя, добавляем напрямую
-                            if full_url not in images:
-                                images.append(full_url)
+        # Дополнительный поиск фоновых изображений и data-src на элементах без <img>
+        background_selectors = [
+            '[data-src]',
+            '[data-image]',
+            '[data-img]',
+            '[data-background]',
+            '[style*="background-image"]'
+        ]
+
+        for selector in background_selectors:
+            elements = soup.select(selector)
+            for el in elements:
+                potential_sources = []
+
+                # data-* атрибуты часто содержат прямой URL изображения
+                for attr in ['data-src', 'data-image', 'data-img', 'data-background']:
+                    val = el.get(attr)
+                    if val:
+                        potential_sources.append(val)
+
+                # Значения background-image могут содержать несколько url()
+                style = el.get('style', '')
+                if 'background-image' in style:
+                    # Извлекаем все вхождения url("...") или url('...')
+                    fragments = style.split('url(')
+                    for fragment in fragments[1:]:
+                        url_part = fragment.split(')', 1)[0].strip().strip("\"'")
+                        if url_part:
+                            potential_sources.append(url_part)
+
+                for src in potential_sources:
+                    if not src:
+                        continue
+                    if self.is_valid_property_image(src):
+                        full_url = urljoin(self.base_url, src)
+                        base_name = self.get_image_base_name(src)
+                        store_variant(base_name, full_url, 0, source_desc='background/data-src')
 
         # Выбираем лучшее качество для каждого изображения
         for base_name, variants in image_variants.items():
@@ -1034,8 +1302,12 @@ class Command(BaseCommand):
             if best_image and best_image not in images:
                 images.append(best_image)
                 if self.verbose and len(variants) > 1:
+                    variant_descriptions = [
+                        f"{variant['url']} ({variant['width']}w)" if variant.get('width') else variant['url']
+                        for variant in variants
+                    ]
                     self.stdout.write(f"  Выбрано лучшее качество для {base_name}: {best_image}")
-                    self.stdout.write(f"    Из вариантов: {variants}")
+                    self.stdout.write(f"    Из вариантов: {variant_descriptions}")
 
         return images
 
@@ -1057,54 +1329,45 @@ class Command(BaseCommand):
 
         return name_without_ext
 
-    def select_best_image_quality(self, image_urls):
-        """Выбирает изображение лучшего качества из вариантов"""
-        if not image_urls:
+    def select_best_image_quality(self, image_variants):
+        """Выбирает URL изображения лучшего качества из вариантов"""
+        if not image_variants:
             return None
 
-        if len(image_urls) == 1:
-            return image_urls[0]
+        if len(image_variants) == 1:
+            return image_variants[0]['url']
 
-        # Приоритеты форматов (webp обычно лучше)
         format_priority = {'.webp': 3, '.png': 2, '.jpg': 1, '.jpeg': 1}
 
-        # Оцениваем каждое изображение
         scored_images = []
-        for url in image_urls:
-            score = 0
+        for variant in image_variants:
+            url = variant['url']
+            width_hint = variant.get('width') or 0
+            score = width_hint
             url_lower = url.lower()
 
-            # Приоритет формата
             for ext, priority in format_priority.items():
                 if ext in url_lower:
-                    score += priority * 100
+                    score += priority * 10000
                     break
 
-            # Приоритет более короткому хешу в пути (обычно это оригинал или лучшее качество)
-            # /cache/d2/... лучше чем /cache/d87d1c3c/...
-            cache_match = re.search(r'/cache/([a-f0-9]+)/', url_lower)
-            if cache_match:
-                hash_len = len(cache_match.group(1))
-                # Чем короче хеш, тем выше приоритет
-                score += (10 - min(hash_len, 10)) * 10
+            if not width_hint:
+                for size, bump in [(1920, 60), (1600, 55), (1440, 50), (1366, 45), (1200, 40), (1024, 35), (960, 30), (800, 25), (768, 20), (600, 10)]:
+                    if str(size) in url_lower:
+                        score += bump
+                        break
 
-            # Приоритет размерам в URL
-            if '1920' in url_lower or '1200' in url_lower:
-                score += 50
-            elif '800' in url_lower:
-                score += 30
+            scored_images.append((score, width_hint, url))
 
-            scored_images.append((score, url))
-
-        # Сортируем по убываниюScore и возвращаем лучший
-        scored_images.sort(reverse=True, key=lambda x: x[0])
+        scored_images.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
 
         if self.verbose and len(scored_images) > 1:
-            self.stdout.write(f"    Оценки изображений:")
-            for score, url in scored_images:
-                self.stdout.write(f"      {score}: {url}")
+            self.stdout.write("    Оценки изображений:")
+            for score, width_hint, url in scored_images:
+                width_note = f" ({width_hint}w)" if width_hint else ""
+                self.stdout.write(f"      {score}: {url}{width_note}")
 
-        return scored_images[0][1]
+        return scored_images[0][2]
 
     def extract_property_type_and_location(self, soup, url, data):
         """Определение типа недвижимости и локации"""
@@ -1116,6 +1379,12 @@ class Command(BaseCommand):
             ('apartment', 'condo'),
             ('condominium', 'condo'),
             ('condo', 'condo'),
+            ('townhouses-for-sale', 'townhouse'),
+            ('townhouses-for-rent', 'townhouse'),
+            ('townhouse-for-sale', 'townhouse'),
+            ('townhouse-for-rent', 'townhouse'),
+            ('townhouses', 'townhouse'),
+            ('town-house', 'townhouse'),
             ('townhouse', 'townhouse'),
             ('villa', 'villa'),
             ('house', 'villa'),
@@ -1242,7 +1511,7 @@ class Command(BaseCommand):
         # Исключаем служебные изображения
         exclude_patterns = [
             '.svg', 'icon-', 'logo', 'avatar', 'social',
-            'telegram', 'whatsapp', 'phone', 'email',
+            'phone', 'email',
             'button', 'btn-', 'arrow', 'flag-', 'flags/',
         ]
 
@@ -1334,17 +1603,44 @@ class Command(BaseCommand):
         return district, location
 
     def find_duplicate_property(self, data):
-        """Поиск дубликатов объектов"""
-        # Ищем по legacy_id
-        if data.get('legacy_id'):
-            existing = Property.objects.filter(legacy_id=data['legacy_id']).first()
+        """Поиск дубликатов объектов по приоритетным критериям"""
+        # Приоритет 1: Ищем по slug (уникальный для каждого URL объекта)
+        if data.get('slug'):
+            existing = Property.objects.filter(slug=data['slug']).first()
             if existing:
+                if self.verbose:
+                    self.stdout.write(f"  🔍 Дубликат найден по slug='{data['slug']}'")
                 return existing
 
-        # Ищем по заголовку
+        # Приоритет 2: Ищем по комбинации заголовка + цены (защита от разных объектов с одинаковыми названиями)
         if data.get('title'):
+            # Проверяем заголовок + цена продажи
+            if data.get('price_sale_thb'):
+                existing = Property.objects.filter(
+                    title=data['title'],
+                    price_sale_thb=data['price_sale_thb']
+                ).first()
+                if existing:
+                    if self.verbose:
+                        self.stdout.write(f"  🔍 Дубликат найден по title + price_sale_thb")
+                    return existing
+
+            # Проверяем заголовок + цена аренды
+            if data.get('price_rent_monthly_thb'):
+                existing = Property.objects.filter(
+                    title=data['title'],
+                    price_rent_monthly_thb=data['price_rent_monthly_thb']
+                ).first()
+                if existing:
+                    if self.verbose:
+                        self.stdout.write(f"  🔍 Дубликат найден по title + price_rent_monthly_thb")
+                    return existing
+
+            # Приоритет 3: Только по заголовку (с предупреждением - может быть ложное срабатывание)
             existing = Property.objects.filter(title=data['title']).first()
             if existing:
+                if self.verbose:
+                    self.stdout.write(f"  ⚠️  Дубликат найден ТОЛЬКО по title (возможно ложное срабатывание)")
                 return existing
 
         return None
@@ -1451,12 +1747,27 @@ class Command(BaseCommand):
         return icon_mapping.get(feature_name, 'fas fa-check')
 
     def save_property_images(self, property_obj, image_urls):
-        """Сохранение изображений объекта"""
+        """Сохранение изображений объекта с проверкой на дубликаты"""
+        if not image_urls:
+            return
+
+        # Получаем список уже существующих изображений для этого объекта
+        existing_images = PropertyImage.objects.filter(property=property_obj)
+        existing_count = existing_images.count()
+
+        if existing_count > 0:
+            if self.verbose:
+                self.stdout.write(f"  У объекта уже есть {existing_count} изображений — удаляем перед обновлением")
+            existing_images.delete()
+
+        saved_count = 0
         for i, image_url in enumerate(image_urls):
             try:
                 # Скачиваем изображение
                 response = self.session.get(image_url, timeout=30)
                 if response.status_code != 200:
+                    if self.verbose:
+                        self.stdout.write(f"  Ошибка загрузки изображения {i+1}: HTTP {response.status_code}")
                     continue
 
                 # Создаем временный файл
@@ -1484,7 +1795,12 @@ class Command(BaseCommand):
                     save=True
                 )
 
-                self.stdout.write(f"Сохранено изображение: {filename}")
+                saved_count += 1
+                if self.verbose:
+                    self.stdout.write(f"  Сохранено изображение {i+1}/{len(image_urls)}: {filename}")
 
             except Exception as e:
                 self.stdout.write(self.style.WARNING(f"Ошибка сохранения изображения {image_url}: {e}"))
+
+        if saved_count > 0:
+            self.stdout.write(self.style.SUCCESS(f"Сохранено {saved_count} изображений для объекта {property_obj.title}"))

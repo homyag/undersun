@@ -71,10 +71,10 @@
         <!-- Content Section -->
         <div class="p-5 flex-1 flex flex-col">
             <!-- Title -->
-            <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight">
+            <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight line-clamp-2">
                 <a href="{{ property.get_absolute_url }}"
                    class="hover:text-primary transition-colors group-hover:text-accent">
-                    {{ property.title|truncatechars:60 }}
+                    {{ property.title }}
                 </a>
             </h3>
 

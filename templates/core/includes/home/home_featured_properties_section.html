@@ -1,13 +1,13 @@
 {% load static %}
 {% load i18n %}
 <section class="py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4">
+    <div class="w-full mx-auto px-4 md:px-6 lg:px-10">
         <div class="text-center mb-8 sm:mb-12">
-            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{% trans "Избранные объекты недвижимости" %}</h2>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 uppercase">{% trans "Избранные объекты недвижимости" %}</h2>
 
             <!-- Property Type Tabs -->
             <div class="flex justify-center mb-8">
-                <div class="inline-flex bg-white rounded-lg p-1 shadow-md max-w-full overflow-x-auto">
+                <div class="inline-flex bg-white rounded-lg p-1 shadow-md max-w-full overflow-x-auto featured-tabs">
                     <button onclick="switchPropertyType('villa')" id="tab-villa"
                             class="px-4 sm:px-6 py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 property-tab active whitespace-nowrap">
                         <i class="fas fa-home mr-1 sm:mr-2"></i>{% trans "Виллы" %}
@@ -28,11 +28,11 @@
         <div class="relative overflow-hidden">
             <!-- Navigation Buttons -->
             <button id="featured-prev"
-                    class="hidden sm:flex absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-lg items-center justify-center text-gray-600 hover:text-primary hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/30">
+                    class="hidden sm:flex absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-accent text-gray-900 rounded-full shadow-lg items-center justify-center hover:bg-yellow-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent/40">
                 <i class="fas fa-chevron-left text-sm"></i>
             </button>
             <button id="featured-next"
-                    class="hidden sm:flex absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-lg items-center justify-center text-gray-600 hover:text-primary hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/30">
+                    class="hidden sm:flex absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-accent text-gray-900 rounded-full shadow-lg items-center justify-center hover:bg-yellow-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent/40">
                 <i class="fas fa-chevron-right text-sm"></i>
             </button>
 

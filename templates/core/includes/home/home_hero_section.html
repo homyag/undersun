@@ -1,6 +1,6 @@
 {% load static %}
 {% load i18n %}
-<section class="hero-section relative flex items-center overflow-hidden">
+<section class="hero-section relative flex items-start md:items-center overflow-hidden">
     <!-- Background Slideshow -->
     <div class="absolute inset-0">
         <div id="hero-slide-1" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-100" style="background-image: url('{% static 'images/home_page/homepage_hero_section/thailand_hero_section_1.jpg' %}');"></div>
@@ -13,140 +13,190 @@
     <!-- Dark gradient at bottom -->
     <div class="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
     <div class="relative z-10 w-full hero-content">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <div class="space-y-4 lg:space-y-6">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 text-center">
+            <div class="space-y-3 sm:space-y-4 lg:space-y-6 pt-1 sm:pt-24 pb-3 sm:pb-16">
                 <!-- Заголовок -->
-                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white font-extrabold leading-tight">
-                    <span class="block text-accent">{% trans "Phuket, Thailand" %}</span>
-                    <span class="block">{% trans "Вся недвижимость Пхукета" %}</span>
-                    <span class="block">{% trans "в одном каталоге" %}</span>
+                <h1 class="font-normal text-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white leading-snug tracking-tight sm:tracking-normal">
+                    <span class="block text-base sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "Phuket, Thailand" %}</span>
+                    <span class="block text-accent uppercase text-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "Вся недвижимость Пхукета" %}</span>
+                    <span class="block text-accent uppercase text-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "в одном каталоге" %}</span>
                 </h1>
-
-                <!-- Описание - скрыто на мобильных -->
-                <p class="hidden sm:block text-base md:text-base lg:text-lg text-white font-bold max-w-4xl mx-auto">
+                <!-- Описание -->
+                <p class="text-sm sm:text-base md:text-lg text-white font-semibold max-w-4xl mx-auto leading-relaxed">
                     {% trans "Undersun Estate — ваш ориентир в недвижимости Таиланда. Мы могли бы показать весь рынок, но порекомендуем только то, что действительно стоит вашего внимания." %}
                 </p>
 
                 <!-- Catalog Button -->
                 <div class="py-1">
-                    <a href="{% url 'properties:property_list' %}" class="inline-flex items-center px-8 py-3 bg-accent hover:bg-yellow-500 text-gray-900 text-sm sm:text-base lg:text-lg rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    <a href="{% url 'properties:property_list' %}" class="inline-flex items-center px-7 py-3 bg-accent hover:bg-yellow-500 text-gray-900 text-xs sm:text-base lg:text-lg rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                         {% trans "Смотреть все объекты" %}
                     </a>
                 </div>
 
                 <!-- Поисковая форма -->
-                <div class="w-full flex justify-center px-4">
+                <div class="w-full flex justify-center px-3 sm:px-4">
                     <!-- Desktop форма -->
-                    <form method="get" action="{% url 'core:search' %}" class="hidden lg:flex bg-white rounded-md shadow-lg overflow-hidden w-full max-w-5xl h-18">
-                        <!-- Поле "Тип" -->
-                        <div class="border-r border-[#F2F5F8] flex items-center flex-shrink-0" style="width: 140px; height: 72px;">
-                            <select name="type" class="w-full bg-transparent border-none outline-none text-gray-900 text-sm cursor-pointer appearance-none" style="height: 72px; padding-left: 12px; padding-right: 40px; background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e'); background-position: right 12px center; background-repeat: no-repeat; background-size: 16px 16px;">
-                                <option value="">{% trans "Все типы" %}</option>
-                                {% for type in property_types %}
-                                    <option value="{{ type.name }}">{{ type.name_display }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <!-- Поле "Локация" -->
-                        <div class="border-r border-[#F2F5F8] flex items-center" style="width: 200px; height: 72px;">
-                            <select name="location" class="w-full bg-transparent border-none outline-none text-gray-900 text-sm cursor-pointer appearance-none" style="height: 72px; padding-left: 12px; padding-right: 40px; background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e'); background-position: right 12px center; background-repeat: no-repeat; background-size: 16px 16px;">
-                                <option value="">{% trans "Все локации" %}</option>
-                                {% for district in districts %}
-                                    {% if district.locations.all %}
-                                        <optgroup label="{{ district.name }}">
-                                            {% for location in district.locations.all %}
-                                                <option value="{{ location.id }}">{{ location.name }}</option>
+                    <form method="get" action="{% url 'core:search' %}" class="hidden lg:block w-full max-w-6xl">
+                        <div class="bg-white/95 backdrop-blur-sm rounded-md shadow-2xl px-6 py-6 xl:px-8 2xl:px-10 2xl:py-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1.2fr_1.2fr_1fr_1fr_0.8fr] items-end gap-3 xl:gap-5 2xl:gap-8">
+                                <!-- Поле "Тип" -->
+                                <div class="flex flex-col min-w-[150px] 2xl:min-w-[200px]">
+                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Тип" %}</label>
+                                    <div class="relative mt-2">
+                                        <select name="type" class="w-full h-12 2xl:h-14 px-3 2xl:px-4 pr-10 2xl:pr-12 bg-white border border-gray-200 rounded-md text-gray-900 text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                            <option value="">{% trans "Все типы" %}</option>
+                                            {% for type in property_types %}
+                                                <option value="{{ type.name }}">{{ type.name_display }}</option>
                                             {% endfor %}
-                                        </optgroup>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <!-- Поле "Мин. цена" -->
-                        <div class="border-r border-[#F2F5F8] flex items-center" style="width: 160px; height: 72px;">
-                            <input type="number" name="min_price" class="w-full px-3 bg-transparent border-none outline-none text-gray-900 text-sm placeholder-gray-500" style="height: 72px;" placeholder="{% trans 'Мин. цена' %}">
-                        </div>
-                        
-                        <!-- Поле "Макс. цена" -->
-                        <div class="border-r border-[#F2F5F8] flex items-center" style="width: 260px; height: 72px;">
-                            <input type="number" name="max_price" class="w-full px-3 bg-transparent border-none outline-none text-gray-900 text-sm placeholder-gray-500" style="height: 72px;" placeholder="{% trans 'Макс. цена' %}">
-                        </div>
-                        
-                        <!-- Кнопка поиска -->
-                        <div class="flex items-center justify-center bg-accent hover:bg-yellow-500 transition-colors duration-300" style="width: 240px; height: 72px; border-top-right-radius: 3px; border-bottom-right-radius: 3px;">
-                            <button type="submit" id="search-button" class="text-white flex items-center justify-center">
-                                <div class="flex flex-col items-center mr-3 text-center">
-                                    <div id="search-count" class="text-white" style="font-weight: 700; font-size: 24px; line-height: 18px;">{{ total_properties_count|default:"0" }}</div>
-                                    <div class="text-white" style="font-weight: 700; font-size: 12px; line-height: 18px;">{% trans "подходящих предложений" %}</div>
+                                        </select>
+                                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10l4 4 4-4" />
+                                            </svg>
+                                        </span>
+                                    </div>
                                 </div>
-                                <img src="{% static 'images/home_page/homepage_hero_section/hero_section_find_button_arrow.svg' %}" alt="Search" class="w-6 h-6">
-                            </button>
+
+                                <!-- Поле "Район" -->
+                                <div class="flex flex-col min-w-[170px] 2xl:min-w-[220px]">
+                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Район" %}</label>
+                                    <div class="relative mt-2">
+                                        <select name="location" class="w-full h-11 sm:h-12 px-3 sm:px-4 pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                            <option value="">{% trans "Все районы" %}</option>
+                                            {% for district in districts %}
+                                                {% if district.locations.all %}
+                                                    <optgroup label="{{ district.name }}">
+                                                        {% for location in district.locations.all %}
+                                                            <option value="{{ location.id }}">{{ location.name }}</option>
+                                                        {% endfor %}
+                                                    </optgroup>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10l4 4 4-4" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Поле "Мин. цена" -->
+                                <div class="flex flex-col min-w-[140px] 2xl:min-w-[180px]">
+                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Мин. цена" %}</label>
+                                    <input type="number" name="min_price" min="0" inputmode="numeric" class="mt-2 h-12 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                </div>
+
+                                <!-- Поле "Макс. цена" -->
+                                <div class="flex flex-col min-w-[140px] 2xl:min-w-[180px]">
+                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Макс. цена" %}</label>
+                                    <input type="number" name="max_price" min="0" inputmode="numeric" class="mt-2 h-12 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                </div>
+
+                                <!-- Кнопка поиска -->
+                                <div class="flex flex-col items-center text-center xl:items-start xl:text-left min-w-[140px] 2xl:min-w-[160px] lg:col-span-2 xl:col-span-1">
+                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Показать" %}</label>
+                                    <button type="submit" class="mt-2 h-12 2xl:h-14 w-full xl:w-auto px-5 2xl:px-7 bg-accent text-gray-900 font-semibold rounded-md shadow-lg shadow-accent/40 hover:bg-yellow-500 transition flex items-center justify-center gap-3 2xl:gap-4">
+                                        <div class="flex flex-col items-center leading-tight text-center">
+                                            <span id="search-count" data-search-count class="text-base 2xl:text-xl font-semibold leading-none">{{ total_properties_count|default:"0" }}</span>
+                                            <span class="text-[10px] 2xl:text-xs font-medium uppercase tracking-wide text-gray-800 leading-tight">{% trans "объектов" %}</span>
+                                        </div>
+                                        <i class="fas fa-search text-lg 2xl:text-2xl text-gray-900"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
 
                     <!-- Mobile форма -->
                     <div class="lg:hidden w-full max-w-md">
-                        <form method="get" action="{% url 'core:search' %}" class="bg-white rounded-lg shadow-lg p-4 space-y-4">
+                        <form method="get" action="{% url 'core:search' %}" class="mobile-search-form bg-white/95 backdrop-blur-sm rounded-md shadow-xl p-4 sm:p-5 space-y-3">
                             <!-- Поле "Тип" -->
                             <div>
-                                <select name="type" class="w-full h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm cursor-pointer focus:ring-2 focus:ring-accent focus:border-accent">
-                                    <option value="">{% trans "Все типы" %}</option>
-                                    {% for type in property_types %}
-                                        <option value="{{ type.name }}">{{ type.name_display }}</option>
-                                    {% endfor %}
-                                </select>
+                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Тип" %}</label>
+                                <div class="relative mt-1 sm:mt-2">
+                                    <select name="type" class="w-full h-11 sm:h-12 px-3 sm:px-4 pr-9 sm:pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-sm sm:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                        <option value="">{% trans "Все типы" %}</option>
+                                        {% for type in property_types %}
+                                            <option value="{{ type.name }}">{{ type.name_display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="pointer-events-none absolute inset-y-0 right-2 sm:right-3 flex items-center text-gray-400">
+                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10l4 4 4-4" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </div>
-                            
-                            <!-- Поле "Локация" -->
+
+                            <!-- Поле "Район" -->
                             <div>
-                                <select name="location" class="w-full h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm cursor-pointer focus:ring-2 focus:ring-accent focus:border-accent">
-                                    <option value="">{% trans "Все локации" %}</option>
-                                    {% for district in districts %}
-                                        {% if district.locations.all %}
-                                            <optgroup label="{{ district.name }}">
-                                                {% for location in district.locations.all %}
-                                                    <option value="{{ location.id }}">{{ location.name }}</option>
-                                                {% endfor %}
-                                            </optgroup>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
+                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Район" %}</label>
+                                <div class="relative mt-1 sm:mt-2">
+                                    <select name="location" class="w-full h-11 sm:h-12 px-3 sm:px-4 pr-9 sm:pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-sm sm:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                        <option value="">{% trans "Все районы" %}</option>
+                                        {% for district in districts %}
+                                            {% if district.locations.all %}
+                                                <optgroup label="{{ district.name }}">
+                                                    {% for location in district.locations.all %}
+                                                        <option value="{{ location.id }}">{{ location.name }}</option>
+                                                    {% endfor %}
+                                                </optgroup>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <span class="pointer-events-none absolute inset-y-0 right-2 sm:right-3 flex items-center text-gray-400">
+                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10l4 4 4-4" />
+                                        </svg>
+                                    </span>
+                                </div>
                             </div>
-                            
-                            <!-- Поля цены в одной строке -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <input type="number" name="min_price" class="h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm placeholder-gray-500 focus:ring-2 focus:ring-accent focus:border-accent" placeholder="{% trans 'Мин. цена' %}">
-                                <input type="number" name="max_price" class="h-12 px-3 bg-white border border-gray-300 rounded-md text-gray-900 text-sm placeholder-gray-500 focus:ring-2 focus:ring-accent focus:border-accent" placeholder="{% trans 'Макс. цена' %}">
+
+                            <!-- Поля цены -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Мин. цена" %}</label>
+                                    <input type="number" name="min_price" min="0" inputmode="numeric" class="mt-1 sm:mt-2 h-11 sm:h-12 w-full px-3 bg-white border border-gray-200 rounded-md text-gray-900 text-sm placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Макс. цена" %}</label>
+                                    <input type="number" name="max_price" min="0" inputmode="numeric" class="mt-1 sm:mt-2 h-11 sm:h-12 w-full px-3 bg-white border border-gray-200 rounded-md text-gray-900 text-sm placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                </div>
                             </div>
-                            
+
                             <!-- Кнопка поиска -->
-                            <button type="submit" class="w-full h-12 bg-accent hover:bg-yellow-500 text-white font-bold rounded-md transition-colors duration-300 flex items-center justify-center">
-                                <span class="mr-2">{% trans "Найти" %} {{ total_properties_count|default:"0" }} {% trans "объектов" %}</span>
-                                <img src="{% static 'images/home_page/homepage_hero_section/hero_section_find_button_arrow.svg' %}" alt="Search" class="w-5 h-5">
-                            </button>
+                            <div>
+                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">{% trans "Показать" %}</label>
+                                <button type="submit" class="w-full h-11 sm:h-12 bg-accent text-gray-900 font-semibold rounded-md shadow-lg shadow-accent/30 hover:bg-yellow-500 transition flex items-center justify-center gap-2">
+                                    <div class="flex flex-col items-center leading-tight text-center">
+                                        <span data-search-count class="text-sm font-semibold leading-none">{{ total_properties_count|default:"0" }}</span>
+                                        <span class="text-[9px] font-medium uppercase tracking-wide text-gray-800 leading-tight">{% trans "объектов" %}</span>
+                                    </div>
+                                    <i class="fas fa-search text-sm text-gray-900"></i>
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
 
                 <!-- Sales Points -->
-                <div class="px-4">
+                <div class="px-3 sm:px-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 text-center sm:text-left text-white max-w-5xl mx-auto">
                         <div>
-                            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">5 лет</div>
-                            <div class="text-sm sm:text-base lg:text-lg font-bold leading-tight text-accent">в недвижимости Пхукета</div>
-                            <div class="hidden md:block text-white text-xs lg:text-sm font-normal mt-2">Понимаем рынок и видим возможности, которые другие пропускают.</div>
+                            <div class="text-xl sm:text-3xl lg:text-4xl font-bold text-accent">5 лет</div>
+                            <div class="text-xs sm:text-base lg:text-lg font-bold leading-tight text-accent">в недвижимости Пхукета</div>
+                            <div class="mt-2 text-white/90 text-xs sm:text-sm md:text-sm font-medium leading-snug">Понимаем рынок и видим возможности, которые другие пропускают.</div>
                         </div>
                         <div>
-                            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">600+</div>
-                            <div class="text-sm sm:text-base lg:text-lg font-bold leading-tight text-accent">актуальных объектов</div>
-                            <div class="hidden md:block text-white text-xs lg:text-sm font-normal mt-2">От бюджетных студий до элитных вилл.</div>
+                            <div class="text-xl sm:text-3xl lg:text-4xl font-bold text-accent">600+</div>
+                            <div class="text-xs sm:text-base lg:text-lg font-bold leading-tight text-accent">актуальных объектов</div>
+                            <div class="mt-2 text-white/90 text-xs sm:text-sm md:text-sm font-medium leading-snug">От бюджетных студий до элитных вилл.</div>
                         </div>
                         <div>
-                            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-accent">0%</div>
-                            <div class="text-sm sm:text-base lg:text-lg font-bold leading-tight text-accent">рассрочка от застройщиков</div>
-                            <div class="hidden md:block text-white text-xs lg:text-sm font-normal mt-2">Покупка без переплат с гибкими условиями платежа.</div>
+                            <div class="text-xl sm:text-3xl lg:text-4xl font-bold text-accent">0%</div>
+                            <div class="text-xs sm:text-base lg:text-lg font-bold leading-tight text-accent">рассрочка от застройщиков</div>
+                            <div class="mt-2 text-white/90 text-xs sm:text-sm md:text-sm font-medium leading-snug">Покупка без переплат с гибкими условиями платежа.</div>
                         </div>
                     </div>
                 </div>

@@ -9,18 +9,24 @@ function initializeSearchCounter() {
     const searchForm = document.querySelector('form[action*="search"]') || 
                       document.querySelector('form[method="get"]') ||
                       document.querySelector('form');
-    const searchCount = document.getElementById('search-count');
-    
-    if (!searchForm || !searchCount) {
+    const searchCountElements = Array.from(document.querySelectorAll('[data-search-count]'));
+
+    if (!searchForm || searchCountElements.length === 0) {
         // Попробуем еще раз через 500ms, если не исчерпали попытки
         if (initAttempts < MAX_INIT_ATTEMPTS) {
             setTimeout(initializeSearchCounter, 500);
         }
         return;
     }
-    
+
     // Сохраняем первоначальное значение как fallback
-    const initialCount = searchCount.textContent;
+    const initialCount = searchCountElements[0].textContent.trim();
+
+    function setSearchCount(value) {
+        searchCountElements.forEach(el => {
+            el.textContent = value;
+        });
+    }
     
     // Ищем элементы фильтрации
     const typeSelect = searchForm.querySelector('select[name="type"]') || 
@@ -50,12 +56,12 @@ function initializeSearchCounter() {
             
             // Если все фильтры пустые, показываем изначальное значение без AJAX запроса
             if (params.toString() === '') {
-                searchCount.textContent = initialCount;
+                setSearchCount(initialCount);
                 return;
             }
-            
+
             // Показываем индикатор загрузки
-            searchCount.textContent = '...';
+            setSearchCount('...');
             
             // Определяем языковой префикс из текущего URL
             const currentPath = window.location.pathname;
@@ -80,17 +86,17 @@ function initializeSearchCounter() {
             })
             .then(data => {
                 if (data.success) {
-                    searchCount.textContent = data.count;
+                    setSearchCount(data.count);
                 } else {
                     console.error('Server error:', data.error);
                     // Возвращаем первоначальное значение при ошибке
-                    searchCount.textContent = initialCount;
+                    setSearchCount(initialCount);
                 }
             })
             .catch(error => {
                 console.error('Error fetching search count:', error);
                 // Возвращаем первоначальное значение при ошибке сети
-                searchCount.textContent = initialCount;
+                setSearchCount(initialCount);
             });
         }, 300); // Debounce updates
     }
