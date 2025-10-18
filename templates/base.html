@@ -1,7 +1,7 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}">
+<html lang="{{ LANGUAGE_CODE }}" class="overflow-x-hidden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -123,7 +123,7 @@
 
     {% endblock %}
 </head>
-<body>
+<body class="overflow-x-hidden">
     <!-- Top Contact Bar - Desktop: top, Mobile: bottom -->
     <div id="contact-bar" class="bg-primary text-white py-2 fixed w-full z-50 transition-transform duration-300
                                  md:top-0 md:bottom-auto
@@ -219,7 +219,7 @@
                 </div>
 
                 <!-- Desktop Menu - Centered -->
-                <div class="hidden md:flex items-center justify-center flex-1">
+                <div class="hidden lg:flex items-center justify-center flex-1">
                     <div class="flex space-x-3 xl:space-x-6 nav-menu-container">
                         <!-- Property Dropdown -->
                         <div class="relative group">
@@ -290,13 +290,13 @@
                 </div>
 
                 <!-- Right side controls -->
-                <div class="hidden md:flex items-center space-x-2 xl:space-x-4 nav-controls">
+                <div class="hidden lg:flex items-center space-x-2 xl:space-x-4 nav-controls">
                     <!-- Favorites Menu -->
                     <a href="{% url 'properties:property_favorites' %}" class="relative" title="{% trans 'Избранное' %}">
                         <div class="bg-white w-10 h-10 rounded-full transition-all duration-200 group shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center border border-gray-200 hover:border-red-200">
                             <i id="nav-favorites-heart" class="far fa-heart text-gray-600 transition-all duration-200"></i>
                         </div>
-                        <span id="nav-favorites-count" class="favorites-count absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold hidden min-w-[20px] text-center">0</span>
+                        <span id="desktop-favorites-count" class="favorites-count absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 inline-flex items-center justify-center text-xs font-bold hidden leading-none">0</span>
                     </a>
 
                     <!-- Language Switcher -->
@@ -340,7 +340,7 @@
                 </div>
 
                 <!-- Mobile menu button and search -->
-                <div class="md:hidden flex items-center space-x-3 flex-shrink-0 mobile-menu-exception">
+                <div class="lg:hidden flex items-center space-x-3 flex-shrink-0 mobile-menu-exception">
                     <!-- Mobile Search Button -->
                     <button onclick="toggleMobileSearch()" class="text-primary hover:text-accent transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,7 +358,7 @@
                 </div>
                 
                 <!-- Mobile Search Form -->
-                <div id="mobile-search" class="md:hidden hidden absolute top-14 left-0 right-0 bg-white border-b border-gray-200 p-4 z-40">
+                <div id="mobile-search" class="lg:hidden hidden absolute top-14 left-0 right-0 bg-white border-b border-gray-200 p-4 z-40">
                     <form class="flex" method="get" action="{% url 'core:search' %}">
                         <input type="search" name="q" placeholder="{% trans 'Поиск...' %}" class="flex-1 px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors">
                         <button type="submit" class="px-4 py-2 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
@@ -369,7 +369,7 @@
             </div>
 
             <!-- Mobile Menu -->
-            <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200 max-h-screen overflow-y-auto">
+            <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200 max-h-screen overflow-y-auto">
                 <div class="px-2 pt-2 pb-3 space-y-1">
                     <!-- Property dropdown -->
                     <div>
@@ -450,7 +450,7 @@
                     <div class="border-t border-gray-200 pt-2 mt-2">
                         <a href="{% url 'properties:property_favorites' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
                             <i id="mobile-nav-favorites-heart" class="far fa-heart mr-2 text-gray-600"></i>{% trans "Избранное" %} 
-                            <span id="mobile-nav-favorites-count" class="favorites-count ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold hidden">0</span>
+                            <span id="mobile-nav-favorites-count" class="favorites-count ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold hidden inline-flex items-center justify-center leading-none">0</span>
                         </a>
                     </div>
                     
@@ -822,6 +822,167 @@
 
     <!-- Custom JS - Main Script -->
     <script src="{% static 'js/main.js' %}"></script>
+
+    <!-- Global Favorites Functions -->
+    <script>
+        // Получить избранное из localStorage
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem('favorites') || '[]');
+        }
+
+        // Сохранить избранное в localStorage
+        function saveFavorites(favorites) {
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+
+        // Переключить избранное для объекта
+        function toggleFavorite(propertyId) {
+            let favorites = getFavorites();
+            const isFavorite = favorites.includes(propertyId);
+
+            if (isFavorite) {
+                // Удалить из избранного
+                favorites = favorites.filter(id => id !== propertyId);
+                showNotification('{% trans "Удалено из избранного" %}', 'favorite-removed');
+            } else {
+                // Добавить в избранное
+                favorites.push(propertyId);
+                showNotification('{% trans "Добавлено в избранное" %}', 'favorite-added');
+            }
+
+            saveFavorites(favorites);
+            updateFavoritesCounter();
+            updateFavoriteButtons(propertyId, !isFavorite);
+
+            return !isFavorite;
+        }
+
+        // Обновить состояние кнопок избранного для конкретного объекта
+        function updateFavoriteButtons(propertyId, isFavorite) {
+            // Обновляем все кнопки для данного объекта
+            const buttons = document.querySelectorAll(`[data-property-id="${propertyId}"].favorite-btn`);
+            buttons.forEach(button => {
+                const icon = button.querySelector('i');
+                if (icon) {
+                    if (isFavorite) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'text-red-500');
+                    } else {
+                        icon.classList.remove('fas', 'text-red-500');
+                        icon.classList.add('far');
+                    }
+                }
+            });
+        }
+
+        // Обновить счетчики избранного в навигации
+        function updateFavoritesCounter() {
+            const favorites = getFavorites();
+            const count = favorites.length;
+            const displayValue = count > 99 ? '99+' : count;
+
+            // Desktop counter
+            const desktopCounter = document.getElementById('desktop-favorites-count');
+            if (desktopCounter) {
+                desktopCounter.textContent = displayValue;
+                if (count > 0) {
+                    desktopCounter.classList.remove('hidden');
+                    desktopCounter.classList.add('inline-flex');
+                    desktopCounter.style.display = 'inline-flex';
+                } else {
+                    desktopCounter.classList.add('hidden');
+                    desktopCounter.style.display = 'none';
+                }
+            }
+
+            // Mobile counter
+            const mobileCounter = document.getElementById('mobile-nav-favorites-count');
+            if (mobileCounter) {
+                mobileCounter.textContent = displayValue;
+                if (count > 0) {
+                    mobileCounter.classList.remove('hidden');
+                    mobileCounter.classList.add('inline-flex');
+                    mobileCounter.style.display = 'inline-flex';
+                } else {
+                    mobileCounter.classList.add('hidden');
+                    mobileCounter.style.display = 'none';
+                }
+            }
+        }
+
+        // Показать уведомление
+        function showNotification(message, type) {
+            // Создаем элемент уведомления
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 z-50 transform transition-all duration-300 ease-in-out';
+
+            let bgColor = 'bg-gray-800';
+            let icon = 'fa-info-circle';
+
+            if (type === 'favorite-added') {
+                bgColor = 'bg-green-600';
+                icon = 'fa-check-circle';
+            } else if (type === 'favorite-removed') {
+                bgColor = 'bg-blue-600';
+                icon = 'fa-info-circle';
+            } else if (type === 'success') {
+                bgColor = 'bg-green-600';
+                icon = 'fa-check-circle';
+            } else if (type === 'error') {
+                bgColor = 'bg-red-600';
+                icon = 'fa-exclamation-circle';
+            }
+
+            notification.innerHTML = `
+                <div class="${bgColor} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center space-x-3 min-w-[300px]">
+                    <i class="fas ${icon} text-xl"></i>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Анимация появления
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+                notification.style.opacity = '1';
+            }, 100);
+
+            // Удаление через 3 секунды
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обновляем счетчики
+            updateFavoritesCounter();
+
+            // Инициализируем состояние всех кнопок избранного на странице
+            const favorites = getFavorites();
+            favorites.forEach(propertyId => {
+                updateFavoriteButtons(propertyId, true);
+            });
+
+            // Добавляем обработчики для всех кнопок избранного
+            document.addEventListener('click', function(e) {
+                const favoriteBtn = e.target.closest('.favorite-btn');
+                if (favoriteBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const propertyId = parseInt(favoriteBtn.dataset.propertyId);
+                    if (propertyId) {
+                        toggleFavorite(propertyId);
+                    }
+                }
+            });
+        });
+    </script>
 
     <!-- Extra JS Block for page-specific scripts -->
     {% block extra_js %}

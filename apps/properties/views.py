@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, Http404
@@ -8,6 +10,8 @@ from django.contrib import messages
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.urls import reverse
+
+from apps.currency.services import CurrencyService
 from .models import Property, PropertyType
 from apps.locations.models import District
 from apps.users.models import PropertyInquiry
@@ -72,24 +76,30 @@ class PropertyListView(ListView):
         if location:
             queryset = queryset.filter(location__slug=location)
         
-        # Цена в USD (учитываем и продажу и аренду)
+        currency_code = CurrencyService.get_selected_currency_code(self.request)
+        sale_field, rent_field = CurrencyService.get_price_field_names(currency_code)
+
         min_price = self.request.GET.get('min_price')
         max_price = self.request.GET.get('max_price')
+
         if min_price:
             try:
-                min_val = int(min_price)
-                queryset = queryset.filter(
-                    Q(price_sale_usd__gte=min_val) | Q(price_rent_monthly__gte=min_val)
-                )
-            except ValueError:
+                min_val = Decimal(min_price)
+                price_filter = Q(**{f"{sale_field}__gte": min_val})
+                if rent_field:
+                    price_filter |= Q(**{f"{rent_field}__gte": min_val})
+                queryset = queryset.filter(price_filter)
+            except (InvalidOperation, ValueError):
                 pass
+
         if max_price:
             try:
-                max_val = int(max_price)
-                queryset = queryset.filter(
-                    Q(price_sale_usd__lte=max_val) | Q(price_rent_monthly__lte=max_val)
-                )
-            except ValueError:
+                max_val = Decimal(max_price)
+                price_filter = Q(**{f"{sale_field}__lte": max_val})
+                if rent_field:
+                    price_filter |= Q(**{f"{rent_field}__lte": max_val})
+                queryset = queryset.filter(price_filter)
+            except (InvalidOperation, ValueError):
                 pass
         
         # Количество спален
@@ -402,29 +412,94 @@ def get_favorite_properties(request):
             'district', 'property_type'
         ).prefetch_related('images')
         
+        # Получаем выбранную валюту из сессии
+        selected_currency_code = request.session.get('currency')
+        if not selected_currency_code:
+            # Определяем валюту по языку
+            language = getattr(request, 'LANGUAGE_CODE', 'ru')
+            default_currency = CurrencyService.get_currency_for_language(language)
+            selected_currency_code = default_currency.code if default_currency else 'USD'
+
+        user_currency = CurrencyService.get_currency_by_code(selected_currency_code)
+        if not user_currency:
+            user_currency = CurrencyService.get_currency_by_code('USD')
+
         # Формируем данные для ответа
         properties_data = []
         for prop in properties:
             main_image_url = ''
             if prop.main_image:
                 main_image_url = prop.main_image.thumbnail.url
-            
-            # Формируем цену для отображения
+
+            # Формируем цену для отображения с учетом выбранной валюты
             price_display = 'Цена по запросу'
-            if prop.deal_type == 'rent' and prop.price_rent_monthly:
-                price_display = f'${prop.price_rent_monthly:,.0f}/мес'
-            elif prop.deal_type in ['sale', 'both'] and prop.price_sale_usd:
-                price_display = f'${prop.price_sale_usd:,.0f}'
-            
+
+            # Определяем исходную цену и валюту
+            source_price = None
+            source_currency = None
+
+            if prop.deal_type == 'rent':
+                # Проверяем цены аренды в разных валютах
+                if prop.price_rent_monthly:
+                    source_price = float(prop.price_rent_monthly)
+                    source_currency = 'USD'
+                elif prop.price_rent_monthly_thb:
+                    source_price = float(prop.price_rent_monthly_thb)
+                    source_currency = 'THB'
+                elif prop.price_rent_monthly_rub:
+                    source_price = float(prop.price_rent_monthly_rub)
+                    source_currency = 'RUB'
+            elif prop.deal_type in ['sale', 'both']:
+                # Проверяем цены продажи в разных валютах
+                if prop.price_sale_usd:
+                    source_price = float(prop.price_sale_usd)
+                    source_currency = 'USD'
+                elif prop.price_sale_thb:
+                    source_price = float(prop.price_sale_thb)
+                    source_currency = 'THB'
+                elif prop.price_sale_rub:
+                    source_price = float(prop.price_sale_rub)
+                    source_currency = 'RUB'
+
+            # Конвертируем цену в выбранную валюту пользователя
+            converted_price = None
+            price_per_sqm = None
+
+            if source_price and source_currency:
+                converted_price = CurrencyService.convert_price(
+                    source_price, source_currency, user_currency.code
+                )
+                if converted_price:
+                    if prop.deal_type == 'rent':
+                        price_display = f'{user_currency.symbol}{converted_price:,.0f}/мес'
+                    else:
+                        price_display = f'{user_currency.symbol}{converted_price:,.0f}'
+
+                    # Вычисляем цену за квадратный метр (только для продажи)
+                    if prop.deal_type in ['sale', 'both'] and prop.area_total and prop.area_total > 0:
+                        price_per_sqm = converted_price / float(prop.area_total)
+
             properties_data.append({
                 'id': prop.id,
                 'title': prop.title,
                 'slug': prop.slug,
                 'district_name': prop.district.name if prop.district else '',
-                'property_type_name': prop.property_type.name if prop.property_type else '',
+                'property_type_name': prop.property_type.name_display if prop.property_type else '',
                 'deal_type': prop.deal_type,
                 'price_display': price_display,
+                'price_per_sqm': price_per_sqm,
+                'currency_symbol': user_currency.symbol,
                 'main_image_url': main_image_url,
+                # Дополнительные данные для таблицы сравнения
+                'bedrooms': prop.bedrooms,
+                'bathrooms': prop.bathrooms,
+                'area_total': float(prop.area_total) if prop.area_total else None,
+                'area_land': float(prop.area_land) if prop.area_land else None,
+                'pool': prop.pool,
+                'parking': prop.parking,
+                'furnished': prop.furnished,
+                'security': prop.security,
+                'gym': prop.gym,
             })
         
         return JsonResponse({
@@ -684,7 +759,8 @@ def ajax_search_count(request):
         
         # Применяем фильтры (используем POST или GET данные)
         filters = request.POST if request.method == 'POST' else request.GET
-        queryset = apply_search_filters(queryset, filters)
+        currency_code = CurrencyService.get_selected_currency_code(request)
+        queryset = apply_search_filters(queryset, filters, currency_code)
         
         # Возвращаем количество
         count = queryset.count()
@@ -701,7 +777,7 @@ def ajax_search_count(request):
         })
 
 
-def apply_search_filters(queryset, filters):
+def apply_search_filters(queryset, filters, currency_code='USD'):
     """Применяет поисковые фильтры к queryset (работает с POST и GET данными)"""
     
     # Тип недвижимости
@@ -723,22 +799,26 @@ def apply_search_filters(queryset, filters):
     min_price = filters.get('min_price')
     max_price = filters.get('max_price')
     
+    sale_field, rent_field = CurrencyService.get_price_field_names(currency_code)
+
     if min_price:
         try:
-            min_val = int(min_price)
-            queryset = queryset.filter(
-                Q(price_sale_usd__gte=min_val) | Q(price_rent_monthly__gte=min_val)
-            )
-        except ValueError:
+            min_val = Decimal(min_price)
+            price_filter = Q(**{f"{sale_field}__gte": min_val})
+            if rent_field:
+                price_filter |= Q(**{f"{rent_field}__gte": min_val})
+            queryset = queryset.filter(price_filter)
+        except (InvalidOperation, ValueError):
             pass
             
     if max_price:
         try:
-            max_val = int(max_price)
-            queryset = queryset.filter(
-                Q(price_sale_usd__lte=max_val) | Q(price_rent_monthly__lte=max_val)
-            )
-        except ValueError:
+            max_val = Decimal(max_price)
+            price_filter = Q(**{f"{sale_field}__lte": max_val})
+            if rent_field:
+                price_filter |= Q(**{f"{rent_field}__lte": max_val})
+            queryset = queryset.filter(price_filter)
+        except (InvalidOperation, ValueError):
             pass
     
     # Количество спален

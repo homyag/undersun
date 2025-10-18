@@ -53,186 +53,106 @@ class SEOPage(models.Model):
 
 
 class PromotionalBanner(models.Model):
-    """Модель для управления рекламным баннером на главной странице"""
-    
-    # Визуальное оформление
-    image = models.ImageField(_('Фоновое изображение'), upload_to='promotional_banners/', 
-                            help_text=_('Рекомендуемое разрешение: 1248x125 пикселей'))
-    
-    # Временные настройки
-    valid_until = models.DateField(_('Действительно до'), blank=True, null=True,
-                                 help_text=_('Дата окончания действия предложения'))
-    button_url = models.CharField(_('Ссылка кнопки'), max_length=200, blank=True,
-                                help_text=_('URL или имя Django URL pattern. Поддерживает: "/property/" (статический URL), "property_list" (имя URL), "https://example.com" (внешний URL)'))
-    
-    # Настройки отображения
-    is_active = models.BooleanField(_('Активно'), default=True,
-                                  help_text=_('Показывать ли баннер на сайте'))
-    priority = models.IntegerField(_('Приоритет'), default=100,
-                                 help_text=_('Чем меньше число, тем выше приоритет. Показывается баннер с наивысшим приоритетом'))
-    
-    # Даты
-    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('Обновлено'), auto_now=True)
-    
+    """Модель рекламного баннера главной страницы"""
+
+    LANGUAGE_CHOICES = (
+        ('ru', _('Русский')),
+        ('en', _('Английский')),
+        ('th', _('Тайский')),
+    )
+
+    language_code = models.CharField(
+        _('Язык'),
+        max_length=2,
+        choices=LANGUAGE_CHOICES,
+        default='ru',
+        help_text=_('Создавайте отдельные баннеры для каждого языка (RU / EN / TH).')
+    )
+    desktop_image = models.ImageField(
+        _('Изображение для десктопа'),
+        upload_to='promotional_banners/',
+        blank=True,
+        help_text=_('Рекомендуемый размер: 2400×150 px. Держите ключевой контент в центральной зоне, края могут обрезаться.')
+    )
+    tablet_image = models.ImageField(
+        _('Изображение для планшета'),
+        upload_to='promotional_banners/',
+        blank=True,
+        help_text=_('Рекомендуемый размер: 1536×150 px. Фокусируйте основной контент в центре кадра.')
+    )
+    mobile_image = models.ImageField(
+        _('Изображение для мобильных устройств'),
+        upload_to='promotional_banners/',
+        blank=True,
+        help_text=_('Рекомендуемый размер: 828×150 px. Располагайте текст и логотип внутри центральных 60% ширины.')
+    )
+    link = models.CharField(
+        _('Ссылка'),
+        max_length=255,
+        blank=True,
+        help_text=_('Полный URL (https://example.com), путь с языковым префиксом (/ru/path/) или имя Django URL pattern.')
+    )
+
     class Meta:
         verbose_name = _('Рекламный баннер')
         verbose_name_plural = _('Рекламные баннеры')
-        ordering = ['priority', '-created_at']
-    
+        ordering = ['language_code', 'id']
+
     def __str__(self):
-        status = _('Активный') if self.is_active else _('Неактивный')
-        # Получаем заголовок на русском языке для отображения
-        try:
-            title = self.translations.get(language_code='ru').title
-        except:
-            title = f"Баннер #{self.pk}"
-        return f"{title} ({status})"
-    
-    def get_translation(self, language_code='ru'):
-        """Получить перевод для указанного языка с fallback на русский"""
-        try:
-            return self.translations.get(language_code=language_code)
-        except PromotionalBannerTranslation.DoesNotExist:
-            try:
-                return self.translations.get(language_code='ru')
-            except PromotionalBannerTranslation.DoesNotExist:
-                return None
-    
-    @property
-    def title(self):
-        """Получить заголовок для текущего языка"""
-        from django.utils.translation import get_language
-        current_language = get_language() or 'ru'
-        # Берем первые 2 символа для языковых кодов типа 'ru', 'en', 'th'
-        lang_code = current_language[:2]
-        translation = self.get_translation(lang_code)
-        return translation.title if translation else ''
-    
-    @property
-    def description(self):
-        """Получить описание для текущего языка"""
-        from django.utils.translation import get_language
-        current_language = get_language() or 'ru'
-        lang_code = current_language[:2]
-        translation = self.get_translation(lang_code)
-        return translation.description if translation else ''
-    
-    @property
-    def discount_text(self):
-        """Получить текст скидки для текущего языка"""
-        from django.utils.translation import get_language
-        current_language = get_language() or 'ru'
-        lang_code = current_language[:2]
-        translation = self.get_translation(lang_code)
-        return translation.discount_text if translation else ''
-    
-    @property
-    def button_text(self):
-        """Получить текст кнопки для текущего языка"""
-        from django.utils.translation import get_language
-        current_language = get_language() or 'ru'
-        lang_code = current_language[:2]
-        translation = self.get_translation(lang_code)
-        return translation.button_text if translation else ''
-    
+        if not self.pk:
+            return _('Новый баннер')
+        lang_display = dict(self.LANGUAGE_CHOICES).get(self.language_code, self.language_code)
+        return f"{_('Баннер')} #{self.pk} [{lang_display}]"
+
     @classmethod
-    def get_active_banner(cls):
-        """Получить активный баннер с наивысшим приоритетом"""
-        from django.utils import timezone
-        now = timezone.now().date()
-        
-        queryset = cls.objects.filter(is_active=True).prefetch_related('translations')
-        
-        # Фильтруем по дате окончания, если указана
-        queryset = queryset.filter(
-            models.Q(valid_until__isnull=True) | 
-            models.Q(valid_until__gte=now)
-        )
-        
-        return queryset.first()
-    
-    def get_language_aware_url(self, language_code=None):
-        """Получить URL кнопки с учетом текущего языка"""
-        if not self.button_url:
-            return None
-        
-        # Получаем текущий язык, если не передан
+    def get_active_banner(cls, language_code=None):
+        """Возвращает баннер для запрошенного языка (с fallback на русский)."""
         if language_code is None:
             from django.utils.translation import get_language
             current_language = get_language() or 'ru'
             language_code = current_language[:2]
-        
-        # Если URL начинается с http:// или https://, возвращаем как есть
-        if self.button_url.startswith(('http://', 'https://')):
-            return self.button_url
-        
-        # Если URL начинается с '/', это статический URL
-        if self.button_url.startswith('/'):
-            # Проверяем, не содержит ли URL уже языковой префикс
-            if not any(self.button_url.startswith(f'/{lang}/') for lang in ['ru', 'en', 'th']):
-                return f'/{language_code}{self.button_url}'
-            return self.button_url
-        
-        # Если URL не содержит '/', предполагаем, что это имя URL pattern
+
+        banner = cls.objects.filter(language_code=language_code).first()
+        if banner:
+            return banner
+        # fallback to Russian if requested language отсутствует
+        if language_code != 'ru':
+            return cls.objects.filter(language_code='ru').first()
+        return None
+
+    def get_language_aware_url(self, language_code=None):
+        """Получить ссылку с учётом языкового префикса (если она относительная)."""
+        if not self.link:
+            return None
+
+        if language_code is None:
+            from django.utils.translation import get_language
+            current_language = get_language() or 'ru'
+            language_code = current_language[:2]
+
+        link = self.link.strip()
+
+        if link.startswith(('http://', 'https://')):
+            return link
+
+        if link.startswith('/'):
+            if not any(link.startswith(f'/{lang}/') for lang in ('ru', 'en', 'th')):
+                return f'/{language_code}{link}'
+            return link
+
         try:
             from django.urls import reverse
-            # Пытаемся разобрать URL pattern с параметрами
-            url_parts = self.button_url.split(':')
-            if len(url_parts) == 2:
-                # Формат: "app_name:url_name" или "app_name:url_name:param"
-                app_name, url_pattern = url_parts
-                return reverse(f'{app_name}:{url_pattern}')
-            else:
-                # Простое имя URL pattern
-                return reverse(self.button_url)
+            return reverse(link)
         except Exception:
-            # Если не удалось распарсить как URL pattern, возвращаем как статический URL
-            return f'/{language_code}/{self.button_url.lstrip("/")}'
-    
-    def is_valid(self):
-        """Проверить, действителен ли баннер на текущую дату"""
-        if not self.is_active:
-            return False
-        
-        if self.valid_until:
-            from django.utils import timezone
-            return self.valid_until >= timezone.now().date()
-        
-        return True
+            return f'/{language_code}/{link.lstrip("/")}'
 
-
-class PromotionalBannerTranslation(models.Model):
-    """Переводы для рекламных баннеров"""
-    
-    LANGUAGE_CHOICES = [
-        ('ru', 'Русский'),
-        ('en', 'English'),
-        ('th', 'ไทย'),
-    ]
-    
-    banner = models.ForeignKey(PromotionalBanner, on_delete=models.CASCADE, related_name='translations')
-    language_code = models.CharField(_('Язык'), max_length=2, choices=LANGUAGE_CHOICES)
-    
-    # Переводимые поля
-    title = models.CharField(_('Заголовок'), max_length=200)
-    description = models.TextField(_('Описание'), max_length=500)
-    discount_text = models.CharField(_('Текст скидки/предложения'), max_length=100, blank=True,
-                                   help_text=_('Например: "Скидка 20%" или "Ограниченное предложение"'))
-    button_text = models.CharField(_('Текст кнопки'), max_length=50, blank=True,
-                                 help_text=_('Например: "Узнать подробнее" или "Связаться с нами"'))
-    
-    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('Обновлено'), auto_now=True)
-    
-    class Meta:
-        verbose_name = _('Перевод баннера')
-        verbose_name_plural = _('Переводы баннеров')
-        unique_together = [['banner', 'language_code']]
-        ordering = ['language_code']
-    
-    def __str__(self):
-        return f"{self.title} ({self.get_language_code_display()})"
+    @staticmethod
+    def image_disclaimer():
+        return _(
+            'Загрузите три версии баннера: 2400×150 px (desktop), 1536×150 px (tablet) и 828×150 px (mobile). '
+            'Важные элементы держите в центральной зоне — по ширине она безопасна для всех устройств. '
+            'Создайте отдельный баннер для каждого языка (RU / EN / TH), чтобы использовать локализованные изображения.'
+        )
 
 
 class SEOTemplate(models.Model):

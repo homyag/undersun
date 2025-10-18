@@ -21,6 +21,7 @@ class PropertyType(models.Model):
 
     name = models.CharField(_('Тип'), max_length=20, choices=PROPERTY_TYPES, unique=True)
     name_display = models.CharField(_('Отображаемое название'), max_length=100)
+    name_plural = models.CharField(_('Название во множественном числе'), max_length=100, blank=True)
     icon = models.CharField(_('Иконка'), max_length=50, blank=True)
 
     class Meta:

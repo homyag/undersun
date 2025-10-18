@@ -4,17 +4,21 @@ function adjustHeroHeight() {
     if (!heroSection) return;
 
     if (window.innerWidth >= 1440) {
-        // Large desktop (1440px+): Full viewport height
+        // Large desktop (1440px+): Full viewport height, account for header stack
         heroSection.style.minHeight = '100vh';
-        heroSection.style.paddingTop = '0px';
-    } else if (window.innerWidth >= 1024) {
-        // Desktop: account for contact bar + navigation
-        heroSection.style.minHeight = 'calc(100vh - 120px)';
         heroSection.style.paddingTop = '120px';
-    } else {
-        // Mobile: only navigation
-        heroSection.style.minHeight = 'calc(100vh - 64px)';
+    } else if (window.innerWidth >= 1024) {
+        // Desktop: leave room for contact bar + navigation
+        heroSection.style.minHeight = '100vh';
+        heroSection.style.paddingTop = '120px';
+    } else if (window.innerWidth >= 768) {
+        // Tablet: navigation height only
+        heroSection.style.minHeight = '100vh';
         heroSection.style.paddingTop = '64px';
+    } else {
+        // Mobile: maintain clearance from sticky navigation without large gap
+        heroSection.style.minHeight = '100vh';
+        heroSection.style.paddingTop = '32px';
     }
 }
 

@@ -37,10 +37,17 @@
             }, 100);
         }
 
+        window.addEventListener('resize', () => {
+            updateCarouselPosition(false);
+            initializeSwipeSupport();
+        });
+
         // Carousel state
         let currentIndex = 0;
         let isTransitioning = false;
         let autoplayInterval;
+        let swipeStartX = 0;
+        let isMouseSwiping = false;
 
         // Render properties with consultation forms
         function renderProperties(properties) {
@@ -81,6 +88,7 @@
 
             // Initialize carousel controls
             initializeCarouselControls();
+            initializeSwipeSupport();
 
             // Update all prices to current header currency
             updateAllPricesToHeaderCurrency();
@@ -110,6 +118,51 @@
             }, 600);
         }
 
+        function formatPlaceholderValue(symbol, currency) {
+            const code = (currency || '').trim();
+            const sign = (symbol || '').trim();
+
+            if (!code) {
+                return '';
+            }
+
+            return sign ? `${sign} ${code}` : code;
+        }
+
+        function updateHeroSearchPlaceholders(symbol, currency) {
+            const inputs = document.querySelectorAll('[data-currency-placeholder]');
+            if (!inputs.length || !currency) {
+                return;
+            }
+
+            const placeholderValue = formatPlaceholderValue(symbol, currency);
+            inputs.forEach(input => {
+                if (placeholderValue) {
+                    input.placeholder = placeholderValue;
+                }
+                input.dataset.placeholderCode = currency;
+                input.dataset.placeholderSymbol = symbol || '';
+            });
+        }
+
+        function initializeHeroSearchPlaceholders() {
+            const inputs = document.querySelectorAll('[data-currency-placeholder]');
+            if (!inputs.length) {
+                return;
+            }
+
+            const reference = inputs[0];
+            const initialCode = reference.dataset.placeholderCode || reference.placeholder || 'USD';
+            const initialSymbol = reference.dataset.placeholderSymbol || '';
+            const formatted = formatPlaceholderValue(initialSymbol, initialCode);
+
+            if (formatted) {
+                inputs.forEach(input => {
+                    input.placeholder = formatted;
+                });
+            }
+        }
+
         // Update carousel position
         function updateCarouselPosition(animate = true) {
             const container = document.getElementById('properties-carousel');
@@ -121,20 +174,24 @@
             // Calculate actual slide width based on first item
             const firstItem = carouselItems[0];
             const itemRect = firstItem.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const parentRect = container.parentElement ? container.parentElement.getBoundingClientRect() : containerRect;
+            const gap = parseFloat(window.getComputedStyle(container).columnGap) || 0;
 
             // Calculate slide width based on screen size
             const isMobile = window.innerWidth < 768;
             let slideWidth;
 
             if (isMobile) {
-                // Mobile: use almost full viewport width minus padding
-                slideWidth = Math.min(window.innerWidth - 48, 350); // 48px for padding
+                // Mobile: align width to actual card size and gap
+                slideWidth = itemRect.width + gap;
             } else {
                 // Desktop: fixed width plus gap
-                slideWidth = itemRect.width + 24; // 24px gap
+                slideWidth = itemRect.width + gap;
             }
 
-            const translateX = -(currentIndex * slideWidth);
+            const offset = isMobile ? Math.max((parentRect.width - itemRect.width) / 2 - gap / 2, 0) : 0;
+            const translateX = -(currentIndex * slideWidth) + offset;
 
             if (animate) {
                 container.style.transition = 'transform 1s ease-in-out';
@@ -216,6 +273,79 @@
             startAutoplay();
         }
 
+        function initializeSwipeSupport() {
+            const container = document.getElementById('properties-carousel');
+            if (!container) {
+                return;
+            }
+
+            detachSwipeSupport(container);
+
+            if (window.innerWidth >= 768) {
+                return;
+            }
+
+            container.addEventListener('touchstart', onTouchStart, { passive: true });
+            container.addEventListener('touchend', onTouchEnd);
+            container.addEventListener('touchcancel', onTouchEnd);
+
+            container.addEventListener('mousedown', onMouseDown);
+            container.addEventListener('mouseup', onMouseUp);
+            container.addEventListener('mouseleave', onMouseLeave);
+        }
+
+        function detachSwipeSupport(container) {
+            container.removeEventListener('touchstart', onTouchStart);
+            container.removeEventListener('touchend', onTouchEnd);
+            container.removeEventListener('touchcancel', onTouchEnd);
+            container.removeEventListener('mousedown', onMouseDown);
+            container.removeEventListener('mouseup', onMouseUp);
+            container.removeEventListener('mouseleave', onMouseLeave);
+        }
+
+        function onTouchStart(event) {
+            swipeStartX = event.changedTouches[0].clientX;
+            stopAutoplay();
+        }
+
+        function onTouchEnd(event) {
+            const touchEndX = event.changedTouches[0].clientX;
+            handleSwipe(touchEndX - swipeStartX);
+            resetAutoplay();
+        }
+
+        function onMouseDown(event) {
+            swipeStartX = event.clientX;
+            isMouseSwiping = true;
+            stopAutoplay();
+        }
+
+        function onMouseUp(event) {
+            if (!isMouseSwiping) return;
+            isMouseSwiping = false;
+            handleSwipe(event.clientX - swipeStartX);
+            resetAutoplay();
+        }
+
+        function onMouseLeave(event) {
+            if (!isMouseSwiping) return;
+            isMouseSwiping = false;
+            resetAutoplay();
+        }
+
+        function handleSwipe(deltaX) {
+            if (Math.abs(deltaX) < 40) {
+                updateCarouselPosition();
+                return;
+            }
+
+            if (deltaX > 0) {
+                prevSlide();
+            } else {
+                nextSlide();
+            }
+        }
+
         // Autoplay functions
         function startAutoplay() {
             autoplayInterval = setInterval(() => {
@@ -224,8 +354,12 @@
         }
 
         function resetAutoplay() {
-            clearInterval(autoplayInterval);
+            stopAutoplay();
             startAutoplay();
+        }
+
+        function stopAutoplay() {
+            clearInterval(autoplayInterval);
         }
 
         // Update all prices to current header currency
@@ -1027,10 +1161,14 @@
 
         // Initialize with villa properties
         renderProperties(featuredProperties.villa || []);
+        initializeHeroSearchPlaceholders();
 
         // Listen for currency changes from header
         window.addEventListener('currencyChanged', function(event) {
-            const { currency, symbol } = event.detail;
+            const { currency, symbol } = event.detail || {};
+            if (currency) {
+                updateHeroSearchPlaceholders(symbol, currency);
+            }
             
             // Update all property currency buttons and prices
             setTimeout(() => {

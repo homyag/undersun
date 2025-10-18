@@ -28,6 +28,29 @@ class CurrencyService:
             return Currency.objects.get(code=code, is_active=True)
         except Currency.DoesNotExist:
             return None
+
+    @staticmethod
+    def get_selected_currency_code(request):
+        """Определить выбранную пользователем валюту с учетом языка"""
+        code = request.session.get('currency') if request else None
+
+        if not code:
+            language = getattr(request, 'LANGUAGE_CODE', 'en') if request else 'en'
+            default_currency = CurrencyService.get_currency_for_language(language)
+            code = default_currency.code if default_currency else 'USD'
+
+        return (code or 'USD').upper()
+
+    @staticmethod
+    def get_price_field_names(currency_code):
+        """Вернуть имена полей цены для выбранной валюты (продажа, аренда)"""
+        mapping = {
+            'USD': ('price_sale_usd', 'price_rent_monthly'),
+            'THB': ('price_sale_thb', 'price_rent_monthly_thb'),
+            'RUB': ('price_sale_rub', 'price_rent_monthly_rub'),
+        }
+
+        return mapping.get((currency_code or 'USD').upper(), mapping['USD'])
     
     @staticmethod
     def convert_price(amount, from_currency_code, to_currency_code):
@@ -92,3 +115,4 @@ class CurrencyService:
                         pass
                         
         return summary
+

@@ -8,6 +8,8 @@ class PropertyInquiry(models.Model):
     INQUIRY_TYPES = (
         ('viewing', _('Запись на просмотр')),
         ('consultation', _('Консультация')),
+        ('callback', _('Заказ обратного звонка')),
+        ('custom_selection', _('Индивидуальный подбор недвижимости')),
         ('general', _('Общий вопрос')),
     )
 
