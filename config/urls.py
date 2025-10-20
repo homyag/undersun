@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
-from apps.core.views import SitemapView
+from apps.core.views import SitemapView, legacy_real_estate_redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,6 +14,8 @@ urlpatterns = [
     path('currency/', include('apps.currency.urls')),  # URLs для валют
     path('tinymce/', include('tinymce.urls')),  # URLs для TinyMCE
     path('admin-ajax/', include('apps.properties.admin_urls')),  # Admin AJAX endpoints без i18n
+    path('real-estate/', legacy_real_estate_redirect),
+    path('real-estate/<path:legacy_path>/', legacy_real_estate_redirect),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),  # Robots
     path('sitemap.xml', SitemapView.as_view(), name='sitemap'),
     path('', RedirectView.as_view(url='/ru/', permanent=True)),  # Редирект на русскую версию
@@ -22,6 +24,8 @@ urlpatterns = [
 # Многоязычные URL
 urlpatterns += i18n_patterns(
     path('', include('apps.core.urls')),
+    path('real-estate/', legacy_real_estate_redirect),
+    path('real-estate/<path:legacy_path>/', legacy_real_estate_redirect),
     path('property/', include('apps.properties.urls')),
     path('locations/', include('apps.locations.urls')),
     path('users/', include('apps.users.urls')),

@@ -5,10 +5,11 @@ from django.views.generic import TemplateView, DetailView, View
 from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponsePermanentRedirect
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import translation
+from django.urls import reverse
 
 from apps.currency.services import CurrencyService
 from apps.properties.models import Property, PropertyType
@@ -352,6 +353,16 @@ def custom_404(request, exception):
     response = TemplateResponse(request, 'core/404.html', status=404)
     response.render()
     return response
+
+
+def legacy_real_estate_redirect(request, *args, **kwargs):
+    """Постоянный редирект со старых URL /real-estate/... на новый каталог /property/."""
+    target_url = reverse('properties:property_list')
+    query_string = request.META.get('QUERY_STRING')
+    if query_string:
+        target_url = f'{target_url}?{query_string}'
+
+    return HttpResponsePermanentRedirect(target_url)
 
 
 class ServiceDetailView(DetailView):
