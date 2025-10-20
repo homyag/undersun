@@ -50,7 +50,6 @@ LOCAL_APPS = [
     'apps.users.apps.UsersConfig',
     'apps.currency.apps.CurrencyConfig',
     'apps.blog.apps.BlogConfig',
-    'data_import',
     'modeltranslation',  # Перемещаем после наших приложений
 ]
 

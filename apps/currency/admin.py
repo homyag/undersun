@@ -1,4 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from .models import Currency, ExchangeRate, CurrencyPreference
 
 
@@ -30,6 +32,7 @@ class ExchangeRateAdmin(admin.ModelAdmin):
     search_fields = ('base_currency__code', 'target_currency__code')
     readonly_fields = ('created_at', 'updated_at')
     date_hierarchy = 'date'
+    actions = ('update_exchange_rates_action',)
     
     fieldsets = (
         ('Курс обмена', {
@@ -40,6 +43,32 @@ class ExchangeRateAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    def update_exchange_rates_action(self, request, queryset):
+        """Админ-действие для запуска команды обновления курсов"""
+        base_currency_code = (
+            Currency.objects.filter(is_base=True).values_list('code', flat=True).first()
+            or 'THB'
+        )
+
+        try:
+            call_command('update_exchange_rates', base_currency=base_currency_code)
+        except CommandError as exc:
+            self.message_user(
+                request,
+                f'Не удалось обновить курсы валют: {exc}',
+                level=messages.ERROR,
+            )
+            return
+
+        self.message_user(
+            request,
+            f'Курсы валют обновлены для базовой валюты {base_currency_code}. '
+            'Обновление цен недвижимости выполнено.',
+            level=messages.SUCCESS,
+        )
+
+    update_exchange_rates_action.short_description = 'Обновить курсы через API'
 
 
 @admin.register(CurrencyPreference)
