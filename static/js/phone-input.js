@@ -6,7 +6,7 @@
 class PhoneInputManager {
     constructor() {
         // Отключено - не инициализируем intl-tel-input
-        console.log('Phone input auto-detection disabled');
+        // Phone input auto-detection intentionally disabled; no runtime init
     }
 
     async init() {
@@ -18,5 +18,3 @@ class PhoneInputManager {
 let phoneManager = null;
 window.phoneManager = phoneManager;
 window.PhoneInputManager = PhoneInputManager;
-
-console.log('Phone input functionality disabled - using simple tel inputs');

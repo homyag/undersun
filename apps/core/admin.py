@@ -1,6 +1,7 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.translation import gettext_lazy as _
 from .models import SEOPage, SEOTemplate, PromotionalBanner, Service, Team
+from apps.properties.services import translate_service_entry
 
 
 @admin.register(SEOPage)
@@ -278,7 +279,7 @@ class ServiceAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).order_by('menu_order', 'title')
     
-    actions = ['activate_services', 'deactivate_services', 'add_to_menu', 'remove_from_menu', 'duplicate_services']
+    actions = ['activate_services', 'deactivate_services', 'add_to_menu', 'remove_from_menu', 'duplicate_services', 'auto_translate_services', 'force_retranslate_services']
     
     def activate_services(self, request, queryset):
         """Активировать выбранные услуги"""
@@ -314,6 +315,82 @@ class ServiceAdmin(admin.ModelAdmin):
             service.save()
         self.message_user(request, f"Продублировано {queryset.count()} услуг")
     duplicate_services.short_description = "Дублировать выбранные услуги"
+
+    def auto_translate_services(self, request, queryset):
+        """Переводит услуги на EN/TH, не перезаписывая заполненные поля"""
+        from apps.core.services import translation_service
+
+        if not translation_service.is_configured():
+            self.message_user(
+                request,
+                'API перевода не настроен. Пожалуйста, укажите YANDEX_TRANSLATE_API_KEY и YANDEX_TRANSLATE_FOLDER_ID.',
+                level=messages.ERROR
+            )
+            return
+
+        translated = 0
+        errors = 0
+
+        for service_obj in queryset:
+            try:
+                translate_service_entry(service_obj, force_retranslate=False)
+                translated += 1
+            except Exception as exc:
+                errors += 1
+                self.message_user(
+                    request,
+                    f'Ошибка перевода услуги "{service_obj.title}": {exc}',
+                    level=messages.ERROR
+                )
+
+        if translated:
+            provider = translation_service.get_available_service()
+            self.message_user(
+                request,
+                f'Переведено {translated} услуг через {provider.upper()}. Пропущено: {errors}.',
+                level=messages.SUCCESS
+            )
+        elif not errors:
+            self.message_user(request, 'Не удалось перевести выбранные услуги: данные уже заполнены или отсутствуют.', level=messages.WARNING)
+
+    auto_translate_services.short_description = "🌐 Перевести услуги на EN/TH (только пустые поля)"
+
+    def force_retranslate_services(self, request, queryset):
+        """Принудительный перевод услуг с перезаписью существующих значений"""
+        from apps.core.services import translation_service
+
+        if not translation_service.is_configured():
+            self.message_user(
+                request,
+                'API перевода не настроен. Пожалуйста, укажите YANDEX_TRANSLATE_API_KEY и YANDEX_TRANSLATE_FOLDER_ID.',
+                level=messages.ERROR
+            )
+            return
+
+        translated = 0
+
+        for service_obj in queryset:
+            try:
+                translate_service_entry(service_obj, force_retranslate=True)
+                translated += 1
+            except Exception as exc:
+                self.message_user(
+                    request,
+                    f'Ошибка перевода услуги "{service_obj.title}": {exc}',
+                    level=messages.ERROR
+                )
+
+        if translated:
+            provider = translation_service.get_available_service()
+            self.message_user(
+                request,
+                f'Принудительно переведено {translated} услуг через {provider.upper()}.',
+                level=messages.SUCCESS
+            )
+        else:
+            self.message_user(request, 'Не удалось перевести выбранные услуги.', level=messages.WARNING)
+
+    force_retranslate_services.short_description = "🔄 Перевести услуги заново (перезаписать)"
     
     def save_model(self, request, obj, form, change):
         """Дополнительная логика при сохранении"""

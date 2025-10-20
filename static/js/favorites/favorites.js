@@ -38,8 +38,7 @@ $(document).ready(function() {
     });
 
     // Обработчик смены валюты
-    window.addEventListener('currencyChanged', function(e) {
-        console.log('Currency changed to:', e.detail.currency);
+    window.addEventListener('currencyChanged', function() {
         // Перезагружаем избранное с новыми ценами
         loadFavoritesPage();
     });

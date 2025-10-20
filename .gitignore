@@ -159,3 +159,6 @@ cleanup.log
 /undersun_data.json
 /underson_bd_dump.json
 /full_database_dump.sql
+/FUNCTIONS_RU.md
+/FUNCTIONS.md
+/AGENT.md

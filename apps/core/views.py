@@ -1,10 +1,14 @@
 from decimal import Decimal, InvalidOperation
 import json
 
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import TemplateView, DetailView, View
 from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.template.response import TemplateResponse
+from django.utils import translation
 
 from apps.currency.services import CurrencyService
 from apps.properties.models import Property, PropertyType
@@ -255,30 +259,99 @@ class MapView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Недвижимость с координатами для карты
         properties = Property.objects.filter(
             is_active=True,
             status='available',
             latitude__isnull=False,
             longitude__isnull=False
-        ).select_related('district', 'property_type').prefetch_related('images')
+        ).select_related('district', 'property_type', 'agent', 'contact_person').prefetch_related('images')
 
         context['properties'] = properties
-        
-        # Статистика для карты
+        context['property_types'] = PropertyType.objects.all()
+        context['districts'] = District.objects.prefetch_related('locations')
+
         context['total_properties'] = properties.count()
         context['sale_properties'] = properties.filter(deal_type__in=['sale', 'both']).count()
         context['rent_properties'] = properties.filter(deal_type__in=['rent', 'both']).count()
-        context['districts_count'] = District.objects.annotate(
-            properties_count=Count('property', filter=Q(
-                property__is_active=True, 
-                property__status='available',
-                property__latitude__isnull=False,
-                property__longitude__isnull=False
-            ))
-        ).filter(properties_count__gt=0).count()
+        context['districts_count'] = District.objects.filter(
+            property__is_active=True,
+            property__status='available'
+        ).distinct().count()
 
         return context
+
+
+class PrivacyView(TemplateView):
+    template_name = 'core/privacy.html'
+
+
+class TermsView(TemplateView):
+    template_name = 'core/terms.html'
+
+
+class SitemapView(View):
+    languages = ['ru', 'en', 'th']
+    static_names = ['core:home', 'core:about', 'core:contact', 'core:map', 'core:privacy', 'core:terms']
+
+    def get(self, request, *args, **kwargs):
+        from django.urls import reverse
+
+        base_url = request.build_absolute_uri('/')[:-1]
+        entries = []
+
+        def build_alternates(resolve_func):
+            alternates = []
+            for lang in self.languages:
+                with translation.override(lang):
+                    path = resolve_func()
+                    alternates.append({
+                        'lang': lang,
+                        'url': f'{base_url}{path}'
+                    })
+            return alternates
+
+        # Static pages
+        for name in self.static_names:
+            alternates = build_alternates(lambda n=name: reverse(n))
+            entries.extend(self._expand_entries(alternates, None))
+
+        # Services
+        for service in Service.objects.filter(is_active=True):
+            alternates = build_alternates(service.get_absolute_url)
+            lastmod = service.updated_at.isoformat() if service.updated_at else None
+            entries.extend(self._expand_entries(alternates, lastmod))
+
+        # Properties
+        for prop in Property.objects.filter(is_active=True, status='available'):
+            alternates = build_alternates(prop.get_absolute_url)
+            lastmod = prop.updated_at.isoformat() if prop.updated_at else None
+            entries.extend(self._expand_entries(alternates, lastmod))
+
+        # Blog
+        for post in BlogPost.get_published():
+            alternates = build_alternates(post.get_absolute_url)
+            lastmod = post.updated_at.isoformat() if post.updated_at else None
+            entries.extend(self._expand_entries(alternates, lastmod))
+
+        xml_content = render_to_string('core/sitemaps/sitemap.xml', {'entries': entries})
+        return HttpResponse(xml_content, content_type='application/xml')
+
+    @staticmethod
+    def _expand_entries(alternates, lastmod):
+        expanded = []
+        for alt in alternates:
+            expanded.append({
+                'loc': alt['url'],
+                'lastmod': lastmod,
+                'alternates': [a for a in alternates if a['url'] != alt['url']]
+            })
+        return expanded
+
+
+def custom_404(request, exception):
+    response = TemplateResponse(request, 'core/404.html', status=404)
+    response.render()
+    return response
 
 
 class ServiceDetailView(DetailView):

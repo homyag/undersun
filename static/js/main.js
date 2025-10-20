@@ -421,7 +421,6 @@ function updatePropertyFilters() {
             showNotification('Ошибка при обновлении фильтров', 'error');
         },
         complete: function() {
-            console.log('AJAX complete');
             // Убираем лоадер
             $('.properties-container').removeClass('loading');
             $('.loading-overlay').remove();

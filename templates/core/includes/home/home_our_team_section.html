@@ -152,10 +152,11 @@
 
             <!-- Call to action -->
             <div class="text-center mt-12">
-                <div class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-accent to-yellow-400 rounded-md shadow-lg">
+                <a href="{% url 'core:contact' %}"
+                   class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-accent to-yellow-400 rounded-md shadow-lg transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-200">
                     <i class="fas fa-phone text-gray-900 mr-2"></i>
                     <span class="text-gray-900 font-medium">{% trans "Свяжитесь с нашей командой для консультации" %}</span>
-                </div>
+                </a>
             </div>
         </div>
     </section>

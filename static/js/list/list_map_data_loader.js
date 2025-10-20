@@ -5,7 +5,6 @@ function updateMapMarkers() {
     // Clear existing markers
     markersGroup.clearLayers();
     
-    console.log('Loading all filtered properties for map view...');
     
     // Get current filter parameters
     const form = document.getElementById('filter-form');
@@ -33,7 +32,6 @@ function updateMapMarkers() {
             const properties = data.properties;
             const bounds = [];
             
-            console.log(`Loaded ${properties.length} total filtered properties for map`);
             
             properties.forEach((property, index) => {
                 const lat = property.lat;
@@ -127,14 +125,10 @@ function updateMapMarkers() {
                 bounds.push([adjustedLat, adjustedLng]);
             });
             
-            console.log(`Total markers added: ${bounds.length}`);
-            
             // Fit map to bounds if we have markers
             if (bounds.length > 0) {
                 const group = new L.featureGroup(markersGroup.getLayers());
                 propertiesMap.fitBounds(group.getBounds().pad(0.1));
-            } else {
-                console.log('No markers to display - keeping default Phuket view');
             }
         })
         .catch(error => {
@@ -146,7 +140,6 @@ function updateMapMarkers() {
 
 // Fallback function to load current page properties
 function loadCurrentPageProperties() {
-    console.log('Loading current page properties as fallback...');
     const propertyCards = document.querySelectorAll('.property-card');
     const bounds = [];
     
@@ -162,12 +155,7 @@ function loadCurrentPageProperties() {
             lng = parseFloat(card.dataset.longitude.replace(',', '.'));
         }
         
-        console.log(`Property ${index + 1}: ID=${propertyId}`);
-        console.log(`  - Raw data: lat="${card.dataset.latitude}", lng="${card.dataset.longitude}"`);
-        console.log(`  - Parsed: lat=${lat}, lng=${lng}`);
-        
         if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-            console.log(`Skipping property ${propertyId} - no valid coordinates (lat=${card.dataset.latitude}, lng=${card.dataset.longitude})`);
             return; // Skip if no coordinates
         }
         
@@ -204,10 +192,7 @@ function loadCurrentPageProperties() {
             const jitter = 0.001; // ~100 meters
             adjustedLat = lat + (Math.random() - 0.5) * jitter;
             adjustedLng = lng + (Math.random() - 0.5) * jitter;
-            console.log(`Applied jitter to property ${propertyId}: [${lat}, ${lng}] -> [${adjustedLat.toFixed(6)}, ${adjustedLng.toFixed(6)}]`);
         }
-        
-        console.log(`Adding marker for property ${propertyId}: ${title} at [${adjustedLat}, ${adjustedLng}]`);
         
         // Create marker with adjusted coordinates using custom marker (include price)
         const marker = createCustomMarker(adjustedLat, adjustedLng, propertyType, dealType, formattedPrice).addTo(markersGroup);
@@ -275,13 +260,9 @@ function loadCurrentPageProperties() {
         bounds.push([adjustedLat, adjustedLng]);
     });
     
-    console.log(`Total markers added: ${bounds.length}`);
-    
     // Fit map to bounds if we have markers
     if (bounds.length > 0) {
         const group = new L.featureGroup(markersGroup.getLayers());
         propertiesMap.fitBounds(group.getBounds().pad(0.1));
-    } else {
-        console.log('No markers to display - keeping default Phuket view');
     }
 }

@@ -1,4 +1,5 @@
 {% load currency_tags %}
+{% load i18n %}
 <!-- Django data injection for JavaScript -->
 {{ featured_properties_villa|json_script:"featured-properties-villa" }}
 {{ featured_properties_condo|json_script:"featured-properties-condo" }}
@@ -28,4 +29,11 @@ try {
         }
     };
 }
+
+window.homePageTranslations = {
+    learnMore: "{{ _('Узнать подробнее')|escapejs }}",
+    changeCurrency: "{{ _('Изменить валюту')|escapejs }}",
+    priceOnRequest: "{{ _('Цена по запросу')|escapejs }}",
+    unitSqm: "{{ _('м²')|escapejs }}"
+};
 </script>

@@ -6,15 +6,23 @@
 
 {% block content %}
 <!-- About Hero Section -->
-<section class="bg-gradient-to-r from-primary to-blue-800 text-white py-20">
-    <div class="max-w-7xl mx-auto px-4">
+<section class="relative overflow-hidden py-20 text-white">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#1a2950] via-primary to-[#071426]"></div>
+    <div class="absolute inset-y-0 right-[-10%] h-full w-2/5 bg-[radial-gradient(circle_at_center,_rgba(255,193,7,0.55)_0%,_rgba(12,23,43,0)_70%)]"></div>
+    <div class="absolute bottom-0 left-1/2 h-1 w-40 -translate-x-1/2 rounded-full bg-accent"></div>
+    <div class="relative z-10 mx-auto max-w-7xl px-4">
         <div class="text-center">
-            <h1 class="text-4xl lg:text-6xl font-bold mb-6">
-                {% trans "О компании Undersun Estate" %}
-            </h1>
-            <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
-                {% trans "Молодая и энергичная команда экспертов рынка недвижимости Таиланда" %}
-            </p>
+            {% with lang=LANGUAGE_CODE|default:'ru' %}
+                <p class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-accent shadow-[0_0_25px_rgba(255,193,7,0.35)]">
+                    {% if lang == 'en' %}About{% elif lang == 'th' %}เกี่ยวกับเรา{% else %}О компании{% endif %}
+                </p>
+                <h1 class="text-4xl font-bold leading-tight lg:text-6xl">
+                    {% if lang == 'en' %}Undersun Estate — experts driving your Phuket investment success{% elif lang == 'th' %}Undersun Estate — ผู้เชี่ยวชาญด้านการลงทุนอสังหาฯ ภูเก็ตของคุณ{% else %}Undersun Estate — команда для вашего инвестиционного успеха{% endif %}
+                </h1>
+                <p class="mt-6 text-lg opacity-90 lg:text-2xl">
+                    {% if lang == 'en' %}A multi-language team specialising in Thai real estate investments, lifestyle properties, and premium client service.{% elif lang == 'th' %}ทีมงานหลายภาษาเชี่ยวชาญอสังหาริมทรัพย์ไทย การลงทุน และบริการระดับพรีเมียมสำหรับลูกค้า{% else %}Эксперты рынка недвижимости Таиланда с акцентом на инвестиции, lifestyle и сервис премиум-класса.{% endif %}
+                </p>
+            {% endwith %}
         </div>
     </div>
 </section>

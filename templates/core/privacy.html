@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% with lang=LANGUAGE_CODE|default:'ru' %}
+{% block title %}
+    {% if lang == 'en' %}Privacy & Cookies Policy - Undersun Estate{% elif lang == 'th' %}นโยบายความเป็นส่วนตัวและคุกกี้ - Undersun Estate{% else %}Политика конфиденциальности и cookie - Undersun Estate{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-r from-primary to-blue-800 py-16 text-white">
+    <div class="mx-auto max-w-5xl px-4 text-center">
+        <h1 class="text-3xl font-bold sm:text-5xl">
+            {% if lang == 'en' %}Privacy & Cookies Policy{% elif lang == 'th' %}นโยบายความเป็นส่วนตัวและการใช้คุกกี้{% else %}Политика конфиденциальности и использование файлов cookie{% endif %}
+        </h1>
+        <p class="mt-4 text-base sm:text-lg opacity-90">
+            {% if lang == 'en' %}
+                Effective date: 20 October 2025. This notice explains how Undersun Estate collects, uses, and protects personal data across all languages of the website.
+            {% elif lang == 'th' %}
+                มีผลบังคับใช้วันที่ 20 ตุลาคม 2025 คำชี้แจงนี้อธิบายวิธีที่ Undersun Estate เก็บ ใช้ และปกป้องข้อมูลส่วนบุคคลในทุกภาษา
+            {% else %}
+                Дата вступления в силу: 20 октября 2025 года. Настоящий документ описывает, как Undersun Estate собирает, использует и защищает персональные данные на всех языках сайта.
+            {% endif %}
+        </p>
+    </div>
+</section>
+
+<section class="py-12">
+    <div class="mx-auto max-w-5xl space-y-10 px-4">
+        {% if lang == 'en' %}
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">1. Data controller & lawful bases (GDPR)</h2>
+                <p>Undersun Estate acts as the data controller for client enquiries, newsletter subscriptions, consultation bookings, and analytics collected through this website. We rely on the following lawful bases pursuant to Articles 6 and 7 GDPR:</p>
+                <ul class="list-disc space-y-3 pl-6 text-slate-700">
+                    <li><strong>Performance of a contract</strong> – responding to property enquiries, preparing consultation offers, scheduling viewings.</li>
+                    <li><strong>Legitimate interests</strong> – securing the platform, preventing fraud, understanding demand for Phuket properties.</li>
+                    <li><strong>Consent</strong> – optional marketing updates, analytics cookies and retargeting technologies.</li>
+                </ul>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">2. Categories of personal data</h2>
+                <p>We process identification and contact information (name, email, phone), investment preferences, consultation notes, technical identifiers (IP address, browser metadata), and cookie IDs. Sensitive data is not intentionally collected; please avoid submitting passport details or financial statements via public forms.</p>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">3. Cookies & tracking technologies</h2>
+                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <h3 class="text-lg font-medium">Essential cookies</h3>
+                    <p class="text-sm text-slate-600">Required for authentication, language preferences, currency selection, and security (set for 12 months).</p>
+                    <h3 class="mt-4 text-lg font-medium">Analytics cookies</h3>
+                    <p class="text-sm text-slate-600">Google Analytics 4 and internal dashboards to evaluate marketing performance (retained for 14 months). These cookies are only activated after explicit consent.</p>
+                    <h3 class="mt-4 text-lg font-medium">Withdrawal of consent</h3>
+                    <p class="text-sm text-slate-600">You may revoke analytics consent at any time in your browser’s cookie settings or by contacting us at <a class="underline" href="/en/contact/">/en/contact/</a>.</p>
+                </div>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">4. International data transfers</h2>
+                <p>Property CRM and marketing systems may store data in the European Union, the United States, and Thailand. We implement Standard Contractual Clauses and PDPA-compliant agreements to ensure equivalent protection where data leaves the EEA.</p>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">5. Data subject rights</h2>
+                <p>You can exercise the rights of access, rectification, erasure, restriction, objection, and portability. Contact <a class="underline" href="mailto:privacy@undersunestate.com">privacy@undersunestate.com</a> or use the form on the contact page. We respond within one month (Article 12 GDPR).</p>
+            </article>
+        {% elif lang == 'th' %}
+            <article class="space-y-6 leading-relaxed">
+                <h2 class="text-2xl font-semibold">นโยบายคุ้มครองข้อมูลส่วนบุคคล</h2>
+                <p>บริษัท UNDERSUN ESTATE CO., LTD ตระหนักถึงความสำคัญของการคุ้มครองข้อมูลส่วนบุคคลของลูกค้า ผู้มีส่วนได้ส่วนเสีย และผู้เกี่ยวข้องทุกท่าน เอกสารฉบับนี้จัดทำขึ้นเพื่ออธิบายแนวทางในการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA)</p>
+                <p>เมื่อคุณใช้บริการ ติดต่อ หรือลงทะเบียนกับเรา ถือว่าคุณยินยอมให้เราเก็บรวบรวม ใช้ และแบ่งปันข้อมูลส่วนบุคคลของคุณตามรายละเอียดที่ระบุไว้ในนโยบายฉบับนี้</p>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">1. ข้อมูลส่วนบุคคลที่เราจัดเก็บ</h2>
+                <p>“ข้อมูลส่วนบุคคล” คือข้อมูลที่สามารถใช้ระบุตัวตนของคุณได้ ไม่ว่าจะโดยทางตรงหรือทางอ้อม เช่น:</p>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li>ชื่อ-นามสกุล</li>
+                    <li>เลขที่บัตรประชาชนหรือหนังสือเดินทาง</li>
+                    <li>เบอร์โทรศัพท์ อีเมล</li>
+                    <li>ที่อยู่ปัจจุบัน</li>
+                    <li>ข้อมูลทรัพย์สินที่คุณสนใจ หรือต้องการขาย/เช่า</li>
+                    <li>ข้อมูลบัญชีธนาคาร (ในกรณีการทำธุรกรรม)</li>
+                    <li>ภาพถ่าย วิดีโอ หรือเสียง จากการเข้าร่วมกิจกรรมหรือตรวจสอบสถานที่</li>
+                </ul>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">2. วิธีการเก็บรวบรวมข้อมูล</h2>
+                <p>เรารวบรวมข้อมูลของคุณผ่านช่องทางต่าง ๆ เช่น:</p>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li>แบบฟอร์มออนไลน์ หรือการสมัครใช้บริการ</li>
+                    <li>การติดต่อกับพนักงานของเรา ผ่านโทรศัพท์ ไลน์ อีเมล หรือช่องทางโซเชียลมีเดีย</li>
+                    <li>การใช้เว็บไซต์ แอปพลิเคชัน หรือระบบจัดการอสังหาริมทรัพย์ของเรา</li>
+                    <li>เอกสารการทำสัญญาจะซื้อจะขาย สัญญาเช่า มอบอำนาจ หรือเอกสารอื่น ๆ ที่เกี่ยวข้อง</li>
+                    <li>ระบบกล้องวงจรปิดในสำนักงาน หรือการถ่ายภาพ/วิดีโอทรัพย์สิน</li>
+                    <li>การรับข้อมูลจากแหล่งอื่นที่คุณได้ให้ความยินยอมไว้ เช่น ผู้แนะนำ ผู้ร่วมงาน หรือพาร์ทเนอร์</li>
+                </ul>
+                <p>หากคุณให้ข้อมูลของบุคคลอื่น เช่น คู่สมรส ผู้เช่า หรือเจ้าของทรัพย์ กรุณาตรวจสอบว่าคุณได้รับความยินยอมจากบุคคลนั้นแล้ว</p>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">3. วัตถุประสงค์ของการใช้ข้อมูล</h2>
+                <p>ข้อมูลส่วนบุคคลที่เรารวบรวมจะถูกนำไปใช้เพื่อวัตถุประสงค์ดังต่อไปนี้:</p>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li>ประสานงานการซื้อ-ขาย หรือเช่าอสังหาริมทรัพย์</li>
+                    <li>ตรวจสอบข้อมูลเบื้องต้นของลูกค้า ผู้ขาย หรือผู้เช่า</li>
+                    <li>จัดทำสัญญา เอกสารประกอบการทำธุรกรรม และรายงานที่เกี่ยวข้อง</li>
+                    <li>ติดต่อ ประสานงาน และให้ข้อมูลที่เกี่ยวข้องกับทรัพย์สิน</li>
+                    <li>ส่งข่าวสารเกี่ยวกับอสังหาริมทรัพย์ใหม่ โปรโมชั่น หรือกิจกรรมที่เกี่ยวข้อง</li>
+                    <li>วิเคราะห์พฤติกรรมของผู้ใช้งานเพื่อปรับปรุงบริการ</li>
+                    <li>ปฏิบัติตามข้อกำหนดของกฎหมายหรือหน่วยงานรัฐ เช่น การยื่นภาษี หรือรายงานกรมที่ดิน</li>
+                </ul>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">4. การเปิดเผยข้อมูลส่วนบุคคล</h2>
+                <p>เราอาจเปิดเผยข้อมูลของคุณต่อบุคคลหรือองค์กรภายนอกภายใต้ขอบเขตที่จำเป็นและเหมาะสม เช่น:</p>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li>เจ้าของทรัพย์/ผู้เช่า หรือผู้มีส่วนเกี่ยวข้องในธุรกรรม</li>
+                    <li>ผู้ประเมินราคา หรือหน่วยงานที่เกี่ยวข้องกับอสังหาริมทรัพย์</li>
+                    <li>ทนายความ นักบัญชี หรือที่ปรึกษาทางกฎหมาย</li>
+                    <li>หน่วยงานภาครัฐ เช่น กรมที่ดิน กรมสรรพากร หรือสำนักงานที่เกี่ยวข้อง</li>
+                    <li>บริษัทในเครือ หรือพันธมิตรทางธุรกิจของเรา (เช่น บริการสินเชื่อธนาคาร บริษัทตกแต่งบ้าน)</li>
+                    <li>ผู้ให้บริการด้านเทคโนโลยีที่ดูแลระบบของเรา เช่น ระบบ CRM หรือเว็บไซต์</li>
+                </ul>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">5. การตลาดและการสื่อสาร</h2>
+                <p>หากคุณได้สมัครรับข่าวสารหรือยินยอมให้เราติดต่อ เราอาจส่ง:</p>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li>ข่าวสารอสังหาริมทรัพย์ที่อาจสนใจ</li>
+                    <li>โปรโมชั่นพิเศษ</li>
+                    <li>ข้อมูลจากพาร์ทเนอร์ที่เกี่ยวข้อง เช่น สินเชื่อ หรือบริการตกแต่งภายใน</li>
+                </ul>
+                <p>คุณสามารถถอนความยินยอมได้ทุกเมื่อ โดยแจ้งผ่านช่องทางที่กำหนดด้านล่าง</p>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">6. การใช้คุกกี้</h2>
+                <p>เว็บไซต์ของเราอาจใช้คุกกี้เพื่อปรับปรุงประสบการณ์ของผู้ใช้ เช่น:</p>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li>จดจำการตั้งค่าของคุณ</li>
+                    <li>วิเคราะห์พฤติกรรมการเข้าชมเว็บไซต์</li>
+                    <li>นำเสนอเนื้อหาที่เหมาะสม</li>
+                </ul>
+                <p>คุณสามารถเลือกปิดการใช้งานคุกกี้ผ่านเบราว์เซอร์ได้ แต่บางฟีเจอร์อาจใช้งานได้ไม่เต็มที่</p>
+            </article>
+
+        {% else %}
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">1. Оператор персональных данных (152‑ФЗ)</h2>
+                <p>ООО «Undersun Estate» выступает оператором персональных данных при обработке заявок, консультаций и статистики посещения сайта в соответствии с Федеральным законом № 152‑ФЗ «О персональных данных».</p>
+                <ul class="list-disc space-y-3 pl-6 text-slate-700">
+                    <li><strong>Цели обработки</strong> – подготовка индивидуальных предложений, организация показов, анализ спроса на недвижимость Пхукета.</li>
+                    <li><strong>Правовые основания</strong> – ст. 6, 9 152‑ФЗ, договорные отношения и выраженное согласие пользователя.</li>
+                    <li><strong>Категории данных</strong> – ФИО, контактные данные, параметры инвестиционного запроса, технические идентификаторы (IP, cookies).</li>
+                </ul>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">2. Файлы cookie</h2>
+                <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <h3 class="text-lg font-medium">Обязательные cookie</h3>
+                    <p class="text-sm text-slate-600">Поддержка авторизации, выбранной валюты, языка интерфейса и защиты от мошенничества (срок хранения — 12 месяцев).</p>
+                    <h3 class="mt-4 text-lg font-medium">Аналитические cookie</h3>
+                    <p class="text-sm text-slate-600">Google Analytics 4 и внутренние отчёты для оптимизации сервиса. Включаются только после получения согласия.</p>
+                    <h3 class="mt-4 text-lg font-medium">Отзыв согласия</h3>
+                    <p class="text-sm text-slate-600">Вы вправе отозвать согласие через настройки браузера или направив запрос на <a class="underline" href="/ru/contact/">страницу контактов</a>.</p>
+                </div>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">3. Права субъекта данных</h2>
+                <p>Вы можете запросить актуализацию, блокирование или уничтожение данных, отправив обращение на <a class="underline" href="mailto:privacy@undersunestate.com">privacy@undersunestate.com</a>. Ответ предоставляется в течение 30 дней (ст. 14, 20 152‑ФЗ).</p>
+            </article>
+
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold">4. Хранение и защита</h2>
+                <p>Данные размещаются на защищённых серверах в ЕС и Таиланде. Применяются организационные и технические меры: шифрование, контроль доступа, аудит обработки.</p>
+            </article>
+        {% endif %}
+
+        <article class="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-5 text-sm text-slate-600">
+            <h2 class="text-lg font-semibold text-slate-900">{% if lang == 'en' %}Contact the Data Protection Officer{% elif lang == 'th' %}ติดต่อฝ่ายนโยบายข้อมูลส่วนบุคคล{% else %}Контакты ответственного за защиту данных{% endif %}</h2>
+            <p>Email: <a class="underline" href="mailto:privacy@undersunestate.com">privacy@undersunestate.com</a></p>
+            <p>{% if lang == 'en' %}Postal address: 9/9 Moo 6, Cherngtalay, Thalang, Phuket 83110, Thailand{% elif lang == 'th' %}ที่อยู่: 9/9 หมู่ 6 เชิงทะเล ถลาง ภูเก็ต 83110 ประเทศไทย{% else %}Почтовый адрес: 9/9 Moo 6, Cherngtalay, Thalang, Phuket 83110, Таиланд{% endif %}</p>
+            <p>{% if lang == 'en' %}Phone: +66 63 303 3133{% elif lang == 'th' %}โทร: +66 63 303 3133{% else %}Телефон: +66 63 303 3133{% endif %}</p>
+            <p>{% if lang == 'en' %}Supervisory authority: Office of the Personal Data Protection Committee (Thailand), Russian Roskomnadzor, and relevant EU DPAs.{% elif lang == 'th' %}หน่วยงานกำกับดูแล: สำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคล (PDPC) และหน่วยงานกำกับดูแลของรัสเซียและสหภาพยุโรปที่เกี่ยวข้อง{% else %}Надзорные органы: Роскомнадзор, Офис PDPC Таиланда, уполномоченные органы ЕС.{% endif %}</p>
+        </article>
+    </div>
+</section>
+{% endblock %}
+{% endwith %}

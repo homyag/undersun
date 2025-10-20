@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% with lang=LANGUAGE_CODE|default:'ru' %}
+{% block title %}
+    {% if lang == 'en' %}Terms of Use - Undersun Estate{% elif lang == 'th' %}เงื่อนไขการใช้งาน - Undersun Estate{% else %}Пользовательское соглашение - Undersun Estate{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-r from-primary to-blue-800 py-16 text-white">
+    <div class="mx-auto max-w-5xl px-4 text-center">
+        <h1 class="text-3xl font-bold sm:text-5xl">
+            {% if lang == 'en' %}Terms of Use{% elif lang == 'th' %}เงื่อนไขการใช้งาน{% else %}Пользовательское соглашение{% endif %}
+        </h1>
+        <p class="mt-4 text-base sm:text-lg opacity-90">
+            {% if lang == 'en' %}Effective date: 20 October 2025. These terms govern your access to the Undersun Estate website, services, and digital tools.{% elif lang == 'th' %}มีผลใช้บังคับวันที่ 20 ตุลาคม 2025 ข้อกำหนดนี้ควบคุมการใช้งานเว็บไซต์ บริการ และเครื่องมือดิจิทัลของ Undersun Estate{% else %}Дата вступления в силу: 20 октября 2025 года. Настоящие условия регулируют доступ к сайту, сервисам и цифровым инструментам Undersun Estate.{% endif %}
+        </p>
+    </div>
+</section>
+
+<section class="py-12">
+    <div class="mx-auto max-w-5xl space-y-10 px-4 text-slate-700">
+        {% if lang == 'en' %}
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">1. Acceptance of terms</h2>
+                <p>By browsing Undersun Estate, submitting enquiries, or booking consultations you agree to these Terms of Use and our Privacy & Cookies Policy. If you do not accept these terms, please refrain from using the website.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">2. Services provided</h2>
+                <p>Undersun Estate offers real-estate listings, investment advisory, consultation booking, and property management support based in Phuket, Thailand. Online content is for informational purposes and may change without notice.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">3. User responsibilities</h2>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>Provide accurate contact information when submitting forms.</li>
+                    <li>Use the website for lawful purposes only and refrain from automated scraping.</li>
+                    <li>Respect intellectual property; do not republish or distribute listings without permission.</li>
+                </ul>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">4. Investment disclaimer</h2>
+                <p>Real estate investment involves risks. The information provided on this site does not constitute legal, financial, or tax advice. Always consult qualified specialists before committing to a transaction.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">5. Limitation of liability</h2>
+                <p>Undersun Estate is not liable for inaccuracies in third-party listings, external website links, or decisions made solely on the basis of online information.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">6. Governing law</h2>
+                <p>These terms are governed by the laws of the Kingdom of Thailand. Disputes shall be handled by competent Thai courts.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">7. Contact</h2>
+                <p>Questions regarding these terms can be addressed to <a class="underline" href="mailto:info@undersunestate.com">info@undersunestate.com</a>.</p>
+            </article>
+        {% elif lang == 'th' %}
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">1. การยอมรับเงื่อนไข</h2>
+                <p>เมื่อคุณเข้าชมเว็บไซต์ Undersun Estate ส่งแบบฟอร์ม หรือจองการปรึกษา ถือว่าคุณยอมรับเงื่อนไขการใช้งานนี้ หากไม่เห็นด้วย โปรดหยุดใช้บริการเว็บไซต์</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">2. บริการที่ให้</h2>
+                <p>Undersun Estate ให้บริการประกาศอสังหาริมทรัพย์ ที่ปรึกษาการลงทุน การนัดหมายชมทรัพย์ และการดูแลจัดการทรัพย์ในจังหวัดภูเก็ต ข้อมูลบนเว็บไซต์ใช้เพื่อการให้ข้อมูลและอาจมีการเปลี่ยนแปลงได้</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">3. หน้าที่ของผู้ใช้งาน</h2>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>ให้ข้อมูลการติดต่อที่ถูกต้องเมื่อกรอกแบบฟอร์ม</li>
+                    <li>ใช้เว็บไซต์เพื่อวัตถุประสงค์ที่ถูกกฎหมาย และไม่ทำการเก็บข้อมูลแบบอัตโนมัติ</li>
+                    <li>เคารพลิขสิทธิ์ ห้ามคัดลอกหรือเผยแพร่ประกาศโดยไม่ได้รับอนุญาต</li>
+                </ul>
+            </article>
+            <article class="space-y-6 leading-relaxed">
+                <h2 class="text-2xl font-semibold text-slate-900">4. ข้อจำกัดความรับผิด</h2>
+                <p>ธุรกรรมอสังหาริมทรัพย์มีความเสี่ยง ข้อมูลในเว็บไซต์ไม่ได้เป็นคำแนะนำด้านกฎหมาย การเงิน หรือภาษี กรุณาปรึกษาผู้เชี่ยวชาญก่อนตัดสินใจ</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">5. กฎหมายที่ใช้บังคับ</h2>
+                <p>เงื่อนไขนี้อยู่ภายใต้กฎหมายแห่งราชอาณาจักรไทย ข้อพิพาทใด ๆ ให้อยู่ในอำนาจศาลไทยที่เหมาะสม</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">6. ช่องทางติดต่อ</h2>
+                <p>สอบถามเพิ่มเติมเกี่ยวกับเงื่อนไขการใช้งาน กรุณาติดต่อ <a class="underline" href="mailto:info@undersunestate.com">info@undersunestate.com</a></p>
+
+                <div class="prose prose-sm lg:prose-base max-w-none">
+                    <h3 class="text-xl font-semibold mt-6 text-slate-900">นโยบายคุ้มครองข้อมูลส่วนบุคคล</h3>
+                    <p>บริษัท UNDERSUN ESTATE CO., LTD ตระหนักถึงความสำคัญของการคุ้มครองข้อมูลส่วนบุคคลของลูกค้า ผู้มีส่วนได้ส่วนเสีย และผู้เกี่ยวข้องทุกท่าน เอกสารฉบับนี้จัดทำขึ้นเพื่ออธิบายแนวทางในการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA)</p>
+                    <p>เมื่อคุณใช้บริการ ติดต่อ หรือลงทะเบียนกับเรา ถือว่าคุณยินยอมให้เราเก็บรวบรวม ใช้ และแบ่งปันข้อมูลส่วนบุคคลของคุณตามรายละเอียดที่ระบุไว้ในนโยบายฉบับนี้</p>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">1. ข้อมูลส่วนบุคคลที่เราจัดเก็บ</h4>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li>ชื่อ-นามสกุล</li>
+                        <li>เลขที่บัตรประชาชนหรือหนังสือเดินทาง</li>
+                        <li>เบอร์โทรศัพท์ อีเมล</li>
+                        <li>ที่อยู่ปัจจุบัน</li>
+                        <li>ข้อมูลทรัพย์สินที่คุณสนใจ หรือต้องการขาย/เช่า</li>
+                        <li>ข้อมูลบัญชีธนาคาร (ในกรณีการทำธุรกรรม)</li>
+                        <li>ภาพถ่าย วิดีโอ หรือเสียง จากการเข้าร่วมกิจกรรมหรือตรวจสอบสถานที่</li>
+                    </ul>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">2. วิธีการเก็บรวบรวมข้อมูล</h4>
+                    <p>เรารวบรวมข้อมูลของคุณผ่านแบบฟอร์ม การติดต่อกับพนักงาน การใช้เว็บไซต์/แอปพลิเคชัน เอกสารสัญญา ระบบกล้องวงจรปิด และข้อมูลจากผู้แนะนำหรือพาร์ทเนอร์</p>
+                    <p>หากคุณให้ข้อมูลของบุคคลอื่น โปรดตรวจสอบว่าคุณได้รับความยินยอมแล้ว</p>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">3. วัตถุประสงค์ของการใช้ข้อมูล</h4>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li>ประสานงานการซื้อ-ขายหรือเช่าอสังหาริมทรัพย์</li>
+                        <li>ตรวจสอบข้อมูลเบื้องต้นของลูกค้า ผู้ขาย หรือผู้เช่า</li>
+                        <li>จัดทำเอกสารและรายงานประกอบธุรกรรม</li>
+                        <li>ส่งข่าวสารหรือโปรโมชั่นที่เกี่ยวข้อง</li>
+                        <li>วิเคราะห์การใช้งานเพื่อปรับปรุงบริการ</li>
+                        <li>ปฏิบัติตามกฎหมาย เช่น การยื่นภาษีหรือรายงานกรมที่ดิน</li>
+                    </ul>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">4. การเปิดเผยข้อมูลส่วนบุคคล</h4>
+                    <p>เราอาจเปิดเผยข้อมูลต่อผู้เกี่ยวข้องในธุรกรรม หน่วยงานรัฐ คู่ค้า หรือผู้ให้บริการด้านเทคโนโลยีตามความจำเป็น</p>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">5. การตลาดและการสื่อสาร</h4>
+                    <p>เราส่งข่าวสาร โปรโมชั่น หรือข้อมูลพาร์ทเนอร์ให้คุณเมื่อได้รับความยินยอม คุณสามารถถอนความยินยอมได้ทุกเมื่อ</p>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">6. การใช้คุกกี้</h4>
+                    <p>เว็บไซต์ใช้คุกกี้เพื่อจดจำการตั้งค่า วิเคราะห์การใช้งาน และนำเสนอเนื้อหาที่เหมาะสม คุณสามารถปิดคุกกี้ในเบราว์เซอร์ได้ แต่บางฟีเจอร์อาจใช้งานได้ไม่ครบ</p>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">7. ความปลอดภัยของข้อมูล</h4>
+                    <p>เราใช้มาตรการด้านเทคนิคและองค์กร เช่น การเข้ารหัสและการควบคุมสิทธิ์ เพื่อป้องกันการเข้าถึงโดยไม่ได้รับอนุญาต</p>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">8. สิทธิของเจ้าของข้อมูล</h4>
+                    <p>คุณมีสิทธิ์ขอเข้าถึง แก้ไข ลบ หรือถอนความยินยอมในการใช้ข้อมูล ติดต่อเราได้ตามช่องทางด้านล่าง</p>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">9. การติดต่อเรา</h4>
+                    <p>ฝ่ายนโยบายข้อมูลส่วนบุคคล UNDERSUN ESTATE CO., LTD โทร: +66 63 303 3133 อีเมล: info@undersunestate.com เว็บไซต์: www.undersunestate.com</p>
+
+                    <h4 class="font-semibold text-slate-900 mt-4">10. กฎหมายที่ใช้บังคับ</h4>
+                    <p>นโยบายนี้อยู่ภายใต้กฎหมายประเทศไทย หากมีข้อสงสัยเพิ่มเติม โปรดติดต่อเรา</p>
+                </div>
+            </article>
+        {% else %}
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">1. Принятие условий</h2>
+                <p>Используя сайт Undersun Estate, отправляя заявки или оформляя консультации, вы соглашаетесь с настоящими условиями и Политикой конфиденциальности. Если условия вас не устраивают, прекратите использование ресурсов.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">2. Предоставляемые услуги</h2>
+                <p>Undersun Estate предлагает объявления недвижимости, консультации по инвестициям, организацию показов и сопровождение сделок в Пхукете. Материалы на сайте носят справочный характер и могут обновляться без уведомления.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">3. Обязанности пользователя</h2>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>Предоставлять достоверные контактные данные в формах.</li>
+                    <li>Использовать сайт исключительно в легальных целях и не осуществлять автоматизированный сбор данных.</li>
+                    <li>Соблюдать авторские права и не распространять материалы без разрешения.</li>
+                </ul>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">4. Отказ от ответственности</h2>
+                <p>Инвестиции в недвижимость сопряжены с рисками. Информация на сайте не является юридической, налоговой или финансовой консультацией. Перед совершением сделки обращайтесь к специалистам.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">5. Ограничение ответственности</h2>
+                <p>Undersun Estate не несет ответственности за неточности в объявлениях третьих лиц, внешние ссылки и решения, принятые исключительно на основании интернет-информации.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">6. Применимое право</h2> 
+                <p>Условия регулируются законодательством Королевства Таиланд. Споры рассматриваются компетентными судами Таиланда.</p>
+            </article>
+            <article class="space-y-6">
+                <h2 class="text-2xl font-semibold text-slate-900">7. Контакты</h2> 
+                <p>Вопросы по условиям направляйте на <a class="underline" href="mailto:info@undersunestate.com">info@undersunestate.com</a>.</p>
+            </article>
+        {% endif %}
+
+        <article class="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-5 text-sm text-slate-600">
+            <h2 class="text-lg font-semibold text-slate-900">{% if lang == 'en' %}Need assistance?{% elif lang == 'th' %}ต้องการความช่วยเหลือ?{% else %}Нужна помощь?{% endif %}</h2>
+            <p>{% if lang == 'en' %}Reach us at +66 63 303 3133 or via the contact form for personalised support.{% elif lang == 'th' %}ติดต่อเราได้ที่ +66 63 303 3133 หรือผ่านแบบฟอร์มติดต่อ เพื่อรับคำปรึกษาอย่างมืออาชีพ{% else %}Свяжитесь с нами по телефону +66 63 303 3133 или через форму обратной связи для персональной консультации.{% endif %}</p>
+        </article>
+    </div>
+</section>
+{% endblock %}
+{% endwith %}

@@ -1,6 +1,16 @@
 // Featured Properties Carousel
 (function () {
 
+    const translations = window.homePageTranslations || {};
+    const translate = (key, fallback) => {
+        const value = translations[key];
+        return typeof value === 'string' && value.length ? value : fallback;
+    };
+    const PRICE_ON_REQUEST = translate('priceOnRequest', 'Цена по запросу');
+    const LEARN_MORE = translate('learnMore', 'Узнать подробнее');
+    const CHANGE_CURRENCY = translate('changeCurrency', 'Изменить валюту');
+    const UNIT_SQM = translate('unitSqm', 'м²');
+
     function initFeaturedProperties() {
         
         // Check if data is available
@@ -487,7 +497,7 @@
             }
 
             if (!basePrice) {
-                priceElement.innerHTML = 'Цена по запросу';
+                priceElement.innerHTML = PRICE_ON_REQUEST;
                 if (pricePerSqmElement) {
                     pricePerSqmElement.innerHTML = '';
                 }
@@ -885,7 +895,7 @@
 
             if (!basePrice) {
                 allPriceElements.forEach(priceElement => {
-                    priceElement.textContent = 'Цена по запросу';
+                    priceElement.textContent = PRICE_ON_REQUEST;
                 });
                 return;
             }
@@ -1043,7 +1053,11 @@
         // Create property card
         function createPropertyCard(property) {
             const imageUrl = property.main_image_url || '/static/images/no-image.svg';
-            const priceDisplay = property.price_formatted || 'Цена по запросу';
+            const priceDisplay = property.price_formatted || PRICE_ON_REQUEST;
+            const unitSqm = UNIT_SQM;
+            const changeCurrencyLabel = CHANGE_CURRENCY;
+            const learnMoreLabel = LEARN_MORE;
+            const priceOnRequestLabel = PRICE_ON_REQUEST;
 
             // Safely check favorites - use window.isFavorite if available
             let isFav = false;
@@ -1112,7 +1126,7 @@
                                 ${property.area > 0 ? `
                                     <div class="flex items-center text-gray-600">
                                         <i class="fas fa-ruler-combined mr-2 text-primary text-base"></i>
-                                        <span class="text-base font-medium">${property.area} м²</span>
+                                        <span class="text-base font-medium">${property.area} ${unitSqm}</span>
                                     </div>
                                 ` : ''}
                             </div>
@@ -1124,7 +1138,14 @@
                             <div class="flex items-center justify-center space-x-3 mb-2">
                                 <!-- Price -->
                                 <span class="text-2xl font-bold text-primary card-price-${property.id}" data-property-id="${property.id}" data-deal-type="${property.deal_type}">
-                                    ${formatPrice(getInitialPrice(property))}
+                                    ${(() => {
+                                        const initialPrice = getInitialPrice(property);
+                                        if (!initialPrice) {
+                                            return priceOnRequestLabel;
+                                        }
+                                        const formattedPrice = formatPrice(initialPrice);
+                                        return formattedPrice || priceOnRequestLabel;
+                                    })()}
                                 </span>
                                 
                                 <!-- Currency Dropdown -->
@@ -1132,7 +1153,7 @@
                                     <button class="currency-toggle-btn bg-gray-100 hover:bg-primary hover:text-white text-gray-500 transition-all duration-200 px-3 py-1.5 rounded-md text-sm border border-gray-200 hover:border-primary flex items-center"
                                             data-property-id="${property.id}"
                                             data-deal-type="${property.deal_type}"
-                                            title="Изменить валюту">
+                                            title="${changeCurrencyLabel}">
                                         <span class="current-currency-${property.id} font-mono mr-1">${getInitialCurrency(property).symbol}</span>
                                         <span class="current-currency-code-${property.id} font-medium mr-1">${getInitialCurrency(property).code}</span>
                                         <i class="fas fa-chevron-down text-xs"></i>
@@ -1152,7 +1173,7 @@
                     </div>
                     
                     <a href="${property.url}" class="block w-full bg-accent hover:bg-yellow-500 text-gray-900 py-2 px-4 rounded-md font-semibold transition-all duration-300 text-center text-sm">
-                        Узнать подробнее
+                        ${learnMoreLabel}
                     </a>
                 </div>
             </div>
@@ -1204,31 +1225,5 @@
     } else {
         initFeaturedProperties();
     }
-    
-    // Test function for debugging
-    window.testCurrencyDropdown = function() {
-        console.log('=== Testing Currency Dropdown ===');
-        const buttons = document.querySelectorAll('.currency-toggle-btn');
-        const dropdowns = document.querySelectorAll('.currency-dropdown');
-        
-        console.log('Found buttons:', buttons.length);
-        console.log('Found dropdowns:', dropdowns.length);
-        
-        buttons.forEach((btn, i) => {
-            console.log(`Button ${i}:`, {
-                propertyId: btn.dataset.propertyId,
-                hasHandler: !!btn.currencyToggleHandler
-            });
-        });
-        
-        dropdowns.forEach((dropdown, i) => {
-            console.log(`Dropdown ${i}:`, {
-                id: dropdown.id,
-                display: dropdown.style.display,
-                opacity: dropdown.style.opacity,
-                visibility: dropdown.style.visibility
-            });
-        });
-    };
     
 })();

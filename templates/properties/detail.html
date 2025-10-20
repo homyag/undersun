@@ -325,7 +325,7 @@
                                     </div>
                                     <div class="flex-grow">
                                         <div class="font-bold text-xl text-gray-900">{{ property.area_total }}</div>
-                                        <div class="text-sm text-gray-600 font-medium">м²</div>
+                                        <div class="text-sm text-gray-600 font-medium">{% trans "м²" %}</div>
                                     </div>
                                 </div>
                             {% endif %}
@@ -1681,6 +1681,9 @@ const TRANSLATIONS = {
             area_total: {% if property.area_total %}{{ property.area_total|unlocalize }}{% else %}null{% endif %},
             deal_type: '{{ property.deal_type }}'
         };
+        const perMonthSuffix = "{% trans '/мес' %}";
+        const priceOnRequestText = "{% trans 'По запросу' %}";
+        const squareMeterUnit = "{% trans 'м²' %}";
 
         function updatePrices() {
             // Get current currency from localStorage
@@ -1716,19 +1719,19 @@ const TRANSLATIONS = {
                 if (propertyData.deal_type === 'sale' && salePrice) {
                     priceText = `${currencySymbol}${Math.round(salePrice).toLocaleString()}`;
                 } else if (propertyData.deal_type === 'rent' && rentPrice) {
-                    priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/мес`;
+                    priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}${perMonthSuffix}`;
                 } else if (propertyData.deal_type === 'both') {
                     if (salePrice) {
                         priceText = `${currencySymbol}${Math.round(salePrice).toLocaleString()}`;
                     } else if (rentPrice) {
-                        priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/мес`;
+                        priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}${perMonthSuffix}`;
                     }
                 }
 
                 if (priceText) {
                     mainPriceEl.textContent = priceText;
                 } else {
-                    mainPriceEl.textContent = 'По запросу';
+                    mainPriceEl.textContent = priceOnRequestText;
                 }
             }
 
@@ -1738,7 +1741,7 @@ const TRANSLATIONS = {
             if (pricePerSqmEl && propertyData.area_total && salePrice) {
                 if (propertyData.deal_type !== 'rent') {
                     const pricePerSqm = Math.round(salePrice / propertyData.area_total);
-                    const pricePerSqmText = `${pricePerSqm.toLocaleString()} ${currencySymbol}/м²`;
+                    const pricePerSqmText = `${pricePerSqm.toLocaleString()} ${currencySymbol}/${squareMeterUnit}`;
                     pricePerSqmEl.textContent = pricePerSqmText;
                 } else {
                     pricePerSqmEl.textContent = '';
