@@ -524,47 +524,7 @@ class Command(BaseCommand):
         for element in soup(['script', 'style', 'noscript', 'svg', 'form']):
             element.decompose()
 
-        content_selectors = [
-            '[itemprop="articleBody"]',
-            '.el-article',
-            '.article-content',
-            '.post-content',
-            '.uk-article',
-            'article',
-            '.content',
-            'main'
-        ]
-
-        content_element = None
-        for selector in content_selectors:
-            candidates = []
-            for element in soup.select(selector):
-                prepared = self.prepare_content_element(element)
-                if not prepared:
-                    continue
-                text = prepared.get_text(separator=' ', strip=True)
-                if len(text) < 200:
-                    continue
-                candidates.append((len(text), prepared))
-            if candidates:
-                # Берём самый содержательный элемент среди кандидатов
-                candidates.sort(key=lambda item: item[0], reverse=True)
-                content_element = candidates[0][1]
-                break
-
-        # Если подходящий контейнер не найден, собираем текст из параграфов и списков
-        if not content_element:
-            paragraphs = soup.find_all(['p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote'])
-            meaningful = []
-            for tag in paragraphs:
-                text = tag.get_text(separator=' ', strip=True)
-                if tag.name in ['h2', 'h3', 'h4'] or len(text) > 40:
-                    meaningful.append(tag)
-            if meaningful:
-                container = soup.new_tag('div')
-                for tag in meaningful:
-                    container.append(tag)
-                content_element = self.prepare_content_element(container)
+        content_element = self.find_content_element(soup)
 
         if content_element:
             self.make_urls_absolute(content_element)
@@ -576,6 +536,49 @@ class Command(BaseCommand):
                 excerpt = excerpt_text[:500] + '...' if len(excerpt_text) > 500 else excerpt_text
 
         return content, excerpt
+
+    def find_content_element(self, soup):
+        """Поиск наиболее содержательного контейнера статьи"""
+        content_selectors = [
+            '[itemprop="articleBody"]',
+            '.el-article',
+            '.article-content',
+            '.post-content',
+            '.uk-article',
+            'article',
+            '.content',
+            'main'
+        ]
+
+        for selector in content_selectors:
+            candidates = []
+            for element in soup.select(selector):
+                prepared = self.prepare_content_element(element)
+                if not prepared:
+                    continue
+                text = prepared.get_text(separator=' ', strip=True)
+                if len(text) < 200:
+                    continue
+                candidates.append((len(text), prepared))
+            if candidates:
+                candidates.sort(key=lambda item: item[0], reverse=True)
+                return candidates[0][1]
+
+        # Если подходящий контейнер не найден, собираем текст из параграфов и списков
+        paragraphs = soup.find_all(['p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote'])
+        meaningful = []
+        for tag in paragraphs:
+            text = tag.get_text(separator=' ', strip=True)
+            if tag.name in ['h2', 'h3', 'h4'] or len(text) > 40:
+                meaningful.append(tag)
+
+        if meaningful:
+            container = soup.new_tag('div')
+            for tag in meaningful:
+                container.append(tag)
+            return self.prepare_content_element(container)
+
+        return None
 
     def prepare_content_element(self, element):
         """Подготовка элемента с контентом статьи"""
@@ -785,27 +788,35 @@ class Command(BaseCommand):
 
     def extract_video_links(self, soup):
         """Извлечение ссылок на видео"""
+        content_element = self.find_content_element(soup)
+        if not content_element:
+            return []
+
         videos = []
-        
-        # Ищем YouTube ссылки
+
+        # Ищем YouTube ссылки только внутри контента статьи
         youtube_patterns = [
             r'https?://(?:www\.)?youtube\.com/watch\?v=[\w-]+',
             r'https?://youtu\.be/[\w-]+',
             r'https?://(?:www\.)?youtube\.com/embed/[\w-]+'
         ]
-        
-        page_text = soup.get_text()
+
+        content_text = content_element.get_text()
         for pattern in youtube_patterns:
-            matches = re.findall(pattern, page_text)
+            matches = re.findall(pattern, content_text)
             videos.extend(matches)
-        
-        # Ищем ссылки в href атрибутах
-        for link in soup.find_all('a', href=True):
+
+        for link in content_element.find_all('a', href=True):
             href = link.get('href')
             if any(pattern in href for pattern in ['youtube.com', 'youtu.be']):
                 videos.append(href)
-        
-        return list(set(videos))  # Убираем дубликаты
+
+        for iframe in content_element.find_all('iframe', src=True):
+            src = iframe.get('src')
+            if any(pattern in src for pattern in ['youtube.com', 'youtu.be']):
+                videos.append(src)
+
+        return list(set(videos))
 
     def extract_youtube_id(self, url):
         """Извлечение ID видео YouTube"""
