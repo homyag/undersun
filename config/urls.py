@@ -13,7 +13,6 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),  # URLs для смены языка
     path('currency/', include('apps.currency.urls')),  # URLs для валют
     path('tinymce/', include('tinymce.urls')),  # URLs для TinyMCE
-    path('data-import/', include('data_import.urls')),  # URLs для импорта данных
     path('admin-ajax/', include('apps.properties.admin_urls')),  # Admin AJAX endpoints без i18n
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),  # Robots
     path('sitemap.xml', SitemapView.as_view(), name='sitemap'),
