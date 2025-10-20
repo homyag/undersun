@@ -68,8 +68,24 @@ class BlogPost(models.Model):
                              help_text=_('Пользователь системы - автор статьи (устаревшее поле)'))
     
     # Изображения
-    featured_image = models.ImageField(_('Главное изображение'), upload_to='blog/featured/', 
-                                     blank=True, help_text=_('Главное изображение статьи'))
+    featured_image = models.ImageField(
+        _('Главное изображение (RU)'),
+        upload_to='blog/featured/',
+        blank=True,
+        help_text=_('Главное изображение статьи для русской версии')
+    )
+    featured_image_en = models.ImageField(
+        _('Главное изображение (EN)'),
+        upload_to='blog/featured/',
+        blank=True,
+        help_text=_('Локализованное изображение статьи для английской версии')
+    )
+    featured_image_th = models.ImageField(
+        _('Главное изображение (TH)'),
+        upload_to='blog/featured/',
+        blank=True,
+        help_text=_('Локализованное изображение статьи для тайской версии')
+    )
     featured_image_alt = models.CharField(_('Alt текст изображения'), max_length=200, blank=True)
     
     # Дополнительные поля для событий
@@ -87,8 +103,21 @@ class BlogPost(models.Model):
                                        help_text=_('Для обзоров - рейтинг от 1 до 5'))
     
     # Поля миграции из внешнего сайта
-    original_url = models.URLField(_('Оригинальный URL'), blank=True,
-                                 help_text=_('URL статьи на исходном сайте'))
+    original_url = models.URLField(
+        _('Оригинальный URL (RU)'),
+        blank=True,
+        help_text=_('URL русской версии статьи на исходном сайте')
+    )
+    original_url_en = models.URLField(
+        _('Оригинальный URL (EN)'),
+        blank=True,
+        help_text=_('URL английской версии статьи на исходном сайте')
+    )
+    original_url_th = models.URLField(
+        _('Оригинальный URL (TH)'),
+        blank=True,
+        help_text=_('URL тайской версии статьи на исходном сайте')
+    )
     original_id = models.CharField(_('Оригинальный ID'), max_length=50, blank=True,
                                  help_text=_('ID статьи на исходном сайте'))
     

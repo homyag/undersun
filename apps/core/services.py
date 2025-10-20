@@ -11,16 +11,24 @@ logger = logging.getLogger(__name__)
 
 class TranslationService:
     """Сервис для автоматического перевода контента через API"""
-    
+
     def __init__(self):
-        self.google_api_key = getattr(settings, 'GOOGLE_TRANSLATE_API_KEY', '')
-        self.deepl_api_key = getattr(settings, 'DEEPL_API_KEY', '')
-        self.preferred_service = getattr(settings, 'TRANSLATION_SERVICE', 'google')
         self.translation_settings = getattr(settings, 'TRANSLATION_SETTINGS', {
             'source_language': 'ru',
             'target_languages': ['en', 'th'],
             'chunk_size': 5000,
         })
+        self.refresh_credentials()
+
+    def refresh_credentials(self) -> None:
+        """Читает актуальные реквизиты доступа из настроек."""
+        self.yandex_api_key = getattr(settings, 'YANDEX_TRANSLATE_API_KEY', '')
+        self.yandex_folder_id = getattr(settings, 'YANDEX_TRANSLATE_FOLDER_ID', '')
+        self.yandex_endpoint = getattr(
+            settings,
+            'YANDEX_TRANSLATE_ENDPOINT',
+            'https://translate.api.cloud.yandex.net/translate/v2/translate'
+        )
     
     def translate_text(self, text: str, target_language: str, preserve_html: bool = False) -> Optional[str]:
         """
@@ -36,7 +44,10 @@ class TranslationService:
         """
         if not text or not text.strip():
             return text
-            
+
+        # Обновляем реквизиты, чтобы подхватить изменения без рестарта
+        self.refresh_credentials()
+
         # Удаляем HTML теги если не нужно их сохранять
         if not preserve_html:
             text = strip_tags(text)
@@ -46,14 +57,11 @@ class TranslationService:
         translated_chunks = []
         
         for chunk in chunks:
-            if self.preferred_service == 'deepl' and self.deepl_api_key:
-                translated_chunk = self._translate_with_deepl(chunk, target_language)
-            elif self.google_api_key:
-                translated_chunk = self._translate_with_google(chunk, target_language)
-            else:
-                logger.error("No translation API key configured")
-                return None
-                
+            translated_chunk = self._translate_with_yandex(
+                chunk,
+                target_language,
+                preserve_html=preserve_html
+            )
             if translated_chunk is None:
                 logger.error(f"Failed to translate chunk: {chunk[:100]}...")
                 return None
@@ -95,72 +103,65 @@ class TranslationService:
             
         return chunks
     
-    def _translate_with_google(self, text: str, target_language: str) -> Optional[str]:
-        """Перевод через Google Translate API"""
+    def _translate_with_yandex(
+        self,
+        text: str,
+        target_language: str,
+        preserve_html: bool = False
+    ) -> Optional[str]:
+        """Перевод через Yandex Translate API"""
+        if not self.is_configured():
+            logger.error("Yandex Translate API is not configured")
+            return None
+
+        format_type = 'HTML' if preserve_html else 'PLAIN_TEXT'
+
+        payload = {
+            'folderId': self.yandex_folder_id,
+            'texts': [text],
+            'targetLanguageCode': target_language,
+            'format': format_type,
+        }
+
+        source_language = self.translation_settings.get('source_language')
+        if source_language:
+            payload['sourceLanguageCode'] = source_language
+
+        headers = {
+            'Authorization': f'Api-Key {self.yandex_api_key}',
+            'Content-Type': 'application/json',
+        }
+
         try:
-            url = "https://translation.googleapis.com/language/translate/v2"
-            params = {
-                'key': self.google_api_key,
-                'q': text,
-                'source': self.translation_settings['source_language'],
-                'target': target_language,
-                'format': 'text'
-            }
-            
-            response = requests.post(url, params=params, timeout=30)
+            response = requests.post(
+                self.yandex_endpoint,
+                json=payload,
+                headers=headers,
+                timeout=30
+            )
             response.raise_for_status()
-            
+
             data = response.json()
-            if 'data' in data and 'translations' in data['data']:
-                return data['data']['translations'][0]['translatedText']
-            else:
-                logger.error(f"Unexpected Google Translate response: {data}")
-                return None
-                
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Google Translate API error: {e}")
+            translations = data.get('translations')
+            if translations:
+                return translations[0].get('text')
+
+            logger.error(f"Unexpected Yandex Translate response: {data}")
             return None
-        except Exception as e:
-            logger.error(f"Google Translate unexpected error: {e}")
+        except requests.exceptions.HTTPError as exc:
+            # Логируем тело ответа, чтобы проще было диагностировать авторизацию
+            error_text = exc.response.text if exc.response is not None else str(exc)
+            logger.error(
+                "Yandex Translate API error: %s | response body: %s",
+                exc,
+                error_text[:500]
+            )
             return None
-    
-    def _translate_with_deepl(self, text: str, target_language: str) -> Optional[str]:
-        """Перевод через DeepL API"""
-        try:
-            # DeepL использует другие коды языков
-            deepl_language_map = {
-                'en': 'EN',
-                'th': 'TH',  # Проверить поддержку тайского в DeepL
-            }
-            
-            target_lang = deepl_language_map.get(target_language, target_language.upper())
-            
-            url = "https://api-free.deepl.com/v2/translate"
-            headers = {
-                'Authorization': f'DeepL-Auth-Key {self.deepl_api_key}',
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
-            data = {
-                'text': text,
-                'source_lang': 'RU',
-                'target_lang': target_lang,
-            }
-            
-            response = requests.post(url, headers=headers, data=data, timeout=30)
-            response.raise_for_status()
-            
-            result = response.json()
-            if 'translations' in result and result['translations']:
-                return result['translations'][0]['text']
-            else:
-                logger.error(f"Unexpected DeepL response: {result}")
-                return None
-                
-        except requests.exceptions.RequestException as e:
-            logger.error(f"DeepL API error: {e}")
+        except requests.exceptions.RequestException as exc:
+            logger.error(f"Yandex Translate API error: {exc}")
             return None
-        except Exception as e:
-            logger.error(f"DeepL unexpected error: {e}")
+        except Exception as exc:
+            logger.error(f"Yandex Translate unexpected error: {exc}")
             return None
     
     def translate_model_fields(self, instance, fields: List[str]) -> Dict[str, Dict[str, str]]:
@@ -223,14 +224,14 @@ class TranslationService:
     
     def is_configured(self) -> bool:
         """Проверяет, настроен ли сервис перевода"""
-        return bool(self.google_api_key or self.deepl_api_key)
-    
+        # Перечитываем ключи на случай, если они обновились во время работы процесса
+        self.refresh_credentials()
+        return bool(self.yandex_api_key and self.yandex_folder_id)
+
     def get_available_service(self) -> Optional[str]:
         """Возвращает доступный сервис перевода"""
-        if self.preferred_service == 'deepl' and self.deepl_api_key:
-            return 'deepl'
-        elif self.google_api_key:
-            return 'google'
+        if self.is_configured():
+            return 'yandex'
         return None
 
 

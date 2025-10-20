@@ -7,15 +7,23 @@
 
 {% block content %}
 <!-- Contact Hero -->
-<section class="bg-gradient-to-r from-primary to-blue-800 text-white py-20">
-    <div class="max-w-7xl mx-auto px-4">
+<section class="relative overflow-hidden py-20 text-white">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#0f1f3d] via-primary to-[#031226]"></div>
+    <div class="absolute inset-y-0 right-[-12%] h-full w-1/2 bg-[radial-gradient(circle_at_center,_rgba(255,193,7,0.55)_0%,_rgba(12,23,43,0)_68%)]"></div>
+    <div class="absolute bottom-0 right-12 h-1 w-32 rounded-full bg-accent"></div>
+    <div class="relative z-10 mx-auto max-w-7xl px-4">
         <div class="text-center">
-            <h1 class="text-4xl lg:text-6xl font-bold mb-6">
-                {% trans "Свяжитесь с нами" %}
-            </h1>
-            <p class="text-xl lg:text-2xl opacity-90 max-w-3xl mx-auto">
-                {% trans "Мы готовы ответить на все ваши вопросы о недвижимости на Пхукете" %}
-            </p>
+            {% with lang=LANGUAGE_CODE|default:'ru' %}
+                <p class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-accent shadow-[0_0_25px_rgba(255,193,7,0.35)]">
+                    {% if lang == 'en' %}Contact{% elif lang == 'th' %}ติดต่อเรา{% else %}Контакты{% endif %}
+                </p>
+                <h1 class="text-4xl font-bold leading-tight lg:text-6xl">
+                    {% if lang == 'en' %}Let's talk about your Phuket real-estate plans{% elif lang == 'th' %}พร้อมพูดคุยทุกแผนอสังหาฯ ในภูเก็ตของคุณ{% else %}Всегда на связи и готовы к диалогу{% endif %}
+                </h1>
+                <p class="mt-6 text-lg opacity-90 lg:text-2xl">
+                    {% if lang == 'en' %}Ask anything about the Phuket market or book a consultation — our team replies within one business day.{% elif lang == 'th' %}สอบถามข้อมูลเกี่ยวกับตลาดภูเก็ตหรือจองปรึกษา ทีมของเราตอบกลับภายใน 1 วันทำการ{% else %}Задайте вопрос о недвижимости Пхукета или закажите консультацию — ответим в течение рабочего дня.{% endif %}
+                </p>
+            {% endwith %}
         </div>
     </div>
 </section>

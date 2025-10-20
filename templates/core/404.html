@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}404 — {% trans "Страница не найдена" %}{% endblock %}
+
+{% block content %}
+<section class="relative flex min-h-[70vh] items-center justify-center overflow-hidden text-white">
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{% static 'images/home_page/homepage_hero_section/thailand_hero_section_1.jpg' %}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/70 to-black/70"></div>
+    <div class="relative z-10 w-full max-w-3xl px-6 text-center space-y-6">
+        <p class="inline-flex items-center gap-3 rounded-full bg-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-accent">{% trans "Ошибка 404" %}</p>
+        <h1 class="text-3xl font-bold sm:text-5xl">{% trans "Страница недоступна или перемещена" %}</h1>
+        <p class="text-base text-white/80 sm:text-lg">{% trans "Мы обновили структуру каталога. Используйте кнопки ниже, чтобы вернуться на главную или найти нужный объект." %}</p>
+        <div class="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
+            <a href="{% url 'core:home' %}" class="inline-flex items-center justify-center rounded-md bg-accent px-6 py-3 text-gray-900 font-semibold shadow-lg hover:bg-yellow-400 transition">{% trans "На главную" %}</a>
+            <a href="{% url 'properties:property_list' %}" class="inline-flex items-center justify-center rounded-md border border-white/40 px-6 py-3 font-semibold text-white hover:bg-white/10 transition">{% trans "Смотреть объекты" %}</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

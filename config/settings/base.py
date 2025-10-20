@@ -273,11 +273,12 @@ TINYMCE_DEFAULT_CONFIG = {
 }
 
 # Translation API Settings
-GOOGLE_TRANSLATE_API_KEY = env('GOOGLE_TRANSLATE_API_KEY', default='')
-DEEPL_API_KEY = env('DEEPL_API_KEY', default='')
-
-# Preferred translation service ('google' or 'deepl')
-TRANSLATION_SERVICE = env('TRANSLATION_SERVICE', default='google')
+YANDEX_TRANSLATE_API_KEY = env('YANDEX_TRANSLATE_API_KEY', default='')
+YANDEX_TRANSLATE_FOLDER_ID = env('YANDEX_TRANSLATE_FOLDER_ID', default='')
+YANDEX_TRANSLATE_ENDPOINT = env(
+    'YANDEX_TRANSLATE_ENDPOINT',
+    default='https://translate.api.cloud.yandex.net/translate/v2/translate'
+)
 
 # Translation settings
 TRANSLATION_SETTINGS = {

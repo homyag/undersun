@@ -46,5 +46,4 @@ function updateResultsCounter() {
     }
     
     resultsCountElement.textContent = counterText;
-    console.log(`Updated results counter: ${totalCount} total properties found (${document.querySelectorAll('.property-card').length} on current page)`);
 }

@@ -144,25 +144,25 @@
                 <div class="flex items-center space-x-4">
                     <!-- Search Form in contact bar -->
                     <form class="flex" method="get" action="{% url 'core:search' %}">
-                        <input type="search" name="q" placeholder="{% trans 'Поиск...' %}" class="px-3 py-1.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors w-40">
+                        <input type="search" name="q" placeholder="{% if LANGUAGE_CODE == 'en' %}Search...{% elif LANGUAGE_CODE == 'th' %}ค้นหา...{% else %}Поиск...{% endif %}" class="px-3 py-1.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors w-40">
                         <button type="submit" class="px-2 py-1.5 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
                             <i class="fas fa-search text-xs"></i>
                         </button>
                     </form>
                     <div class="flex items-center space-x-3">
-                        <a href="https://facebook.com/undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                        <a href="https://www.facebook.com/mr.undersunestate/" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="https://instagram.com/undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                        <a href="https://www.instagram.com/undersun.estate/" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="https://youtube.com/@undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                        <a href="https://www.youtube.com/@undersun_estate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
                             <i class="fab fa-youtube"></i>
                         </a>
                         <a href="https://t.me/undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
                             <i class="fab fa-telegram"></i>
                         </a>
-                        <a href="https://linkedin.com/company/undersunestate" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
+                        <a href="https://www.linkedin.com/company/undersun-estate/" class="text-white hover:text-accent transition-colors text-sm" target="_blank" rel="noopener noreferrer">
                             <i class="fab fa-linkedin-in"></i>
                         </a>
                     </div>
@@ -173,7 +173,7 @@
             <div class="md:hidden flex justify-between items-center text-xs py-2">
                 <!-- Social Icons - Left -->
                 <div class="flex items-center space-x-3">
-                    <a href="https://youtube.com/@undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.youtube.com/@undersun_estate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-youtube text-base"></i>
                     </a>
                     <a href="https://t.me/undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
@@ -182,13 +182,13 @@
                     <a href="https://wa.me/66633033133" class="text-green-400 hover:text-green-300 transition-colors" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-whatsapp text-base"></i>
                     </a>
-                    <a href="https://instagram.com/undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.instagram.com/undersun.estate/" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-instagram text-base"></i>
                     </a>
-                    <a href="https://linkedin.com/company/undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.linkedin.com/company/undersun-estate/" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-linkedin-in text-base"></i>
                     </a>
-                    <a href="https://facebook.com/undersunestate" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.facebook.com/mr.undersunestate/" class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-facebook-f text-base"></i>
                     </a>
                 </div>
@@ -204,6 +204,7 @@
         </div>
     </div>
 
+    {% with lang=LANGUAGE_CODE|default:'ru' %}
     <!-- Navigation -->
     <nav id="main-nav" class="bg-white text-gray-900 fixed top-0 w-full z-40 shadow-lg border-b border-gray-200 md:top-12 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4">
@@ -224,17 +225,17 @@
                         <!-- Property Dropdown -->
                         <div class="relative group">
                             <button class="{% if request.resolver_match.url_name in 'property_sale,property_rent,property_list,property_detail' or 'property' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
-                                {% trans "Недвижимость" %}
+                                {% if lang == 'en' %}Properties{% elif lang == 'th' %}อสังหาริมทรัพย์{% else %}Недвижимость{% endif %}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
                             <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                                 <div class="py-1">
-                                    <a href="{% url 'properties:property_sale' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Продажа" %}</a>
-                                    <a href="{% url 'properties:property_rent' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Аренда" %}</a>
+                                    <a href="{% url 'properties:property_sale' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}Buy{% elif lang == 'th' %}ซื้อ{% else %}Продажа{% endif %}</a>
+                                    <a href="{% url 'properties:property_rent' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}Rent{% elif lang == 'th' %}เช่า{% else %}Аренда{% endif %}</a>
                                     <div class="border-t border-gray-200"></div>
-                                    <a href="{% url 'location_list' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Районы" %}</a>
+                                    <a href="{% url 'location_list' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}Areas{% elif lang == 'th' %}ทำเล{% else %}Районы{% endif %}</a>
                                     <div class="border-t border-gray-200"></div>
                                     {% for type in property_types %}
                                         <a href="{% url 'properties:property_by_type' type.name %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{{ type.name_display }}</a>
@@ -243,12 +244,12 @@
                             </div>
                         </div>
 
-                        <a href="{% url 'core:map' %}" class="{% if request.resolver_match.url_name == 'core:map' or 'map' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">{% trans "Карта" %}</a>
+                        <a href="{% url 'core:map' %}" class="{% if request.resolver_match.url_name == 'core:map' or 'map' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">{% if lang == 'en' %}Map{% elif lang == 'th' %}แผนที่{% else %}Карта{% endif %}</a>
                         
                         <!-- Services Dropdown -->
                         <div class="relative group">
                             <button class="{% if 'services' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
-                                {% trans "Услуги" %}
+                                {% if lang == 'en' %}Services{% elif lang == 'th' %}บริการ{% else %}Услуги{% endif %}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -257,11 +258,11 @@
                                 <div class="py-1">
                                     {% for service in menu_services %}
                                         <a href="{{ service.get_absolute_url }}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200">
-                                            {{ service.title }}
+                                            {% if lang == 'en' %}{{ service.title_en|default:service.title }}{% elif lang == 'th' %}{{ service.title_th|default:service.title }}{% else %}{{ service.title }}{% endif %}
                                         </a>
                                     {% endfor %}
                                     {% if not menu_services %}
-                                        <div class="px-4 py-2 text-gray-500">{% trans "Услуги скоро появятся" %}</div>
+                                        <div class="px-4 py-2 text-gray-500">{% if lang == 'en' %}Services coming soon{% elif lang == 'th' %}บริการจะพร้อมเร็วๆ นี้{% else %}Услуги скоро появятся{% endif %}</div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -270,21 +271,21 @@
                         <!-- About Dropdown -->
                         <div class="relative group">
                             <button class="{% if request.resolver_match.url_name in 'core:about,core:contact' or 'about' in request.path or 'contact' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
-                                {% trans "О нас" %}
+                                {% if lang == 'en' %}About{% elif lang == 'th' %}เกี่ยวกับเรา{% else %}О нас{% endif %}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
                             <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                                 <div class="py-1">
-                                    <a href="{% url 'core:about' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "О компании" %}</a>
-                                    <a href="{% url 'core:contact' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% trans "Контакты" %}</a>
+                                    <a href="{% url 'core:about' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}About Undersun Estate{% elif lang == 'th' %}เกี่ยวกับ Undersun Estate{% else %}О компании{% endif %}</a>
+                                    <a href="{% url 'core:contact' %}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}Contact{% elif lang == 'th' %}ติดต่อเรา{% else %}Контакты{% endif %}</a>
                                 </div>
                             </div>
                         </div>
                         
                         <a href="{% url 'blog:list' %}" class="{% if request.resolver_match.url_name in 'blog:list,blog:detail' or 'blog' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">
-                            {% trans "Блог" %}
+                            {% if lang == 'en' %}Blog{% elif lang == 'th' %}บล็อก{% else %}Блог{% endif %}
                         </a>
                     </div>
                 </div>
@@ -292,7 +293,7 @@
                 <!-- Right side controls -->
                 <div class="hidden lg:flex items-center space-x-2 xl:space-x-4 nav-controls">
                     <!-- Favorites Menu -->
-                    <a href="{% url 'properties:property_favorites' %}" class="relative" title="{% trans 'Избранное' %}">
+                    <a href="{% url 'properties:property_favorites' %}" class="relative" title="{% if lang == 'en' %}Favorites{% elif lang == 'th' %}รายการโปรด{% else %}Избранное{% endif %}">
                         <div class="bg-white w-10 h-10 rounded-full transition-all duration-200 group shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center border border-gray-200 hover:border-red-200">
                             <i id="nav-favorites-heart" class="far fa-heart text-gray-600 transition-all duration-200"></i>
                         </div>
@@ -320,15 +321,15 @@
                             <div class="py-1">
                                 <a href="/ru{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
                                     <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 mr-2 object-cover">
-                                    Русский
+                                    {% trans "Русский" %}
                                 </a>
                                 <a href="/en{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
                                     <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 mr-2 object-cover">
-                                    English
+                                    {% trans "English" %}
                                 </a>
                                 <a href="/th{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
                                     <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 mr-2 object-cover">
-                                    ไทย
+                                    {% trans "ไทย" %}
                                 </a>
                             </div>
                         </div>
@@ -360,7 +361,7 @@
                 <!-- Mobile Search Form -->
                 <div id="mobile-search" class="lg:hidden hidden absolute top-14 left-0 right-0 bg-white border-b border-gray-200 p-4 z-40">
                     <form class="flex" method="get" action="{% url 'core:search' %}">
-                        <input type="search" name="q" placeholder="{% trans 'Поиск...' %}" class="flex-1 px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors">
+                        <input type="search" name="q" placeholder="{% if LANGUAGE_CODE == 'en' %}Search...{% elif LANGUAGE_CODE == 'th' %}ค้นหา...{% else %}Поиск...{% endif %}" class="flex-1 px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors">
                         <button type="submit" class="px-4 py-2 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
                             <i class="fas fa-search"></i>
                         </button>
@@ -374,16 +375,16 @@
                     <!-- Property dropdown -->
                     <div>
                         <button onclick="toggleMobileSubmenu('property-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                            <span>{% trans "Недвижимость" %}</span>
+                            <span>{% if LANGUAGE_CODE == 'en' %}Properties{% elif LANGUAGE_CODE == 'th' %}อสังหาริมทรัพย์{% else %}Недвижимость{% endif %}</span>
                             <svg class="w-4 h-4 transform transition-transform" id="property-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
                         <div id="property-submenu" class="hidden ml-4 mt-1 space-y-1">
-                            <a href="{% url 'properties:property_sale' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Продажа" %}</a>
-                            <a href="{% url 'properties:property_rent' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Аренда" %}</a>
+                            <a href="{% url 'properties:property_sale' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% if LANGUAGE_CODE == 'en' %}Buy{% elif LANGUAGE_CODE == 'th' %}ซื้อ{% else %}Продажа{% endif %}</a>
+                            <a href="{% url 'properties:property_rent' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% if LANGUAGE_CODE == 'en' %}Rent{% elif LANGUAGE_CODE == 'th' %}เช่า{% else %}Аренда{% endif %}</a>
                             <div class="border-t border-gray-200 my-1"></div>
-                            <a href="{% url 'location_list' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Районы" %}</a>
+                            <a href="{% url 'location_list' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% if LANGUAGE_CODE == 'en' %}Areas{% elif LANGUAGE_CODE == 'th' %}ทำเล{% else %}Районы{% endif %}</a>
                             <div class="border-t border-gray-200 my-1"></div>
                             {% for type in property_types %}
                                 <a href="{% url 'properties:property_by_type' type.name %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{{ type.name_display }}</a>
@@ -391,12 +392,12 @@
                         </div>
                     </div>
                     
-                    <a href="{% url 'core:map' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">{% trans "Карта" %}</a>
+                    <a href="{% url 'core:map' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">{% if LANGUAGE_CODE == 'en' %}Map{% elif LANGUAGE_CODE == 'th' %}แผนที่{% else %}Карта{% endif %}</a>
                     
                     <!-- Services dropdown -->
                     <div>
                         <button onclick="toggleMobileSubmenu('services-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                            <span>{% trans "Услуги" %}</span>
+                            <span>{% if LANGUAGE_CODE == 'en' %}Services{% elif LANGUAGE_CODE == 'th' %}บริการ{% else %}Услуги{% endif %}</span>
                             <svg class="w-4 h-4 transform transition-transform" id="services-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
@@ -404,11 +405,11 @@
                         <div id="services-submenu" class="hidden ml-4 mt-1 space-y-1">
                             {% for service in menu_services %}
                                 <a href="{{ service.get_absolute_url }}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
-                                    {{ service.title }}
+                                    {% if LANGUAGE_CODE == 'en' %}{{ service.title_en|default:service.title }}{% elif LANGUAGE_CODE == 'th' %}{{ service.title_th|default:service.title }}{% else %}{{ service.title }}{% endif %}
                                 </a>
                             {% endfor %}
                             {% if not menu_services %}
-                                <div class="px-3 py-1 text-gray-500">{% trans "Услуги скоро появятся" %}</div>
+                                <div class="px-3 py-1 text-gray-500">{% if LANGUAGE_CODE == 'en' %}Services coming soon{% elif LANGUAGE_CODE == 'th' %}บริการจะพร้อมเร็วๆ นี้{% else %}Услуги скоро появятся{% endif %}</div>
                             {% endif %}
                         </div>
                     </div>
@@ -416,20 +417,20 @@
                     <!-- About dropdown -->
                     <div>
                         <button onclick="toggleMobileSubmenu('about-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                            <span>{% trans "О нас" %}</span>
+                            <span>{% if LANGUAGE_CODE == 'en' %}About{% elif LANGUAGE_CODE == 'th' %}เกี่ยวกับเรา{% else %}О нас{% endif %}</span>
                             <svg class="w-4 h-4 transform transition-transform" id="about-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
                         <div id="about-submenu" class="hidden ml-4 mt-1 space-y-1">
-                            <a href="{% url 'core:about' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "О компании" %}</a>
-                            <a href="{% url 'core:contact' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% trans "Контакты" %}</a>
+                            <a href="{% url 'core:about' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% if LANGUAGE_CODE == 'en' %}About Undersun Estate{% elif LANGUAGE_CODE == 'th' %}เกี่ยวกับ Undersun Estate{% else %}О компании{% endif %}</a>
+                            <a href="{% url 'core:contact' %}" class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{% if LANGUAGE_CODE == 'en' %}Contact{% elif LANGUAGE_CODE == 'th' %}ติดต่อเรา{% else %}Контакты{% endif %}</a>
                         </div>
                     </div>
                     
                     <!-- Mobile Blog Link -->
                     <a href="{% url 'blog:list' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                        {% trans "Блог" %}
+                        {% if LANGUAGE_CODE == 'en' %}Blog{% elif LANGUAGE_CODE == 'th' %}บล็อก{% else %}Блог{% endif %}
                     </a>
                     
                     <!-- Mobile Contact Info -->
@@ -449,7 +450,7 @@
                     <!-- Mobile Favorites Menu -->
                     <div class="border-t border-gray-200 pt-2 mt-2">
                         <a href="{% url 'properties:property_favorites' %}" class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                            <i id="mobile-nav-favorites-heart" class="far fa-heart mr-2 text-gray-600"></i>{% trans "Избранное" %} 
+                            <i id="mobile-nav-favorites-heart" class="far fa-heart mr-2 text-gray-600"></i>{% if LANGUAGE_CODE == 'en' %}Favorites{% elif LANGUAGE_CODE == 'th' %}รายการโปรด{% else %}Избранное{% endif %}
                             <span id="mobile-nav-favorites-count" class="favorites-count ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold hidden inline-flex items-center justify-center leading-none">0</span>
                         </a>
                     </div>
@@ -458,7 +459,7 @@
                     <!-- Mobile Language Switcher -->
                     <div class="border-t border-gray-200 pt-2 mt-2">
                         <button onclick="toggleMobileSubmenu('language-submenu')" class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                            <span><i class="fas fa-globe mr-2"></i>{% trans "Язык" %}</span>
+                            <span><i class="fas fa-globe mr-2"></i>{% if LANGUAGE_CODE == 'en' %}Language{% elif LANGUAGE_CODE == 'th' %}ภาษา{% else %}Язык{% endif %}</span>
                             <svg class="w-4 h-4 transform transition-transform" id="language-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
@@ -466,21 +467,21 @@
                         <div id="language-submenu" class="hidden ml-6 mt-1 space-y-1">
                             <a href="/ru{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
                                 <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 mr-2 object-cover">
-                                Русский
+                                {% trans "Русский" %}
                             </a>
                             <a href="/en{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
                                 <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 mr-2 object-cover">
-                                English
+                                {% trans "English" %}
                             </a>
                             <a href="/th{{ request.get_full_path|slice:'3:' }}" class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
                                 <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 mr-2 object-cover">
-                                ไทย
+                                {% trans "ไทย" %}
                             </a>
                         </div>
 
                         <!-- Mobile Currency Switcher -->
                         <button onclick="toggleMobileSubmenu('currency-submenu')" class="w-full flex justify-between items-center px-3 py-2 mt-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                            <span><i class="fas fa-dollar-sign mr-2"></i>{% trans "Валюта" %} ({{ selected_currency.symbol }}{{ selected_currency.code }})</span>
+                            <span><i class="fas fa-dollar-sign mr-2"></i>{% if LANGUAGE_CODE == 'en' %}Currency{% elif LANGUAGE_CODE == 'th' %}สกุลเงิน{% else %}Валюта{% endif %} ({{ selected_currency.symbol }}{{ selected_currency.code }})</span>
                             <svg class="w-4 h-4 transform transition-transform" id="currency-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
@@ -500,6 +501,7 @@
             </div>
         </div>
     </nav>
+    {% endwith %}
 
     <!-- CSRF Token for AJAX -->
     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
@@ -532,41 +534,43 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="lg:col-span-1">
                     <h5 class="text-xl font-bold mb-4">Undersun Estate</h5>
-                    <p class="text-gray-300 mb-4">{% trans "делаем покупку недвижимости на Пхукете простой и безопасной. Проверенные застройщики, прозрачные сделки и поддержка на каждом этапе." %}</p>
+                    <p class="text-gray-300 mb-4">{% if LANGUAGE_CODE == 'en' %}We make buying property in Phuket simple and secure: vetted developers, transparent deals, and support at every step.{% elif LANGUAGE_CODE == 'th' %}เราทำให้การซื้ออสังหาริมทรัพย์ในภูเก็ตง่ายและปลอดภัย ด้วยผู้พัฒนาที่ผ่านการคัดเลือก ข้อตกลงโปร่งใส และทีมสนับสนุนทุกขั้นตอน{% else %}делаем покупку недвижимости на Пхукете простой и безопасной. Проверенные застройщики, прозрачные сделки и поддержка на каждом этапе.{% endif %}</p>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.facebook.com/mr.undersunestate/" class="text-gray-300 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/undersun.estate/" class="text-gray-300 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/@undersun_estate" class="text-gray-300 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
                         <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-telegram"></i></a>
                     </div>
                 </div>
 
                 <div>
-                    <h6 class="text-lg font-semibold mb-4">{% trans "Недвижимость" %}</h6>
+                    <h6 class="text-lg font-semibold mb-4">{% if LANGUAGE_CODE == 'en' %}Properties{% elif LANGUAGE_CODE == 'th' %}อสังหาริมทรัพย์{% else %}Недвижимость{% endif %}</h6>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'properties:property_by_type' 'villa' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Виллы" %}</a></li>
-                        <li><a href="{% url 'properties:property_by_type' 'apartment' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Апартаменты" %}</a></li>
-                        <li><a href="{% url 'properties:property_by_type' 'townhouse' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Таунхаус" %}</a></li>
-                        <li><a href="{% url 'properties:property_by_type' 'land' %}" class="text-gray-300 hover:text-white transition-colors">{% trans "Земельный участок" %}</a></li>
+                        <li><a href="{% url 'properties:property_by_type' 'villa' %}" class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}Villas{% elif LANGUAGE_CODE == 'th' %}วิลล่า{% else %}Виллы{% endif %}</a></li>
+                        <li><a href="{% url 'properties:property_by_type' 'condo' %}" class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}Condo{% elif LANGUAGE_CODE == 'th' %}อพาร์ตเมนต์{% else %}Квартиры{% endif %}</a></li>
+                        <li><a href="{% url 'properties:property_by_type' 'townhouse' %}" class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}Townhouses{% elif LANGUAGE_CODE == 'th' %}ทาวน์เฮาส์{% else %}Таунхаусы{% endif %}</a></li>
+                        <li><a href="{% url 'properties:property_by_type' 'land' %}" class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}Land plots{% elif LANGUAGE_CODE == 'th' %}ที่ดิน{% else %}Земельные участки{% endif %}</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h6 class="text-lg font-semibold mb-4">{% trans "Услуги" %}</h6>
+                    <h6 class="text-lg font-semibold mb-4">{% if LANGUAGE_CODE == 'en' %}Services{% elif LANGUAGE_CODE == 'th' %}บริการ{% else %}Услуги{% endif %}</h6>
                     <ul class="space-y-2">
                         {% for service in menu_services %}
-                            <li><a href="{{ service.get_absolute_url }}" class="text-gray-300 hover:text-white transition-colors">{{ service.title }}</a></li>
+                            <li><a href="{{ service.get_absolute_url }}" class="text-gray-300 hover:text-white transition-colors">
+                                {% if LANGUAGE_CODE == 'en' %}{{ service.title_en|default:service.title }}{% elif LANGUAGE_CODE == 'th' %}{{ service.title_th|default:service.title }}{% else %}{{ service.title }}{% endif %}
+                            </a></li>
                         {% endfor %}
                     </ul>
                 </div>
 
                 <div>
-                    <h6 class="text-lg font-semibold mb-4">{% trans "Контакты" %}</h6>
+                    <h6 class="text-lg font-semibold mb-4">{% if LANGUAGE_CODE == 'en' %}Contacts{% elif LANGUAGE_CODE == 'th' %}ติดต่อเรา{% else %}Контакты{% endif %}</h6>
                     <div class="space-y-2 text-gray-300">
                         <p><i class="fas fa-map-marker-alt mr-2"></i> 221/7 Koktanod Rd, Karon, Phuket 83100</p>
                         <p><i class="fas fa-phone mr-2"></i> +66 63 303 3133</p>
                         <p><i class="fas fa-envelope mr-2"></i> info@undersunestate.com</p>
-                        <p><i class="fas fa-clock mr-2"></i> {% trans "Пн-Вс: 9:00 - 21:00" %}</p>
+                        <p><i class="fas fa-clock mr-2"></i> {% if LANGUAGE_CODE == 'en' %}Mon-Sun: 9:00 - 21:00{% elif LANGUAGE_CODE == 'th' %}จันทร์-อาทิตย์: 9:00 - 21:00{% else %}Пн-Вс: 9:00 - 21:00{% endif %}</p>
                     </div>
                 </div>
             </div>
@@ -574,10 +578,10 @@
             <hr class="border-gray-700 my-8">
 
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-300 mb-4 md:mb-0">&copy; 2024 Undersun Estate. {% trans "Все права защищены." %}</p>
+                <p class="text-gray-300 mb-4 md:mb-0">&copy; 2025 Undersun Estate. {% if LANGUAGE_CODE == 'en' %}All rights reserved.{% elif LANGUAGE_CODE == 'th' %}สงวนลิขสิทธิ์ทั้งหมด{% else %}Все права защищены.{% endif %}</p>
                 <div class="flex space-x-6">
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors">{% trans "Политика конфиденциальности" %}</a>
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors">{% trans "Условия использования" %}</a>
+                    <a href="{% url 'core:privacy' %}" class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}Privacy Policy{% elif LANGUAGE_CODE == 'th' %}นโยบายความเป็นส่วนตัว{% else %}Политика конфиденциальности{% endif %}</a>
+                    <a href="{% url 'core:terms' %}" class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}Terms of Use{% elif LANGUAGE_CODE == 'th' %}เงื่อนไขการใช้งาน{% else %}Условия использования{% endif %}</a>
                 </div>
             </div>
         </div>
@@ -743,7 +747,7 @@
                             // Update mobile currency button text
                             const mobileButton = document.querySelector('[onclick="toggleMobileSubmenu(\'currency-submenu\')"] span');
                             if (mobileButton) {
-                                mobileButton.innerHTML = `<i class="fas fa-dollar-sign mr-2"></i>{% trans "Валюта" %} (${symbol}${currency})`;
+                                mobileButton.innerHTML = `<i class="fas fa-dollar-sign mr-2"></i>{% if LANGUAGE_CODE == 'en' %}Currency{% elif LANGUAGE_CODE == 'th' %}สกุลเงิน{% else %}Валюта{% endif %} (${symbol}${currency})`;
                             }
 
                             // Close mobile menu
@@ -780,6 +784,10 @@
             });
         });
     </script>
+
+    {% include "includes/cookie_consent.html" %}
+
+    <script src="{% static 'js/cookie-consent.js' %}"></script>
 
     <!-- Success Popup Modal -->
     <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">

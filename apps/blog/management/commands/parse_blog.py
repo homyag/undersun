@@ -1,15 +1,22 @@
 import os
 import time
 import re
+import uuid
+import mimetypes
+from datetime import datetime
 from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
-from django.core.management.base import BaseCommand
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 from django.core.files import File
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.files.temp import NamedTemporaryFile
 from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime, parse_date
 from apps.blog.models import BlogPost, BlogCategory
 
 
@@ -32,6 +39,18 @@ class Command(BaseCommand):
             help='Категория блога для парсинга (news, articles, cases, reviews, etc.)'
         )
         parser.add_argument(
+            '--languages',
+            type=str,
+            default='ru,en,th',
+            help='Список языков через запятую для парсинга (ru,en,th)'
+        )
+        parser.add_argument(
+            '--language',
+            type=str,
+            choices=['ru', 'en', 'th'],
+            help='Язык для одиночной статьи (--test-single). Если не указан, используется первый из --languages.'
+        )
+        parser.add_argument(
             '--test-single',
             type=str,
             help='Парсить только одну статью по URL для тестирования'
@@ -44,49 +63,112 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.verbose = options.get('verbose', False)
-        
+        languages = self._parse_languages(options.get('languages'))
+
         if options['test_single']:
-            self.parse_single_article(options['test_single'])
+            test_language = options.get('language') or languages[0]
+            self.parse_single_article(options['test_single'], language=test_language)
             return
 
         category = options['category']
-        
-        # Создаем или получаем категорию блога
-        blog_category = self.get_or_create_blog_category(category)
-        
-        self.stdout.write(f"Начинаем парсинг категории: {category}")
-        
-        # Получаем URL всех статей в категории
-        article_urls = self.get_category_articles(category)
-        self.stdout.write(f"Найдено {len(article_urls)} статей для парсинга")
-        
-        success_count = 0
-        error_count = 0
-        duplicate_count = 0
-        
-        for i, url in enumerate(article_urls):
-            self.stdout.write(f"Парсинг {i+1}/{len(article_urls)}: {url}")
-            try:
-                article_obj = self.parse_single_article(url, blog_category)
-                if hasattr(self, '_is_duplicate') and self._is_duplicate:
-                    duplicate_count += 1
-                else:
-                    success_count += 1
-                    
-                # Пауза между запросами
-                time.sleep(1) 
-            except Exception as e:
-                error_count += 1
-                self.stdout.write(self.style.ERROR(f"Ошибка при парсинге {url}: {e}"))
-        
-        # Итоговая статистика
-        self.stdout.write(self.style.SUCCESS(f"\n=== РЕЗУЛЬТАТЫ ПАРСИНГА ==="))
-        self.stdout.write(f"Успешно обработано: {success_count}")
-        self.stdout.write(f"Найдено дубликатов: {duplicate_count}")  
-        self.stdout.write(f"Ошибок: {error_count}")
-        self.stdout.write(f"Всего обработано: {len(article_urls)}")
 
-    def get_category_articles(self, category):
+        for language in languages:
+            self.stdout.write(f"\n=== Парсинг языка: {language.upper()} ===")
+
+            # Создаем или получаем категорию блога (обновляем перевод названия при необходимости)
+            blog_category = self.get_or_create_blog_category(category, language)
+
+            self.stdout.write(f"Начинаем парсинг категории: {category} ({language})")
+
+            article_urls = self.get_category_articles(category, language)
+            self.stdout.write(f"Найдено {len(article_urls)} статей для парсинга ({language})")
+
+            success_count = 0
+            error_count = 0
+            duplicate_count = 0
+
+            for i, url in enumerate(article_urls):
+                self.stdout.write(f"Парсинг {i+1}/{len(article_urls)} [{language}]: {url}")
+                try:
+                    self.parse_single_article(url, blog_category, language=language)
+                    if getattr(self, '_is_duplicate', False):
+                        duplicate_count += 1
+                    else:
+                        success_count += 1
+
+                    time.sleep(1)
+                except Exception as e:
+                    error_count += 1
+                    self.stdout.write(self.style.ERROR(f"Ошибка при парсинге {url}: {e}"))
+
+            self.stdout.write(self.style.SUCCESS(
+                f"\n=== Итоги для {language.upper()} ===\n"
+                f"Успешно обработано: {success_count}\n"
+                f"Найдено дубликатов: {duplicate_count}\n"
+                f"Ошибок: {error_count}\n"
+                f"Всего обработано: {len(article_urls)}"
+            ))
+
+    def _parse_languages(self, languages_option):
+        """Нормализовать список запрошенных языков"""
+        supported = {'ru', 'en', 'th'}
+        if not languages_option:
+            return ['ru']
+
+        raw_values = [lang.strip().lower() for lang in languages_option.split(',') if lang.strip()]
+        languages = []
+        for lang in raw_values:
+            if lang not in supported:
+                raise CommandError(f"Неподдерживаемый язык: {lang}. Допустимые: ru, en, th")
+            if lang not in languages:
+                languages.append(lang)
+
+        return languages or ['ru']
+
+    def _get_language_suffix(self, language):
+        return '' if language == 'ru' else f'_{language}'
+
+    def _translated_field(self, field_name, language):
+        suffix = self._get_language_suffix(language)
+        return f"{field_name}{suffix}" if suffix else field_name
+
+    def _get_original_url_field(self, language):
+        return 'original_url' if language == 'ru' else f'original_url_{language}'
+
+    def _get_featured_image_field(self, language):
+        return 'featured_image' if language == 'ru' else f'featured_image_{language}'
+
+    def _parse_datetime_string(self, value):
+        if not value:
+            return None
+
+        value = value.strip()
+        if not value:
+            return None
+
+        parsed_dt = parse_datetime(value)
+        if parsed_dt:
+            if timezone.is_naive(parsed_dt):
+                parsed_dt = timezone.make_aware(parsed_dt, timezone.get_current_timezone())
+            return parsed_dt
+
+        parsed_date = parse_date(value)
+        if parsed_date:
+            combined = datetime.combine(parsed_date, datetime.min.time())
+            return timezone.make_aware(combined, timezone.get_current_timezone())
+
+        for fmt in ("%d %B %Y", "%B %d, %Y", "%d %b %Y", "%Y-%m-%d"):
+            try:
+                dt = datetime.strptime(value, fmt)
+                if timezone.is_naive(dt):
+                    dt = timezone.make_aware(dt, timezone.get_current_timezone())
+                return dt
+            except ValueError:
+                continue
+
+        return None
+
+    def get_category_articles(self, category, language):
         """Получить все URL статей из определенной категории блога с поддержкой пагинации"""
         article_urls = []
         page_number = 1
@@ -95,9 +177,9 @@ class Command(BaseCommand):
         while True:
             # Формируем URL для текущей страницы
             if page_number == 1:
-                page_url = f"{self.base_url}/ru/blog/{category}"
+                page_url = f"{self.base_url}/{language}/blog/{category}"
             else:
-                page_url = f"{self.base_url}/ru/blog/{category}?start={start_param}"
+                page_url = f"{self.base_url}/{language}/blog/{category}?start={start_param}"
             
             self.stdout.write(f"Загружаем страницу {page_number}: {page_url}")
             
@@ -109,7 +191,7 @@ class Command(BaseCommand):
             soup = BeautifulSoup(response.content, 'html.parser')
             
             # Ищем ссылки на статьи на текущей странице
-            page_articles = self.extract_articles_from_page(soup, category)
+            page_articles = self.extract_articles_from_page(soup, category, language)
             
             # Если статей на странице не найдено - прекращаем
             if not page_articles:
@@ -127,7 +209,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Найдено {new_articles} новых статей на странице {page_number}")
             
             # Ищем ссылку на следующую страницу
-            next_page_url = self.get_next_page_url(soup, category, start_param)
+            next_page_url = self.get_next_page_url(soup, category, language, start_param)
             if not next_page_url:
                 self.stdout.write(f"Достигнута последняя страница")
                 break
@@ -151,14 +233,14 @@ class Command(BaseCommand):
         self.stdout.write(f"Всего найдено {len(article_urls)} статей на {page_number} страницах")
         return article_urls
 
-    def extract_articles_from_page(self, soup, category):
+    def extract_articles_from_page(self, soup, category, language):
         """Извлечение ссылок на статьи с одной страницы"""
         article_urls = []
         
         # Пробуем разные селекторы для ссылок на статьи
         selectors = [
-            f'a[href*="/ru/blog/{category}/"]',
-            f'a[href^="/ru/blog/{category}/"]',
+            f'a[href*="/{language}/blog/{category}/"]',
+            f'a[href^="/{language}/blog/{category}/"]',
             '.el-item a',
             'article a',
             '.uk-article a'
@@ -169,7 +251,7 @@ class Command(BaseCommand):
             if links:
                 for link in links:
                     href = link.get('href', '')
-                    if self.is_valid_article_url(href, category):
+                    if self.is_valid_article_url(href, category, language):
                         full_url = urljoin(self.base_url, href)
                         if full_url not in article_urls:
                             article_urls.append(full_url)
@@ -180,12 +262,12 @@ class Command(BaseCommand):
         
         return article_urls
     
-    def get_next_page_url(self, soup, category, current_start=0):
+    def get_next_page_url(self, soup, category, language, current_start=0):
         """Получить URL следующей страницы пагинации"""
         # Ищем различные варианты ссылок на следующую страницу
         next_selectors = [
             # Классические ссылки пагинации
-            f'a[href*="/ru/blog/{category}?start="]',
+            f'a[href*="/{language}/blog/{category}?start="]',
             f'a[href*="blog/{category}?start="]',
             
             # Ссылки со словом "Далее", "Next", ">"
@@ -215,7 +297,7 @@ class Command(BaseCommand):
                     href = link.get('href', '')
                     if href and 'start=' in href:
                         # Проверяем что это действительно пагинация для нашей категории
-                        if f'/blog/{category}' in href or f'blog/{category}' in href:
+                        if f'/{language}/blog/{category}' in href or f'blog/{category}' in href:
                             # Извлекаем start параметр из ссылки
                             start_match = re.search(r'start=(\d+)', href)
                             if start_match:
@@ -237,17 +319,21 @@ class Command(BaseCommand):
             link_text = link.get_text().strip()
             
             # Если ссылка содержит число и start параметр
-            if (link_text.isdigit() and 
+            if (
+                link_text.isdigit() and 
                 int(link_text) > 1 and 
                 'start=' in href and 
-                f'blog/{category}' in href):
+                (f'/{language}/blog/{category}' in href or f'blog/{category}' in href)
+            ):
                 return urljoin(self.base_url, href)
         
         return None
 
-    def is_valid_article_url(self, url, category):
+    def is_valid_article_url(self, url, category, language):
         """Проверка, является ли URL действительной статьей"""
-        if not url or f'/ru/blog/{category}/' not in url:
+        if not url:
+            return False
+        if f'/{language}/blog/{category}/' not in url:
             return False
         
         # URL должен содержать ID статьи (число)
@@ -260,7 +346,7 @@ class Command(BaseCommand):
         
         return False
 
-    def parse_single_article(self, url, category=None):
+    def parse_single_article(self, url, category=None, language='ru'):
         """Парсинг одной статьи блога"""
         response = self.session.get(url)
         if response.status_code != 200:
@@ -269,65 +355,74 @@ class Command(BaseCommand):
         soup = BeautifulSoup(response.content, 'html.parser')
         
         # Извлекаем данные
-        data = self.extract_article_data(soup, url)
+        data = self.extract_article_data(soup, url, language)
         
         # Если категория не указана, определяем из URL
         if not category:
             category_slug = self.extract_category_from_url(url)
-            category = self.get_or_create_blog_category(category_slug)
-        
+            category = self.get_or_create_blog_category(category_slug, language)
+
         data['category'] = category
-        
+        data['language'] = language
+
+        content_field = self._translated_field('content', language)
+
         # Отладочная информация
         if self.verbose:
             self.stdout.write(f"Извлеченные данные:")
             for key, value in data.items():
-                if key not in ['content', 'featured_image_url']:
+                if key != 'featured_image_url' and not key.startswith('content'):
                     self.stdout.write(f"  {key}: {value}")
-            if 'content' in data:
-                self.stdout.write(f"  content: {len(data['content'])} символов")
+            if data.get(content_field):
+                self.stdout.write(f"  {content_field}: {len(data[content_field])} символов")
             if 'featured_image_url' in data:
                 self.stdout.write(f"  featured_image_url: {data['featured_image_url']}")
-        
+
         # Создаем или обновляем статью в БД
         article_obj = self.save_article(data)
-        
+
         # Сохраняем изображение
-        if data.get('featured_image_url'):
-            self.save_featured_image(article_obj, data['featured_image_url'])
+        if article_obj and data.get('featured_image_url'):
+            self.save_featured_image(article_obj, data['featured_image_url'], language)
         
         return article_obj
 
-    def extract_article_data(self, soup, url):
+    def extract_article_data(self, soup, url, language):
         """Извлечение данных из HTML страницы статьи"""
-        data = {'original_url': url}
-        
+        data = {}
+        original_url_field = self._get_original_url_field(language)
+        data[original_url_field] = url
+
         # Извлекаем original_id из URL
         original_id_match = re.search(r'/(\d+)-', url)
         if original_id_match:
             data['original_id'] = original_id_match.group(1)
         
         # Заголовок статьи
+        title_field = self._translated_field('title', language)
         title_element = soup.find('h1') or soup.select_one('.uk-article-title') or soup.find('title')
         if title_element:
-            data['title'] = title_element.get_text().strip()
+            data[title_field] = title_element.get_text().strip()
         else:
-            data['title'] = 'Без названия'
-        
+            data[title_field] = 'Без названия'
+
         # Генерируем slug из URL (более надёжно) или из заголовка
-        data['slug'] = self.generate_slug(url, data['title'])
-        
+        base_title = data[title_field]
+        data['slug'] = self.generate_slug(url, base_title)
+
         # Дата публикации - ищем в различных местах
-        data['published_at'] = self.extract_publication_date(soup, url)
-        
+        data['published_at'] = self.extract_publication_date(soup, url, language)
+
         # Основное содержимое статьи
         content, excerpt = self.extract_content(soup)
-        data['content'] = content
-        data['excerpt'] = excerpt
-        
+        content_field = self._translated_field('content', language)
+        excerpt_field = self._translated_field('excerpt', language)
+        data[content_field] = content
+        data[excerpt_field] = excerpt
+
         # Главное изображение
         data['featured_image_url'] = self.extract_featured_image(soup)
-        
+
         # Извлекаем видео ссылки
         videos = self.extract_video_links(soup)
         if videos:
@@ -340,7 +435,7 @@ class Command(BaseCommand):
                         video_html += f'<iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" frameborder="0" allowfullscreen></iframe>\n'
                 else:
                     video_html += f'<a href="{video_url}" target="_blank">{video_url}</a>\n'
-            data['content'] += video_html
+            data[content_field] = (data.get(content_field) or '') + video_html
         
         return data
 
@@ -368,38 +463,55 @@ class Command(BaseCommand):
         
         return "no-slug"
 
-    def extract_publication_date(self, soup, url):
+    def extract_publication_date(self, soup, url, language):
         """Извлечение даты публикации"""
-        # Попробуем найти дату в различных местах
-        date_patterns = [
-            r'(\d{1,2})\s+(\w+)\s+(\d{4})',  # "22 мая 2025"
-            r'(\d{1,2})\.(\d{1,2})\.(\d{4})',  # "22.05.2025"
-            r'(\d{4})-(\d{1,2})-(\d{1,2})'   # "2025-05-22"
+        # Попробуем прочитать дату из мета-тегов/атрибутов
+        meta_selectors = [
+            'meta[property="article:published_time"]',
+            'meta[name="article:published_time"]',
+            'meta[name="pubdate"]',
+            'meta[name="publish-date"]',
+            'meta[name="date"]',
         ]
-        
-        # Ищем дату в тексте страницы
-        page_text = soup.get_text()
-        
-        # Словарь для преобразования месяцев
-        months_ru = {
-            'января': '01', 'февраля': '02', 'марта': '03', 'апреля': '04',
-            'мая': '05', 'июня': '06', 'июля': '07', 'августа': '08',
-            'сентября': '09', 'октября': '10', 'ноября': '11', 'декабря': '12'
-        }
-        
-        # Поиск русского формата даты
-        ru_date_match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', page_text)
-        if ru_date_match:
-            day, month_ru, year = ru_date_match.groups()
-            month = months_ru.get(month_ru.lower())
-            if month:
-                try:
-                    date_str = f"{year}-{month}-{day.zfill(2)}"
-                    parsed_date = timezone.datetime.strptime(date_str, "%Y-%m-%d")
-                    return timezone.make_aware(parsed_date)
-                except:
-                    pass
-        
+
+        for selector in meta_selectors:
+            element = soup.select_one(selector)
+            if not element:
+                continue
+            value = element.get('content') or element.get('value')
+            parsed = self._parse_datetime_string(value)
+            if parsed:
+                return parsed
+
+        # Ищем time теги с datetime
+        for time_tag in soup.find_all('time'):
+            for attr in ('datetime', 'content'):
+                value = time_tag.get(attr)
+                parsed = self._parse_datetime_string(value)
+                if parsed:
+                    return parsed
+
+        # Фолбэк для русского текста
+        if language == 'ru':
+            page_text = soup.get_text()
+            months_ru = {
+                'января': '01', 'февраля': '02', 'марта': '03', 'апреля': '04',
+                'мая': '05', 'июня': '06', 'июля': '07', 'августа': '08',
+                'сентября': '09', 'октября': '10', 'ноября': '11', 'декабря': '12'
+            }
+
+            ru_date_match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', page_text)
+            if ru_date_match:
+                day, month_ru, year = ru_date_match.groups()
+                month = months_ru.get(month_ru.lower())
+                if month:
+                    try:
+                        date_str = f"{year}-{month}-{day.zfill(2)}"
+                        parsed_date = timezone.datetime.strptime(date_str, "%Y-%m-%d")
+                        return timezone.make_aware(parsed_date)
+                    except Exception:
+                        pass
+
         # Если дату не нашли, возвращаем текущую
         return timezone.now()
 
@@ -407,49 +519,215 @@ class Command(BaseCommand):
         """Извлечение содержимого статьи"""
         content = ""
         excerpt = ""
-        
-        # Удаляем ненужные элементы
-        for element in soup(['script', 'style', 'nav', 'header', 'footer', 'aside']):
+
+        # Удаляем элементы, которые точно не относятся к тексту статьи
+        for element in soup(['script', 'style', 'noscript', 'svg', 'form']):
             element.decompose()
-        
-        # Ищем основной контент в различных контейнерах
+
         content_selectors = [
-            'article',
+            '[itemprop="articleBody"]',
+            '.el-article',
             '.article-content',
             '.post-content',
+            '.uk-article',
+            'article',
             '.content',
-            'main',
-            '.uk-article'
+            'main'
         ]
-        
+
         content_element = None
         for selector in content_selectors:
-            element = soup.select_one(selector)
-            if element:
-                content_element = element
+            candidates = []
+            for element in soup.select(selector):
+                prepared = self.prepare_content_element(element)
+                if not prepared:
+                    continue
+                text = prepared.get_text(separator=' ', strip=True)
+                if len(text) < 200:
+                    continue
+                candidates.append((len(text), prepared))
+            if candidates:
+                # Берём самый содержательный элемент среди кандидатов
+                candidates.sort(key=lambda item: item[0], reverse=True)
+                content_element = candidates[0][1]
                 break
-        
-        # Если не нашли специальный контейнер, ищем параграфы
+
+        # Если подходящий контейнер не найден, собираем текст из параграфов и списков
         if not content_element:
-            paragraphs = soup.find_all('p')
-            if paragraphs:
-                content_div = soup.new_tag('div')
-                for p in paragraphs:
-                    if len(p.get_text().strip()) > 50:  # Только содержательные параграфы
-                        content_div.append(p)
-                content_element = content_div
-        
+            paragraphs = soup.find_all(['p', 'h2', 'h3', 'h4', 'ul', 'ol', 'blockquote'])
+            meaningful = []
+            for tag in paragraphs:
+                text = tag.get_text(separator=' ', strip=True)
+                if tag.name in ['h2', 'h3', 'h4'] or len(text) > 40:
+                    meaningful.append(tag)
+            if meaningful:
+                container = soup.new_tag('div')
+                for tag in meaningful:
+                    container.append(tag)
+                content_element = self.prepare_content_element(container)
+
         if content_element:
-            # Очищаем и форматируем HTML
+            self.make_urls_absolute(content_element)
             content = str(content_element)
-            
-            # Создаем краткое описание из первого абзаца
+
             first_p = content_element.find('p')
             if first_p:
-                excerpt_text = first_p.get_text().strip()
+                excerpt_text = first_p.get_text(separator=' ', strip=True)
                 excerpt = excerpt_text[:500] + '...' if len(excerpt_text) > 500 else excerpt_text
-        
+
         return content, excerpt
+
+    def prepare_content_element(self, element):
+        """Подготовка элемента с контентом статьи"""
+        if not element:
+            return None
+
+        # Удаляем блоки с шарингом, рекламой и навигацией внутри статьи
+        removal_keywords = [
+            'share', 'social', 'breadcrumbs', 'tags', 'related', 'comment',
+            'pagination', 'author', 'meta', 'subscribe', 'read-more'
+        ]
+        for descendant in list(element.find_all(True)):
+            classes = ' '.join(descendant.get('class', [])).lower()
+            element_id = (descendant.get('id') or '').lower()
+            fingerprint = f"{classes} {element_id}".strip()
+            if any(keyword in fingerprint for keyword in removal_keywords):
+                descendant.decompose()
+
+        return element
+
+    def make_urls_absolute(self, element):
+        """Преобразование относительных ссылок в абсолютные"""
+        for tag in element.find_all(['a', 'img']):
+            if tag.name == 'a':
+                attrs = ['href']
+            else:
+                attrs = ['src', 'data-src', 'data-srcset', 'srcset']
+
+            for attr in attrs:
+                value = tag.get(attr)
+                if not value:
+                    continue
+
+                if attr.endswith('srcset'):
+                    rewritten_items = []
+                    for item in value.split(','):
+                        item = item.strip()
+                        if not item:
+                            continue
+                        parts = item.split()
+                        url_part = parts[0]
+                        descriptor = ' '.join(parts[1:])
+                        if not url_part.startswith(('http://', 'https://')):
+                            url_part = urljoin(self.base_url, url_part)
+                        rewritten_items.append(' '.join(filter(None, [url_part, descriptor])))
+                    tag[attr] = ', '.join(rewritten_items)
+                    continue
+
+                if value.startswith(('http://', 'https://')):
+                    continue
+
+                tag[attr] = urljoin(self.base_url, value)
+
+            # Если у изображения есть data-src, копируем его в src, чтобы позже скачивать правильные файлы
+            if tag.name == 'img':
+                data_src = tag.get('data-src')
+                if data_src:
+                    tag['src'] = data_src
+
+    def process_inline_images(self, article, field_name='content'):
+        """Скачивание и локальное сохранение изображений из контента статьи"""
+        html_content = getattr(article, field_name, '')
+        if not html_content:
+            return
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+        images = soup.find_all('img')
+        if not images:
+            return
+
+        content_changed = False
+        media_prefix = settings.MEDIA_URL or '/media/'
+
+        for img_tag in images:
+            src = self._extract_image_source(img_tag)
+            if not src:
+                continue
+
+            # Пропускаем уже локальные изображения или data-URL
+            if src.startswith('data:') or src.startswith(media_prefix):
+                continue
+
+            absolute_src = urljoin(self.base_url, src)
+            try:
+                response = self.session.get(absolute_src, timeout=30)
+                response.raise_for_status()
+            except Exception as exc:
+                if self.verbose:
+                    self.stdout.write(self.style.WARNING(
+                        f"Не удалось скачать изображение {absolute_src}: {exc}"
+                    ))
+                continue
+
+            content_type = response.headers.get('Content-Type', '').split(';')[0]
+            extension = self._guess_extension(content_type, absolute_src)
+            filename = f"blog/content/{article.slug}-{uuid.uuid4().hex[:8]}{extension}"
+
+            try:
+                saved_path = default_storage.save(filename, ContentFile(response.content))
+                stored_url = default_storage.url(saved_path)
+                img_tag['src'] = stored_url
+                content_changed = True
+            except Exception as exc:
+                if self.verbose:
+                    self.stdout.write(self.style.WARNING(
+                        f"Не удалось сохранить изображение {absolute_src}: {exc}"
+                    ))
+                continue
+
+        if content_changed:
+            setattr(article, field_name, str(soup))
+            article.save(update_fields=[field_name])
+
+    def _guess_extension(self, content_type, src):
+        """Определение расширения файла по заголовку или URL"""
+        if content_type:
+            ext = mimetypes.guess_extension(content_type)
+            if ext:
+                return ext
+
+        path_ext = os.path.splitext(urlparse(src).path)[1]
+        if path_ext:
+            return path_ext
+
+        return '.jpg'
+
+    def _extract_image_source(self, img_tag):
+        """Выбор наиболее релевантного URL изображения"""
+        candidates = [
+            img_tag.get('src'),
+            img_tag.get('data-src'),
+            img_tag.get('data-original'),
+        ]
+
+        srcset = img_tag.get('srcset') or img_tag.get('data-srcset')
+        if srcset:
+            first_item = srcset.split(',')[0].strip()
+            if first_item:
+                first_url = first_item.split()[0]
+                candidates.append(first_url)
+
+        for candidate in candidates:
+            if not candidate:
+                continue
+            candidate = candidate.strip()
+            if not candidate or candidate.startswith('data:'):
+                continue
+            if not candidate.startswith(('http://', 'https://')):
+                candidate = urljoin(self.base_url, candidate)
+            return candidate
+
+        return None
 
     def extract_featured_image(self, soup):
         """Извлечение главного изображения статьи"""
@@ -630,31 +908,39 @@ class Command(BaseCommand):
                 return category_part
         return 'article'
 
-    def get_or_create_blog_category(self, category_slug):
+    def get_or_create_blog_category(self, category_slug, language='ru'):
         """Получить или создать категорию блога"""
         category_names = {
-            'news': 'Новости',
-            'articles': 'Статьи',
-            'cases': 'Кейсы',
-            'reviews': 'Обзоры',
-            'places': 'Места и активности',
-            'events': 'Мероприятия'
+            'news': {'ru': 'Новости', 'en': 'News'},
+            'articles': {'ru': 'Статьи', 'en': 'Articles'},
+            'cases': {'ru': 'Кейсы', 'en': 'Cases'},
+            'reviews': {'ru': 'Обзоры', 'en': 'Reviews'},
+            'places': {'ru': 'Места и активности', 'en': 'Places & Activities'},
+            'events': {'ru': 'Мероприятия', 'en': 'Events'},
         }
-        
-        category_name = category_names.get(category_slug, category_slug.title())
-        
+
+        defaults = {
+            'name': category_names.get(category_slug, {}).get('ru', category_slug.title()),
+            'description': f'Категория {category_slug}',
+            'color': '#007bff'
+        }
+
         category, created = BlogCategory.objects.get_or_create(
             slug=category_slug,
-            defaults={
-                'name': category_name,
-                'description': f'Категория {category_name}',
-                'color': '#007bff'
-            }
+            defaults=defaults
         )
         
         if created and self.verbose:
-            self.stdout.write(f"Создана новая категория: {category_name}")
-            
+            self.stdout.write(f"Создана новая категория: {defaults['name']}")
+
+        # Обновляем перевод названия категории, если знаем его значение
+        localized_name = category_names.get(category_slug, {}).get(language)
+        if localized_name:
+            field_name = self._translated_field('name', language)
+            if getattr(category, field_name, None) != localized_name:
+                setattr(category, field_name, localized_name)
+                category.save(update_fields=[field_name])
+
         return category
 
     def get_default_author(self):
@@ -689,43 +975,64 @@ class Command(BaseCommand):
 
     def save_article(self, data):
         """Сохранение статьи в базе данных"""
-        # Убираем поля, которых нет в модели
-        clean_data = {k: v for k, v in data.items() if k != 'featured_image_url'}
-        
-        # Ищем дубликаты
+        language = data.get('language', 'ru')
+        content_field = self._translated_field('content', language)
+        excerpt_field = self._translated_field('excerpt', language)
+        override_fields = {content_field, excerpt_field}
+
+        clean_data = {
+            k: v for k, v in data.items()
+            if k not in {'featured_image_url', 'language'}
+        }
+
         duplicate = self.find_duplicate_article(data)
         if duplicate:
             self._is_duplicate = True
             if self.verbose:
                 self.stdout.write(self.style.WARNING(f"Найден дубликат: {duplicate.title}"))
-            
-            # Обновляем данные дубликата
+
             updated = False
             for key, value in clean_data.items():
-                if value and (not getattr(duplicate, key, None) or key in ['content', 'excerpt']):
+                if not value:
+                    continue
+
+                current_value = getattr(duplicate, key, None)
+                if not current_value or key in override_fields:
                     setattr(duplicate, key, value)
                     updated = True
-            
+
             if updated:
                 duplicate.save()
+                if clean_data.get(content_field):
+                    self.process_inline_images(duplicate, content_field)
                 if self.verbose:
-                    self.stdout.write(self.style.SUCCESS(f"Обновлены данные статьи"))
-            
+                    self.stdout.write(self.style.SUCCESS("Обновлены данные статьи"))
+
             return duplicate
-        
-        # Создаем новую статью
+
         self._is_duplicate = False
-        clean_data['author'] = self.get_default_author()
-        clean_data['status'] = 'published'
-        
+        clean_data.setdefault('author', self.get_default_author())
+        clean_data.setdefault('status', 'published')
+
+        # Если статья создается впервые не на русском, заполняем базовые поля переводами
+        if language != 'ru':
+            for base_field in ('title', 'excerpt', 'content'):
+                if not clean_data.get(base_field):
+                    localized_field = self._translated_field(base_field, language)
+                    localized_value = clean_data.get(localized_field)
+                    if localized_value:
+                        clean_data[base_field] = localized_value
+
         article = BlogPost.objects.create(**clean_data)
-        
+        if clean_data.get(content_field):
+            self.process_inline_images(article, content_field)
+
         if self.verbose:
             self.stdout.write(self.style.SUCCESS(f"Создана новая статья: {article.title}"))
-        
+
         return article
 
-    def save_featured_image(self, article, image_url):
+    def save_featured_image(self, article, image_url, language='ru'):
         """Сохранение главного изображения статьи"""
         try:
             # Скачиваем изображение
@@ -744,13 +1051,15 @@ class Command(BaseCommand):
                 filename = f"article_{article.id}.jpg"
             
             # Сохраняем файл
-            article.featured_image.save(
+            field_name = self._get_featured_image_field(language)
+            image_field = getattr(article, field_name)
+            image_field.save(
                 filename,
                 File(img_temp),
                 save=True
             )
             
-            self.stdout.write(f"Сохранено изображение: {filename}")
+            self.stdout.write(f"Сохранено изображение ({language}): {filename}")
             
         except Exception as e:
             self.stdout.write(self.style.WARNING(f"Ошибка сохранения изображения {image_url}: {e}"))

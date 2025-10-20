@@ -171,7 +171,7 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
         
         if not translation_service.is_configured():
             self.message_user(request, 
-                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                'API перевода не настроен. Пожалуйста, добавьте YANDEX_TRANSLATE_API_KEY и YANDEX_TRANSLATE_FOLDER_ID в настройки.', 
                 level=messages.ERROR)
             return
         
@@ -202,7 +202,7 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
         
         if not translation_service.is_configured():
             self.message_user(request, 
-                'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.', 
+                'API перевода не настроен. Пожалуйста, добавьте YANDEX_TRANSLATE_API_KEY и YANDEX_TRANSLATE_FOLDER_ID в настройки.', 
                 level=messages.ERROR)
             return
         
@@ -242,7 +242,7 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
             
             if not translation_service.is_configured():
                 messages.error(request, 
-                    'API перевода не настроен. Пожалуйста, добавьте GOOGLE_TRANSLATE_API_KEY или DEEPL_API_KEY в настройки.')
+                    'API перевода не настроен. Пожалуйста, добавьте YANDEX_TRANSLATE_API_KEY и YANDEX_TRANSLATE_FOLDER_ID в настройки.')
                 return HttpResponseRedirect(f"/admin/blog/blogpost/{object_id}/change/")
             
             # Проверяем параметр force из GET-запроса
