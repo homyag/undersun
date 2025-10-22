@@ -25,3 +25,5 @@ DATABASES = {
 
 # Email backend для тестирования
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+TAILWIND_USE_CDN = True

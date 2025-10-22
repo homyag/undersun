@@ -1,3 +1,4 @@
+from django.conf import settings
 from apps.properties.models import PropertyType, Property
 from apps.locations.models import District, Location
 from apps.core.models import SEOPage, Service
@@ -10,6 +11,7 @@ def site_context(request):
         'districts': District.objects.prefetch_related('locations').all(),
         'current_language': request.LANGUAGE_CODE,
         'menu_services': Service.get_menu_services(),
+        'tailwind_use_cdn': getattr(settings, 'TAILWIND_USE_CDN', False),
     }
 
 def seo_context(request):

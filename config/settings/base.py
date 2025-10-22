@@ -54,7 +54,6 @@ LOCAL_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
-INSTALLED_APPS += ['debug_toolbar']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -67,8 +66,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.core.middleware.PermissionsPolicyMiddleware',  # Fix for admin permissions policy
 ]
-
-MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
 
 ROOT_URLCONF = 'config.urls'
 
@@ -176,8 +173,8 @@ LOGOUT_REDIRECT_URL = '/'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
 
 # File upload settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB
 
 # Cache (для продакшена настроить Redis)
 CACHES = {
@@ -288,3 +285,6 @@ TRANSLATION_SETTINGS = {
     'target_languages': ['en', 'th'],
     'chunk_size': 5000,  # Max characters per translation request
 }
+
+
+TAILWIND_USE_CDN = False

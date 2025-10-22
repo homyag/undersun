@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-css": "npx tailwindcss -i ./static/css/tailwind.css -o ./static/css/tailwind.min.css --watch",
-    "build-css-prod": "npx tailwindcss -i ./static/css/tailwind.css -o ./static/css/tailwind.min.css --minify",
+    "build-css": "npx @tailwindcss/cli --config tailwind.config.js --input ./static/css/tailwind.css --output ./static/css/tailwind.min.css --content './templates/**/*.html' --content './static/js/**/*.js' --watch",
+    "build-css-prod": "npx @tailwindcss/cli --config tailwind.config.js --input ./static/css/tailwind.css --output ./static/css/tailwind.min.css --content './templates/**/*.html' --content './static/js/**/*.js' --minify",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@tailwindcss/cli": "^4.1.15",
     "tailwindcss": "^4.1.11"
   }
 }
