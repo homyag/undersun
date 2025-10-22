@@ -433,15 +433,31 @@ class Team(models.Model):
     @property 
     def whatsapp_url(self):
         """URL для WhatsApp ссылки"""
-        if self.whatsapp:
-            # Очищаем номер от лишних символов
-            phone_clean = ''.join(filter(str.isdigit, self.whatsapp))
-            if phone_clean.startswith('0'):
-                phone_clean = '66' + phone_clean[1:]  # Заменяем 0 на код Таиланда
-            elif not phone_clean.startswith('66'):
-                phone_clean = '66' + phone_clean
-            return f"https://wa.me/{phone_clean}"
-        return None
+        if not self.whatsapp:
+            return None
+
+        raw_value = self.whatsapp.strip()
+        digits_only = ''.join(filter(str.isdigit, raw_value))
+
+        if not digits_only:
+            return None
+
+        phone_clean = digits_only
+
+        if raw_value.startswith('+'):
+            phone_clean = digits_only
+        elif raw_value.startswith('00'):
+            phone_clean = digits_only[2:] or digits_only
+        elif digits_only.startswith('66'):
+            phone_clean = digits_only
+        elif digits_only.startswith('0'):
+            phone_clean = f"66{digits_only[1:]}"
+        elif len(digits_only) > 10:
+            phone_clean = digits_only
+        else:
+            phone_clean = f"66{digits_only}"
+
+        return f"https://wa.me/{phone_clean}"
     
     @property
     def phone_display(self):

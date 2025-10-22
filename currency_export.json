@@ -1,0 +1,79 @@
+[
+{
+  "model": "currency.currency",
+  "pk": 1,
+  "fields": {
+    "code": "USD",
+    "name": "US Dollar",
+    "name_ru": "Доллар США",
+    "name_en": "US Dollar",
+    "name_th": "ดอลลาร์สหรัฐ",
+    "symbol": "$",
+    "is_active": true,
+    "is_base": false,
+    "decimal_places": 2,
+    "created_at": "2025-08-13T16:16:28.136Z",
+    "updated_at": "2025-08-13T16:16:28.136Z"
+  }
+},
+{
+  "model": "currency.currency",
+  "pk": 2,
+  "fields": {
+    "code": "THB",
+    "name": "Thai Baht",
+    "name_ru": "Тайский бат",
+    "name_en": "Thai Baht",
+    "name_th": "บาทไทย",
+    "symbol": "฿",
+    "is_active": true,
+    "is_base": true,
+    "decimal_places": 0,
+    "created_at": "2025-08-13T16:16:28.141Z",
+    "updated_at": "2025-08-13T16:16:28.141Z"
+  }
+},
+{
+  "model": "currency.currency",
+  "pk": 3,
+  "fields": {
+    "code": "RUB",
+    "name": "Russian Ruble",
+    "name_ru": "Российский рубль",
+    "name_en": "Russian Ruble",
+    "name_th": "รูเบิลรัสเซีย",
+    "symbol": "₽",
+    "is_active": true,
+    "is_base": false,
+    "decimal_places": 0,
+    "created_at": "2025-08-13T16:16:28.143Z",
+    "updated_at": "2025-08-13T16:16:28.143Z"
+  }
+},
+{
+  "model": "currency.exchangerate",
+  "pk": 3,
+  "fields": {
+    "base_currency": 2,
+    "target_currency": 3,
+    "rate": "2.480000",
+    "date": "2025-10-20",
+    "source": "exchangerate-api.com",
+    "created_at": "2025-10-20T13:47:02.119Z",
+    "updated_at": "2025-10-20T13:47:02.119Z"
+  }
+},
+{
+  "model": "currency.exchangerate",
+  "pk": 4,
+  "fields": {
+    "base_currency": 2,
+    "target_currency": 1,
+    "rate": "0.030500",
+    "date": "2025-10-20",
+    "source": "exchangerate-api.com",
+    "created_at": "2025-10-20T13:47:02.130Z",
+    "updated_at": "2025-10-20T13:47:02.130Z"
+  }
+}
+]

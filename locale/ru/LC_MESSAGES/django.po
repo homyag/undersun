@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -15,2566 +16,2331 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 msgid "Цвет"
-msgstr "Colour"
+msgstr ""
 
 msgid "Количество статей"
-msgstr "Number of articles"
+msgstr ""
 
 msgid "Основная информация (Русский)"
-msgstr "Basic Information (Russian)"
-
+msgstr ""
 
 msgid "Дополнительные поля для событий"
-msgstr "Additional fields for events"
+msgstr ""
 
 msgid "Заполняется только для мероприятий"
-msgstr "Filled in only for events"
+msgstr ""
 
 msgid "Дополнительные поля для кейсов и обзоров"
-msgstr "Additional fields for case studies and reviews"
+msgstr ""
 
 msgid "Заполняется для кейсов (ссылка) и обзоров (рейтинг 1-5)"
-msgstr "Filled in for cases (link) and reviews (rating 1-5)"
-
+msgstr ""
 
 msgid "Поля миграции"
-msgstr "Migration Fields"
+msgstr ""
 
 msgid "Автоматически заполняется при импорте"
-msgstr "Automatically filled in when importing"
-
+msgstr ""
 
 msgid "Переводы - English"
-msgstr "Translations - English"
+msgstr ""
 
 msgid "Переводы - ไทย"
-msgstr "Translations - Thai"
+msgstr ""
 
 msgid "Изображения"
-msgstr "Images"
+msgstr ""
 
 msgid "SEO - Русский"
-msgstr "SEO - Russian"
+msgstr ""
 
 msgid "SEO - English"
-msgstr "SEO - English"
+msgstr ""
 
 msgid "SEO - ไทย"
-msgstr "SEO - ไทย"
-
+msgstr ""
 
 msgid "Настройки публикации"
-msgstr "Publication Settings"
-
+msgstr ""
 
 msgid "Опубликовать выбранные статьи"
-msgstr "Publish selected articles"
+msgstr ""
 
 msgid "Перенести в черновики"
-msgstr "Transfer to drafts"
-
+msgstr ""
 
 msgid "Отметить как рекомендуемые"
-msgstr "Mark as recommended"
+msgstr ""
 
 msgid "🌐 Перевести на EN и TH (только пустые поля)"
-msgstr "🌐 Translate to EN and TH (only empty fields)"
+msgstr ""
 
 msgid "🔄 Перевести заново (перезаписать все переводы)"
-msgstr ", Translate again (overwrite all translations)"
+msgstr ""
 
 msgid "Название"
-msgstr "Title"
-
+msgstr ""
 
 msgid "URL-адрес"
-msgstr "URL"
+msgstr ""
 
 msgid "Описание"
-msgstr "Description"
+msgstr ""
 
 msgid "Цвет категории в формате HEX (#ffffff)"
-msgstr "The color of the category in HEX format (#ffffff)"
-
+msgstr ""
 
 msgid "SEO заголовок"
-msgstr "SEO Title"
-
+msgstr ""
 
 msgid "SEO описание"
-msgstr "SEO Description"
-
+msgstr ""
 
 msgid "SEO ключевые слова"
-msgstr "SEO Keywords"
+msgstr ""
 
 msgid "Активно"
-msgstr "Actively"
+msgstr ""
 
 msgid "Порядок"
-msgstr "Order"
+msgstr ""
 
 msgid "Создано"
-msgstr "Created"
+msgstr ""
 
 msgid "Обновлено"
-msgstr "Updated"
+msgstr ""
 
 msgid "Категория блога"
-msgstr "Blog Category"
+msgstr ""
 
 msgid "Категории блога"
-msgstr "Blog Categories"
+msgstr ""
 
 msgid "Черновик"
-msgstr "Draft"
-
+msgstr ""
 
 msgid "Опубликовано"
-msgstr "Published"
-
+msgstr ""
 
 msgid "В архиве"
-msgstr "In the archive"
-
+msgstr ""
 
 msgid "Заголовок"
-msgstr "Title"
+msgstr ""
 
 msgid "Краткое описание"
-msgstr "Short description"
-
+msgstr ""
 
 msgid "Краткое описание статьи для превью"
-msgstr "A brief description of the preview article"
+msgstr ""
 
 msgid "Содержание статьи"
-msgstr "The content of the article"
-
+msgstr ""
 
 msgid "Категория"
-msgstr "Category"
+msgstr ""
 
 msgid "Автор (сотрудник)"
-msgstr "Author (employee)"
+msgstr ""
 
 msgid "Сотрудник компании - автор статьи (по умолчанию: Tatiana)"
-msgstr "The company's employee is the author of the article (default: Tatiana)"
+msgstr ""
 
 msgid "Автор (legacy)"
-msgstr "Author (legacy)"
+msgstr ""
 
 msgid "Пользователь системы - автор статьи (устаревшее поле)"
-msgstr "The system user is the author of the article (outdated field)"
-
+msgstr ""
 
 msgid "Главное изображение (RU)"
-msgstr "Main Image (RU)"
-
+msgstr ""
 
 msgid "Главное изображение статьи для русской версии"
-msgstr "The main image of the article for the Russian version"
-
+msgstr ""
 
 msgid "Главное изображение (EN)"
-msgstr "Main Image (EN)"
-
+msgstr ""
 
 msgid "Локализованное изображение статьи для английской версии"
-msgstr "Localized image of the article for the English version"
-
+msgstr ""
 
 msgid "Главное изображение (TH)"
-msgstr "Main Image (TH)"
-
+msgstr ""
 
 msgid "Локализованное изображение статьи для тайской версии"
-msgstr "Localized image of the article for the Thai version"
-
+msgstr ""
 
 msgid "Alt текст изображения"
-msgstr "Alt image text"
+msgstr ""
 
 msgid "Дата события"
-msgstr "Date of the event"
-
+msgstr ""
 
 msgid "Для мероприятий - дата проведения"
-msgstr "For events, the date of the event"
-
+msgstr ""
 
 msgid "Место проведения"
-msgstr "Location of the event"
-
+msgstr ""
 
 msgid "Для мероприятий - место проведения"
-msgstr "For events - the venue"
+msgstr ""
 
 msgid "Стоимость участия"
-msgstr "Cost of participation"
+msgstr ""
 
 msgid "Для мероприятий - стоимость участия"
-msgstr "For events - the cost of participation"
-
+msgstr ""
 
 msgid "Ссылка на проект"
-msgstr "Link to the project"
+msgstr ""
 
 msgid "Для кейсов - ссылка на проект"
-msgstr "For cases, there is a link to the project."
+msgstr ""
 
 msgid "Рейтинг"
-msgstr "Rating"
+msgstr ""
 
 msgid "Для обзоров - рейтинг от 1 до 5"
-msgstr "For reviews - rating from 1 to 5"
-
+msgstr ""
 
 msgid "Оригинальный URL (RU)"
-msgstr "Original URL (RU)"
-
+msgstr ""
 
 msgid "URL русской версии статьи на исходном сайте"
-msgstr "The URL of the Russian version of the article on the original website"
-
+msgstr ""
 
 msgid "Оригинальный URL (EN)"
-msgstr "Original URL (EN)"
-
+msgstr ""
 
 msgid "URL английской версии статьи на исходном сайте"
-msgstr "The URL of the English version of the article on the original website"
-
+msgstr ""
 
 msgid "Оригинальный URL (TH)"
-msgstr "Original URL (TH)"
-
+msgstr ""
 
 msgid "URL тайской версии статьи на исходном сайте"
-msgstr "The URL of the Thai version of the article on the original website"
+msgstr ""
 
 msgid "Оригинальный ID"
-msgstr "Original ID"
+msgstr ""
 
 msgid "ID статьи на исходном сайте"
-msgstr "The ID of the article on the source site"
+msgstr ""
 
 msgid "Статус"
-msgstr "Status"
+msgstr ""
 
 msgid "Рекомендуемая"
-msgstr "Recommended"
+msgstr ""
 
 msgid "Отображать в блоке рекомендуемых статей"
-msgstr "Display in the recommended articles section"
-
+msgstr ""
 
 msgid "Разрешить комментарии"
-msgstr "Allow comments"
-
+msgstr ""
 
 msgid "Дата публикации"
-msgstr "Date of publication"
-
+msgstr ""
 
 msgid "Количество просмотров"
-msgstr "Number of views"
+msgstr ""
 
 msgid "Статья блога"
-msgstr "Blog Article"
+msgstr ""
 
 msgid "Статьи блога"
-msgstr "Blog Articles"
-
+msgstr ""
 
 msgid "Статьи"
-msgstr "Articles"
+msgstr ""
 
 msgid "Тег блога"
-msgstr "Blog tag"
+msgstr ""
 
 msgid "Теги блога"
-msgstr "Blog Tags"
+msgstr ""
 
 msgid "Загрузите отдельные версии баннера для десктопа, планшета и мобильных устройств."
-msgstr "Download separate versions of the banner for desktop, tablet, and mobile devices."
+msgstr ""
 
 msgid "Настройки"
-msgstr "Settings"
+msgstr ""
 
 msgid "Свяжите баннер с нужным языком и задайте целевую ссылку."
-msgstr "Link the banner to the desired language and set the target link."
+msgstr ""
 
 msgid "Desktop"
-msgstr "Desktop"
+msgstr ""
 
 msgid "Tablet"
-msgstr "Tablet"
+msgstr ""
 
 msgid "Mobile"
-msgstr "Mobile"
-
+msgstr ""
 
 msgid "Рекомендации по изображениям"
-msgstr "Image Recommendations"
+msgstr ""
 
 msgid "Имя страницы"
-msgstr "Page Name"
+msgstr ""
 
 msgid "Title (RU)"
-msgstr "Title (RU)"
+msgstr ""
 
 msgid "Description (RU)"
-msgstr "Description (RU)"
+msgstr ""
 
 msgid "Keywords (RU)"
-msgstr "Keywords (RU)"
+msgstr ""
 
 msgid "Title (EN)"
-msgstr "Title (EN)"
+msgstr ""
 
 msgid "Description (EN)"
-msgstr "Description (EN)"
+msgstr ""
 
 msgid "Keywords (EN)"
-msgstr "Keywords (EN)"
+msgstr ""
 
 msgid "Title (TH)"
-msgstr "Title (TH)"
+msgstr ""
 
 msgid "Description (TH)"
-msgstr "Description (TH)"
+msgstr ""
 
 msgid "Keywords (TH)"
-msgstr "Keywords (TH)"
-
+msgstr ""
 
 msgid "SEO страница"
-msgstr "SEO page"
+msgstr ""
 
 msgid "SEO страницы"
-msgstr "SEO Pages"
+msgstr ""
 
 msgid "Русский"
-msgstr "Russian"
+msgstr ""
 
 msgid "Английский"
-msgstr "English"
+msgstr ""
 
 msgid "Тайский"
-msgstr "Thai"
+msgstr ""
 
 msgid "Язык"
-msgstr "Language"
+msgstr ""
 
 msgid "Создавайте отдельные баннеры для каждого языка (RU / EN / TH)."
-msgstr "Create separate banners for each language (RU / EN / TH)."
-
+msgstr ""
 
 msgid "Изображение для десктопа"
-msgstr "Desktop image"
+msgstr ""
 
 msgid "Рекомендуемый размер: 2400×150 px. Держите ключевой контент в центральной зоне, края могут обрезаться."
-msgstr "Recommended size: 2400×150 px. Keep the key content in the central area, the edges can be cut off."
-
+msgstr ""
 
 msgid "Изображение для планшета"
-msgstr "Tablet Image"
+msgstr ""
 
 msgid "Рекомендуемый размер: 1536×150 px. Фокусируйте основной контент в центре кадра."
-msgstr "Recommended size: 1536×150 px. Focus the main content in the center of the frame."
-
+msgstr ""
 
 msgid "Изображение для мобильных устройств"
-msgstr "Image for mobile devices"
+msgstr ""
 
 msgid "Рекомендуемый размер: 828×150 px. Располагайте текст и логотип внутри центральных 60% ширины."
-msgstr "Recommended size: 828×150 px. Place the text and logo inside the central 60% of the width."
-
+msgstr ""
 
 msgid "Ссылка"
-msgstr "Link"
+msgstr ""
 
 msgid "Полный URL (https://example.com), путь с языковым префиксом (/ru/path/) или имя Django URL pattern."
-msgstr "Full URL (https://example.com ), the path with the language prefix (/ru/path/), or the Django URL pattern name."
-
+msgstr ""
 
 msgid "Рекламный баннер"
-msgstr "Advertising banner"
+msgstr ""
 
 msgid "Рекламные баннеры"
-msgstr "Advertising banners"
-
+msgstr ""
 
 msgid "Новый баннер"
-msgstr "New banner"
+msgstr ""
 
 msgid "Баннер"
-msgstr "The banner"
+msgstr ""
 
 msgid "Загрузите три версии баннера: 2400×150 px (desktop), 1536×150 px (tablet) и 828×150 px (mobile). Важные элементы держите в центральной зоне — по ширине она безопасна для всех устройств. Создайте отдельный баннер для каждого языка (RU / EN / TH), чтобы использовать локализованные изображения."
-msgstr "Download three versions of the banner: 2400×150 px (desktop), 1536×150 px (tablet) and 828×150 px (mobile). Keep important items in the central area — it is safe for all devices in terms of width. Create a separate banner for each language (RU/ EN/ TH) to use localized images."
-
+msgstr ""
 
 msgid "Карточка недвижимости"
-msgstr "Real Estate card"
-
+msgstr ""
 
 msgid "Список по типу недвижимости"
-msgstr "List by property type"
+msgstr ""
 
 msgid "Список по локации"
-msgstr "List by Location"
-
+msgstr ""
 
 msgid "-- Все типы --"
-msgstr "-- All Types --"
+msgstr ""
 
 msgid "Вилла"
-msgstr "Villa"
+msgstr ""
 
 msgid "Апартаменты"
-msgstr "Apartments"
+msgstr ""
 
 msgid "Таунхаус"
-msgstr "Townhouse"
+msgstr ""
 
 msgid "Земельный участок"
-msgstr "Land Plot"
+msgstr ""
 
 msgid "Инвестиции"
-msgstr "Investments"
+msgstr ""
 
 msgid "Готовый бизнес"
-msgstr "Ready Business"
-
+msgstr ""
 
 msgid "-- Все типы сделок --"
-msgstr "-- All types of transactions --"
+msgstr ""
 
 msgid "Продажа"
-msgstr "Sale"
+msgstr ""
 
 msgid "Аренда"
-msgstr "Rent"
+msgstr ""
 
 msgid "Продажа/Аренда"
-msgstr "Sale/Rent"
-
+msgstr ""
 
 msgid "Название шаблона"
-msgstr "Template Name"
-
+msgstr ""
 
 msgid "Тип шаблона"
-msgstr "Template Type"
+msgstr ""
 
 msgid "Тип недвижимости"
-msgstr "Property Type"
-
+msgstr ""
 
 msgid "Выберите тип недвижимости или оставьте пустым для всех типов"
-msgstr "Choose the type of property or leave it blank for all types"
+msgstr ""
 
 msgid "Тип сделки"
-msgstr "Type of transaction"
+msgstr ""
 
 msgid "Выберите тип сделки или оставьте пустым для всех типов"
-msgstr "Select transaction type or leave empty for all types"
+msgstr ""
 
 msgid "Шаблон заголовка (RU)"
-msgstr "Title Template (RU)"
+msgstr ""
 
 #, python-brace-format
 msgid "Используйте переменные: {title}, {type}, {location}, {district}, {price}, {area}"
-msgstr "Use variables: {title}, {type}, {location}, {district}, {price}, {area}"
-
+msgstr ""
 
 msgid "Шаблон описания (RU)"
-msgstr "Description template (RU)"
+msgstr ""
 
 #, python-brace-format
 msgid "Используйте переменные: {title}, {type}, {location}, {district}, {price}, {area}, {rooms}"
-msgstr "Use variables: {title}, {type}, {location}, {district}, {price}, {area}, {rooms}"
+msgstr ""
 
 msgid "Шаблон ключевых слов (RU)"
-msgstr "Keywords Template (RU)"
+msgstr ""
 
 msgid "Используйте переменные через запятую"
-msgstr "Use variables separated by commas"
+msgstr ""
 
 msgid "Шаблон заголовка (EN)"
-msgstr "Title Template (EN)"
-
+msgstr ""
 
 msgid "Шаблон описания (EN)"
-msgstr "Description Template (EN)"
+msgstr ""
 
 msgid "Шаблон ключевых слов (EN)"
-msgstr "Keywords Template (EN)"
+msgstr ""
 
 msgid "Шаблон заголовка (TH)"
-msgstr "Title Template (TH)"
-
+msgstr ""
 
 msgid "Шаблон описания (TH)"
-msgstr "Short description"
+msgstr ""
 
 msgid "Шаблон ключевых слов (TH)"
-msgstr "Keywords Template (TH)"
+msgstr ""
 
 msgid "Приоритет"
-msgstr "Priority"
+msgstr ""
 
 msgid "Чем меньше число, тем выше приоритет"
-msgstr "The lower the number, the higher the priority"
+msgstr ""
 
 msgid "SEO шаблон"
-msgstr "SEO Template"
+msgstr ""
 
 msgid "SEO шаблоны"
-msgstr "SEO Templates"
+msgstr ""
 
 msgid "Уникальный URL адрес страницы (например: buying-property)"
-msgstr "The unique URL of the page (for example: buying-property)"
+msgstr ""
 
-#, fuzzy
-#| msgid "Краткое описание"
 msgid "Краткое описание услуги для превью"
-msgstr "A brief description of the preview service"
+msgstr ""
 
 msgid "Основной контент"
-msgstr "Main content"
-
+msgstr ""
 
 msgid "Подробное описание услуги"
-msgstr "Detailed description of the service"
+msgstr ""
 
 msgid "Если пустое, будет использоваться основной заголовок"
-msgstr "If empty, the main header will be used."
+msgstr ""
 
 msgid "Если пустое, будет использоваться краткое описание"
-msgstr "If empty, a short description will be used."
+msgstr ""
 
 msgid "Изображение"
-msgstr "Image"
-
+msgstr ""
 
 msgid "Основное изображение для страницы услуги"
-msgstr "The main image for the service page"
+msgstr ""
 
 msgid "CSS класс иконки"
-msgstr "CSS icon class"
+msgstr ""
 
 msgid "CSS класс для иконки в меню (например: fas fa-home)"
-msgstr "CSS class for the icon in the menu (for example: fas fa-home)"
+msgstr ""
 
 msgid "Показывать в меню"
-msgstr "Show in the menu"
-
+msgstr ""
 
 msgid "Порядок в меню"
-msgstr "The order in the menu"
+msgstr ""
 
 msgid "Порядок отображения в меню (меньше = выше)"
-msgstr "The order of display in the menu (less = higher)"
-
+msgstr ""
 
 msgid "Услуга"
-msgstr "Service"
-
+msgstr ""
 
 msgid "Услуги"
-msgstr "Services"
+msgstr ""
 
 msgid "Sales Director"
-msgstr "Sales Director"
+msgstr ""
 
 msgid "Senior Manager for International Client Relations"
-msgstr "Senior Manager for International Client Relations"
+msgstr ""
 
 msgid "Manager for International Client Relations"
-msgstr "Manager for International Client Relations"
+msgstr ""
 
 msgid "Chief Art Officer (CAO)"
-msgstr "Chief Art Officer (CAO)"
+msgstr ""
 
 msgid "Chief Marketing Officer (CMO)"
-msgstr "Chief Marketing Officer (CMO)"
+msgstr ""
 
 msgid "Chief Financial Officer (CFO)"
-msgstr "Chief Financial Officer (CFO)"
+msgstr ""
 
 msgid "Office Manager"
-msgstr "Office Manager"
+msgstr ""
 
 msgid "Агент по недвижимости"
-msgstr "Real Estate Agent"
+msgstr ""
 
 msgid "Специалист"
-msgstr "Specialist"
+msgstr ""
 
 msgid "Другое"
-msgstr "Other"
+msgstr ""
 
 msgid "Имя"
-msgstr "Name"
+msgstr ""
 
 msgid "Фамилия"
-msgstr "Surname"
-
+msgstr ""
 
 msgid "Должность"
-msgstr "Post"
+msgstr ""
 
 msgid "Роль"
-msgstr "Role"
+msgstr ""
 
 msgid "Телефон"
-msgstr "Phone"
+msgstr ""
 
 msgid "Email"
-msgstr "Email"
+msgstr ""
 
 msgid "WhatsApp"
-msgstr "WhatsApp"
+msgstr ""
 
 msgid "Номер телефона для WhatsApp"
-msgstr "Phone number for WhatsApp"
+msgstr ""
 
 msgid "Facebook"
-msgstr "Facebook"
-
+msgstr ""
 
 msgid "Ссылка на профиль в Facebook"
-msgstr "Link to Facebook profile"
+msgstr ""
 
 msgid "Instagram"
-msgstr "Instagram"
-
+msgstr ""
 
 msgid "Ссылка на профиль в Instagram"
-msgstr "Link to Instagram profile"
+msgstr ""
 
 msgid "LinkedIn"
-msgstr "LinkedIn"
-
+msgstr ""
 
 msgid "Ссылка на профиль в LinkedIn"
-msgstr "Link to the LinkedIn profile"
+msgstr ""
 
 msgid "Twitter"
-msgstr "Twitter"
-
+msgstr ""
 
 msgid "Ссылка на профиль в Twitter"
-msgstr "Link to Twitter profile"
+msgstr ""
 
 msgid "Telegram"
-msgstr "Telegram"
+msgstr ""
 
 msgid "Username в Telegram (без @)"
-msgstr "Username in Telegram (without @)"
+msgstr ""
 
 msgid "YouTube"
-msgstr "YouTube"
-
+msgstr ""
 
 msgid "Ссылка на канал YouTube"
-msgstr "Link to the YouTube channel"
+msgstr ""
 
 msgid "TikTok"
-msgstr "TikTok"
-
+msgstr ""
 
 msgid "Ссылка на профиль в TikTok"
-msgstr "Link to TikTok profile"
+msgstr ""
 
 msgid "Фото"
-msgstr "Photo"
-
+msgstr ""
 
 msgid "Рекомендуемое разрешение: 300x300 пикселей"
-msgstr "Recommended resolution: 300x300 pixels"
+msgstr ""
 
 msgid "Биография"
-msgstr "Biography"
-
+msgstr ""
 
 msgid "Краткая информация о сотруднике"
-msgstr "Brief information about the employee"
+msgstr ""
 
 msgid "Специализация"
-msgstr "Specialization"
-
+msgstr ""
 
 msgid "Основные направления работы"
-msgstr "Main areas of work"
-
+msgstr ""
 
 msgid "Языки"
-msgstr "Languages"
-
+msgstr ""
 
 msgid "Перечислите языки через запятую"
-msgstr "List the languages separated by commas"
-
+msgstr ""
 
 msgid "Активный"
-msgstr "Active"
-
+msgstr ""
 
 msgid "Показывать ли сотрудника на сайте"
-msgstr "Whether to show the employee on the site"
-
+msgstr ""
 
 msgid "Показывать на главной"
-msgstr "Show on the main page"
+msgstr ""
 
 msgid "Отображать в блоке \"Наша команда\" на главной странице"
-msgstr "Display in the \"Our Team\" block on the main page"
-
+msgstr ""
 
 msgid "Порядок отображения"
-msgstr "Display order"
+msgstr ""
 
 msgid "Порядок отображения в списке (меньше = выше)"
-msgstr "The order of display in the list (less = higher)"
+msgstr ""
 
 msgid "Дата приема на работу"
-msgstr "Date of employment"
+msgstr ""
 
 msgid "Сотрудник"
-msgstr "Employee"
+msgstr ""
 
 msgid "Сотрудники"
-msgstr "Staff"
+msgstr ""
 
 msgid "Валюты и курсы"
-msgstr "Currencies and exchange rates"
+msgstr ""
 
 msgid "Код валюты"
-msgstr "Currency code"
+msgstr ""
 
 msgid "ISO 4217 код (USD, EUR, RUB, THB)"
-msgstr "ISO 4217 code (USD, EUR, RUB, THB)"
-
+msgstr ""
 
 msgid "Название (RU)"
-msgstr "Title (RU)"
-
+msgstr ""
 
 msgid "Название (EN)"
-msgstr "Title (EN)"
-
+msgstr ""
 
 msgid "Название (TH)"
-msgstr "Title (TH)"
+msgstr ""
 
 msgid "Символ"
-msgstr "Symbol"
+msgstr ""
 
 msgid "Символ валюты ($, €, ₽, ฿)"
-msgstr "Currency symbol ($, €, ₽, ฿)"
-
+msgstr ""
 
 msgid "Активна"
-msgstr "Actively"
+msgstr ""
 
 msgid "Базовая валюта"
-msgstr "Base currency"
+msgstr ""
 
 msgid "Базовая валюта для расчетов"
-msgstr "The base currency for settlements"
+msgstr ""
 
 msgid "Знаков после запятой"
-msgstr "Decimal places"
+msgstr ""
 
 msgid "Валюта"
-msgstr "Currency"
+msgstr ""
 
 msgid "Валюты"
-msgstr "Currencies"
+msgstr ""
 
 msgid "Целевая валюта"
-msgstr "Target currency"
+msgstr ""
 
 msgid "Курс"
-msgstr "Course"
+msgstr ""
 
 msgid "Дата"
-msgstr "Date"
+msgstr ""
 
 msgid "Источник"
-msgstr "A source"
+msgstr ""
 
 msgid "Курс обмена"
-msgstr "Exchange rate"
+msgstr ""
 
 msgid "Курсы обмена"
-msgstr "Exchange rates"
+msgstr ""
 
 msgid "English"
-msgstr "English"
+msgstr ""
 
 msgid "ไทย"
-msgstr "Thai"
-
+msgstr ""
 
 msgid "Валюта по умолчанию"
-msgstr "Default currency"
+msgstr ""
 
 msgid "Предпочтение валюты"
-msgstr "Currency preference"
+msgstr ""
 
 msgid "Предпочтения валют"
-msgstr "Currency preferences"
+msgstr ""
 
 msgid "URL"
-msgstr "URL"
+msgstr ""
 
 msgid "Район"
-msgstr "District"
+msgstr ""
 
 msgid "Районы"
-msgstr "Districts"
+msgstr ""
 
 msgid "Локация"
-msgstr "Location"
+msgstr ""
 
 msgid "Локации"
-msgstr "Locations"
-
+msgstr ""
 
 msgid "Кондоминиум"
-msgstr "Condo"
+msgstr ""
 
 msgid "Тип"
-msgstr "Type"
+msgstr ""
 
 msgid "Отображаемое название"
-msgstr "Display Name"
-
+msgstr ""
 
 msgid "Название во множественном числе"
-msgstr "Name in the plural"
+msgstr ""
 
 msgid "Иконка"
-msgstr "Icon"
+msgstr ""
 
 msgid "Типы недвижимости"
-msgstr "Property Types"
+msgstr ""
 
 msgid "Логотип"
-msgstr "Logo"
+msgstr ""
 
 msgid "Сайт"
-msgstr "Website"
+msgstr ""
 
 msgid "Застройщик"
-msgstr "Developer"
+msgstr ""
 
 msgid "Застройщики"
-msgstr "Developers"
+msgstr ""
 
 msgid "Доступно"
-msgstr "Available"
+msgstr ""
 
 msgid "Забронировано"
-msgstr "Booked"
+msgstr ""
 
 msgid "Продано"
-msgstr "Sold"
+msgstr ""
 
 msgid "Сдано"
-msgstr "Rented"
-
+msgstr ""
 
 msgid "Специальное предложение"
-msgstr "Special offer"
+msgstr ""
 
 msgid "Адрес"
-msgstr "Address"
+msgstr ""
 
 msgid "Широта"
-msgstr "Latitude"
+msgstr ""
 
 msgid "Долгота"
-msgstr "Longitude"
+msgstr ""
 
 msgid "Спальни"
-msgstr "Bedrooms"
+msgstr ""
 
 msgid "Ванные"
-msgstr "Bathrooms"
+msgstr ""
 
 msgid "Общая площадь, м²"
-msgstr "Total area, m²"
+msgstr ""
 
 msgid "Жилая площадь, м²"
-msgstr "Living area, m²"
+msgstr ""
 
 msgid "Площадь участка, м²"
-msgstr "Plot area, m²"
+msgstr ""
 
 msgid "Этаж"
-msgstr "Floor"
+msgstr ""
 
 msgid "Всего этажей"
-msgstr "Total floors"
+msgstr ""
 
 msgid "Цена продажи, USD"
-msgstr "Sale price, USD"
+msgstr ""
 
 msgid "Цена продажи, THB"
-msgstr "Sale price, THB"
-
+msgstr ""
 
 msgid "Цена продажи, RUB"
-msgstr "Sale price, USD"
+msgstr ""
 
 msgid "Аренда в месяц, USD"
-msgstr "Rent per month, USD"
-
+msgstr ""
 
 msgid "Аренда в месяц, THB"
-msgstr "Rent per month, THB"
-
+msgstr ""
 
 msgid "Аренда в месяц, RUB"
-msgstr "Rent per month, RUB"
+msgstr ""
 
 msgid "Год постройки"
-msgstr "Year of construction"
+msgstr ""
 
 msgid "С мебелью"
-msgstr "With furniture"
+msgstr ""
 
 msgid "Бассейн"
-msgstr "Swimming pool"
+msgstr ""
 
 msgid "Парковка"
-msgstr "Parking space"
+msgstr ""
 
 msgid "Охрана"
-msgstr "Security"
+msgstr ""
 
 msgid "Спортзал"
-msgstr "Gym"
-
+msgstr ""
 
 msgid "Для инвестиций"
-msgstr "For investments"
-
+msgstr ""
 
 msgid "Объект рекомендован для инвестиций"
-msgstr "The property is recommended for investment"
+msgstr ""
 
 msgid "ID старой системы"
-msgstr "The ID of the old system"
+msgstr ""
 
 msgid "Идентификатор из старой Joomla системы (например: VS82)"
-msgstr "ID from the old Joomla system (for example: VS82)"
-
+msgstr ""
 
 msgid "Название комплекса"
-msgstr "Name of the complex"
+msgstr ""
 
 msgid "Название жилого комплекса или проекта"
-msgstr "The name of the residential complex or project"
-
+msgstr ""
 
 msgid "Площадь бассейна, м²"
-msgstr "Pool area, m²"
+msgstr ""
 
 msgid "Первоначальная цена, THB"
-msgstr "Original price, THB"
-
+msgstr ""
 
 msgid "Цена до скидки"
-msgstr "Price before discount"
-
+msgstr ""
 
 msgid "Срочная продажа"
-msgstr "Urgent sale"
+msgstr ""
 
 msgid "Примечание о срочности"
-msgstr "A note on urgency"
+msgstr ""
 
 msgid "Дополнительная информация о срочной продаже"
-msgstr "Additional information about the urgent sale"
+msgstr ""
 
 msgid "Архитектурный стиль"
-msgstr "Architectural style"
+msgstr ""
 
 msgid "Материалы"
-msgstr "Materials"
+msgstr ""
 
 msgid "Основные строительные материалы"
-msgstr "Basic building materials"
-
+msgstr ""
 
 msgid "Инвестиционный потенциал"
-msgstr "Investment potential"
+msgstr ""
 
 msgid "Описание инвестиционной привлекательности"
-msgstr "Description of investment attractiveness"
+msgstr ""
 
 msgid "Подходит для"
-msgstr "Suitable for"
+msgstr ""
 
 msgid "Назначение использования (отпуск, постоянное проживание и т.д.)"
-msgstr "Purpose of use (vacation, permanent residence, etc.)"
-
+msgstr ""
 
 msgid "До пляжа, мин"
-msgstr "To the beach, min"
+msgstr ""
 
 msgid "До аэропорта, мин"
-msgstr "To the airport, min"
+msgstr ""
 
 msgid "До школы, мин"
-msgstr "To school, min"
-
+msgstr ""
 
 msgid "Двуспальные кровати"
-msgstr "Double beds"
+msgstr ""
 
 msgid "Количество двуспальных кроватей"
-msgstr "Number of double beds"
+msgstr ""
 
 msgid "Односпальные кровати"
-msgstr "Single beds"
+msgstr ""
 
 msgid "Количество односпальных кроватей"
-msgstr "Number of single beds"
-
+msgstr ""
 
 msgid "Диван-кровати"
-msgstr "Sofa beds"
-
+msgstr ""
 
 msgid "Количество диван-кроватей"
-msgstr "Number of sofa beds"
-
+msgstr ""
 
 msgid "Контактное лицо"
-msgstr "Contact person"
+msgstr ""
 
 msgid "Сотрудник компании, ответственный за данный объект (по умолчанию: Bogdan)"
-msgstr "The company's employee responsible for this facility (default: Bogdan)"
+msgstr ""
 
 msgid "Агент (legacy)"
-msgstr "Agent (legacy)"
+msgstr ""
 
 msgid "Ответственный агент (устаревшее поле)"
-msgstr "Responsible Agent (obsolete field)"
-
+msgstr ""
 
 msgid "План этажа"
-msgstr "Floor plan"
+msgstr ""
 
 msgid "План планировки этажей"
-msgstr "Floor plan"
-
+msgstr ""
 
 msgid "Интро изображение"
-msgstr "Intro image"
-
+msgstr ""
 
 msgid "Дополнительное изображение для анонса"
-msgstr "Additional image for the announcement"
+msgstr ""
 
 msgid "Просмотры"
-msgstr "Views"
+msgstr ""
 
 msgid "Рекомендуемое"
-msgstr "Recommended"
+msgstr ""
 
 msgid "Заголовок (RU)"
-msgstr "Title (RU)"
+msgstr ""
 
 msgid "Оставьте пустым для автоматической генерации"
-msgstr "Leave empty for automatic generation"
-
+msgstr ""
 
 msgid "Описание (RU)"
-msgstr "Description (RU)"
+msgstr ""
 
 msgid "Ключевые слова (RU)"
-msgstr "Keywords (RU)"
+msgstr ""
 
 msgid "Заголовок (EN)"
-msgstr "Title (EN)"
-
+msgstr ""
 
 msgid "Описание (EN)"
-msgstr "Description (EN)"
+msgstr ""
 
 msgid "Ключевые слова (EN)"
-msgstr "Keywords (EN)"
+msgstr ""
 
 msgid "Заголовок (TH)"
-msgstr "Title (TH)"
-
+msgstr ""
 
 msgid "Описание (TH)"
-msgstr "Description (TH)"
+msgstr ""
 
 msgid "Ключевые слова (TH)"
-msgstr "Keywords (TH)"
+msgstr ""
 
 msgid "Недвижимость"
-msgstr "Real estate"
-
+msgstr ""
 
 msgid "Активен"
-msgstr "Active"
+msgstr ""
 
 msgid "ID из Joomla"
-msgstr "ID from Joomla"
+msgstr ""
 
 msgid "Идентификатор из старой Joomla системы"
-msgstr "ID from the old Joomla system"
+msgstr ""
 
 msgid "Агент"
-msgstr "The Agent"
-
+msgstr ""
 
 msgid "Агенты"
-msgstr "Agents"
+msgstr ""
 
 msgid "Основная галерея"
-msgstr "Main Gallery"
+msgstr ""
 
 msgid "Тизер"
-msgstr "The teaser"
+msgstr ""
 
 msgid "Главное изображение"
-msgstr "Main Image"
-
+msgstr ""
 
 msgid "Тип изображения"
-msgstr "Image Type"
-
+msgstr ""
 
 msgid "Тип изображения для категоризации"
-msgstr "The type of image to categorize"
+msgstr ""
 
 msgid "Alt текст"
-msgstr "Alt text"
+msgstr ""
 
 msgid "Альтернативный текст для SEO и доступности"
-msgstr "Alternative text for SEO and accessibility"
+msgstr ""
 
 msgid "Характеристика"
-msgstr "Parameter"
+msgstr ""
 
 msgid "Характеристики"
-msgstr "Specifications"
+msgstr ""
 
 msgid "Контактная информация"
-msgstr "Contact information"
-
+msgstr ""
 
 msgid "Информация о запросе"
-msgstr "Request Information"
-
+msgstr ""
 
 msgid "Статус обработки"
-msgstr "Processing status"
-
+msgstr ""
 
 msgid "Интеграции"
-msgstr "Integrations"
-
+msgstr ""
 
 msgid "Объект"
-msgstr "An object"
+msgstr ""
 
 msgid "Отметить как обработанные"
-msgstr "Mark as Processed"
+msgstr ""
 
 msgid "Отметить как необработанные"
-msgstr "Mark as unprocessed"
+msgstr ""
 
 msgid "Сообщение"
-msgstr "Message"
+msgstr ""
 
 msgid "Детали встречи"
-msgstr "Details of the meeting"
+msgstr ""
 
 msgid "Подтвердить встречи"
-msgstr "Confirm appointments"
-
+msgstr ""
 
 msgid "Вопрос"
-msgstr "Request"
+msgstr ""
 
 msgid "Ответ"
-msgstr "Answer"
+msgstr ""
 
 msgid "Отвечен"
-msgstr "Answered"
+msgstr ""
 
 msgid "Активировать подписки"
-msgstr "Activate subscriptions"
+msgstr ""
 
 msgid "Деактивировать подписки"
-msgstr "Deactivate subscriptions"
+msgstr ""
 
 msgid "Запись на просмотр"
-msgstr "Record for viewing"
-
+msgstr ""
 
 msgid "Консультация"
-msgstr "Consultation"
+msgstr ""
 
 msgid "Заказ обратного звонка"
-msgstr "Ordering a callback"
-
+msgstr ""
 
 msgid "Индивидуальный подбор недвижимости"
-msgstr "Individual selection of real estate"
-
+msgstr ""
 
 msgid "Общий вопрос"
-msgstr "The general question"
+msgstr ""
 
 msgid "Уточнение цены"
-msgstr "Price clarification"
-
+msgstr ""
 
 msgid "Документы и оформление"
-msgstr "Documents and registration"
+msgstr ""
 
 msgid "О районе и инфраструктуре"
-msgstr "About the area and infrastructure"
-
+msgstr ""
 
 msgid "Тип запроса"
-msgstr "Type of Request"
+msgstr ""
 
 msgid "Желаемая дата"
-msgstr "Desired date"
-
+msgstr ""
 
 msgid "Тема консультации"
-msgstr "Legal Consultations"
+msgstr ""
 
 msgid "Предпочтительный способ связи"
-msgstr "Preferred communication method"
+msgstr ""
 
 msgid "ID лида в AmoCRM"
-msgstr "Lead ID in AmoCRM"
+msgstr ""
 
 msgid "Создан"
-msgstr "Created"
+msgstr ""
 
 msgid "Обработан"
-msgstr "Processed"
-
+msgstr ""
 
 msgid "Обработал"
-msgstr "Processed"
-
+msgstr ""
 
 msgid "Дата обработки"
-msgstr "Date of processing"
-
+msgstr ""
 
 msgid "Запрос по объекту"
-msgstr "Object request"
-
+msgstr ""
 
 msgid "Запросы по объектам"
-msgstr "Property Tour"
+msgstr ""
 
 msgid "Страница отправки"
-msgstr "Sending page"
+msgstr ""
 
 msgid "User Agent"
-msgstr "User Agent"
-
+msgstr ""
 
 msgid "IP адрес"
-msgstr "IP Address"
-
+msgstr ""
 
 msgid "Быстрая консультация"
-msgstr "Quick consultation"
-
+msgstr ""
 
 msgid "Быстрые консультации"
-msgstr "Quick consultations"
-
+msgstr ""
 
 msgid "Вопрос о недвижимости"
-msgstr "The question of real estate"
-
+msgstr ""
 
 msgid "Услуги компании"
-msgstr "Company services"
+msgstr ""
 
 msgid "Сотрудничество"
-msgstr "Cooperation"
+msgstr ""
 
 msgid "Тема"
-msgstr "Subject"
+msgstr ""
 
 msgid "Обращение с контактной формы"
-msgstr "Contacting the contact form"
+msgstr ""
 
 msgid "Обращения с контактной формы"
-msgstr "Requests from the contact form"
+msgstr ""
 
 msgid "Дополнительная информация"
-msgstr "Additional information"
-
+msgstr ""
 
 msgid "Согласие с политикой конфиденциальности"
-msgstr "Acceptance of the Privacy Policy"
+msgstr ""
 
 msgid "Встреча подтверждена"
-msgstr "The meeting has been confirmed"
+msgstr ""
 
 msgid "Подтвержденная дата и время"
-msgstr "Confirmed date and time"
+msgstr ""
 
 msgid "Запись на встречу в офисе"
-msgstr "Make an appointment at the office"
+msgstr ""
 
 msgid "Записи на встречу в офисе"
-msgstr "Make appointments at the office"
+msgstr ""
 
 msgid "Дата ответа"
-msgstr "Response date"
-
+msgstr ""
 
 msgid "Вопрос из FAQ"
-msgstr "Question from the FAQ"
-
+msgstr ""
 
 msgid "Вопросы из FAQ"
-msgstr "Questions from the FAQ"
+msgstr ""
 
 msgid "Страница подписки"
-msgstr "Subscription page"
-
+msgstr ""
 
 msgid "Дата подписки"
-msgstr "Subscription date"
+msgstr ""
 
 msgid "Дата отписки"
-msgstr "Unsubscribe date"
-
+msgstr ""
 
 msgid "Подписка на новости"
-msgstr "Subscribe to the news"
-
+msgstr ""
 
 msgid "Подписки на новости"
-msgstr "News subscriptions"
+msgstr ""
 
 msgid "Пожалуйста, заполните имя и телефон"
-msgstr "Please fill in your name and phone number."
+msgstr ""
 
 msgid "Спасибо! Ваша заявка принята. Наш менеджер свяжется с вами в ближайшее время."
-msgstr "Thanks! Your application has been accepted. Our manager will contact you soon."
+msgstr ""
 
 msgid "Произошла ошибка. Пожалуйста, попробуйте позже."
-msgstr "An error has occurred. Please try again later."
+msgstr ""
 
 msgid "Пожалуйста, укажите номер телефона"
-msgstr "Please provide a phone number."
+msgstr ""
 
 msgid "Спасибо! Мы свяжемся с вами в течение 30 минут и подберем 3 лучших объекта."
-msgstr "Thanks! We will contact you within 30 minutes and select the 3 best sites."
+msgstr ""
 
 msgid "Пожалуйста, заполните все обязательные поля"
-msgstr "Please fill in all required fields."
+msgstr ""
 
 msgid "Спасибо за обращение! Мы ответим вам в ближайшее время."
-msgstr "Thank you for contacting us! We will respond to you as soon as possible."
+msgstr ""
 
 msgid "Пожалуйста, заполните имя, телефон и дату"
-msgstr "Please fill in the name, phone number and date."
+msgstr ""
 
 msgid "Спасибо! Ваша запись принята. Мы перезвоним для подтверждения встречи."
-msgstr "Thanks! Your entry has been accepted. We will call you back to confirm the appointment."
+msgstr ""
 
 msgid "Пожалуйста, укажите телефон и вопрос"
-msgstr "Please provide a phone number and a question."
+msgstr ""
 
 msgid "Спасибо за вопрос! Наш эксперт свяжется с вами в ближайшее время."
-msgstr "Thanks for the question! Our expert will contact you soon."
+msgstr ""
 
 msgid "Пожалуйста, укажите email"
-msgstr "Please provide an email address"
+msgstr ""
 
 msgid "Вы уже подписаны на нашу рассылку"
-msgstr "You have already subscribed to our newsletter."
+msgstr ""
 
 msgid "Спасибо за подписку! Теперь вы будете получать наши новости."
-msgstr "Thanks for subscribing! Now you will receive our news."
+msgstr ""
 
 msgid "Поддерживаемые форматы: .xlsx, .xls. Максимальный размер: 10MB"
-msgstr "Supported formats: .xlsx, .xls. Maximum size: 10MB"
-
+msgstr ""
 
 msgid "Выберите тип операции импорта"
-msgstr "Select the type of import operation"
+msgstr ""
 
 msgid "Размер файла не должен превышать 10MB"
-msgstr "The file size should not exceed 10MB"
+msgstr ""
 
 msgid "Поддерживаются только файлы Excel (.xlsx, .xls)"
-msgstr "Only Excel files (.xlsx, .xls) are supported"
+msgstr ""
 
 msgid "JSON маппинг в формате: {\"Excel_колонка\": \"поле_модели\"}. Например: {\"A\": \"legacy_id\", \"B\": \"title\", \"C\": \"price_sale_usd\"}"
-msgstr "JSON mapping in the format: {\"Excel_column\": \"model field\"}. For example: {\"A\": \"legacy_id\", \"B\": \"title\", \"C\": \"price_sale_usd\"}"
+msgstr ""
 
 msgid "Недопустимое поле модели: {}. Допустимые поля: {}"
-msgstr "Invalid model field: {}. Acceptable fields: {}"
+msgstr ""
 
 msgid "Неправильный формат JSON. Используйте формат: {\"A\": \"legacy_id\", \"B\": \"title\"}"
-msgstr "Incorrect JSON format. Use the format: {\"A\": \"legacy_id\", \"B\": \"title\"}"
-
+msgstr ""
 
 msgid "-- Выберите маппинг --"
-msgstr "-- Select mapping --"
+msgstr ""
 
 msgid "Маппинг полей"
-msgstr "Mapping fields"
-
+msgstr ""
 
 msgid "Выберите схему соответствия колонок Excel полям объектов недвижимости"
-msgstr "Select a scheme for matching Excel columns to real estate fields"
-
+msgstr ""
 
 msgid "-- Выберите действие --"
-msgstr "-- Select an action --"
-
+msgstr ""
 
 msgid "Обработать импорт"
-msgstr "Process the import"
+msgstr ""
 
 msgid "Удалить"
-msgstr "Remove"
-
+msgstr ""
 
 msgid "Переобработать"
-msgstr "Re-process"
-
+msgstr ""
 
 msgid "Действие"
-msgstr "Action"
+msgstr ""
 
 msgid "Неправильный формат выбранных файлов"
-msgstr "Incorrect format of selected files"
-
+msgstr ""
 
 msgid "Загружен"
-msgstr "Uploaded"
-
+msgstr ""
 
 msgid "Обрабатывается"
-msgstr "Being processed"
+msgstr ""
 
 msgid "Завершен"
-msgstr "Completed"
+msgstr ""
 
 msgid "Ошибка"
-msgstr "Mistake"
-
+msgstr ""
 
 msgid "Обновление недвижимости"
-msgstr "Real estate update"
-
+msgstr ""
 
 msgid "Создание недвижимости"
-msgstr "Creation of real estate"
-
+msgstr ""
 
 msgid "Обновление цен"
-msgstr "Price updates"
-
+msgstr ""
 
 msgid "Название файла"
-msgstr "File name"
+msgstr ""
 
 msgid "Файл"
-msgstr "File"
-
+msgstr ""
 
 msgid "Тип импорта"
-msgstr "Type of import"
+msgstr ""
 
 msgid "Загрузил"
-msgstr "Uploaded"
-
+msgstr ""
 
 msgid "Всего строк"
-msgstr "Total lines"
-
+msgstr ""
 
 msgid "Обработано строк"
-msgstr "Rows processed"
-
+msgstr ""
 
 msgid "Успешно обработано"
-msgstr "Successfully processed"
+msgstr ""
 
 msgid "Ошибок"
-msgstr "Errors"
-
+msgstr ""
 
 msgid "Распарсенные данные"
-msgstr "Parsed data"
-
+msgstr ""
 
 msgid "Ошибки валидации"
-msgstr "Validation errors"
+msgstr ""
 
 msgid "Начато"
-msgstr "Started"
+msgstr ""
 
 msgid "Завершено"
-msgstr "Completed"
+msgstr ""
 
 msgid "Файл импорта"
-msgstr "Import file"
+msgstr ""
 
 msgid "Файлы импорта"
-msgstr "Import files"
-
+msgstr ""
 
 msgid "Информация"
-msgstr "Information"
-
+msgstr ""
 
 msgid "Предупреждение"
-msgstr "Warning"
+msgstr ""
 
 msgid "Успех"
-msgstr "Success"
+msgstr ""
 
 msgid "Уровень"
-msgstr "Level"
-
+msgstr ""
 
 msgid "Номер строки"
-msgstr "Line number"
+msgstr ""
 
 msgid "Детали"
-msgstr "Details"
+msgstr ""
 
 msgid "Лог импорта"
-msgstr "Import log"
+msgstr ""
 
 msgid "Логи импорта"
-msgstr "Import logs"
+msgstr ""
 
 msgid "ID объекта (legacy_id)"
-msgstr "Object ID (legacy_id)"
-
+msgstr ""
 
 msgid "Название (title)"
-msgstr "Title"
-
+msgstr ""
 
 msgid "Цена продажи USD (price_sale_usd)"
-msgstr "Sale price USD (price_sale_usd)"
-
+msgstr ""
 
 msgid "Цена продажи THB (price_sale_thb)"
-msgstr "Sale price THB (price_sale_thb)"
-
+msgstr ""
 
 msgid "Цена продажи RUB (price_sale_rub)"
-msgstr "Sale price RUB (price_sale_rub)"
+msgstr ""
 
 msgid "Аренда USD (price_rent_monthly)"
-msgstr "Rent USD (price_rent_monthly)"
+msgstr ""
 
 msgid "Аренда THB (price_rent_monthly_thb)"
-msgstr "THB rental (price_rent_monthly_thb)"
+msgstr ""
 
 msgid "Аренда RUB (price_rent_monthly_rub)"
-msgstr "Rent RUB (price_rent_monthly_rub)"
-
+msgstr ""
 
 msgid "Общая площадь (area_total)"
-msgstr "Total area (area_total)"
-
+msgstr ""
 
 msgid "Жилая площадь (area_living)"
-msgstr "Living area (area_living)"
-
+msgstr ""
 
 msgid "Площадь участка (area_land)"
-msgstr "Land area (area_land)"
-
+msgstr ""
 
 msgid "Спальни (bedrooms)"
-msgstr "Bedrooms"
-
+msgstr ""
 
 msgid "Ванные (bathrooms)"
-msgstr "Bathrooms"
-
+msgstr ""
 
 msgid "Этаж (floor)"
-msgstr "Floor"
-
+msgstr ""
 
 msgid "Всего этажей (floors_total)"
-msgstr "Total floors"
-
+msgstr ""
 
 msgid "Статус (status)"
-msgstr "Status"
-
+msgstr ""
 
 msgid "Тип сделки (deal_type)"
-msgstr "Type of transaction"
-
+msgstr ""
 
 msgid "Широта (latitude)"
-msgstr "Latitude"
-
+msgstr ""
 
 msgid "Долгота (longitude)"
-msgstr "Longitude"
-
+msgstr ""
 
 msgid "С мебелью (furnished)"
-msgstr "With furniture"
-
+msgstr ""
 
 msgid "Бассейн (pool)"
-msgstr "Swimming pool"
-
+msgstr ""
 
 msgid "Парковка (parking)"
-msgstr "Parking space"
-
+msgstr ""
 
 msgid "Охрана (security)"
-msgstr "Security"
-
+msgstr ""
 
 msgid "Спортзал (gym)"
-msgstr "Gym"
-
+msgstr ""
 
 msgid "Год постройки (year_built)"
-msgstr "Year of construction"
+msgstr ""
 
 msgid "До пляжа (distance_to_beach)"
-msgstr "To the beach (distance_to_beach)"
+msgstr ""
 
 msgid "До аэропорта (distance_to_airport)"
-msgstr "To the airport (distance_to_airport)"
+msgstr ""
 
 msgid "До школы (distance_to_school)"
-msgstr "To school (distance_to_school)"
+msgstr ""
 
 msgid "Двуспальные кровати (double_beds)"
-msgstr "Double beds (double_beds)"
+msgstr ""
 
 msgid "Односпальные кровати (single_beds)"
-msgstr "Single beds (single_beds)"
+msgstr ""
 
 msgid "Диван-кровати (sofa_beds)"
-msgstr "Sofa beds (sofa_beds)"
-
+msgstr ""
 
 msgid "Площадь бассейна (pool_area)"
-msgstr "Pool area (pool_area)"
-
+msgstr ""
 
 msgid "Срочная продажа (is_urgent_sale)"
-msgstr "Urgent sale (is_urgent_sale)"
+msgstr ""
 
 msgid "Примечание срочности (urgency_note)"
-msgstr "Note of urgency (urgency_note)"
+msgstr ""
 
 msgid "Архитектурный стиль (architectural_style)"
-msgstr "Architectural style (architectural_style)"
+msgstr ""
 
 msgid "Материалы (material_type)"
-msgstr "Materials (material_type)"
+msgstr ""
 
 msgid "Подходит для (suitable_for)"
-msgstr "Suitable for (suitable_for)"
-
+msgstr ""
 
 msgid "Название маппинга"
-msgstr "Mapping name"
-
+msgstr ""
 
 msgid "По умолчанию"
-msgstr "By default"
-
+msgstr ""
 
 msgid "Строка заголовков"
-msgstr "The header line"
-
+msgstr ""
 
 msgid "Номер строки с заголовками (1-based)"
-msgstr "Line number with headings (1-based)"
+msgstr ""
 
 msgid "Начало данных"
-msgstr "The beginning of the data"
+msgstr ""
 
 msgid "Номер первой строки с данными (1-based)"
-msgstr "Number of the first row with data (1-based)"
+msgstr ""
 
 msgid "Маппинг импорта"
-msgstr "Import mapping"
+msgstr ""
 
 msgid "Маппинги импорта"
-msgstr "Import mappings"
+msgstr ""
 
 msgid "Файл успешно загружен. Теперь выберите маппинг полей."
-msgstr "The file was uploaded successfully. Now select field mapping."
+msgstr ""
 
 msgid "Ошибка парсинга файла: {}"
-msgstr "File parsing error: {}"
+msgstr ""
 
 msgid "Файл уже обрабатывается или обработан"
-msgstr "The file is already being processed or has been processed"
+msgstr ""
 
 msgid "Импорт запущен. Вы можете отслеживать прогресс на странице деталей."
-msgstr "The import is running. You can track the progress on the details page."
+msgstr ""
 
 msgid "Удалено {} файлов"
-msgstr "Deleted {} files"
+msgstr ""
 
 msgid "Запущена обработка {} файлов"
-msgstr "Processing of {} files started"
+msgstr ""
 
 msgid "Маппинг \"{}\" успешно создан"
-msgstr "Mapping \"{}\" has been successfully created"
+msgstr ""
 
 msgid "Маппинг \"{}\" успешно обновлен"
-msgstr "Mapping \"{}\" successfully updated"
+msgstr ""
 
 msgid "Маппинг \"{}\" удален"
-msgstr "Mapping \"{}\" has been removed"
-
+msgstr ""
 
 msgid "Выберите язык"
-msgstr "Select a language"
+msgstr ""
 
 msgid "Спасибо!"
-msgstr "Thanks!"
+msgstr ""
 
 msgid "Закрыть"
-msgstr "To close"
+msgstr ""
 
 msgid "Удалено из избранного"
-msgstr "Deleted from favorites"
-
+msgstr ""
 
 msgid "Добавлено в избранное"
-msgstr "Added to favorites"
-
+msgstr ""
 
 msgid "Недвижимость в Таиланде"
-msgstr "Real estate in Thailand"
+msgstr ""
 
 msgid "Блог"
-msgstr "Blog"
+msgstr ""
 
 msgid "Автор"
-msgstr "Author"
-
+msgstr ""
 
 msgid "мин чтения"
-msgstr "Reading time"
-
+msgstr ""
 
 msgid "просмотров"
-msgstr "Views"
+msgstr ""
 
 msgid "Теги"
-msgstr "Tags"
+msgstr ""
 
 msgid "Автор статьи"
-msgstr "The author of the article"
+msgstr ""
 
 msgid "Похожие статьи"
-msgstr "Related articles"
+msgstr ""
 
 msgid "Категории"
-msgstr "Categories"
+msgstr ""
 
 msgid "Свяжитесь с нами"
-msgstr "Contact us"
+msgstr ""
 
 msgid "Есть вопросы? Мы всегда рады помочь!"
-msgstr "Any questions? We are always happy to help!"
+msgstr ""
 
 msgid "Ваше имя"
-msgstr "Your name"
+msgstr ""
 
 msgid "Email (необязательно)"
-msgstr "Email (optional)"
+msgstr ""
 
 msgid "Ваш вопрос или комментарий"
-msgstr "Your question or comment"
-
+msgstr ""
 
 msgid "Отправить"
-msgstr "Send"
+msgstr ""
 
 msgid "Нажимая кнопку, вы соглашаетесь с"
-msgstr "By clicking the button, you agree to"
-
+msgstr ""
 
 msgid "политикой конфиденциальности"
-msgstr "Privacy Policy"
+msgstr ""
 
 msgid "Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время."
-msgstr "Thanks! Your message has been sent. We will contact you as soon as possible."
+msgstr ""
 
 msgid "Произошла ошибка. Пожалуйста, попробуйте еще раз."
-msgstr "An error has occurred. Please try again."
-
+msgstr ""
 
 msgid "Рекомендуемые статьи"
-msgstr "Recommended articles"
-
+msgstr ""
 
 msgid "Отправка..."
-msgstr "Shipment..."
+msgstr ""
 
 msgid "Статьи с тегом"
-msgstr "Articles with a tag"
+msgstr ""
 
 msgid "Результаты поиска"
-msgstr "Search Results"
-
+msgstr ""
 
 msgid "Новости, статьи, кейсы и события в мире недвижимости Пхукета"
-msgstr "News, articles, cases and events in the Phuket real estate world"
-
+msgstr ""
 
 msgid "Поиск по статьям..."
-msgstr "Article search..."
-
+msgstr ""
 
 msgid "Все категории"
-msgstr "All categories"
+msgstr ""
 
 msgid "Найти"
-msgstr "Find"
+msgstr ""
 
 msgid "Сбросить"
-msgstr "Throw off"
-
+msgstr ""
 
 msgid "мин"
-msgstr "min"
+msgstr ""
 
 msgid "Читать далее"
-msgstr "Read more"
-
+msgstr ""
 
 msgid "Статьи не найдены"
-msgstr "No articles found"
-
+msgstr ""
 
 msgid "По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска."
-msgstr "Nothing was found for your search. Try changing the search parameters."
+msgstr ""
 
 msgid "В данной категории пока нет статей."
-msgstr "There are no articles in this category yet."
-
+msgstr ""
 
 msgid "Все статьи"
-msgstr "All articles"
-
+msgstr ""
 
 msgid "Рекомендуемые"
-msgstr "Recommended"
+msgstr ""
 
 msgid "Все статьи с тегом"
-msgstr "All articles with the tag"
+msgstr ""
 
 msgid "Страница не найдена"
-msgstr "Page Not Found"
+msgstr ""
 
 msgid "Ошибка 404"
-msgstr "Error 404"
+msgstr ""
 
 msgid "Страница недоступна или перемещена"
-msgstr "The page you requested doesn't exist"
+msgstr ""
 
 msgid "Мы обновили структуру каталога. Используйте кнопки ниже, чтобы вернуться на главную или найти нужный объект."
-msgstr "We recently reorganised our catalogue. Use the buttons below to return home or explore new listings."
+msgstr ""
 
 msgid "На главную"
-msgstr "Back to home"
+msgstr ""
 
 msgid "Смотреть объекты"
-msgstr "Browse properties"
+msgstr ""
 
 msgid "О нас"
-msgstr "About Us"
+msgstr ""
 
 msgid "Наша история"
-msgstr "Our history"
+msgstr ""
 
 msgid "Undersun Estate - это молодая и энергичная команда экспертов рынка недвижимости Таиланда с 3-летним опытом работы. Мы предлагаем разнообразные варианты недвижимости: от доступного жилья до роскошных вилл."
-msgstr "Undersun Estate is a young and energetic team of real estate experts in Thailand with 3 years of experience. We offer diverse property options: from affordable housing to luxury villas."
+msgstr ""
 
 msgid "Наша команда предоставляет комплексную и бесплатную поддержку на всех этапах сделки. Мы тщательно отбираем объекты недвижимости, ориентируясь на потребности и пожелания клиентов."
-msgstr "Our team provides comprehensive and free support at all stages of the transaction. We carefully select real estate objects, focusing on the needs and wishes of clients."
+msgstr ""
 
 msgid "Мы специализируемся на продаже и аренде вилл, таунхаусов, кондоминиумов и земельных участков в различных районах Пхукета: Муанг Пхукет, Катху и Таланг."
-msgstr "We specialize in the sale and rental of villas, townhouses, condominiums and land plots in various districts of Phuket: Mueang Phuket, Kathu and Thalang."
+msgstr ""
 
 msgid "Команда Undersun Estate"
-msgstr "Undersun Estate Team"
+msgstr ""
 
 msgid "Наши достижения"
-msgstr "Our achievements"
+msgstr ""
 
 msgid "Довольных клиентов"
-msgstr "Satisfied customers"
+msgstr ""
 
 msgid "Объектов в портфолио"
-msgstr "Objects in the portfolio"
+msgstr ""
 
 msgid "Года опыта"
-msgstr "Years of experience"
+msgstr ""
 
 msgid "Языка обслуживания"
-msgstr "The language of service"
+msgstr ""
 
 msgid "Наша команда"
-msgstr "Our team"
+msgstr ""
 
 msgid "Молодые и энергичные специалисты рынка недвижимости Пхукета"
-msgstr "Young and energetic real estate specialists in Phuket"
+msgstr ""
 
 msgid "Наша дружная команда всегда готова помочь вам найти идеальную недвижимость"
-msgstr "Our friendly team is always ready to help you find the perfect property"
+msgstr ""
 
 msgid "Наши услуги"
-msgstr "Our Services"
+msgstr ""
 
 msgid "Подробнее"
-msgstr "Details"
+msgstr ""
 
 msgid "Готовы найти дом мечты?"
-msgstr "Ready to find your dream home?"
+msgstr ""
 
 msgid "Свяжитесь с нами сегодня для бесплатной консультации"
-msgstr "Contact us today for a free consultation"
+msgstr ""
 
 msgid "Связаться с нами"
-msgstr "Contact us"
+msgstr ""
 
 msgid "Контакты"
-msgstr "Contacts"
+msgstr ""
 
 msgid "Отправьте нам сообщение"
-msgstr "Send us a message"
+msgstr ""
 
 msgid "Выберите тему"
-msgstr "Select a subject"
+msgstr ""
 
 msgid "Покупка недвижимости"
-msgstr "Purchasing Real Estate"
+msgstr ""
 
 msgid "Аренда недвижимости"
-msgstr "Property Rental"
+msgstr ""
 
 msgid "Продажа недвижимости"
-msgstr "Property Sales"
+msgstr ""
 
 msgid "Отправить сообщение"
-msgstr "Send Message"
+msgstr ""
 
 msgid "Наши контакты"
-msgstr "Our Contacts"
+msgstr ""
 
 msgid "Часы работы"
-msgstr "Operating Hours"
+msgstr ""
 
 msgid "Пн-Вс: 9:00 - 21:00"
-msgstr "Mon-Sun: 9:00 - 21:00"
+msgstr ""
 
 msgid "Следите за нами"
-msgstr "Follow us"
+msgstr ""
 
 msgid "Наше расположение"
-msgstr "Our Location"
+msgstr ""
 
 msgid "Мы находимся в самом сердце Карона, Пхукет"
-msgstr "We are located in the heart of Karon, Phuket"
+msgstr ""
 
 msgid "Часто задаваемые вопросы"
-msgstr "Frequently Asked Questions"
+msgstr ""
 
 msgid "Могу ли я как иностранец купить недвижимость в Таиланде?"
-msgstr "Can I, as a foreigner, buy real estate in Thailand?"
+msgstr ""
 
 #, python-format
 msgid "Да, иностранцы могут покупать кондоминиумы (до 49%% от общей площади здания) и дома в лизинг. Мы поможем вам разобраться во всех юридических аспектах."
-msgstr "Yes, foreigners can buy condominiums (up to 49%% of the total building area) and lease houses. We will help you understand all the legal aspects."
+msgstr ""
 
 msgid "Какие дополнительные расходы при покупке?"
-msgstr "What are the additional costs when buying?"
+msgstr ""
 
 #, python-format
 msgid "Обычно это 6-8%% от стоимости недвижимости: трансферный налог (2%%), гербовый сбор (0.5%%), регистрационные сборы, услуги юриста и агентская комиссия."
-msgstr "Usually it is 6-8%% of the property value: transfer tax (2%%), stamp duty (0.5%%), registration fees, lawyer services and agency commission."
+msgstr ""
 
 msgid "Сколько времени занимает сделка?"
-msgstr "How long does the transaction take?"
+msgstr ""
 
 msgid "От 2 до 6 недель в зависимости от сложности сделки. Мы ведем весь процесс от начала до конца."
-msgstr "From 2 to 6 weeks depending on the complexity of the transaction. We lead the entire process from start to finish."
+msgstr ""
 
 msgid "Предоставляете ли вы услуги управления недвижимостью?"
-msgstr "Do you provide property management services?"
+msgstr ""
 
 msgid "Да, мы предлагаем полный спектр услуг по управлению недвижимостью: уборка, ремонт, сдача в аренду и многое другое."
-msgstr "Yes, we offer a full range of property management services: cleaning, repairs, rentals and much more."
+msgstr ""
 
-#, fuzzy
-#| msgid "Недвижимость на Пхукете"
 msgid "Undersun Estate - Недвижимость на Пхукете, Таиланд"
-msgstr "Undersun Estate - Real estate in Phuket, Thailand"
+msgstr ""
 
 msgid "Популярные районы"
-msgstr "Popular Districts"
+msgstr ""
 
 msgid "Изучите лучшие локации Пхукета"
-msgstr "Explore the best locations in Phuket"
+msgstr ""
 
 msgid "объектов"
-msgstr "properties"
+msgstr ""
 
 msgid "Найдите ответы на ключевые вопросы о покупке недвижимости на Пхукете"
-msgstr "Find answers to key questions about buying property in Phuket"
-
+msgstr ""
 
 msgid "Можно ли купить недвижимость удалённо?"
-msgstr "Is it possible to buy a property remotely?"
+msgstr ""
 
 msgid "Да. Дистанционная покупка недвижимости — это привычный, отлаженный и юридически безопасный процесс во многих странах, и Таиланд здесь не исключение. Мы организуем онлайн-показы, согласуем условия с продавцом, поможем с оформлением документов и при необходимости примем объект от вашего имени по доверенности."
-msgstr "Yes. Remote purchase of real estate is a familiar, well—established and legally secure process in many countries, and Thailand is no exception here. We will organize online screenings, coordinate the terms with the seller, help with the paperwork and, if necessary, accept the object on your behalf by proxy."
-
+msgstr ""
 
 msgid "Можно ли иностранцу купить недвижимость в собственность?"
-msgstr "Is it possible for a foreigner to buy a property?"
+msgstr ""
 
 msgid "Да. В Таиланде существуют две формы собственности — freehold (полная) и leasehold (долгосрочная аренда)."
-msgstr "Yes. In Thailand, there are two forms of ownership — freehold (full) and leasehold (long-term lease)."
+msgstr ""
 
 msgid "Квартиры (кондоминиумы)"
-msgstr "Apartments (condominiums)"
+msgstr ""
 
 #, python-format
 msgid "иностранцам можно владеть до 49%% юнитов в freehold."
-msgstr "Foreigners can own up to 49%% of units in freehold."
+msgstr ""
 
 msgid "Виллы"
-msgstr "Villas"
+msgstr ""
 
 msgid "часто продаются с землёй в leasehold, при этом сама вилла может быть оформлена в полную собственность. При покупке у застройщика (юридического лица) нет проблем с продлением аренды на 30+30+30 лет — это стандартная и юридически закреплённая практика."
-msgstr "They are often sold with land in a leasehold, while the villa itself can be fully owned. When buying from a developer (a legal entity), there are no problems with extending the lease for 30+30+30 years is a standard and legally established practice."
+msgstr ""
 
 msgid "Есть ли рассрочка?"
-msgstr "Is there an installment plan?"
+msgstr ""
 
 msgid "Да. При покупке у застройщика обычно предоставляется беспроцентная рассрочка на весь срок строительства. На вторичном рынке, как правило, требуется полная оплата."
-msgstr "Yes. When buying from a developer, an interest-free installment plan is usually provided for the entire construction period. In the secondary market, full payment is usually required."
+msgstr ""
 
 msgid "Сколько стоят услуги агента?"
-msgstr "How much does an agent's service cost?"
+msgstr ""
 
 msgid "Для покупателя — 0 THB. Вознаграждение агентства выплачивается застройщиком из своего маркетингового бюджета. Это даёт вам сопровождение, защиту интересов и доступ к полной базе объектов без дополнительных расходов. При этом мы подбираем варианты объективно, без давления, которое может возникнуть при работе с отделом продаж застройщиков."
-msgstr "For the buyer — 0 THB. The agency's remuneration is paid by the developer from its marketing budget. This gives you support, protection of interests and access to a complete database of facilities at no additional cost. At the same time, we select options objectively, without the pressure that may arise when working with the developers' sales department."
+msgstr ""
 
-
-msgid "What taxes are there when buying a property?"
-msgstr "Real Estate Purchase Process Steps"
+msgid "Какие налоги есть при покупке недвижимости?"
+msgstr ""
 
 #, python-format
 msgid "налог при регистрации — 1,1%% от стоимости, делится поровну между покупателем и продавцом."
-msgstr "The registration tax is 1.1%% of the cost, divided equally between the buyer and seller."
+msgstr ""
 
 #, python-format
 msgid "налог при регистрации — 6,8%%, также делится пополам."
-msgstr "The registration tax is 6.8%%, also divided in half."
+msgstr ""
 
 msgid "Мы заранее рассчитываем все расходы, чтобы для вас не было неожиданных платежей."
-msgstr "We calculate all expenses in advance so that there are no unexpected payments for you."
+msgstr ""
 
 msgid "Не нашли ответ?"
-msgstr "Didn't find the answer?"
+msgstr ""
 
 msgid "Свяжитесь с нами, и мы ответим на ваш вопрос в удобном для вас формате — по телефону или в мессенджере."
-msgstr "Contact us and we will answer your question in a format that is convenient for you — by phone or messenger."
+msgstr ""
 
 msgid "Задать вопрос"
-msgstr "Ask a question"
-
+msgstr ""
 
 msgid "Ваш телефон"
-msgstr "Your phone number"
+msgstr ""
 
 msgid "+7 (999) 123-45-67"
-msgstr "+7 (999) 123-45-67"
-
+msgstr ""
 
 msgid "Ваш вопрос"
-msgstr "Your question"
-
+msgstr ""
 
 msgid "Опишите ваш вопрос подробно..."
-msgstr "Describe your question in detail..."
+msgstr ""
 
 msgid "Я согласен(на) с"
-msgstr "I agree with"
-
+msgstr ""
 
 msgid "Получить ответ"
-msgstr "Get a response"
+msgstr ""
 
 msgid "Избранные объекты недвижимости"
-msgstr "Selected real estate properties"
-
+msgstr ""
 
 msgid "Квартиры"
-msgstr "Condos"
+msgstr ""
 
 msgid "Дома"
-msgstr "Townhouses"
+msgstr ""
 
 msgid "Смотреть каталог"
-msgstr "View catalog"
+msgstr ""
 
 msgid "Phuket, Thailand"
-msgstr "Phuket, Thailand"
+msgstr ""
 
 msgid "Вся недвижимость Пхукета"
-msgstr "All Phuket properties"
+msgstr ""
 
 msgid "в одном каталоге"
-msgstr "in one catalog"
+msgstr ""
 
 msgid "Undersun Estate — ваш ориентир в недвижимости Таиланда. Мы могли бы показать весь рынок, но порекомендуем только то, что действительно стоит вашего внимания."
-msgstr "Undersun Estate is your reference point in real estate in Thailand. We could show the whole market, but we will recommend only what is really worth your attention."
+msgstr ""
 
 msgid "Смотреть все объекты"
-msgstr "View Catalog"
+msgstr ""
 
 msgid "Все типы"
-msgstr "All Types"
+msgstr ""
 
 msgid "Все районы"
-msgstr "All Districts"
+msgstr ""
 
 msgid "Мин. цена"
-msgstr "Min. Price"
+msgstr ""
 
 msgid "Макс. цена"
-msgstr "Max. Price"
+msgstr ""
 
 msgid "Показать"
-msgstr "Show"
+msgstr ""
 
 msgid "5 лет"
-msgstr "5 years"
+msgstr ""
 
 msgid "в недвижимости Пхукета"
-msgstr "in Phuket real estate"
+msgstr ""
 
 msgid "Понимаем рынок и видим возможности, которые другие пропускают."
-msgstr "We understand the market and see opportunities others miss."
+msgstr ""
 
 msgid "600+"
-msgstr "600+"
+msgstr ""
 
 msgid "актуальных объектов"
-msgstr "active listings"
+msgstr ""
 
 msgid "От бюджетных студий до элитных вилл."
-msgstr "From budget studios to luxury villas."
+msgstr ""
 
 #, python-format
 msgid "0%%"
-msgstr "0%%"
+msgstr ""
 
 msgid "рассрочка от застройщиков"
-msgstr "developer installment plans"
+msgstr ""
 
 msgid "Покупка без переплат с гибкими условиями платежа."
-msgstr "Purchase without overpayment with flexible payment terms."
+msgstr ""
 
 msgid "Новые поступления"
-msgstr "New Arrivals"
-
+msgstr ""
 
 msgid "Свежие предложения недвижимости"
-msgstr "Fresh real estate offers"
-
+msgstr ""
 
 msgid "Посмотреть все новинки"
-msgstr "View all new items"
+msgstr ""
 
 msgid "Новые объекты скоро появятся"
-msgstr "New facilities are coming soon"
-
+msgstr ""
 
 msgid "Следите за обновлениями"
-msgstr "Stay tuned for updates"
+msgstr ""
 
 msgid "Новости"
-msgstr "News"
+msgstr ""
 
 msgid "Все новости"
-msgstr "All news"
+msgstr ""
 
 msgid "Новости скоро появятся"
-msgstr "News coming soon"
+msgstr ""
 
 msgid "Наши специалисты по недвижимости и работе с клиентами"
-msgstr "Our real estate and client service specialists"
+msgstr ""
 
 msgid "Эксперты, которые с заботой и вниманием подберут объект под ваши цели и будут рядом на каждом этапе."
-msgstr "Experts who will carefully select an object for your goals and will be there for you at every stage."
+msgstr ""
 
 msgid "Команда обновляется..."
-msgstr "The team is being updated..."
-
+msgstr ""
 
 msgid "Свяжитесь с нашей командой для консультации"
-msgstr "Contact our team for a consultation"
+msgstr ""
 
 msgid "Нет времени искать?"
-msgstr "No time to search?"
+msgstr ""
 
 msgid "Отправьте заявку, и мы подберем 3 лучших объекта за 24 часа"
-msgstr "Send a request and we will select the 3 best properties in 24 hours."
+msgstr ""
 
 msgid "Получить подборку"
-msgstr "Get a selection"
+msgstr ""
 
 msgid "Современная недвижимость"
-msgstr "Modern property"
-
+msgstr ""
 
 msgid "Рекламный баннер Undersun Estate"
-msgstr "Undersun Estate Advertising Banner"
+msgstr ""
 
 msgid "Этапы сделки по покупке недвижимости"
-msgstr "Real Estate Purchase Process Steps"
+msgstr ""
 
 msgid "Нажмите на этап, чтобы узнать подробности"
-msgstr "Click on a step to learn more details"
+msgstr ""
 
 msgid "Выбор объекта"
-msgstr "Property Selection"
+msgstr ""
 
 msgid "Тур по объектам"
-msgstr "Property Tour"
+msgstr ""
 
 msgid "Переговоры"
-msgstr "Negotiations"
+msgstr ""
 
 msgid "Договор"
-msgstr "Contract"
+msgstr ""
 
 msgid "Оплата"
-msgstr "Payment"
+msgstr ""
 
 msgid "Приемка"
-msgstr "Acceptance"
+msgstr ""
 
 msgid "Регистрация"
-msgstr "Registration"
+msgstr ""
 
 msgid "Формируем короткий список по вашим критериям и целям. Даём досье по каждому варианту: вид собственности, способы и график оплаты, наличие программ аренды, расходы и риски."
-msgstr "We create a short list according to your criteria and goals. We provide a dossier on each option: type of property, payment methods and schedule, availability of rental programs, costs and risks."
+msgstr ""
 
 msgid "Организуем показы с застройщиком/продавцом — онлайн (видеотур) или офлайн. Берём на себя логистику и фиксируем ответы на все вопросы."
-msgstr "We organize screenings with the developer / seller — online (video tour) or offline. We take care of logistics and record the answers to all questions."
-
+msgstr ""
 
 msgid "Переговоры и бронирование"
-msgstr "Negotiations and reservations"
+msgstr ""
 
 #, python-format
 msgid "Согласуем цену, рассрочку и условия сделки. Оформляем Reservation Agreement и вносится депозит (обычно около 1%% стоимости; условия у застройщика могут отличаться) — объект снимается с продажи."
-msgstr "We will coordinate the price, the installment plan and the terms of the deal. We issue a Reservation Agreement and a deposit is made (usually about 1%% of the cost; the conditions of the developer may vary) — the object is withdrawn from sale."
+msgstr ""
 
 msgid "Договор и проверка"
-msgstr "Contract and verification"
+msgstr ""
 
 msgid "Продавец готовит основной договор; наш менеджер проводит его предварительную проверку. При необходимости подключаем партнёрских юристов для детальной экспертизы и внесения корректировок. После этого вместе с вами обсуждаем правки, при желании переводим ключевые разделы договора и подписываем его — лично или дистанционно по доверенности."
-msgstr "The seller prepares the main contract; our manager conducts a preliminary review of it. If necessary, we connect partner lawyers for a detailed examination and adjustments. After that, we discuss the changes with you, translate the key sections of the agreement, if desired, and sign it in person or remotely by proxy."
-
+msgstr ""
 
 msgid "Оплата по графику"
-msgstr "Payment according to schedule"
+msgstr ""
 
 msgid "Платежи вносятся согласно контракту из любой страны. Мы контролируем сроки, подтверждения зачислений и соответствие этапов строительной готовности (если новостройка)."
-msgstr "Payments are made according to the contract from any country. We monitor deadlines, confirmation of deposits, and compliance with the stages of construction readiness (if a new building)."
+msgstr ""
 
 msgid "Приемка объекта"
-msgstr "Property acceptance"
+msgstr ""
 
 msgid "После готовности — техническая приёмка, чек‑лист замечаний и контроль их устранения. По доверенности можем принять объект от вашего имени."
-msgstr "When ready, technical acceptance, a checklist of comments and control of their elimination are carried out. By proxy, we can accept the object on your behalf."
-
+msgstr ""
 
 msgid "Регистрация права"
-msgstr "Registration of a right"
+msgstr ""
 
 msgid "Регистрация недвижимости на ваше имя осуществляется в Земельном департаменте Пхукета и проводится застройщиком совместно с вами либо с вашим уполномоченным представителем. Вы получаете Blue Book — основной документ в Таиланде, подтверждающий право собственности на недвижимость. После этого мы подключаем послепродажную поддержку."
-msgstr "The registration of real estate in your name is carried out at the Phuket Land Department and is carried out by the developer together with you or with your authorized representative. You receive a Blue Book, which is the main document in Thailand confirming ownership of real estate. After that, we activate after-sales support."
+msgstr ""
 
 msgid "Подберём недвижимость "
-msgstr "We'll find a property "
+msgstr ""
 
 msgid "точно под ваши цели"
-msgstr "perfectly aligned with your goals"
+msgstr ""
 
 msgid "Имя*"
-msgstr "Name*"
-
+msgstr ""
 
 msgid "Email*"
-msgstr "Email*"
-
+msgstr ""
 
 msgid "Номер телефона"
-msgstr "Phone number"
+msgstr ""
 
-
-msgid "Расскажите, что вы ищете..."
-msgstr "Tell us what you are looking for..."
-
+msgid "Расскажите, что вы ищете"
+msgstr ""
 
 msgid "Отправить заявку"
-msgstr "Send a request"
+msgstr ""
 
 msgid "Клиенты говорят о нас"
-msgstr "Customers are talking about us"
+msgstr ""
 
 msgid "Квартира в Патонге"
-msgstr "Apartment in Patong"
+msgstr ""
 
 msgid "Отличная работа команды! Помогли подобрать квартиру в Патонге, провели через все этапы сделки. Особенно благодарен Богдану за профессионализм и внимание к деталям."
-msgstr "Great team work! We helped you find an apartment in Patong, and we went through all the stages of the transaction. I am especially grateful to Bogdan for his professionalism and attention to detail."
+msgstr ""
 
 msgid "Вилла в Черн Талае"
-msgstr "Villa in Chern Talai"
+msgstr ""
 
 msgid "Купили виллу в Черн Талае через Undersun Estate. Кирилл провёл отличную презентацию..."
-msgstr "We bought a villa in Chern Talai through Undersun Estate. Kirill gave an excellent presentation..."
+msgstr ""
 
 msgid "Посмотреть все отзывы в Google Maps"
-msgstr "View all reviews on Google Maps"
+msgstr ""
 
 msgid "Отличная работа команды! Помогли подобрать квартиру в Патонге..."
-msgstr "Great team work! They helped me find an apartment in Patong..."
+msgstr ""
 
 msgid "Купили виллу в Черн Талае через Undersun Estate. Кирилл провёл отличную презентацию проектов, всё объяснил понятно. Процесс прошёл гладко, без неприятных сюрпризов."
-msgstr "We bought a villa in Chern Talai through Undersun Estate. Kirill gave an excellent presentation of the projects, explained everything clearly. The process went smoothly, without unpleasant surprises."
-
+msgstr ""
 
 msgid "Инвестиционное кондо"
-msgstr "Investment condo"
+msgstr ""
 
 msgid "Хороший сервис, адекватные цены. Виталий помог с выбором кондо для инвестиций. Единственное - процесс занял чуть больше времени чем ожидалось, но результат хороший."
-msgstr "Good service, reasonable prices. Vitaly helped with the selection of a condo for investment. The only thing is that the process took a little longer than expected, but the result is good."
+msgstr ""
 
 msgid "Хороший сервис, адекватные цены. Виталий помог с выбором кондо..."
-msgstr "Good service, reasonable prices. Vitaly helped me choose a condo..."
-
+msgstr ""
 
 msgid "Новый проект"
-msgstr "New project"
+msgstr ""
 
 msgid "Очень довольны покупкой! Команда профессиональная, всегда были на связи. Помогли с оформлением всех документов. Рекомендую для покупки недвижимости в Таиланде."
-msgstr "We are very pleased with the purchase! The team is professional, we have always been in touch. We helped with all the paperwork. I recommend buying a property in Thailand."
+msgstr ""
 
 msgid "Очень довольны покупкой! Команда профессиональная, всегда были на связи..."
-msgstr "We are very pleased with the purchase! The team is professional, we have always been in touch..."
-
+msgstr ""
 
 msgid "Квартира в Камале"
-msgstr "Apartment in Kamala"
+msgstr ""
 
 msgid "Купили квартиру в новом проекте в Камале. Все прошло отлично! Особенно приятно было работать с русскоговорящими специалистами. Спасибо команде за поддержку!"
-msgstr "We bought an apartment in a new project in Kamala. Everything went great! It was especially pleasant to work with Russian-speaking specialists. Thanks to the team for their support!"
+msgstr ""
 
 msgid "Купили квартиру в новом проекте в Камале. Все прошло отлично!..."
-msgstr "We bought an apartment in a new project in Kamala. Everything went great!..."
-
+msgstr ""
 
 msgid "Undersun Estate офис"
-msgstr "Undersun Estate Office"
+msgstr ""
 
 msgid "Посетите"
-msgstr "Visit"
+msgstr ""
 
 msgid "офис"
-msgstr "office"
-
+msgstr ""
 
 msgid "Пн-Пт: 9:00-18:00"
-msgstr "Mon-Sun: 9:00-18:00"
+msgstr ""
 
 msgid "Связаться для встречи"
-msgstr "Arrange a meeting"
+msgstr ""
 
 msgid "Показать на карте"
-msgstr "Show on map"
+msgstr ""
 
 msgid "Записаться на встречу"
-msgstr "Make an appointment"
-
+msgstr ""
 
 msgid "Иван Петров"
-msgstr "Ivan Petrov"
-
+msgstr ""
 
 msgid "Предпочтительная дата"
-msgstr "Preferred date"
-
+msgstr ""
 
 msgid "Расскажите о ваших интересах и предпочтениях..."
-msgstr "Tell us about your interests and preferences..."
+msgstr ""
 
 msgid "Что мы предлагаем"
-msgstr "What We Offer"
+msgstr ""
 
 msgid "Услуги агентства недвижимости Undersun Estate"
-msgstr "UnderSun Estate Real Estate Agency Services"
+msgstr ""
 
 msgid "Откройте для себя недвижимость Пхукета"
-msgstr "Discover Phuket real estate"
+msgstr ""
 
 msgid "Более 600 объектов на Пхукете — выберите тот, что станет вашим."
-msgstr "Over 600 properties in Phuket — choose the one that will be yours."
-
+msgstr ""
 
 msgid "Недвижимость Пхукета"
-msgstr "Phuket Real Estate"
+msgstr ""
 
 msgid "Покупка недвижимости онлайн и офлайн"
-msgstr "Property Purchase Online and Offline"
+msgstr ""
 
 msgid "Индивидуальный подход к каждой сделке"
-msgstr "Individual approach to each transaction"
+msgstr ""
 
 msgid "Тщательный отбор объектов под ваши цели, полная проверка и сопровождение до получения ключей."
-msgstr "Careful selection of objects for your purposes, complete verification and maintenance before receiving the keys."
+msgstr ""
 
 msgid "Максимум выгоды, минимум хлопот"
-msgstr "Maximum benefit, minimum hassle"
+msgstr ""
 
 msgid "Используем эффективные каналы, чтобы найти покупателя и закрыть сделку на лучших условиях."
-msgstr "We use effective channels to find a buyer and close the deal on the best terms."
-
+msgstr ""
 
 msgid "Консультации"
-msgstr "Consultations"
-
+msgstr ""
 
 msgid "Консультации по покупке недвижимости"
-msgstr "Consultations on the purchase of real estate"
+msgstr ""
 
 msgid "Экспертиза рынка и права"
-msgstr "Market and legal expertise"
+msgstr ""
 
 msgid "Разъясним ключевые юридические нюансы и организуем процесс оформления сделки в Таиланде."
-msgstr "We will explain the key legal nuances and organize the transaction processing process in Thailand."
+msgstr ""
 
 msgid "Продажа земли"
-msgstr "Land Sales"
+msgstr ""
 
 msgid "Участки в стратегических локациях"
-msgstr "Plots in strategic locations"
-
+msgstr ""
 
 msgid "В нашем портфеле — земля в перспективных районах Пхукета."
-msgstr "Our portfolio includes land in promising areas of Phuket"
+msgstr ""
 
 msgid "Карта недвижимости"
-msgstr "Property Map"
+msgstr ""
 
 msgid "Карта недвижимости Пхукета"
-msgstr "Phuket Property Map"
+msgstr ""
 
 msgid "Найдите идеальное расположение для вашей недвижимости"
-msgstr "Find the perfect location for your property"
+msgstr ""
 
 msgid "Все"
-msgstr "All"
+msgstr ""
 
 msgid "Таунхаусы"
-msgstr "Townhouses"
+msgstr ""
 
 msgid "Земля"
-msgstr "Land plot"
+msgstr ""
 
 msgid "Легенда"
-msgstr "Legend"
+msgstr ""
 
 msgid "Всего объектов"
-msgstr "Total Properties"
+msgstr ""
 
 msgid "Показано"
-msgstr "Shown"
+msgstr ""
 
 msgid "Загружаем карту..."
-msgstr "Loading map..."
+msgstr ""
 
 msgid "На продажу"
-msgstr "For Sale"
+msgstr ""
 
 msgid "В аренду"
-msgstr "For Rent"
+msgstr ""
 
 msgid "Районов"
-msgstr "Districts"
+msgstr ""
 
 msgid "спален"
-msgstr "bedrooms"
+msgstr ""
 
 msgid "ванных"
-msgstr "bathrooms"
+msgstr ""
 
 msgid "м²"
-msgstr "m²"
+msgstr ""
 
 msgid "этаж"
-msgstr "floor"
-
+msgstr ""
 
 msgid "В избранное"
-msgstr "To Favorites"
+msgstr ""
 
 msgid "Здравствуйте! Меня интересует объект"
-msgstr "Hello! I'm interested in the object"
+msgstr ""
 
 msgid "Поиск недвижимости"
-msgstr "Property Search"
+msgstr ""
 
 #, python-format
 msgid ""
@@ -2586,33 +2352,25 @@ msgid_plural ""
 "                        Найдено %(counter)s объектов\n"
 "                    "
 msgstr[0] ""
-"\n"
-"                        Found %(counter)s property\n"
-"                    "
 msgstr[1] ""
-"\n"
-"                        Found %(counter)s properties\n"
-"                    "
 
 msgid "Поиск"
-msgstr "Search"
+msgstr ""
 
 msgid "Введите ключевые слова..."
-msgstr "Enter keywords..."
+msgstr ""
 
 msgid "Сделка"
-msgstr "Deal Type"
-
+msgstr ""
 
 msgid "Цена от"
-msgstr "Price from"
-
+msgstr ""
 
 msgid "Цена до"
-msgstr "Price to"
+msgstr ""
 
 msgid "Без ограничений"
-msgstr "No limits"
+msgstr ""
 
 #, python-format
 msgid ""
@@ -2624,597 +2382,535 @@ msgid_plural ""
 "                        Показано %(counter)s объектов\n"
 "                    "
 msgstr[0] ""
-"\n"
-"                        Showing %(counter)s property\n"
-"                    "
 msgstr[1] ""
-"\n"
-"                        Showing %(counter)s properties\n"
-"                    "
 
 msgid "Сортировка:"
-msgstr "Sort by:"
+msgstr ""
 
 msgid "По дате"
-msgstr "By date"
+msgstr ""
 
 msgid "Цена: по возрастанию"
-msgstr "Price: ascending"
+msgstr ""
 
 msgid "Цена: по убыванию"
-msgstr "Price: descending"
+msgstr ""
 
 msgid "По площади"
-msgstr "By area"
+msgstr ""
 
 msgid "Первая"
-msgstr "First"
+msgstr ""
 
 msgid "Предыдущая"
-msgstr "Previous"
+msgstr ""
 
 msgid "Следующая"
-msgstr "Next"
+msgstr ""
 
 msgid "Последняя"
-msgstr "Last"
+msgstr ""
 
 msgid "Ничего не найдено"
-msgstr "Nothing found"
+msgstr ""
 
 msgid "По вашему запросу не найдено ни одного объекта. Попробуйте изменить параметры поиска."
-msgstr "No properties found for your query. Try changing the search parameters."
+msgstr ""
 
 msgid "Посмотреть все объекты"
-msgstr "View all properties"
+msgstr ""
 
 msgid "Поиск по району"
-msgstr "Search by District"
+msgstr ""
 
 msgid "Найдите недвижимость в конкретном районе Пхукета"
-msgstr "Find real estate in a specific district of Phuket"
+msgstr ""
 
 msgid "Поиск по типу"
-msgstr "Search by Type"
+msgstr ""
 
 msgid "Выберите тип недвижимости: вилла, апартаменты, кондо"
-msgstr "Choose property type: villa, apartments, condo"
+msgstr ""
 
 msgid "Поиск по цене"
-msgstr "Search by Price"
+msgstr ""
 
 msgid "Укажите ценовой диапазон для более точного поиска"
-msgstr "Specify price range for more accurate search"
-
+msgstr ""
 
 msgid "Получить консультацию"
-msgstr "Get a consultation"
+msgstr ""
 
 msgid "Оставьте заявку и наш специалист свяжется с вами в течение часа"
-msgstr "Leave a request and our specialist will contact you within an hour."
+msgstr ""
 
 msgid "Рекомендуемые объекты"
-msgstr "Recommended Properties"
+msgstr ""
 
 msgid "Недвижимость, которая может вас заинтересовать"
-msgstr "Real estate that might interest you"
-
+msgstr ""
 
 msgid "Готовы начать?"
-msgstr "Are you ready to start?"
-
+msgstr ""
 
 msgid "Свяжитесь с нами прямо сейчас для получения персональной консультации по"
-msgstr "Contact us right now for a personal consultation on"
+msgstr ""
 
 msgid "Позвонить"
-msgstr "To call"
+msgstr ""
 
 msgid "Спасибо! Мы свяжемся с вами в ближайшее время."
-msgstr "Thanks! We will contact you as soon as possible."
+msgstr ""
 
 msgid "Узнать подробнее"
-msgstr "Learn more"
+msgstr ""
 
 msgid "Изменить валюту"
-msgstr "Change the currency"
+msgstr ""
 
 msgid "Цена по запросу"
-msgstr "Price on request"
-
+msgstr ""
 
 msgid "Все локации"
-msgstr "All locations"
+msgstr ""
 
 msgid "Районы Пхукета"
-msgstr "Phuket Districts"
+msgstr ""
 
 msgid "Один из лучших районов Пхукета для жизни и инвестиций"
-msgstr "One of the best areas of Phuket for living and investment"
+msgstr ""
 
 msgid "Объектов"
-msgstr "Properties"
+msgstr ""
 
 msgid "Средняя цена"
-msgstr "Average price"
+msgstr ""
 
 msgid "Недвижимость в районе"
-msgstr "Real estate in the area"
+msgstr ""
 
 msgid "Расположение"
-msgstr "Location"
-
+msgstr ""
 
 msgid "Выберите идеальное место для жизни"
-msgstr "Choose the perfect place to live"
-
+msgstr ""
 
 msgid "районов"
-msgstr "districts"
+msgstr ""
 
 msgid "пляжей"
-msgstr "beaches"
+msgstr ""
 
 msgid "Цены от:"
-msgstr "Prices from:"
-
+msgstr ""
 
 msgid "Исследовать район"
-msgstr "Real estate in the area"
+msgstr ""
 
 msgid "Карта районов Пхукета"
-msgstr "Map of Phuket Districts"
+msgstr ""
 
 msgid "Изучите расположение районов на интерактивной карте"
-msgstr "Explore the location of districts on an interactive map"
+msgstr ""
 
 msgid "Почему Пхукет?"
-msgstr "Why Phuket?"
+msgstr ""
 
 msgid "Лучшие пляжи"
-msgstr "Best Beaches"
+msgstr ""
 
 msgid "Белоснежный песок и кристально чистая вода"
-msgstr "White sand and crystal clear water"
+msgstr ""
 
 msgid "Тропический климат"
-msgstr "Tropical Climate"
+msgstr ""
 
 msgid "Солнце круглый год, комфортная температура"
-msgstr "Sunshine year-round, comfortable temperature"
+msgstr ""
 
 msgid "Удобная логистика"
-msgstr "Convenient Logistics"
+msgstr ""
 
 msgid "Международный аэропорт и развитая инфраструктура"
-msgstr "International airport and developed infrastructure"
+msgstr ""
 
 msgid "Качество жизни"
-msgstr "Quality of Life"
+msgstr ""
 
 msgid "Безопасность, медицина, международное сообщество"
-msgstr "Safety, healthcare, international community"
+msgstr ""
 
 msgid "Пхукет"
-msgstr "Phuket"
+msgstr ""
 
 msgid "Информация о локации"
-msgstr "Location Information"
+msgstr ""
 
 msgid "Район:"
-msgstr "District:"
+msgstr ""
 
 msgid "Объектов:"
-msgstr "Properties:"
+msgstr ""
 
 msgid "Недвижимость в"
-msgstr "Real estate in"
-
+msgstr ""
 
 msgid "Изображение недоступно"
-msgstr "The image is unavailable"
+msgstr ""
 
 msgid "Рекомендуем"
-msgstr "Recommended"
+msgstr ""
 
 msgid "фото"
-msgstr "photo"
-
+msgstr ""
 
 msgid "Изображения недоступны"
-msgstr "Images are unavailable"
+msgstr ""
 
 msgid "Назад"
-msgstr "Back"
+msgstr ""
 
 msgid "На карте"
-msgstr "On the map"
-
+msgstr ""
 
 msgid "Заказать звонок"
-msgstr "Order a call"
-
+msgstr ""
 
 msgid "Основные характеристики"
-msgstr "Main Features"
+msgstr ""
 
 msgid "Спален"
-msgstr "Bedrooms"
+msgstr ""
 
 msgid "Ванных"
-msgstr "Bathrooms"
+msgstr ""
 
 msgid "Участок м²"
-msgstr "Land m²"
-
+msgstr ""
 
 msgid "Год"
-msgstr "Year"
+msgstr ""
 
 msgid "Есть"
-msgstr "Yes"
-
+msgstr ""
 
 msgid "Показать полностью"
-msgstr "Show in full"
+msgstr ""
 
 msgid "Особенности и удобства"
-msgstr "Features and Amenities"
-
+msgstr ""
 
 msgid "Остались вопросы по объекту?"
-msgstr "Any other questions about the facility?"
-
+msgstr ""
 
 msgid "Уточнить детали"
-msgstr "To clarify the details"
+msgstr ""
 
 msgid "Заинтересовались объектом?"
-msgstr "Interested in this property?"
+msgstr ""
 
 msgid "Написать в WhatsApp"
-msgstr "Write to WhatsApp"
-
+msgstr ""
 
 msgid "Менеджер по недвижимости"
-msgstr "Real Estate Manager"
+msgstr ""
 
 msgid "Записаться на просмотр"
-msgstr "Sign up for viewing"
+msgstr ""
 
 msgid "Похожие объекты"
-msgstr "Similar objects"
+msgstr ""
 
 msgid "Не нашли подходящий вариант?"
-msgstr "Didn't find a suitable option?"
-
+msgstr ""
 
 msgid "Оставьте заявку на индивидуальный подбор недвижимости"
-msgstr "Leave a request for an individual selection of real estate"
+msgstr ""
 
 msgid "Удобное время для общения / Часовой пояс"
-msgstr "Convenient time for communication / Time zone"
+msgstr ""
 
 msgid "Например: 10:00-18:00 UTC+7"
-msgstr "For example: 10:00-18:00 UTC+7"
-
+msgstr ""
 
 msgid "Расскажите о ваших пожеланиях к недвижимости..."
-msgstr "Tell us about your wishes for real estate..."
-
+msgstr ""
 
 msgid "Или посетите наш офис на Пхукете"
-msgstr "Or visit our office in Phuket"
-
+msgstr ""
 
 msgid "Получить последние новости и интересные предложения о недвижимости"
-msgstr "Get the latest news and interesting real estate offers"
-
+msgstr ""
 
 msgid "Введите ваш email"
-msgstr "Enter your email address"
+msgstr ""
 
 msgid "Подписаться"
-msgstr "Subscribe"
-
+msgstr ""
 
 msgid "Похожие объекты не найдены"
-msgstr "No similar objects were found"
+msgstr ""
 
 msgid "К сожалению, в данный момент нет похожих объектов. Рекомендуем посмотреть другие варианты в нашем каталоге."
-msgstr "Unfortunately, there are no similar objects at the moment. We recommend that you look at other options in our catalog."
-
+msgstr ""
 
 msgid "Связаться с агентом"
-msgstr "Contact the agent"
+msgstr ""
 
 msgid "Скачать"
-msgstr "Download"
+msgstr ""
 
 msgid "Поделиться"
-msgstr "To share"
+msgstr ""
 
 msgid "Укажите удобное время для просмотра объекта. Наш менеджер свяжется с вами для подтверждения встречи."
-msgstr "Specify a convenient time to view the place. Our manager will contact you to confirm the appointment."
+msgstr ""
 
 msgid "Желаемая дата и время"
-msgstr "Desired date and time"
-
+msgstr ""
 
 msgid "Дополнительные пожелания"
-msgstr "Additional requests"
-
+msgstr ""
 
 msgid "Укажите дополнительные пожелания к просмотру..."
-msgstr "Specify additional viewing requests..."
+msgstr ""
 
 msgid "Отмена"
-msgstr "Cancel"
-
+msgstr ""
 
 msgid "Или свяжитесь с нами напрямую:"
-msgstr "Or contact us directly.:"
-
+msgstr ""
 
 msgid "Получите профессиональную консультацию по этому объекту недвижимости. Наш эксперт ответит на все ваши вопросы."
-msgstr "Get professional advice on this property. Our expert will answer all your questions."
+msgstr ""
 
 msgid "Что вас интересует?"
-msgstr "What are you interested in?"
-
+msgstr ""
 
 msgid "Выберите тему консультации"
-msgstr "Choose a topic for consultation"
-
+msgstr ""
 
 msgid "Цена и условия покупки"
-msgstr "Price and terms of purchase"
-
+msgstr ""
 
 msgid "Район и инфраструктура"
-msgstr "Area and infrastructure"
-
+msgstr ""
 
 msgid "Финансирование покупки"
-msgstr "Financing the purchase"
-
+msgstr ""
 
 msgid "Сдача в аренду"
-msgstr "Renting out"
-
+msgstr ""
 
 msgid "Ваши вопросы"
-msgstr "Your questions"
+msgstr ""
 
 msgid "Опишите, что вас интересует об этом объекте..."
-msgstr "Describe what interests you about this object..."
-
+msgstr ""
 
 msgid "Телефонный звонок"
-msgstr "Phone call"
+msgstr ""
 
 msgid "Оставьте свой номер телефона, и наш менеджер свяжется с вами в ближайшее время."
-msgstr "Leave your phone number and our manager will contact you as soon as possible."
-
+msgstr ""
 
 msgid "Посмотрите на эту недвижимость"
-msgstr "Take a look at this property"
+msgstr ""
 
 msgid "Ссылка скопирована в буфер обмена"
-msgstr "The link has been copied to the clipboard"
+msgstr ""
 
 msgid "Ошибка при копировании ссылки"
-msgstr "Error when copying the link"
+msgstr ""
 
 msgid "Свернуть"
-msgstr "Roll up"
+msgstr ""
 
 msgid "Отправляем..."
-msgstr "We are sending it..."
+msgstr ""
 
 msgid "Произошла ошибка. Попробуйте еще раз."
-msgstr "An error has occurred. Try again."
+msgstr ""
 
 msgid "Подписываем..."
-msgstr "We are signing it..."
+msgstr ""
 
 msgid "Спасибо за подписку! Мы будем держать вас в курсе последних новостей."
-msgstr "Thanks for subscribing! We will keep you updated with the latest news."
+msgstr ""
 
 msgid "/мес"
-msgstr "/month"
+msgstr ""
 
 msgid "По запросу"
-msgstr "On request"
+msgstr ""
 
 msgid "Отправить запрос"
-msgstr "Send a request"
+msgstr ""
 
 msgid "Избранное"
-msgstr "Favourites"
+msgstr ""
 
 msgid "Избранные объекты"
-msgstr "Selected objects"
+msgstr ""
 
 msgid "Здесь собраны все объекты недвижимости, которые вы добавили в избранное"
-msgstr "Here are all the properties that you have added to your favorites."
-
+msgstr ""
 
 msgid "Количество избранных объектов"
-msgstr "Number of selected objects"
-
+msgstr ""
 
 msgid "Обновляется автоматически"
-msgstr "It is updated automatically"
-
+msgstr ""
 
 msgid "Карточки"
-msgstr "Cards"
-
+msgstr ""
 
 msgid "Сравнение"
-msgstr "Comparison"
+msgstr ""
 
 msgid "Пока нет избранных объектов"
-msgstr "There are no favorites yet"
+msgstr ""
 
 msgid "Добавляйте понравившиеся объекты в избранное, нажимая на иконку сердца"
-msgstr "Add your favorite objects to your favorites by clicking on the heart icon."
+msgstr ""
 
 msgid "Посмотреть объекты"
-msgstr "View objects"
-
+msgstr ""
 
 msgid "Очистить избранное"
-msgstr "Clear Favorites"
+msgstr ""
 
 msgid "Продолжить просмотр"
-msgstr "Continue viewing"
+msgstr ""
 
 msgid "Вы уверены, что хотите удалить все избранные объекты?"
-msgstr "Are you sure you want to delete all your favorites?"
-
+msgstr ""
 
 msgid "Загрузка избранных объектов..."
-msgstr "Loading favorite objects..."
+msgstr ""
 
 msgid "Избранные объекты не найдены"
-msgstr "The favorite objects were not found"
+msgstr ""
 
 msgid "Удалить из избранного"
-msgstr "Delete from Favorites"
-
+msgstr ""
 
 msgid "Цена"
-msgstr "Price"
-
+msgstr ""
 
 msgid "Цена за м²"
-msgstr "Price per m²"
-
+msgstr ""
 
 msgid "Общая площадь"
-msgstr "Total area"
-
+msgstr ""
 
 msgid "Площадь участка"
-msgstr "Plot area"
-
+msgstr ""
 
 msgid "Мебель"
-msgstr "With furniture"
-
+msgstr ""
 
 msgid "Действия"
-msgstr "Actions"
+msgstr ""
 
 msgid "Смотреть"
-msgstr "Look"
+msgstr ""
 
 msgid "Да"
-msgstr "Yes"
-
+msgstr ""
 
 msgid "Нет"
-msgstr "No"
-
+msgstr ""
 
 msgid "Не указано"
-msgstr "Not specified"
-
+msgstr ""
 
 msgid "Только для продажи"
-msgstr "For sale only"
+msgstr ""
 
 msgid "Ошибка при загрузке избранных объектов"
-msgstr "Error when uploading favorites"
-
+msgstr ""
 
 msgid "Избранное очищено"
-msgstr "Favorites have been cleared"
+msgstr ""
 
 msgid "Фильтры"
-msgstr "Filters"
-
+msgstr ""
 
 msgid "Все объекты"
-msgstr "All objects"
+msgstr ""
 
 msgid "Бюджет"
-msgstr "Budget"
-
+msgstr ""
 
 msgid "От"
-msgstr "from"
-
+msgstr ""
 
 msgid "До"
-msgstr "To"
+msgstr ""
 
 msgid "Укажите бюджет в"
-msgstr "Specify the budget in"
+msgstr ""
 
 msgid "Количество спален"
-msgstr "Number of bedrooms"
-
+msgstr ""
 
 msgid "спальня"
-msgstr "bedroom"
+msgstr ""
 
 msgid "Удобства"
-msgstr "Conveniences"
+msgstr ""
 
 msgid "Применить"
-msgstr "Apply"
+msgstr ""
 
 msgid "Очистить"
-msgstr "Clear"
+msgstr ""
 
 msgid "Недвижимость на продажу"
-msgstr "Real estate for sale"
+msgstr ""
 
 msgid "Недвижимость в аренду"
-msgstr "Real estate for rent"
-
+msgstr ""
 
 msgid "Каталог недвижимости"
-msgstr "Real estate catalog"
+msgstr ""
 
 msgid "Пхукет, Таиланд"
-msgstr "Phuket, Thailand"
+msgstr ""
 
 msgid "Объекты не найдены"
-msgstr "No objects found"
+msgstr ""
 
 msgid "Попробуйте изменить параметры поиска или сбросить фильтры"
-msgstr "Try changing the search parameters or resetting the filters."
+msgstr ""
 
 msgid "Сбросить фильтры"
-msgstr "Reset Filters"
+msgstr ""
 
 msgid "‹ Пред"
-msgstr "‹ Before"
+msgstr ""
 
 msgid "След ›"
-msgstr "Next ›"
+msgstr ""
 
 msgid "Цена ↑"
-msgstr "Price ↑"
+msgstr ""
 
 msgid "Цена ↓"
-msgstr "Price ↓"
+msgstr ""
 
 msgid "Площадь ↓"
-msgstr "Square ↓"
+msgstr ""
 
 msgid "Сетка"
-msgstr "Grid"
+msgstr ""
 
 msgid "Карта"
-msgstr "Map"
+msgstr ""
 
 msgid "Недвижимость на Пхукете"
-msgstr "Phuket Real Estate"
+msgstr ""
 
 #, python-format
 msgid ""
@@ -3226,88 +2922,82 @@ msgid_plural ""
 "                                        Найдено %(counter)s объектов\n"
 "                                    "
 msgstr[0] ""
-"\n"
-"                                        Found %(counter)s property\n"
-"                                    "
 msgstr[1] ""
-"\n"
-"                                        Found %(counter)s properties\n"
-"                                    "
 
 msgid "Здесь собраны все объекты, которые вас заинтересовали"
-msgstr "Here are all the objects that you are interested in."
+msgstr ""
 
 msgid "Добавляйте понравившиеся объекты в избранное, нажав на сердечко"
-msgstr "Add your favorite objects to your favorites by clicking on the heart"
+msgstr ""
 
 msgid "Вход"
-msgstr "Enter"
+msgstr ""
 
 msgid "Войдите в свой аккаунт"
-msgstr "Log in to your account"
+msgstr ""
 
 msgid "Или"
-msgstr "Or"
+msgstr ""
 
 msgid "зарегистрируйтесь"
-msgstr "register"
+msgstr ""
 
 msgid "Email или имя пользователя"
-msgstr "Email or user name"
+msgstr ""
 
 msgid "Пароль"
-msgstr "Password"
+msgstr ""
 
 msgid "Запомнить меня"
-msgstr "Remember me"
+msgstr ""
 
 msgid "Забыли пароль?"
-msgstr "Forgot your password?"
+msgstr ""
 
 msgid "Войти"
-msgstr "Enter"
+msgstr ""
 
 msgid "Профиль"
-msgstr "Profile"
+msgstr ""
 
 msgid "Информация профиля"
-msgstr "Profile Information"
+msgstr ""
 
 msgid "Сохранить изменения"
-msgstr "Save changes"
+msgstr ""
 
 msgid "Смена пароля"
-msgstr "Password change"
+msgstr ""
 
 msgid "Текущий пароль"
-msgstr "Current password"
+msgstr ""
 
 msgid "Новый пароль"
-msgstr "New password"
+msgstr ""
 
 msgid "Подтвердите новый пароль"
-msgstr "Confirm the new password"
+msgstr ""
 
 msgid "Изменить пароль"
-msgstr "Change the password"
+msgstr ""
 
 msgid "Создайте аккаунт"
-msgstr "Create an account"
+msgstr ""
 
 msgid "войдите в существующий"
-msgstr "log in to an existing one"
+msgstr ""
 
 msgid "Имя пользователя"
-msgstr "Username"
+msgstr ""
 
 msgid "Подтвердите пароль"
-msgstr "Confirm the password"
+msgstr ""
 
 msgid "Я соглашаюсь с"
-msgstr "I agree with"
+msgstr ""
 
 msgid "условиями использования"
-msgstr "Terms of use"
+msgstr ""
 
 msgid "Зарегистрироваться"
-msgstr "Register"
+msgstr ""
