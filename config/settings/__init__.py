@@ -1,8 +1,18 @@
 import os
+from pathlib import Path
+import environ
 
-environment = os.environ.get('DJANGO_ENVIRONMENT', 'development')
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+env = environ.Env()
+env_file = BASE_DIR / ".env"
+if env_file.exists():
+    env.read_env(env_file)
 
-if environment == 'production':
+environment = env("DJANGO_ENVIRONMENT", default="development")
+
+if environment == "production":
     from .production import *
-else:
+elif environment == "development":
     from .development import *
+else:
+    raise ValueError(f"Unknown DJANGO_ENVIRONMENT='{environment}'")

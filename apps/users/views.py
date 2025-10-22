@@ -1,6 +1,5 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
@@ -14,6 +13,7 @@ from .models import (
     FAQQuestion,
     NewsletterSubscription
 )
+from .notifications import build_admin_change_url, notify_admins_about_submission
 
 
 def get_client_ip(request):
@@ -76,6 +76,61 @@ def property_inquiry_view(request, property_id):
         # TODO: Интеграция с AmoCRM
         # send_to_amocrm(inquiry)
 
+        details = [
+            (_('Объект'), property_obj.title),
+            (_('Тип запроса'), inquiry.get_inquiry_type_display()),
+            (_('Имя'), inquiry.name),
+            (_('Телефон'), inquiry.phone),
+        ]
+
+        if inquiry.email:
+            details.append((_('Email'), inquiry.email))
+
+        if inquiry.preferred_date:
+            preferred_date = inquiry.preferred_date
+            if hasattr(preferred_date, 'strftime'):
+                try:
+                    preferred_date = timezone.localtime(preferred_date)
+                except Exception:
+                    pass
+                else:
+                    preferred_date = preferred_date.strftime('%d.%m.%Y %H:%M')
+            details.append((_('Желаемая дата'), preferred_date))
+
+        if inquiry.consultation_topic:
+            topic_display = dict(PropertyInquiry.CONSULTATION_TOPICS).get(
+                inquiry.consultation_topic,
+                inquiry.consultation_topic,
+            )
+            details.append((_('Тема консультации'), topic_display))
+
+        if inquiry.preferred_contact:
+            contact_display = dict(PropertyInquiry.CONTACT_PREFERENCES).get(
+                inquiry.preferred_contact,
+                inquiry.preferred_contact,
+            )
+            details.append((_('Предпочтительный способ связи'), contact_display))
+
+        if inquiry.message:
+            details.append((_('Сообщение'), inquiry.message))
+
+        details.append(
+            (_('Создано'), timezone.localtime(inquiry.created_at).strftime('%d.%m.%Y %H:%M'))
+        )
+
+        property_url = request.build_absolute_uri(property_obj.get_absolute_url())
+
+        notify_admins_about_submission(
+            form_name=_('Запрос по объекту'),
+            subject_context=property_obj.title,
+            details=details,
+            admin_url=build_admin_change_url(inquiry),
+            request=request,
+            extra_lines=[
+                _('Ссылка на объект: %(url)s') % {'url': property_url},
+            ],
+        )
+
         return JsonResponse({
             'success': True,
             'message': _('Спасибо! Ваша заявка принята. Наш менеджер свяжется с вами в ближайшее время.')
@@ -86,6 +141,7 @@ def property_inquiry_view(request, property_id):
             'success': False,
             'message': _('Произошла ошибка. Пожалуйста, попробуйте позже.')
         }, status=500)
+
 
 
 @require_http_methods(["POST"])
@@ -110,6 +166,25 @@ def quick_consultation_view(request):
 
         # TODO: Интеграция с AmoCRM
         # send_to_amocrm(consultation)
+
+        details = [
+            (_('Телефон'), consultation.phone),
+            (_('Страница отправки'), consultation.source_page),
+            (_('IP адрес'), consultation.ip_address),
+            (_('User Agent'), consultation.user_agent),
+            (
+                _('Создано'),
+                timezone.localtime(consultation.created_at).strftime('%d.%m.%Y %H:%M'),
+            ),
+        ]
+
+        notify_admins_about_submission(
+            form_name=_('Быстрая консультация'),
+            subject_context=consultation.phone,
+            details=details,
+            admin_url=build_admin_change_url(consultation),
+            request=request,
+        )
 
         return JsonResponse({
             'success': True,
@@ -152,6 +227,35 @@ def contact_form_view(request):
         # TODO: Интеграция с AmoCRM
         # send_to_amocrm(submission)
 
+        details = [
+            (_('Имя'), submission.name),
+            (_('Email'), submission.email),
+        ]
+
+        if submission.phone:
+            details.append((_('Телефон'), submission.phone))
+
+        details.append((_('Тема'), submission.get_subject_display()))
+
+        if submission.message:
+            details.append((_('Сообщение'), submission.message))
+
+        details.append(
+            (_('Создано'), timezone.localtime(submission.created_at).strftime('%d.%m.%Y %H:%M'))
+        )
+
+        notify_admins_about_submission(
+            form_name=_('Контактная форма'),
+            subject_context=submission.get_subject_display(),
+            details=details,
+            admin_url=build_admin_change_url(submission),
+            request=request,
+            extra_lines=[
+                _('Источник запроса: %(url)s')
+                % {'url': request.META.get('HTTP_REFERER', '')},
+            ],
+        )
+
         return JsonResponse({
             'success': True,
             'message': _('Спасибо за обращение! Мы ответим вам в ближайшее время.')
@@ -191,6 +295,33 @@ def office_visit_request_view(request):
         # TODO: Интеграция с AmoCRM
         # send_to_amocrm(visit_request)
 
+        visit_date = visit_request.preferred_date
+        if hasattr(visit_date, 'strftime'):
+            visit_date_display = visit_date.strftime('%d.%m.%Y')
+        else:
+            visit_date_display = visit_date
+
+        details = [
+            (_('Имя'), visit_request.name),
+            (_('Телефон'), visit_request.phone),
+            (_('Желаемая дата'), visit_date_display),
+        ]
+
+        if visit_request.message:
+            details.append((_('Дополнительная информация'), visit_request.message))
+
+        details.append(
+            (_('Создано'), timezone.localtime(visit_request.created_at).strftime('%d.%m.%Y %H:%M'))
+        )
+
+        notify_admins_about_submission(
+            form_name=_('Запись на встречу в офисе'),
+            subject_context=visit_request.name,
+            details=details,
+            admin_url=build_admin_change_url(visit_request),
+            request=request,
+        )
+
         return JsonResponse({
             'success': True,
             'message': _('Спасибо! Ваша запись принята. Мы перезвоним для подтверждения встречи.')
@@ -225,6 +356,23 @@ def faq_question_view(request):
 
         # TODO: Интеграция с AmoCRM
         # send_to_amocrm(faq)
+
+        details = [
+            (_('Телефон'), faq.phone),
+            (_('Вопрос'), faq.question),
+            (
+                _('Создано'),
+                timezone.localtime(faq.created_at).strftime('%d.%m.%Y %H:%M'),
+            ),
+        ]
+
+        notify_admins_about_submission(
+            form_name=_('Вопрос из FAQ'),
+            subject_context=faq.phone,
+            details=details,
+            admin_url=build_admin_change_url(faq),
+            request=request,
+        )
 
         return JsonResponse({
             'success': True,
@@ -273,6 +421,63 @@ def newsletter_subscribe_view(request):
                 subscription.unsubscribed_at = None
                 subscription.save()
 
+                reactivate_details = [
+                    (_('Email'), subscription.email),
+                    (_('Статус'), _('Активна')),
+                    (_('Дата первоначальной подписки'),
+                     timezone.localtime(subscription.subscribed_at).strftime('%d.%m.%Y %H:%M')),
+                ]
+
+                reactivate_details.append(
+                    (
+                        _('Дата повторной активации'),
+                        timezone.localtime(timezone.now()).strftime('%d.%m.%Y %H:%M'),
+                    )
+                )
+
+                notify_admins_about_submission(
+                    form_name=_('Подписка на новости'),
+                    subject_context=_('реактивация'),
+                    details=reactivate_details,
+                    admin_url=build_admin_change_url(subscription),
+                    request=request,
+                    extra_lines=[
+                        _('Источник запроса: %(url)s') % {
+                            'url': request.META.get('HTTP_REFERER', ''),
+                        }
+                    ],
+                )
+        else:
+            subscribe_details = [
+                (_('Email'), subscription.email),
+                (_('Статус'), _('Активна')),
+            ]
+
+            if subscription.source_page:
+                subscribe_details.append(
+                    (_('Страница подписки'), subscription.source_page)
+                )
+
+            subscribe_details.append(
+                (
+                    _('Создано'),
+                    timezone.localtime(subscription.subscribed_at).strftime('%d.%m.%Y %H:%M'),
+                )
+            )
+
+            notify_admins_about_submission(
+                form_name=_('Подписка на новости'),
+                subject_context=subscription.email,
+                details=subscribe_details,
+                admin_url=build_admin_change_url(subscription),
+                request=request,
+                extra_lines=[
+                    _('Источник запроса: %(url)s') % {
+                        'url': request.META.get('HTTP_REFERER', ''),
+                    }
+                ],
+            )
+
         return JsonResponse({
             'success': True,
             'message': _('Спасибо за подписку! Теперь вы будете получать наши новости.')
@@ -283,3 +488,4 @@ def newsletter_subscribe_view(request):
             'success': False,
             'message': _('Произошла ошибка. Пожалуйста, попробуйте позже.')
         }, status=500)
+
