@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['146.103.105.231','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['51.79.173.21','localhost','127.0.0.1']
 
 # Database для разработки (PostgreSQL)
 DATABASES = {
