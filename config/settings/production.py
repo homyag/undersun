@@ -4,6 +4,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['undersunestate.com', 'www.undersunestate.com'])
 
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://localhost:8080'])
+
 # Database для продакшена (PostgreSQL)
 DATABASES = {
     'default': {
@@ -24,6 +26,14 @@ SECURE_HSTS_PRELOAD = True
 SECURE_HSTS_SECONDS = 31536000
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
+X_FRAME_OPTIONS = 'DENY'
+
+SECURE_SSL_REDIRECT = True # раскомментировать после получения доступа по 443
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") # раскомментировать после получения доступа по 443
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin" # раскомментировать после получения доступа по 443
+
 
 # Static files для продакшена
 STATIC_ROOT = BASE_DIR / 'staticfiles'

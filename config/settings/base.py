@@ -226,6 +226,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'apps.users.notifications': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
 
@@ -288,3 +293,5 @@ TRANSLATION_SETTINGS = {
 
 
 TAILWIND_USE_CDN = False
+
+ADMINS = [tuple(admin.split(":")) for admin in env.list("ADMINS", default=[])]
