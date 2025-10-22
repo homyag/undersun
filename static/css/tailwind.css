@@ -1,18 +1,46 @@
+@import "tailwindcss";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@source "../templates/**/*.html";
+@source "../static/js/**/*.js";
+
 /* Custom components */
+@theme {
+    --color-primary: #474B57;
+    --color-primary-dark: #333847;
+    --color-tertiary: #616677;
+    --color-accent: #F1B400;
+    --color-secondary: #f8f9fa;
+}
+
 @layer components {
-  .btn-primary {
-    @apply bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded;
-  }
-  
-  .card {
-    @apply bg-white shadow-lg rounded-lg overflow-hidden;
-  }
-  
-  .navbar {
-    @apply bg-white shadow-md;
-  }
+    .btn-primary {
+        background-color: var(--color-primary);
+        color: #fff;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--color-tertiary);
+    }
+
+    .card {
+        background-color: #fff;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .1),
+        0 4px 6px -4px rgba(0, 0, 0, .1);
+    }
+
+    .navbar {
+        background-color: #fff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1),
+        0 2px 4px -1px rgba(0, 0, 0, .06);
+    }
 }
