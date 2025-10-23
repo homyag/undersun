@@ -7,7 +7,7 @@ from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Case, When, Value, IntegerField
 from django.core.paginator import Paginator
 from django.urls import reverse
 
@@ -22,6 +22,7 @@ class PropertyListView(ListView):
     template_name = 'properties/list.html'
     context_object_name = 'properties'
     paginate_by = 12
+    PROPERTY_TYPE_PRIORITY = ['condo', 'villa', 'townhouse', 'land']
     
     def get_paginate_by(self, queryset):
         """Отключить пагинацию для карты"""
@@ -146,7 +147,20 @@ class PropertyListView(ListView):
         from .models import PropertyFeature
         
         context = super().get_context_data(**kwargs)
-        context['property_types'] = PropertyType.objects.all()
+        priority_case = Case(
+            *[
+                When(name=property_type, then=Value(index))
+                for index, property_type in enumerate(self.PROPERTY_TYPE_PRIORITY)
+            ],
+            default=Value(len(self.PROPERTY_TYPE_PRIORITY)),
+            output_field=IntegerField(),
+        )
+
+        context['property_types'] = (
+            PropertyType.objects
+            .annotate(_type_priority=priority_case)
+            .order_by('_type_priority', 'name_display')
+        )
         context['districts'] = District.objects.all()
         
         # Добавляем локации для выбранного района
@@ -182,7 +196,21 @@ class PropertySaleView(PropertyListView):
     template_name = 'properties/list.html'
 
     def get_queryset(self):
-        return super().get_queryset().filter(deal_type__in=['sale', 'both'])
+        queryset = super().get_queryset().filter(deal_type__in=['sale', 'both'])
+
+        sort_by = self.request.GET.get('sort')
+        if sort_by in (None, '', '-created_at'):
+            priority_case = Case(
+                *[
+                    When(property_type__name=property_type, then=Value(index))
+                    for index, property_type in enumerate(self.PROPERTY_TYPE_PRIORITY)
+                ],
+                default=Value(len(self.PROPERTY_TYPE_PRIORITY)),
+                output_field=IntegerField(),
+            )
+            queryset = queryset.annotate(_type_priority=priority_case).order_by('_type_priority', '-created_at')
+
+        return queryset
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
