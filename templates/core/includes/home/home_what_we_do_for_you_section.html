@@ -48,7 +48,7 @@
                         <p class="text-primary font-medium mb-3 text-center text-sm italic">{% trans "Индивидуальный подход к каждой сделке" %}</p>
                         <p class="text-gray-600 mb-4 text-center">{% trans "Тщательный отбор объектов под ваши цели, полная проверка и сопровождение до получения ключей." %}</p>
                         <div class="text-center">
-                            <a href="#"
+                            <a href="{% url 'core:service_detail' slug='buying-property' %}"
                                class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
                         <p class="text-primary font-medium mb-3 text-center text-sm italic">{% trans "Максимум выгоды, минимум хлопот" %}</p>
                         <p class="text-gray-600 mb-4 text-center">{% trans "Используем эффективные каналы, чтобы найти покупателя и закрыть сделку на лучших условиях." %}</p>
                         <div class="text-center">
-                            <a href="#"
+                            <a href="{% url 'core:service_detail' slug='selling-property' %}"
                                class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
                         </div>
                     </div>
@@ -82,7 +82,7 @@
                         <p class="text-primary font-medium mb-3 text-center text-sm italic">{% trans "Экспертиза рынка и права" %}</p>
                         <p class="text-gray-600 mb-4 text-center">{% trans "Разъясним ключевые юридические нюансы и организуем процесс оформления сделки в Таиланде." %}</p>
                         <div class="text-center">
-                            <a href="#"
+                            <a href="{% url 'core:service_detail' slug='legal-services' %}"
                                class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
                         </div>
                     </div>
@@ -99,7 +99,7 @@
                         <p class="text-primary font-medium mb-3 text-center text-sm italic">{% trans "Участки в стратегических локациях" %}</p>
                         <p class="text-gray-600 mb-4 text-center">{% trans "В нашем портфеле — земля в перспективных районах Пхукета." %}</p>
                         <div class="text-center">
-                            <a href="#"
+                            <a href="{% url 'core:service_detail' slug='land-sale' %}"
                                class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
                         </div>
                     </div>

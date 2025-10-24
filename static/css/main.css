@@ -13,6 +13,20 @@
     --shadow-lg: 0 1rem 3rem rgba(71, 75, 87, 0.175);
 }
 
+/* Ensure interactive elements show the hand cursor consistently */
+button,
+[role="button"],
+a[role="button"],
+.nav-menu-item,
+.cta-button {
+    cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+    cursor: not-allowed;
+}
+
 /* ===== ОСНОВНЫЕ СТИЛИ ===== */
 body {
     font-family: 'Gilroy', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

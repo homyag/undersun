@@ -21,13 +21,13 @@
      data-bedrooms="{{ property.bedrooms|default:'' }}"
      data-bathrooms="{{ property.bathrooms|default:'' }}"
      data-area="{{ property.area_total|default:'' }}"
-     data-main-image="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}"
-     data-images="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}{% for image in property.images.all|slice:":2" %},{{ image.medium.url }}{% endfor %}">
+     data-main-image="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium_url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}"
+     data-images="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium_url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}{% for image in property.images.all|slice:":2" %},{{ image.medium_url }}{% endfor %}">
     <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden max-w-sm mx-auto transform hover:-translate-y-2 hover:scale-[1.02] group h-full flex flex-col">
         <!-- Image Section -->
         <div class="relative h-48">
             {% if property.main_image %}
-                <img src="{{ property.main_image.medium.url }}"
+                <img src="{{ property.main_image.medium_url }}"
                      class="w-full h-full object-cover"
                      alt="{{ property.title }}"
                      loading="lazy">

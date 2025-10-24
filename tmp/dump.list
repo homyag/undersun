@@ -1,0 +1,341 @@
+;
+; Archive created at 2025-10-07 20:14:14 MSK
+;     dbname: undersunestate_db
+;     TOC Entries: 331
+;     Compression: gzip
+;     Dump Version: 1.15-0
+;     Format: CUSTOM
+;     Integer: 4 bytes
+;     Offset: 8 bytes
+;     Dumped from database version: 16.9 (Homebrew)
+;     Dumped by pg_dump version: 16.9 (Homebrew)
+;
+;
+; Selected TOC Entries:
+;
+4332; 0 0 ACL - SCHEMA public pg_database_owner
+222; 1259 40330 TABLE public auth_group undersunestate_user
+221; 1259 40329 SEQUENCE public auth_group_id_seq undersunestate_user
+224; 1259 40338 TABLE public auth_group_permissions undersunestate_user
+223; 1259 40337 SEQUENCE public auth_group_permissions_id_seq undersunestate_user
+220; 1259 40324 TABLE public auth_permission undersunestate_user
+219; 1259 40323 SEQUENCE public auth_permission_id_seq undersunestate_user
+226; 1259 40344 TABLE public auth_user undersunestate_user
+228; 1259 40352 TABLE public auth_user_groups undersunestate_user
+227; 1259 40351 SEQUENCE public auth_user_groups_id_seq undersunestate_user
+225; 1259 40343 SEQUENCE public auth_user_id_seq undersunestate_user
+230; 1259 40358 TABLE public auth_user_user_permissions undersunestate_user
+229; 1259 40357 SEQUENCE public auth_user_user_permissions_id_seq undersunestate_user
+234; 1259 40445 TABLE public blog_blogcategory undersunestate_user
+233; 1259 40444 SEQUENCE public blog_blogcategory_id_seq undersunestate_user
+236; 1259 40455 TABLE public blog_blogpost undersunestate_user
+235; 1259 40454 SEQUENCE public blog_blogpost_id_seq undersunestate_user
+238; 1259 40466 TABLE public blog_blogtag undersunestate_user
+237; 1259 40465 SEQUENCE public blog_blogtag_id_seq undersunestate_user
+240; 1259 40476 TABLE public blog_blogtag_posts undersunestate_user
+239; 1259 40475 SEQUENCE public blog_blogtag_posts_id_seq undersunestate_user
+246; 1259 40538 TABLE public core_promotionalbanner undersunestate_user
+245; 1259 40537 SEQUENCE public core_promotionalbanner_id_seq undersunestate_user
+250; 1259 40557 TABLE public core_promotionalbannertranslation undersunestate_user
+249; 1259 40556 SEQUENCE public core_promotionalbannertranslation_id_seq undersunestate_user
+242; 1259 40519 TABLE public core_seopage undersunestate_user
+241; 1259 40518 SEQUENCE public core_seopage_id_seq undersunestate_user
+244; 1259 40530 TABLE public core_seotemplate undersunestate_user
+243; 1259 40529 SEQUENCE public core_seotemplate_id_seq undersunestate_user
+248; 1259 40546 TABLE public core_service undersunestate_user
+247; 1259 40545 SEQUENCE public core_service_id_seq undersunestate_user
+285; 1259 44528 TABLE public core_team undersunestate_user
+284; 1259 44527 SEQUENCE public core_team_id_seq undersunestate_user
+252; 1259 40573 TABLE public currency_currency undersunestate_user
+251; 1259 40572 SEQUENCE public currency_currency_id_seq undersunestate_user
+254; 1259 40582 TABLE public currency_currencypreference undersunestate_user
+253; 1259 40581 SEQUENCE public currency_currencypreference_id_seq undersunestate_user
+256; 1259 40590 TABLE public currency_exchangerate undersunestate_user
+255; 1259 40589 SEQUENCE public currency_exchangerate_id_seq undersunestate_user
+260; 1259 40628 TABLE public data_import_importfile undersunestate_user
+259; 1259 40627 SEQUENCE public data_import_importfile_id_seq undersunestate_user
+262; 1259 40640 TABLE public data_import_importlog undersunestate_user
+261; 1259 40639 SEQUENCE public data_import_importlog_id_seq undersunestate_user
+258; 1259 40618 TABLE public data_import_propertyimportmapping undersunestate_user
+257; 1259 40617 SEQUENCE public data_import_propertyimportmapping_id_seq undersunestate_user
+232; 1259 40416 TABLE public django_admin_log undersunestate_user
+231; 1259 40415 SEQUENCE public django_admin_log_id_seq undersunestate_user
+218; 1259 40316 TABLE public django_content_type undersunestate_user
+217; 1259 40315 SEQUENCE public django_content_type_id_seq undersunestate_user
+216; 1259 40308 TABLE public django_migrations undersunestate_user
+215; 1259 40307 SEQUENCE public django_migrations_id_seq undersunestate_user
+281; 1259 40879 TABLE public django_session undersunestate_user
+264; 1259 40667 TABLE public locations_district undersunestate_user
+263; 1259 40666 SEQUENCE public locations_district_id_seq undersunestate_user
+266; 1259 40677 TABLE public locations_location undersunestate_user
+265; 1259 40676 SEQUENCE public locations_location_id_seq undersunestate_user
+280; 1259 40818 TABLE public properties_agent undersunestate_user
+279; 1259 40817 SEQUENCE public properties_agent_id_seq undersunestate_user
+268; 1259 40696 TABLE public properties_developer undersunestate_user
+267; 1259 40695 SEQUENCE public properties_developer_id_seq undersunestate_user
+274; 1259 40720 TABLE public properties_property undersunestate_user
+273; 1259 40719 SEQUENCE public properties_property_id_seq undersunestate_user
+270; 1259 40706 TABLE public properties_propertyfeature undersunestate_user
+269; 1259 40705 SEQUENCE public properties_propertyfeature_id_seq undersunestate_user
+278; 1259 40743 TABLE public properties_propertyfeaturerelation undersunestate_user
+277; 1259 40742 SEQUENCE public properties_propertyfeaturerelation_id_seq undersunestate_user
+276; 1259 40736 TABLE public properties_propertyimage undersunestate_user
+275; 1259 40735 SEQUENCE public properties_propertyimage_id_seq undersunestate_user
+272; 1259 40712 TABLE public properties_propertytype undersunestate_user
+271; 1259 40711 SEQUENCE public properties_propertytype_id_seq undersunestate_user
+289; 1259 55027 TABLE public users_contactformsubmission undersunestate_user
+288; 1259 55026 SEQUENCE public users_contactformsubmission_id_seq undersunestate_user
+291; 1259 55035 TABLE public users_faqquestion undersunestate_user
+290; 1259 55034 SEQUENCE public users_faqquestion_id_seq undersunestate_user
+287; 1259 55009 TABLE public users_newslettersubscription undersunestate_user
+286; 1259 55008 SEQUENCE public users_newslettersubscription_id_seq undersunestate_user
+293; 1259 55043 TABLE public users_officevisitrequest undersunestate_user
+292; 1259 55042 SEQUENCE public users_officevisitrequest_id_seq undersunestate_user
+283; 1259 40889 TABLE public users_propertyinquiry undersunestate_user
+282; 1259 40888 SEQUENCE public users_propertyinquiry_id_seq undersunestate_user
+295; 1259 55051 TABLE public users_quickconsultationrequest undersunestate_user
+294; 1259 55050 SEQUENCE public users_quickconsultationrequest_id_seq undersunestate_user
+4251; 0 40330 TABLE DATA public auth_group undersunestate_user
+4253; 0 40338 TABLE DATA public auth_group_permissions undersunestate_user
+4249; 0 40324 TABLE DATA public auth_permission undersunestate_user
+4255; 0 40344 TABLE DATA public auth_user undersunestate_user
+4257; 0 40352 TABLE DATA public auth_user_groups undersunestate_user
+4259; 0 40358 TABLE DATA public auth_user_user_permissions undersunestate_user
+4263; 0 40445 TABLE DATA public blog_blogcategory undersunestate_user
+4265; 0 40455 TABLE DATA public blog_blogpost undersunestate_user
+4267; 0 40466 TABLE DATA public blog_blogtag undersunestate_user
+4269; 0 40476 TABLE DATA public blog_blogtag_posts undersunestate_user
+4275; 0 40538 TABLE DATA public core_promotionalbanner undersunestate_user
+4279; 0 40557 TABLE DATA public core_promotionalbannertranslation undersunestate_user
+4271; 0 40519 TABLE DATA public core_seopage undersunestate_user
+4273; 0 40530 TABLE DATA public core_seotemplate undersunestate_user
+4277; 0 40546 TABLE DATA public core_service undersunestate_user
+4314; 0 44528 TABLE DATA public core_team undersunestate_user
+4281; 0 40573 TABLE DATA public currency_currency undersunestate_user
+4283; 0 40582 TABLE DATA public currency_currencypreference undersunestate_user
+4285; 0 40590 TABLE DATA public currency_exchangerate undersunestate_user
+4289; 0 40628 TABLE DATA public data_import_importfile undersunestate_user
+4291; 0 40640 TABLE DATA public data_import_importlog undersunestate_user
+4287; 0 40618 TABLE DATA public data_import_propertyimportmapping undersunestate_user
+4261; 0 40416 TABLE DATA public django_admin_log undersunestate_user
+4247; 0 40316 TABLE DATA public django_content_type undersunestate_user
+4245; 0 40308 TABLE DATA public django_migrations undersunestate_user
+4310; 0 40879 TABLE DATA public django_session undersunestate_user
+4293; 0 40667 TABLE DATA public locations_district undersunestate_user
+4295; 0 40677 TABLE DATA public locations_location undersunestate_user
+4309; 0 40818 TABLE DATA public properties_agent undersunestate_user
+4297; 0 40696 TABLE DATA public properties_developer undersunestate_user
+4303; 0 40720 TABLE DATA public properties_property undersunestate_user
+4299; 0 40706 TABLE DATA public properties_propertyfeature undersunestate_user
+4307; 0 40743 TABLE DATA public properties_propertyfeaturerelation undersunestate_user
+4305; 0 40736 TABLE DATA public properties_propertyimage undersunestate_user
+4301; 0 40712 TABLE DATA public properties_propertytype undersunestate_user
+4318; 0 55027 TABLE DATA public users_contactformsubmission undersunestate_user
+4320; 0 55035 TABLE DATA public users_faqquestion undersunestate_user
+4316; 0 55009 TABLE DATA public users_newslettersubscription undersunestate_user
+4322; 0 55043 TABLE DATA public users_officevisitrequest undersunestate_user
+4312; 0 40889 TABLE DATA public users_propertyinquiry undersunestate_user
+4324; 0 55051 TABLE DATA public users_quickconsultationrequest undersunestate_user
+4333; 0 0 SEQUENCE SET public auth_group_id_seq undersunestate_user
+4334; 0 0 SEQUENCE SET public auth_group_permissions_id_seq undersunestate_user
+4335; 0 0 SEQUENCE SET public auth_permission_id_seq undersunestate_user
+4336; 0 0 SEQUENCE SET public auth_user_groups_id_seq undersunestate_user
+4337; 0 0 SEQUENCE SET public auth_user_id_seq undersunestate_user
+4338; 0 0 SEQUENCE SET public auth_user_user_permissions_id_seq undersunestate_user
+4339; 0 0 SEQUENCE SET public blog_blogcategory_id_seq undersunestate_user
+4340; 0 0 SEQUENCE SET public blog_blogpost_id_seq undersunestate_user
+4341; 0 0 SEQUENCE SET public blog_blogtag_id_seq undersunestate_user
+4342; 0 0 SEQUENCE SET public blog_blogtag_posts_id_seq undersunestate_user
+4343; 0 0 SEQUENCE SET public core_promotionalbanner_id_seq undersunestate_user
+4344; 0 0 SEQUENCE SET public core_promotionalbannertranslation_id_seq undersunestate_user
+4345; 0 0 SEQUENCE SET public core_seopage_id_seq undersunestate_user
+4346; 0 0 SEQUENCE SET public core_seotemplate_id_seq undersunestate_user
+4347; 0 0 SEQUENCE SET public core_service_id_seq undersunestate_user
+4348; 0 0 SEQUENCE SET public core_team_id_seq undersunestate_user
+4349; 0 0 SEQUENCE SET public currency_currency_id_seq undersunestate_user
+4350; 0 0 SEQUENCE SET public currency_currencypreference_id_seq undersunestate_user
+4351; 0 0 SEQUENCE SET public currency_exchangerate_id_seq undersunestate_user
+4352; 0 0 SEQUENCE SET public data_import_importfile_id_seq undersunestate_user
+4353; 0 0 SEQUENCE SET public data_import_importlog_id_seq undersunestate_user
+4354; 0 0 SEQUENCE SET public data_import_propertyimportmapping_id_seq undersunestate_user
+4355; 0 0 SEQUENCE SET public django_admin_log_id_seq undersunestate_user
+4356; 0 0 SEQUENCE SET public django_content_type_id_seq undersunestate_user
+4357; 0 0 SEQUENCE SET public django_migrations_id_seq undersunestate_user
+4358; 0 0 SEQUENCE SET public locations_district_id_seq undersunestate_user
+4359; 0 0 SEQUENCE SET public locations_location_id_seq undersunestate_user
+4360; 0 0 SEQUENCE SET public properties_agent_id_seq undersunestate_user
+4361; 0 0 SEQUENCE SET public properties_developer_id_seq undersunestate_user
+4362; 0 0 SEQUENCE SET public properties_property_id_seq undersunestate_user
+4363; 0 0 SEQUENCE SET public properties_propertyfeature_id_seq undersunestate_user
+4364; 0 0 SEQUENCE SET public properties_propertyfeaturerelation_id_seq undersunestate_user
+4365; 0 0 SEQUENCE SET public properties_propertyimage_id_seq undersunestate_user
+4366; 0 0 SEQUENCE SET public properties_propertytype_id_seq undersunestate_user
+4367; 0 0 SEQUENCE SET public users_contactformsubmission_id_seq undersunestate_user
+4368; 0 0 SEQUENCE SET public users_faqquestion_id_seq undersunestate_user
+4369; 0 0 SEQUENCE SET public users_newslettersubscription_id_seq undersunestate_user
+4370; 0 0 SEQUENCE SET public users_officevisitrequest_id_seq undersunestate_user
+4371; 0 0 SEQUENCE SET public users_propertyinquiry_id_seq undersunestate_user
+4372; 0 0 SEQUENCE SET public users_quickconsultationrequest_id_seq undersunestate_user
+3886; 2606 40442 CONSTRAINT public auth_group auth_group_name_key undersunestate_user
+3891; 2606 40373 CONSTRAINT public auth_group_permissions auth_group_permissions_group_id_permission_id_0cd325b0_uniq undersunestate_user
+3894; 2606 40342 CONSTRAINT public auth_group_permissions auth_group_permissions_pkey undersunestate_user
+3888; 2606 40334 CONSTRAINT public auth_group auth_group_pkey undersunestate_user
+3881; 2606 40364 CONSTRAINT public auth_permission auth_permission_content_type_id_codename_01ab375a_uniq undersunestate_user
+3883; 2606 40328 CONSTRAINT public auth_permission auth_permission_pkey undersunestate_user
+3902; 2606 40356 CONSTRAINT public auth_user_groups auth_user_groups_pkey undersunestate_user
+3905; 2606 40388 CONSTRAINT public auth_user_groups auth_user_groups_user_id_group_id_94350c0c_uniq undersunestate_user
+3896; 2606 40348 CONSTRAINT public auth_user auth_user_pkey undersunestate_user
+3908; 2606 40362 CONSTRAINT public auth_user_user_permissions auth_user_user_permissions_pkey undersunestate_user
+3911; 2606 40402 CONSTRAINT public auth_user_user_permissions auth_user_user_permissions_user_id_permission_id_14a6b632_uniq undersunestate_user
+3899; 2606 40437 CONSTRAINT public auth_user auth_user_username_key undersunestate_user
+3917; 2606 40451 CONSTRAINT public blog_blogcategory blog_blogcategory_pkey undersunestate_user
+3920; 2606 40453 CONSTRAINT public blog_blogcategory blog_blogcategory_slug_key undersunestate_user
+3924; 2606 40462 CONSTRAINT public blog_blogpost blog_blogpost_pkey undersunestate_user
+3927; 2606 40464 CONSTRAINT public blog_blogpost blog_blogpost_slug_key undersunestate_user
+3931; 2606 40472 CONSTRAINT public blog_blogtag blog_blogtag_name_key undersunestate_user
+3933; 2606 40470 CONSTRAINT public blog_blogtag blog_blogtag_pkey undersunestate_user
+3939; 2606 40498 CONSTRAINT public blog_blogtag_posts blog_blogtag_posts_blogtag_id_blogpost_id_dfcf2236_uniq undersunestate_user
+3942; 2606 40480 CONSTRAINT public blog_blogtag_posts blog_blogtag_posts_pkey undersunestate_user
+3936; 2606 40474 CONSTRAINT public blog_blogtag blog_blogtag_slug_key undersunestate_user
+3951; 2606 40544 CONSTRAINT public core_promotionalbanner core_promotionalbanner_pkey undersunestate_user
+3958; 2606 40565 CONSTRAINT public core_promotionalbannertranslation core_promotionalbannertr_banner_id_language_code_eb7cd30d_uniq undersunestate_user
+3961; 2606 40563 CONSTRAINT public core_promotionalbannertranslation core_promotionalbannertranslation_pkey undersunestate_user
+3945; 2606 40527 CONSTRAINT public core_seopage core_seopage_page_name_key undersunestate_user
+3947; 2606 40525 CONSTRAINT public core_seopage core_seopage_pkey undersunestate_user
+3949; 2606 40536 CONSTRAINT public core_seotemplate core_seotemplate_pkey undersunestate_user
+3953; 2606 40552 CONSTRAINT public core_service core_service_pkey undersunestate_user
+3956; 2606 40554 CONSTRAINT public core_service core_service_slug_key undersunestate_user
+4046; 2606 44534 CONSTRAINT public core_team core_team_pkey undersunestate_user
+3964; 2606 40580 CONSTRAINT public currency_currency currency_currency_code_key undersunestate_user
+3966; 2606 40578 CONSTRAINT public currency_currency currency_currency_pkey undersunestate_user
+3970; 2606 40588 CONSTRAINT public currency_currencypreference currency_currencypreference_language_key undersunestate_user
+3972; 2606 40586 CONSTRAINT public currency_currencypreference currency_currencypreference_pkey undersunestate_user
+3975; 2606 40604 CONSTRAINT public currency_exchangerate currency_exchangerate_base_currency_id_target__37b4a1ae_uniq undersunestate_user
+3977; 2606 40594 CONSTRAINT public currency_exchangerate currency_exchangerate_pkey undersunestate_user
+3983; 2606 40638 CONSTRAINT public data_import_importfile data_import_importfile_pkey undersunestate_user
+3987; 2606 40647 CONSTRAINT public data_import_importlog data_import_importlog_pkey undersunestate_user
+3980; 2606 40626 CONSTRAINT public data_import_propertyimportmapping data_import_propertyimportmapping_pkey undersunestate_user
+3914; 2606 40423 CONSTRAINT public django_admin_log django_admin_log_pkey undersunestate_user
+3876; 2606 40322 CONSTRAINT public django_content_type django_content_type_app_label_model_76bd3d3b_uniq undersunestate_user
+3878; 2606 40320 CONSTRAINT public django_content_type django_content_type_pkey undersunestate_user
+3874; 2606 40314 CONSTRAINT public django_migrations django_migrations_pkey undersunestate_user
+4039; 2606 40885 CONSTRAINT public django_session django_session_pkey undersunestate_user
+3989; 2606 40673 CONSTRAINT public locations_district locations_district_pkey undersunestate_user
+3992; 2606 40675 CONSTRAINT public locations_district locations_district_slug_key undersunestate_user
+3995; 2606 40683 CONSTRAINT public locations_location locations_location_pkey undersunestate_user
+3999; 2606 40686 CONSTRAINT public locations_location locations_location_slug_district_id_05412737_uniq undersunestate_user
+4034; 2606 40826 CONSTRAINT public properties_agent properties_agent_legacy_id_key undersunestate_user
+4036; 2606 40824 CONSTRAINT public properties_agent properties_agent_pkey undersunestate_user
+4001; 2606 40702 CONSTRAINT public properties_developer properties_developer_pkey undersunestate_user
+4004; 2606 40704 CONSTRAINT public properties_developer properties_developer_slug_key undersunestate_user
+4018; 2606 40732 CONSTRAINT public properties_property properties_property_pkey undersunestate_user
+4022; 2606 40842 CONSTRAINT public properties_property properties_property_slug_key undersunestate_user
+4027; 2606 40782 CONSTRAINT public properties_propertyfeaturerelation properties_propertyfeatu_property_id_feature_id_17c17c22_uniq undersunestate_user
+4006; 2606 40710 CONSTRAINT public properties_propertyfeature properties_propertyfeature_pkey undersunestate_user
+4030; 2606 40747 CONSTRAINT public properties_propertyfeaturerelation properties_propertyfeaturerelation_pkey undersunestate_user
+4024; 2606 40741 CONSTRAINT public properties_propertyimage properties_propertyimage_pkey undersunestate_user
+4009; 2606 40718 CONSTRAINT public properties_propertytype properties_propertytype_name_key undersunestate_user
+4011; 2606 40716 CONSTRAINT public properties_propertytype properties_propertytype_pkey undersunestate_user
+4053; 2606 55033 CONSTRAINT public users_contactformsubmission users_contactformsubmission_pkey undersunestate_user
+4056; 2606 55041 CONSTRAINT public users_faqquestion users_faqquestion_pkey undersunestate_user
+4049; 2606 55017 CONSTRAINT public users_newslettersubscription users_newslettersubscription_email_key undersunestate_user
+4051; 2606 55015 CONSTRAINT public users_newslettersubscription users_newslettersubscription_pkey undersunestate_user
+4059; 2606 55049 CONSTRAINT public users_officevisitrequest users_officevisitrequest_pkey undersunestate_user
+4042; 2606 40895 CONSTRAINT public users_propertyinquiry users_propertyinquiry_pkey undersunestate_user
+4062; 2606 55057 CONSTRAINT public users_quickconsultationrequest users_quickconsultationrequest_pkey undersunestate_user
+3884; 1259 40443 INDEX public auth_group_name_a6ea08ec_like undersunestate_user
+3889; 1259 40384 INDEX public auth_group_permissions_group_id_b120cbf9 undersunestate_user
+3892; 1259 40385 INDEX public auth_group_permissions_permission_id_84c5c92e undersunestate_user
+3879; 1259 40370 INDEX public auth_permission_content_type_id_2f476e4b undersunestate_user
+3900; 1259 40400 INDEX public auth_user_groups_group_id_97559544 undersunestate_user
+3903; 1259 40399 INDEX public auth_user_groups_user_id_6a12ed8b undersunestate_user
+3906; 1259 40414 INDEX public auth_user_user_permissions_permission_id_1fbb5f2c undersunestate_user
+3909; 1259 40413 INDEX public auth_user_user_permissions_user_id_a95ead1b undersunestate_user
+3897; 1259 40438 INDEX public auth_user_username_6821ab7c_like undersunestate_user
+3918; 1259 40481 INDEX public blog_blogcategory_slug_7996de7a_like undersunestate_user
+3921; 1259 40493 INDEX public blog_blogpost_author_id_ffcc150f undersunestate_user
+3922; 1259 40494 INDEX public blog_blogpost_category_id_0e9835dd undersunestate_user
+3925; 1259 40492 INDEX public blog_blogpost_slug_9e84ade1_like undersunestate_user
+3928; 1259 44553 INDEX public blog_blogpost_team_author_id_d122a66f undersunestate_user
+3929; 1259 40495 INDEX public blog_blogtag_name_fdf4eaf8_like undersunestate_user
+3937; 1259 40510 INDEX public blog_blogtag_posts_blogpost_id_0b5cc2f8 undersunestate_user
+3940; 1259 40509 INDEX public blog_blogtag_posts_blogtag_id_d8ed4778 undersunestate_user
+3934; 1259 40496 INDEX public blog_blogtag_slug_eecf3988_like undersunestate_user
+3959; 1259 40571 INDEX public core_promotionalbannertranslation_banner_id_1b4b1a2e undersunestate_user
+3943; 1259 40528 INDEX public core_seopage_page_name_31157fef_like undersunestate_user
+3954; 1259 40555 INDEX public core_service_slug_fae512bc_like undersunestate_user
+3962; 1259 40595 INDEX public currency_currency_code_cde0e0d1_like undersunestate_user
+3967; 1259 40602 INDEX public currency_currencypreference_default_currency_id_198a0c0d undersunestate_user
+3968; 1259 40601 INDEX public currency_currencypreference_language_9e0fbcda_like undersunestate_user
+3973; 1259 40615 INDEX public currency_exchangerate_base_currency_id_d8712e7e undersunestate_user
+3978; 1259 40616 INDEX public currency_exchangerate_target_currency_id_e49153f4 undersunestate_user
+3981; 1259 40659 INDEX public data_import_importfile_mapping_id_2f369347 undersunestate_user
+3984; 1259 40658 INDEX public data_import_importfile_uploaded_by_id_4a8f12c8 undersunestate_user
+3985; 1259 40665 INDEX public data_import_importlog_import_file_id_5955a036 undersunestate_user
+3912; 1259 40434 INDEX public django_admin_log_content_type_id_c4bce8eb undersunestate_user
+3915; 1259 40435 INDEX public django_admin_log_user_id_c564eba6 undersunestate_user
+4037; 1259 40887 INDEX public django_session_expire_date_a5c62663 undersunestate_user
+4040; 1259 40886 INDEX public django_session_session_key_c0390e0f_like undersunestate_user
+3990; 1259 40684 INDEX public locations_district_slug_2012a78a_like undersunestate_user
+3993; 1259 40694 INDEX public locations_location_district_id_70d233bc undersunestate_user
+3996; 1259 40692 INDEX public locations_location_slug_0338bba7 undersunestate_user
+3997; 1259 40693 INDEX public locations_location_slug_0338bba7_like undersunestate_user
+4032; 1259 40839 INDEX public properties_agent_legacy_id_681cfe6e_like undersunestate_user
+4002; 1259 40748 INDEX public properties_developer_slug_776fdc3f_like undersunestate_user
+4012; 1259 40840 INDEX public properties_property_agent_id_469d1bc8 undersunestate_user
+4013; 1259 44547 INDEX public properties_property_contact_person_id_e35bf068 undersunestate_user
+4014; 1259 40771 INDEX public properties_property_developer_id_a828ee78 undersunestate_user
+4015; 1259 40772 INDEX public properties_property_district_id_7cbcdbdb undersunestate_user
+4016; 1259 40773 INDEX public properties_property_location_id_cf4cc7d7 undersunestate_user
+4019; 1259 40774 INDEX public properties_property_property_type_id_21d12070 undersunestate_user
+4020; 1259 40843 INDEX public properties_property_slug_f3b16024_like undersunestate_user
+4028; 1259 40793 INDEX public properties_propertyfeaturerelation_feature_id_dcbddf57 undersunestate_user
+4031; 1259 40794 INDEX public properties_propertyfeaturerelation_property_id_83946edf undersunestate_user
+4025; 1259 40780 INDEX public properties_propertyimage_property_id_883194e7 undersunestate_user
+4007; 1259 40749 INDEX public properties_propertytype_name_8ac3641c_like undersunestate_user
+4054; 1259 55065 INDEX public users_contactformsubmission_processed_by_id_78a3b424 undersunestate_user
+4057; 1259 55071 INDEX public users_faqquestion_processed_by_id_34b09633 undersunestate_user
+4047; 1259 55058 INDEX public users_newslettersubscription_email_849faa3b_like undersunestate_user
+4060; 1259 55077 INDEX public users_officevisitrequest_processed_by_id_b9eb8a77 undersunestate_user
+4043; 1259 55059 INDEX public users_propertyinquiry_processed_by_id_a3ca4c16 undersunestate_user
+4044; 1259 40915 INDEX public users_propertyinquiry_property_id_ae97516d undersunestate_user
+4063; 1259 55083 INDEX public users_quickconsultationrequest_processed_by_id_4697d564 undersunestate_user
+4065; 2606 40379 FK CONSTRAINT public auth_group_permissions auth_group_permissio_permission_id_84c5c92e_fk_auth_perm undersunestate_user
+4066; 2606 40374 FK CONSTRAINT public auth_group_permissions auth_group_permissions_group_id_b120cbf9_fk_auth_group_id undersunestate_user
+4064; 2606 40365 FK CONSTRAINT public auth_permission auth_permission_content_type_id_2f476e4b_fk_django_co undersunestate_user
+4067; 2606 40394 FK CONSTRAINT public auth_user_groups auth_user_groups_group_id_97559544_fk_auth_group_id undersunestate_user
+4068; 2606 40389 FK CONSTRAINT public auth_user_groups auth_user_groups_user_id_6a12ed8b_fk_auth_user_id undersunestate_user
+4069; 2606 40408 FK CONSTRAINT public auth_user_user_permissions auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm undersunestate_user
+4070; 2606 40403 FK CONSTRAINT public auth_user_user_permissions auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id undersunestate_user
+4073; 2606 40482 FK CONSTRAINT public blog_blogpost blog_blogpost_author_id_ffcc150f_fk_auth_user_id undersunestate_user
+4074; 2606 40487 FK CONSTRAINT public blog_blogpost blog_blogpost_category_id_0e9835dd_fk_blog_blogcategory_id undersunestate_user
+4075; 2606 44554 FK CONSTRAINT public blog_blogpost blog_blogpost_team_author_id_d122a66f_fk_core_team_id undersunestate_user
+4076; 2606 40504 FK CONSTRAINT public blog_blogtag_posts blog_blogtag_posts_blogpost_id_0b5cc2f8_fk_blog_blogpost_id undersunestate_user
+4077; 2606 40499 FK CONSTRAINT public blog_blogtag_posts blog_blogtag_posts_blogtag_id_d8ed4778_fk_blog_blogtag_id undersunestate_user
+4078; 2606 40566 FK CONSTRAINT public core_promotionalbannertranslation core_promotionalbann_banner_id_1b4b1a2e_fk_core_prom undersunestate_user
+4079; 2606 40596 FK CONSTRAINT public currency_currencypreference currency_currencypre_default_currency_id_198a0c0d_fk_currency_ undersunestate_user
+4080; 2606 40605 FK CONSTRAINT public currency_exchangerate currency_exchangerat_base_currency_id_d8712e7e_fk_currency_ undersunestate_user
+4081; 2606 40610 FK CONSTRAINT public currency_exchangerate currency_exchangerat_target_currency_id_e49153f4_fk_currency_ undersunestate_user
+4082; 2606 40653 FK CONSTRAINT public data_import_importfile data_import_importfi_mapping_id_2f369347_fk_data_impo undersunestate_user
+4083; 2606 40648 FK CONSTRAINT public data_import_importfile data_import_importfile_uploaded_by_id_4a8f12c8_fk_auth_user_id undersunestate_user
+4084; 2606 40660 FK CONSTRAINT public data_import_importlog data_import_importlo_import_file_id_5955a036_fk_data_impo undersunestate_user
+4071; 2606 40424 FK CONSTRAINT public django_admin_log django_admin_log_content_type_id_c4bce8eb_fk_django_co undersunestate_user
+4072; 2606 40429 FK CONSTRAINT public django_admin_log django_admin_log_user_id_c564eba6_fk_auth_user_id undersunestate_user
+4085; 2606 40687 FK CONSTRAINT public locations_location locations_location_district_id_70d233bc_fk_locations undersunestate_user
+4086; 2606 40834 FK CONSTRAINT public properties_property properties_property_agent_id_469d1bc8_fk_properties_agent_id undersunestate_user
+4087; 2606 44559 FK CONSTRAINT public properties_property properties_property_contact_person_id_e35bf068_fk_core_team_id undersunestate_user
+4088; 2606 40750 FK CONSTRAINT public properties_property properties_property_developer_id_a828ee78_fk_propertie undersunestate_user
+4089; 2606 40755 FK CONSTRAINT public properties_property properties_property_district_id_7cbcdbdb_fk_locations undersunestate_user
+4090; 2606 40760 FK CONSTRAINT public properties_property properties_property_location_id_cf4cc7d7_fk_locations undersunestate_user
+4091; 2606 40765 FK CONSTRAINT public properties_property properties_property_property_type_id_21d12070_fk_propertie undersunestate_user
+4093; 2606 40783 FK CONSTRAINT public properties_propertyfeaturerelation properties_propertyf_feature_id_dcbddf57_fk_propertie undersunestate_user
+4094; 2606 40788 FK CONSTRAINT public properties_propertyfeaturerelation properties_propertyf_property_id_83946edf_fk_propertie undersunestate_user
+4092; 2606 40775 FK CONSTRAINT public properties_propertyimage properties_propertyi_property_id_883194e7_fk_propertie undersunestate_user
+4097; 2606 55060 FK CONSTRAINT public users_contactformsubmission users_contactformsub_processed_by_id_78a3b424_fk_auth_user undersunestate_user
+4098; 2606 55066 FK CONSTRAINT public users_faqquestion users_faqquestion_processed_by_id_34b09633_fk_auth_user_id undersunestate_user
+4099; 2606 55072 FK CONSTRAINT public users_officevisitrequest users_officevisitreq_processed_by_id_b9eb8a77_fk_auth_user undersunestate_user
+4095; 2606 40910 FK CONSTRAINT public users_propertyinquiry users_propertyinquir_property_id_ae97516d_fk_propertie undersunestate_user
+4096; 2606 55021 FK CONSTRAINT public users_propertyinquiry users_propertyinquiry_processed_by_id_a3ca4c16_fk_auth_user_id undersunestate_user
+4100; 2606 55078 FK CONSTRAINT public users_quickconsultationrequest users_quickconsultat_processed_by_id_4697d564_fk_auth_user undersunestate_user
+2238; 826 40306 DEFAULT ACL public DEFAULT PRIVILEGES FOR SEQUENCES igorantonov
+2237; 826 40305 DEFAULT ACL public DEFAULT PRIVILEGES FOR TABLES igorantonov

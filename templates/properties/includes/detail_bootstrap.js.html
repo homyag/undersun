@@ -2,6 +2,8 @@
 {% load l10n %}
 {% load currency_tags %}
 
+// NOTE: Rendered via Django template include; do not serve as a static asset.
+
 // ============================================
 // Configuration Objects (Django Template Data)
 // ============================================
@@ -9,7 +11,7 @@
 // Property images
 const PROPERTY_IMAGES = [
     {% for image in property.images.all %}
-        "{{ image.medium.url }}"{% if not forloop.last %},{% endif %}
+        "{{ image.medium_url }}"{% if not forloop.last %},{% endif %}
     {% endfor %}
 ];
 
@@ -75,11 +77,4 @@ document.addEventListener('DOMContentLoaded', function () {
             .bindPopup(MAP_DATA.title);
     }
 
-    // Favorite toggle (uses PROPERTY_ID from Django)
-    const favoriteBtn = document.querySelector('.favorite-btn');
-    if (favoriteBtn) {
-        favoriteBtn.addEventListener('click', function () {
-            toggleFavoriteDetail(PROPERTY_ID);
-        });
-    }
 });

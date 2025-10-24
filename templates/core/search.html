@@ -131,31 +131,7 @@
             
             <!-- Pagination -->
             {% if is_paginated %}
-                <div class="flex justify-center mt-12">
-                    <nav class="flex items-center space-x-2">
-                        {% if page_obj.has_previous %}
-                            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors">
-                                {% trans "Первая" %}
-                            </a>
-                            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors">
-                                {% trans "Предыдущая" %}
-                            </a>
-                        {% endif %}
-                        
-                        <span class="px-3 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-md">
-                            {{ page_obj.number }}
-                        </span>
-                        
-                        {% if page_obj.has_next %}
-                            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors">
-                                {% trans "Следующая" %}
-                            </a>
-                            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors">
-                                {% trans "Последняя" %}
-                            </a>
-                        {% endif %}
-                    </nav>
-                </div>
+                {% include 'properties/includes/list/list_pagination.html' %}
             {% endif %}
             
         {% elif query %}

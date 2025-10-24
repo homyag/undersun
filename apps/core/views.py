@@ -24,7 +24,7 @@ def serialize_properties_for_js(properties):
     for prop in properties:
         main_image_url = ''
         if prop.main_image:
-            main_image_url = prop.main_image.medium.url if hasattr(prop.main_image, 'medium') else prop.main_image.url
+            main_image_url = prop.main_image.medium_url
         
         # Форматирование цены с правильным преобразованием Decimal
         price_formatted = 'Цена по запросу'

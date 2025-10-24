@@ -539,11 +539,11 @@ var properties = [
         price_rent_usd: {{ property.price_rent_monthly_usd|default:"0"|unlocalize }},
         price_rent_thb: {{ property.price_rent_monthly_thb|default:"0"|unlocalize }},
         price_rent_rub: {{ property.price_rent_monthly_rub|default:"0"|unlocalize }},
-        image: "{% if property.main_image and property.main_image.image %}{{ property.main_image.medium.url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}",
+        image: "{% if property.main_image and property.main_image.image %}{{ property.main_image.medium_url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}",
         images: [
-            {% if property.main_image and property.main_image.image %}"{{ property.main_image.medium.url }}"{% else %}"{% static 'images/no-image.jpg' %}"{% endif %}
+            {% if property.main_image and property.main_image.image %}"{{ property.main_image.medium_url }}"{% else %}"{% static 'images/no-image.jpg' %}"{% endif %}
             {% for image in property.images.all|slice:":2" %},
-            "{{ image.medium.url }}"
+            "{{ image.medium_url }}"
             {% endfor %}
         ],
         floors: {{ property.floors_total|default:"0" }},

@@ -230,89 +230,65 @@ function shareProperty() {
     }
 }
 
-// Update favorites counter in header
-function formatFavoritesCount(count) {
-    return count > 99 ? '99+' : count;
-}
-
-function updateFavoritesCounter(count) {
-    const displayValue = formatFavoritesCount(count);
-
-    // Update desktop counter
-    const desktopCounter = document.getElementById('desktop-favorites-count');
-    if (desktopCounter) {
-        desktopCounter.textContent = displayValue;
-        if (count > 0) {
-            desktopCounter.classList.remove('hidden');
-            desktopCounter.classList.add('inline-flex');
-            desktopCounter.style.display = 'inline-flex';
-        } else {
-            desktopCounter.classList.add('hidden');
-            desktopCounter.style.display = 'none';
-        }
+function setDetailFavoriteState(propertyId, isFavorite) {
+    if (typeof window.updateFavoriteButtons === 'function') {
+        window.updateFavoriteButtons(propertyId, isFavorite);
+    } else {
+        // Fallback for pages without global helpers
+        document.querySelectorAll(`.favorite-btn[data-property-id="${propertyId}"] i`).forEach(iconEl => {
+            iconEl.classList.toggle('fas', isFavorite);
+            iconEl.classList.toggle('far', !isFavorite);
+            iconEl.classList.toggle('text-red-500', isFavorite);
+            iconEl.classList.toggle('text-gray-600', !isFavorite);
+        });
     }
 
-    // Update mobile counter
-    const mobileCounter = document.getElementById('mobile-nav-favorites-count');
-    if (mobileCounter) {
-        mobileCounter.textContent = displayValue;
-        if (count > 0) {
-            mobileCounter.classList.remove('hidden');
-            mobileCounter.classList.add('inline-flex');
-            mobileCounter.style.display = 'inline-flex';
-        } else {
-            mobileCounter.classList.add('hidden');
-            mobileCounter.style.display = 'none';
-        }
+    const carouselIcon = document.querySelector('.carousel-favorite-btn i');
+    if (carouselIcon) {
+        carouselIcon.classList.toggle('fas', isFavorite);
+        carouselIcon.classList.toggle('far', !isFavorite);
+        carouselIcon.classList.toggle('text-red-500', isFavorite);
     }
 }
 
 // Toggle favorite function (for carousel button)
 function toggleFavoriteDetail(propertyId) {
-    const carouselBtn = document.querySelector('.carousel-favorite-btn i');
-    const sidebarBtn = document.querySelector('.favorite-btn i');
+    let isFavoriteNow = null;
 
-    // Get current favorites from localStorage
-    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const isFavorite = favorites.includes(propertyId);
-
-    if (isFavorite) {
-        // Remove from favorites
-        favorites = favorites.filter(id => id !== propertyId);
-        carouselBtn.className = 'far fa-heart';
-        if (sidebarBtn) sidebarBtn.className = 'far text-gray-600 fa-heart';
-        showNotification(TRANSLATIONS.removedFromFavorites, 'info');
-    } else {
-        // Add to favorites
-        favorites.push(propertyId);
-        carouselBtn.className = 'fas fa-heart text-red-500';
-        if (sidebarBtn) sidebarBtn.className = 'fas text-red-500 fa-heart';
-        showNotification(TRANSLATIONS.addedToFavorites, 'success');
+    if (typeof window.toggleFavorite === 'function') {
+        isFavoriteNow = window.toggleFavorite(propertyId);
     }
 
-    // Save to localStorage
-    localStorage.setItem('favorites', JSON.stringify(favorites));
+    if (typeof isFavoriteNow !== 'boolean') {
+        // Fallback if global handler недоступен
+        let favorites = [];
+        if (typeof window.getFavorites === 'function') {
+            favorites = window.getFavorites();
+        } else {
+            favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            favorites = favorites.map(id => parseInt(id, 10)).filter(id => Number.isInteger(id));
+        }
 
-    // Update header counter
-    updateFavoritesCounter(favorites.length);
-}
+        const id = parseInt(propertyId, 10);
+        const wasFavorite = favorites.includes(id);
 
-// Notification helper function
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
-    notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
+        if (wasFavorite) {
+            favorites = favorites.filter(item => item !== id);
+            showNotification(TRANSLATIONS.removedFromFavorites, 'info');
+        } else {
+            favorites.push(id);
+            showNotification(TRANSLATIONS.addedToFavorites, 'success');
+        }
 
-    // Animate in
-    setTimeout(() => notification.style.transform = 'translateY(0)', 10);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        if (typeof window.updateFavoritesCounter === 'function') {
+            window.updateFavoritesCounter();
+        }
 
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.style.transform = 'translateY(-100%)';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+        isFavoriteNow = !wasFavorite;
+    }
+
+    setDetailFavoriteState(parseInt(propertyId, 10), Boolean(isFavoriteNow));
 }
 
 // Share image function
@@ -629,24 +605,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Initialize favorite buttons state
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     const propertyId = PROPERTY_ID;
-    const isFavorite = favorites.includes(propertyId);
-
-    const carouselBtn = document.querySelector('.carousel-favorite-btn i');
-    const sidebarBtn = document.querySelector('.favorite-btn i');
-
-    if (isFavorite) {
-        if (carouselBtn) carouselBtn.className = 'fas fa-heart text-red-500';
-        if (sidebarBtn) sidebarBtn.className = 'fas text-red-500 fa-heart';
+    let favorites = [];
+    if (typeof window.getFavorites === 'function') {
+        favorites = window.getFavorites();
+    } else {
+        favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        favorites = favorites.map(id => parseInt(id, 10)).filter(id => Number.isInteger(id));
     }
 
-    // Initialize header counter
-    updateFavoritesCounter(favorites.length);
+    const isFavorite = (typeof window.isFavorite === 'function')
+        ? window.isFavorite(propertyId)
+        : favorites.includes(propertyId);
+
+    setDetailFavoriteState(propertyId, isFavorite);
+
+    if (typeof window.updateFavoritesCounter === 'function') {
+        window.updateFavoritesCounter();
+    }
 
     const favoriteBtn = document.querySelector('.favorite-btn');
     if (favoriteBtn) {
-        favoriteBtn.addEventListener('click', function () {
+        favoriteBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
             toggleFavoriteDetail(propertyId);
         });
     }
