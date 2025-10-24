@@ -4,7 +4,7 @@ from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, Http404
 # login_required decorator removed
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models import Q, Count, Case, When, Value, IntegerField
@@ -423,11 +423,18 @@ def favorites_view(request):
     """Страница избранного"""
     return render(request, 'properties/favorites.html')
 
-@require_POST
+@require_http_methods(["GET", "POST"])
 def get_favorite_properties(request):
     """AJAX endpoint для получения данных избранных объектов"""
-    property_ids = request.POST.getlist('property_ids[]')
-    
+    if request.method == 'POST':
+        property_ids = request.POST.getlist('property_ids[]') or request.POST.getlist('property_ids')
+    else:
+        property_ids = request.GET.getlist('property_ids[]') or request.GET.getlist('property_ids')
+
+    # Поддержка передачи ID одной строкой через запятую
+    if len(property_ids) == 1 and ',' in property_ids[0]:
+        property_ids = [item.strip() for item in property_ids[0].split(',') if item.strip()]
+
     if not property_ids:
         return JsonResponse({'success': False, 'message': 'Не переданы ID объектов'})
     
@@ -457,7 +464,7 @@ def get_favorite_properties(request):
         for prop in properties:
             main_image_url = ''
             if prop.main_image:
-                main_image_url = prop.main_image.thumbnail.url
+                main_image_url = prop.main_image.thumbnail_url
 
             # Формируем цену для отображения с учетом выбранной валюты
             price_display = 'Цена по запросу'
@@ -658,8 +665,8 @@ def property_list_ajax(request):
             'district_name': property_obj.district.name if property_obj.district else '',
             'property_type_name': property_obj.property_type.name_display if property_obj.property_type else '',
             'slug': property_obj.slug,
-            'main_image_url': main_image.image.url if main_image else '',
-            'main_image_thumbnail_url': main_image.thumbnail.url if main_image and hasattr(main_image, 'thumbnail') else '',
+            'main_image_url': main_image.original_url if main_image else '',
+            'main_image_thumbnail_url': main_image.thumbnail_url if main_image else '',
             'deal_type': property_obj.deal_type,
             'is_featured': property_obj.is_featured,
         })
@@ -727,11 +734,7 @@ def map_properties_json(request):
             if not main_image:
                 main_image = prop.images.first()
             
-            image_url = ''
-            if main_image and hasattr(main_image, 'thumbnail'):
-                image_url = main_image.thumbnail.url
-            elif main_image:
-                image_url = main_image.image.url
+            image_url = main_image.thumbnail_url if main_image else ''
                 
             # Определяем цену для отображения
             price_display = ''
@@ -973,8 +976,8 @@ def bulk_upload_images(request):
                 created_images.append({
                     'id': property_image.id,
                     'title': property_image.title,
-                    'image_url': property_image.image.url,
-                    'thumbnail_url': property_image.thumbnail.url if hasattr(property_image, 'thumbnail') else property_image.image.url,
+                    'image_url': property_image.original_url,
+                    'thumbnail_url': property_image.thumbnail_url,
                     'is_main': property_image.is_main,
                     'order': property_image.order
                 })

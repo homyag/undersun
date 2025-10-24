@@ -48,14 +48,15 @@
     {% endwith %}
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{#    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">#}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <!-- International Phone Input CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
     <link rel="stylesheet" href="{% static 'css/phone-input.css' %}">
     <!-- Tailwind CSS -->
-    {% if tailwind_use_cdn %}
+{#    {% if tailwind_use_cdn %}#}
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
@@ -75,9 +76,9 @@
                 }
             }
         </script>
-    {% else %}
-        <link rel="stylesheet" href="{% static 'css/tailwind.min.css' %}">
-    {% endif %}
+{#    {% else %}#}
+{#        <link rel="stylesheet" href="{% static 'css/tailwind.min.css' %}">#}
+{#    {% endif %}#}
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
@@ -1001,165 +1002,12 @@
 <!-- Custom JS - Main Script -->
 <script src="{% static 'js/main.js' %}"></script>
 
-<!-- Global Favorites Functions -->
+<!-- Favorites translations for JS -->
 <script>
-    // Получить избранное из localStorage
-    function getFavorites() {
-        return JSON.parse(localStorage.getItem('favorites') || '[]');
-    }
-
-    // Сохранить избранное в localStorage
-    function saveFavorites(favorites) {
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-    }
-
-    // Переключить избранное для объекта
-    function toggleFavorite(propertyId) {
-        let favorites = getFavorites();
-        const isFavorite = favorites.includes(propertyId);
-
-        if (isFavorite) {
-            // Удалить из избранного
-            favorites = favorites.filter(id => id !== propertyId);
-            showNotification('{% trans "Удалено из избранного" %}', 'favorite-removed');
-        } else {
-            // Добавить в избранное
-            favorites.push(propertyId);
-            showNotification('{% trans "Добавлено в избранное" %}', 'favorite-added');
-        }
-
-        saveFavorites(favorites);
-        updateFavoritesCounter();
-        updateFavoriteButtons(propertyId, !isFavorite);
-
-        return !isFavorite;
-    }
-
-    // Обновить состояние кнопок избранного для конкретного объекта
-    function updateFavoriteButtons(propertyId, isFavorite) {
-        // Обновляем все кнопки для данного объекта
-        const buttons = document.querySelectorAll(`[data-property-id="${propertyId}"].favorite-btn`);
-        buttons.forEach(button => {
-            const icon = button.querySelector('i');
-            if (icon) {
-                if (isFavorite) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas', 'text-red-500');
-                } else {
-                    icon.classList.remove('fas', 'text-red-500');
-                    icon.classList.add('far');
-                }
-            }
-        });
-    }
-
-    // Обновить счетчики избранного в навигации
-    function updateFavoritesCounter() {
-        const favorites = getFavorites();
-        const count = favorites.length;
-        const displayValue = count > 99 ? '99+' : count;
-
-        // Desktop counter
-        const desktopCounter = document.getElementById('desktop-favorites-count');
-        if (desktopCounter) {
-            desktopCounter.textContent = displayValue;
-            if (count > 0) {
-                desktopCounter.classList.remove('hidden');
-                desktopCounter.classList.add('inline-flex');
-                desktopCounter.style.display = 'inline-flex';
-            } else {
-                desktopCounter.classList.add('hidden');
-                desktopCounter.style.display = 'none';
-            }
-        }
-
-        // Mobile counter
-        const mobileCounter = document.getElementById('mobile-nav-favorites-count');
-        if (mobileCounter) {
-            mobileCounter.textContent = displayValue;
-            if (count > 0) {
-                mobileCounter.classList.remove('hidden');
-                mobileCounter.classList.add('inline-flex');
-                mobileCounter.style.display = 'inline-flex';
-            } else {
-                mobileCounter.classList.add('hidden');
-                mobileCounter.style.display = 'none';
-            }
-        }
-    }
-
-    // Показать уведомление
-    function showNotification(message, type) {
-        // Создаем элемент уведомления
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-20 right-4 z-50 transform transition-all duration-300 ease-in-out';
-
-        let bgColor = 'bg-gray-800';
-        let icon = 'fa-info-circle';
-
-        if (type === 'favorite-added') {
-            bgColor = 'bg-green-600';
-            icon = 'fa-check-circle';
-        } else if (type === 'favorite-removed') {
-            bgColor = 'bg-blue-600';
-            icon = 'fa-info-circle';
-        } else if (type === 'success') {
-            bgColor = 'bg-green-600';
-            icon = 'fa-check-circle';
-        } else if (type === 'error') {
-            bgColor = 'bg-red-600';
-            icon = 'fa-exclamation-circle';
-        }
-
-        notification.innerHTML = `
-                <div class="${bgColor} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center space-x-3 min-w-[300px]">
-                    <i class="fas ${icon} text-xl"></i>
-                    <span class="font-medium">${message}</span>
-                </div>
-            `;
-
-        document.body.appendChild(notification);
-
-        // Анимация появления
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-            notification.style.opacity = '1';
-        }, 100);
-
-        // Удаление через 3 секунды
-        setTimeout(() => {
-            notification.style.transform = 'translateX(400px)';
-            notification.style.opacity = '0';
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 3000);
-    }
-
-    // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', function () {
-        // Обновляем счетчики
-        updateFavoritesCounter();
-
-        // Инициализируем состояние всех кнопок избранного на странице
-        const favorites = getFavorites();
-        favorites.forEach(propertyId => {
-            updateFavoriteButtons(propertyId, true);
-        });
-
-        // Добавляем обработчики для всех кнопок избранного
-        document.addEventListener('click', function (e) {
-            const favoriteBtn = e.target.closest('.favorite-btn');
-            if (favoriteBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const propertyId = parseInt(favoriteBtn.dataset.propertyId);
-                if (propertyId) {
-                    toggleFavorite(propertyId);
-                }
-            }
-        });
-    });
+    window.FAVORITES_MESSAGES = {
+        added: '{% trans "Добавлено в избранное" %}',
+        removed: '{% trans "Удалено из избранного" %}'
+    };
 </script>
 
 <!-- Extra JS Block for page-specific scripts -->

@@ -278,50 +278,111 @@ function showNotification(message, type = 'info') {
 
 // ===== ФУНКЦИИ УПРАВЛЕНИЯ ИЗБРАННЫМ =====
 
+// Сообщения для уведомлений об избранном
+function getFavoritesMessages() {
+    const defaults = {
+        added: 'Добавлено в избранное',
+        removed: 'Удалено из избранного'
+    };
+
+    if (window.FAVORITES_MESSAGES) {
+        return {
+            ...defaults,
+            ...window.FAVORITES_MESSAGES
+        };
+    }
+
+    return defaults;
+}
+
 // Получить список избранного из LocalStorage
 function getFavorites() {
-    const favorites = localStorage.getItem('favorites');
-    return favorites ? JSON.parse(favorites) : [];
+    const raw = localStorage.getItem('favorites');
+    if (!raw) return [];
+
+    try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+            return [];
+        }
+        return parsed
+            .map(id => parseInt(id, 10))
+            .filter(id => Number.isInteger(id));
+    } catch (err) {
+        console.warn('Failed to parse favorites from localStorage', err);
+        return [];
+    }
 }
 
 // Сохранить список избранного в LocalStorage
 function saveFavorites(favorites) {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
+    const sanitized = (favorites || [])
+        .map(id => parseInt(id, 10))
+        .filter(id => Number.isInteger(id));
+    localStorage.setItem('favorites', JSON.stringify(sanitized));
 }
 
 // Проверить, находится ли объект в избранном
 function isFavorite(propertyId) {
-    const favorites = getFavorites();
-    return favorites.includes(parseInt(propertyId));
+    const id = parseInt(propertyId, 10);
+    if (!Number.isInteger(id)) {
+        return false;
+    }
+    return getFavorites().includes(id);
+}
+
+function updateFavoriteButtons(propertyId, isFavoriteNow) {
+    document.querySelectorAll(`.favorite-btn[data-property-id="${propertyId}"]`).forEach(btn => {
+        const iconEl = btn.querySelector('i');
+        if (!iconEl) return;
+
+        iconEl.classList.toggle('fas', isFavoriteNow);
+        iconEl.classList.toggle('far', !isFavoriteNow);
+        iconEl.classList.toggle('text-red-500', isFavoriteNow);
+        iconEl.classList.toggle('text-gray-600', !isFavoriteNow);
+    });
+
+    const standaloneIcon = document.getElementById(`favorite-${propertyId}`);
+    if (standaloneIcon) {
+        standaloneIcon.classList.toggle('fas', isFavoriteNow);
+        standaloneIcon.classList.toggle('far', !isFavoriteNow);
+        standaloneIcon.classList.toggle('text-red-500', isFavoriteNow);
+        standaloneIcon.classList.toggle('text-gray-600', !isFavoriteNow);
+    }
 }
 
 // Добавить/удалить объект из избранного
 function toggleFavorite(propertyId, icon = null) {
-    
+    const id = parseInt(propertyId, 10);
+    if (!Number.isInteger(id)) {
+        return false;
+    }
+
     const favorites = getFavorites();
-    const id = parseInt(propertyId);
-    const index = favorites.indexOf(id);
-    
-    if (index > -1) {
-        // Удаляем из избранного
-        favorites.splice(index, 1);
+    const wasFavorite = favorites.includes(id);
+    let updatedFavorites;
+
+    const messages = getFavoritesMessages();
+
+    if (wasFavorite) {
+        updatedFavorites = favorites.filter(favId => favId !== id);
         if (icon) {
             icon.removeClass('fas text-red-500').addClass('far text-gray-600');
         }
-        showNotification('Удалено из избранного', 'favorite-removed');
+        showNotification(messages.removed, 'favorite-removed');
     } else {
-        // Добавляем в избранное
-        favorites.push(id);
+        updatedFavorites = [...favorites, id];
         if (icon) {
             icon.removeClass('far text-gray-600').addClass('fas text-red-500');
         }
-        showNotification('Добавлено в избранное', 'favorite-added');
+        showNotification(messages.added, 'favorite-added');
     }
-    
-    saveFavorites(favorites);
+
+    saveFavorites(updatedFavorites);
+    updateFavoriteButtons(id, !wasFavorite);
     updateFavoritesCounter();
-    
-    return !isFavorite(propertyId);
+
+    return !wasFavorite;
 }
 
 // Обновить счетчик избранного
@@ -359,16 +420,11 @@ function updateFavoritesCounter() {
 
 // Инициализация состояния кнопок избранного на странице
 function initializeFavorites() {
-    
     $('.favorite-btn').each(function() {
-        const btn = $(this);
-        const propertyId = btn.data('property-id');
-        const icon = btn.find('i');
-        
-        if (isFavorite(propertyId)) {
-            icon.removeClass('far text-gray-600').addClass('fas text-red-500');
-        } else {
-            icon.removeClass('fas text-red-500').addClass('far text-gray-600');
+        const propertyId = $(this).data('property-id');
+        const id = parseInt(propertyId, 10);
+        if (Number.isInteger(id)) {
+            updateFavoriteButtons(id, isFavorite(id));
         }
     });
 }
@@ -841,6 +897,15 @@ function formatPrice(price) {
 function formatArea(area) {
     return parseFloat(area).toLocaleString() + ' м²';
 }
+
+// Экспортируем избранное в глобальную область, чтобы другие бандлы могли переиспользовать их
+window.getFavorites = getFavorites;
+window.saveFavorites = saveFavorites;
+window.isFavorite = isFavorite;
+window.toggleFavorite = toggleFavorite;
+window.updateFavoriteButtons = updateFavoriteButtons;
+window.updateFavoritesCounter = updateFavoritesCounter;
+window.initializeFavorites = initializeFavorites;
 
 // ===== ВАЛИДАЦИЯ ФОРМ =====
 function validateForm(form) {

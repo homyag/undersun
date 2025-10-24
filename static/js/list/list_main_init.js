@@ -167,15 +167,33 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Initialize favorites on page load
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    let favorites = [];
+    if (typeof window.getFavorites === 'function') {
+        favorites = window.getFavorites();
+    } else {
+        favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        favorites = favorites.map(id => parseInt(id, 10)).filter(id => Number.isInteger(id));
+    }
+
     favorites.forEach(propertyId => {
-        const icon = document.getElementById(`favorite-${propertyId}`);
-        if (icon) {
-            icon.classList.remove('far');
-            icon.classList.add('fas');
+        const id = parseInt(propertyId, 10);
+        if (!Number.isInteger(id)) {
+            return;
+        }
+
+        if (typeof window.updateFavoriteButtons === 'function') {
+            window.updateFavoriteButtons(id, true);
+        } else {
+            const icon = document.getElementById(`favorite-${id}`);
+            if (icon) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+            }
         }
     });
     
     // Update favorites counter on page load
-    updateFavoritesCounter(favorites.length);
+    if (typeof window.updateFavoritesCounter === 'function') {
+        window.updateFavoritesCounter();
+    }
 });

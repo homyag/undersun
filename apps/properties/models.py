@@ -1,3 +1,5 @@
+import builtins
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
@@ -582,6 +584,39 @@ class PropertyImage(models.Model):
         elif not PropertyImage.objects.filter(property=self.property, is_main=True).exists():
             self.is_main = True
         super().save(*args, **kwargs)
+
+    @staticmethod
+    def _safe_url(file_field):
+        """Вернуть URL файла, если он существует."""
+        try:
+            return file_field.url
+        except Exception:
+            return ''
+
+    @builtins.property
+    def original_url(self):
+        """Базовый URL оригинального изображения."""
+        return self._safe_url(self.image)
+
+    @builtins.property
+    def medium_url(self):
+        """URL изображения среднего размера с fallback на оригинал."""
+        if not self.original_url:
+            return ''
+        try:
+            return self.medium.url
+        except Exception:
+            return self.original_url
+
+    @builtins.property
+    def thumbnail_url(self):
+        """URL превью с fallback на оригинал."""
+        if not self.original_url:
+            return ''
+        try:
+            return self.thumbnail.url
+        except Exception:
+            return self.original_url
 
 
 class PropertyFeature(models.Model):

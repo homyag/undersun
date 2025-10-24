@@ -86,14 +86,11 @@ function loadFavoriteProperties(favoriteIds) {
     `);
 
     // AJAX запрос для получения данных объектов
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
     $.ajax({
         url: URLS.getFavoriteProperties,
-        type: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken
-        },
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
         data: {
             'property_ids[]': favoriteIds
         },
