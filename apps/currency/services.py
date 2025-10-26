@@ -63,8 +63,20 @@ class CurrencyService:
         
         if not from_currency or not to_currency:
             return None
-            
-        return ExchangeRate.convert_amount(amount, from_currency, to_currency)
+
+        direct_conversion = ExchangeRate.convert_amount(amount, from_currency, to_currency)
+        if direct_conversion is not None:
+            return direct_conversion
+
+        base_currency = Currency.objects.filter(is_base=True).first()
+        if not base_currency or base_currency in (from_currency, to_currency):
+            return None
+
+        amount_in_base = ExchangeRate.convert_amount(amount, from_currency, base_currency)
+        if amount_in_base is None:
+            return None
+
+        return ExchangeRate.convert_amount(amount_in_base, base_currency, to_currency)
     
     @staticmethod
     def format_price(amount, currency_code):
@@ -115,4 +127,3 @@ class CurrencyService:
                         pass
                         
         return summary
-
