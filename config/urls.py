@@ -9,6 +9,7 @@ from apps.core.views import SitemapView, legacy_real_estate_redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('templates/yootheme/', RedirectView.as_view(url='/', permanent=True)),
     path('rosetta/', include('rosetta.urls')),  # Интерфейс для переводов
     path('i18n/', include('django.conf.urls.i18n')),  # URLs для смены языка
     path('currency/', include('apps.currency.urls')),  # URLs для валют

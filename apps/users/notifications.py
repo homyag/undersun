@@ -95,7 +95,16 @@ def notify_admins_about_submission(
     message = "\n".join(message_lines) if message_lines else subject
 
     try:
+        logger.warning(
+            "Отправляем уведомление '%s' для %s",
+            subject,
+            settings.ADMINS,
+        )
         mail_admins(subject, message, fail_silently=False)
+        logger.warning(
+            "Уведомление '%s' успешно отправлено",
+            subject,
+        )
     except Exception:
         logger.exception(
             "Не удалось отправить уведомление администраторам по форме '%s'",

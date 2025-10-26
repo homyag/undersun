@@ -34,6 +34,30 @@ body {
     color: var(--text-dark);
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--primary-color);
+}
+
+.hero-section h1,
+.hero-section h1 *,
+.hero-section h2,
+.hero-section h2 *,
+.hero-section h3,
+.hero-section h3 *,
+.hero-section h4,
+.hero-section h4 *,
+.hero-section h5,
+.hero-section h5 *,
+.hero-section h6,
+.hero-section h6 * {
+    color: #ffffff !important;
+}
+
 /* ===== HERO СЕКЦИЯ ===== */
 .hero-section {
     position: relative;
