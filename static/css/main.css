@@ -58,6 +58,11 @@ h6 {
     color: #ffffff !important;
 }
 
+.properties-container input[type="radio"],
+.properties-container input[type="checkbox"] {
+    accent-color: var(--primary-color);
+}
+
 /* ===== HERO СЕКЦИЯ ===== */
 .hero-section {
     position: relative;

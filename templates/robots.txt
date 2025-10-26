@@ -4,8 +4,8 @@ Disallow: /rosetta/
 Disallow: /data-import/
 Disallow: /static/
 Disallow: /media/private/
-
-User-agent: *
 Allow: /
+
+Clean-param: etext&yadiscount
 
 Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
