@@ -1,3 +1,5 @@
+import logging
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils.translation import gettext as _
@@ -14,6 +16,9 @@ from .models import (
     NewsletterSubscription
 )
 from .notifications import build_admin_change_url, notify_admins_about_submission
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_client_ip(request):
@@ -202,6 +207,7 @@ def quick_consultation_view(request):
 def contact_form_view(request):
     """Обработка общей контактной формы"""
     try:
+        logger.warning("contact_form_view POST: %s", dict(request.POST))
         name = request.POST.get('name', '').strip()
         email = request.POST.get('email', '').strip()
         phone = request.POST.get('phone', '').strip()
@@ -488,4 +494,3 @@ def newsletter_subscribe_view(request):
             'success': False,
             'message': _('Произошла ошибка. Пожалуйста, попробуйте позже.')
         }, status=500)
-
