@@ -215,6 +215,8 @@ class PropertySaleView(PropertyListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['deal_type'] = 'sale'
+        if not self.request.GET.get('deal_type'):
+            context['current_filters']['deal_type'] = 'sale'
         return context
 
 
@@ -227,6 +229,8 @@ class PropertyRentView(PropertyListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['deal_type'] = 'rent'
+        if not self.request.GET.get('deal_type'):
+            context['current_filters']['deal_type'] = 'rent'
         return context
 
 
