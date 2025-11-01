@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.templatetags.static import static
 from django.urls import translate_url
+from urllib.parse import urlsplit, urlunsplit
 from apps.properties.models import PropertyType, Property
 from apps.locations.models import District, Location
 from apps.core.models import SEOPage, Service
@@ -29,6 +30,7 @@ def site_context(request):
         default_og_image_url = default_hero_image
 
     current_absolute_url = request.build_absolute_uri()
+    language_urls = {}
     hreflang_items = []
     for code, _ in settings.LANGUAGES:
         try:
@@ -36,6 +38,14 @@ def site_context(request):
         except Exception:
             translated_url = current_absolute_url
         hreflang_items.append((code, translated_url))
+
+        split_result = urlsplit(translated_url)
+        relative_url = urlunsplit(('', '', split_result.path, split_result.query, split_result.fragment))
+        if not relative_url.startswith('/'):
+            relative_url = f'/{relative_url}'
+        if not relative_url.strip('/'):
+            relative_url = f'/{code}/'
+        language_urls[code] = relative_url
 
     hreflang_x_default = None
     if hreflang_items:
@@ -53,6 +63,7 @@ def site_context(request):
         'hero_og_images': hero_image_urls,
         'hreflang_items': hreflang_items,
         'hreflang_x_default': hreflang_x_default,
+        'language_urls': language_urls,
     }
 
 def seo_context(request):
