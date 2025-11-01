@@ -396,23 +396,23 @@
                         </button>
                         <div class="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                             <div class="py-1">
-                                <a href="/ru{{ request.get_full_path|slice:'3:' }}"
+                                <a href="{{ language_urls.ru|default:'/ru/' }}"
                                    class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
                                     <img src="https://flagcdn.com/w20/ru.png" alt="RU"
                                          class="w-5 h-3 mr-2 object-cover">
                                     {% trans "Русский" %}
                                 </a>
-                                <a href="/en{{ request.get_full_path|slice:'3:' }}"
+                                <a href="{{ language_urls.en|default:'/en/' }}"
                                    class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
                                     <img src="https://flagcdn.com/w20/us.png" alt="EN"
                                          class="w-5 h-3 mr-2 object-cover">
-                                    {% trans "English" %}
+                                    {% trans "Английский" %}
                                 </a>
-                                <a href="/th{{ request.get_full_path|slice:'3:' }}"
+                                <a href="{{ language_urls.th|default:'/th/' }}"
                                    class="flex items-center px-4 py-2 text-gray-800 hover:bg-gray-100">
                                     <img src="https://flagcdn.com/w20/th.png" alt="TH"
                                          class="w-5 h-3 mr-2 object-cover">
-                                    {% trans "ไทย" %}
+                                    {% trans "Тайский" %}
                                 </a>
                             </div>
                         </div>
@@ -601,17 +601,17 @@
                         </svg>
                     </button>
                     <div id="language-submenu" class="hidden ml-6 mt-1 space-y-1">
-                        <a href="/ru{{ request.get_full_path|slice:'3:' }}"
+                        <a href="{{ language_urls.ru|default:'/ru/' }}"
                            class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
                             <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 mr-2 object-cover">
                             {% trans "Русский" %}
                         </a>
-                        <a href="/en{{ request.get_full_path|slice:'3:' }}"
+                        <a href="{{ language_urls.en|default:'/en/' }}"
                            class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
                             <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 mr-2 object-cover">
                             {% trans "English" %}
                         </a>
-                        <a href="/th{{ request.get_full_path|slice:'3:' }}"
+                        <a href="{{ language_urls.th|default:'/th/' }}"
                            class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
                             <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 mr-2 object-cover">
                             {% trans "ไทย" %}
