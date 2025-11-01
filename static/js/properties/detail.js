@@ -380,22 +380,42 @@ function toggleDescription() {
     const toggleText = document.getElementById('toggle-text');
     const toggleIcon = document.getElementById('toggle-icon');
 
-    if (content.classList.contains('max-h-24')) {
+    if (!content) {
+        return;
+    }
+
+    const collapsedClassCandidates = ['max-h-52', 'max-h-48', 'max-h-40', 'max-h-32', 'max-h-24'];
+    if (!content.dataset.collapsedClass) {
+        const foundClass = collapsedClassCandidates.find(className => content.classList.contains(className));
+        if (foundClass) {
+            content.dataset.collapsedClass = foundClass;
+        }
+    }
+
+    const collapsedClass = content.dataset.collapsedClass || collapsedClassCandidates[0];
+    const expandedClass = 'max-h-full';
+
+    if (content.classList.contains(collapsedClass)) {
         // Expand
-        content.classList.remove('max-h-24');
-        content.classList.add('max-h-full');
-        gradient.style.opacity = '0';
-        toggleText.textContent = TRANSLATIONS.collapse;
-        toggleIcon.classList.remove('fa-chevron-down');
-        toggleIcon.classList.add('fa-chevron-up');
+        collapsedClassCandidates.forEach(className => content.classList.remove(className));
+        content.classList.add(expandedClass);
+        if (gradient) gradient.style.opacity = '0';
+        if (toggleText) toggleText.textContent = TRANSLATIONS.collapse;
+        if (toggleIcon) {
+            toggleIcon.classList.remove('fa-chevron-down');
+            toggleIcon.classList.add('fa-chevron-up');
+        }
     } else {
         // Collapse
-        content.classList.remove('max-h-full');
-        content.classList.add('max-h-24');
-        gradient.style.opacity = '1';
-        toggleText.textContent = TRANSLATIONS.showFull;
-        toggleIcon.classList.remove('fa-chevron-up');
-        toggleIcon.classList.add('fa-chevron-down');
+        content.classList.remove(expandedClass);
+        collapsedClassCandidates.forEach(className => content.classList.remove(className));
+        content.classList.add(collapsedClass);
+        if (gradient) gradient.style.opacity = '1';
+        if (toggleText) toggleText.textContent = TRANSLATIONS.showFull;
+        if (toggleIcon) {
+            toggleIcon.classList.remove('fa-chevron-up');
+            toggleIcon.classList.add('fa-chevron-down');
+        }
     }
 }
 

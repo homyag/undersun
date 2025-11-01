@@ -160,7 +160,48 @@ class BlogPost(models.Model):
     def get_meta_description(self):
         """Получить SEO описание или краткое описание"""
         return self.meta_description if self.meta_description else self.excerpt
-        
+
+    def get_featured_image_for_language(self, language_code='ru'):
+        """Вернуть изображение обложки с учетом локали и доступности."""
+        language_code = (language_code or 'ru')[:2]
+        candidates = []
+        language_map = {
+            'ru': self.featured_image,
+            'en': self.featured_image_en,
+            'th': self.featured_image_th,
+        }
+
+        # Локализованное изображение в первую очередь
+        if language_code in language_map:
+            candidates.append(language_map[language_code])
+
+        # Далее — остальные локализации в предсказуемом порядке
+        for code in ('ru', 'en', 'th'):
+            if code != language_code:
+                candidates.append(language_map.get(code))
+
+        for field in candidates:
+            if not field:
+                continue
+            try:
+                url = field.url
+            except Exception:
+                url = ''
+            if url:
+                return url
+
+        return ''
+
+    def get_featured_image_absolute_url(self, request, language_code='ru'):
+        """Вернуть абсолютный URL изображения обложки для OG метатегов."""
+        relative_url = self.get_featured_image_for_language(language_code)
+        if not relative_url:
+            return ''
+        try:
+            return request.build_absolute_uri(relative_url)
+        except Exception:
+            return relative_url
+
     def get_author_display(self):
         """Получить автора для отображения (приоритет team_author > author)"""
         if self.team_author:

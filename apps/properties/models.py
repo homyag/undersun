@@ -1,6 +1,7 @@
 import builtins
 
 from django.db import models
+from django.db.models import Case, When, Value, IntegerField
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
@@ -26,12 +27,27 @@ class PropertyType(models.Model):
     name_plural = models.CharField(_('Название во множественном числе'), max_length=100, blank=True)
     icon = models.CharField(_('Иконка'), max_length=50, blank=True)
 
+    NAVIGATION_ORDER = ['condo', 'villa', 'townhouse', 'land']
+
     class Meta:
         verbose_name = _('Тип недвижимости')
         verbose_name_plural = _('Типы недвижимости')
 
     def __str__(self):
         return self.name_display
+
+    @classmethod
+    def ordered_for_navigation(cls):
+        """Return property types ordered for navigation menus."""
+        order_case = Case(
+            *[
+                When(name=property_type, then=Value(index))
+                for index, property_type in enumerate(cls.NAVIGATION_ORDER)
+            ],
+            default=Value(len(cls.NAVIGATION_ORDER)),
+            output_field=IntegerField(),
+        )
+        return cls.objects.annotate(_nav_order=order_case).order_by('_nav_order', 'name_display')
 
 
 class Developer(models.Model):
@@ -219,6 +235,26 @@ class Property(models.Model):
     def main_image(self):
         """Получить главное изображение"""
         return self.images.filter(is_main=True).first()
+
+    def get_main_image_url(self):
+        """Вернуть URL главного изображения или первого доступного."""
+        candidate_images = [self.main_image, self.images.first()]
+        for image in candidate_images:
+            if not image:
+                continue
+            if image.original_url:
+                return image.original_url
+        return ''
+
+    def get_main_image_absolute_url(self, request):
+        """Вернуть абсолютный URL главного изображения для OG метатегов."""
+        relative_url = self.get_main_image_url()
+        if not relative_url:
+            return ''
+        try:
+            return request.build_absolute_uri(relative_url)
+        except Exception:
+            return relative_url
 
     @property
     def price_display(self):
@@ -603,20 +639,40 @@ class PropertyImage(models.Model):
         """URL изображения среднего размера с fallback на оригинал."""
         if not self.original_url:
             return ''
+
         try:
-            return self.medium.url
+            medium_file = self.medium
+            generate = getattr(medium_file, 'generate', None)
+            if callable(generate):
+                generate()
+            storage = getattr(medium_file, 'storage', None)
+            name = getattr(medium_file, 'name', None)
+            if storage and name and storage.exists(name):
+                return storage.url(name)
         except Exception:
-            return self.original_url
+            pass
+
+        return self.original_url
 
     @builtins.property
     def thumbnail_url(self):
         """URL превью с fallback на оригинал."""
         if not self.original_url:
             return ''
+
         try:
-            return self.thumbnail.url
+            thumb_file = self.thumbnail
+            generate = getattr(thumb_file, 'generate', None)
+            if callable(generate):
+                generate()
+            storage = getattr(thumb_file, 'storage', None)
+            name = getattr(thumb_file, 'name', None)
+            if storage and name and storage.exists(name):
+                return storage.url(name)
         except Exception:
-            return self.original_url
+            pass
+
+        return self.original_url
 
 
 class PropertyFeature(models.Model):
