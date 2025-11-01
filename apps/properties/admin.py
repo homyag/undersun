@@ -11,6 +11,40 @@ from .models import (
     PropertyFeature, PropertyFeatureRelation
 )
 from .services import translate_property, translate_property_type, translate_developer, translate_property_feature
+
+
+class TranslationStatusFilter(admin.SimpleListFilter):
+    title = 'Статус перевода'
+    parameter_name = 'translation_status'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('missing', 'Нет перевода'),
+            ('partial', 'Частичный перевод'),
+            ('complete', 'Полный перевод'),
+        )
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == 'missing':
+            return queryset.filter(
+                title_en__exact='', description_en__exact='',
+                title_th__exact='', description_th__exact='' 
+            )
+        if value == 'complete':
+            return queryset.filter(
+                title_en__gt='', description_en__gt='',
+                title_th__gt='', description_th__gt='' 
+            )
+        if value == 'partial':
+            return queryset.exclude(
+                title_en__gt='', description_en__gt='',
+                title_th__gt='', description_th__gt='' 
+            ).exclude(
+                title_en__exact='', description_en__exact='',
+                title_th__exact='', description_th__exact='' 
+            )
+        return queryset
 from .widgets import BulkImageUploadWidget
 
 
@@ -114,9 +148,15 @@ class PropertyAdminForm(forms.ModelForm):
 @admin.register(Property)
 class PropertyAdmin(BaseAdminWithRequiredFields):
     form = PropertyAdminForm
-    list_display = ('legacy_id', 'title', 'property_type', 'district', 'deal_type', 'status', 
-                   'price_sale_usd', 'special_offer', 'is_active', 'is_featured', 'views_count', 'created_at')
-    list_filter = ('is_active', 'property_type', 'district', 'deal_type', 'status', 'is_featured', 'furnished')
+    list_display = (
+        'legacy_id', 'title', 'property_type', 'district', 'deal_type', 'status',
+        'price_sale_usd', 'special_offer', 'is_active', 'is_featured',
+        'views_count', 'created_at', 'translation_status'
+    )
+    list_filter = (
+        'is_active', 'property_type', 'district', 'deal_type',
+        'status', 'is_featured', 'furnished', TranslationStatusFilter
+    )
     search_fields = ('legacy_id', 'title', 'description', 'address')
     prepopulated_fields = {'slug': ('title',)}
     inlines = [PropertyImageInline, PropertyFeatureInline]
@@ -125,6 +165,8 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     ordering = ('-created_at',)
     
     actions = ['make_active', 'make_inactive', 'make_featured', 'make_not_featured', 'auto_translate', 'force_retranslate']
+
+    readonly_fields = ('translation_status_note',)
     
     def make_active(self, request, queryset):
         """Сделать недвижимость активной (опубликованной)"""
@@ -149,6 +191,65 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
         updated = queryset.update(is_featured=False)
         self.message_user(request, f'{updated} объектов недвижимости убрано из рекомендуемых.')
     make_not_featured.short_description = "⚪ Убрать из рекомендуемых"
+
+    # --- Перевод ---
+
+    @staticmethod
+    def _compute_translation_status(obj):
+        if not obj:
+            return '⛔', 'Нет перевода', '#94a3b8'
+
+        required_pairs = [
+            ('title_en', 'description_en'),
+            ('title_th', 'description_th'),
+        ]
+
+        completed = 0
+        partially = False
+        for title_field, description_field in required_pairs:
+            raw_title = getattr(obj, title_field, '')
+            raw_description = getattr(obj, description_field, '')
+
+            title_value = raw_title if isinstance(raw_title, str) else ('' if raw_title in (None, False) else str(raw_title))
+            description_value = raw_description if isinstance(raw_description, str) else ('' if raw_description in (None, False) else str(raw_description))
+
+            has_title = bool(title_value.strip())
+            has_description = bool(description_value.strip())
+            if has_title and has_description:
+                completed += 1
+            elif has_title or has_description:
+                partially = True
+
+        if completed == len(required_pairs):
+            return '✅', 'Перевод готов', '#22c55e'
+        if completed > 0 or partially:
+            return '⚠️', 'Частичный перевод', '#facc15'
+        return '⛔', 'Нет перевода', '#94a3b8'
+
+    def translation_status(self, obj):
+        icon, label, color = self._compute_translation_status(obj)
+        return format_html(
+            '<span title="{}" style="color:{}; font-weight:600;">{}</span>',
+            label,
+            color,
+            icon,
+        )
+
+    translation_status.short_description = 'Статус перевода'
+    translation_status.allow_tags = True
+
+    def translation_status_note(self, obj):
+        icon, label, color = self._compute_translation_status(obj)
+        return format_html(
+            '<span style="display:inline-flex; align-items:center; gap:8px; color:{color}; font-weight:600;">'
+            '<span style="font-size:18px;">{icon}</span>{label}'
+            '</span>',
+            color=color,
+            icon=icon,
+            label=label,
+        )
+
+    translation_status_note.short_description = 'Перевод'
     
     def auto_translate(self, request, queryset):
         """Автоматически переводит выбранные объекты недвижимости на английский и тайский (только пустые поля)"""

@@ -12,6 +12,7 @@ from django.core.paginator import Paginator
 from django.urls import reverse
 
 from apps.currency.services import CurrencyService
+from apps.core.utils import build_query_string
 from .models import Property, PropertyType
 from apps.locations.models import District
 from apps.users.models import PropertyInquiry
@@ -23,12 +24,52 @@ class PropertyListView(ListView):
     context_object_name = 'properties'
     paginate_by = 12
     PROPERTY_TYPE_PRIORITY = ['condo', 'villa', 'townhouse', 'land']
-    
+
+    FILTER_PARAM_NAMES = {
+        'deal_type': 'single',
+        'property_type': 'multi',
+        'district': 'single',
+        'location': 'single',
+        'min_price': 'single',
+        'max_price': 'single',
+        'bedrooms': 'multi',
+        'amenities': 'multi',
+        'q': 'single',
+    }
+
+    PAGINATION_ALLOWED_PARAMS = (
+        'deal_type',
+        'property_type',
+        'district',
+        'location',
+        'min_price',
+        'max_price',
+        'bedrooms',
+        'amenities',
+        'q',
+        'sort',
+        'map_view',
+    )
+
     def get_paginate_by(self, queryset):
         """Отключить пагинацию для карты"""
         if self.request.GET.get('map_view') == 'true':
             return None  # Отключить пагинацию для карты
         return self.paginate_by
+
+    def has_active_filters(self):
+        """Проверяет наличие пользовательских фильтров в GET параметрах."""
+        request = self.request
+        for param, param_type in self.FILTER_PARAM_NAMES.items():
+            if param_type == 'multi':
+                values = [value for value in request.GET.getlist(param) if value not in (None, '')]
+                if values:
+                    return True
+            else:
+                value = request.GET.get(param)
+                if value not in (None, ''):
+                    return True
+        return False
 
     def get_queryset(self):
         queryset = Property.objects.filter(
@@ -38,9 +79,10 @@ class PropertyListView(ListView):
         
         # Применяем фильтры из GET параметров
         queryset = self.apply_filters(queryset)
-        
+
         # Сортировка
-        sort_by = self.request.GET.get('sort', '-created_at')
+        sort_param = self.request.GET.get('sort')
+        sort_by = sort_param or '-created_at'
         allowed_sorts = [
             'price_sale_usd', '-price_sale_usd', 
             'price_sale_thb', '-price_sale_thb',
@@ -48,11 +90,18 @@ class PropertyListView(ListView):
             'area_total', '-area_total',
             'created_at', '-created_at'
         ]
+        ordering = []
+
+        if not sort_param and not self.has_active_filters():
+            ordering.append('-is_featured')
+
         if sort_by in allowed_sorts:
-            queryset = queryset.order_by(sort_by)
+            ordering.append(sort_by)
         else:
-            queryset = queryset.order_by('-created_at')
-            
+            ordering.append('-created_at')
+
+        queryset = queryset.order_by(*ordering)
+
         return queryset
 
     def apply_filters(self, queryset):
@@ -188,8 +237,14 @@ class PropertyListView(ListView):
             'q': self.request.GET.get('q', ''),
             'sort': self.request.GET.get('sort', '-created_at'),
         }
+
+        context['pagination_query_string'] = self.get_pagination_query_string()
         
         return context
+
+    def get_pagination_query_string(self):
+        allowed_keys = list(self.PAGINATION_ALLOWED_PARAMS)
+        return build_query_string(self.request.GET, allowed_keys)
 
 
 class PropertySaleView(PropertyListView):
@@ -208,7 +263,12 @@ class PropertySaleView(PropertyListView):
                 default=Value(len(self.PROPERTY_TYPE_PRIORITY)),
                 output_field=IntegerField(),
             )
-            queryset = queryset.annotate(_type_priority=priority_case).order_by('_type_priority', '-created_at')
+            ordering = []
+            if not self.has_active_filters():
+                ordering.append('-is_featured')
+            ordering.extend(['_type_priority', '-created_at'])
+
+            queryset = queryset.annotate(_type_priority=priority_case).order_by(*ordering)
 
         return queryset
     
@@ -348,6 +408,10 @@ class PropertyDetailView(DetailView):
 
         # Favorite functionality removed
         context['is_favorite'] = False
+
+        main_image_url = self.object.get_main_image_absolute_url(self.request)
+        if main_image_url:
+            context['og_image_url'] = main_image_url
 
         return context
     

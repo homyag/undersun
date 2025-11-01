@@ -34,7 +34,7 @@
     <!-- Open Graph -->
     <meta property="og:title" content="{% block og_title %}{{ page_title }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ page_description }}{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{% static 'images/og-image.jpg' %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:locale"
           content="{% if LANGUAGE_CODE == 'ru' %}ru_RU{% elif LANGUAGE_CODE == 'en' %}en_US{% elif LANGUAGE_CODE == 'th' %}th_TH{% endif %}">
@@ -54,13 +54,14 @@
 
     <!-- Hreflang Tags -->
     {% load i18n %}
-    {% get_current_language as current_lang %}
-    {% with base_url=request.build_absolute_uri|slice:':-4' current_path=request.get_full_path|slice:'3:' %}
-        <link rel="alternate" hreflang="ru" href="{{ base_url }}/ru{{ current_path }}">
-        <link rel="alternate" hreflang="en" href="{{ base_url }}/en{{ current_path }}">
-        <link rel="alternate" hreflang="th" href="{{ base_url }}/th{{ current_path }}">
-        <link rel="alternate" hreflang="x-default" href="{{ base_url }}/en{{ current_path }}">
-    {% endwith %}
+    {% if hreflang_items %}
+        {% for code, url in hreflang_items %}
+            <link rel="alternate" hreflang="{{ code }}" href="{{ url }}">
+        {% endfor %}
+        {% if hreflang_x_default %}
+            <link rel="alternate" hreflang="x-default" href="{{ hreflang_x_default }}">
+        {% endif %}
+    {% endif %}
 
     <!-- Font Awesome -->
 {#    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">#}

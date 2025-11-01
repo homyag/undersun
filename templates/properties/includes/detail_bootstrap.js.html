@@ -66,11 +66,18 @@ const TRANSLATIONS = {
 document.addEventListener('DOMContentLoaded', function () {
     // Map initialization (requires MAP_DATA from Django)
     if (MAP_DATA && MAP_DATA.lat && MAP_DATA.lng) {
-        const map = L.map('property-map').setView([MAP_DATA.lat, MAP_DATA.lng], 20);
+        const map = L.map('property-map');
+
+        const phuketBounds = L.latLngBounds(
+            [7.55, 98.15], // Юго-западная часть острова
+            [8.20, 98.60]  // Северо-восточная часть острова
+        );
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
+
+        map.fitBounds(phuketBounds, { padding: [20, 20] });
 
         L.marker([MAP_DATA.lat, MAP_DATA.lng])
             .addTo(map)

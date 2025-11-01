@@ -34,28 +34,13 @@ body {
     color: var(--text-dark);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1:not([class*="text-"]),
+h2:not([class*="text-"]),
+h3:not([class*="text-"]),
+h4:not([class*="text-"]),
+h5:not([class*="text-"]),
+h6:not([class*="text-"]) {
     color: var(--primary-color);
-}
-
-.hero-section h1,
-.hero-section h1 *,
-.hero-section h2,
-.hero-section h2 *,
-.hero-section h3,
-.hero-section h3 *,
-.hero-section h4,
-.hero-section h4 *,
-.hero-section h5,
-.hero-section h5 *,
-.hero-section h6,
-.hero-section h6 * {
-    color: #ffffff !important;
 }
 
 .properties-container input[type="radio"],

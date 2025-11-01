@@ -1,17 +1,58 @@
 from django.conf import settings
+from django.templatetags.static import static
+from django.urls import translate_url
 from apps.properties.models import PropertyType, Property
 from apps.locations.models import District, Location
 from apps.core.models import SEOPage, Service
 import re
 
+
+HERO_OG_IMAGE_PATHS = [
+    'images/home_page/homepage_hero_section/thailand_hero_section_1.jpg',
+    'images/home_page/homepage_hero_section/thailand_hero_section_2.jpg',
+    'images/home_page/homepage_hero_section/thailand_hero_section_3.jpg',
+]
+
 def site_context(request):
     """Глобальный контекст для всех шаблонов"""
+    hero_image_urls = []
+    for image_path in HERO_OG_IMAGE_PATHS:
+        try:
+            hero_image_urls.append(request.build_absolute_uri(static(image_path)))
+        except Exception:
+            hero_image_urls.append(static(image_path))
+
+    default_hero_image = hero_image_urls[0] if hero_image_urls else static('images/og-image.jpg')
+    try:
+        default_og_image_url = request.build_absolute_uri(default_hero_image)
+    except Exception:
+        default_og_image_url = default_hero_image
+
+    current_absolute_url = request.build_absolute_uri()
+    hreflang_items = []
+    for code, _ in settings.LANGUAGES:
+        try:
+            translated_url = translate_url(current_absolute_url, code)
+        except Exception:
+            translated_url = current_absolute_url
+        hreflang_items.append((code, translated_url))
+
+    hreflang_x_default = None
+    if hreflang_items:
+        language_codes_map = dict(hreflang_items)
+        # Предпочитаем английскую версию в качестве x-default, если доступна
+        hreflang_x_default = language_codes_map.get('en', hreflang_items[0][1])
+
     return {
-        'property_types': PropertyType.objects.all(),
+        'property_types': PropertyType.ordered_for_navigation(),
         'districts': District.objects.prefetch_related('locations').all(),
         'current_language': request.LANGUAGE_CODE,
         'menu_services': Service.get_menu_services(),
         'tailwind_use_cdn': getattr(settings, 'TAILWIND_USE_CDN', False),
+        'default_og_image_url': default_og_image_url,
+        'hero_og_images': hero_image_urls,
+        'hreflang_items': hreflang_items,
+        'hreflang_x_default': hreflang_x_default,
     }
 
 def seo_context(request):

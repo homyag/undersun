@@ -12,6 +12,7 @@ from django.utils import translation
 from django.urls import reverse
 
 from apps.currency.services import CurrencyService
+from apps.core.utils import build_query_string
 from apps.properties.models import Property, PropertyType
 from apps.locations.models import District
 from apps.blog.models import BlogPost
@@ -114,7 +115,7 @@ class HomeView(TemplateView):
         context['promotional_banner'] = PromotionalBanner.get_active_banner(current_language)
         
         # Типы недвижимости для поиска
-        context['property_types'] = PropertyType.objects.all()
+        context['property_types'] = PropertyType.ordered_for_navigation()
         
         # Общее количество активных объектов
         context['total_properties_count'] = Property.objects.filter(
@@ -197,6 +198,27 @@ class SearchView(TemplateView):
         if deal_type:
             properties = properties.filter(deal_type=deal_type)
 
+        sort_param = self.request.GET.get('sort')
+        sort_by = sort_param or '-created_at'
+        allowed_sorts = [
+            'price_sale_usd', '-price_sale_usd',
+            'price_sale_thb', '-price_sale_thb',
+            'price_rent_monthly', '-price_rent_monthly',
+            'area_total', '-area_total',
+            'created_at', '-created_at'
+        ]
+
+        ordering = []
+        if not sort_param:
+            ordering.append('-is_featured')
+
+        if sort_by in allowed_sorts:
+            ordering.append(sort_by)
+        else:
+            ordering.append('-created_at')
+
+        properties = properties.order_by(*ordering)
+
         # Получаем текущую валюту (аналогично context_processor)
         selected_currency_code = CurrencyService.get_selected_currency_code(self.request)
         current_currency = CurrencyService.get_currency_by_code(selected_currency_code)
@@ -235,7 +257,7 @@ class SearchView(TemplateView):
         context['results'] = page_obj  # Добавляем для совместимости с шаблоном
         context['page_obj'] = page_obj
         context['is_paginated'] = page_obj.has_other_pages()
-        context['property_types'] = PropertyType.objects.all()
+        context['property_types'] = PropertyType.ordered_for_navigation()
         context['districts'] = District.objects.all()
         context['query'] = query
         context['selected_currency'] = current_currency
@@ -249,7 +271,14 @@ class SearchView(TemplateView):
             'min_price': min_price,
             'max_price': max_price,
             'bedrooms': bedrooms,
+            'sort': sort_param or '-created_at',
         }
+
+        allowed_keys = ['q', 'type', 'district', 'location', 'deal_type', 'min_price', 'max_price', 'bedrooms', 'sort']
+        context['pagination_query_string'] = build_query_string(self.request.GET, allowed_keys)
+
+        if 'q' in self.request.GET:
+            context['meta_robots'] = 'noindex, follow'
 
         return context
 
@@ -268,7 +297,7 @@ class MapView(TemplateView):
         ).select_related('district', 'property_type', 'agent', 'contact_person').prefetch_related('images')
 
         context['properties'] = properties
-        context['property_types'] = PropertyType.objects.all()
+        context['property_types'] = PropertyType.ordered_for_navigation()
         context['districts'] = District.objects.prefetch_related('locations')
 
         context['total_properties'] = properties.count()

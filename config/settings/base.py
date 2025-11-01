@@ -295,3 +295,6 @@ TRANSLATION_SETTINGS = {
 TAILWIND_USE_CDN = False
 
 ADMINS = [tuple(admin.split(":")) for admin in env.list("ADMINS", default=[])]
+
+# ImageKit cache strategy
+IMAGEKIT_DEFAULT_CACHEFILE_STRATEGY = 'imagekit.cachefiles.strategies.JustInTime'

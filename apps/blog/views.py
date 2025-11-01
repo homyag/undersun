@@ -96,7 +96,11 @@ def blog_detail(request, slug):
         'meta_description': post.get_meta_description(),
         'meta_keywords': post.meta_keywords,
     }
-    
+
+    og_image_url = post.get_featured_image_absolute_url(request, getattr(request, 'LANGUAGE_CODE', 'ru'))
+    if og_image_url:
+        context['og_image_url'] = og_image_url
+
     return render(request, 'blog/blog_detail.html', context)
 
 

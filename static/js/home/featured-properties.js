@@ -74,13 +74,16 @@
             let items = [];
 
             properties.forEach((property, index) => {
-                // Add consultation form every 4th position (after 3rd, 7th, 11th, etc.)
+                items.push(createPropertyCard(property));
+
                 if ((index + 1) % 4 === 0) {
                     items.push(createConsultationCard());
                 }
-
-                items.push(createPropertyCard(property));
             });
+
+            if (properties.length > 0 && properties.length % 4 !== 0) {
+                items.push(createConsultationCard());
+            }
 
             // Create infinite carousel by duplicating items
             const allItems = [...items, ...items, ...items]; // Triple the items for smooth infinite scroll
