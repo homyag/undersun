@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+
 from .services import CurrencyService
 from .models import ExchangeRate, Currency
 
@@ -45,10 +48,20 @@ class ExchangeRatesView(View):
             
             for from_currency in currencies:
                 for to_currency in currencies:
-                    if from_currency != to_currency:
-                        rate = ExchangeRate.get_latest_rate(from_currency, to_currency)
-                        if rate:
-                            rates[f"{from_currency.code}_{to_currency.code}"] = float(rate)
+                    key = f"{from_currency.code}_{to_currency.code}"
+
+                    if from_currency == to_currency:
+                        rates[key] = 1.0
+                        continue
+
+                    converted = CurrencyService.convert_price(
+                        Decimal('1'),
+                        from_currency.code,
+                        to_currency.code
+                    )
+
+                    if converted is not None:
+                        rates[key] = float(converted)
             
             return JsonResponse({
                 'success': True,
