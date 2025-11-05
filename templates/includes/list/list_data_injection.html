@@ -10,12 +10,20 @@ window.djangoUrls = {
 };
 
 // Inject Django translations
+{% with results=results_count_i18n %}
 window.djangoTranslations = {
     favoriteAdded: "{% trans 'Добавлено в избранное' %}",
     favoriteRemoved: "{% trans 'Удалено из избранного' %}",
     whatsappText: "{% trans 'Здравствуйте! Меня интересует объект' %}",
     moreDetails: "{% trans 'Подробнее' %}",
     addToFavorites: "{% trans 'В избранное' %}",
-    allLocations: "{% trans 'Все локации' %}"
+    allLocations: "{% trans 'Все локации' %}",
+    resultsCount: {
+        zero: "{{ results.zero|default_if_none:''|escapejs }}",
+        one: "{{ results.one|default_if_none:''|escapejs }}",
+        few: "{{ results.few|default_if_none:''|escapejs }}",
+        many: "{{ results.many|default_if_none:''|escapejs }}"
+    }
 };
+{% endwith %}
 </script>

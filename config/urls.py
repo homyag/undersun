@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
+from django.views.i18n import JavaScriptCatalog
 from apps.core.views import SitemapView, legacy_real_estate_redirect
 
 urlpatterns = [
@@ -15,6 +16,7 @@ urlpatterns = [
     path('currency/', include('apps.currency.urls')),  # URLs для валют
     path('tinymce/', include('tinymce.urls')),  # URLs для TinyMCE
     path('admin-ajax/', include('apps.properties.admin_urls')),  # Admin AJAX endpoints без i18n
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     path('real-estate/', legacy_real_estate_redirect),
     path('real-estate/<path:legacy_path>/', legacy_real_estate_redirect),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),  # Robots

@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django import forms
 from django.forms import ModelForm
 from django.utils.html import format_html
+from django.db.models import Q
 from tinymce.widgets import TinyMCE
 # from modeltranslation.admin import TranslationAdmin
 from .models import (
@@ -26,24 +27,23 @@ class TranslationStatusFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         value = self.value()
+        empty_en_title = Q(title_en__isnull=True) | Q(title_en__exact='')
+        empty_en_desc = Q(description_en__isnull=True) | Q(description_en__exact='')
+        empty_th_title = Q(title_th__isnull=True) | Q(title_th__exact='')
+        empty_th_desc = Q(description_th__isnull=True) | Q(description_th__exact='')
+
+        missing_filter = empty_en_title & empty_en_desc & empty_th_title & empty_th_desc
+        complete_filter = (
+            ~empty_en_title & ~empty_en_desc &
+            ~empty_th_title & ~empty_th_desc
+        )
+
         if value == 'missing':
-            return queryset.filter(
-                title_en__exact='', description_en__exact='',
-                title_th__exact='', description_th__exact='' 
-            )
+            return queryset.filter(missing_filter)
         if value == 'complete':
-            return queryset.filter(
-                title_en__gt='', description_en__gt='',
-                title_th__gt='', description_th__gt='' 
-            )
+            return queryset.filter(complete_filter)
         if value == 'partial':
-            return queryset.exclude(
-                title_en__gt='', description_en__gt='',
-                title_th__gt='', description_th__gt='' 
-            ).exclude(
-                title_en__exact='', description_en__exact='',
-                title_th__exact='', description_th__exact='' 
-            )
+            return queryset.exclude(missing_filter).exclude(complete_filter)
         return queryset
 from .widgets import BulkImageUploadWidget
 
@@ -160,7 +160,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     search_fields = ('legacy_id', 'title', 'description', 'address')
     prepopulated_fields = {'slug': ('title',)}
     inlines = [PropertyImageInline, PropertyFeatureInline]
-    list_editable = ('is_active', 'is_featured', 'status')
+    list_editable = ('property_type', 'is_active', 'is_featured', 'status')
     date_hierarchy = 'created_at'
     ordering = ('-created_at',)
     

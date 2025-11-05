@@ -225,12 +225,14 @@
             <!-- Properties Grid -->
             <div class="lg:col-span-3 properties-container">
                 <!-- Sort & Results Count -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                    <div class="mb-4 sm:mb-0">
-                        <h2 class="text-xl font-semibold text-gray-900 results-count" data-heading-tag="H2" data-total-count="{% if properties %}{% if is_paginated %}{{ paginator.count }}{% else %}{{ properties|length }}{% endif %}{% else %}0{% endif %}">
-                            {% if properties %}
-                                {% if is_paginated %}
-                                    {% blocktrans count counter=paginator.count %}
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                        <div class="mb-4 sm:mb-0">
+                            <h2 class="text-xl font-semibold text-gray-900 results-count"
+                                data-heading-tag="H2"
+                                data-total-count="{% if properties %}{% if is_paginated %}{{ paginator.count }}{% else %}{{ properties|length }}{% endif %}{% else %}0{% endif %}">
+                                {% if properties %}
+                                    {% if is_paginated %}
+                                        {% blocktrans count counter=paginator.count %}
                                         Найден {{ counter }} объект
                                     {% plural %}
                                         Найдено {{ counter }} объектов
@@ -1139,19 +1141,12 @@ function updateResultsCounter() {
     // Get total count from data attribute (server-provided total count)
     const totalCount = parseInt(resultsCountElement.dataset.totalCount) || 0;
     
-    // Update counter text with proper Russian pluralization
-    let counterText;
-    if (totalCount === 0) {
-        counterText = 'Объекты не найдены';
-    } else if (totalCount === 1) {
-        counterText = 'Найден 1 объект';
-    } else if (totalCount >= 2 && totalCount <= 4) {
-        counterText = `Найдено ${totalCount} объекта`;
-    } else {
-        counterText = `Найдено ${totalCount} объектов`;
+    if (typeof window.getLocalizedResultsCountText === 'function') {
+        const localizedText = window.getLocalizedResultsCountText(resultsCountElement, totalCount);
+        if (localizedText) {
+            resultsCountElement.textContent = localizedText;
+        }
     }
-    
-    resultsCountElement.textContent = counterText;
     console.log(`Updated results counter: ${totalCount} total properties found (${document.querySelectorAll('.property-card').length} on current page)`);
 }
 

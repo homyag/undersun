@@ -3,7 +3,9 @@
 <!-- Sort & Results Count -->
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
     <div class="mb-4 sm:mb-0">
-        <h2 class="text-xl font-semibold text-gray-900 results-count" data-heading-tag="H2" data-total-count="{% if properties %}{% if is_paginated %}{{ paginator.count }}{% else %}{{ properties|length }}{% endif %}{% else %}0{% endif %}">
+        <h2 class="text-xl font-semibold text-gray-900 results-count"
+            data-heading-tag="H2"
+            data-total-count="{% if properties %}{% if is_paginated %}{{ paginator.count }}{% else %}{{ properties|length }}{% endif %}{% else %}0{% endif %}">
             {% if properties %}
                 {% if is_paginated %}
                     {% blocktrans count counter=paginator.count %}

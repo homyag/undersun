@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import translation
 from django.urls import reverse
+from django.utils.translation import gettext, ngettext
 
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string
@@ -276,6 +277,13 @@ class SearchView(TemplateView):
 
         allowed_keys = ['q', 'type', 'district', 'location', 'deal_type', 'min_price', 'max_price', 'bedrooms', 'sort']
         context['pagination_query_string'] = build_query_string(self.request.GET, allowed_keys)
+
+        context['results_count_i18n'] = {
+            'zero': gettext('Объекты не найдены'),
+            'one': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 1),
+            'few': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 2),
+            'many': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 5),
+        }
 
         if 'q' in self.request.GET:
             context['meta_robots'] = 'noindex, follow'

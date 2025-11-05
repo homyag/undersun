@@ -3,6 +3,9 @@
 <!-- Inject Django data for JavaScript -->
 {% include 'includes/list/list_data_injection.html' %}
 
+<!-- Django i18n catalog for JavaScript -->
+<script src="{% url 'javascript-catalog' %}"></script>
+
 <!-- Leaflet JavaScript -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="

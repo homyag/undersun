@@ -25,25 +25,73 @@ function updateSort(value) {
     form.submit();
 }
 
+function getResultsCountTranslations() {
+    const translations = window.djangoTranslations || {};
+    if (!translations.resultsCount) {
+        return null;
+    }
+
+    return translations.resultsCount;
+}
+
+function getLocalizedResultsCountText(element, count) {
+    if (!element) {
+        return '';
+    }
+
+    const translationSet = getResultsCountTranslations();
+
+    if (count === 0) {
+        if (translationSet && translationSet.zero) {
+            return translationSet.zero;
+        }
+        return 'No properties found';
+    }
+
+    if (translationSet) {
+        const locale = document.documentElement.lang || 'ru';
+        let pluralCategory = 'other';
+
+        if (typeof Intl !== 'undefined' && Intl.PluralRules) {
+            try {
+                const pluralRules = new Intl.PluralRules(locale);
+                pluralCategory = pluralRules.select(count);
+            } catch (error) {
+                pluralCategory = 'other';
+            }
+        }
+
+        const normalizedCategory = pluralCategory.toLowerCase();
+        let template = null;
+
+        if (normalizedCategory === 'one' && translationSet.one) {
+            template = translationSet.one;
+        } else if ((normalizedCategory === 'few' || normalizedCategory === 'two') && translationSet.few) {
+            template = translationSet.few;
+        } else if (translationSet.many) {
+            template = translationSet.many;
+        }
+
+        if (template) {
+            return template.replace('%(count)s', count).replace('%(counter)s', count);
+        }
+    }
+
+    return count === 1 ? `Found ${count} property` : `Found ${count} properties`;
+}
+
+window.getLocalizedResultsCountText = getLocalizedResultsCountText;
+
 // Update results counter 
 function updateResultsCounter() {
     const resultsCountElement = document.querySelector('.results-count');
     if (!resultsCountElement) return;
-    
-    // Get total count from data attribute (server-provided total count)
+
     const totalCount = parseInt(resultsCountElement.dataset.totalCount) || 0;
-    
-    // Update counter text with proper Russian pluralization
-    let counterText;
-    if (totalCount === 0) {
-        counterText = 'Объекты не найдены';
-    } else if (totalCount === 1) {
-        counterText = 'Найден 1 объект';
-    } else if (totalCount >= 2 && totalCount <= 4) {
-        counterText = `Найдено ${totalCount} объекта`;
-    } else {
-        counterText = `Найдено ${totalCount} объектов`;
+    const localizedText = getLocalizedResultsCountText(resultsCountElement, totalCount);
+
+    if (localizedText) {
+        resultsCountElement.textContent = localizedText;
+        resultsCountElement.dataset.totalCount = totalCount;
     }
-    
-    resultsCountElement.textContent = counterText;
 }
