@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.db.models import Q, Count, Case, When, Value, IntegerField
 from django.core.paginator import Paginator
 from django.urls import reverse
+from django.utils.translation import gettext, ngettext
 
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string
@@ -239,7 +240,14 @@ class PropertyListView(ListView):
         }
 
         context['pagination_query_string'] = self.get_pagination_query_string()
-        
+
+        context['results_count_i18n'] = {
+            'zero': gettext('Объекты не найдены'),
+            'one': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 1),
+            'few': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 2),
+            'many': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 5),
+        }
+
         return context
 
     def get_pagination_query_string(self):

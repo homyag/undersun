@@ -689,7 +689,23 @@ function updatePagination(pagination) {
 }
 
 function updateResultsCount(count) {
-    $('.results-count').text(`Найдено: ${count} объектов`);
+    const element = document.querySelector('.results-count');
+    if (!element) {
+        return;
+    }
+
+    if (typeof window.getLocalizedResultsCountText === 'function') {
+        const localizedText = window.getLocalizedResultsCountText(element, count);
+        if (localizedText) {
+            element.textContent = localizedText;
+            element.dataset.totalCount = count;
+            return;
+        }
+    }
+
+    // Fallback (English pluralization)
+    element.textContent = count === 1 ? `Found ${count} property` : `Found ${count} properties`;
+    element.dataset.totalCount = count;
 }
 
 function updateSortSelect() {
