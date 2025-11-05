@@ -24,62 +24,100 @@ window.handlePhoneCallback = function (event, consultationId) {
     event.preventDefault();
 
     const form = event.target;
-    const phoneInput = form.querySelector('input[type="tel"]');
-    const phone = phoneInput.value.trim();
+    const phoneInput = form.querySelector('input[name="phone"]');
+    const phone = phoneInput ? phoneInput.value.trim() : '';
 
     if (!phone) {
         alert('Пожалуйста, введите номер телефона');
         return;
     }
 
-    // Basic phone validation
     const phoneRegex = /^\+?[\d\s\-\(\)]{10,15}$/;
     if (!phoneRegex.test(phone)) {
         alert('Пожалуйста, введите корректный номер телефона');
         return;
     }
 
+    const langPrefix = typeof getLanguagePrefix === 'function'
+        ? getLanguagePrefix()
+        : `/${(document.documentElement.lang || 'ru').split('-')[0]}`;
+
+    const endpoint = `${langPrefix.replace(/\/$/, '')}/users/quick-consultation/`;
+
+    if (typeof submitFormAjax === 'function') {
+        submitFormAjax(form, endpoint, () => {
+            window.switchConsultationTab(consultationId, 'whatsapp');
+        });
+        return;
+    }
+
     const button = form.querySelector('button[type="submit"]');
-    const originalText = button.textContent;
+    const originalText = button ? button.textContent : '';
 
-    // Show loading state
-    button.textContent = 'Отправляем...';
-    button.disabled = true;
+    if (button) {
+        button.textContent = 'Отправляем...';
+        button.disabled = true;
+    }
 
-    // Simulate form submission (replace with actual API call)
-    setTimeout(() => {
-        alert('Спасибо! Мы свяжемся с вами в ближайшее время.');
-        phoneInput.value = '';
-        button.textContent = originalText;
-        button.disabled = false;
+    if (phoneInput) {
+        phoneInput.value = phone;
+    }
 
-        // Switch to WhatsApp tab as alternative
-        window.switchConsultationTab(consultationId, 'whatsapp');
-    }, 1500);
+    const formData = new FormData(form);
 
-    // TODO: Replace with actual API call to backend
-    // fetch('/api/callback-request/', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value
-    //     },
-    //     body: JSON.stringify({ phone: phone })
-    // }).then(response => response.json())
-    // .then(data => {
-    //     if (data.success) {
-    //         alert('Спасибо! Мы свяжемся с вами в ближайшее время.');
-    //         phoneInput.value = '';
-    //     } else {
-    //         alert('Произошла ошибка. Попробуйте еще раз.');
-    //     }
-    // }).catch(error => {
-    //     console.error('Error:', error);
-    //     alert('Произошла ошибка. Попробуйте еще раз.');
-    // }).finally(() => {
-    //     button.textContent = originalText;
-    //     button.disabled = false;
-    // });
+    const headers = { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' };
+    const csrfToken = typeof getCSRFToken === 'function'
+        ? getCSRFToken()
+        : document.querySelector('meta[name="csrf-token"]')?.content;
+    if (csrfToken) {
+        headers['X-CSRFToken'] = csrfToken;
+    }
+
+    fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+        headers
+        ,
+        credentials: 'same-origin'
+    })
+        .then(response => {
+            if (!response.ok && response.status !== 400) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                if (typeof FormsPopup !== 'undefined') {
+                    FormsPopup.showSuccess(data.message || 'Спасибо! Мы свяжемся с вами в ближайшее время.');
+                } else {
+                    alert(data.message || 'Спасибо! Мы свяжемся с вами в ближайшее время.');
+                }
+                phoneInput.value = '';
+                window.switchConsultationTab(consultationId, 'whatsapp');
+            } else {
+                const message = data.message || 'Произошла ошибка. Попробуйте еще раз.';
+                if (typeof FormsPopup !== 'undefined') {
+                    FormsPopup.showError(message);
+                } else {
+                    alert(message);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting consultation form:', error);
+            if (typeof FormsPopup !== 'undefined') {
+                FormsPopup.showError('Произошла ошибка. Попробуйте еще раз.');
+            } else {
+                alert('Произошла ошибка. Попробуйте еще раз.');
+            }
+        })
+        .finally(() => {
+            if (button) {
+                button.textContent = originalText || 'Заказать звонок';
+                button.disabled = false;
+            }
+        });
 };
 
 // Phone mask functionality
