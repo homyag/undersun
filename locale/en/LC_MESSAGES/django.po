@@ -867,7 +867,8 @@ msgid "Email"
 msgstr "Email"
 
 #: apps/core/models.py:374 apps/properties/models.py:549
-#: apps/users/models.py:18 templates/properties/detail.html:1090
+#: apps/users/models.py:18 templates/includes/home/home_data_injection.html:41
+#: templates/properties/detail.html:1090
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
@@ -908,6 +909,7 @@ msgid "Ссылка на профиль в Twitter"
 msgstr "Link to Twitter profile"
 
 #: apps/core/models.py:386 apps/properties/models.py:550
+#: templates/includes/home/home_data_injection.html:42
 msgid "Telegram"
 msgstr "Telegram"
 
@@ -1005,7 +1007,7 @@ msgstr "Staff"
 #: templates/properties/list_backup.html:248
 #: templates/properties/list_backup.html:333
 msgid "Объекты не найдены"
-msgstr "No objects found"
+msgstr "No properties found"
 
 #: apps/core/views.py:283 apps/core/views.py:284 apps/core/views.py:285
 #: apps/properties/views.py:246 apps/properties/views.py:247
@@ -1013,8 +1015,8 @@ msgstr "No objects found"
 #, python-format
 msgid "Найден %(count)s объект"
 msgid_plural "Найдено %(count)s объектов"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Found %(count)s property"
+msgstr[1] "Found %(count)s properties"
 
 #: apps/currency/apps.py:8
 msgid "Валюты и курсы"
@@ -3805,6 +3807,34 @@ msgstr "Change the currency"
 msgid "Цена по запросу"
 msgstr "Price on request"
 
+#: templates/includes/home/home_data_injection.html:38
+msgid "Получить консультацию эксперта <span class='text-accent'>Undersun</span>"
+msgstr "Book a consultation with an <span class='text-accent'>Undersun</span> expert"
+
+#: templates/includes/home/home_data_injection.html:39
+msgid "Где вам удобнее общаться"
+msgstr "Choose the channel that suits you"
+
+#: templates/includes/home/home_data_injection.html:40
+msgid "Звонок"
+msgstr "Call"
+
+#: templates/includes/home/home_data_injection.html:43
+msgid "+66 XXX XXX XXX"
+msgstr "+66 XXX XXX XXX"
+
+#: templates/includes/home/home_data_injection.html:45
+msgid "Напишите нам в WhatsApp для быстрой консультации"
+msgstr "Message us on WhatsApp for a quick consultation"
+
+#: templates/includes/home/home_data_injection.html:47
+msgid "Напишите нам в Telegram для получения консультации"
+msgstr "Message us on Telegram for a consultation"
+
+#: templates/includes/home/home_data_injection.html:48
+msgid "Написать в Telegram"
+msgstr "Chat on Telegram"
+
 #: templates/includes/list/list_data_injection.html:20
 #: templates/properties/includes/list/list_filters_sidebar.html:106
 #: templates/properties/list_backup.html:162
@@ -3948,6 +3978,7 @@ msgstr "Back"
 msgid "На карте"
 msgstr "On the map"
 
+#: templates/includes/home/home_data_injection.html:44
 #: templates/properties/detail.html:266 templates/properties/detail.html:288
 #: templates/properties/detail.html:1140 templates/properties/detail.html:1171
 msgid "Заказать звонок"
@@ -3998,6 +4029,7 @@ msgstr "To clarify the details"
 msgid "Заинтересовались объектом?"
 msgstr "Interested in this property?"
 
+#: templates/includes/home/home_data_injection.html:46
 #: templates/properties/detail.html:533 templates/properties/detail.html:571
 msgid "Написать в WhatsApp"
 msgstr "Write to WhatsApp"

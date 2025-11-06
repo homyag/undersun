@@ -894,7 +894,8 @@ msgid "Email"
 msgstr "งกัน"
 
 #: apps/core/models.py:374 apps/properties/models.py:549
-#: apps/users/models.py:18 templates/properties/detail.html:1090
+#: apps/users/models.py:18 templates/includes/home/home_data_injection.html:41
+#: templates/properties/detail.html:1090
 msgid "WhatsApp"
 msgstr "วอทส์แอพ"
 
@@ -935,6 +936,7 @@ msgid "Ссылка на профиль в Twitter"
 msgstr "ทวิตเตอร์"
 
 #: apps/core/models.py:386 apps/properties/models.py:550
+#: templates/includes/home/home_data_injection.html:42
 msgid "Telegram"
 msgstr "โทรเลข"
 
@@ -1034,7 +1036,7 @@ msgstr "เจ้าหน้าที่"
 #: templates/properties/list_backup.html:248
 #: templates/properties/list_backup.html:333
 msgid "Объекты не найдены"
-msgstr "ไม่พบวัตถุ"
+msgstr "ไม่พบอสังหาริมทรัพย์"
 
 #: apps/core/views.py:283 apps/core/views.py:284 apps/core/views.py:285
 #: apps/properties/views.py:246 apps/properties/views.py:247
@@ -1042,7 +1044,7 @@ msgstr "ไม่พบวัตถุ"
 #, python-format
 msgid "Найден %(count)s объект"
 msgid_plural "Найдено %(count)s объектов"
-msgstr[0] ""
+msgstr[0] "พบอสังหาริมทรัพย์ %(count)s รายการ"
 
 #: apps/currency/apps.py:8
 msgid "Валюты и курсы"
@@ -1160,7 +1162,7 @@ msgstr "อีเมล"
 #: templates/properties/includes/list/list_filters_sidebar.html:88
 #: templates/properties/list_backup.html:144
 msgid "Район"
-msgstr "เขต"
+msgstr "พื้นที่"
 
 #: apps/locations/models.py:14
 msgid "Районы"
@@ -1186,7 +1188,7 @@ msgstr "คอนโดมิเนียม"
 #: templates/core/includes/home/home_hero_section.html:116
 #: templates/core/search.html:45
 msgid "Тип"
-msgstr "ชนิด"
+msgstr "ประเภท"
 
 #: apps/properties/models.py:26
 msgid "Отображаемое название"
@@ -3045,14 +3047,12 @@ msgid "Избранные объекты недвижимости"
 msgstr "อสังหาริมทรัพย์แนะนำ"
 
 #: templates/core/includes/home/home_featured_properties_section.html:17
-#, fuzzy
-#| msgid "Квартира в Патонге"
 msgid "Квартиры"
-msgstr "อพาร์ทเม้นท์ในป่าตอง"
+msgstr "คอนโดมิเนียม"
 
 #: templates/core/includes/home/home_featured_properties_section.html:21
 msgid "Дома"
-msgstr ""
+msgstr "ทาวน์เฮาส์"
 
 #: templates/core/includes/home/home_featured_properties_section.html:51
 msgid "Смотреть каталог"
@@ -3060,15 +3060,15 @@ msgstr "ดูแคตตาล็อก"
 
 #: templates/core/includes/home/home_hero_section.html:20
 msgid "Phuket, Thailand"
-msgstr "ภูเก็ต,ประเทศไทย"
+msgstr "ภูเก็ต ประเทศไทย"
 
 #: templates/core/includes/home/home_hero_section.html:21
 msgid "Вся недвижимость Пхукета"
-msgstr "อสังหาริมทรัพย์ทั้งหมดในภูเก็ต"
+msgstr "อสังหาริมทรัพย์ทุกประเภทในภูเก็ต"
 
 #: templates/core/includes/home/home_hero_section.html:22
 msgid "в одном каталоге"
-msgstr "ในแคตตาล็อกเดียว"
+msgstr "รวมไว้ในแคตตาล็อกเดียว"
 
 #: templates/core/includes/home/home_hero_section.html:26
 msgid ""
@@ -3076,14 +3076,13 @@ msgid ""
 "весь рынок, но порекомендуем только то, что действительно стоит вашего "
 "внимания."
 msgstr ""
-"อสังหาริมทรัพย์ในประเทศไทย "
-"เราสามารถแสดงตลาดทั้งหมดแต่เราจะแนะนำเฉพาะสิ่งที่คุ้มค่าจริงๆความสนใจของคุณ"
+"Undersun Estate คือเข็มทิศของคุณในตลาดอสังหาริมทรัพย์ไทย เราสามารถนำเสนอทั้งตลาดได้ แต่จะคัดสรรเฉพาะสิ่งที่คุ้มค่ากับความสนใจของคุณจริงๆ"
 
 #: templates/core/includes/home/home_hero_section.html:32
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:22
 #: templates/core/service_detail.html:239
 msgid "Смотреть все объекты"
-msgstr "ดูวัตถุทั้งหมด"
+msgstr "ดูอสังหาริมทรัพย์ทั้งหมด"
 
 #: templates/core/includes/home/home_hero_section.html:47
 #: templates/core/includes/home/home_hero_section.html:119
@@ -3097,7 +3096,7 @@ msgstr "ทุกประเภท"
 #: templates/properties/includes/list/list_filters_sidebar.html:91
 #: templates/properties/list_backup.html:147
 msgid "Все районы"
-msgstr "ทุกเขต"
+msgstr "ทุกพื้นที่"
 
 #: templates/core/includes/home/home_hero_section.html:86
 #: templates/core/includes/home/home_hero_section.html:159
@@ -3107,7 +3106,7 @@ msgstr "ราคาต่ำสุด"
 #: templates/core/includes/home/home_hero_section.html:92
 #: templates/core/includes/home/home_hero_section.html:163
 msgid "Макс. цена"
-msgstr "แม็กซ์ ราคา"
+msgstr "ราคาสูงสุด"
 
 #: templates/core/includes/home/home_hero_section.html:98
 #: templates/core/includes/home/home_hero_section.html:170
@@ -3867,6 +3866,34 @@ msgstr "เปลี่ยนสกุลเงิน"
 msgid "Цена по запросу"
 msgstr "ราคาตามคำขอ"
 
+#: templates/includes/home/home_data_injection.html:38
+msgid "Получить консультацию эксперта <span class='text-accent'>Undersun</span>"
+msgstr "รับคำปรึกษาจากผู้เชี่ยวชาญ <span class='text-accent'>Undersun</span>"
+
+#: templates/includes/home/home_data_injection.html:39
+msgid "Где вам удобнее общаться"
+msgstr "เลือกช่องทางการติดต่อที่คุณสะดวก"
+
+#: templates/includes/home/home_data_injection.html:40
+msgid "Звонок"
+msgstr "โทร"
+
+#: templates/includes/home/home_data_injection.html:43
+msgid "+66 XXX XXX XXX"
+msgstr "+66 XXX XXX XXX"
+
+#: templates/includes/home/home_data_injection.html:45
+msgid "Напишите нам в WhatsApp для быстрой консультации"
+msgstr "ส่งข้อความถึงเราทาง WhatsApp เพื่อรับคำปรึกษาอย่างรวดเร็ว"
+
+#: templates/includes/home/home_data_injection.html:47
+msgid "Напишите нам в Telegram для получения консультации"
+msgstr "ส่งข้อความถึงเราทาง Telegram เพื่อรับคำปรึกษา"
+
+#: templates/includes/home/home_data_injection.html:48
+msgid "Написать в Telegram"
+msgstr "แชทผ่าน Telegram"
+
 #: templates/includes/list/list_data_injection.html:20
 #: templates/properties/includes/list/list_filters_sidebar.html:106
 #: templates/properties/list_backup.html:162
@@ -4016,12 +4043,11 @@ msgstr "กลับ"
 msgid "На карте"
 msgstr "บนแผนที่"
 
+#: templates/includes/home/home_data_injection.html:44
 #: templates/properties/detail.html:266 templates/properties/detail.html:288
 #: templates/properties/detail.html:1140 templates/properties/detail.html:1171
-#, fuzzy
-#| msgid "Показано"
 msgid "Заказать звонок"
-msgstr "แสดง"
+msgstr "ขอให้โทรกลับ"
 
 #: templates/properties/detail.html:295
 msgid "Основные характеристики"
@@ -4072,9 +4098,10 @@ msgstr "ส่งคำขอ"
 msgid "Заинтересовались объектом?"
 msgstr "สนใจอสังหาริมทรัพย์นี้หรือไม่?"
 
+#: templates/includes/home/home_data_injection.html:46
 #: templates/properties/detail.html:533 templates/properties/detail.html:571
 msgid "Написать в WhatsApp"
-msgstr "เขียนถึงวอทส์แอพ"
+msgstr "แชทผ่าน WhatsApp"
 
 #: templates/properties/detail.html:548
 #, fuzzy

@@ -10,6 +10,17 @@
     const LEARN_MORE = translate('learnMore', 'Узнать подробнее');
     const CHANGE_CURRENCY = translate('changeCurrency', 'Изменить валюту');
     const UNIT_SQM = translate('unitSqm', 'м²');
+    const CONSULTATION_TITLE = translate('consultationTitle', "Получить консультацию эксперта <span class='text-accent'>Undersun</span>");
+    const CONSULTATION_SUBTITLE = translate('consultationSubtitle', 'Где вам удобнее общаться');
+    const TAB_PHONE = translate('tabPhone', 'Звонок');
+    const TAB_WHATSAPP = translate('tabWhatsApp', 'WhatsApp');
+    const TAB_TELEGRAM = translate('tabTelegram', 'Telegram');
+    const PHONE_PLACEHOLDER = translate('phonePlaceholder', '+66 XXX XXX XXX');
+    const PHONE_SUBMIT = translate('phoneSubmit', 'Заказать звонок');
+    const WHATSAPP_DESCRIPTION = translate('whatsappDescription', 'Напишите нам в WhatsApp для быстрой консультации');
+    const WHATSAPP_BUTTON = translate('whatsappButton', 'Написать в WhatsApp');
+    const TELEGRAM_DESCRIPTION = translate('telegramDescription', 'Напишите нам в Telegram для получения консультации');
+    const TELEGRAM_BUTTON = translate('telegramButton', 'Написать в Telegram');
 
     function initFeaturedProperties() {
         
@@ -984,8 +995,8 @@
                     <div class="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-3 consultation-icon-circle">
                         <i class="fas fa-user-tie text-gray-900 text-lg consultation-expert-icon"></i>
                     </div>
-                    <h3 class="text-lg font-bold mb-2 leading-tight text-white">Получить консультацию эксперта <span class="text-accent">Undersun</span></h3>
-                    <p class="text-white/90 mb-4 text-sm">Где вам удобнее общаться</p>
+                    <h3 class="text-lg font-bold mb-2 leading-tight text-white">${CONSULTATION_TITLE}</h3>
+                    <p class="text-white/90 mb-4 text-sm">${CONSULTATION_SUBTITLE}</p>
                 </div>
                 
                 <!-- Tabs -->
@@ -993,17 +1004,17 @@
                     <button onclick="switchConsultationTab('${consultationId}', 'phone')" 
                             class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200 active" 
                             data-tab="phone" data-consultation-id="${consultationId}">
-                        <i class="fas fa-phone text-xs mr-1"></i>Звонок
+                        <i class="fas fa-phone text-xs mr-1"></i>${TAB_PHONE}
                     </button>
                     <button onclick="switchConsultationTab('${consultationId}', 'whatsapp')" 
                             class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200" 
                             data-tab="whatsapp" data-consultation-id="${consultationId}">
-                        <i class="fab fa-whatsapp text-xs mr-1"></i>WhatsApp
+                        <i class="fab fa-whatsapp text-xs mr-1"></i>${TAB_WHATSAPP}
                     </button>
                     <button onclick="switchConsultationTab('${consultationId}', 'telegram')" 
                             class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200" 
                             data-tab="telegram" data-consultation-id="${consultationId}">
-                        <i class="fab fa-telegram text-xs mr-1"></i>Telegram
+                        <i class="fab fa-telegram text-xs mr-1"></i>${TAB_TELEGRAM}
                     </button>
                 </div>
                 
@@ -1015,13 +1026,13 @@
                             <div>
                                 <input type="tel" 
                                        name="phone"
-                                       placeholder="+66 XXX XXX XXX" 
+                                       placeholder="${PHONE_PLACEHOLDER}" 
                                        class="consultation-form-input w-full px-3 py-2 rounded-md bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                                        required>
                             </div>
                             <button type="submit" 
                                     class="w-full bg-accent hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
-                                Заказать звонок
+                                ${PHONE_SUBMIT}
                             </button>
                         </form>
                     </div>
@@ -1029,11 +1040,11 @@
                     <!-- WhatsApp Tab -->
                     <div class="consultation-content hidden" data-tab="whatsapp" data-consultation-id="${consultationId}">
                         <div class="text-center py-4">
-                            <p class="text-white/90 mb-4 text-sm">Напишите нам в WhatsApp для быстрой консультации</p>
+                            <p class="text-white/90 mb-4 text-sm">${WHATSAPP_DESCRIPTION}</p>
                             <a href="https://wa.me/66633033133?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9C%D0%B5%D0%BD%D1%8F%20%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%B5%D1%81%D1%83%D0%B5%D1%82%20%D0%BA%D0%BE%D0%BD%D1%81%D1%83%D0%BB%D1%8C%D1%82%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%20%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D0%B8" 
                                target="_blank" 
                                class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
-                                <i class="fab fa-whatsapp mr-2"></i>Написать в WhatsApp
+                                <i class="fab fa-whatsapp mr-2"></i>${WHATSAPP_BUTTON}
                             </a>
                         </div>
                     </div>
@@ -1041,11 +1052,11 @@
                     <!-- Telegram Tab -->
                     <div class="consultation-content hidden" data-tab="telegram" data-consultation-id="${consultationId}">
                         <div class="text-center py-4">
-                            <p class="text-white/90 mb-4 text-sm">Напишите нам в Telegram для получения консультации</p>
+                            <p class="text-white/90 mb-4 text-sm">${TELEGRAM_DESCRIPTION}</p>
                             <a href="https://t.me/undersunestate" 
                                target="_blank" 
                                class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
-                                <i class="fab fa-telegram mr-2"></i>Написать в Telegram
+                                <i class="fab fa-telegram mr-2"></i>${TELEGRAM_BUTTON}
                             </a>
                         </div>
                     </div>
