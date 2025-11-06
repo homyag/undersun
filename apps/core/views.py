@@ -1,5 +1,6 @@
 from decimal import Decimal, InvalidOperation
 import json
+from urllib.parse import parse_qsl, urlencode
 
 from django.views.generic import TemplateView, DetailView, View
 from django.db.models import Q, Count
@@ -395,9 +396,18 @@ def custom_404(request, exception):
 def legacy_real_estate_redirect(request, *args, **kwargs):
     """Постоянный редирект со старых URL /real-estate/... на новый каталог /property/."""
     target_url = reverse('properties:property_list')
-    query_string = request.META.get('QUERY_STRING')
-    if query_string:
-        target_url = f'{target_url}?{query_string}'
+
+    raw_query = request.META.get('QUERY_STRING', '').strip()
+    allowed_params = {}
+
+    if raw_query:
+        # Сохраняем только безопасные параметры, чтобы не протягивать legacy-хвосты в индекс
+        for key, value in parse_qsl(raw_query, keep_blank_values=True):
+            if key == 'page' and value:
+                allowed_params[key] = value
+
+    if allowed_params:
+        target_url = f"{target_url}?{urlencode(allowed_params)}"
 
     return HttpResponsePermanentRedirect(target_url)
 

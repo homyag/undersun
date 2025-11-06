@@ -3,8 +3,11 @@
 <!-- Inject Django data for JavaScript -->
 {% include 'includes/list/list_data_injection.html' %}
 
-<!-- Django i18n catalog for JavaScript -->
-<script src="{% url 'javascript-catalog' %}"></script>
+<!-- Django i18n catalog for JavaScript (fails gracefully if route is missing) -->
+{% url 'javascript-catalog' as js_catalog_url %}
+{% if js_catalog_url %}
+<script src="{{ js_catalog_url }}"></script>
+{% endif %}
 
 <!-- Leaflet JavaScript -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

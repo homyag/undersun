@@ -1957,7 +1957,7 @@ msgid "Смотреть каталог"
 msgstr ""
 
 msgid "Phuket, Thailand"
-msgstr ""
+msgstr "Пхукет, Таиланд"
 
 msgid "Вся недвижимость Пхукета"
 msgstr ""
