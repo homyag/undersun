@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load currency_tags %}
 
-{% block title %}{% trans "Поиск недвижимости" %}{% if query %} - "{{ query }}"{% endif %} - Undersun Estate{% endblock %}
+{% block title %}{% trans "Поиск недвижимости" %}{% if query %} - "{{ query }}"{% endif %}{{ pagination_seo_suffix }} - Undersun Estate{% endblock %}
 
 {% block extra_meta %}
     <meta name="robots" content="noindex,nofollow">
