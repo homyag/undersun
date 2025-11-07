@@ -1,6 +1,7 @@
+import json
 from django.conf import settings
 from django.templatetags.static import static
-from django.urls import translate_url
+from django.urls import translate_url, reverse
 from urllib.parse import urlsplit, urlunsplit
 from apps.properties.models import PropertyType, Property
 from apps.locations.models import District, Location
@@ -30,6 +31,7 @@ def site_context(request):
         default_og_image_url = default_hero_image
 
     current_absolute_url = request.build_absolute_uri()
+    language_code = getattr(request, 'LANGUAGE_CODE', 'ru')
     language_urls = {}
     hreflang_items = []
     for code, _ in settings.LANGUAGES:
@@ -53,10 +55,40 @@ def site_context(request):
         # Предпочитаем английскую версию в качестве x-default, если доступна
         hreflang_x_default = language_codes_map.get('en', hreflang_items[0][1])
 
+    # Schema.org для поискового окна
+    try:
+        search_path = reverse('core:search')
+    except Exception:
+        search_path = '/search/'
+
+    try:
+        site_root_url = request.build_absolute_uri('/')
+    except Exception:
+        site_root_url = '/'
+
+    try:
+        search_url = request.build_absolute_uri(search_path)
+    except Exception:
+        search_url = search_path
+
+    search_schema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": site_root_url,
+        "inLanguage": language_code,
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": f"{search_url}?q={{search_term_string}}",
+            "query-input": "required name=search_term_string",
+        },
+    }
+
+    search_schema_json = json.dumps(search_schema, ensure_ascii=False)
+
     return {
         'property_types': PropertyType.ordered_for_navigation(),
         'districts': District.objects.prefetch_related('locations').all(),
-        'current_language': request.LANGUAGE_CODE,
+        'current_language': language_code,
         'menu_services': Service.get_menu_services(),
         'tailwind_use_cdn': getattr(settings, 'TAILWIND_USE_CDN', False),
         'default_og_image_url': default_og_image_url,
@@ -64,7 +96,64 @@ def site_context(request):
         'hreflang_items': hreflang_items,
         'hreflang_x_default': hreflang_x_default,
         'language_urls': language_urls,
+        'search_schema_json': search_schema_json,
     }
+
+PAGINATED_VIEW_NAMES = {
+    'properties:property_list',
+    'properties:property_sale',
+    'properties:property_rent',
+    'properties:property_by_type',
+    'core:search',
+    'blog:list',
+    'blog:category',
+    'blog:tag',
+    'district_detail',
+    'location_detail',
+}
+
+PAGE_LABELS = {
+    'ru': 'Страница {page}',
+    'en': 'Page {page}',
+    'th': 'หน้า {page}',
+}
+
+def _should_append_pagination_suffix(request, view_name):
+    """Определяем, нужно ли добавлять номер страницы и возвращаем кортеж (bool, page_number)."""
+    page_param = request.GET.get('page')
+
+    page_number = None
+    if page_param:
+        try:
+            page_number = int(page_param)
+        except (TypeError, ValueError):
+            page_number = 1
+        else:
+            if page_number < 1:
+                page_number = 1
+
+    if view_name in PAGINATED_VIEW_NAMES:
+        return True, page_number or 1
+
+    if page_number is not None:
+        return True, page_number
+
+    return False, None
+
+def _append_suffix_if_needed(value, suffix):
+    """Добавляет суффикс к строке, если он ещё не присутствует."""
+    if not suffix:
+        return value
+
+    if not value:
+        return suffix.strip(' |')
+
+    normalized_value = value.lower()
+    normalized_suffix = suffix.lower().strip()
+    if normalized_suffix and normalized_suffix in normalized_value:
+        return value
+
+    return f"{value}{suffix}"
 
 def seo_context(request):
     """Контекст для SEO метатегов"""
@@ -141,4 +230,23 @@ def seo_context(request):
             'page_keywords': lang_defaults['keywords'],
         }
     
+    resolver_match = getattr(request, 'resolver_match', None)
+    view_name = resolver_match.view_name if resolver_match else ''
+    should_append, page_number = _should_append_pagination_suffix(request, view_name)
+
+    pagination_label = ''
+    pagination_suffix = ''
+
+    if should_append and page_number:
+        label_template = PAGE_LABELS.get(language_code[:2], PAGE_LABELS['en'])
+        pagination_label = label_template.format(page=page_number)
+        pagination_suffix = f" | {pagination_label}"
+
+        seo_data['page_title'] = _append_suffix_if_needed(seo_data.get('page_title'), pagination_suffix)
+        seo_data['page_description'] = _append_suffix_if_needed(seo_data.get('page_description'), pagination_suffix)
+
+    seo_data['pagination_page_number'] = page_number
+    seo_data['pagination_seo_label'] = pagination_label
+    seo_data['pagination_seo_suffix'] = pagination_suffix
+
     return seo_data

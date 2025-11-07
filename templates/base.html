@@ -143,7 +143,12 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
 
     <!-- Structured Data -->
-    {% block structured_data %}{% endblock %}
+    {% block structured_data %}
+        {{ block.super }}
+        {% if search_schema_json %}
+            <script type="application/ld+json">{{ search_schema_json|safe }}</script>
+        {% endif %}
+    {% endblock %}
 
     <!-- Extra Meta Tags -->
     {% block extra_meta %}
