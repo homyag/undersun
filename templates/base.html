@@ -50,7 +50,7 @@
     {% endif %}
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <link rel="canonical" href="{{ canonical_url|default:request.build_absolute_uri }}">
 
     <!-- Hreflang Tags -->
     {% load i18n %}

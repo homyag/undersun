@@ -31,6 +31,9 @@ def site_context(request):
         default_og_image_url = default_hero_image
 
     current_absolute_url = request.build_absolute_uri()
+    split_current = urlsplit(current_absolute_url)
+    canonical_path = split_current.path or '/'
+    canonical_absolute_url = urlunsplit((split_current.scheme, split_current.netloc, canonical_path, '', ''))
     language_code = getattr(request, 'LANGUAGE_CODE', 'ru')
     language_urls = {}
     hreflang_items = []
@@ -39,10 +42,11 @@ def site_context(request):
             translated_url = translate_url(current_absolute_url, code)
         except Exception:
             translated_url = current_absolute_url
-        hreflang_items.append((code, translated_url))
-
         split_result = urlsplit(translated_url)
-        relative_url = urlunsplit(('', '', split_result.path, split_result.query, split_result.fragment))
+        clean_absolute_url = urlunsplit((split_result.scheme, split_result.netloc, split_result.path, '', ''))
+        hreflang_items.append((code, clean_absolute_url))
+
+        relative_url = urlunsplit(('', '', split_result.path, '', ''))
         if not relative_url.startswith('/'):
             relative_url = f'/{relative_url}'
         if not relative_url.strip('/'):
@@ -96,6 +100,7 @@ def site_context(request):
         'hreflang_items': hreflang_items,
         'hreflang_x_default': hreflang_x_default,
         'language_urls': language_urls,
+        'canonical_url': canonical_absolute_url,
         'search_schema_json': search_schema_json,
     }
 
