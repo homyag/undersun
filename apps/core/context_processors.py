@@ -195,6 +195,8 @@ def seo_context(request):
         page_name = 'locations'
     elif path.startswith('/users/'):
         page_name = 'users'
+    elif path.startswith('/map'):
+        page_name = 'map'
     elif 'about' in path:
         page_name = 'about'
     elif 'contact' in path:

@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load l10n %}
 
-{% block title %}{% trans "Карта недвижимости" %} - Undersun Estate{% endblock %}
+{% block title %}{{ page_title|default:_("Карта недвижимости") }}{% endblock %}
 
 {% block extra_css %}
 <!-- Leaflet CSS -->
@@ -11,532 +11,1188 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 <style>
-    .leaflet-container {
-        height: calc(100vh - 120px);
-        width: 100%;
+    :root {
+        --brand-primary: #474B57;
+        --brand-accent: #F1B400;
+        --brand-tertiary: #616677;
+        --brand-deep: #1f2937;
+        --brand-soft: #f5f5f9;
+        --brand-muted: #cdd3dd;
     }
-    
-    /* Enhanced Popup Styles */
-    .leaflet-popup-content-wrapper {
-        border-radius: 12px !important;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
-        border: none !important;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-        overflow: hidden !important;
-        padding: 0 !important;
+
+    .text-brand-primary { color: var(--brand-primary); }
+    .text-brand-tertiary { color: var(--brand-tertiary); }
+    .text-brand-accent { color: var(--brand-accent); }
+    .bg-brand-soft { background: var(--brand-soft); }
+
+    .map-hero {
+        background: linear-gradient(120deg, #1f2937 0%, #474B57 55%, #616677 100%);
+        color: white;
     }
-    
-    .leaflet-popup-tip {
-        background: white !important;
-        box-shadow: 0 3px 14px rgba(0, 0, 0, 0.1) !important;
+
+    .map-hero-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
     }
-    
-    .property-popup {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        width: 300px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+
+    .map-stat-card {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 1rem 1.25rem;
+        backdrop-filter: blur(6px);
     }
-    
-    /* Image Carousel */
-    .popup-image-container {
+
+    .map-stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .map-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 330px) minmax(0, 1fr);
+        gap: 1.5rem;
+        padding: 2rem 0;
+        background: var(--brand-soft);
+        transition: grid-template-columns 0.3s ease;
+    }
+
+    .map-layout.panel-hidden {
+        grid-template-columns: 1fr;
+    }
+
+    .map-layout.panel-hidden .map-panel {
+        display: none;
+    }
+
+    .map-layout.panel-hidden .map-wrapper {
+        grid-column: 1 / -1;
+    }
+
+    .map-panel {
+        width: 330px;
+        max-width: 100%;
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 20px 50px rgba(71, 75, 87, 0.15);
+        padding: 1.5rem;
         position: relative;
-        height: 180px;
-        overflow: hidden;
-        background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
     }
-    
-    .popup-image {
+
+    .map-panel.is-collapsed {
+        transform: translateX(-110%);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .map-panel-toggle {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--brand-primary);
+        color: white;
+        border-radius: 12px;
+        padding: 0.65rem 1rem;
+        font-weight: 600;
+    }
+
+    .map-panel-toggle-floating {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(71, 75, 87, 0.9);
+        color: white;
+        border-radius: 12px;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(31, 41, 55, 0.35);
+        border: none;
+    }
+
+    .map-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+    .map-panel-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .map-panel-mobile-close {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(71,75,87,0.2);
+        background: white;
+        color: var(--brand-primary);
+    }
+
+    .panel-section {
+        margin-bottom: 1.25rem;
+    }
+
+    .map-panel-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        flex: 1;
+    }
+
+    .map-panel-mobile-tabs {
+        display: none;
+        gap: 0.4rem;
+        background: #f4f5f9;
+        border-radius: 14px;
+        padding: 0.4rem;
+    }
+
+    .map-panel-tab {
+        flex: 1;
+        border: none;
+        background: transparent;
+        border-radius: 12px;
+        padding: 0.55rem 0.4rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--brand-primary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.15rem;
+    }
+
+    .map-panel-tab i {
+        font-size: 1rem;
+    }
+
+    .map-panel-tab.is-active {
+        background: white;
+        box-shadow: 0 5px 15px rgba(71,75,87,0.15);
+    }
+
+    .panel-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--brand-tertiary);
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+    }
+
+    .map-search {
+        position: relative;
+    }
+
+    .map-search input {
         width: 100%;
-        height: 100%;
+        padding: 0.75rem 0.9rem 0.75rem 2.6rem;
+        border-radius: 14px;
+        border: 1px solid rgba(71, 75, 87, 0.15);
+        background: #fdfdfd;
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .map-search input:focus {
+        border-color: var(--brand-accent);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(241, 180, 0, 0.2);
+    }
+
+    .map-search i {
+        position: absolute;
+        top: 50%;
+        left: 0.9rem;
+        transform: translateY(-50%);
+        color: var(--brand-tertiary);
+        font-size: 0.9rem;
+    }
+
+    .map-select {
+        width: 100%;
+        background: #fdfdfd;
+        border: 1px solid rgba(71, 75, 87, 0.2);
+        border-radius: 12px;
+        padding: 0.55rem 0.9rem;
+        font-weight: 600;
+        color: var(--brand-primary);
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .map-select:focus {
+        border-color: var(--brand-accent);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(241, 180, 0, 0.2);
+    }
+
+    .map-price-control {
+        background: #f8f8fb;
+        border-radius: 14px;
+        padding: 1rem;
+        border: 1px solid rgba(71, 75, 87, 0.08);
+    }
+
+    .map-price-values {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 600;
+        color: var(--brand-primary);
+        margin-bottom: 0.35rem;
+        font-size: 0.9rem;
+    }
+
+    #priceRangeInput {
+        width: 100%;
+        accent-color: var(--brand-accent);
+        -webkit-appearance: none;
+        appearance: none;
+        height: 5px;
+        border-radius: 999px;
+        background: rgba(241, 180, 0, 0.25);
+    }
+
+    #priceRangeInput::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--brand-accent);
+        border: 2px solid #fff6dd;
+        box-shadow: 0 4px 10px rgba(241, 180, 0, 0.35);
+        cursor: pointer;
+    }
+
+    #priceRangeInput::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--brand-accent);
+        border: 2px solid #fff6dd;
+        box-shadow: 0 4px 10px rgba(241, 180, 0, 0.35);
+        cursor: pointer;
+    }
+
+    #priceRangeInput::-ms-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--brand-accent);
+        border: 2px solid #fff6dd;
+        box-shadow: 0 4px 10px rgba(241, 180, 0, 0.35);
+    }
+
+    .map-price-reset {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--brand-tertiary);
+        cursor: pointer;
+    }
+
+    .map-focus-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.6rem;
+    }
+
+    .map-focus-chip {
+        border-radius: 14px;
+        padding: 0.65rem 0.9rem;
+        border: 1px solid rgba(71, 75, 87, 0.1);
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--brand-primary);
+    }
+
+    .map-focus-chip i {
+        color: var(--brand-accent);
+        font-size: 0.8rem;
+    }
+
+    .map-panel-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .map-reset-btn {
+        flex: 1;
+        border-radius: 12px;
+        border: 1px solid rgba(71, 75, 87, 0.2);
+        padding: 0.65rem;
+        background: white;
+        font-weight: 600;
+    }
+
+    .map-apply-btn {
+        flex: 1;
+        border-radius: 12px;
+        padding: 0.65rem;
+        border: none;
+        background: var(--brand-primary);
+        color: white;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+    }
+
+    .map-apply-count {
+        font-weight: 700;
+        padding: 0.1rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.2);
+    }
+
+    .map-wrapper {
+        width: 100%;
+        position: relative;
+        background: white;
+        border-radius: 22px;
+        box-shadow: 0 25px 60px rgba(71, 75, 87, 0.15);
+        overflow: visible;
+        min-height: 540px;
+        isolation: isolate; /* keep map overlays beneath global nav */
+        z-index: 0;
+    }
+
+    #property-map {
+        width: 100%;
+        height: calc(100vh - 260px);
+        min-height: 520px;
+        border-radius: 22px;
+    }
+
+    .map-wrapper .leaflet-container {
+        border-radius: 22px;
+    }
+
+    .map-toolbar {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
+        right: 1.25rem;
+        z-index: 5;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: space-between;
+        pointer-events: none;
+    }
+
+    .map-toolbar > * {
+        pointer-events: auto;
+    }
+
+    .map-toolbar-card {
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        min-width: 160px;
+        border: 1px solid rgba(71, 75, 87, 0.08);
+        box-shadow: 0 10px 25px rgba(71, 75, 87, 0.18);
+    }
+
+    .map-floating-actions {
+        position: absolute;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        z-index: 5;
+    }
+
+    .map-floating-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        border: none;
+        background: rgba(71, 75, 87, 0.9);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        box-shadow: 0 12px 30px rgba(31, 41, 55, 0.4);
+    }
+
+    .map-floating-btn.secondary {
+        background: var(--brand-accent);
+        color: #1f1f1f;
+    }
+
+    .map-floating-stats {
+        position: absolute;
+        left: 1.25rem;
+        bottom: 1.25rem;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        z-index: 500;
+    }
+
+    .map-floating-stats .stat-pill {
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 999px;
+        padding: 0.55rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(71, 75, 87, 0.1);
+    }
+
+    .map-highlight-section {
+        background: white;
+        padding: 2.5rem 0 3rem;
+    }
+
+    .map-highlight-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .map-highlight-card {
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(71, 75, 87, 0.08);
+        box-shadow: 0 25px 55px rgba(31, 41, 55, 0.12);
+        background: white;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .map-highlight-card img {
+        height: 160px;
         object-fit: cover;
+        width: 100%;
+    }
+
+    .map-highlight-body {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 1;
+    }
+
+    .map-highlight-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--brand-accent);
+    }
+
+    .map-highlight-meta {
+        display: flex;
+        gap: 0.8rem;
+        font-size: 0.85rem;
+        color: var(--brand-tertiary);
+    }
+
+    .leaflet-container {
+        font-family: 'Gilroy', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 18px !important;
+        box-shadow: 0 25px 60px rgba(17, 24, 39, 0.25) !important;
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    .leaflet-popup-content {
+        margin: 0 !important;
+    }
+
+    .leaflet-popup-tip {
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .property-popup {
+        width: 320px;
+        background: #ffffff;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+    }
+
+    .popup-media {
+        position: relative;
+        overflow: hidden;
+        height: 190px;
+        background: #f1f2f6;
+    }
+
+    .popup-image {
+        position: absolute;
+        inset: 0;
+        object-fit: cover;
+        display: block;
         transition: transform 0.3s ease;
     }
-    
-    .popup-image:hover {
-        transform: scale(1.05);
+
+    .popup-media:hover .popup-image {
+        transform: scale(1.03);
     }
-    
+
+    .popup-media-chip {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(17, 24, 39, 0.75);
+        color: white;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        z-index: 2;
+    }
+
+    .favorite-toggle {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--brand-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        z-index: 2;
+    }
+
+    .favorite-toggle:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2);
+    }
+
     .image-carousel-nav {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background: rgba(255, 255, 255, 0.9);
         border: none;
         width: 32px;
         height: 32px;
         border-radius: 50%;
+        background: rgba(15, 23, 42, 0.25);
+        color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
-        font-size: 14px;
-        color: #474B57;
-        transition: all 0.2s ease;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(4px);
+        z-index: 2;
     }
-    
-    .image-carousel-nav:hover {
-        background: rgba(255, 255, 255, 1);
-        transform: translateY(-50%) scale(1.1);
-        color: #F1B400;
-    }
-    
-    .image-carousel-nav.prev {
-        left: 8px;
-    }
-    
-    .image-carousel-nav.next {
-        right: 8px;
-    }
-    
+
+    .image-carousel-nav.prev { left: 8px; }
+    .image-carousel-nav.next { right: 8px; }
+
     .image-indicators {
         position: absolute;
         bottom: 12px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        gap: 6px;
+        gap: 5px;
+        z-index: 2;
     }
-    
+
     .image-indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.5);
-        cursor: pointer;
-        transition: all 0.2s ease;
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.45);
     }
-    
+
     .image-indicator.active {
-        background: #F1B400;
-        box-shadow: 0 0 0 2px rgba(241, 180, 0, 0.3);
+        background: var(--brand-accent);
     }
-    
-    /* Content Area */
-    .popup-content {
-        padding: 20px;
-        background: white;
-    }
-    
-    .popup-title {
-        font-weight: 700;
-        font-size: 16px;
-        color: #474B57;
-        margin-bottom: 8px;
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    
-    .popup-price {
-        color: #F1B400;
-        font-weight: 800;
-        font-size: 18px;
-        margin-bottom: 12px;
-        text-shadow: 0 1px 2px rgba(241, 180, 0, 0.1);
-    }
-    
-    .popup-location {
-        display: flex;
-        align-items: center;
-        color: #616677;
-        font-size: 13px;
-        margin-bottom: 12px;
-    }
-    
-    .popup-location i {
-        color: #F1B400;
-        margin-right: 6px;
-        font-size: 12px;
-    }
-    
-    /* Property Details Grid */
-    .popup-details-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 16px;
-    }
-    
-    .popup-detail-item {
-        display: flex;
-        align-items: center;
-        font-size: 12px;
-        color: #616677;
-        background: rgba(71, 75, 87, 0.05);
-        padding: 6px 8px;
-        border-radius: 6px;
-        border: 1px solid rgba(71, 75, 87, 0.1);
-    }
-    
-    .popup-detail-item i {
-        color: #F1B400;
-        margin-right: 6px;
-        font-size: 11px;
-        min-width: 12px;
-    }
-    
-    /* Agent Info */
-    .popup-agent {
-        background: linear-gradient(135deg, #474B57 0%, #616677 100%);
-        color: white;
-        padding: 12px 16px;
-        margin: -20px -20px 16px -20px;
-        border-bottom: 3px solid #F1B400;
-    }
-    
-    .popup-agent-name {
-        font-weight: 600;
-        font-size: 13px;
-        margin-bottom: 2px;
-    }
-    
-    .popup-agent-title {
-        font-size: 11px;
-        opacity: 0.8;
-    }
-    
-    /* Action Buttons */
-    .popup-actions {
-        display: flex;
-        gap: 8px;
-    }
-    
-    .popup-button {
-        flex: 1;
-        padding: 10px 12px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 600;
-        text-align: center;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .popup-button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
-    }
-    
-    .popup-button:hover::before {
-        left: 100%;
-    }
-    
-    .popup-button-primary {
-        background: linear-gradient(135deg, #474B57 0%, #616677 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(71, 75, 87, 0.3);
-    }
-    
-    .popup-button-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(71, 75, 87, 0.4);
-        color: white;
-    }
-    
-    .popup-button-secondary {
-        background: linear-gradient(135deg, #F1B400 0%, #e6a300 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(241, 180, 0, 0.3);
-    }
-    
-    .popup-button-secondary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(241, 180, 0, 0.4);
-        color: white;
-    }
-    
-    .popup-button-icon {
-        background: rgba(241, 180, 0, 0.1);
-        color: #F1B400;
-        border: 2px solid rgba(241, 180, 0, 0.2);
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-    }
-    
-    .popup-button-icon:hover {
-        background: #F1B400;
-        color: white;
-        transform: translateY(-2px) scale(1.1);
-        box-shadow: 0 8px 25px rgba(241, 180, 0, 0.4);
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .property-popup {
-            width: 280px;
-        }
-        
-        .popup-content {
-            padding: 16px;
-        }
-        
-        .popup-details-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    /* Custom Marker Styles */
-    .property-marker-wrapper {
-        background: none !important;
-        border: none !important;
-    }
-    
-    .property-marker-container {
-        position: relative;
+
+    .popup-body {
         display: flex;
         flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem 1.1rem 1.2rem;
+    }
+
+    .popup-price-row {
+        display: flex;
         align-items: center;
-        transition: all 0.2s ease;
+        justify-content: space-between;
+        gap: 0.5rem;
     }
-    
-    .property-marker-container:hover {
-        transform: scale(1.05);
-    }
-    
-    .custom-marker {
-        position: relative;
-        transition: all 0.2s ease;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-    }
-    
-    .custom-marker:hover {
-        transform: scale(1.1);
-        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    }
-    
-    .custom-marker svg {
-        display: block;
-    }
-    
-    /* Price Indicator Styles (like Booking.com) */
-    .price-indicator {
-        position: relative;
-        background: #10b981;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-        white-space: nowrap;
-        margin-bottom: 2px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        border: 2px solid white;
-        transition: all 0.2s ease;
-    }
-    
-    .price-indicator:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    
-    .price-text {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 11px;
+
+    .popup-price {
+        color: var(--brand-accent);
         font-weight: 700;
-        letter-spacing: 0.5px;
+        font-size: 1.05rem;
     }
-    
-    .price-arrow {
+
+    .popup-link {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--brand-primary);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .popup-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--brand-primary);
+        line-height: 1.3;
+        margin: 0;
+    }
+
+    .popup-location {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.84rem;
+        color: var(--brand-tertiary);
+    }
+
+    .popup-meta {
+        display: flex;
+        gap: 0.85rem;
+        font-size: 0.82rem;
+        color: var(--brand-primary);
+    }
+
+    .popup-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-weight: 600;
+    }
+
+    .popup-actions {
+        display: flex;
+        gap: 0.6rem;
+    }
+
+    .popup-action {
+        flex: 1;
+        border-radius: 10px;
+        padding: 0.55rem 0.65rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(71, 75, 87, 0.15);
+        background: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+    }
+
+    .popup-action.primary {
+        background: var(--brand-primary);
+        color: white;
+        border-color: var(--brand-primary);
+    }
+
+    .popup-action.whatsapp {
+        color: #128C7E;
+        border-color: rgba(18, 140, 126, 0.3);
+    }
+
+    .property-marker-wrapper { background:none !important; border:none !important; }
+
+    .marker-card {
+        min-width: 120px;
+        max-width: 140px;
+        background: white;
+        border-radius: 16px;
+        padding: 0.4rem 0.65rem 0.2rem;
+        box-shadow: 0 18px 30px rgba(31, 41, 55, 0.35);
+        border: 2px solid rgba(255,255,255,0.6);
+        font-family: inherit;
+        position: relative;
+        text-align: left;
+    }
+
+    .marker-card::after {
+        content: '';
         position: absolute;
-        bottom: -6px;
+        bottom: -10px;
         left: 50%;
         transform: translateX(-50%);
         width: 0;
         height: 0;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-top: 6px solid inherit;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 12px solid white;
+        filter: drop-shadow(0 6px 6px rgba(31,41,55,0.25));
     }
-    
-    .price-arrow::before {
-        content: '';
+
+    .marker-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .marker-price {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #111827;
+    }
+
+    .marker-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.72rem;
+    }
+
+    .marker-type-pill {
+        padding: 0.1rem 0.45rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        background: rgba(17,24,39,0.08);
+        color: var(--brand-primary);
+    }
+
+    .marker-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .marker-card.sale {
+        border-color: rgba(16,185,129,0.45);
+    }
+
+    .marker-card.sale .marker-type-pill {
+        background: rgba(16,185,129,0.15);
+        color: #047857;
+    }
+
+    .marker-card.rent {
+        border-color: rgba(59,130,246,0.45);
+    }
+
+    .marker-card.rent .marker-type-pill {
+        background: rgba(59,130,246,0.15);
+        color: #1d4ed8;
+    }
+
+    .marker-card.both {
+        border-color: rgba(139,92,246,0.45);
+    }
+
+    .marker-card.both .marker-type-pill {
+        background: rgba(139,92,246,0.15);
+        color: #6d28d9;
+    }
+
+    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+        background-color: rgba(241, 180, 0, 0.8) !important;
+        color: #1f1f1f !important;
+        border: 2px solid white !important;
+        box-shadow: 0 12px 25px rgba(241, 180, 0, 0.35);
+    }
+
+    #map-loading {
         position: absolute;
-        bottom: 2px;
-        left: -4px;
-        width: 0;
-        height: 0;
-        border-left: 4px solid transparent;
-        border-right: 4px solid transparent;
-        border-top: 4px solid white;
+        inset: 0;
+        background: rgba(255,255,255,0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 6;
     }
-    
-    /* Responsive adjustments */
+
+    @media (max-width: 1024px) {
+        .map-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            padding: 1.5rem 0;
+        }
+        .map-panel {
+            width: calc(100% - 2rem);
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            height: calc(100vh - 2rem);
+            overflow: hidden;
+            z-index: 900;
+            padding: 1.25rem;
+            gap: 1rem;
+        }
+        .map-panel.is-collapsed { transform: translateY(-130%); }
+        .map-panel-toggle { display: inline-flex; }
+        .map-panel-toggle-floating { display: inline-flex; }
+        .map-wrapper {
+            min-height: 60vh;
+            border-radius: 18px;
+        }
+        #property-map { height: 70vh; min-height: 420px; }
+        .map-panel-body {
+            position: relative;
+            flex: 1;
+        }
+        .map-panel-body .panel-section {
+            display: none;
+        }
+        .map-panel-body .panel-section.is-active {
+            display: block;
+        }
+        .map-panel-mobile-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .map-panel-mobile-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0,1fr));
+        }
+        .map-panel-actions {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding-top: 0.75rem;
+            padding-bottom: 0.25rem;
+            box-shadow: 0 -10px 25px rgba(17,24,39,0.1);
+            border-top: 1px solid rgba(71,75,87,0.1);
+        }
+    }
+
     @media (max-width: 768px) {
-        .price-indicator {
-            font-size: 10px;
-            padding: 3px 6px;
+        .map-toolbar {
+            position: static;
+            top: auto;
+            left: auto;
+            right: auto;
+            padding: 0;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
-        
-        .price-text {
-            font-size: 9px;
+        .map-toolbar-card {
+            width: 100%;
         }
+        .map-floating-actions,
+        .map-floating-stats {
+            position: static;
+            inset: auto;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .map-floating-actions {
+            justify-content: flex-end;
+        }
+        .map-floating-stats .stat-pill {
+            flex: 1 1 calc(50% - 0.5rem);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .map-hero-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        .map-highlight-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    }
+
+    .price-indicator {
+        font-size: 11px;
+        padding: 3px 6px;
     }
 </style>
 {% endblock %}
 
+
 {% block content %}
-<!-- Map Header -->
-<section class="bg-primary text-white py-8">
+<!-- Hero -->
+<section class="map-hero py-10">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold mb-2">{% trans "Карта недвижимости Пхукета" %}</h1>
-                <p class="text-blue-100">{% trans "Найдите идеальное расположение для вашей недвижимости" %}</p>
+                <p class="uppercase tracking-[0.4em] text-xs text-white/70 mb-2">{% trans "Карта Undersun Estate" %}</p>
+                <h1 class="text-3xl md:text-4xl font-bold leading-tight">
+                    {% trans "Исследуйте Пхукет на карте и находите лучшие районы" %}
+                </h1>
+                <p class="text-white/80 mt-3 max-w-2xl">
+                    {% trans "Кастомные маркеры, продвинутые фильтры и брендовая аналитика помогают сравнивать объекты по локациям, цене и типу сделки гораздо быстрее." %}
+                </p>
             </div>
-            
-            <!-- Map Filters -->
-            <div class="mt-4 md:mt-0">
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="filterProperties('all')" class="filter-btn active bg-white text-primary px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="all">
-                        {% trans "Все" %}
+            <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto max-w-md md:max-w-none">
+                <a href="{% url 'properties:property_list' %}" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white text-brand-primary font-semibold shadow-lg hover:-translate-y-0.5 transition text-sm whitespace-nowrap">
+                    <i class="fas fa-layer-group mr-2"></i>
+                    {% trans "Каталог объектов" %}
+                </a>
+                <a href="tel:+66633033133" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-white/40 text-white font-semibold hover:bg-white/10 transition text-sm whitespace-nowrap">
+                    <i class="fas fa-phone mr-2"></i>
+                    +66 63 303 3133
+                </a>
+            </div>
+        </div>
+        <div class="map-hero-grid mt-8">
+            <div class="map-stat-card">
+                <div class="text-xs uppercase tracking-[0.3em] text-white/70 mb-1">{% trans "Всего" %}</div>
+                <div class="map-stat-value">{{ total_properties }}</div>
+                <div class="text-sm text-white/70">{% trans "активных объектов" %}</div>
+            </div>
+            <div class="map-stat-card">
+                <div class="text-xs uppercase tracking-[0.3em] text-white/70 mb-1">{% trans "Продажа" %}</div>
+                <div class="map-stat-value">{{ sale_properties }}</div>
+                <div class="text-sm text-white/70">{% trans "виллы, кондо, земля" %}</div>
+            </div>
+            <div class="map-stat-card">
+                <div class="text-xs uppercase tracking-[0.3em] text-white/70 mb-1">{% trans "Аренда" %}</div>
+                <div class="map-stat-value">{{ rent_properties }}</div>
+                <div class="text-sm text-white/70">{% trans "от 1 месяца" %}</div>
+            </div>
+            <div class="map-stat-card">
+                <div class="text-xs uppercase tracking-[0.3em] text-white/70 mb-1">{% trans "Районы" %}</div>
+                <div class="map-stat-value">{{ districts_count }}</div>
+                <div class="text-sm text-white/70">{% trans "подготовлены к исследованию" %}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map experience -->
+<section class="bg-brand-soft">
+    <div class="max-w-7xl mx-auto px-4 map-layout" id="mapLayout">
+        <aside class="map-panel" id="mapPanel" aria-hidden="false">
+            <div class="map-panel-header">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.4em] text-brand-tertiary mb-1">{% trans "Фильтры" %}</p>
+                    <h2 class="text-xl font-bold text-brand-primary">{% trans "Настройте выдачу" %}</h2>
+                </div>
+                <div class="map-panel-header-actions">
+                    <button class="map-panel-mobile-close" data-close-panel>
+                        <i class="fas fa-times"></i>
                     </button>
-                    <button onclick="filterProperties('sale')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="sale">
-                        {% trans "Продажа" %}
+                    <button class="map-panel-toggle" id="panelToggle">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>{% trans "Фильтры" %}</span>
                     </button>
-                    <button onclick="filterProperties('rent')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="rent">
-                        {% trans "Аренда" %}
-                    </button>
-                    <button onclick="filterProperties('villa')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="villa">
-                        {% trans "Виллы" %}
-                    </button>
-                    <button onclick="filterProperties('apartment')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="apartment">
-                        {% trans "Апартаменты" %}
-                    </button>
-                    <button onclick="filterProperties('investment')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="investment">
-                        {% trans "Инвестиции" %}
-                    </button>
-                    <button onclick="filterProperties('townhouse')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="townhouse">
-                        {% trans "Таунхаусы" %}
-                    </button>
-                    <button onclick="filterProperties('land')" class="filter-btn bg-primary hover:bg-tertiary text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300" data-type="land">
-                        {% trans "Земля" %}
-                    </button>
+                </div>
+            </div>
+
+            <div class="map-panel-mobile-tabs" id="mapPanelTabs">
+                <button type="button" class="map-panel-tab is-active" data-panel-tab="search">
+                    <i class="fas fa-search"></i>
+                    <span>{% trans "Поиск" %}</span>
+                </button>
+                <button type="button" class="map-panel-tab" data-panel-tab="deal">
+                    <i class="fas fa-handshake"></i>
+                    <span>{% trans "Сделка" %}</span>
+                </button>
+                <button type="button" class="map-panel-tab" data-panel-tab="type">
+                    <i class="fas fa-building"></i>
+                    <span>{% trans "Тип" %}</span>
+                </button>
+                <button type="button" class="map-panel-tab" data-panel-tab="price">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>{% trans "Цена" %}</span>
+                </button>
+            </div>
+
+            <div class="map-panel-body" id="mapPanelBody">
+                <div class="panel-section is-active" data-panel-content="search">
+                    <div class="panel-label">{% trans "Поиск" %}</div>
+                    <div class="map-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="mapSearchInput" placeholder="{% trans 'Введите район, проект или ID' %}">
+                    </div>
+                </div>
+
+                <div class="panel-section" data-panel-content="deal">
+                    <div class="panel-label">{% trans "Тип сделки" %}</div>
+                    <select id="dealSelect" class="map-select">
+                        <option value="all">{% trans "Все" %}</option>
+                        <option value="sale">{% trans "Покупка" %}</option>
+                        <option value="rent">{% trans "Аренда" %}</option>
+                    </select>
+                </div>
+
+                <div class="panel-section" data-panel-content="type">
+                    <div class="panel-label">{% trans "Тип недвижимости" %}</div>
+                    <select id="typeSelect" class="map-select">
+                        <option value="all">{% trans "Все типы" %}</option>
+                        {% for property_type in property_types %}
+                            <option value="{{ property_type.name }}">{{ property_type.name_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="panel-section" data-panel-content="price">
+                    <div class="panel-label">{% trans "Диапазон цены" %}</div>
+                    <div class="map-price-control">
+                        <div class="map-price-values">
+                            <span>{% trans "Максимум" %}</span>
+                            <span id="priceRangeValue">{% trans "Без ограничений" %}</span>
+                        </div>
+                        <input type="range" id="priceRangeInput" min="0" max="100000000" step="500000">
+                        <div class="map-price-reset" id="priceResetBtn">{% trans "Сбросить ограничение" %}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-panel-actions">
+                <button class="map-reset-btn" id="resetFiltersBtn">
+                    <i class="fas fa-rotate mr-2"></i>
+                    {% trans "Сбросить фильтры" %}
+                </button>
+                <button class="map-apply-btn" id="closePanelBtn">
+                    <span>{% trans "Показать" %}</span>
+                    <span class="map-apply-count" id="map-panel-apply-count">{{ properties.count }}</span>
+                </button>
+            </div>
+        </aside>
+
+        <div class="map-wrapper">
+            <div class="map-toolbar">
+                <div class="map-toolbar-card">
+                    <p class="text-xs uppercase tracking-[0.3em] text-brand-tertiary mb-1">{% trans "Показано" %}</p>
+                    <div class="text-2xl font-bold text-brand-primary" id="map-toolbar-visible">{{ properties.count }}</div>
+                    <p class="text-xs text-brand-tertiary">{% trans "объектов на карте" %}</p>
+                </div>
+                <button class="map-panel-toggle map-panel-toggle-floating" id="panelToggleFloating">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>{% trans "Фильтр" %}</span>
+                </button>
+            </div>
+
+            <div id="property-map"></div>
+
+            <div id="map-loading">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto mb-4"></div>
+                    <p class="text-brand-tertiary">{% trans "Загружаем лучшие предложения" %}</p>
+                </div>
+            </div>
+
+            <div class="map-floating-actions">
+                <button class="map-floating-btn" id="geoLocateBtn" title="{% trans 'Определить местоположение' %}">
+                    <i class="fas fa-location-arrow"></i>
+                </button>
+                <button class="map-floating-btn secondary" id="resetViewBtn" title="{% trans 'Сбросить вид' %}">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
+
+            <div class="map-floating-stats">
+                <div class="stat-pill">
+                    {% trans "Показано" %}: <span id="map-visible-count">{{ properties.count }}</span>
+                </div>
+                <div class="stat-pill">
+                    {% trans "Продажа" %}: <span id="map-visible-sale">{{ sale_properties }}</span>
+                </div>
+                <div class="stat-pill">
+                    {% trans "Аренда" %}: <span id="map-visible-rent">{{ rent_properties }}</span>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Map Section -->
-<section class="relative">
-    <div id="property-map" class="w-full"></div>
-    
-    <!-- Map Legend -->
-    <div class="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg z-1000">
-        <h3 class="font-semibold text-gray-900 mb-3">{% trans "Легенда" %}</h3>
-        <div class="space-y-2 text-sm">
-            <div class="flex items-center">
-                <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
-                <span>{% trans "Продажа" %}</span>
-            </div>
-            <div class="flex items-center">
-                <div class="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
-                <span>{% trans "Аренда" %}</span>
-            </div>
-            <div class="flex items-center">
-                <div class="w-4 h-4 bg-purple-500 rounded-full mr-2"></div>
-                <span>{% trans "Продажа/Аренда" %}</span>
-            </div>
-        </div>
-        
-        <div class="mt-4 pt-3 border-t border-gray-200">
-            <div class="text-xs text-gray-600">
-                <div>{% trans "Всего объектов" %}: <span id="total-count">{{ properties.count }}</span></div>
-                <div>{% trans "Показано" %}: <span id="visible-count">{{ properties.count }}</span></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Loading Indicator -->
-    <div id="map-loading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-1000">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p class="text-gray-600">{% trans "Загружаем карту..." %}</p>
-        </div>
-    </div>
-</section>
-
-<!-- Quick Stats -->
-<section class="bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="text-center">
-                <div class="text-2xl font-bold text-primary mb-1">{{ total_properties }}</div>
-                <div class="text-gray-600 text-sm">{% trans "Всего объектов" %}</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-green-600 mb-1">{{ sale_properties }}</div>
-                <div class="text-gray-600 text-sm">{% trans "На продажу" %}</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-blue-600 mb-1">{{ rent_properties }}</div>
-                <div class="text-gray-600 text-sm">{% trans "В аренду" %}</div>
-            </div>
-            <div class="text-center">
-                <div class="text-2xl font-bold text-purple-600 mb-1">{{ districts_count }}</div>
-                <div class="text-gray-600 text-sm">{% trans "Районов" %}</div>
-            </div>
-        </div>
-    </div>
-</section>
+<!-- Featured properties section reused from home -->
+{% include 'core/includes/home/home_featured_properties_section.html' %}
 {% endblock %}
+
 
 {% block extra_js %}
 <!-- Leaflet JavaScript -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+{% trans "Без ограничений" as i18n_price_unlimited %}
+{% trans "Цена по запросу" as i18n_price_on_request %}
+{% trans "мес" as i18n_month_short %}
+{% trans "Геолокация не поддерживается" as i18n_geo_unsupported %}
+{% trans "Не удалось определить позицию" as i18n_geo_failed %}
+{{ map_currency_settings|json_script:"map-currency-settings" }}
 <script>
-// Initialize the map
-var map = L.map('property-map').setView([7.8804, 98.3923], 11);
+const MAP_DEFAULT_CENTER = [7.8804, 98.3923];
+const PRICE_UNLIMITED_LABEL = "{{ i18n_price_unlimited|escapejs }}";
+const PRICE_ON_REQUEST_LABEL = "{{ i18n_price_on_request|escapejs }}";
+const PER_MONTH_SUFFIX = "{{ i18n_month_short|escapejs }}";
+const defaultDealTypes = ['sale', 'rent', 'both'];
+const priceFieldMap = {
+    sale: { USD: 'price_sale_usd', THB: 'price_sale_thb', RUB: 'price_sale_rub' },
+    rent: { USD: 'price_rent_usd', THB: 'price_rent_thb', RUB: 'price_rent_rub' }
+};
+const initialCurrencyCode = "{{ selected_currency_code|default:'THB'|upper }}";
 
-// Add tile layer
+const mapCurrencySettingsRaw = document.getElementById('map-currency-settings');
+let currencySettings = [];
+let currencyMap = {};
+
+if (mapCurrencySettingsRaw) {
+    try {
+        currencySettings = JSON.parse(mapCurrencySettingsRaw.textContent) || [];
+        currencyMap = currencySettings.reduce((acc, currency) => {
+            acc[currency.code] = currency;
+            return acc;
+        }, {});
+    } catch (error) {
+        console.warn('Failed to parse currency settings for map:', error);
+    }
+}
+
+let currentCurrencyCode = currencyMap[initialCurrencyCode] ? initialCurrencyCode : (currencySettings[0]?.code || 'THB');
+if (!currencyMap[currentCurrencyCode]) {
+    currencyMap[currentCurrencyCode] = { symbol: '', decimal_places: 0, code: currentCurrencyCode };
+}
+
+const map = L.map('property-map', { preferCanvas: true }).setView(MAP_DEFAULT_CENTER, 11);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-// Properties data
 var properties = [
-    // This will be populated from Django context
     {% for property in properties %}
     {
         id: {{ property.id }},
-        title: "{{ property.title|escapejs }}",
+        title: "{{ property.localized_title|default:property.title|escapejs }}",
         lat: {{ property.latitude|default:"0"|unlocalize }},
         lng: {{ property.longitude|default:"0"|unlocalize }},
         price: "{{ property.price_display|escapejs }}",
         deal_type: "{{ property.deal_type|escapejs }}",
-        property_type: "{{ property.property_type.name|escapejs }}",
-        district: "{{ property.district.name|escapejs }}",
+        property_type: "{{ property.property_type.name|default:''|escapejs }}",
+        property_type_label: "{{ property.localized_property_type|default:property.property_type.name_display|default:''|escapejs }}",
+        district: "{{ property.district.localized_name|default:property.district.name|escapejs }}",
         bedrooms: {{ property.bedrooms|default:"0" }},
         bathrooms: {{ property.bathrooms|default:"0" }},
         area: {{ property.area_total|default:"0"|unlocalize }},
         price_sale_usd: {{ property.price_sale_usd|default:"0"|unlocalize }},
         price_sale_thb: {{ property.price_sale_thb|default:"0"|unlocalize }},
         price_sale_rub: {{ property.price_sale_rub|default:"0"|unlocalize }},
-        price_rent_usd: {{ property.price_rent_monthly_usd|default:"0"|unlocalize }},
+        price_rent_usd: {{ property.price_rent_monthly|default:"0"|unlocalize }},
         price_rent_thb: {{ property.price_rent_monthly_thb|default:"0"|unlocalize }},
         price_rent_rub: {{ property.price_rent_monthly_rub|default:"0"|unlocalize }},
         image: "{% if property.main_image and property.main_image.image %}{{ property.main_image.medium_url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}",
@@ -549,440 +1205,767 @@ var properties = [
         floors: {{ property.floors_total|default:"0" }},
         current_floor: {{ property.floor|default:"0" }},
         agent_name: "{% if property.agent %}{{ property.agent.name|escapejs }}{% else %}Undersun Estate{% endif %}",
-        agent_phone: "{% if property.agent %}{{ property.agent.phone|escapejs }}{% else %}+66 12 345 6789{% endif %}",
-        location_name: "{% if property.location %}{{ property.location.name|escapejs }}{% else %}{{ property.district.name|escapejs }}{% endif %}",
+        agent_phone: "{% if property.agent %}{{ property.agent.phone|escapejs }}{% else %}+66 63 303 3133{% endif %}",
+        location_name: "{% if property.location %}{{ property.localized_location_name|default:property.location.name|escapejs }}{% else %}{{ property.district.localized_name|default:property.district.name|escapejs }}{% endif %}",
         url: "{{ property.get_absolute_url }}"
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
 ];
 
-// Create marker cluster group
-var markers = L.markerClusterGroup();
-var allMarkers = [];
-
-// Function to get marker color based on deal type
-function getMarkerColor(dealType) {
-    switch(dealType) {
-        case 'sale': return '#10b981'; // green
-        case 'rent': return '#3b82f6'; // blue
-        case 'both': return '#8b5cf6'; // purple
-        default: return '#6b7280'; // gray
-    }
-}
-
-// Function to get property type icon SVG content
-function getPropertyIconSVG(propertyType) {
-    const iconSVGs = {
-        'villa': `
-            <g transform="translate(6, 6)">
-                <path d="M10 4L2 10h2v8h12v-8h2L10 4z" fill="white"/>
-                <rect x="4" y="10" width="12" height="8" fill="white"/>
-                <rect x="8.5" y="14" width="3" height="4" fill="currentColor"/>
-                <rect x="5.5" y="12" width="2" height="2" fill="currentColor"/>
-                <rect x="12.5" y="12" width="2" height="2" fill="currentColor"/>
-                <rect x="13" y="6" width="1.5" height="4" fill="white"/>
-            </g>
-        `,
-        'apartment': `
-            <g transform="translate(6, 4)">
-                <rect x="2" y="4" width="16" height="16" fill="white"/>
-                <polygon points="1,4 10,1 19,4" fill="white"/>
-                <rect x="4" y="7" width="2" height="2" fill="currentColor"/>
-                <rect x="7" y="7" width="2" height="2" fill="currentColor"/>
-                <rect x="11" y="7" width="2" height="2" fill="currentColor"/>
-                <rect x="14" y="7" width="2" height="2" fill="currentColor"/>
-                <rect x="4" y="11" width="2" height="2" fill="currentColor"/>
-                <rect x="7" y="11" width="2" height="2" fill="currentColor"/>
-                <rect x="11" y="11" width="2" height="2" fill="currentColor"/>
-                <rect x="14" y="11" width="2" height="2" fill="currentColor"/>
-                <rect x="4" y="15" width="2" height="2" fill="currentColor"/>
-                <rect x="14" y="15" width="2" height="2" fill="currentColor"/>
-                <rect x="8" y="15" width="4" height="5" fill="currentColor"/>
-            </g>
-        `,
-        'condominium': `
-            <g transform="translate(6, 4)">
-                <rect x="2" y="4" width="16" height="16" fill="white"/>
-                <polygon points="1,4 10,1 19,4" fill="white"/>
-                <rect x="4" y="7" width="2" height="2" fill="currentColor"/>
-                <rect x="7" y="7" width="2" height="2" fill="currentColor"/>
-                <rect x="11" y="7" width="2" height="2" fill="currentColor"/>
-                <rect x="14" y="7" width="2" height="2" fill="currentColor"/>
-                <rect x="4" y="11" width="2" height="2" fill="currentColor"/>
-                <rect x="7" y="11" width="2" height="2" fill="currentColor"/>
-                <rect x="11" y="11" width="2" height="2" fill="currentColor"/>
-                <rect x="14" y="11" width="2" height="2" fill="currentColor"/>
-                <rect x="4" y="15" width="2" height="2" fill="currentColor"/>
-                <rect x="14" y="15" width="2" height="2" fill="currentColor"/>
-                <rect x="8" y="15" width="4" height="5" fill="currentColor"/>
-            </g>
-        `,
-        'townhouse': `
-            <g transform="translate(4, 5)">
-                <rect x="0" y="8" width="7" height="10" fill="white"/>
-                <polygon points="0,8 3.5,4 7,8" fill="white"/>
-                <rect x="6" y="6" width="7" height="12" fill="white"/>
-                <polygon points="6,6 9.5,2 13,6" fill="white"/>
-                <rect x="12" y="9" width="7" height="9" fill="white"/>
-                <polygon points="12,9 15.5,5 19,9" fill="white"/>
-                <rect x="2" y="14" width="2" height="4" fill="currentColor"/>
-                <rect x="8" y="14" width="2" height="4" fill="currentColor"/>
-                <rect x="14" y="14" width="2" height="4" fill="currentColor"/>
-                <rect x="1" y="11" width="1.5" height="1.5" fill="currentColor"/>
-                <rect x="4.5" y="11" width="1.5" height="1.5" fill="currentColor"/>
-                <rect x="7" y="9" width="1.5" height="1.5" fill="currentColor"/>
-                <rect x="10.5" y="9" width="1.5" height="1.5" fill="currentColor"/>
-                <rect x="13" y="12" width="1.5" height="1.5" fill="currentColor"/>
-                <rect x="16.5" y="12" width="1.5" height="1.5" fill="currentColor"/>
-            </g>
-        `,
-        'land': `
-            <g transform="translate(5, 6)">
-                <rect x="1" y="2" width="18" height="14" fill="none" stroke="white" stroke-width="1.5" stroke-dasharray="2,1"/>
-                <circle cx="6" cy="8" r="3" fill="white"/>
-                <rect x="5.5" y="11" width="1" height="3" fill="white"/>
-                <circle cx="14" cy="6" r="2.5" fill="white"/>
-                <rect x="13.5" y="8.5" width="1" height="2.5" fill="white"/>
-                <circle cx="4" cy="13" r="1.5" fill="white"/>
-                <circle cx="16" cy="12" r="1.5" fill="white"/>
-                <circle cx="2" cy="3" r="1" fill="white"/>
-                <circle cx="18" cy="3" r="1" fill="white"/>
-                <circle cx="2" cy="15" r="1" fill="white"/>
-                <circle cx="18" cy="15" r="1" fill="white"/>
-            </g>
-        `,
-        'business': `
-            <g transform="translate(6, 5)">
-                <rect x="2" y="6" width="16" height="12" fill="white"/>
-                <polygon points="1,6 10,3 19,6" fill="white"/>
-                <rect x="3" y="14" width="6" height="4" fill="currentColor"/>
-                <rect x="11" y="14" width="6" height="4" fill="currentColor"/>
-                <rect x="4" y="9" width="2" height="2" fill="currentColor"/>
-                <rect x="7" y="9" width="2" height="2" fill="currentColor"/>
-                <rect x="11" y="9" width="2" height="2" fill="currentColor"/>
-                <rect x="14" y="9" width="2" height="2" fill="currentColor"/>
-                <rect x="3" y="12" width="14" height="1" fill="white"/>
-                <rect x="9" y="15" width="2" height="3" fill="white"/>
-            </g>
-        `
-    };
-    
-    return iconSVGs[propertyType.toLowerCase()] || `
-        <g transform="translate(7, 6)">
-            <rect x="2" y="10" width="14" height="10" fill="white"/>
-            <polygon points="1,10 9,4 17,10" fill="white"/>
-            <rect x="7" y="15" width="4" height="5" fill="currentColor"/>
-            <rect x="4" y="13" width="2.5" height="2" fill="currentColor"/>
-            <rect x="11.5" y="13" width="2.5" height="2" fill="currentColor"/>
+const PROPERTY_ICON_SVGS = {
+    'villa': `
+        <g transform="translate(6, 6)">
+            <path d="M10 4L2 10h2v8h12v-8h2L10 4z" fill="white"/>
+            <rect x="4" y="10" width="12" height="8" fill="white"/>
+            <rect x="8.5" y="14" width="3" height="4" fill="currentColor"/>
+            <rect x="5.5" y="12" width="2" height="2" fill="currentColor"/>
+            <rect x="12.5" y="12" width="2" height="2" fill="currentColor"/>
+            <rect x="13" y="6" width="1.5" height="4" fill="white"/>
         </g>
-    `;
+    `,
+    'apartment': `
+        <g transform="translate(6, 4)">
+            <rect x="2" y="4" width="16" height="16" fill="white"/>
+            <polygon points="1,4 10,1 19,4" fill="white"/>
+            <rect x="4" y="7" width="2" height="2" fill="currentColor"/>
+            <rect x="7" y="7" width="2" height="2" fill="currentColor"/>
+            <rect x="11" y="7" width="2" height="2" fill="currentColor"/>
+            <rect x="14" y="7" width="2" height="2" fill="currentColor"/>
+            <rect x="4" y="11" width="2" height="2" fill="currentColor"/>
+            <rect x="7" y="11" width="2" height="2" fill="currentColor"/>
+            <rect x="11" y="11" width="2" height="2" fill="currentColor"/>
+            <rect x="14" y="11" width="2" height="2" fill="currentColor"/>
+            <rect x="4" y="15" width="2" height="2" fill="currentColor"/>
+            <rect x="14" y="15" width="2" height="2" fill="currentColor"/>
+            <rect x="8" y="15" width="4" height="5" fill="currentColor"/>
+        </g>
+    `,
+    'condo': `
+        <g transform="translate(6, 4)">
+            <rect x="2" y="4" width="16" height="16" fill="white"/>
+            <polygon points="1,4 10,1 19,4" fill="white"/>
+            <rect x="4" y="7" width="2" height="2" fill="currentColor"/>
+            <rect x="7" y="7" width="2" height="2" fill="currentColor"/>
+            <rect x="11" y="7" width="2" height="2" fill="currentColor"/>
+            <rect x="14" y="7" width="2" height="2" fill="currentColor"/>
+            <rect x="4" y="11" width="2" height="2" fill="currentColor"/>
+            <rect x="7" y="11" width="2" height="2" fill="currentColor"/>
+            <rect x="11" y="11" width="2" height="2" fill="currentColor"/>
+            <rect x="14" y="11" width="2" height="2" fill="currentColor"/>
+            <rect x="4" y="15" width="2" height="2" fill="currentColor"/>
+            <rect x="14" y="15" width="2" height="2" fill="currentColor"/>
+            <rect x="8" y="15" width="4" height="5" fill="currentColor"/>
+        </g>
+    `,
+    'townhouse': `
+        <g transform="translate(4, 5)">
+            <rect x="0" y="8" width="7" height="10" fill="white"/>
+            <polygon points="0,8 3.5,4 7,8" fill="white"/>
+            <rect x="6" y="6" width="7" height="12" fill="white"/>
+            <polygon points="6,6 9.5,2 13,6" fill="white"/>
+            <rect x="12" y="9" width="7" height="9" fill="white"/>
+            <polygon points="12,9 15.5,5 19,9" fill="white"/>
+            <rect x="2" y="14" width="2" height="4" fill="currentColor"/>
+            <rect x="8" y="14" width="2" height="4" fill="currentColor"/>
+            <rect x="14" y="14" width="2" height="4" fill="currentColor"/>
+            <rect x="1" y="11" width="1.5" height="1.5" fill="currentColor"/>
+            <rect x="4.5" y="11" width="1.5" height="1.5" fill="currentColor"/>
+            <rect x="7" y="9" width="1.5" height="1.5" fill="currentColor"/>
+            <rect x="10.5" y="9" width="1.5" height="1.5" fill="currentColor"/>
+            <rect x="13" y="12" width="1.5" height="1.5" fill="currentColor"/>
+            <rect x="16.5" y="12" width="1.5" height="1.5" fill="currentColor"/>
+        </g>
+    `,
+    'land': `
+        <g transform="translate(5, 6)">
+            <rect x="2" y="10" width="20" height="10" fill="white"/>
+            <rect x="0" y="12" width="24" height="8" fill="white"/>
+            <rect x="4" y="6" width="16" height="8" fill="white"/>
+            <polygon points="4,6 12,0 20,6" fill="white"/>
+            <rect x="6" y="13" width="3" height="5" fill="currentColor"/>
+            <rect x="11" y="9" width="3" height="9" fill="currentColor"/>
+            <rect x="16" y="12" width="3" height="6" fill="currentColor"/>
+        </g>
+    `,
+    'investment': `
+        <g transform="translate(6, 6)">
+            <rect x="1" y="8" width="20" height="12" fill="white"/>
+            <rect x="1" y="2" width="20" height="8" fill="white"/>
+            <rect x="4" y="0" width="4" height="4" fill="currentColor"/>
+            <rect x="10" y="0" width="4" height="4" fill="currentColor"/>
+            <rect x="16" y="0" width="4" height="4" fill="currentColor"/>
+            <rect x="4" y="10" width="3" height="6" fill="currentColor"/>
+            <rect x="9.5" y="10" width="3" height="6" fill="currentColor"/>
+            <rect x="15" y="10" width="3" height="6" fill="currentColor"/>
+        </g>
+    `,
+    'business': `
+        <g transform="translate(6, 6)">
+            <rect x="2" y="6" width="18" height="14" fill="white"/>
+            <rect x="6" y="0" width="10" height="8" fill="white"/>
+            <rect x="5" y="8" width="2" height="4" fill="currentColor"/>
+            <rect x="9" y="8" width="2" height="4" fill="currentColor"/>
+            <rect x="13" y="8" width="2" height="4" fill="currentColor"/>
+            <rect x="5" y="13" width="2" height="3" fill="currentColor"/>
+            <rect x="9" y="13" width="2" height="3" fill="currentColor"/>
+            <rect x="13" y="13" width="2" height="3" fill="currentColor"/>
+        </g>
+    `
+};
+
+function getPropertyIconSVG(type) {
+    if (!type) return PROPERTY_ICON_SVGS.villa;
+    const key = type.toLowerCase();
+    return PROPERTY_ICON_SVGS[key] || PROPERTY_ICON_SVGS.villa;
 }
 
-// Function to format price for display
-function formatPriceForMarker(property) {
-    if (property.price) {
-        return property.price;
+const markers = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    spiderfyDistanceMultiplier: 1.4,
+    maxClusterRadius: 55,
+    iconCreateFunction: function(cluster) {
+        const count = cluster.getChildCount();
+        let sizeClass = 'small';
+        if (count > 50) {
+            sizeClass = 'large';
+        } else if (count > 20) {
+            sizeClass = 'medium';
+        }
+        return L.divIcon({
+            html: '<div><span>' + count + '</span></div>',
+            className: 'marker-cluster marker-cluster-' + sizeClass,
+            iconSize: L.point(40, 40)
+        });
     }
-    return '';
-}
+});
 
-function getPropertyIcon(propertyType) {
-    if (!propertyType) {
-        return 'default.svg';
+const allMarkers = [];
+const markerById = new Map();
+
+properties.forEach(property => {
+    property.price_value = computePriceValue(property);
+    property.search_blob = [
+        property.title,
+        property.district,
+        property.location_name || '',
+        property.property_type || '',
+        property.property_type_label || ''
+    ]
+        .join(' ').toLowerCase();
+    const marker = createMarker(property);
+    marker.propertyData = property;
+    allMarkers.push(marker);
+    markerById.set(property.id, marker);
+    markers.addLayer(marker);
+});
+
+map.addLayer(markers);
+
+const filterState = {
+    search: '',
+    dealTypes: new Set(defaultDealTypes),
+    limitDeals: false,
+    propertyTypes: new Set(),
+    maxPrice: Infinity
+};
+
+const priceSlider = document.getElementById('priceRangeInput');
+const priceValueEl = document.getElementById('priceRangeValue');
+const priceResetBtn = document.getElementById('priceResetBtn');
+const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+const searchInputEl = document.getElementById('mapSearchInput');
+const dealSelect = document.getElementById('dealSelect');
+const typeSelect = document.getElementById('typeSelect');
+
+initializePriceControls();
+setupSearch();
+setupDistrictFocus();
+setupPanelToggles();
+setupPanelTabs();
+setupFloatingButtons();
+updateFavoritesIcons();
+setupGlobalReset();
+applyMapFilters();
+refreshCurrencyViews();
+
+map.whenReady(function() {
+    const loader = document.getElementById('map-loading');
+    if (loader) loader.style.display = 'none';
+});
+
+window.addEventListener('resize', function() {
+    map.invalidateSize();
+    handlePanelOnResize();
+});
+handlePanelOnResize();
+
+window.addEventListener('currencyChanged', event => {
+    const detail = event?.detail || {};
+    if (!detail.currency || !currencyMap[detail.currency]) return;
+    currentCurrencyCode = detail.currency;
+    refreshCurrencyViews();
+});
+
+function initializePriceControls() {
+    if (!priceSlider) return;
+    const values = properties.map(p => p.price_value || 0).filter(Boolean);
+    const max = values.length ? Math.max(...values) : 100000000;
+    const min = values.length ? Math.min(...values) : 0;
+    priceSlider.min = Math.max(0, Math.floor(min));
+    priceSlider.max = Math.ceil(max);
+    priceSlider.value = priceSlider.max;
+    priceValueEl.textContent = PRICE_UNLIMITED_LABEL;
+    filterState.maxPrice = Infinity;
+
+    priceSlider.addEventListener('input', function() {
+        const value = parseInt(this.value, 10);
+        if (isNaN(value) || value <= 0) {
+            filterState.maxPrice = Infinity;
+            priceValueEl.textContent = PRICE_UNLIMITED_LABEL;
+        } else {
+            filterState.maxPrice = value;
+            priceValueEl.textContent = formatPriceLabel(value);
+        }
+        applyMapFilters();
+    });
+
+    if (priceResetBtn) {
+        priceResetBtn.addEventListener('click', function() {
+            filterState.maxPrice = Infinity;
+            priceValueEl.textContent = PRICE_UNLIMITED_LABEL;
+            priceSlider.value = priceSlider.max;
+            applyMapFilters();
+        });
     }
-    const mapping = {
-        villa: 'villa.svg',
-        condo: 'condo.svg',
-        condominium: 'condo.svg',
-        apartment: 'condo.svg',
-        townhouse: 'townhouse.svg',
-        land: 'land.svg',
-        investment: 'investment.svg',
-        business: 'business.svg'
-    };
-    const key = propertyType.toLowerCase();
-    return mapping[key] || 'default.svg';
 }
 
-// Function to create custom marker
+function setupFilterChips() {
+    if (dealSelect) {
+        dealSelect.addEventListener('change', function() {
+            const value = this.value;
+            if (value === 'all') {
+                filterState.limitDeals = false;
+                filterState.dealTypes = new Set(defaultDealTypes);
+            } else {
+                filterState.limitDeals = true;
+                filterState.dealTypes = new Set([value]);
+            }
+            applyMapFilters();
+        });
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            const value = this.value;
+            if (value === 'all') {
+                filterState.propertyTypes = new Set();
+            } else {
+                filterState.propertyTypes = new Set([value]);
+            }
+            applyMapFilters();
+        });
+    }
+}
+
+function setupFilterChips() {
+    // No-op replaced by select change handlers
+}
+
+function handleDealChipClick() {}
+function syncDealChips() {}
+function syncTypeChips() {}
+function setupSearch() {
+    const searchInput = searchInputEl;
+    if (!searchInput) return;
+    let timeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            filterState.search = this.value.trim().toLowerCase();
+            applyMapFilters();
+        }, 250);
+    });
+}
+
+function setupGlobalReset() {
+    if (!resetFiltersBtn) return;
+    resetFiltersBtn.addEventListener('click', () => {
+        filterState.search = '';
+        if (searchInputEl) {
+            searchInputEl.value = '';
+        }
+
+        filterState.limitDeals = false;
+        filterState.dealTypes = new Set(defaultDealTypes);
+        syncDealChips();
+
+        filterState.propertyTypes = new Set();
+        syncTypeChips();
+
+        filterState.maxPrice = Infinity;
+        if (priceSlider) {
+            priceSlider.value = priceSlider.max || priceSlider.value;
+        }
+        if (priceValueEl) {
+            priceValueEl.textContent = PRICE_UNLIMITED_LABEL;
+        }
+
+        applyMapFilters();
+    });
+}
+
+function setupDistrictFocus() {}
+
+function setupPanelToggles() {
+    const panel = document.getElementById('mapPanel');
+    const closeBtn = document.getElementById('closePanelBtn');
+    const toggleBtn = document.getElementById('panelToggle');
+    const floatingToggle = document.getElementById('panelToggleFloating');
+    if (!panel) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'map-panel-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.background = 'rgba(0,0,0,0.35)';
+    overlay.style.zIndex = '850';
+    overlay.style.display = 'none';
+    document.body.appendChild(overlay);
+
+    function updateFloatingToggle() {
+        if (!floatingToggle) return;
+        const shouldShow = window.innerWidth < 1024 || panel.classList.contains('is-collapsed');
+        floatingToggle.classList.toggle('is-visible', shouldShow);
+    }
+
+    function togglePanel(forceState) {
+        const layout = document.getElementById('mapLayout');
+        const shouldOpen = typeof forceState === 'boolean' ? forceState : panel.classList.contains('is-collapsed');
+        if (shouldOpen) {
+            panel.classList.remove('is-collapsed');
+            panel.setAttribute('aria-hidden', 'false');
+            layout?.classList.remove('panel-hidden');
+            overlay.style.display = window.innerWidth < 1024 ? 'block' : 'none';
+        } else {
+            panel.classList.add('is-collapsed');
+            panel.setAttribute('aria-hidden', 'true');
+            layout?.classList.add('panel-hidden');
+            overlay.style.display = 'none';
+        }
+        updateFloatingToggle();
+        requestAnimationFrame(() => map.invalidateSize());
+    }
+
+    closeBtn?.addEventListener('click', () => togglePanel(false));
+    document.querySelectorAll('[data-close-panel]').forEach(btn => {
+        btn.addEventListener('click', () => togglePanel(false));
+    });
+    toggleBtn?.addEventListener('click', () => togglePanel());
+    floatingToggle?.addEventListener('click', () => togglePanel(true));
+    overlay.addEventListener('click', () => togglePanel(false));
+
+    updateFloatingToggle();
+}
+
+function setupPanelTabs() {
+    const tabContainer = document.getElementById('mapPanelTabs');
+    const tabs = tabContainer ? tabContainer.querySelectorAll('[data-panel-tab]') : [];
+    const sections = document.querySelectorAll('[data-panel-content]');
+    if (!tabs.length || !sections.length) return;
+
+    function applyTab(target) {
+        tabs.forEach(tab => tab.classList.toggle('is-active', tab.dataset.panelTab === target));
+        sections.forEach(section => {
+            if (window.innerWidth <= 1024) {
+                section.classList.toggle('is-active', section.dataset.panelContent === target);
+            } else {
+                section.classList.add('is-active');
+            }
+        });
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            applyTab(tab.dataset.panelTab);
+        });
+    });
+
+    const initialTab = tabContainer.querySelector('.map-panel-tab.is-active')?.dataset.panelTab || tabs[0].dataset.panelTab;
+    applyTab(initialTab);
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) {
+            sections.forEach(section => section.classList.add('is-active'));
+        } else {
+            const activeTab = tabContainer.querySelector('.map-panel-tab.is-active')?.dataset.panelTab || tabs[0].dataset.panelTab;
+            applyTab(activeTab);
+        }
+    });
+}
+
+function handlePanelOnResize() {
+    const panel = document.getElementById('mapPanel');
+    const overlay = document.getElementById('map-panel-overlay');
+    const floatingToggle = document.getElementById('panelToggleFloating');
+    const layout = document.querySelector('.map-layout');
+    if (!panel) return;
+    if (window.innerWidth >= 1024) {
+        panel.classList.remove('is-collapsed');
+        panel.setAttribute('aria-hidden', 'false');
+        layout?.classList.remove('panel-hidden');
+        if (overlay) overlay.style.display = 'none';
+    } else {
+        panel.classList.add('is-collapsed');
+        panel.setAttribute('aria-hidden', 'true');
+        layout?.classList.add('panel-hidden');
+        if (overlay) overlay.style.display = 'none';
+    }
+    if (floatingToggle) {
+        const shouldShow = window.innerWidth < 1024 || panel.classList.contains('is-collapsed');
+        floatingToggle.classList.toggle('is-visible', shouldShow);
+    }
+    requestAnimationFrame(() => map.invalidateSize());
+}
+
+function setupFloatingButtons() {
+    document.getElementById('geoLocateBtn')?.addEventListener('click', locateUser);
+    document.getElementById('resetViewBtn')?.addEventListener('click', () => {
+        map.setView(MAP_DEFAULT_CENTER, 11);
+    });
+}
+
+
+function computePriceValue(property) {
+    const thbValues = [property.price_sale_thb, property.price_rent_thb];
+    const usdValues = [property.price_sale_usd, property.price_rent_usd];
+    const rubValues = [property.price_sale_rub, property.price_rent_rub];
+
+    for (const value of thbValues) {
+        if (value && value > 0) return value;
+    }
+    for (const value of usdValues) {
+        if (value && value > 0) return value * 36;
+    }
+    for (const value of rubValues) {
+        if (value && value > 0) return value / 2; // приблизительный пересчет RUB -> THB
+    }
+    return 0;
+}
+
+function applyMapFilters() {
+    markers.clearLayers();
+    const filtered = [];
+
+    allMarkers.forEach(marker => {
+        const property = marker.propertyData;
+        if (!property || !property.lat || !property.lng) return;
+        if (!passesFilters(property)) return;
+        markers.addLayer(marker);
+        filtered.push(property);
+    });
+
+    updateStats(filtered);
+}
+
+function passesFilters(property) {
+    if (filterState.limitDeals && !filterState.dealTypes.has(property.deal_type)) {
+        return false;
+    }
+    if (filterState.propertyTypes.size && !filterState.propertyTypes.has(property.property_type)) {
+        return false;
+    }
+    if (filterState.search && !property.search_blob.includes(filterState.search)) {
+        return false;
+    }
+    if (filterState.maxPrice !== Infinity && property.price_value && property.price_value > filterState.maxPrice) {
+        return false;
+    }
+    return true;
+}
+
+function refreshCurrencyViews() {
+    markerById.forEach(marker => {
+        const property = marker.propertyData;
+        if (!property) return;
+        marker.setIcon(buildMarkerIcon(property));
+        const popup = marker.getPopup();
+        if (popup) {
+            popup.setContent(buildPopup(property));
+        }
+    });
+    updateFavoritesIcons();
+}
+
+function updateStats(list) {
+    const visible = list.length;
+    const sale = list.filter(p => p.deal_type === 'sale' || p.deal_type === 'both').length;
+    const rent = list.filter(p => p.deal_type === 'rent' || p.deal_type === 'both').length;
+    setText('map-visible-count', visible);
+    setText('map-visible-sale', sale);
+    setText('map-visible-rent', rent);
+    setText('map-toolbar-visible', visible);
+    setText('map-panel-apply-count', visible);
+}
+
+function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = value;
+    }
+}
+
+function formatPriceLabel(value) {
+    if (!Number.isFinite(value) || value <= 0) return PRICE_UNLIMITED_LABEL;
+    if (value >= 1_000_000) {
+        return `до ${(value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1)}M ฿`;
+    }
+    if (value >= 1_000) {
+        return `до ${(value / 1_000).toFixed(value % 1_000 === 0 ? 0 : 1)}K ฿`;
+    }
+    return `до ${value.toLocaleString('ru-RU')} ฿`;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function locateUser() {
+    if (!navigator.geolocation) {
+        showNotification('{{ i18n_geo_unsupported|escapejs }}');
+        return;
+    }
+    navigator.geolocation.getCurrentPosition(position => {
+        const coords = [position.coords.latitude, position.coords.longitude];
+        map.setView(coords, 13);
+        L.circleMarker(coords, {
+            radius: 8,
+            color: '#F1B400',
+            fillColor: '#F1B400',
+            fillOpacity: 0.6
+        }).addTo(map);
+    }, () => {
+        showNotification('{{ i18n_geo_failed|escapejs }}');
+    });
+}
+
 function createMarker(property) {
-    const iconUrl = `/static/images/markers/${getPropertyIcon(property.property_type)}`;
+    const marker = L.marker([property.lat, property.lng], { icon: buildMarkerIcon(property) });
+    marker.bindPopup(buildPopup(property), {
+        maxWidth: 340,
+        className: 'enhanced-popup'
+    });
+    return marker;
+}
+
+function buildMarkerIcon(property) {
     const markerColor = getMarkerColor(property.deal_type);
     const priceDisplay = formatPriceForMarker(property);
-    
-    // Create marker with price indicator
-    const customIcon = L.divIcon({
+    const propertyTypeLabel = property.property_type_label || '';
+
+    return L.divIcon({
         html: `
-            <div class="property-marker-container">
-                <!-- Price indicator (like Booking.com) -->
-                ${priceDisplay ? `
-                <div class="price-indicator" style="background: ${markerColor};">
-                    <span class="price-text">${priceDisplay}</span>
-                    <div class="price-arrow"></div>
-                </div>
-                ` : ''}
-                
-                <!-- Property icon marker -->
-                <div class="custom-marker" style="color: ${markerColor};">
-                    <svg width="32" height="40" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="${markerColor}"/>
-                        ${getPropertyIconSVG(property.property_type)}
-                    </svg>
+            <div class="marker-card marker-${property.deal_type || 'sale'}">
+                <div class="marker-card-body">
+                    <div class="marker-price">${priceDisplay}</div>
+                    <div class="marker-meta">
+                        <span class="marker-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 9.5L12 4L21 9.5V20H3V9.5Z" stroke="${markerColor}" stroke-width="1.5" stroke-linejoin="round"/>
+                                <path d="M9 20V12H15V20" stroke="${markerColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            ${property.district || ''}
+                        </span>
+                        ${propertyTypeLabel ? `<span class="marker-type-pill">${propertyTypeLabel}</span>` : ''}
+                    </div>
                 </div>
             </div>
         `,
         className: 'property-marker-wrapper',
-        iconSize: [140, 60], // Увеличиваем размер для размещения цены
-        iconAnchor: [70, 60], // Центрируем по горизонтали, привязка к низу
-        popupAnchor: [0, -60]
+        iconSize: [140, 70],
+        iconAnchor: [70, 70],
+        popupAnchor: [0, -70]
     });
-    
-    var marker = L.marker([property.lat, property.lng], {
-        icon: customIcon
-    });
-    
-    // Create enhanced popup content
+}
+
+function buildPopup(property) {
     const hasMultipleImages = property.images && property.images.length > 1;
-    const currentImageIndex = 0;
-    
-    var popupContent = `
+    const priceLabel = formatPriceForMarker(property) || PRICE_ON_REQUEST_LABEL;
+    return `
         <div class="property-popup">
-            <!-- Image Carousel -->
-            <div class="popup-image-container" data-property-id="${property.id}">
-                <img src="${property.images ? property.images[0] : property.image}" 
-                     alt="${property.title}" 
-                     class="popup-image" 
-                     data-image-index="0" />
-                
+            <div class="popup-media" data-property-id="${property.id}">
+                <img src="${property.images ? property.images[0] : property.image}" alt="${escapeHtml(property.title)}" class="popup-image" data-image-index="0">
+                ${property.property_type_label ? `<span class="popup-media-chip">${escapeHtml(property.property_type_label)}</span>` : ''}
+                <button class="favorite-toggle" type="button" onclick="toggleFavorite(${property.id})" title="{% trans 'В избранное' %}">
+                    <i class="far fa-heart" id="favorite-${property.id}"></i>
+                </button>
                 ${hasMultipleImages ? `
-                    <button class="image-carousel-nav prev" onclick="changePopupImage(${property.id}, -1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="image-carousel-nav next" onclick="changePopupImage(${property.id}, 1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    
+                    <button class="image-carousel-nav prev" onclick="changePopupImage(${property.id}, -1)"><i class="fas fa-chevron-left"></i></button>
+                    <button class="image-carousel-nav next" onclick="changePopupImage(${property.id}, 1)"><i class="fas fa-chevron-right"></i></button>
                     <div class="image-indicators">
                         ${property.images.map((img, index) => `
-                            <div class="image-indicator ${index === 0 ? 'active' : ''}" 
-                                 onclick="setPopupImage(${property.id}, ${index})" 
-                                 data-index="${index}"></div>
+                            <div class="image-indicator ${index === 0 ? 'active' : ''}" onclick="setPopupImage(${property.id}, ${index})" data-index="${index}"></div>
                         `).join('')}
                     </div>
                 ` : ''}
             </div>
-            
-            <!-- Content -->
-            <div class="popup-content">
-                <!-- Agent Info -->
-                <div class="popup-agent">
-                    <div class="popup-agent-name">${property.agent_name}</div>
-                    <div class="popup-agent-title">{% trans "Агент по недвижимости" %}</div>
-                </div>
-                
-                <!-- Title and Price -->
-                <div class="popup-title">${property.title}</div>
-                <div class="popup-price">${property.price}</div>
-                
-                <!-- Location -->
-                <div class="popup-location">
-                    <i class="fas fa-map-marker-alt"></i>
-                    ${property.location_name || property.district}
-                </div>
-                
-                <!-- Property Details Grid -->
-                <div class="popup-details-grid">
-                    ${property.bedrooms > 0 ? `
-                        <div class="popup-detail-item">
-                            <i class="fas fa-bed"></i>
-                            <span>${property.bedrooms} {% trans "спален" %}</span>
-                        </div>
-                    ` : ''}
-                    ${property.bathrooms > 0 ? `
-                        <div class="popup-detail-item">
-                            <i class="fas fa-bath"></i>
-                            <span>${property.bathrooms} {% trans "ванных" %}</span>
-                        </div>
-                    ` : ''}
-                    ${property.area > 0 ? `
-                        <div class="popup-detail-item">
-                            <i class="fas fa-ruler-combined"></i>
-                            <span>${property.area} {% trans "м²" %}</span>
-                        </div>
-                    ` : ''}
-                    ${property.current_floor > 0 ? `
-                        <div class="popup-detail-item">
-                            <i class="fas fa-building"></i>
-                            <span>${property.current_floor}/${property.floors} {% trans "этаж" %}</span>
-                        </div>
-                    ` : ''}
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="popup-actions">
-                    <button class="popup-button-icon" onclick="toggleFavorite(${property.id})" title="{% trans 'В избранное' %}">
-                        <i class="far fa-heart" id="favorite-${property.id}"></i>
-                    </button>
-                    
-                    <a href="https://wa.me/${property.agent_phone.replace(/[^0-9]/g, '')}?text={% trans 'Здравствуйте! Меня интересует объект' %}: ${encodeURIComponent(property.title)}" 
-                       class="popup-button popup-button-secondary" 
-                       target="_blank">
-                        <i class="fab fa-whatsapp"></i> WhatsApp
+            <div class="popup-body">
+                <div class="popup-price-row">
+                    <div class="popup-price">${priceLabel}</div>
+                    <a href="${property.url}" class="popup-link" target="_blank" rel="noopener">
+                        {% trans "Подробнее" %}
+                        <i class="fas fa-arrow-right text-xs"></i>
                     </a>
-                    
-                    <a href="${property.url}" class="popup-button popup-button-primary">
+                </div>
+                <p class="popup-title">${escapeHtml(property.title)}</p>
+                <div class="popup-location"><i class="fas fa-map-marker-alt"></i>${escapeHtml(property.location_name || property.district)}</div>
+                <div class="popup-meta">
+                    ${property.bedrooms > 0 ? `<span><i class="fas fa-bed"></i>${property.bedrooms} {% trans "спал." %}</span>` : ''}
+                    ${property.bathrooms > 0 ? `<span><i class="fas fa-shower"></i>${property.bathrooms} {% trans "ванн." %}</span>` : ''}
+                    ${property.area > 0 ? `<span><i class="fas fa-ruler-combined"></i>${property.area} {% trans "м²" %}</span>` : ''}
+                </div>
+                <div class="popup-actions">
+                    <a href="https://wa.me/${property.agent_phone.replace(/[^0-9]/g, '')}?text={% trans 'Здравствуйте! Меня интересует объект' %}: ${encodeURIComponent(property.title)}" class="popup-action whatsapp" target="_blank" rel="noopener">
+                        <i class="fab fa-whatsapp"></i>
+                        WhatsApp
+                    </a>
+                    <a href="${property.url}" class="popup-action primary" target="_blank" rel="noopener">
                         {% trans "Подробнее" %}
                     </a>
                 </div>
             </div>
         </div>
     `;
-    
-    marker.bindPopup(popupContent, {
-        maxWidth: 320,
-        className: 'enhanced-popup'
-    });
-    marker.propertyData = property;
-    
-    return marker;
 }
 
-// Add all properties to map
-properties.forEach(function(property) {
-    if (property.lat && property.lng && property.lat !== 0 && property.lng !== 0) {
-        var marker = createMarker(property);
-        allMarkers.push(marker);
-        markers.addLayer(marker);
+function formatPriceForMarker(property, currencyCode = currentCurrencyCode) {
+    const priceData = resolvePropertyPrice(property, currencyCode);
+    if (!priceData || !priceData.amount) {
+        return PRICE_ON_REQUEST_LABEL;
     }
-});
 
-// Add markers to map
-map.addLayer(markers);
+    const formatted = formatCurrencyAmount(priceData.amount, priceData.currency || currencyCode);
+    if (!formatted) return PRICE_ON_REQUEST_LABEL;
 
-// Filter functions
-function filterProperties(type) {
-    // Update button states
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active', 'bg-white', 'text-primary');
-        btn.classList.add('bg-primary', 'hover:bg-tertiary', 'text-white');
-    });
-    
-    var activeBtn = document.querySelector(`[data-type="${type}"]`);
-    activeBtn.classList.add('active', 'bg-white', 'text-primary');
-    activeBtn.classList.remove('bg-primary', 'hover:bg-tertiary', 'text-white');
-    
-    // Clear existing markers
-    markers.clearLayers();
-    
-    // Filter and add markers
-    var visibleCount = 0;
-    allMarkers.forEach(function(marker) {
-        var property = marker.propertyData;
-        var show = false;
-        
-        if (type === 'all') {
-            show = true;
-        } else if (type === 'sale' || type === 'rent') {
-            show = property.deal_type === type || property.deal_type === 'both';
-        } else {
-            show = property.property_type === type;
-        }
-        
-        if (show) {
-            markers.addLayer(marker);
-            visibleCount++;
-        }
-    });
-    
-    // Update counter
-    document.getElementById('visible-count').textContent = visibleCount;
+    if (priceData.dealType === 'rent') {
+        return `${formatted}/${PER_MONTH_SUFFIX}`;
+    }
+    return formatted;
 }
 
-// Hide loading indicator when map is ready
-map.whenReady(function() {
-    document.getElementById('map-loading').style.display = 'none';
-});
+function resolvePropertyPrice(property, currencyCode) {
+    if (!property) return null;
+    let normalizedCurrency = currencyCode && currencyMap[currencyCode] ? currencyCode : currentCurrencyCode;
+    const preferredDeal = property.deal_type === 'rent' ? 'rent' : 'sale';
+    const fallbackDeal = preferredDeal === 'sale' ? 'rent' : 'sale';
 
-// Handle map resize
-window.addEventListener('resize', function() {
-    map.invalidateSize();
-});
+    let amount = pickPriceValue(property, preferredDeal, normalizedCurrency);
+    let dealUsed = preferredDeal;
 
-// Image carousel functionality
+    if (!amount && property.deal_type === 'both') {
+        amount = pickPriceValue(property, fallbackDeal, normalizedCurrency);
+        if (amount) {
+            dealUsed = fallbackDeal;
+        }
+    }
+
+    if (!amount && normalizedCurrency !== 'THB') {
+        amount = pickPriceValue(property, dealUsed, 'THB');
+        normalizedCurrency = 'THB';
+    }
+
+    if (!amount) {
+        amount = pickPriceValue(property, fallbackDeal, 'THB');
+        if (amount) {
+            dealUsed = fallbackDeal;
+            normalizedCurrency = 'THB';
+        }
+    }
+
+    return amount ? { amount, dealType: dealUsed, currency: normalizedCurrency } : null;
+}
+
+function pickPriceValue(property, dealType, currencyCode) {
+    const fieldName = priceFieldMap[dealType]?.[currencyCode];
+    if (!fieldName) return null;
+    const value = Number(property[fieldName] || 0);
+    return value > 0 ? value : null;
+}
+
+function formatCurrencyAmount(amount, currencyCode) {
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) return null;
+    const currency = currencyMap[currencyCode] || currencyMap[currentCurrencyCode] || { symbol: '', decimal_places: 0, code: currencyCode };
+    const formatter = new Intl.NumberFormat(undefined, {
+        minimumFractionDigits: currency.decimal_places,
+        maximumFractionDigits: currency.decimal_places
+    });
+    const prefix = currency.symbol || `${currency.code || ''} `;
+    return `${prefix}${formatter.format(numericAmount)}`.trim();
+}
+
+function getMarkerColor(dealType) {
+    switch (dealType) {
+        case 'sale': return '#10b981';
+        case 'rent': return '#3b82f6';
+        case 'both': return '#8b5cf6';
+        default: return '#6b7280';
+    }
+}
+
+// Image carousel helpers remain the same as ранее
 function changePopupImage(propertyId, direction) {
     const container = document.querySelector(`[data-property-id="${propertyId}"]`);
     if (!container) return;
-    
     const img = container.querySelector('.popup-image');
     const indicators = container.querySelectorAll('.image-indicator');
-    
     if (!img || indicators.length === 0) return;
-    
-    const currentIndex = parseInt(img.dataset.imageIndex);
+    const currentIndex = parseInt(img.dataset.imageIndex, 10) || 0;
     let newIndex = currentIndex + direction;
-    
-    // Wrap around
     if (newIndex < 0) newIndex = indicators.length - 1;
     if (newIndex >= indicators.length) newIndex = 0;
-    
     setPopupImage(propertyId, newIndex);
 }
 
 function setPopupImage(propertyId, index) {
     const container = document.querySelector(`[data-property-id="${propertyId}"]`);
     if (!container) return;
-    
     const img = container.querySelector('.popup-image');
     const indicators = container.querySelectorAll('.image-indicator');
-    
     if (!img || !indicators[index]) return;
-    
-    // Find the property data
     const property = properties.find(p => p.id == propertyId);
     if (!property || !property.images) return;
-    
-    // Update image
     img.src = property.images[index];
     img.dataset.imageIndex = index;
-    
-    // Update indicators
     indicators.forEach((indicator, i) => {
         indicator.classList.toggle('active', i === index);
     });
 }
 
-// Favorites functionality
 function toggleFavorite(propertyId) {
     const icon = document.getElementById(`favorite-${propertyId}`);
     if (!icon) return;
-    
-    // Get current favorites from localStorage
     let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    
     if (favorites.includes(propertyId)) {
-        // Remove from favorites
         favorites = favorites.filter(id => id !== propertyId);
         icon.classList.remove('fas');
         icon.classList.add('far');
+        showNotification('{% trans "Удалено из избранного" %}');
     } else {
-        // Add to favorites
         favorites.push(propertyId);
         icon.classList.remove('far');
         icon.classList.add('fas');
+        showNotification('{% trans "Добавлено в избранное" %}');
     }
-    
-    // Save to localStorage
     localStorage.setItem('favorites', JSON.stringify(favorites));
-    
-    // Optional: Show notification
-    showNotification(favorites.includes(propertyId) ? 
-        '{% trans "Добавлено в избранное" %}' : 
-        '{% trans "Удалено из избранного" %}'
-    );
 }
 
-// Initialize favorites on page load
-document.addEventListener('DOMContentLoaded', function() {
+function updateFavoritesIcons() {
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     favorites.forEach(propertyId => {
         const icon = document.getElementById(`favorite-${propertyId}`);
@@ -991,29 +1974,21 @@ document.addEventListener('DOMContentLoaded', function() {
             icon.classList.add('fas');
         }
     });
-});
+}
 
-// Simple notification function
 function showNotification(message) {
-    // Create notification element
     const notification = document.createElement('div');
-    notification.className = 'fixed top-4 right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full';
+    notification.className = 'fixed top-4 right-4 bg-brand-primary text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full';
     notification.textContent = message;
-    
     document.body.appendChild(notification);
-    
-    // Slide in
-    setTimeout(() => {
-        notification.classList.remove('translate-x-full');
-    }, 100);
-    
-    // Remove after 3 seconds
+    setTimeout(() => notification.classList.remove('translate-x-full'), 50);
     setTimeout(() => {
         notification.classList.add('translate-x-full');
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 3000);
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
 }
 </script>
+{% include 'includes/home/home_data_injection.html' %}
+<script src="{% static 'js/home/featured-properties.js' %}"></script>
+<script src="{% static 'js/home/consultation.js' %}"></script>
 {% endblock %}

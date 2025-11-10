@@ -298,26 +298,109 @@ class MapView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        properties = Property.objects.filter(
+        properties_qs = Property.objects.filter(
             is_active=True,
             status='available',
             latitude__isnull=False,
             longitude__isnull=False
         ).select_related('district', 'property_type', 'agent', 'contact_person').prefetch_related('images')
 
+        properties = list(properties_qs)
+        language_code = (translation.get_language() or 'ru')[:2]
+        supported_languages = {'ru', 'en', 'th'}
+        if language_code not in supported_languages:
+            language_code = 'ru'
+
+        for prop in properties:
+            prop.localized_title = self._get_localized_value(prop, 'title', language_code)
+            if prop.property_type:
+                prop.localized_property_type = self._get_localized_value(
+                    prop.property_type,
+                    'name_display',
+                    language_code
+                ) or prop.property_type.name_display
+            if prop.district:
+                prop.district.localized_name = self._get_localized_value(prop.district, 'name', language_code)
+            if prop.location:
+                prop.localized_location_name = self._get_localized_value(prop.location, 'name', language_code)
+
         context['properties'] = properties
         context['property_types'] = PropertyType.ordered_for_navigation()
         context['districts'] = District.objects.prefetch_related('locations')
 
-        context['total_properties'] = properties.count()
-        context['sale_properties'] = properties.filter(deal_type__in=['sale', 'both']).count()
-        context['rent_properties'] = properties.filter(deal_type__in=['rent', 'both']).count()
+        context['total_properties'] = len(properties)
+        context['sale_properties'] = sum(1 for prop in properties if prop.deal_type in ['sale', 'both'])
+        context['rent_properties'] = sum(1 for prop in properties if prop.deal_type in ['rent', 'both'])
         context['districts_count'] = District.objects.filter(
             property__is_active=True,
             property__status='available'
         ).distinct().count()
 
+        # Featured properties data reused on map page
+        featured_base = Property.objects.filter(
+            is_featured=True,
+            is_active=True,
+            status='available'
+        ).select_related('district', 'property_type').prefetch_related('images')
+
+        context['featured_properties_villa'] = mark_safe(serialize_properties_for_js(
+            featured_base.filter(property_type__name='villa')[:9]
+        ))
+        context['featured_properties_condo'] = mark_safe(serialize_properties_for_js(
+            featured_base.filter(property_type__name='condo')[:9]
+        ))
+        context['featured_properties_townhouse'] = mark_safe(serialize_properties_for_js(
+            featured_base.filter(property_type__name='townhouse')[:9]
+        ))
+
+        district_coords = {}
+        for prop in properties:
+            if not prop.latitude or not prop.longitude:
+                continue
+            if prop.district_id and prop.district_id not in district_coords:
+                district_coords[prop.district_id] = (prop.latitude, prop.longitude)
+
+        focus_districts = []
+        for district in context['districts']:
+            lat, lng = district_coords.get(district.id, (None, None))
+            if lat is None or lng is None:
+                continue
+            focus_districts.append({
+                'name': district.name,
+                'lat': lat,
+                'lng': lng,
+            })
+            if len(focus_districts) >= 6:
+                break
+
+        context['district_focus_list'] = focus_districts
+
+        selected_currency_code = CurrencyService.get_selected_currency_code(self.request)
+        selected_currency = CurrencyService.get_currency_by_code(selected_currency_code)
+        active_currencies = CurrencyService.get_active_currencies()
+
+        context['selected_currency_code'] = selected_currency_code
+        context['selected_currency'] = selected_currency
+        context['map_currency_settings'] = [
+            {
+                'code': currency.code,
+                'symbol': currency.symbol,
+                'decimal_places': currency.decimal_places,
+            }
+            for currency in active_currencies
+        ]
+
         return context
+
+    @staticmethod
+    def _get_localized_value(obj, field_name, language_code):
+        if not obj:
+            return ''
+        localized_field = f"{field_name}_{language_code}"
+        value = getattr(obj, localized_field, None)
+        if value:
+            return value
+        return getattr(obj, field_name, '')
 
 
 class PrivacyView(TemplateView):
