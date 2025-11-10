@@ -2,7 +2,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponseRedirect
 # login_required decorator removed
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +17,38 @@ from apps.core.utils import build_query_string
 from .models import Property, PropertyType
 from apps.locations.models import District
 from apps.users.models import PropertyInquiry
+
+
+class DealTypeRedirectMixin:
+    """Перенаправляет на корректный раздел каталога при смене типа сделки."""
+
+    deal_type_redirects = None  # {deal_type_value: 'url_name'}
+
+    def dispatch(self, request, *args, **kwargs):
+        redirect_response = self._maybe_redirect_by_deal_type(request)
+        if redirect_response:
+            return redirect_response
+        return super().dispatch(request, *args, **kwargs)
+
+    def _maybe_redirect_by_deal_type(self, request):
+        if not self.deal_type_redirects:
+            return None
+
+        deal_type = request.GET.get('deal_type')
+        target_view = self.deal_type_redirects.get(deal_type)
+        if not target_view:
+            return None
+
+        query_params = request.GET.copy()
+        if 'deal_type' in query_params:
+            query_params.pop('deal_type')
+
+        query_string = query_params.urlencode()
+        target_url = reverse(target_view)
+        if query_string:
+            target_url = f"{target_url}?{query_string}"
+
+        return HttpResponseRedirect(target_url)
 
 
 class PropertyListView(ListView):
@@ -255,8 +287,12 @@ class PropertyListView(ListView):
         return build_query_string(self.request.GET, allowed_keys)
 
 
-class PropertySaleView(PropertyListView):
+class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
     template_name = 'properties/list.html'
+    deal_type_redirects = {
+        'rent': 'properties:property_rent',
+        '': 'properties:property_list',
+    }
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(deal_type__in=['sale', 'both'])
@@ -288,8 +324,12 @@ class PropertySaleView(PropertyListView):
         return context
 
 
-class PropertyRentView(PropertyListView):
+class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
     template_name = 'properties/list.html'
+    deal_type_redirects = {
+        'sale': 'properties:property_sale',
+        '': 'properties:property_list',
+    }
 
     def get_queryset(self):
         return super().get_queryset().filter(deal_type__in=['rent', 'both'])

@@ -150,7 +150,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     form = PropertyAdminForm
     list_display = (
         'legacy_id', 'title', 'property_type', 'district', 'deal_type', 'status',
-        'price_sale_usd', 'special_offer', 'is_active', 'is_featured',
+        'price_sale_thb', 'special_offer', 'is_active', 'is_featured',
         'views_count', 'created_at', 'translation_status'
     )
     list_filter = (
@@ -531,7 +531,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
             'fields': ('bedrooms', 'bathrooms', 'area_total', 'area_living', 'area_land', 'floor', 'floors_total')
         }),
         ('Цены', {
-            'fields': ('price_sale_usd', 'price_sale_thb', 'price_rent_monthly')
+            'fields': ('price_sale_thb', 'price_sale_usd', 'price_sale_rub', 'price_rent_monthly')
         }),
         ('Дополнительно', {
             'fields': ('developer', 'contact_person', 'year_built', 'furnished', 'pool', 'parking', 'security', 'gym')

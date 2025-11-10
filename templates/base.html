@@ -11,22 +11,6 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon/apple-touch-icon.png' %}"/>
 {#    <link rel="manifest" href="{% static 'images/favicon/site.webmanifest' %}"/>#}
     <title>{% block title %}{{ page_title }}{% endblock %}</title>
-
-
-<!-- Yandex.Metrika counter -->
-<script type="text/javascript">
-    (function(m,e,t,r,i,k,a){
-        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js', 'ym');
-
-    ym(90630603, 'init', {webvisor:true, clickmap:true, accurateTrackBounce:true, trackLinks:true});
-</script>
-<noscript><div><img src="https://mc.yandex.ru/watch/90630603" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<!-- /Yandex.Metrika counter -->
-
     <!-- SEO Meta Tags -->
     <meta name="description" content="{% block description %}{{ page_description }}{% endblock %}">
     <meta name="keywords" content="{% block keywords %}{{ page_keywords }}{% endblock %}">
@@ -156,6 +140,19 @@
     {% endblock %}
 </head>
 <body class="overflow-x-hidden">
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js', 'ym');
+
+    ym(90630603, 'init', {webvisor:true, clickmap:true, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/90630603" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
 <!-- Top Contact Bar - Desktop: top, Mobile: bottom -->
 <div id="contact-bar" class="bg-primary text-white py-2 fixed w-full z-50 transition-transform duration-300
                                  md:top-0 md:bottom-auto
