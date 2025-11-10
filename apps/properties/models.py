@@ -1,12 +1,16 @@
 import builtins
+import os
+from io import BytesIO
 
 from django.db import models
 from django.db.models import Case, When, Value, IntegerField
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
+from django.core.files.base import ContentFile
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill, ResizeToFit
+from PIL import Image
 from tinymce.models import HTMLField
 from apps.locations.models import District, Location
 
@@ -619,6 +623,8 @@ class PropertyImage(models.Model):
             PropertyImage.objects.filter(property=self.property).exclude(id=self.id).update(is_main=False)
         elif not PropertyImage.objects.filter(property=self.property, is_main=True).exists():
             self.is_main = True
+
+        self._convert_image_to_webp()
         super().save(*args, **kwargs)
 
     @staticmethod
@@ -653,6 +659,45 @@ class PropertyImage(models.Model):
             pass
 
         return self.original_url
+
+    def _convert_image_to_webp(self):
+        """Преобразовать исходный файл изображения в WebP при сохранении."""
+        image_field = getattr(self, 'image', None)
+        if not image_field:
+            return
+
+        filename = image_field.name or ''
+        if filename.lower().endswith('.webp'):
+            return
+
+        try:
+            image_field.open()
+            pil_image = Image.open(image_field)
+            pil_image.load()
+        except Exception:
+            return
+
+        buffer = None
+        try:
+            if pil_image.mode not in ('RGB', 'RGBA'):
+                # Сохраняем прозрачность, если она была, иначе конвертируем в RGB
+                target_mode = 'RGBA' if pil_image.mode in ('LA', 'P') else 'RGB'
+                pil_image = pil_image.convert(target_mode)
+
+            buffer = BytesIO()
+            pil_image.save(buffer, format='WEBP', quality=85, method=6)
+            buffer.seek(0)
+
+            base_name, _ = os.path.splitext(filename)
+            webp_name = f"{base_name}.webp"
+            self.image.save(webp_name, ContentFile(buffer.read()), save=False)
+        finally:
+            if buffer is not None:
+                buffer.close()
+            pil_image.close()
+            close_file = getattr(image_field, 'close', None)
+            if callable(close_file):
+                close_file()
 
     @builtins.property
     def thumbnail_url(self):
