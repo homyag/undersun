@@ -133,8 +133,6 @@ h6:not([class*="text-"]) {
 }
 
 .property-popup .popup-image {
-    width: 200px;
-    height: 120px;
     object-fit: cover;
     border-radius: 8px;
     margin-bottom: 10px;
@@ -301,6 +299,14 @@ h6:not([class*="text-"]) {
 
 .fade-in-up {
     animation: fadeInUp 0.6s ease-out;
+}
+
+@media (max-width: 768px) {
+    .property-card.fade-in-up {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
 }
 
 @keyframes pulse {
