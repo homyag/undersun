@@ -130,40 +130,47 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Fix pagination to work with filters using event delegation  
     document.addEventListener('click', function(e) {
-        // Check if clicked element is a pagination link
-        if (e.target.closest('.pagination-container a')) {
-            e.preventDefault();
-            
-            const link = e.target.closest('.pagination-container a');
-            
-            // Check if this is an AJAX-generated pagination link (has data-page)
-            if (link.hasAttribute('data-page')) {
-                // Let AJAX handler from main.js handle this
-                return;
-            }
-            
-            // Handle Django-generated pagination links
-            const url = new URL(link.href);
-            const page = url.searchParams.get('page');
-            
-            // Get current form data
-            const form = document.getElementById('filter-form');
-            const formData = new FormData(form);
-            
-            // Convert FormData to URLSearchParams
-            const params = new URLSearchParams();
-            for (const [key, value] of formData.entries()) {
-                if (typeof value === 'string') {
-                    params.append(key, value);
-                }
-            }
-            
-            // Add/update page parameter
-            params.set('page', page);
-            
-            // Navigate to new URL with all parameters
-            window.location.href = '?' + params.toString();
+        const paginationLink = e.target.closest('.pagination-container a');
+        if (!paginationLink) {
+            return;
         }
+
+        // Позволяем AJAX-пагинации, если ссылка используется JS из main.js
+        if (paginationLink.hasAttribute('data-page')) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const targetUrl = new URL(paginationLink.href);
+        const targetPage = targetUrl.searchParams.get('page') || '1';
+
+        const formElement = document.getElementById('filter-form');
+        if (!formElement) {
+            window.location.href = targetUrl.toString();
+            return;
+        }
+
+        const formData = new FormData(formElement);
+        const params = new URLSearchParams();
+
+        // Копируем значения из формы и игнорируем пустые поля
+        for (const [key, value] of formData.entries()) {
+            if (typeof value !== 'string' || value.trim() === '') {
+                continue;
+            }
+            if (key === 'page') {
+                continue;
+            }
+            params.append(key, value);
+        }
+
+        params.set('page', targetPage);
+        const queryString = params.toString();
+        const basePath = window.location.pathname;
+        const newUrl = queryString ? `${basePath}?${queryString}` : `${basePath}?page=${targetPage}`;
+
+        window.location.href = newUrl;
     });
     
     // Initialize favorites on page load
