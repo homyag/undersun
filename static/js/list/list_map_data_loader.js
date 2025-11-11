@@ -66,7 +66,9 @@ function updateMapMarkers() {
                     <div class="property-popup">
                         <!-- Main Image -->
                         <div class="popup-image-container">
-                            <img src="${imageUrl}" alt="${property.title}" class="popup-image" />
+                            <a href="${property.url}" class="popup-image-link" aria-label="${property.title}">
+                                <img src="${imageUrl}" alt="${property.title}" class="popup-image" />
+                            </a>
                         </div>
                         
                         <!-- Content -->
@@ -202,7 +204,9 @@ function loadCurrentPageProperties() {
             <div class="property-popup">
                 <!-- Main Image -->
                 <div class="popup-image-container">
-                    <img src="${mainImage}" alt="${title}" class="popup-image" />
+                    <a href="${link}" class="popup-image-link" aria-label="${title}">
+                        <img src="${mainImage}" alt="${title}" class="popup-image" />
+                    </a>
                 </div>
                 
                 <!-- Content -->

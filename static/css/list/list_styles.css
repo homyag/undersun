@@ -191,6 +191,16 @@ input[type="radio"]:focus {
     background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
 }
 
+.popup-image-link {
+    display: block;
+    height: 100%;
+}
+
+.popup-image-link:focus-visible {
+    outline: 2px solid #F1B400;
+    outline-offset: 2px;
+}
+
 .popup-image {
     width: 100%;
     height: 100%;
