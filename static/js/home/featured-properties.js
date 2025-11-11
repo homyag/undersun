@@ -1090,17 +1090,19 @@
             return `
             <div class="property-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden w-full h-full">
                 <div class="relative h-48">
-                    <img src="${imageUrl}" class="w-full h-full object-cover" alt="${property.title}" loading="lazy">
+                    <a href="${property.url}" class="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent" aria-label="${property.title}">
+                        <img src="${imageUrl}" class="w-full h-full object-cover" alt="${property.title}" loading="lazy">
 
-                    <!-- Special Offer Ribbon -->
-                    ${property.special_offer ?
-                    `<div class="special-offer-ribbon">
-                            <div class="ribbon-content">
-                                ${property.special_offer}
-                            </div>
-                        </div>` :
-                    ''
-                }
+                        <!-- Special Offer Ribbon -->
+                        ${property.special_offer ?
+                        `<div class="special-offer-ribbon">
+                                <div class="ribbon-content">
+                                    ${property.special_offer}
+                                </div>
+                            </div>` :
+                        ''
+                    }
+                    </a>
                     
                     <div class="absolute top-3 right-3">
                         <button class="bg-white/90 hover:bg-white w-10 h-10 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center"
