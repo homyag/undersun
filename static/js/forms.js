@@ -153,7 +153,11 @@ function submitFormAjax(form, url, successCallback = null, errorCallback = null)
 function getLanguagePrefix() {
     const path = window.location.pathname;
     const match = path.match(/^\/(ru|en|th)\//);
-    return match ? `/${match[1]}` : '/ru';
+    if (match) {
+        return `/${match[1]}`;
+    }
+    const documentLang = document.documentElement.lang?.split('-')[0] || 'en';
+    return `/${documentLang}`;
 }
 
 // Инициализация обработчиков при загрузке DOM

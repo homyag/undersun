@@ -6,6 +6,38 @@
 
 {% block title %}{{ property.title }} - Undersun Estate{% endblock %}
 
+{% block structured_data %}
+    {% load l10n %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Offer",
+      "priceCurrency": "THB",
+      "price": "{% if property.deal_type == 'rent' and property.price_rent_monthly_thb %}{{ property.price_rent_monthly_thb|unlocalize }}{% else %}{{ property.price_sale_thb|default:'0'|unlocalize }}{% endif %}",
+      "availability": "{% if property.status == 'available' %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+      "url": "{{ request.build_absolute_uri }}",
+      "itemOffered": {
+        "@type": "{% if property.property_type.name == 'condo' %}Apartment{% elif property.property_type.name == 'villa' %}SingleFamilyResidence{% elif property.property_type.name == 'townhouse' %}House{% else %}Residence{% endif %}",
+        "name": "{{ property.title|escapejs }}",
+        "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
+        "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{% static 'images/no-image.svg' %}"{% endif %}],
+        "numberOfRooms": {{ property.bedrooms|default:0 }},
+        "floorSize": {
+          "@type": "QuantitativeValue",
+          "value": {{ property.area_total|default:'0'|unlocalize }},
+          "unitCode": "MTK"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "{{ property.location.name|default:property.district.name|default:''|escapejs }}",
+          "addressRegion": "Phuket",
+          "addressCountry": "TH"
+        }
+      }
+    }
+    </script>
+{% endblock %}
+
 {% block content %}
     <!-- Property Gallery Carousel -->
     <section class="py-4 sm:py-8 mt-6 sm:mt-10">
@@ -175,6 +207,40 @@
             <!-- Breadcrumbs -->
             <div class="mt-4">
                 <nav class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 overflow-x-auto pb-2">
+                    {% url 'properties:property_rent' as rent_catalog_url %}
+                    {% url 'properties:property_sale' as sale_catalog_url %}
+                    <script type="application/ld+json">
+                    {
+                      "@context": "https://schema.org",
+                      "@type": "BreadcrumbList",
+                      "itemListElement": [
+                        {
+                          "@type": "ListItem",
+                          "position": 1,
+                          "name": "{% trans "Недвижимость" %}",
+                          "item": "{% if property.deal_type == 'rent' %}{{ rent_catalog_url }}{% else %}{{ sale_catalog_url }}{% endif %}"
+                        }{% if property.district %},
+                        {
+                          "@type": "ListItem",
+                          "position": 2,
+                          "name": "{{ property.district.name|escapejs }}",
+                          "item": "{{ property.district.get_absolute_url }}"
+                        }{% endif %}{% if property.location %},
+                        {
+                          "@type": "ListItem",
+                          "position": 3,
+                          "name": "{{ property.location.name|escapejs }}",
+                          "item": "{{ property.location.get_absolute_url }}"
+                        }{% endif %},
+                        {
+                          "@type": "ListItem",
+                          "position": {% if property.location %}4{% elif property.district %}3{% else %}2{% endif %},
+                          "name": "{{ property.title|escapejs }}",
+                          "item": "{{ property.get_absolute_url }}"
+                        }
+                      ]
+                    }
+                    </script>
                     <a href="
                             {% if property.deal_type == 'rent' %}{% url 'properties:property_rent' %}{% else %}{% url 'properties:property_sale' %}{% endif %}"
                        class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
@@ -254,7 +320,7 @@
                                 </div>
                                 {% if property.deal_type == 'sale' or property.deal_type == 'both' %}
                                     {% if property.area_total %}
-                                        <div id="price-per-sqm" class="text-sm text-gray-500 mb-3 self-start"></div>
+                                        <div id="price-per-sqm" class="text-sm text-gray-500 mb-3 self-end text-right w-full"></div>
                                     {% endif %}
                                 {% endif %}
 
@@ -368,29 +434,29 @@
                                 </div>
                             {% endif %}
 
-                            {% if property.parking %}
-                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                        <i class="fas fa-car text-primary text-xl"></i>
-                                    </div>
-                                    <div class="flex-grow">
-                                        <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
-                                        <div class="text-sm text-gray-600 font-medium">{% trans "Парковка" %}</div>
-                                    </div>
-                                </div>
-                            {% endif %}
+{#                            {% if property.parking %}#}
+{#                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">#}
+{#                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">#}
+{#                                        <i class="fas fa-car text-primary text-xl"></i>#}
+{#                                    </div>#}
+{#                                    <div class="flex-grow">#}
+{#                                        <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>#}
+{#                                        <div class="text-sm text-gray-600 font-medium">{% trans "Парковка" %}</div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            {% endif %}#}
 
-                            {% if property.pool %}
-                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">
-                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">
-                                        <i class="fas fa-swimming-pool text-primary text-xl"></i>
-                                    </div>
-                                    <div class="flex-grow">
-                                        <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>
-                                        <div class="text-sm text-gray-600 font-medium">{% trans "Бассейн" %}</div>
-                                    </div>
-                                </div>
-                            {% endif %}
+{#                            {% if property.pool %}#}
+{#                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">#}
+{#                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">#}
+{#                                        <i class="fas fa-swimming-pool text-primary text-xl"></i>#}
+{#                                    </div>#}
+{#                                    <div class="flex-grow">#}
+{#                                        <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>#}
+{#                                        <div class="text-sm text-gray-600 font-medium">{% trans "Бассейн" %}</div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            {% endif %}#}
                         </div>
                     </div>
 
@@ -733,8 +799,8 @@
                             </div>
                             <div class="flex-grow">
                                 <p class="text-sm font-medium text-white leading-relaxed">
-                                    59/358 Moo.4 T.Kathu<br>
-                                    Kathu, Phuket, Thailand
+                                    59/358 Moo.4, Kathu Sub-District, <br>
+                                    Kathu District, Phuket Province 83120
                                 </p>
                             </div>
                         </div>
@@ -847,19 +913,20 @@
 
     <!-- Gallery Modal -->
     <div id="gallery-modal"
-         class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
-        <div class="absolute inset-0 flex items-center justify-center p-4">
+         class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden transition-opacity duration-300 backdrop-blur-sm"
+         onclick="closeGallery()" data-gallery-backdrop>
+        <div class="absolute inset-0 flex items-center justify-center p-4" onclick="event.stopPropagation()" data-gallery-content>
             <div class="relative max-w-6xl w-full">
                 <!-- Header -->
-                <div class="absolute top-4 left-0 right-0 z-20 flex justify-between items-center px-6">
+                <div class="absolute top-4 left-4 z-20 hidden md:block">
                     <div class="text-white text-lg font-medium bg-black bg-opacity-50 px-4 py-2 rounded-full">
                         {{ property.title }}
                     </div>
-                    <button onclick="closeGallery()"
-                            class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110">
-                        <i class="fas fa-times"></i>
-                    </button>
                 </div>
+                <button onclick="closeGallery()"
+                        class="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110">
+                    <i class="fas fa-times"></i>
+                </button>
 
                 <!-- Main Image -->
                 <div class="relative">
@@ -874,14 +941,14 @@
                 </div>
 
                 <!-- Navigation Buttons -->
-                <div class="absolute inset-y-0 left-4 flex items-center">
+                <div class="absolute inset-y-0 left-4 hidden md:flex items-center">
                     <button onclick="previousImage()"
                             class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 </div>
 
-                <div class="absolute inset-y-0 right-4 flex items-center">
+                <div class="absolute inset-y-0 right-4 hidden md:flex items-center">
                     <button onclick="nextImage()"
                             class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 p-3 rounded-full transition-all duration-200 hover:scale-110 backdrop-blur-sm">
                         <i class="fas fa-chevron-right"></i>
@@ -889,7 +956,7 @@
                 </div>
 
                 <!-- Footer Info -->
-                <div class="absolute bottom-4 left-0 right-0 z-20 flex justify-between items-center px-6">
+                <div class="absolute bottom-4 left-0 right-0 z-20 hidden md:flex justify-between items-center px-6">
                     <div class="text-white text-sm bg-black bg-opacity-50 px-4 py-2 rounded-full backdrop-blur-sm">
                         <span id="gallery-counter">1 / 1</span>
                     </div>
@@ -907,7 +974,7 @@
 
                 <!-- Thumbnail Navigation -->
                 {% if property.images.count > 1 %}
-                    <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
+                    <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20 hidden md:block">
                         <div class="flex space-x-2 bg-black bg-opacity-50 p-2 rounded-full backdrop-blur-sm overflow-x-auto max-w-xs md:max-w-md">
                             {% for image in property.images.all %}
                                 <img src="{{ image.thumbnail_url }}" alt="{{ property.title }}"
@@ -925,7 +992,7 @@
     <!-- Viewing Modal -->
     <div id="viewing-modal"
          class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
-        <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="absolute inset-0 flex items-center justify-center p-4" onclick="event.stopPropagation()">
             <div class="relative bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
                 <!-- Header -->
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
@@ -1014,7 +1081,7 @@
     <!-- Consultation Modal -->
     <div id="consultation-modal"
          class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
-        <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="absolute inset-0 flex items-center justify-center p-4" onclick="event.stopPropagation()">
             <div class="relative bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
                 <!-- Header -->
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
@@ -1133,7 +1200,7 @@
     <!-- Callback Modal (Simple Call Request) -->
     <div id="callback-modal"
          class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300 backdrop-blur-sm">
-        <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="absolute inset-0 flex items-center justify-center p-4" onclick="event.stopPropagation()">
             <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full">
                 <!-- Header -->
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">

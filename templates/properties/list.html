@@ -3,6 +3,27 @@
 
 {% block title %}{{ page_title }}{% endblock %}
 
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "{{ page_title|default:_('Каталог недвижимости')|escapejs }}",
+      "numberOfItems": {{ properties|length|default:0 }},
+      "itemListElement": [
+        {% for property in properties|slice:":20" %}
+        {
+          "@type": "ListItem",
+          "position": {{ forloop.counter }},
+          "url": "{{ request.build_absolute_uri|add:property.get_absolute_url }}",
+          "name": "{{ property.title|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }
+    </script>
+{% endblock %}
+
 {% block content %}
 <!-- Header Banner -->
 {% include 'properties/includes/list/list_header_banner.html' %}

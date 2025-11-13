@@ -1027,6 +1027,9 @@
                                 <input type="tel" 
                                        name="phone"
                                        placeholder="${PHONE_PLACEHOLDER}" 
+                                       inputmode="tel"
+                                       pattern="^\\+?[\\d\\s\\-\\(\\)]{10,15}$"
+                                       title="${PHONE_PLACEHOLDER}"
                                        class="consultation-form-input w-full px-3 py-2 rounded-md bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                                        required>
                             </div>

@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 import environ
+from django.urls import reverse_lazy
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -58,6 +59,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'apps.core.middleware.LanguageRedirectMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -123,6 +125,12 @@ LANGUAGES = [
 LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
+
+# Language cookie settings
+LANGUAGE_COOKIE_NAME = 'language'
+LANGUAGE_COOKIE_AGE = 60 * 60 * 24 * 365  # 1 year
+LANGUAGE_COOKIE_SAMESITE = 'Lax'
+LANGUAGE_COOKIE_SECURE = env.bool('LANGUAGE_COOKIE_SECURE', default=False)
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -273,7 +281,7 @@ TINYMCE_DEFAULT_CONFIG = {
     'image_title': True,
     'automatic_uploads': True,
     'file_picker_types': 'image',
-    'images_upload_url': '/ru/blog/tinymce-upload/',
+    'images_upload_url': reverse_lazy('blog:tinymce_upload'),
 }
 
 # Translation API Settings

@@ -18,11 +18,11 @@
                 <!-- Заголовок -->
                 <h1 class="font-normal text-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white leading-snug tracking-tight sm:tracking-normal">
                     <span class="block text-base sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white">{% trans "Phuket, Thailand" %}</span>
-                    <span class="block text-accent uppercase text-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "Вся недвижимость Пхукета" %}</span>
-                    <span class="block text-accent uppercase text-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "в одном каталоге" %}</span>
+                    <span class="block text-accent uppercase text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "Вся недвижимость Пхукета" %}</span>
+                    <span class="block text-accent uppercase text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "в одном каталоге" %}</span>
                 </h1>
                 <!-- Описание -->
-                <p class="text-sm sm:text-base md:text-lg text-white font-semibold max-w-4xl mx-auto leading-relaxed">
+                <p class="text-sm sm:text-base md:text-lg text-white font-medium max-w-4xl mx-auto leading-snug sm:leading-relaxed">
                     {% trans "Undersun Estate — ваш ориентир в недвижимости Таиланда. Мы могли бы показать весь рынок, но порекомендуем только то, что действительно стоит вашего внимания." %}
                 </p>
 
@@ -43,7 +43,7 @@
                                 <div class="flex flex-col min-w-[150px] 2xl:min-w-[200px]">
                                     <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Тип" %}</label>
                                     <div class="relative mt-2">
-                                        <select name="type" class="w-full h-12 2xl:h-14 px-3 2xl:px-4 pr-10 2xl:pr-12 bg-white border border-gray-200 rounded-md text-gray-900 text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                        <select name="type" class="w-full h-11 2xl:h-14 px-3 2xl:px-4 pr-10 2xl:pr-12 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
                                             <option value="">{% trans "Все типы" %}</option>
                                             {% for type in property_types %}
                                                 <option value="{{ type.name }}">{{ type.name_display }}</option>
@@ -61,7 +61,7 @@
                                 <div class="flex flex-col min-w-[170px] 2xl:min-w-[220px]">
                                     <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Район" %}</label>
                                     <div class="relative mt-2">
-                                        <select name="location" class="w-full h-11 sm:h-12 px-3 sm:px-4 pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                        <select name="location" class="w-full h-10 sm:h-12 px-3 sm:px-4 pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
                                             <option value="">{% trans "Все районы" %}</option>
                                             {% for district in districts %}
                                                 {% if district.locations.all %}
@@ -84,13 +84,13 @@
                                 <!-- Поле "Мин. цена" -->
                                 <div class="flex flex-col min-w-[140px] 2xl:min-w-[180px]">
                                     <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Мин. цена" %}</label>
-                                    <input type="number" name="min_price" min="0" inputmode="numeric" class="mt-2 h-12 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                    <input type="number" name="min_price" min="0" inputmode="numeric" class="mt-2 h-11 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
                                 </div>
 
                                 <!-- Поле "Макс. цена" -->
                                 <div class="flex flex-col min-w-[140px] 2xl:min-w-[180px]">
                                     <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Макс. цена" %}</label>
-                                    <input type="number" name="max_price" min="0" inputmode="numeric" class="mt-2 h-12 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                    <input type="number" name="max_price" min="0" inputmode="numeric" class="mt-2 h-11 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
                                 </div>
 
                                 <!-- Кнопка поиска -->

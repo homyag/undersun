@@ -5,6 +5,45 @@
 
 {% block title %}{{ page_title|default:_("Карта недвижимости") }}{% endblock %}
 
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Map",
+  "name": "{% trans "Интерактивная карта недвижимости Undersun Estate" %}",
+  "description": "{% trans "Живые данные по объектам недвижимости Пхукета: виллы, квартиры, таунхаусы с фильтрами и актуальными ценами" %}",
+  "url": "{{ request.build_absolute_uri }}",
+  "provider": {
+    "@type": "RealEstateAgent",
+    "name": "Undersun Estate"
+  },
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "Phuket, Thailand",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 7.9519,
+      "longitude": 98.3381
+    }
+  },
+  "mentions": [
+    {% for property in properties|slice:":10" %}
+    {
+      "@type": "Place",
+      "name": "{{ property.title|escapejs }}",
+      "url": "{{ property.get_absolute_url }}",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": {{ property.latitude|default:'0'|unlocalize }},
+        "longitude": {{ property.longitude|default:'0'|unlocalize }}
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
 {% block extra_css %}
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
