@@ -63,9 +63,10 @@ function initializeSearchCounter() {
             // Показываем индикатор загрузки
             setSearchCount('...');
             
-            // Определяем языковой префикс из текущего URL
+            // Определяем языковой префикс из текущего URL или языка документа
             const currentPath = window.location.pathname;
-            const langPrefix = currentPath.match(/^\/(ru|en|th)\//)?.[0] || '/ru/';
+            const documentLang = document.documentElement.lang?.split('-')[0] || 'en';
+            const langPrefix = currentPath.match(/^\/(ru|en|th)\//)?.[0] || `/${documentLang}/`;
             
             // Fetch count from server
             fetch(`${langPrefix}property/ajax/search-count/?${params.toString()}`, {

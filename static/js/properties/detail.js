@@ -170,6 +170,7 @@ function closeGallery() {
     document.body.style.overflow = 'auto';
 }
 
+
 function updateGalleryImage() {
     if (PROPERTY_IMAGES.length > 0) {
         const galleryImage = document.getElementById('gallery-image');
@@ -725,3 +726,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('click', function (event) {
+        const modal = document.getElementById('gallery-modal');
+        if (!modal || modal.classList.contains('hidden')) {
+            return;
+        }
+        const isBackdrop = event.target.hasAttribute('data-gallery-backdrop');
+        const insideContent = event.target.closest('[data-gallery-content]');
+        if (isBackdrop && !insideContent) {
+            closeGallery();
+        }
+    });
+}
+
+

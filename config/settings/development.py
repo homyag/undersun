@@ -2,15 +2,18 @@ from .base import *
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['51.79.173.21','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['51.79.173.21','localhost','127.0.0.1', '72.60.194.3']
 
 # Database для разработки (PostgreSQL)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'undersunestate_db',
+        # 'NAME': 'testbase',
         'USER': 'undersunestate_user',
-        'PASSWORD': 'asertivcn',
+        # 'USER': 'postgres',
+        'PASSWORD': 'Idmv7p8daXca!',
+        # 'PASSWORD': '!QAZxsw2',
         'HOST': 'localhost',
         'PORT': 5432,
     }

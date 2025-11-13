@@ -20,6 +20,18 @@ window.switchConsultationTab = function (consultationId, tabName) {
 };
 
 // Handle phone callback form submission
+function showConsultationMessage(message, type = 'success') {
+    if (typeof FormsPopup !== 'undefined') {
+        if (type === 'error') {
+            FormsPopup.showError(message);
+        } else {
+            FormsPopup.showSuccess(message);
+        }
+    } else {
+        alert(message);
+    }
+}
+
 window.handlePhoneCallback = function (event, consultationId) {
     event.preventDefault();
 
@@ -28,13 +40,13 @@ window.handlePhoneCallback = function (event, consultationId) {
     const phone = phoneInput ? phoneInput.value.trim() : '';
 
     if (!phone) {
-        alert('Пожалуйста, введите номер телефона');
+        showConsultationMessage('Пожалуйста, введите номер телефона', 'error');
         return;
     }
 
     const phoneRegex = /^\+?[\d\s\-\(\)]{10,15}$/;
     if (!phoneRegex.test(phone)) {
-        alert('Пожалуйста, введите корректный номер телефона');
+        showConsultationMessage('Пожалуйста, введите корректный номер телефона', 'error');
         return;
     }
 
@@ -88,29 +100,17 @@ window.handlePhoneCallback = function (event, consultationId) {
         })
         .then(data => {
             if (data.success) {
-                if (typeof FormsPopup !== 'undefined') {
-                    FormsPopup.showSuccess(data.message || 'Спасибо! Мы свяжемся с вами в ближайшее время.');
-                } else {
-                    alert(data.message || 'Спасибо! Мы свяжемся с вами в ближайшее время.');
-                }
+                showConsultationMessage(data.message || 'Спасибо! Мы свяжемся с вами в ближайшее время.', 'success');
                 phoneInput.value = '';
                 window.switchConsultationTab(consultationId, 'whatsapp');
             } else {
                 const message = data.message || 'Произошла ошибка. Попробуйте еще раз.';
-                if (typeof FormsPopup !== 'undefined') {
-                    FormsPopup.showError(message);
-                } else {
-                    alert(message);
-                }
+                showConsultationMessage(message, 'error');
             }
         })
         .catch(error => {
             console.error('Error submitting consultation form:', error);
-            if (typeof FormsPopup !== 'undefined') {
-                FormsPopup.showError('Произошла ошибка. Попробуйте еще раз.');
-            } else {
-                alert('Произошла ошибка. Попробуйте еще раз.');
-            }
+            showConsultationMessage('Произошла ошибка. Попробуйте еще раз.', 'error');
         })
         .finally(() => {
             if (button) {

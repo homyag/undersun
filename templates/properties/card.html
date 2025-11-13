@@ -73,7 +73,7 @@
         </div>
 
         <!-- Content Section -->
-        <div class="p-5 flex-1 flex flex-col">
+        <div class="p-5 flex flex-col h-full">
             <!-- Title -->
             <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight line-clamp-2">
                 <a href="{{ property.get_absolute_url }}"
@@ -187,7 +187,7 @@
             </div>
 
             <!-- Action Button - Full Width -->
-            <a href="{{ property.get_absolute_url }}" class="block w-full bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-center text-sm group-hover:shadow-xl mt-auto">
+            <a href="{{ property.get_absolute_url }}" class="block w-full bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-center text-base sm:text-sm group-hover:shadow-xl mt-auto">
                 {% trans "Подробнее" %}
                 <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-200"></i>
             </a>

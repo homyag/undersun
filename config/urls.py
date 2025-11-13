@@ -21,7 +21,8 @@ urlpatterns = [
     path('real-estate/<path:legacy_path>/', legacy_real_estate_redirect),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),  # Robots
     path('sitemap.xml', SitemapView.as_view(), name='sitemap'),
-    path('', RedirectView.as_view(url='/ru/', permanent=True)),  # Редирект на русскую версию
+    path('7cf6s6qd8qa7ba52pdgkstaekjtk28a2.txt', TemplateView.as_view(template_name='indexnow_key.txt', content_type='text/plain')),
+    # Root handled by LanguageRedirectMiddleware
 ]
 
 # Многоязычные URL

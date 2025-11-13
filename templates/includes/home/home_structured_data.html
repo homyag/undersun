@@ -16,18 +16,18 @@
             "description": "บริษัทนายหน้าอสังหาริมทรัพย์ในภูเก็ตที่มีประสบการณ์ 10 ปี ขาย ซื้อ และเช่าอสังหาริมทรัพย์เอ็กซ์คลูซีฟ: วิลลา คอนโด ที่ดิน อสังหาริมทรัพย์เชิงพาณิชย์",
         {% endif %}
         "url": "{{ request.build_absolute_uri }}",
-  "logo": "{{ request.build_absolute_uri }}{% static 'images/logo.png' %}",
-  "image": "{{ request.build_absolute_uri }}{% static 'images/og-image.jpg' %}",
+  "logo": "{{ request.build_absolute_uri }}{% static 'images/logo_fullscreen.svg' %}",
+  "image": "{{ request.build_absolute_uri }}{% static 'images/logo_fullscreen.svg' %}",
   "telephone": "+66 63 303 3133",
   "email": "info@undersunestate.com",
   "address": {
     "@type": "PostalAddress",
         {% if LANGUAGE_CODE == 'ru' %}
-            "streetAddress": "59/358 Moo.4 T.Kathu",
+            "streetAddress": "59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120",
             "addressLocality": "Катху",
             "addressRegion": "Пхукет",
         {% elif LANGUAGE_CODE == 'en' %}
-            "streetAddress": "59/358 Moo.4 T.Kathu",
+            "streetAddress": "59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120",
             "addressLocality": "Kathu",
             "addressRegion": "Phuket",
         {% elif LANGUAGE_CODE == 'th' %}
@@ -39,8 +39,8 @@
       },
       "geo": {
         "@type": "GeoCoordinates",
-        "latitude": "7.9063",
-        "longitude": "98.3404"
+        "latitude": "7.9138837",
+        "longitude": "98.3417095"
       },
       "areaServed": {
         "@type": "Place",

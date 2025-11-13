@@ -5,6 +5,52 @@
 
 {% block title %}{% trans "Контакты" %} - Undersun Estate{% endblock %}
 
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{% trans "Контакты Undersun Estate" %}",
+  "url": "{{ request.build_absolute_uri }}",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Undersun Estate",
+    "url": "{{ request.scheme }}://{{ request.get_host }}"
+  },
+  "about": {
+    "@type": "RealEstateAgent",
+    "name": "Undersun Estate",
+    "telephone": "+66 63 303 3133",
+    "email": "info@undersunestate.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120",
+      "addressLocality": "Kathu",
+      "addressRegion": "Phuket",
+      "postalCode": "83120",
+      "addressCountry": "TH"
+    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+66 63 303 3133",
+        "contactType": "sales",
+        "areaServed": "TH",
+        "availableLanguage": ["ru", "en", "th"]
+      },
+      {
+        "@type": "ContactPoint",
+        "telephone": "+66 82 726 8615",
+        "contactType": "customer support",
+        "areaServed": "TH",
+        "availableLanguage": ["ru", "en", "th"]
+      }
+    ]
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <!-- Contact Hero -->
 <section class="relative overflow-hidden py-20 text-white">
@@ -90,7 +136,7 @@
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 mb-1">{% trans "Адрес" %}</h3>
-                            <p class="text-gray-600">221/7 Koktanod Rd, Karon, Phuket 83100, Thailand</p>
+                            <p class="text-gray-600">59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120, Thailand</p>
                         </div>
                     </div>
                     
