@@ -86,7 +86,7 @@ class HomeView(TemplateView):
             is_featured=True,
             is_active=True,
             status='available'
-        ).select_related('district', 'property_type').prefetch_related('images')
+        ).select_related('district', 'property_type').prefetch_related('images').order_by('-featured_priority', '-updated_at')
         
         context['featured_properties_villa'] = base_featured.filter(
             property_type__name='villa'
@@ -546,7 +546,7 @@ class ServiceDetailView(DetailView):
             is_featured=True,
             is_active=True,
             status='available'
-        ).select_related('district', 'property_type').prefetch_related('images')
+        ).select_related('district', 'property_type').prefetch_related('images').order_by('-featured_priority', '-updated_at')
         
         # Фильтруем по типу услуги
         if service.slug == 'buying-property':

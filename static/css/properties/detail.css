@@ -28,6 +28,15 @@
     z-index: inherit !important;
 }
 
+#contact-sidebar-wrapper {
+    position: relative;
+}
+
+#property-contact-form {
+    will-change: transform;
+}
+
+
 /* Equal height cards for similar properties grid */
 .similar-properties-grid {
     display: grid;

@@ -180,18 +180,17 @@ class SEOTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(PromotionalBanner)
 class PromotionalBannerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'language_code', 'link', 'has_desktop', 'has_tablet', 'has_mobile')
+    list_display = ('id', 'name', 'language_code', 'link', 'has_desktop', 'has_tablet', 'has_mobile')
     list_filter = ('language_code',)
     readonly_fields = ('image_recommendations',)
 
     fieldsets = (
+        (_('Основное'), {
+            'fields': ('name', 'language_code', 'link'),
+        }),
         (_('Изображения'), {
             'fields': ('desktop_image', 'tablet_image', 'mobile_image', 'image_recommendations'),
             'description': _('Загрузите отдельные версии баннера для десктопа, планшета и мобильных устройств.')
-        }),
-        (_('Настройки'), {
-            'fields': ('language_code', 'link'),
-            'description': _('Свяжите баннер с нужным языком и задайте целевую ссылку.')
         }),
     )
 

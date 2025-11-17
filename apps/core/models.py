@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 import re
+import random
 
 
 class SEOPage(models.Model):
@@ -61,6 +62,12 @@ class PromotionalBanner(models.Model):
         ('th', _('Тайский')),
     )
 
+    name = models.CharField(
+        _('Название баннера'),
+        max_length=150,
+        default='',
+        help_text=_('Внутреннее имя, чтобы не путаться между акциями в админке')
+    )
     language_code = models.CharField(
         _('Язык'),
         max_length=2,
@@ -96,29 +103,45 @@ class PromotionalBanner(models.Model):
     class Meta:
         verbose_name = _('Рекламный баннер')
         verbose_name_plural = _('Рекламные баннеры')
-        ordering = ['language_code', 'id']
+        ordering = ['language_code', 'name']
 
     def __str__(self):
         if not self.pk:
             return _('Новый баннер')
         lang_display = dict(self.LANGUAGE_CHOICES).get(self.language_code, self.language_code)
-        return f"{_('Баннер')} #{self.pk} [{lang_display}]"
+        base = self.name or f"#{self.pk}"
+        return f"{base} [{lang_display}]"
 
     @classmethod
     def get_active_banner(cls, language_code=None):
-        """Возвращает баннер для запрошенного языка (с fallback на русский)."""
+        """Совместимость: возвращает случайный баннер для языка."""
+        return cls.get_random_banner(language_code)
+
+    @classmethod
+    def get_random_banner(cls, language_code=None):
+        """Возвращает случайный баннер для языка (с fallback на русский)."""
         if language_code is None:
             from django.utils.translation import get_language
             current_language = get_language() or 'ru'
             language_code = current_language[:2]
 
-        banner = cls.objects.filter(language_code=language_code).first()
+        banner = cls._get_random_from_queryset(
+            cls.objects.filter(language_code=language_code)
+        )
         if banner:
             return banner
-        # fallback to Russian if requested language отсутствует
         if language_code != 'ru':
-            return cls.objects.filter(language_code='ru').first()
+            return cls._get_random_from_queryset(
+                cls.objects.filter(language_code='ru')
+            )
         return None
+
+    @staticmethod
+    def _get_random_from_queryset(queryset):
+        ids = list(queryset.values_list('id', flat=True))
+        if not ids:
+            return None
+        return queryset.filter(id=random.choice(ids)).first()
 
     def get_language_aware_url(self, language_code=None):
         """Получить ссылку с учётом языкового префикса (если она относительная)."""

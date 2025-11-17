@@ -22,7 +22,7 @@
                                     <source media="(min-width: 768px) and (max-width: 1023px)" srcset="{{ promotional_banner.tablet_image.url }}">
                                 {% endif %}
                                 <source media="(min-width: 1024px)" srcset="{{ promotional_banner.desktop_image.url }}">
-                                <img src="{{ fallback_src }}" alt="{% trans 'Рекламный баннер Undersun Estate' %}"
+                                <img src="{{ fallback_src }}" alt="{{ promotional_banner.name|default:_('Рекламный баннер Undersun Estate') }}"
                                      class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
                             </picture>
                         {% endwith %}
@@ -33,7 +33,7 @@
                                     <source media="(max-width: 767px)" srcset="{{ promotional_banner.mobile_image.url }}">
                                 {% endif %}
                                 <source media="(min-width: 768px) and (max-width: 1023px)" srcset="{{ promotional_banner.tablet_image.url }}">
-                                <img src="{{ fallback_src }}" alt="{% trans 'Рекламный баннер Undersun Estate' %}"
+                                <img src="{{ fallback_src }}" alt="{{ promotional_banner.name|default:_('Рекламный баннер Undersun Estate') }}"
                                      class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
                             </picture>
                         {% endwith %}
@@ -41,7 +41,7 @@
                         {% with fallback_src=promotional_banner.mobile_image.url %}
                             <picture class="block w-full overflow-hidden">
                                 <source media="(max-width: 767px)" srcset="{{ promotional_banner.mobile_image.url }}">
-                                <img src="{{ fallback_src }}" alt="{% trans 'Рекламный баннер Undersun Estate' %}"
+                                <img src="{{ fallback_src }}" alt="{{ promotional_banner.name|default:_('Рекламный баннер Undersun Estate') }}"
                                      class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
                             </picture>
                         {% endwith %}

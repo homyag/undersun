@@ -151,7 +151,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     list_display = (
         'legacy_id', 'title', 'property_type', 'district', 'deal_type', 'status',
         'price_sale_thb', 'special_offer', 'is_active', 'is_featured',
-        'views_count', 'created_at', 'translation_status'
+        'featured_priority', 'views_count', 'created_at', 'translation_status'
     )
     list_filter = (
         'is_active', 'property_type', 'district', 'deal_type',
@@ -160,9 +160,9 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     search_fields = ('legacy_id', 'title', 'description', 'address')
     prepopulated_fields = {'slug': ('title',)}
     inlines = [PropertyImageInline, PropertyFeatureInline]
-    list_editable = ('property_type', 'is_active', 'is_featured', 'status')
+    list_editable = ('property_type', 'is_active', 'is_featured', 'featured_priority', 'status')
     date_hierarchy = 'created_at'
-    ordering = ('-created_at',)
+    ordering = ('-featured_priority', '-created_at')
     
     actions = ['make_active', 'make_inactive', 'make_featured', 'make_not_featured', 'auto_translate', 'force_retranslate']
 
@@ -524,6 +524,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                 'deal_type',
                 'status',
                 'is_featured',
+                'featured_priority',
                 'is_active'
             )
         }),
