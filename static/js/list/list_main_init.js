@@ -76,10 +76,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('filter-form');
     if (form) {
         // Get all form inputs
-        const inputs = form.querySelectorAll('input, select');
+        const inputs = Array.from(form.querySelectorAll('input, select'));
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+        const currentTypeField = form.querySelector('input[name="current_property_type"]');
+        const typeUrlPrefix = form.dataset.typeUrlPrefix || '';
         
         inputs.forEach(input => {
-            if (input.name === 'sort') return; // Skip sort field
+            if (input.name === 'sort' || input.name === 'current_property_type') return; // Skip service fields
             
             const eventType = input.type === 'checkbox' || input.type === 'radio' ? 'change' : 
                             input.tagName === 'SELECT' ? 'change' : 'input';
@@ -93,6 +96,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             input.addEventListener(eventType, function() {
+                if (input.name === 'property_type' && typeUrlPrefix && currentTypeField && currentTypeField.value) {
+                    if (input.checked && input.value && input.value !== currentTypeField.value) {
+                        const formData = new FormData(form);
+                        formData.delete('property_type');
+                        formData.delete('current_property_type');
+                        const params = new URLSearchParams(formData);
+                        const queryString = params.toString();
+                        const normalizedPrefix = typeUrlPrefix.endsWith('/') ? typeUrlPrefix : `${typeUrlPrefix}/`;
+                        const targetUrl = `${normalizedPrefix}${input.value}/`;
+                        window.location.href = queryString ? `${targetUrl}?${queryString}` : targetUrl;
+                        return;
+                    }
+                }
                 // Clear any existing timeout for this specific input
                 const timeoutKey = `filterTimeout_${input.name}`;
                 clearTimeout(window[timeoutKey]);
@@ -114,16 +130,30 @@ document.addEventListener('DOMContentLoaded', function() {
                             indicator.classList.add('hidden');
                         }
                     }
-                    
+
                     // Check if we're in map view and need to preserve it after page reload
                     const currentView = localStorage.getItem('propertyViewType') || 'grid';
                     if (currentView === 'map') {
                         // Store that we want to return to map view after form submission
                         localStorage.setItem('returnToMapView', 'true');
                     }
-                    
+
                     form.submit();
                 }, delay);
+            });
+        });
+
+        // Track checkbox state before auto-submit
+        // Restore checkbox state if form submission is canceled
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('mousedown', function() {
+                checkbox.dataset.wasChecked = checkbox.checked ? 'true' : 'false';
+            });
+
+            checkbox.addEventListener('mouseup', function() {
+                if (checkbox.dataset.wasChecked) {
+                    checkbox.checked = checkbox.dataset.wasChecked !== 'true';
+                }
             });
         });
     }

@@ -4572,7 +4572,31 @@ msgstr "อสังหาริมทรัพย์สำหรับเช่
 #, fuzzy
 #| msgid "Карта недвижимости"
 msgid "Каталог недвижимости"
-msgstr "แผนที่อสังหาริมทรัพย์"
+msgstr "แคตตาล็อกอสังหาริมทรัพย์"
+
+#: apps/properties/views.py:323
+msgid "на продажу"
+msgstr "สำหรับขาย"
+
+#: apps/properties/views.py:324
+msgid "в аренду"
+msgstr "ให้เช่า"
+
+#: apps/properties/views.py:330
+msgid "в %(location)s, Пхукет, Таиланд"
+msgstr "ใน%(location)s ภูเก็ต ประเทศไทย"
+
+#: apps/properties/views.py:332
+msgid "в районе %(district)s, Пхукет, Таиланд"
+msgstr "ในย่าน%(district)s ภูเก็ต ประเทศไทย"
+
+#: apps/properties/views.py:334
+msgid "на Пхукете, Таиланд"
+msgstr "ในภูเก็ต ประเทศไทย"
+
+#: apps/properties/views.py:344
+msgid "Каталог недвижимости на Пхукете, Таиланд"
+msgstr "แคตตาล็อกอสังหาริมทรัพย์ในภูเก็ต ประเทศไทย"
 
 #: templates/properties/includes/list/list_header_banner.html:21
 #: templates/properties/list_backup.html:27

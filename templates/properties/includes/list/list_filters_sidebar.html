@@ -1,5 +1,7 @@
 {% load i18n %}
 {% load currency_tags %}
+{% load querydict_extras %}
+{% load static %}
 
 <!-- Filters Sidebar -->
 <div class="lg:col-span-1">
@@ -10,7 +12,7 @@
             </h3>
         </div>
         
-        <form method="get" action="" id="filter-form" class="p-6">
+        <form method="get" action="" id="filter-form" class="p-6" data-type-url-prefix="/{{ LANGUAGE_CODE|default:'ru' }}/property/type/">
             <!-- Hidden sort field -->
             <input type="hidden" name="sort" value="{{ request.GET.sort|default:'-created_at' }}">
             
@@ -41,14 +43,25 @@
                     {% trans "Тип недвижимости" %}
                 </h4>
                 <div class="space-y-2">
+                    {% with selected_types=request.GET|get_list:'property_type' %}
+                    {% with selected_has_types=selected_types|length %}
                     {% for property_type in property_types %}
                     <label class="flex items-center">
                         <input type="checkbox" name="property_type" value="{{ property_type.name }}" 
-                               {% if property_type.name in request.GET.property_type %}checked{% endif %} 
+                               {% if property_type.name in selected_types %}
+                                   checked
+                               {% elif not selected_has_types and current_property_type == property_type.name %}
+                                   checked
+                               {% endif %} 
                                class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded" style="accent-color: #474B57;">
                         <span class="ml-3 text-sm text-gray-700">{{ property_type.name_display }}</span>
                     </label>
                     {% endfor %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% if current_property_type %}
+                        <input type="hidden" name="current_property_type" value="{{ current_property_type }}">
+                    {% endif %}
                 </div>
             </div>
             
@@ -118,14 +131,16 @@
                     {% trans "Количество спален" %}
                 </h4>
                 <div class="space-y-2">
+                    {% with selected_bedrooms=request.GET|get_list:'bedrooms' %}
                     {% for i in "1234" %}
                     <label class="flex items-center">
                         <input type="checkbox" name="bedrooms" value="{{ i }}" 
-                               {% if i in request.GET.bedrooms %}checked{% endif %} 
+                               {% if i in selected_bedrooms %}checked{% endif %} 
                                class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded" style="accent-color: #474B57;">
                         <span class="ml-3 text-sm text-gray-700">{{ i }}{% if i == "4" %}+{% endif %} {% trans "спальня" %}</span>
                     </label>
                     {% endfor %}
+                    {% endwith %}
                 </div>
             </div>
             

@@ -15,7 +15,7 @@ from django.utils.translation import gettext, ngettext
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string
 from .models import Property, PropertyType
-from apps.locations.models import District
+from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
 
 
@@ -225,7 +225,6 @@ class PropertyListView(ListView):
         return queryset.distinct()
 
     def get_context_data(self, **kwargs):
-        from apps.locations.models import Location
         from .models import PropertyFeature
         
         context = super().get_context_data(**kwargs)
@@ -280,11 +279,71 @@ class PropertyListView(ListView):
             'many': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 5),
         }
 
+        context['seo_heading'] = self.build_seo_heading(context)
+
         return context
 
     def get_pagination_query_string(self):
         allowed_keys = list(self.PAGINATION_ALLOWED_PARAMS)
         return build_query_string(self.request.GET, allowed_keys)
+
+    def _get_primary_property_type(self, context):
+        property_type = context.get('property_type')
+        if property_type:
+            return property_type
+
+        selected_types = self.request.GET.getlist('property_type')
+        if len(selected_types) == 1:
+            return PropertyType.objects.filter(name=selected_types[0]).first()
+
+        return None
+
+    def build_seo_heading(self, context):
+        """Builds an SEO-friendly H1 based on selected filters."""
+        deal_type = context.get('deal_type') or self.request.GET.get('deal_type', '')
+        property_type_obj = self._get_primary_property_type(context)
+
+        location_slug = self.request.GET.get('location')
+        district_slug = self.request.GET.get('district')
+        location_obj = None
+        district_obj = None
+
+        if location_slug:
+            location_qs = Location.objects.select_related('district').filter(slug=location_slug)
+            if district_slug:
+                location_qs = location_qs.filter(district__slug=district_slug)
+            location_obj = location_qs.first()
+            if location_obj:
+                district_obj = location_obj.district
+
+        if not district_obj and district_slug:
+            district_obj = District.objects.filter(slug=district_slug).first()
+
+        subject = property_type_obj.name_display if property_type_obj else gettext('Недвижимость')
+        deal_phrase_map = {
+            'sale': gettext('на продажу'),
+            'rent': gettext('в аренду'),
+        }
+        deal_phrase = deal_phrase_map.get(deal_type, '')
+
+        if location_obj:
+            geo_phrase = gettext('в %(location)s, Пхукет, Таиланд') % {'location': location_obj.name}
+        elif district_obj:
+            geo_phrase = gettext('в районе %(district)s, Пхукет, Таиланд') % {'district': district_obj.name}
+        else:
+            geo_phrase = gettext('на Пхукете, Таиланд')
+
+        segments = [subject]
+        if deal_phrase:
+            segments.append(deal_phrase)
+        if geo_phrase:
+            segments.append(geo_phrase)
+
+        heading = ' '.join(seg for seg in segments if seg).strip()
+        if not heading:
+            heading = gettext('Каталог недвижимости на Пхукете, Таиланд')
+
+        return heading
 
 
 class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
@@ -321,6 +380,7 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
         context['deal_type'] = 'sale'
         if not self.request.GET.get('deal_type'):
             context['current_filters']['deal_type'] = 'sale'
+        context['seo_heading'] = self.build_seo_heading(context)
         return context
 
 
@@ -339,11 +399,59 @@ class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
         context['deal_type'] = 'rent'
         if not self.request.GET.get('deal_type'):
             context['current_filters']['deal_type'] = 'rent'
+        context['seo_heading'] = self.build_seo_heading(context)
         return context
 
 
 class PropertyByTypeView(PropertyListView):
     template_name = 'properties/list.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        redirect_response = self._maybe_redirect_by_property_type(request)
+        if redirect_response:
+            return redirect_response
+        return super().dispatch(request, *args, **kwargs)
+
+    def _maybe_redirect_by_property_type(self, request):
+        selected_types = request.GET.getlist('property_type')
+        if not selected_types:
+            return None
+
+        valid_types = set(
+            PropertyType.objects.filter(name__in=selected_types).values_list('name', flat=True)
+        )
+        if not valid_types:
+            return None
+
+        ordered_selected = [type_name for type_name in selected_types if type_name in valid_types]
+        if not ordered_selected:
+            return None
+
+        resolver_kwargs = request.resolver_match.kwargs if request.resolver_match else {}
+        current_type = resolver_kwargs.get('type_name', self.kwargs.get('type_name'))
+
+        if len(ordered_selected) == 1 and ordered_selected[0] == current_type:
+            return None
+
+        if current_type in valid_types:
+            alternative_types = [type_name for type_name in ordered_selected if type_name != current_type]
+            if not alternative_types:
+                return None
+            target_type = alternative_types[-1]
+        else:
+            target_type = ordered_selected[-1]
+
+        query_params = request.GET.copy()
+        for key in ('property_type', 'current_property_type'):
+            if key in query_params:
+                query_params.pop(key)
+
+        target_url = reverse('properties:property_by_type', args=[target_type])
+        query_string = query_params.urlencode()
+        if query_string:
+            target_url = f"{target_url}?{query_string}"
+
+        return HttpResponseRedirect(target_url)
 
     def get_queryset(self):
         type_name = self.kwargs['type_name']
@@ -359,6 +467,9 @@ class PropertyByTypeView(PropertyListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['property_type'] = self.property_type
+        context['current_property_type'] = self.property_type.name
+        context['current_filters']['property_type'] = [self.property_type.name]
+        context['seo_heading'] = self.build_seo_heading(context)
         return context
 
 

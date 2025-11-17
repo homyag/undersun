@@ -5,6 +5,7 @@
     {% if promotional_banner.desktop_image or promotional_banner.tablet_image or promotional_banner.mobile_image %}
         {% with banner_url=promotional_banner.get_language_aware_url %}
         <section class="w-full promotional-banner-section">
+            <div class="w-full">
             {% if banner_url %}
                 <a href="{{ banner_url }}" class="block group">
             {% else %}
@@ -22,7 +23,7 @@
                                 {% endif %}
                                 <source media="(min-width: 1024px)" srcset="{{ promotional_banner.desktop_image.url }}">
                                 <img src="{{ fallback_src }}" alt="{% trans 'Рекламный баннер Undersun Estate' %}"
-                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out group-hover:scale-[1.01]" loading="lazy">
+                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
                             </picture>
                         {% endwith %}
                     {% elif promotional_banner.tablet_image %}
@@ -33,7 +34,7 @@
                                 {% endif %}
                                 <source media="(min-width: 768px) and (max-width: 1023px)" srcset="{{ promotional_banner.tablet_image.url }}">
                                 <img src="{{ fallback_src }}" alt="{% trans 'Рекламный баннер Undersun Estate' %}"
-                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out group-hover:scale-[1.01]" loading="lazy">
+                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
                             </picture>
                         {% endwith %}
                     {% else %}
@@ -41,7 +42,7 @@
                             <picture class="block w-full overflow-hidden">
                                 <source media="(max-width: 767px)" srcset="{{ promotional_banner.mobile_image.url }}">
                                 <img src="{{ fallback_src }}" alt="{% trans 'Рекламный баннер Undersun Estate' %}"
-                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out group-hover:scale-[1.01]" loading="lazy">
+                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
                             </picture>
                         {% endwith %}
                     {% endif %}
@@ -51,6 +52,7 @@
             {% else %}
                 </div>
             {% endif %}
+            </div>
         </section>
         {% endwith %}
     {% endif %}

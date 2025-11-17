@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% load url_utils %}
 
 {% block title %}{{ district.name }}{{ pagination_seo_suffix }} - {% trans "Районы Пхукета" %} - Undersun Estate{% endblock %}
 
@@ -21,7 +22,7 @@
           "@type": "ListItem",
           "position": 2,
           "name": "{{ district.name|escapejs }}",
-          "item": "{{ district.get_absolute_url }}"
+          "item": "{{ district.get_absolute_url|absolute_url:request|escapejs }}"
         }
       ]
     }
@@ -38,7 +39,7 @@
           "@type": "ListItem",
           "position": {{ forloop.counter }},
           "name": "{{ property.title|escapejs }}",
-          "url": "{{ property.get_absolute_url }}"
+          "url": "{{ property.get_absolute_url|absolute_url:request|escapejs }}"
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
       ]
