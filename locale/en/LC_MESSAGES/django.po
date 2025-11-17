@@ -4191,14 +4191,6 @@ msgstr ""
 msgid "Желаемая дата и время"
 msgstr "Desired date and time"
 
-#: templates/properties/detail.html:975
-msgid "Дополнительные пожелания"
-msgstr "Additional requests"
-
-#: templates/properties/detail.html:978
-msgid "Укажите дополнительные пожелания к просмотру..."
-msgstr "Specify additional viewing requests..."
-
 #: templates/properties/detail.html:988 templates/properties/detail.html:1107
 #: templates/properties/detail.html:1175
 msgid "Отмена"
@@ -4479,6 +4471,26 @@ msgstr "Real estate for rent"
 #: templates/properties/list_backup.html:22
 msgid "Каталог недвижимости"
 msgstr "Real estate catalog"
+
+#: apps/properties/models.py:202
+msgid "Приоритет в рекомендуемых"
+msgstr "Featured priority"
+
+#: apps/properties/models.py:204
+msgid "Чем выше значение, тем раньше объект отображается в блоках рекомендаций"
+msgstr "Higher values bring the property earlier in featured blocks"
+
+#: apps/core/models.py:78
+msgid "Название баннера"
+msgstr "Banner name"
+
+#: apps/core/models.py:81
+msgid "Внутреннее имя, чтобы не путаться между акциями в админке"
+msgstr "Internal label to distinguish promos in admin"
+
+#: apps/core/admin.py:190
+msgid "Основное"
+msgstr "General"
 
 #: apps/properties/views.py:323
 msgid "на продажу"

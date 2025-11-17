@@ -546,9 +546,9 @@
                 </div>
 
                 <!-- Sidebar -->
-                <div class="lg:col-span-1">
+                <div id="contact-sidebar-wrapper" class="lg:col-span-1 lg:relative">
                     <!-- Contact Form -->
-                    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-24">
+                    <div id="property-contact-form" class="bg-white rounded-lg shadow-md p-4 sm:p-6">
                         <h3 class="text-xl font-semibold text-gray-900 mb-6">{% trans "Заинтересовались объектом?" %}</h3>
 
                         <!-- Manager Info -->
@@ -691,7 +691,8 @@
 
     <!-- Similar Properties -->
     {% if similar_properties %}
-        <section class="py-16 bg-gray-50">
+        <div id="similar-sentinel" class="block h-1" aria-hidden="true"></div>
+        <section id="similar-properties" class="py-16 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4">
                 <!-- Header -->
                 <div class="text-center mb-12">
@@ -883,7 +884,7 @@
         </section>
     {% else %}
         <!-- No Similar Properties Available -->
-        <section class="py-16 bg-gray-50">
+        <section id="similar-properties" class="py-16 bg-gray-50">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="text-center">
                     <div class="bg-white rounded-xl shadow-lg p-12 max-w-2xl mx-auto">
@@ -1037,13 +1038,6 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Желаемая дата и время" %}</label>
                             <input type="datetime-local" name="preferred_date"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Дополнительные пожелания" %}</label>
-                            <textarea name="message" rows="3"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                                      placeholder="{% trans 'Укажите дополнительные пожелания к просмотру...' %}"></textarea>
                         </div>
 
                         <div class="flex space-x-3 pt-4">

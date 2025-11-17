@@ -196,6 +196,11 @@ class Property(models.Model):
     # Мета-информация
     views_count = models.PositiveIntegerField(_('Просмотры'), default=0)
     is_featured = models.BooleanField(_('Рекомендуемое'), default=False)
+    featured_priority = models.PositiveIntegerField(
+        _('Приоритет в рекомендуемых'),
+        default=0,
+        help_text=_('Чем выше значение, тем раньше объект отображается в блоках рекомендаций')
+    )
     is_active = models.BooleanField(_('Активно'), default=True)
 
     # SEO поля (опциональные - для переопределения автогенерации)

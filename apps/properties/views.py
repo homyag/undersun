@@ -126,7 +126,7 @@ class PropertyListView(ListView):
         ordering = []
 
         if not sort_param and not self.has_active_filters():
-            ordering.append('-is_featured')
+            ordering.extend(['-featured_priority', '-is_featured'])
 
         if sort_by in allowed_sorts:
             ordering.append(sort_by)
@@ -368,7 +368,7 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
             )
             ordering = []
             if not self.has_active_filters():
-                ordering.append('-is_featured')
+                ordering.extend(['-featured_priority', '-is_featured'])
             ordering.extend(['_type_priority', '-created_at'])
 
             queryset = queryset.annotate(_type_priority=priority_case).order_by(*ordering)

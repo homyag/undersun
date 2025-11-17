@@ -170,6 +170,43 @@ function closeGallery() {
     document.body.style.overflow = 'auto';
 }
 
+function setupContactSidebarScroll() {
+    const wrapper = document.getElementById('contact-sidebar-wrapper');
+    const sidebar = document.getElementById('property-contact-form');
+    const similarSection = document.getElementById('similar-properties');
+    if (!wrapper || !sidebar || !similarSection) {
+        return;
+    }
+
+    let lastY = 0;
+
+    const onScroll = () => {
+        if (window.innerWidth < 1024) {
+            sidebar.style.transform = '';
+            return;
+        }
+
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const wrapperTop = wrapper.getBoundingClientRect().top + scrollTop;
+        const similarTop = similarSection.getBoundingClientRect().top + scrollTop;
+        const sidebarHeight = sidebar.offsetHeight;
+        const topOffset = 24;
+        const maxOffset = Math.max(0, similarTop - sidebarHeight - topOffset - wrapperTop);
+        const currentOffset = Math.max(0, Math.min(scrollTop - wrapperTop + topOffset, maxOffset));
+
+        if (Math.abs(currentOffset - lastY) > 1) {
+            sidebar.style.transform = `translateY(${currentOffset}px)`;
+            lastY = currentOffset;
+        }
+    };
+
+    ['scroll', 'resize', 'orientationchange'].forEach(eventName => {
+        window.addEventListener(eventName, onScroll, { passive: true });
+    });
+
+    onScroll();
+}
+
 
 function updateGalleryImage() {
     if (PROPERTY_IMAGES.length > 0) {
@@ -699,6 +736,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    setupContactSidebarScroll();
+
     // Close modal on outside click
     document.addEventListener('click', function (e) {
         const viewingModal = document.getElementById('viewing-modal');
@@ -741,5 +780,3 @@ if (typeof document !== 'undefined') {
         }
     });
 }
-
-

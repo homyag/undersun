@@ -4267,14 +4267,6 @@ msgstr "ระบุเวลาที่สะดวกในการดูส
 msgid "Желаемая дата и время"
 msgstr "วันที่และเวลาที่ต้องการ"
 
-#: templates/properties/detail.html:975
-msgid "Дополнительные пожелания"
-msgstr "คำขอเพิ่มเติม"
-
-#: templates/properties/detail.html:978
-msgid "Укажите дополнительные пожелания к просмотру..."
-msgstr "ระบุคำขอดูเพิ่มเติม.."
-
 #: templates/properties/detail.html:988 templates/properties/detail.html:1107
 #: templates/properties/detail.html:1175
 msgid "Отмена"
@@ -4573,6 +4565,26 @@ msgstr "อสังหาริมทรัพย์สำหรับเช่
 #| msgid "Карта недвижимости"
 msgid "Каталог недвижимости"
 msgstr "แคตตาล็อกอสังหาริมทรัพย์"
+
+#: apps/properties/models.py:202
+msgid "Приоритет в рекомендуемых"
+msgstr "ลำดับความสำคัญในรายการแนะนำ"
+
+#: apps/properties/models.py:204
+msgid "Чем выше значение, тем раньше объект отображается в блоках рекомендаций"
+msgstr "ค่าที่มากกว่าจะทำให้แสดงก่อนในบล็อกแนะนำ"
+
+#: apps/core/models.py:78
+msgid "Название баннера"
+msgstr "ชื่อแบนเนอร์"
+
+#: apps/core/models.py:81
+msgid "Внутреннее имя, чтобы не путаться между акциями в админке"
+msgstr "ชื่อภายในเพื่อไม่ให้สับสนระหว่างโปรโมชันในแอดมิน"
+
+#: apps/core/admin.py:190
+msgid "Основное"
+msgstr "ข้อมูลหลัก"
 
 #: apps/properties/views.py:323
 msgid "на продажу"
