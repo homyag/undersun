@@ -1,5 +1,13 @@
 {% load static %}
 {% load i18n %}
+{% load url_utils %}
+{% static 'images/logo_fullscreen.svg' as logo_fullscreen_path %}
+{% url 'properties:property_by_type' 'condo' as condo_type_url %}
+{% url 'properties:property_by_type' 'villa' as villa_type_url %}
+{% url 'properties:property_by_type' 'land' as land_type_url %}
+{% url 'properties:property_by_type' 'business' as business_type_url %}
+{% url 'properties:property_by_type' 'townhouse' as townhouse_type_url %}
+{% url 'properties:property_by_type' 'investment' as investment_type_url %}
 <script type="application/ld+json">
         {
           "@context": "https://schema.org",
@@ -15,9 +23,9 @@
             "alternateName": "Undersun Estate - อสังหาริมทรัพย์ในภูเก็ต",
             "description": "บริษัทนายหน้าอสังหาริมทรัพย์ในภูเก็ตที่มีประสบการณ์ 10 ปี ขาย ซื้อ และเช่าอสังหาริมทรัพย์เอ็กซ์คลูซีฟ: วิลลา คอนโด ที่ดิน อสังหาริมทรัพย์เชิงพาณิชย์",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}",
-  "logo": "{{ request.build_absolute_uri }}{% static 'images/logo_fullscreen.svg' %}",
-  "image": "{{ request.build_absolute_uri }}{% static 'images/logo_fullscreen.svg' %}",
+        "url": "{{ request.build_absolute_uri|escapejs }}",
+  "logo": "{{ logo_fullscreen_path|absolute_url:request|escapejs }}",
+  "image": "{{ logo_fullscreen_path|absolute_url:request|escapejs }}",
   "telephone": "+66 63 303 3133",
   "email": "info@undersunestate.com",
   "address": {
@@ -140,7 +148,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "อพาร์ทเมนท์",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'condo' %}"
+        "url": "{{ condo_type_url|absolute_url:request|escapejs }}"
       },
       {
         "@type": "OfferCatalog",
@@ -151,7 +159,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "วิลลา",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'villa' %}"
+        "url": "{{ villa_type_url|absolute_url:request|escapejs }}"
       },
       {
         "@type": "OfferCatalog",
@@ -162,7 +170,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "ที่ดิน",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'land' %}"
+        "url": "{{ land_type_url|absolute_url:request|escapejs }}"
       },
       {
         "@type": "OfferCatalog",
@@ -173,7 +181,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "อสังหาริมทรัพย์เชิงพาณิชย์",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'business' %}"
+        "url": "{{ business_type_url|absolute_url:request|escapejs }}"
       },
       {
         "@type": "OfferCatalog",
@@ -184,7 +192,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "ทาวน์เฮาส์",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'townhouse' %}"
+        "url": "{{ townhouse_type_url|absolute_url:request|escapejs }}"
       },
       {
         "@type": "OfferCatalog",
@@ -195,7 +203,7 @@
         {% elif LANGUAGE_CODE == 'th' %}
             "name": "การลงทุน",
         {% endif %}
-        "url": "{{ request.build_absolute_uri }}{% url 'properties:property_by_type' 'investment' %}"
+        "url": "{{ investment_type_url|absolute_url:request|escapejs }}"
       }
     ]
   },

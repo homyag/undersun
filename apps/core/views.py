@@ -11,7 +11,8 @@ from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import translation
 from django.urls import reverse
-from django.utils.translation import gettext, ngettext
+from django.utils.translation import gettext, ngettext, get_language, get_language_from_path
+from django.conf import settings
 
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string
@@ -19,6 +20,9 @@ from apps.properties.models import Property, PropertyType
 from apps.locations.models import District
 from apps.blog.models import BlogPost
 from .models import PromotionalBanner, Service, Team
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def serialize_properties_for_js(properties):
@@ -405,6 +409,15 @@ class MapView(TemplateView):
 
 class PrivacyView(TemplateView):
     template_name = 'core/privacy.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        candidate = get_language_from_path(self.request.path)
+        default_lang = getattr(self.request, 'LANGUAGE_CODE', None) or get_language() or settings.LANGUAGE_CODE
+        lang = (candidate or default_lang)[:2]
+        self.request.LANGUAGE_CODE = lang
+        context['privacy_language'] = lang
+        return context
 
 
 class TermsView(TemplateView):

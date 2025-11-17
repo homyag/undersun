@@ -4480,6 +4480,30 @@ msgstr "Real estate for rent"
 msgid "Каталог недвижимости"
 msgstr "Real estate catalog"
 
+#: apps/properties/views.py:323
+msgid "на продажу"
+msgstr "for sale"
+
+#: apps/properties/views.py:324
+msgid "в аренду"
+msgstr "for rent"
+
+#: apps/properties/views.py:330
+msgid "в %(location)s, Пхукет, Таиланд"
+msgstr "in %(location)s, Phuket, Thailand"
+
+#: apps/properties/views.py:332
+msgid "в районе %(district)s, Пхукет, Таиланд"
+msgstr "in %(district)s district, Phuket, Thailand"
+
+#: apps/properties/views.py:334
+msgid "на Пхукете, Таиланд"
+msgstr "in Phuket, Thailand"
+
+#: apps/properties/views.py:344
+msgid "Каталог недвижимости на Пхукете, Таиланд"
+msgstr "Real estate catalog in Phuket, Thailand"
+
 #: templates/properties/includes/list/list_header_banner.html:21
 #: templates/properties/list_backup.html:27
 msgid "Пхукет, Таиланд"

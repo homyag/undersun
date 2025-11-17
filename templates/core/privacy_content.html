@@ -1,0 +1,44 @@
+{% block title %}
+    {% if lang == 'en' %}Privacy & Cookies Policy - Undersun Estate{% elif lang == 'th' %}นโยบายความเป็นส่วนตัวและคุกกี้ - Undersun Estate{% else %}Политика конфиденциальности и cookie - Undersun Estate{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-r from-primary to-blue-800 py-16 text-white">
+    <div class="mx-auto max-w-5xl px-4 text-center">
+        <h1 class="text-3xl font-bold sm:text-5xl">
+            {% if lang == 'en' %}Privacy Notice{% elif lang == 'th' %}นโยบายความเป็นส่วนตัว{% else %}Политика конфиденциальности{% endif %}
+        </h1>
+        <p class="mt-4 text-base sm:text-lg opacity-90">
+            {% if lang == 'en' %}
+                Effective date: 20 October 2025. This notice explains how Undersun Estate complies with the EU General Data Protection Regulation (GDPR).
+            {% elif lang == 'th' %}
+                มีผลบังคับใช้วันที่ 20 ตุลาคม 2025 นโยบายนี้อธิบายการปฏิบัติตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)
+            {% else %}
+                Дата вступления в силу: 20 октября 2025 года. Документ составлен в соответствии с Федеральным законом № 152‑ФЗ.
+            {% endif %}
+        </p>
+    </div>
+</section>
+
+<section class="py-12">
+    <div class="mx-auto max-w-5xl space-y-10 px-4">
+        {% if lang == 'en' %}
+            {% include 'core/includes/privacy/privacy_en.html' %}
+        {% elif lang == 'th' %}
+            {% include 'core/includes/privacy/privacy_th.html' %}
+        {% else %}
+            {% include 'core/includes/privacy/privacy_ru.html' %}
+        {% endif %}
+
+        <article class="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-5 text-sm text-slate-600">
+            <h2 class="text-lg font-semibold text-slate-900">
+                {% if lang == 'en' %}Contact the Data Protection Officer{% elif lang == 'th' %}ติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคล{% else %}Контакты ответственного за защиту данных{% endif %}
+            </h2>
+            <p>Email: <a class="underline" href="mailto:privacy@undersunestate.com">privacy@undersunestate.com</a></p>
+            <p>{% if lang == 'en' %}Postal address: 9/9 Moo 6, Cherngtalay, Thalang, Phuket 83110, Thailand{% elif lang == 'th' %}ที่อยู่: 9/9 หมู่ 6 เชิงทะเล ถลาง ภูเก็ต 83110 ประเทศไทย{% else %}Почтовый адрес: 9/9 Moo 6, Cherngtalay, Thalang, Phuket 83110, Таиланд{% endif %}</p>
+            <p>{% if lang == 'en' %}Phone: +66 63 303 3133{% elif lang == 'th' %}โทร: +66 63 303 3133{% else %}Телефон: +66 63 303 3133{% endif %}</p>
+            <p>{% if lang == 'en' %}Supervisory authorities: EU Data Protection Authorities and Thailand PDPC.{% elif lang == 'th' %}หน่วยงานกำกับดูแล: สำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคล (PDPC).{% else %}Надзорные органы: Роскомнадзор и PDPC (Таиланд).{% endif %}</p>
+        </article>
+    </div>
+</section>
+{% endblock %}

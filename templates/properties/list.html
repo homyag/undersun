@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n currency_tags %}
+{% load static i18n currency_tags url_utils %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
@@ -15,7 +15,7 @@
         {
           "@type": "ListItem",
           "position": {{ forloop.counter }},
-          "url": "{{ request.build_absolute_uri|add:property.get_absolute_url }}",
+          "url": "{{ property.get_absolute_url|absolute_url:request|escapejs }}",
           "name": "{{ property.title|escapejs }}"
         }{% if not forloop.last %},{% endif %}
         {% endfor %}

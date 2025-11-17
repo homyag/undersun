@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load l10n %}
 {% load currency_tags %}
+{% load url_utils %}
 
 {% block title %}{{ property.title }} - Undersun Estate{% endblock %}
 
@@ -218,25 +219,25 @@
                           "@type": "ListItem",
                           "position": 1,
                           "name": "{% trans "Недвижимость" %}",
-                          "item": "{% if property.deal_type == 'rent' %}{{ rent_catalog_url }}{% else %}{{ sale_catalog_url }}{% endif %}"
+                          "item": "{% if property.deal_type == 'rent' %}{{ rent_catalog_url|absolute_url:request|escapejs }}{% else %}{{ sale_catalog_url|absolute_url:request|escapejs }}{% endif %}"
                         }{% if property.district %},
                         {
                           "@type": "ListItem",
                           "position": 2,
                           "name": "{{ property.district.name|escapejs }}",
-                          "item": "{{ property.district.get_absolute_url }}"
+                          "item": "{{ property.district.get_absolute_url|absolute_url:request|escapejs }}"
                         }{% endif %}{% if property.location %},
                         {
                           "@type": "ListItem",
                           "position": 3,
                           "name": "{{ property.location.name|escapejs }}",
-                          "item": "{{ property.location.get_absolute_url }}"
+                          "item": "{{ property.location.get_absolute_url|absolute_url:request|escapejs }}"
                         }{% endif %},
                         {
                           "@type": "ListItem",
                           "position": {% if property.location %}4{% elif property.district %}3{% else %}2{% endif %},
                           "name": "{{ property.title|escapejs }}",
-                          "item": "{{ property.get_absolute_url }}"
+                          "item": "{{ property.get_absolute_url|absolute_url:request|escapejs }}"
                         }
                       ]
                     }

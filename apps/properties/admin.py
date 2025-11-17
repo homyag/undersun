@@ -515,7 +515,17 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
 
     fieldsets = (
         ('Основная информация', {
-            'fields': ('legacy_id', 'title', 'slug', 'property_type', 'deal_type', 'status', 'is_featured', 'is_active')
+            'fields': (
+                'legacy_id',
+                'title',
+                'slug',
+                'district',
+                'property_type',
+                'deal_type',
+                'status',
+                'is_featured',
+                'is_active'
+            )
         }),
         ('Описание', {
             'fields': ('description', 'short_description', 'special_offer')
