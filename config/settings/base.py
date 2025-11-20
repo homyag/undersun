@@ -20,6 +20,11 @@ env_file = BASE_DIR / '.env'
 if env_file.exists():
     env.read_env(env_file)
 
+# Basic site metadata (used by structured feeds, OpenGraph, etc.)
+SITE_NAME = env('SITE_NAME', default='Undersun Estate')
+SITE_COMPANY_NAME = env('SITE_COMPANY_NAME', default='Undersun Estate Co., Ltd.')
+SITE_URL = env('SITE_URL', default='https://undersunestate.com')
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-change-me-in-production')
 

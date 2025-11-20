@@ -1,8 +1,8 @@
 from decimal import Decimal, InvalidOperation
 
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, View
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import JsonResponse, Http404, HttpResponseRedirect
+from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 # login_required decorator removed
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +17,7 @@ from apps.core.utils import build_query_string
 from .models import Property, PropertyType
 from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
+from .yml_feed import YandexYmlFeedGenerator
 
 
 class DealTypeRedirectMixin:
@@ -1275,3 +1276,20 @@ def update_image_order(request):
             'success': False,
             'message': f'Произошла ошибка: {str(e)}'
         })
+
+
+class YandexYmlFeedView(View):
+    """Serve Yandex-compatible YML feed with the current inventory."""
+
+    http_method_names = ['get']
+
+    def get(self, request, *args, **kwargs):
+        base_url = request.build_absolute_uri('/')
+        language_code = request.GET.get('lang') or getattr(request, 'LANGUAGE_CODE', 'ru')
+        generator = YandexYmlFeedGenerator(base_url=base_url, language_code=language_code)
+        feed_bytes = generator.generate()
+        response = HttpResponse(feed_bytes, content_type='application/xml; charset=utf-8')
+        response['Content-Disposition'] = 'inline; filename="yandex_realty.xml"'
+        response['X-Generated-At'] = generator.generated_at.isoformat()
+        response['X-Robots-Tag'] = 'noindex, nofollow'
+        return response

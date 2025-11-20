@@ -6,6 +6,7 @@ from django.views.generic import TemplateView, DetailView, View
 from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
+from django.utils.html import strip_tags
 from django.http import HttpResponse, HttpResponsePermanentRedirect
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
@@ -88,22 +89,51 @@ class HomeView(TemplateView):
             status='available'
         ).select_related('district', 'property_type').prefetch_related('images').order_by('-featured_priority', '-updated_at')
         
-        context['featured_properties_villa'] = base_featured.filter(
-            property_type__name='villa'
-        )[:9]  # 9 объектов для размещения 2 форм консультации
-        
-        context['featured_properties_condo'] = base_featured.filter(
-            property_type__name='condo'
-        )[:9]
-        
-        context['featured_properties_townhouse'] = base_featured.filter(
-            property_type__name='townhouse'
-        )[:9]
-        
+        featured_villa = list(base_featured.filter(property_type__name='villa')[:9])
+        featured_condo = list(base_featured.filter(property_type__name='condo')[:9])
+        featured_townhouse = list(base_featured.filter(property_type__name='townhouse')[:9])
+
+        structured_offers = []
+
+        def choose_price(prop):
+            candidates = [
+                ('price_sale_thb', 'THB'),
+                ('price_sale_usd', 'USD'),
+                ('price_sale_rub', 'RUB'),
+                ('price_rent_monthly_thb', 'THB'),
+                ('price_rent_monthly', 'USD'),
+                ('price_rent_monthly_rub', 'RUB'),
+            ]
+            for field, currency in candidates:
+                value = getattr(prop, field, None)
+                if value:
+                    return float(value), currency
+            return None, None
+
+        def append_structured(items):
+            for prop in items[:3]:
+                price_value, price_currency = choose_price(prop)
+                structured_offers.append({
+                    'name': prop.title,
+                    'url': self.request.build_absolute_uri(prop.get_absolute_url()),
+                    'description': strip_tags(prop.short_description or prop.description or ''),
+                    'image': prop.get_main_image_absolute_url(self.request),
+                    'price': price_value,
+                    'price_currency': price_currency,
+                    'deal_type': prop.get_deal_type_display(),
+                    'property_type': prop.property_type.name_display if prop.property_type else '',
+                    'address': prop.address or (str(prop.district) if prop.district else ''),
+                })
+
+        append_structured(featured_villa)
+        append_structured(featured_condo)
+        append_structured(featured_townhouse)
+        context['featured_properties_structured'] = structured_offers
+
         # Сериализация для JavaScript
-        context['featured_properties_villa'] = mark_safe(serialize_properties_for_js(context['featured_properties_villa']))
-        context['featured_properties_condo'] = mark_safe(serialize_properties_for_js(context['featured_properties_condo']))
-        context['featured_properties_townhouse'] = mark_safe(serialize_properties_for_js(context['featured_properties_townhouse']))
+        context['featured_properties_villa'] = mark_safe(serialize_properties_for_js(featured_villa))
+        context['featured_properties_condo'] = mark_safe(serialize_properties_for_js(featured_condo))
+        context['featured_properties_townhouse'] = mark_safe(serialize_properties_for_js(featured_townhouse))
 
 
         # Статистика по типам
@@ -142,6 +172,29 @@ class HomeView(TemplateView):
         context['homepage_team'] = Team.get_homepage_team()
         context['all_team'] = Team.get_all_active()
         context['hidden_team'] = Team.objects.filter(is_active=True, show_on_homepage=False).order_by('display_order', 'last_name')
+
+        context['home_services_structured'] = [
+            {
+                'name': gettext("Покупка недвижимости онлайн и офлайн"),
+                'description': gettext("Тщательный отбор объектов под ваши цели, полная проверка и сопровождение до получения ключей."),
+                'url': self.request.build_absolute_uri(reverse('core:service_detail', kwargs={'slug': 'buying-property'}))
+            },
+            {
+                'name': gettext("Продажа недвижимости"),
+                'description': gettext("Используем эффективные каналы, чтобы найти покупателя и закрыть сделку на лучших условиях."),
+                'url': self.request.build_absolute_uri(reverse('core:service_detail', kwargs={'slug': 'selling-property'}))
+            },
+            {
+                'name': gettext("Консультации по покупке недвижимости"),
+                'description': gettext("Разъясним ключевые юридические нюансы и организуем процесс оформления сделки в Таиланде."),
+                'url': self.request.build_absolute_uri(reverse('core:service_detail', kwargs={'slug': 'legal-services'}))
+            },
+            {
+                'name': gettext("Продажа земли"),
+                'description': gettext("В нашем портфеле — земля в перспективных районах Пхукета."),
+                'url': self.request.build_absolute_uri(reverse('core:service_detail', kwargs={'slug': 'land-sale'}))
+            }
+        ]
 
         return context
 
