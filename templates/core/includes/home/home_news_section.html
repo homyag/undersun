@@ -21,13 +21,17 @@
     {% if latest_news %}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         {% for news in latest_news %}
-          <article class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+          <article class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                   itemscope itemtype="https://schema.org/BlogPosting">
+            <meta itemprop="mainEntityOfPage" content="{{ news.get_absolute_url }}">
+            <meta itemprop="author" content="{{ news.get_author_display }}">
             <!-- News Image with Link -->
             <div class="relative overflow-hidden h-64">
-              <a href="{{ news.get_absolute_url }}" class="block w-full h-full">
+              <a href="{{ news.get_absolute_url }}" class="block w-full h-full" itemprop="url">
                 {% if news.featured_image %}
                   <img src="{{ news.featured_image.url }}" 
                        alt="{{ news.title }}"
+                       itemprop="image"
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 {% else %}
                   <div class="w-full h-full bg-gradient-to-br from-accent/20 to-yellow-100 flex items-center justify-center">
@@ -40,11 +44,12 @@
               <div class="absolute top-4 right-4">
                 <div class="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg">
                   <div class="text-xs font-medium text-gray-600">
-                    {% if news.published_at %}
-                      {{ news.published_at|date:"d.m.Y" }}
-                    {% else %}
-                      {{ news.created_at|date:"d.m.Y" }}
-                    {% endif %}
+                    {% with publication_date=news.published_at|default:news.created_at %}
+                      <time itemprop="datePublished" datetime="{{ publication_date|date:'c' }}">
+                        {{ publication_date|date:"d.m.Y" }}
+                      </time>
+                    {% endwith %}
+                    <meta itemprop="dateModified" content="{{ news.updated_at|date:'c' }}">
                   </div>
                 </div>
               </div>
@@ -52,14 +57,14 @@
 
             <!-- News Content -->
             <div class="p-6">
-              <h3 class="text-lg font-bold text-primary mb-3 line-clamp-2">
-                <a href="{{ news.get_absolute_url }}" class="hover:text-accent transition-colors duration-300">
+              <h3 class="text-lg font-bold text-primary mb-3 line-clamp-2" itemprop="headline">
+                <a href="{{ news.get_absolute_url }}" class="hover:text-accent transition-colors duration-300" itemprop="url">
                   {{ news.title }}
                 </a>
               </h3>
               
               {% if news.excerpt %}
-                <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+                <p class="text-gray-600 text-sm line-clamp-3 mb-4" itemprop="description">
                   {{ news.excerpt }}
                 </p>
               {% endif %}

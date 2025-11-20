@@ -8,6 +8,7 @@
 {% url 'properties:property_by_type' 'business' as business_type_url %}
 {% url 'properties:property_by_type' 'townhouse' as townhouse_type_url %}
 {% url 'properties:property_by_type' 'investment' as investment_type_url %}
+{% url 'core:search' as core_search_url %}
 <script type="application/ld+json">
         {
           "@context": "https://schema.org",
@@ -121,7 +122,7 @@
     ],
     "sameAs": [
       "https://www.facebook.com/undersunestate",
-      "https://www.instagram.com/undersunestate",
+      "https://www.instagram.com/undersun.estate/",
       "https://www.youtube.com/undersunestate",
       "https://t.me/undersunestate",
       "https://linkedin.com/company/undersunestate"
@@ -221,3 +222,173 @@
         }
       }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Undersun Estate",
+{% if LANGUAGE_CODE == 'ru' %}
+  "alternateName": "Undersun Estate – агентство недвижимости на Пхукете",
+  "description": "Агентство недвижимости на Пхукете. Подбор вилл, апартаментов, земли и коммерческих проектов с полным сопровождением сделки.",
+{% elif LANGUAGE_CODE == 'en' %}
+  "alternateName": "Undersun Estate – Phuket real estate agency",
+  "description": "Real estate agency in Phuket. Curated villas, apartments, land and commercial projects with full transaction support.",
+{% elif LANGUAGE_CODE == 'th' %}
+  "alternateName": "Undersun Estate – ตัวแทนอสังหาริมทรัพย์ในภูเก็ต",
+  "description": "บริษัทนายหน้าอสังหาริมทรัพย์ในภูเก็ต ให้บริการเลือกวิลล่า คอนโด ที่ดิน และโครงการเชิงพาณิชย์พร้อมดูแลครบทุกขั้นตอน",
+{% endif %}
+  "url": "{{ request.build_absolute_uri|escapejs }}",
+  "logo": "{{ logo_fullscreen_path|absolute_url:request|escapejs }}",
+  "sameAs": [
+    "https://www.facebook.com/undersunestate",
+    "https://www.instagram.com/undersun.estate/",
+    "https://www.youtube.com/undersunestate",
+    "https://t.me/undersunestate",
+    "https://linkedin.com/company/undersunestate"
+  ],
+  "contactPoint": [{
+    "@type": "ContactPoint",
+    "telephone": "+66 63 303 3133",
+    "contactType": "customer service",
+    "areaServed": "PH",
+    "availableLanguage": ["en", "ru", "th"],
+    "email": "info@undersunestate.com"
+  }]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Undersun Estate",
+  "url": "{{ request.build_absolute_uri|escapejs }}",
+  "image": "{{ logo_fullscreen_path|absolute_url:request|escapejs }}",
+  "priceRange": "$$",
+  "telephone": "+66 63 303 3133",
+  "email": "info@undersunestate.com",
+  "address": {
+    "@type": "PostalAddress",
+{% if LANGUAGE_CODE == 'ru' %}
+    "streetAddress": "59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120",
+    "addressLocality": "Катху",
+    "addressRegion": "Пхукет",
+{% elif LANGUAGE_CODE == 'en' %}
+    "streetAddress": "59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120",
+    "addressLocality": "Kathu",
+    "addressRegion": "Phuket",
+{% elif LANGUAGE_CODE == 'th' %}
+    "streetAddress": "59/358 หมู่ 4 ตำบลกะทู้",
+    "addressLocality": "กะทู้",
+    "addressRegion": "ภูเก็ต",
+{% endif %}
+    "postalCode": "83120",
+    "addressCountry": "TH"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "7.9138837",
+    "longitude": "98.3417095"
+  },
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "opens": "09:00",
+    "closes": "18:00"
+  }],
+  "areaServed": "Phuket"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Undersun Estate",
+  "url": "{{ request.build_absolute_uri|escapejs }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ core_search_url|absolute_url:request|escapejs }}?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{% if home_services_structured %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+{% if LANGUAGE_CODE == 'ru' %}
+  "name": "Услуги агентства Undersun Estate",
+{% elif LANGUAGE_CODE == 'en' %}
+  "name": "Undersun Estate services",
+{% elif LANGUAGE_CODE == 'th' %}
+  "name": "บริการจาก Undersun Estate",
+{% endif %}
+  "itemListElement": [
+  {% for service in home_services_structured %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter }},
+      "item": {
+        "@type": "Service",
+        "name": "{{ service.name|escapejs }}",
+        "description": "{{ service.description|escapejs }}",
+        "url": "{{ service.url|escapejs }}"
+      }
+    }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+{% if featured_properties_structured %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "OfferCatalog",
+{% if LANGUAGE_CODE == 'ru' %}
+  "name": "Избранные объекты недвижимости",
+{% elif LANGUAGE_CODE == 'en' %}
+  "name": "Featured properties",
+{% elif LANGUAGE_CODE == 'th' %}
+  "name": "อสังหาริมทรัพย์แนะนำ",
+{% endif %}
+  "itemListElement": [
+  {% for prop in featured_properties_structured %}
+    {
+      "@type": "Offer",
+      {% if prop.price is not None %}
+      "price": {{ prop.price }},
+      "priceCurrency": "{{ prop.price_currency }}",
+      {% endif %}
+      "url": "{{ prop.url|escapejs }}",
+      "itemOffered": {
+        "@type": "Residence",
+        "name": "{{ prop.name|escapejs }}",
+        {% if prop.description %}
+        "description": "{{ prop.description|truncatechars:200|escapejs }}",
+        {% endif %}
+        {% if prop.image %}
+        "image": "{{ prop.image|escapejs }}",
+        {% endif %}
+        {% if prop.address %}
+        "address": {
+          "@type": "PostalAddress",
+          "name": "{{ prop.address|escapejs }}"
+        },
+        {% endif %}
+        "url": "{{ prop.url|escapejs }}"
+      }
+    }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+  ]
+}
+</script>
+{% endif %}

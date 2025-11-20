@@ -7,6 +7,11 @@ let currentImageIndex = 0;
 let currentSlidePairIndex = 0;
 let totalSlidePairs = Math.ceil(PROPERTY_IMAGES.length / 2);
 
+const PROPERTY_I18N = window.propertyDetailTranslations || {};
+const LABEL_PRICE_ON_REQUEST = PROPERTY_I18N.priceOnRequest || 'По запросу';
+const LABEL_PER_MONTH = PROPERTY_I18N.perMonth || 'мес';
+const LABEL_PER_SQM = PROPERTY_I18N.perSqm || 'м²';
+
 // Check if we're on mobile or desktop
 function isMobile() {
     return window.innerWidth < 768; // md breakpoint
@@ -492,19 +497,19 @@ function updatePrices() {
         if (PROPERTY_DATA.deal_type === 'sale' && salePrice) {
             priceText = `${currencySymbol}${Math.round(salePrice).toLocaleString()}`;
         } else if (PROPERTY_DATA.deal_type === 'rent' && rentPrice) {
-            priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/мес`;
+            priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/${LABEL_PER_MONTH}`;
         } else if (PROPERTY_DATA.deal_type === 'both') {
             if (salePrice) {
                 priceText = `${currencySymbol}${Math.round(salePrice).toLocaleString()}`;
             } else if (rentPrice) {
-                priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/мес`;
+                priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/${LABEL_PER_MONTH}`;
             }
         }
 
         if (priceText) {
             mainPriceEl.textContent = priceText;
         } else {
-            mainPriceEl.textContent = 'По запросу';
+            mainPriceEl.textContent = LABEL_PRICE_ON_REQUEST;
         }
     }
 
@@ -514,7 +519,7 @@ function updatePrices() {
     if (pricePerSqmEl && PROPERTY_DATA.area_total && salePrice) {
         if (PROPERTY_DATA.deal_type !== 'rent') {
             const pricePerSqm = Math.round(salePrice / PROPERTY_DATA.area_total);
-            const pricePerSqmText = `${pricePerSqm.toLocaleString()} ${currencySymbol}/м²`;
+            const pricePerSqmText = `${pricePerSqm.toLocaleString()} ${currencySymbol}/${LABEL_PER_SQM}`;
             pricePerSqmEl.textContent = pricePerSqmText;
         } else {
             pricePerSqmEl.textContent = '';

@@ -172,7 +172,7 @@ def seo_context(request):
     
     # Проверяем, это ли страница конкретного объекта недвижимости
     property_detail_match = re.match(r'^/property/([^/]+)/?$', path)
-    if property_detail_match:
+    if property_detail_match and not path.startswith('/property/type/'):
         property_slug = property_detail_match.group(1)
         try:
             property_obj = Property.objects.get(slug=property_slug, is_active=True)
@@ -187,8 +187,17 @@ def seo_context(request):
     
     # Определяем имя страницы для обычных страниц
     page_name = 'home'  # по умолчанию
+    type_page_name = None
+    type_match = re.match(r'^/property/type/([^/]+)/?$', path)
+    if type_match:
+        type_slug = type_match.group(1)
+        if PropertyType.objects.filter(name=type_slug).exists():
+            type_page_name = f'properties_type_{type_slug}'
+
     if path == '/' or path == '':
         page_name = 'home'
+    elif type_page_name:
+        page_name = type_page_name
     elif path.startswith('/property/'):
         page_name = 'properties'
     elif path.startswith('/locations/'):
@@ -203,15 +212,24 @@ def seo_context(request):
         page_name = 'contact'
     
     # Получаем SEO данные для обычных страниц
+    seo_page = None
     try:
         seo_page = SEOPage.objects.get(page_name=page_name, is_active=True)
+    except SEOPage.DoesNotExist:
+        if type_page_name and page_name == type_page_name:
+            try:
+                seo_page = SEOPage.objects.get(page_name='properties', is_active=True)
+                page_name = 'properties'
+            except SEOPage.DoesNotExist:
+                seo_page = None
+
+    if seo_page:
         seo_data = {
             'page_title': seo_page.get_title(language_code),
             'page_description': seo_page.get_description(language_code),
             'page_keywords': seo_page.get_keywords(language_code),
         }
-    except SEOPage.DoesNotExist:
-        # Значения по умолчанию
+    else:
         defaults = {
             'ru': {
                 'title': 'Undersun Estate - Недвижимость на Пхукете',
@@ -229,7 +247,7 @@ def seo_context(request):
                 'keywords': 'อสังหาริมทรัพย์ภูเก็ต, วิลล่าภูเก็ต, อพาร์ตเมนต์ภูเก็ต'
             }
         }
-        
+
         lang_defaults = defaults.get(language_code, defaults['ru'])
         seo_data = {
             'page_title': lang_defaults['title'],

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-07 20:06+0700\n"
+"POT-Creation-Date: 2025-11-18 00:19+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,7 +62,7 @@ msgstr "แปล-ไทย"
 msgid "Переводы - ไทย"
 msgstr "โอนเงิน -"
 
-#: apps/blog/admin.py:110 apps/core/admin.py:188 apps/properties/models.py:610
+#: apps/blog/admin.py:110 apps/core/admin.py:191 apps/properties/models.py:619
 msgid "Изображения"
 msgstr "รูปภาพ"
 
@@ -103,21 +103,21 @@ msgid "🔄 Перевести заново (перезаписать все п�
 msgstr ",แปลอีกครั้ง(เขียนทับการแปลทั้งหมด)"
 
 #: apps/blog/models.py:10 apps/blog/models.py:324 apps/currency/models.py:10
-#: apps/locations/models.py:8 apps/locations/models.py:25
-#: apps/properties/models.py:55 apps/properties/models.py:85
-#: apps/properties/models.py:583 apps/properties/models.py:680
+#: apps/locations/models.py:8 apps/locations/models.py:32
+#: apps/properties/models.py:59 apps/properties/models.py:89
+#: apps/properties/models.py:592 apps/properties/models.py:730
 msgid "Название"
 msgstr "ชื่อเรื่อง"
 
 #: apps/blog/models.py:11 apps/blog/models.py:55 apps/blog/models.py:325
-#: apps/core/models.py:287
+#: apps/core/models.py:310
 msgid "URL-адрес"
 msgstr "สมาชิก"
 
 #: apps/blog/models.py:12 apps/locations/models.py:10
-#: apps/locations/models.py:28 apps/properties/models.py:57
-#: apps/properties/models.py:92 data_import/models.py:148
-#: templates/properties/detail.html:401
+#: apps/locations/models.py:35 apps/properties/models.py:61
+#: apps/properties/models.py:96 data_import/models.py:148
+#: templates/properties/detail.html:468
 msgid "Описание"
 msgstr "คำอธิบาย"
 
@@ -125,46 +125,44 @@ msgstr "คำอธิบาย"
 msgid "Цвет категории в формате HEX (#ffffff)"
 msgstr "สีของหมวดหมู่ในรูปแบบฐานสิบหก"
 
-#: apps/blog/models.py:17 apps/blog/models.py:125 apps/core/models.py:298
+#: apps/blog/models.py:17 apps/blog/models.py:125 apps/core/models.py:321
 msgid "SEO заголовок"
 msgstr "พาดหัวข่าว"
 
-#: apps/blog/models.py:18 apps/blog/models.py:126 apps/core/models.py:300
-#, fuzzy
-#| msgid "Описание"
+#: apps/blog/models.py:18 apps/blog/models.py:126 apps/core/models.py:323
 msgid "SEO описание"
 msgstr "คำอธิบาย"
 
-#: apps/blog/models.py:19 apps/blog/models.py:127 apps/core/models.py:302
+#: apps/blog/models.py:19 apps/blog/models.py:127 apps/core/models.py:325
 msgid "SEO ключевые слова"
 msgstr "คีย์เวิร์ด"
 
-#: apps/blog/models.py:22 apps/core/models.py:28 apps/core/models.py:216
-#: apps/core/models.py:313 apps/properties/models.py:195
+#: apps/blog/models.py:22 apps/core/models.py:29 apps/core/models.py:239
+#: apps/core/models.py:336 apps/properties/models.py:204
 msgid "Активно"
 msgstr "ใช้งาน"
 
-#: apps/blog/models.py:23 apps/properties/models.py:585
+#: apps/blog/models.py:23 apps/properties/models.py:594
 msgid "Порядок"
 msgstr "สั่งซื้อ"
 
 #: apps/blog/models.py:26 apps/blog/models.py:137 apps/blog/models.py:332
-#: apps/core/models.py:29 apps/core/models.py:217 apps/core/models.py:319
-#: apps/core/models.py:417 apps/currency/models.py:18
+#: apps/core/models.py:30 apps/core/models.py:240 apps/core/models.py:342
+#: apps/core/models.py:440 apps/currency/models.py:18
 #: apps/currency/models.py:58 apps/currency/models.py:127
-#: apps/properties/models.py:220 apps/properties/models.py:560
+#: apps/properties/models.py:229 apps/properties/models.py:569
 #: apps/users/views.py:123 apps/users/views.py:181 apps/users/views.py:250
 #: apps/users/views.py:320 apps/users/views.py:370 apps/users/views.py:469
 #: data_import/models.py:46 data_import/models.py:92 data_import/models.py:161
 msgid "Создано"
 msgstr "สร้าง"
 
-#: apps/blog/models.py:27 apps/blog/models.py:138 apps/core/models.py:30
-#: apps/core/models.py:218 apps/core/models.py:320 apps/core/models.py:418
+#: apps/blog/models.py:27 apps/blog/models.py:138 apps/core/models.py:31
+#: apps/core/models.py:241 apps/core/models.py:343 apps/core/models.py:441
 #: apps/currency/models.py:19 apps/currency/models.py:59
-#: apps/currency/models.py:128 apps/properties/models.py:221
-#: apps/properties/models.py:561 data_import/models.py:162
-#: templates/properties/card.html:66 templates/properties/detail.html:243
+#: apps/currency/models.py:128 apps/properties/models.py:230
+#: apps/properties/models.py:570 data_import/models.py:162
+#: templates/properties/card.html:61 templates/properties/detail.html:310
 msgid "Обновлено"
 msgstr "อัปเดต"
 
@@ -185,16 +183,14 @@ msgid "Опубликовано"
 msgstr "ตีพิมพ์"
 
 #: apps/blog/models.py:49
-#, fuzzy
-#| msgid "В аренду"
 msgid "В архиве"
 msgstr "เช่า"
 
-#: apps/blog/models.py:54 apps/core/models.py:291
+#: apps/blog/models.py:54 apps/core/models.py:314
 msgid "Заголовок"
 msgstr "หัวข้อ"
 
-#: apps/blog/models.py:56 apps/core/models.py:292 apps/properties/models.py:93
+#: apps/blog/models.py:56 apps/core/models.py:315 apps/properties/models.py:97
 msgid "Краткое описание"
 msgstr "คำอธิบายสั้นๆ"
 
@@ -227,38 +223,26 @@ msgid "Пользователь системы - автор статьи (уст
 msgstr "ผู้ใช้ระบบเป็นผู้เขียนบทความ(เขตข้อมูลที่ล้าสมัย)"
 
 #: apps/blog/models.py:72
-#, fuzzy
-#| msgid "Главное изображение"
 msgid "Главное изображение (RU)"
 msgstr "ภาพหลัก"
 
 #: apps/blog/models.py:75
-#, fuzzy
-#| msgid "Главное изображение статьи"
 msgid "Главное изображение статьи для русской версии"
 msgstr "ภาพหลักของบทความ"
 
 #: apps/blog/models.py:78
-#, fuzzy
-#| msgid "Главное изображение"
 msgid "Главное изображение (EN)"
 msgstr "ภาพหลัก"
 
 #: apps/blog/models.py:81
-#, fuzzy
-#| msgid "Карта недвижимости"
 msgid "Локализованное изображение статьи для английской версии"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
 #: apps/blog/models.py:84
-#, fuzzy
-#| msgid "Главное изображение"
 msgid "Главное изображение (TH)"
 msgstr "ภาพหลัก"
 
 #: apps/blog/models.py:87
-#, fuzzy
-#| msgid "Карта недвижимости"
 msgid "Локализованное изображение статьи для тайской версии"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
@@ -275,8 +259,6 @@ msgid "Для мероприятий - дата проведения"
 msgstr "สำหรับเหตุการณ์วันที่ของเหตุการณ์"
 
 #: apps/blog/models.py:94
-#, fuzzy
-#| msgid "Смотреть каталог"
 msgid "Место проведения"
 msgstr "ดูแคตตาล็อก"
 
@@ -309,38 +291,26 @@ msgid "Для обзоров - рейтинг от 1 до 5"
 msgstr "สำหรับความคิดเห็น-คะแนน 1-5"
 
 #: apps/blog/models.py:107
-#, fuzzy
-#| msgid "Оригинальный URL"
 msgid "Оригинальный URL (RU)"
 msgstr "สมาชิกเดิม"
 
 #: apps/blog/models.py:109
-#, fuzzy
-#| msgid "URL статьи на исходном сайте"
 msgid "URL русской версии статьи на исходном сайте"
 msgstr "สมาชิกของบทความบนเว็บไซต์แหล่งที่มา"
 
 #: apps/blog/models.py:112
-#, fuzzy
-#| msgid "Оригинальный URL"
 msgid "Оригинальный URL (EN)"
 msgstr "สมาชิกเดิม"
 
 #: apps/blog/models.py:114
-#, fuzzy
-#| msgid "URL статьи на исходном сайте"
 msgid "URL английской версии статьи на исходном сайте"
 msgstr "สมาชิกของบทความบนเว็บไซต์แหล่งที่มา"
 
 #: apps/blog/models.py:117
-#, fuzzy
-#| msgid "Оригинальный URL"
 msgid "Оригинальный URL (TH)"
 msgstr "สมาชิกเดิม"
 
 #: apps/blog/models.py:119
-#, fuzzy
-#| msgid "URL статьи на исходном сайте"
 msgid "URL тайской версии статьи на исходном сайте"
 msgstr "สมาชิกของบทความบนเว็บไซต์แหล่งที่มา"
 
@@ -352,7 +322,7 @@ msgstr "รหัสต้นฉบับ"
 msgid "ID статьи на исходном сайте"
 msgstr "รหัสของบทความบนเว็บไซต์แหล่งที่มา"
 
-#: apps/blog/models.py:130 apps/properties/models.py:89 apps/users/admin.py:49
+#: apps/blog/models.py:130 apps/properties/models.py:93 apps/users/admin.py:49
 #: apps/users/admin.py:75 apps/users/admin.py:97 apps/users/admin.py:112
 #: apps/users/admin.py:134 apps/users/admin.py:149 apps/users/admin.py:175
 #: apps/users/admin.py:200 apps/users/admin.py:222 apps/users/views.py:432
@@ -400,163 +370,163 @@ msgstr "แท็กบล็อก"
 msgid "Теги блога"
 msgstr "บล็อกแท็ก"
 
-#: apps/core/admin.py:190
+#: apps/core/admin.py:188
+msgid "Основное"
+msgstr "ข้อมูลหลัก"
+
+#: apps/core/admin.py:193
 msgid ""
 "Загрузите отдельные версии баннера для десктопа, планшета и мобильных "
 "устройств."
 msgstr "ดาวน์โหลดแบนเนอร์รุ่นที่แยกต่างหากสำหรับเดสก์ท็อปแท็บเล็ตและอุปกรณ์เคลื่อนที่"
 
-#: apps/core/admin.py:192 templates/users/profile.html:32
-msgid "Настройки"
-msgstr "การตั้งค่า"
-
-#: apps/core/admin.py:194
-msgid "Свяжите баннер с нужным языком и задайте целевую ссылку."
-msgstr "เชื่อมโยงแบนเนอร์กับภาษาที่ต้องการและตั้งค่าการเชื่อมโยงเป้าหมาย"
-
-#: apps/core/admin.py:201
+#: apps/core/admin.py:200
 msgid "Desktop"
 msgstr "เดสก์ท็อป"
 
-#: apps/core/admin.py:206
+#: apps/core/admin.py:205
 msgid "Tablet"
 msgstr "แท็บเล็ต"
 
-#: apps/core/admin.py:211
+#: apps/core/admin.py:210
 msgid "Mobile"
 msgstr "มือถือ"
 
-#: apps/core/admin.py:215
+#: apps/core/admin.py:214
 msgid "Рекомендации по изображениям"
 msgstr "คำแนะนำภาพ"
 
-#: apps/core/models.py:10
+#: apps/core/models.py:11
 msgid "Имя страницы"
 msgstr "ชื่อหน้า"
 
-#: apps/core/models.py:13
+#: apps/core/models.py:14
 msgid "Title (RU)"
 msgstr "ชื่อเรื่อง(รุ)"
 
-#: apps/core/models.py:14
+#: apps/core/models.py:15
 msgid "Description (RU)"
 msgstr "คำอธิบาย(รุ)"
 
-#: apps/core/models.py:15
+#: apps/core/models.py:16
 msgid "Keywords (RU)"
 msgstr "คำสำคัญ(รุ)"
 
-#: apps/core/models.py:18
+#: apps/core/models.py:19
 msgid "Title (EN)"
 msgstr "ชื่อเรื่อง(ภาษาไทย)"
 
-#: apps/core/models.py:19
+#: apps/core/models.py:20
 msgid "Description (EN)"
 msgstr "คำอธิบาย(อังกฤษ)"
 
-#: apps/core/models.py:20
+#: apps/core/models.py:21
 msgid "Keywords (EN)"
 msgstr "คำหลัก(ภาษาไทย)"
 
-#: apps/core/models.py:23
+#: apps/core/models.py:24
 msgid "Title (TH)"
 msgstr "คำนำหน้า"
 
-#: apps/core/models.py:24
+#: apps/core/models.py:25
 msgid "Description (TH)"
 msgstr "คำอธิบาย(ไทย)"
 
-#: apps/core/models.py:25
+#: apps/core/models.py:26
 msgid "Keywords (TH)"
 msgstr "คีย์เวิร์ด(ไทย)"
 
-#: apps/core/models.py:33
+#: apps/core/models.py:34
 msgid "SEO страница"
 msgstr "หน้าโซ"
 
-#: apps/core/models.py:34
+#: apps/core/models.py:35
 msgid "SEO страницы"
 msgstr "หน้าเว็บ"
 
-#: apps/core/models.py:59 apps/currency/models.py:116 templates/base.html:408
-#: templates/base.html:612
+#: apps/core/models.py:60 apps/currency/models.py:116 templates/base.html:405
+#: templates/base.html:609
 msgid "Русский"
 msgstr "ภาษารัสเซีย"
 
-#: apps/core/models.py:60 templates/base.html:414
+#: apps/core/models.py:61 templates/base.html:411
 msgid "Английский"
 msgstr "ภาษาอังกฤษ"
 
-#: apps/core/models.py:61 templates/base.html:420
+#: apps/core/models.py:62 templates/base.html:417
 msgid "Тайский"
 msgstr "ภาษาไทย"
 
-#: apps/core/models.py:65 apps/currency/models.py:121
+#: apps/core/models.py:66
+msgid "Название баннера"
+msgstr "ชื่อแบนเนอร์"
+
+#: apps/core/models.py:69
+msgid "Внутреннее имя, чтобы не путаться между акциями в админке"
+msgstr "ชื่อภายในเพื่อไม่ให้สับสนระหว่างโปรโมชันในแอดมิน"
+
+#: apps/core/models.py:72 apps/currency/models.py:121
 msgid "Язык"
 msgstr "ภาษา"
 
-#: apps/core/models.py:69
+#: apps/core/models.py:76
 msgid "Создавайте отдельные баннеры для каждого языка (RU / EN / TH)."
 msgstr "สร้างแบนเนอร์แยกต่างหากสำหรับแต่ละภาษา"
 
-#: apps/core/models.py:72
+#: apps/core/models.py:79
 msgid "Изображение для десктопа"
 msgstr "ภาพเดสก์ท็อป"
 
-#: apps/core/models.py:75
+#: apps/core/models.py:82
 msgid ""
 "Рекомендуемый размер: 2400×150 px. Держите ключевой контент в центральной "
 "зоне, края могут обрезаться."
 msgstr "ขนาดที่แนะนำ:2400×150 พิกเซล เก็บเนื้อหาที่สำคัญในพื้นที่ภาคกลางขอบสามารถตัดออก"
 
-#: apps/core/models.py:78
+#: apps/core/models.py:85
 msgid "Изображение для планшета"
 msgstr "ภาพแท็บเล็ต"
 
-#: apps/core/models.py:81
+#: apps/core/models.py:88
 msgid ""
 "Рекомендуемый размер: 1536×150 px. Фокусируйте основной контент в центре "
 "кадра."
 msgstr "ขนาดที่แนะนำ:1536×150 พิกเซล โฟกัสเนื้อหาหลักที่ตรงกลางของเฟรม"
 
-#: apps/core/models.py:84
+#: apps/core/models.py:91
 msgid "Изображение для мобильных устройств"
 msgstr "ภาพสำหรับอุปกรณ์มือถือ"
 
-#: apps/core/models.py:87
+#: apps/core/models.py:94
 msgid ""
 "Рекомендуемый размер: 828×150 px. Располагайте текст и логотип внутри "
 "центральных 60% ширины."
 msgstr "ขนาดที่แนะนำ:828×150 พิกเซล วางข้อความและโลโก้ภายในกลาง 60%ของความกว้าง"
 
-#: apps/core/models.py:90
+#: apps/core/models.py:97
 msgid "Ссылка"
 msgstr "ลิงค์"
 
-#: apps/core/models.py:93
+#: apps/core/models.py:100
 msgid ""
 "Полный URL (https://example.com), путь с языковым префиксом (/ru/path/) или "
 "имя Django URL pattern."
 msgstr ""
 "สมาชิกเต็มรูปแบบ(https://example.com นทางที่มีคำนำหน้าภาษา(/รุ/เส้นทาง/)หรือชื่อรูปแบบจังโก้"
 
-#: apps/core/models.py:97
+#: apps/core/models.py:104
 msgid "Рекламный баннер"
 msgstr "แบนเนอร์โฆษณา"
 
-#: apps/core/models.py:98
+#: apps/core/models.py:105
 msgid "Рекламные баннеры"
 msgstr "ป้ายโฆษณา"
 
-#: apps/core/models.py:103
+#: apps/core/models.py:110
 msgid "Новый баннер"
 msgstr "แบนเนอร์ใหม่"
 
-#: apps/core/models.py:105
-msgid "Баннер"
-msgstr "แบนเนอร์"
-
-#: apps/core/models.py:152
+#: apps/core/models.py:175
 msgid ""
 "Загрузите три версии баннера: 2400×150 px (desktop), 1536×150 px (tablet) и "
 "828×150 px (mobile). Важные элементы держите в центральной зоне — по ширине "
@@ -568,469 +538,460 @@ msgstr ""
 "มันมีความปลอดภัยสำหรับอุปกรณ์ทั้งหมดในแง่ของคว สร้างแบนเนอร์แยกต่างหากสำหรับแต่ละภาษา(ภาษา/"
 "ภาษา)เพื่อใช้ภาพที่มีการแปล"
 
-#: apps/core/models.py:162
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
+#: apps/core/models.py:185
 msgid "Карточка недвижимости"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
-#: apps/core/models.py:163
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
+#: apps/core/models.py:186
 msgid "Список по типу недвижимости"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
-#: apps/core/models.py:164
+#: apps/core/models.py:187
 msgid "Список по локации"
 msgstr "รายชื่อตามสถานที่ตั้ง"
 
-#: apps/core/models.py:169
-#, fuzzy
-#| msgid "Все типы"
+#: apps/core/models.py:192
 msgid "-- Все типы --"
 msgstr "ทุกประเภท"
 
-#: apps/core/models.py:170 apps/properties/models.py:17
+#: apps/core/models.py:193 apps/properties/models.py:21
 msgid "Вилла"
 msgstr "เดอะวิลล่า"
 
-#: apps/core/models.py:171
+#: apps/core/models.py:194
 msgid "Апартаменты"
 msgstr "อพาร์ทเม้นท์"
 
-#: apps/core/models.py:172 apps/properties/models.py:19
+#: apps/core/models.py:195 apps/properties/models.py:23
 msgid "Таунхаус"
 msgstr "ทาวน์เฮ้าส์"
 
-#: apps/core/models.py:173 apps/properties/models.py:20
+#: apps/core/models.py:196 apps/properties/models.py:24
 msgid "Земельный участок"
 msgstr "ที่ดิน"
 
-#: apps/core/models.py:174 apps/properties/models.py:21
-#: templates/core/contact.html:65
+#: apps/core/models.py:197 apps/properties/models.py:25
+#: templates/core/contact.html:111
 msgid "Инвестиции"
 msgstr "การลงทุน"
 
-#: apps/core/models.py:175 apps/properties/models.py:22
+#: apps/core/models.py:198 apps/properties/models.py:26
 msgid "Готовый бизнес"
 msgstr "ธุรกิจสำเร็จรูป"
 
-#: apps/core/models.py:179
-#, fuzzy
-#| msgid "Все типы"
+#: apps/core/models.py:202
 msgid "-- Все типы сделок --"
 msgstr "ทุกประเภท"
 
-#: apps/core/models.py:180 apps/properties/models.py:79
-#: templates/core/map.html:794 templates/core/map.html:921
+#: apps/core/models.py:203 apps/properties/models.py:83
+#: templates/core/map.html:1007 templates/core/map.html:1153
 #: templates/core/search.html:72 templates/properties/favorites.html:99
-#: templates/properties/includes/list/list_filters_sidebar.html:29
+#: templates/properties/includes/list/list_filters_sidebar.html:31
 #: templates/properties/list_backup.html:85
 msgid "Продажа"
 msgstr "ขาย"
 
-#: apps/core/models.py:181 apps/properties/models.py:80
-#: templates/core/map.html:799 templates/core/map.html:846
-#: templates/core/map.html:924 templates/core/search.html:73
+#: apps/core/models.py:204 apps/properties/models.py:84
+#: templates/core/map.html:1012 templates/core/map.html:1078
+#: templates/core/map.html:1156 templates/core/search.html:73
 #: templates/properties/favorites.html:100
-#: templates/properties/includes/list/list_filters_sidebar.html:33
+#: templates/properties/includes/list/list_filters_sidebar.html:35
 #: templates/properties/list_backup.html:89
 msgid "Аренда"
 msgstr "เช่า"
 
-#: apps/core/models.py:182 apps/properties/models.py:81
+#: apps/core/models.py:205 apps/properties/models.py:85
 #: templates/core/search.html:71 templates/properties/favorites.html:101
 msgid "Продажа/Аренда"
 msgstr "ขาย/เช่า"
 
-#: apps/core/models.py:186
+#: apps/core/models.py:209
 msgid "Название шаблона"
 msgstr "ชื่อเทมเพลต"
 
-#: apps/core/models.py:187
+#: apps/core/models.py:210
 msgid "Тип шаблона"
 msgstr "ประเภทแม่แบบ"
 
-#: apps/core/models.py:188 apps/properties/models.py:33
-#: templates/core/map.html:851 templates/properties/favorites.html:106
-#: templates/properties/includes/list/list_filters_sidebar.html:41
+#: apps/core/models.py:211 apps/properties/models.py:37
+#: templates/core/map.html:1083 templates/properties/favorites.html:106
+#: templates/properties/includes/list/list_filters_sidebar.html:43
 #: templates/properties/list_backup.html:97
 msgid "Тип недвижимости"
 msgstr "ประเภททรัพย์สิน"
 
-#: apps/core/models.py:190
+#: apps/core/models.py:213
 msgid "Выберите тип недвижимости или оставьте пустым для всех типов"
 msgstr "เลือกประเภทของทรัพย์สินหรือปล่อยว่างไว้สำหรับทุกประเภท"
 
-#: apps/core/models.py:191 apps/properties/models.py:88
-#: templates/core/map.html:842 templates/properties/favorites.html:107
-#: templates/properties/includes/list/list_filters_sidebar.html:20
+#: apps/core/models.py:214 apps/properties/models.py:92
+#: templates/core/map.html:1074 templates/properties/favorites.html:107
+#: templates/properties/includes/list/list_filters_sidebar.html:22
 #: templates/properties/list_backup.html:76
 msgid "Тип сделки"
 msgstr "ประเภทธุรกรรม"
 
-#: apps/core/models.py:193
+#: apps/core/models.py:216
 msgid "Выберите тип сделки или оставьте пустым для всех типов"
 msgstr "เลือกประเภทของธุรกรรมหรือปล่อยให้ว่างไว้สำหรับทุกประเภท"
 
-#: apps/core/models.py:196
+#: apps/core/models.py:219
 msgid "Шаблон заголовка (RU)"
 msgstr "แม่แบบส่วนหัว(รุ)"
 
-#: apps/core/models.py:197
+#: apps/core/models.py:220
 #, python-brace-format
 msgid ""
 "Используйте переменные: {title}, {type}, {location}, {district}, {price}, "
 "{area}"
 msgstr ""
 
-#: apps/core/models.py:198
+#: apps/core/models.py:221
 msgid "Шаблон описания (RU)"
 msgstr "แม่แบบคำอธิบาย(รุ)"
 
-#: apps/core/models.py:199
+#: apps/core/models.py:222
 #, python-brace-format
 msgid ""
 "Используйте переменные: {title}, {type}, {location}, {district}, {price}, "
 "{area}, {rooms}"
 msgstr ""
 
-#: apps/core/models.py:200
+#: apps/core/models.py:223
 msgid "Шаблон ключевых слов (RU)"
 msgstr "แม่แบบคำหลัก(รุ)"
 
-#: apps/core/models.py:201
+#: apps/core/models.py:224
 msgid "Используйте переменные через запятую"
 msgstr "ใช้ตัวแปรที่คั่นด้วยเครื่องหมายจุลภาค"
 
-#: apps/core/models.py:204
+#: apps/core/models.py:227
 msgid "Шаблон заголовка (EN)"
 msgstr "แม่แบบส่วนหัว(EN)"
 
-#: apps/core/models.py:205
+#: apps/core/models.py:228
 msgid "Шаблон описания (EN)"
 msgstr "เทมเพลตคำอธิบาย"
 
-#: apps/core/models.py:206
+#: apps/core/models.py:229
 msgid "Шаблон ключевых слов (EN)"
 msgstr "แม่แบบคำหลัก(ภาษาไทย)"
 
-#: apps/core/models.py:209
+#: apps/core/models.py:232
 msgid "Шаблон заголовка (TH)"
 msgstr "แม่แบบส่วนหัว(ชั้น)"
 
-#: apps/core/models.py:210
+#: apps/core/models.py:233
 msgid "Шаблон описания (TH)"
 msgstr "แม่แบบคำอธิบาย(ชั้น)"
 
-#: apps/core/models.py:211
+#: apps/core/models.py:234
 msgid "Шаблон ключевых слов (TH)"
 msgstr "แม่แบบคำหลัก(ชั้น)"
 
-#: apps/core/models.py:214
+#: apps/core/models.py:237
 msgid "Приоритет"
 msgstr "ลำดับความสำคัญ"
 
-#: apps/core/models.py:215
+#: apps/core/models.py:238
 msgid "Чем меньше число, тем выше приоритет"
 msgstr "ยิ่งตัวเลขต่ำกว่าลำดับความสำคัญที่สูงขึ้น"
 
-#: apps/core/models.py:221
+#: apps/core/models.py:244
 msgid "SEO шаблон"
 msgstr "แม่แบบโซ"
 
-#: apps/core/models.py:222
+#: apps/core/models.py:245
 msgid "SEO шаблоны"
 msgstr "เทมเพลต"
 
-#: apps/core/models.py:288
+#: apps/core/models.py:311
 msgid "Уникальный URL адрес страницы (например: buying-property)"
 msgstr "ลิงก์เฉพาะของเพจ(ตัวอย่างเช่นการซื้ออสังหาริมทรัพย์)"
 
-#: apps/core/models.py:293
+#: apps/core/models.py:316
 msgid "Краткое описание услуги для превью"
 msgstr "คำอธิบายสั้นๆของบริการแสดงตัวอย่าง"
 
-#: apps/core/models.py:294
+#: apps/core/models.py:317
 msgid "Основной контент"
 msgstr "เนื้อหาหลัก"
 
-#: apps/core/models.py:295
+#: apps/core/models.py:318
 msgid "Подробное описание услуги"
 msgstr "รายละเอียดของบริการ"
 
-#: apps/core/models.py:299
+#: apps/core/models.py:322
 msgid "Если пустое, будет использоваться основной заголовок"
 msgstr "หากว่างเปล่าส่วนหัวหลักจะถูกนำมาใช้"
 
-#: apps/core/models.py:301
+#: apps/core/models.py:324
 msgid "Если пустое, будет использоваться краткое описание"
 msgstr "หากว่างเปล่าคำอธิบายสั้นๆจะถูกนำมาใช้"
 
-#: apps/core/models.py:305 apps/properties/models.py:582
-#: apps/properties/models.py:609
+#: apps/core/models.py:328 apps/locations/admin.py:12
+#: apps/locations/admin.py:27 apps/locations/models.py:12
+#: apps/locations/models.py:37 apps/properties/models.py:591
+#: apps/properties/models.py:618
 msgid "Изображение"
 msgstr "รูปภาพ"
 
-#: apps/core/models.py:306
+#: apps/core/models.py:329
 msgid "Основное изображение для страницы услуги"
 msgstr "ภาพหลักสำหรับหน้าบริการ"
 
-#: apps/core/models.py:309
+#: apps/core/models.py:332
 msgid "CSS класс иконки"
 msgstr "วินาทีไอคอนคลาส"
 
-#: apps/core/models.py:310
+#: apps/core/models.py:333
 msgid "CSS класс для иконки в меню (например: fas fa-home)"
 msgstr "ชั้นเรียนซีเอสสำหรับไอคอนในเมนู(ตัวอย่างเช่น:ฟ้าฟ้าบ้าน)"
 
-#: apps/core/models.py:314
+#: apps/core/models.py:337
 msgid "Показывать в меню"
 msgstr "แสดงในเมนู"
 
-#: apps/core/models.py:315
+#: apps/core/models.py:338
 msgid "Порядок в меню"
 msgstr "ลำดับของเมนู"
 
-#: apps/core/models.py:316
+#: apps/core/models.py:339
 msgid "Порядок отображения в меню (меньше = выше)"
 msgstr "ลำดับของการแสดงผลในเมนู(น้อยกว่า=สูงกว่า)"
 
-#: apps/core/models.py:323
+#: apps/core/models.py:346
 msgid "Услуга"
 msgstr "บริการ"
 
-#: apps/core/models.py:324
+#: apps/core/models.py:347
 msgid "Услуги"
 msgstr "บริการ"
 
-#: apps/core/models.py:353
+#: apps/core/models.py:376
 msgid "Sales Director"
 msgstr "ผู้อำนวยการฝ่ายขาย"
 
-#: apps/core/models.py:354
+#: apps/core/models.py:377
 msgid "Senior Manager for International Client Relations"
 msgstr "ผู้จัดการอาวุโสฝ่ายลูกค้าสัมพันธ์ระหว่างประเทศ"
 
-#: apps/core/models.py:355
+#: apps/core/models.py:378
 msgid "Manager for International Client Relations"
 msgstr "ผู้จัดการฝ่ายลูกค้าสัมพันธ์ระหว่างประเทศ"
 
-#: apps/core/models.py:356
+#: apps/core/models.py:379
 msgid "Chief Art Officer (CAO)"
 msgstr "ประธานเจ้าหน้าที่ศิลปะ(เฉา)"
 
-#: apps/core/models.py:357
+#: apps/core/models.py:380
 msgid "Chief Marketing Officer (CMO)"
 msgstr "ประธานเจ้าหน้าที่ฝ่ายการตลาด"
 
-#: apps/core/models.py:358
+#: apps/core/models.py:381
 msgid "Chief Financial Officer (CFO)"
 msgstr "ประธานเจ้าหน้าที่ฝ่ายการเงิน"
 
-#: apps/core/models.py:359
+#: apps/core/models.py:382
 msgid "Office Manager"
 msgstr "ผู้จัดการสำนักงาน"
 
-#: apps/core/models.py:360
-#, fuzzy
-#| msgid "Карта недвижимости"
+#: apps/core/models.py:383
 msgid "Агент по недвижимости"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
-#: apps/core/models.py:361
+#: apps/core/models.py:384
 msgid "Специалист"
 msgstr "ผู้เชี่ยวชาญ"
 
-#: apps/core/models.py:362 apps/users/models.py:27 apps/users/models.py:92
-#: templates/core/contact.html:66 templates/properties/detail.html:1068
+#: apps/core/models.py:385 apps/users/models.py:27 apps/users/models.py:92
+#: templates/core/contact.html:112 templates/properties/detail.html:1130
 msgid "Другое"
 msgstr "อื่นๆ"
 
-#: apps/core/models.py:366 apps/properties/models.py:546
+#: apps/core/models.py:389 apps/properties/models.py:555
 #: apps/users/models.py:34 apps/users/models.py:95 apps/users/models.py:119
 #: apps/users/views.py:87 apps/users/views.py:237 apps/users/views.py:311
-#: templates/core/contact.html:44 templates/properties/detail.html:663
+#: templates/core/contact.html:90 templates/properties/detail.html:731
 #: templates/users/profile.html:51 templates/users/register.html:31
 msgid "Имя"
 msgstr "ชื่อ"
 
-#: apps/core/models.py:367 templates/users/profile.html:56
+#: apps/core/models.py:390 templates/users/profile.html:56
 #: templates/users/register.html:35
 msgid "Фамилия"
 msgstr "นามสกุล"
 
-#: apps/core/models.py:368
+#: apps/core/models.py:391
 msgid "Должность"
 msgstr "ง"
 
-#: apps/core/models.py:369
+#: apps/core/models.py:392
 msgid "Роль"
 msgstr "บทบาท"
 
-#: apps/core/models.py:372 apps/properties/models.py:548
+#: apps/core/models.py:395 apps/properties/models.py:557
 #: apps/users/models.py:17 apps/users/models.py:35 apps/users/models.py:63
 #: apps/users/models.py:97 apps/users/models.py:120 apps/users/models.py:145
 #: apps/users/views.py:88 apps/users/views.py:176 apps/users/views.py:242
 #: apps/users/views.py:312 apps/users/views.py:367
-#: templates/blog/blog_detail.html:388 templates/core/contact.html:55
-#: templates/core/contact.html:102 templates/core/service_detail.html:148
-#: templates/properties/detail.html:671 templates/properties/detail.html:957
-#: templates/properties/detail.html:1046 templates/properties/detail.html:1162
+#: templates/blog/blog_detail.html:388 templates/core/contact.html:101
+#: templates/core/contact.html:148 templates/core/service_detail.html:148
+#: templates/properties/detail.html:739 templates/properties/detail.html:1026
+#: templates/properties/detail.html:1108 templates/properties/detail.html:1224
 #: templates/users/profile.html:67
 msgid "Телефон"
 msgstr "เบอร์โทรศัพท์"
 
-#: apps/core/models.py:373 apps/properties/models.py:547
+#: apps/core/models.py:396 apps/properties/models.py:556
 #: apps/users/models.py:19 apps/users/models.py:36 apps/users/models.py:96
 #: apps/users/models.py:169 apps/users/views.py:92 apps/users/views.py:238
 #: apps/users/views.py:431 apps/users/views.py:458
-#: templates/blog/blog_detail.html:286 templates/core/contact.html:48
-#: templates/core/contact.html:112 templates/core/service_detail.html:153
-#: templates/properties/detail.html:679 templates/properties/detail.html:963
-#: templates/properties/detail.html:1052 templates/properties/detail.html:1095
+#: templates/blog/blog_detail.html:286 templates/core/contact.html:94
+#: templates/core/contact.html:158 templates/core/service_detail.html:153
+#: templates/properties/detail.html:747 templates/properties/detail.html:1032
+#: templates/properties/detail.html:1114 templates/properties/detail.html:1157
 #: templates/users/profile.html:62 templates/users/register.html:41
 msgid "Email"
 msgstr "งกัน"
 
-#: apps/core/models.py:374 apps/properties/models.py:549
+#: apps/core/models.py:397 apps/properties/models.py:558
 #: apps/users/models.py:18 templates/includes/home/home_data_injection.html:41
-#: templates/properties/detail.html:1090
+#: templates/properties/detail.html:1152
 msgid "WhatsApp"
 msgstr "วอทส์แอพ"
 
-#: apps/core/models.py:375
+#: apps/core/models.py:398
 msgid "Номер телефона для WhatsApp"
 msgstr "หมายเลขโทรศัพท์"
 
-#: apps/core/models.py:378
+#: apps/core/models.py:401
 msgid "Facebook"
 msgstr "Facebook"
 
-#: apps/core/models.py:379
+#: apps/core/models.py:402
 msgid "Ссылка на профиль в Facebook"
 msgstr "เชื่อมโยงไปยังโปรไฟล์เฟสบุ๊ค profile"
 
-#: apps/core/models.py:380
+#: apps/core/models.py:403
 msgid "Instagram"
 msgstr "Instragram"
 
-#: apps/core/models.py:381
+#: apps/core/models.py:404
 msgid "Ссылка на профиль в Instagram"
 msgstr "เชื่อมโยงไปยัง Instagram โพรไฟล์"
 
-#: apps/core/models.py:382
+#: apps/core/models.py:405
 msgid "LinkedIn"
 msgstr "ลิงก์อิน"
 
-#: apps/core/models.py:383
+#: apps/core/models.py:406
 msgid "Ссылка на профиль в LinkedIn"
 msgstr "เชื่อมโยงไปยังโปรไฟล์ลิงก์อิน"
 
-#: apps/core/models.py:384
+#: apps/core/models.py:407
 msgid "Twitter"
 msgstr "ทวิตเตอร์"
 
-#: apps/core/models.py:385
+#: apps/core/models.py:408
 msgid "Ссылка на профиль в Twitter"
 msgstr "ทวิตเตอร์"
 
-#: apps/core/models.py:386 apps/properties/models.py:550
+#: apps/core/models.py:409 apps/properties/models.py:559
 #: templates/includes/home/home_data_injection.html:42
 msgid "Telegram"
 msgstr "โทรเลข"
 
-#: apps/core/models.py:387
+#: apps/core/models.py:410
 msgid "Username в Telegram (без @)"
 msgstr "ชื่อผู้ใช้ในโทรเลข(ไม่มี@)"
 
-#: apps/core/models.py:388
+#: apps/core/models.py:411
 msgid "YouTube"
 msgstr "ยูทูป"
 
-#: apps/core/models.py:389
+#: apps/core/models.py:412
 msgid "Ссылка на канал YouTube"
 msgstr "เชื่อมโยงไปยังช่องยูทูป"
 
-#: apps/core/models.py:390
+#: apps/core/models.py:413
 msgid "TikTok"
 msgstr "ติ๊กต๊อก"
 
-#: apps/core/models.py:391
+#: apps/core/models.py:414
 msgid "Ссылка на профиль в TikTok"
 msgstr "ลิงก์ไปยังโปรไฟล์ติ๊กต๊อก"
 
-#: apps/core/models.py:394 apps/properties/models.py:552
+#: apps/core/models.py:417 apps/locations/admin.py:18
+#: apps/locations/admin.py:33 apps/properties/models.py:561
 msgid "Фото"
 msgstr "งกัน"
 
-#: apps/core/models.py:395
+#: apps/core/models.py:418
 msgid "Рекомендуемое разрешение: 300x300 пикселей"
 msgstr "ความละเอียดที่แนะนำ:300*300 พิกเซล"
 
-#: apps/core/models.py:398 apps/properties/models.py:551
+#: apps/core/models.py:421 apps/properties/models.py:560
 msgid "Биография"
 msgstr "งเขา"
 
-#: apps/core/models.py:399
+#: apps/core/models.py:422
 msgid "Краткая информация о сотруднике"
 msgstr "ข้อมูลสั้นๆเกี่ยวกับพนักงาน"
 
-#: apps/core/models.py:400
+#: apps/core/models.py:423
 msgid "Специализация"
 msgstr "ความเชี่ยวชาญ"
 
-#: apps/core/models.py:401
+#: apps/core/models.py:424
 msgid "Основные направления работы"
 msgstr "พื้นที่หลักของการทำงาน"
 
-#: apps/core/models.py:404
+#: apps/core/models.py:427
 msgid "Языки"
 msgstr "ภาษา"
 
-#: apps/core/models.py:405
+#: apps/core/models.py:428
 msgid "Перечислите языки через запятую"
 msgstr "รายการภาษาที่คั่นด้วยเครื่องหมายจุลภาค"
 
-#: apps/core/models.py:408
-#, fuzzy
-#| msgid "Активно"
+#: apps/core/models.py:431
 msgid "Активный"
 msgstr "ใช้งาน"
 
-#: apps/core/models.py:409
+#: apps/core/models.py:432
 msgid "Показывать ли сотрудника на сайте"
 msgstr "ว่าจะแสดงให้พนักงานบนเว็บไซต์"
 
-#: apps/core/models.py:410
+#: apps/core/models.py:433
 msgid "Показывать на главной"
 msgstr "แสดงบนหน้าหลัก"
 
-#: apps/core/models.py:411
+#: apps/core/models.py:434
 msgid "Отображать в блоке \"Наша команда\" на главной странице"
 msgstr "แสดงใน\"ทีมงานของเรา\"บล็อกในหน้าหลัก"
 
-#: apps/core/models.py:412
+#: apps/core/models.py:435
 msgid "Порядок отображения"
 msgstr "แสดงคำสั่งซื้อ"
 
-#: apps/core/models.py:413
+#: apps/core/models.py:436
 msgid "Порядок отображения в списке (меньше = выше)"
 msgstr "ลำดับการแสดงผลในรายการ(น้อยกว่า=สูงกว่า)"
 
-#: apps/core/models.py:416
+#: apps/core/models.py:439
 msgid "Дата приема на работу"
 msgstr "วันที่จ้างงาน"
 
-#: apps/core/models.py:421
+#: apps/core/models.py:444
 msgid "Сотрудник"
 msgstr "ลูกจ้าง"
 
-#: apps/core/models.py:422
+#: apps/core/models.py:445
 msgid "Сотрудники"
 msgstr "เจ้าหน้าที่"
 
-#: apps/core/views.py:283 apps/properties/views.py:245
+#: apps/core/views.py:287 apps/properties/views.py:276
 #: templates/properties/includes/list/list_no_results.html:8
 #: templates/properties/includes/list/list_sort_results_header.html:24
 #: templates/properties/list_backup.html:248
@@ -1038,9 +999,9 @@ msgstr "เจ้าหน้าที่"
 msgid "Объекты не найдены"
 msgstr "ไม่พบอสังหาริมทรัพย์"
 
-#: apps/core/views.py:284 apps/core/views.py:285 apps/core/views.py:286
-#: apps/properties/views.py:246 apps/properties/views.py:247
-#: apps/properties/views.py:248
+#: apps/core/views.py:288 apps/core/views.py:289 apps/core/views.py:290
+#: apps/properties/views.py:277 apps/properties/views.py:278
+#: apps/properties/views.py:279
 #, python-format
 msgid "Найден %(count)s объект"
 msgid_plural "Найдено %(count)s объектов"
@@ -1080,8 +1041,6 @@ msgstr "สัญลักษณ์สกุลเงิน($,€,₽,─)"
 
 #: apps/currency/models.py:15 apps/users/models.py:170 apps/users/views.py:432
 #: apps/users/views.py:459
-#, fuzzy
-#| msgid "Активно"
 msgid "Активна"
 msgstr "ใช้งาน"
 
@@ -1129,11 +1088,11 @@ msgstr "อัตราแลกเปลี่ยน"
 msgid "Курсы обмена"
 msgstr "อัตราแลกเปลี่ยน"
 
-#: apps/currency/models.py:117 templates/base.html:617
+#: apps/currency/models.py:117 templates/base.html:614
 msgid "English"
 msgstr "ภาษาอังกฤษ"
 
-#: apps/currency/models.py:118 templates/base.html:622
+#: apps/currency/models.py:118 templates/base.html:619
 msgid "ไทย"
 msgstr "ไทย"
 
@@ -1149,468 +1108,501 @@ msgstr "การตั้งค่าสกุลเงิน"
 msgid "Предпочтения валют"
 msgstr "การตั้งค่าสกุลเงิน"
 
-#: apps/locations/models.py:9 apps/locations/models.py:26
-#: apps/properties/models.py:56 apps/properties/models.py:86
+#: apps/locations/models.py:9 apps/locations/models.py:33
+#: apps/properties/models.py:60 apps/properties/models.py:90
 msgid "URL"
 msgstr "อีเมล"
 
-#: apps/locations/models.py:13 apps/properties/models.py:97
+#: apps/locations/models.py:16
+msgid ""
+"Добавьте обложку района (используется на странице детального описания и "
+"списке районов)."
+msgstr ""
+
+#: apps/locations/models.py:20 apps/properties/models.py:101
 #: templates/core/includes/home/home_hero_section.html:62
 #: templates/core/includes/home/home_hero_section.html:134
-#: templates/core/search.html:57 templates/properties/detail.html:454
+#: templates/core/search.html:57 templates/properties/detail.html:521
 #: templates/properties/favorites.html:108
-#: templates/properties/includes/list/list_filters_sidebar.html:88
+#: templates/properties/includes/list/list_filters_sidebar.html:101
 #: templates/properties/list_backup.html:144
 msgid "Район"
 msgstr "พื้นที่"
 
-#: apps/locations/models.py:14 templates/core/map.html:804
+#: apps/locations/models.py:21 templates/core/map.html:1017
 msgid "Районы"
 msgstr "เขตต่างๆ"
 
-#: apps/locations/models.py:31 apps/properties/models.py:98
-#: templates/properties/detail.html:460
-#: templates/properties/includes/list/list_filters_sidebar.html:103
+#: apps/locations/models.py:41
+msgid "Опциональная фотография локации для детальной страницы."
+msgstr ""
+
+#: apps/locations/models.py:45 apps/properties/models.py:102
+#: templates/properties/detail.html:527
+#: templates/properties/includes/list/list_filters_sidebar.html:116
 #: templates/properties/list_backup.html:159
 msgid "Локация"
 msgstr "สถานที่"
 
-#: apps/locations/models.py:32 templates/locations/location_detail.html:5
+#: apps/locations/models.py:46 templates/locations/location_detail.html:6
 msgid "Локации"
 msgstr "สถานที่"
 
-#: apps/properties/models.py:18
+#: apps/properties/models.py:22
 msgid "Кондоминиум"
 msgstr "คอนโดมิเนียม"
 
-#: apps/properties/models.py:25 apps/properties/models.py:87
+#: apps/properties/models.py:29 apps/properties/models.py:91
 #: templates/core/includes/home/home_hero_section.html:44
 #: templates/core/includes/home/home_hero_section.html:116
-#: templates/core/search.html:45
+#: templates/core/map.html:1056 templates/core/search.html:45
 msgid "Тип"
 msgstr "ประเภท"
 
-#: apps/properties/models.py:26
+#: apps/properties/models.py:30
 msgid "Отображаемое название"
 msgstr "ชื่อที่แสดง"
 
-#: apps/properties/models.py:27
+#: apps/properties/models.py:31
 msgid "Название во множественном числе"
 msgstr "ชื่อในพหูพจน์"
 
-#: apps/properties/models.py:28 apps/properties/models.py:681
+#: apps/properties/models.py:32 apps/properties/models.py:731
 msgid "Иконка"
 msgstr "ไอคอน"
 
-#: apps/properties/models.py:34
+#: apps/properties/models.py:38
 msgid "Типы недвижимости"
 msgstr "ประเภทของอสังหาริมทรัพย์"
 
-#: apps/properties/models.py:58
+#: apps/properties/models.py:62
 msgid "Логотип"
 msgstr "โลโก้"
 
-#: apps/properties/models.py:59
+#: apps/properties/models.py:63
 msgid "Сайт"
 msgstr "เว็บไซต์"
 
-#: apps/properties/models.py:62 apps/properties/models.py:125
+#: apps/properties/models.py:66 apps/properties/models.py:129
 msgid "Застройщик"
 msgstr "ผู้พัฒนา"
 
-#: apps/properties/models.py:63
+#: apps/properties/models.py:67
 msgid "Застройщики"
 msgstr "ผู้พัฒนา"
 
-#: apps/properties/models.py:72
+#: apps/properties/models.py:76
 msgid "Доступно"
 msgstr "มีจำหน่าย"
 
-#: apps/properties/models.py:73
+#: apps/properties/models.py:77
 msgid "Забронировано"
 msgstr "จอง"
 
-#: apps/properties/models.py:74
+#: apps/properties/models.py:78
 msgid "Продано"
 msgstr "ขายแล้ว"
 
-#: apps/properties/models.py:75
+#: apps/properties/models.py:79
 msgid "Сдано"
 msgstr "ผ่าน"
 
-#: apps/properties/models.py:94
-#, fuzzy
-#| msgid "Смотреть каталог"
+#: apps/properties/models.py:98
 msgid "Специальное предложение"
 msgstr "ดูแคตตาล็อก"
 
-#: apps/properties/models.py:99 templates/core/contact.html:92
-#: templates/properties/detail.html:226
+#: apps/properties/models.py:103 templates/core/contact.html:138
+#: templates/properties/detail.html:293
 msgid "Адрес"
 msgstr "ที่อยู่"
 
-#: apps/properties/models.py:102
+#: apps/properties/models.py:106
 msgid "Широта"
 msgstr "ความกว้าง"
 
-#: apps/properties/models.py:103
+#: apps/properties/models.py:107
 msgid "Долгота"
 msgstr "ลองจิจูด"
 
-#: apps/properties/models.py:106 templates/properties/favorites.html:109
+#: apps/properties/models.py:110 templates/properties/favorites.html:109
 msgid "Спальни"
 msgstr "ห้องนอน"
 
-#: apps/properties/models.py:107 templates/properties/favorites.html:111
+#: apps/properties/models.py:111 templates/properties/favorites.html:111
 msgid "Ванные"
 msgstr "ห้องน้ำ"
 
-#: apps/properties/models.py:108
+#: apps/properties/models.py:112
 msgid "Общая площадь, м²"
 msgstr "พื้นที่ทั้งหมดม.2"
 
-#: apps/properties/models.py:109
+#: apps/properties/models.py:113
 msgid "Жилая площадь, м²"
 msgstr "พื้นที่นั่งเล่นม.2"
 
-#: apps/properties/models.py:110
+#: apps/properties/models.py:114
 msgid "Площадь участка, м²"
 msgstr "พื้นที่ดินม.2"
 
-#: apps/properties/models.py:111 templates/properties/detail.html:354
+#: apps/properties/models.py:115 templates/properties/detail.html:421
 msgid "Этаж"
 msgstr "ชั้น"
 
-#: apps/properties/models.py:112
+#: apps/properties/models.py:116
 msgid "Всего этажей"
 msgstr "ชั้นทั้งหมด"
 
-#: apps/properties/models.py:115
+#: apps/properties/models.py:119
 msgid "Цена продажи, USD"
 msgstr "ราคาขาย,ดอลลาร์สหรัฐ"
 
-#: apps/properties/models.py:116
+#: apps/properties/models.py:120
 msgid "Цена продажи, THB"
 msgstr "ราคาขาย,บาท"
 
-#: apps/properties/models.py:117
-#, fuzzy
-#| msgid "На продажу"
+#: apps/properties/models.py:121
 msgid "Цена продажи, RUB"
 msgstr "ขาย"
 
-#: apps/properties/models.py:118
+#: apps/properties/models.py:122
 msgid "Аренда в месяц, USD"
 msgstr "ค่าเช่าต่อเดือน,ดอลลาร์สหรัฐ"
 
-#: apps/properties/models.py:120
+#: apps/properties/models.py:124
 msgid "Аренда в месяц, THB"
 msgstr "เช่ารายเดือน,บาท"
 
-#: apps/properties/models.py:121
+#: apps/properties/models.py:125
 msgid "Аренда в месяц, RUB"
 msgstr "เช่ารายเดือน,ถู"
 
-#: apps/properties/models.py:126
+#: apps/properties/models.py:130
 msgid "Год постройки"
 msgstr "ปีที่ก่อสร้าง"
 
-#: apps/properties/models.py:127
+#: apps/properties/models.py:131
 msgid "С мебелью"
 msgstr "พร้อมเฟอร์นิเจอร์"
 
-#: apps/properties/models.py:128 templates/properties/detail.html:390
-#: templates/properties/favorites.html:115
+#: apps/properties/models.py:132 templates/properties/favorites.html:115
 msgid "Бассейн"
 msgstr "สระว่ายน้ำ"
 
-#: apps/properties/models.py:129 templates/properties/detail.html:378
-#: templates/properties/favorites.html:116
+#: apps/properties/models.py:133 templates/properties/favorites.html:116
 msgid "Парковка"
 msgstr "พื้นที่จอดรถ"
 
-#: apps/properties/models.py:130
+#: apps/properties/models.py:134
 msgid "Охрана"
 msgstr "ความปลอดภัย"
 
-#: apps/properties/models.py:131
+#: apps/properties/models.py:135
 msgid "Спортзал"
 msgstr "ห้องออกกำลังกาย"
 
-#: apps/properties/models.py:132
-#, fuzzy
-#| msgid "Инвестиции"
+#: apps/properties/models.py:136
 msgid "Для инвестиций"
 msgstr "การลงทุน"
 
-#: apps/properties/models.py:133
+#: apps/properties/models.py:137
 msgid "Объект рекомендован для инвестиций"
 msgstr "อสังหาริมทรัพย์เป็นที่แนะนำสำหรับการลงทุน"
 
-#: apps/properties/models.py:138
+#: apps/properties/models.py:142
 msgid "ID старой системы"
 msgstr "รหัสของระบบเก่า"
 
-#: apps/properties/models.py:139
+#: apps/properties/models.py:143
 msgid "Идентификатор из старой Joomla системы (например: VS82)"
 msgstr "รหัสจากระบบจูมลาเก่า(ตัวอย่างเช่น:เทียบกับ 82)"
 
-#: apps/properties/models.py:140
+#: apps/properties/models.py:144
 msgid "Название комплекса"
 msgstr "ชื่อของที่ซับซ้อน"
 
-#: apps/properties/models.py:141
+#: apps/properties/models.py:145
 msgid "Название жилого комплекса или проекта"
 msgstr "ชื่อของที่อยู่อาศัยที่ซับซ้อนหรือโครงการ"
 
-#: apps/properties/models.py:142
+#: apps/properties/models.py:146
 msgid "Площадь бассейна, м²"
 msgstr "พื้นที่สระว่ายน้ำม.2"
 
-#: apps/properties/models.py:145
+#: apps/properties/models.py:149
 msgid "Первоначальная цена, THB"
 msgstr "ราคาเดิม,บาท"
 
-#: apps/properties/models.py:147
+#: apps/properties/models.py:151
 msgid "Цена до скидки"
 msgstr "ราคาก่อนส่วนลด"
 
-#: apps/properties/models.py:148
-#, fuzzy
-#| msgid "На продажу"
+#: apps/properties/models.py:152
 msgid "Срочная продажа"
 msgstr "ขาย"
 
-#: apps/properties/models.py:149
+#: apps/properties/models.py:153
 msgid "Примечание о срочности"
 msgstr "หมายเหตุเกี่ยวกับความเร่งด่วน"
 
-#: apps/properties/models.py:150
+#: apps/properties/models.py:154
 msgid "Дополнительная информация о срочной продаже"
 msgstr "ข้อมูลเพิ่มเติมเกี่ยวกับการขายด่วน"
 
-#: apps/properties/models.py:153
+#: apps/properties/models.py:157
 msgid "Архитектурный стиль"
 msgstr "สไตล์สถาปัตยกรรม"
 
-#: apps/properties/models.py:154
+#: apps/properties/models.py:158
 msgid "Материалы"
 msgstr "วัสดุ"
 
-#: apps/properties/models.py:155
+#: apps/properties/models.py:159
 msgid "Основные строительные материалы"
 msgstr "วัสดุก่อสร้างพื้นฐาน"
 
-#: apps/properties/models.py:158 apps/users/models.py:24
-#: templates/properties/detail.html:1063
+#: apps/properties/models.py:162 apps/users/models.py:24
+#: templates/properties/detail.html:1125
 msgid "Инвестиционный потенциал"
 msgstr "ศักยภาพการลงทุน"
 
-#: apps/properties/models.py:159
+#: apps/properties/models.py:163
 msgid "Описание инвестиционной привлекательности"
 msgstr "คำอธิบายของความน่าดึงดูดใจในการลงทุน"
 
-#: apps/properties/models.py:160
+#: apps/properties/models.py:164
 msgid "Подходит для"
 msgstr "เหมาะสำหรับ"
 
-#: apps/properties/models.py:161
+#: apps/properties/models.py:165
 msgid "Назначение использования (отпуск, постоянное проживание и т.д.)"
 msgstr "วัตถุประสงค์ของการใช้(วันหยุดพักผ่อนถาวรฯลฯ)"
 
-#: apps/properties/models.py:164
+#: apps/properties/models.py:168
 msgid "До пляжа, мин"
 msgstr "การบริการ"
 
-#: apps/properties/models.py:165
+#: apps/properties/models.py:169
 msgid "До аэропорта, мин"
 msgstr "ที่ตั้งโรงแรม:สนามบินสุวรรณภูมิ"
 
-#: apps/properties/models.py:166
+#: apps/properties/models.py:170
 msgid "До школы, мин"
 msgstr "ไปโรงเรียน,นาที"
 
-#: apps/properties/models.py:169
+#: apps/properties/models.py:173
 msgid "Двуспальные кровати"
 msgstr "เตียงคู่"
 
-#: apps/properties/models.py:170
+#: apps/properties/models.py:174
 msgid "Количество двуспальных кроватей"
 msgstr "จำนวนเตียงคู่"
 
-#: apps/properties/models.py:171
+#: apps/properties/models.py:175
 msgid "Односпальные кровати"
 msgstr "เตียงเดี่ยว"
 
-#: apps/properties/models.py:172
+#: apps/properties/models.py:176
 msgid "Количество односпальных кроватей"
 msgstr "จำนวนเตียงเดี่ยว"
 
-#: apps/properties/models.py:173
+#: apps/properties/models.py:177
 msgid "Диван-кровати"
 msgstr "โซฟาเบด"
 
-#: apps/properties/models.py:174
+#: apps/properties/models.py:178
 msgid "Количество диван-кроватей"
 msgstr "จำนวนโซฟาเบด"
 
-#: apps/properties/models.py:178
+#: apps/properties/models.py:182
 msgid "Контактное лицо"
 msgstr "บุคคลที่ติดต่อ"
 
-#: apps/properties/models.py:179
+#: apps/properties/models.py:183
 msgid ""
 "Сотрудник компании, ответственный за данный объект (по умолчанию: Bogdan)"
 msgstr "พนักงานของบริษัทที่รับผิดชอบในสถานที่นี้(ค่าเริ่มต้น:บ็อกดัน)"
 
-#: apps/properties/models.py:183
+#: apps/properties/models.py:187
 msgid "Агент (legacy)"
 msgstr "ตัวแทน(มรดก)"
 
-#: apps/properties/models.py:184
+#: apps/properties/models.py:188
 msgid "Ответственный агент (устаревшее поле)"
 msgstr "ตัวแทนรับผิดชอบ(เขตล้าสมัย)"
 
-#: apps/properties/models.py:187 apps/properties/models.py:577
+#: apps/properties/models.py:191 apps/properties/models.py:586
 msgid "План этажа"
 msgstr "แผนผังอาคาร"
 
-#: apps/properties/models.py:188
+#: apps/properties/models.py:192
 msgid "План планировки этажей"
 msgstr "แผนผังอาคาร"
 
-#: apps/properties/models.py:189 apps/properties/models.py:576
+#: apps/properties/models.py:193 apps/properties/models.py:585
 msgid "Интро изображение"
 msgstr "ภาพบทนำ"
 
-#: apps/properties/models.py:190
-#, fuzzy
-#| msgid "Карта недвижимости"
+#: apps/properties/models.py:194
 msgid "Дополнительное изображение для анонса"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
-#: apps/properties/models.py:193
+#: apps/properties/models.py:197
 msgid "Просмотры"
 msgstr "งกัน"
 
-#: apps/properties/models.py:194
+#: apps/properties/models.py:198
 msgid "Рекомендуемое"
 msgstr "แนะนำโดยย่อ"
 
-#: apps/properties/models.py:198
+#: apps/properties/models.py:200
+msgid "Приоритет в рекомендуемых"
+msgstr "ลำดับความสำคัญในรายการแนะนำ"
+
+#: apps/properties/models.py:202
+msgid "Чем выше значение, тем раньше объект отображается в блоках рекомендаций"
+msgstr "ค่าที่มากกว่าจะทำให้แสดงก่อนในบล็อกแนะนำ"
+
+#: apps/properties/models.py:207
 msgid "Заголовок (RU)"
 msgstr "ชื่อเรื่อง(รุ)"
 
-#: apps/properties/models.py:199 apps/properties/models.py:201
-#: apps/properties/models.py:203 apps/properties/models.py:206
 #: apps/properties/models.py:208 apps/properties/models.py:210
-#: apps/properties/models.py:213 apps/properties/models.py:215
-#: apps/properties/models.py:217
+#: apps/properties/models.py:212 apps/properties/models.py:215
+#: apps/properties/models.py:217 apps/properties/models.py:219
+#: apps/properties/models.py:222 apps/properties/models.py:224
+#: apps/properties/models.py:226
 msgid "Оставьте пустым для автоматической генерации"
 msgstr "ปล่อยให้มันว่างเปล่าสำหรับการผลิตอัตโนมัติ"
 
-#: apps/properties/models.py:200
+#: apps/properties/models.py:209
 msgid "Описание (RU)"
 msgstr "คำอธิบาย(รุ)"
 
-#: apps/properties/models.py:202
+#: apps/properties/models.py:211
 msgid "Ключевые слова (RU)"
 msgstr "คำสำคัญ(รุ)"
 
-#: apps/properties/models.py:205
+#: apps/properties/models.py:214
 msgid "Заголовок (EN)"
 msgstr "ชื่อเรื่อง(ภาษาไทย)"
 
-#: apps/properties/models.py:207
+#: apps/properties/models.py:216
 msgid "Описание (EN)"
 msgstr "คำอธิบาย(อังกฤษ)"
 
-#: apps/properties/models.py:209
+#: apps/properties/models.py:218
 msgid "Ключевые слова (EN)"
 msgstr "คำหลัก(ภาษาไทย)"
 
-#: apps/properties/models.py:212
+#: apps/properties/models.py:221
 msgid "Заголовок (TH)"
 msgstr "คำนำหน้า"
 
-#: apps/properties/models.py:214
+#: apps/properties/models.py:223
 msgid "Описание (TH)"
 msgstr "คำอธิบาย(ไทย)"
 
-#: apps/properties/models.py:216
+#: apps/properties/models.py:225
 msgid "Ключевые слова (TH)"
 msgstr "คีย์เวิร์ด(ไทย)"
 
-#: apps/properties/models.py:224 apps/properties/models.py:225
-#: templates/properties/detail.html:181
+#: apps/properties/models.py:233 apps/properties/models.py:234
+#: apps/properties/views.py:322 templates/locations/district_detail.html:18
+#: templates/locations/district_detail.html:104
+#: templates/locations/location_detail.html:18
+#: templates/locations/location_detail.html:72
+#: templates/properties/detail.html:221 templates/properties/detail.html:248
 msgid "Недвижимость"
 msgstr "อสังหาริมทรัพย์"
 
-#: apps/properties/models.py:553
-#, fuzzy
-#| msgid "Активно"
+#: apps/properties/models.py:562
 msgid "Активен"
 msgstr "ใช้งาน"
 
-#: apps/properties/models.py:556
+#: apps/properties/models.py:565
 msgid "ID из Joomla"
 msgstr "รหัสจากจุมลา"
 
-#: apps/properties/models.py:557
+#: apps/properties/models.py:566
 msgid "Идентификатор из старой Joomla системы"
 msgstr "รหัสจากระบบจูมลาเก่า"
 
-#: apps/properties/models.py:564
+#: apps/properties/models.py:573
 msgid "Агент"
 msgstr "ตัวแทน"
 
-#: apps/properties/models.py:565
+#: apps/properties/models.py:574
 msgid "Агенты"
 msgstr "ตัวแทน"
 
-#: apps/properties/models.py:575
+#: apps/properties/models.py:584
 msgid "Основная галерея"
 msgstr "แกลเลอรี่หลัก"
 
-#: apps/properties/models.py:578
+#: apps/properties/models.py:587
 msgid "Тизер"
 msgstr "เว็บแคม,ถ้ำมอง,ซ่อน,"
 
-#: apps/properties/models.py:584
+#: apps/properties/models.py:593
 msgid "Главное изображение"
 msgstr "ภาพหลัก"
 
-#: apps/properties/models.py:588
+#: apps/properties/models.py:597
 msgid "Тип изображения"
 msgstr "ประเภทภาพ"
 
-#: apps/properties/models.py:589
+#: apps/properties/models.py:598
 msgid "Тип изображения для категоризации"
 msgstr "ประเภทของภาพที่จะจัดหมวดหมู่"
 
-#: apps/properties/models.py:590
+#: apps/properties/models.py:599
 msgid "Alt текст"
 msgstr "ข้อความ"
 
-#: apps/properties/models.py:591
+#: apps/properties/models.py:600
 msgid "Альтернативный текст для SEO и доступности"
 msgstr "ข้อความทางเลือกสำหรับโซและการเข้าถึง"
 
-#: apps/properties/models.py:684 templates/properties/favorites.html:103
+#: apps/properties/models.py:734 templates/properties/favorites.html:103
 msgid "Характеристика"
 msgstr "ลักษณะเฉพาะ"
 
-#: apps/properties/models.py:685
+#: apps/properties/models.py:735
 msgid "Характеристики"
 msgstr "ข้อมูลจำเพาะ"
+
+#: apps/properties/views.py:324
+msgid "на продажу"
+msgstr "สำหรับขาย"
+
+#: apps/properties/views.py:325
+msgid "в аренду"
+msgstr "ให้เช่า"
+
+#: apps/properties/views.py:330
+#, python-format
+msgid "в %(location)s, Пхукет, Таиланд"
+msgstr "ใน%(location)s ภูเก็ต ประเทศไทย"
+
+#: apps/properties/views.py:332
+#, python-format
+msgid "в районе %(district)s, Пхукет, Таиланд"
+msgstr "ในย่าน%(district)s ภูเก็ต ประเทศไทย"
+
+#: apps/properties/views.py:334
+msgid "на Пхукете, Таиланд"
+msgstr "ในภูเก็ต ประเทศไทย"
+
+#: apps/properties/views.py:344
+#: templates/properties/includes/list/list_header_banner.html:9
+msgid "Каталог недвижимости на Пхукете, Таиланд"
+msgstr "แคตตาล็อกอสังหาริมทรัพย์ในภูเก็ต ประเทศไทย"
 
 #: apps/users/admin.py:23 apps/users/admin.py:91 apps/users/admin.py:128
 msgid "Контактная информация"
 msgstr "ข้อมูลการติดต่อ"
 
 #: apps/users/admin.py:26
-#, fuzzy
-#| msgid "Отправить запрос"
 msgid "Информация о запросе"
 msgstr "ส่งคำขอ"
 
@@ -1624,8 +1616,6 @@ msgid "Интеграции"
 msgstr "การบูรณาการ"
 
 #: apps/users/admin.py:43 apps/users/models.py:30 apps/users/views.py:85
-#, fuzzy
-#| msgid "ID объекта:"
 msgid "Объект"
 msgstr "รหัสอสังหาริมทรัพย์:"
 
@@ -1640,13 +1630,11 @@ msgstr "ทำเครื่องหมายเป็นยังไม่ไ
 
 #: apps/users/admin.py:94 apps/users/models.py:39 apps/users/models.py:99
 #: apps/users/views.py:120 apps/users/views.py:247 data_import/models.py:89
-#: templates/core/contact.html:72
+#: templates/core/contact.html:118
 msgid "Сообщение"
 msgstr "ข้อความ"
 
 #: apps/users/admin.py:131
-#, fuzzy
-#| msgid "Детали объекта"
 msgid "Детали встречи"
 msgstr "รายละเอียดอสังหาริมทรัพย์"
 
@@ -1676,8 +1664,6 @@ msgid "Деактивировать подписки"
 msgstr "ปิดใช้งานการสมัครสมาชิก"
 
 #: apps/users/models.py:9
-#, fuzzy
-#| msgid "Отправить запрос"
 msgid "Запись на просмотр"
 msgstr "ส่งคำขอ"
 
@@ -1690,14 +1676,10 @@ msgid "Заказ обратного звонка"
 msgstr "การสั่งซื้อการโทรกลับ"
 
 #: apps/users/models.py:12
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
 msgid "Индивидуальный подбор недвижимости"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
 #: apps/users/models.py:13
-#, fuzzy
-#| msgid "Отправить запрос"
 msgid "Общий вопрос"
 msgstr "ส่งคำขอ"
 
@@ -1705,7 +1687,7 @@ msgstr "ส่งคำขอ"
 msgid "Уточнение цены"
 msgstr "ชี้แจงราคา"
 
-#: apps/users/models.py:25 templates/properties/detail.html:1064
+#: apps/users/models.py:25 templates/properties/detail.html:1126
 msgid "Документы и оформление"
 msgstr "เอกสารและการลงทะเบียน"
 
@@ -1714,8 +1696,6 @@ msgid "О районе и инфраструктуре"
 msgstr "เกี่ยวกับพื้นที่และโครงสร้างพื้นฐาน"
 
 #: apps/users/models.py:31 apps/users/views.py:86
-#, fuzzy
-#| msgid "Отправить запрос"
 msgid "Тип запроса"
 msgstr "ส่งคำขอ"
 
@@ -1729,7 +1709,7 @@ msgid "Тема консультации"
 msgstr "หัวข้อของการให้คำปรึกษา"
 
 #: apps/users/models.py:42 apps/users/views.py:117
-#: templates/properties/detail.html:1080
+#: templates/properties/detail.html:1142
 msgid "Предпочтительный способ связи"
 msgstr "วิธีการสื่อสารที่ต้องการ"
 
@@ -1758,14 +1738,11 @@ msgid "Дата обработки"
 msgstr "วันที่ประมวลผล"
 
 #: apps/users/models.py:53 apps/users/views.py:129
-#, fuzzy
-#| msgid "Выбор объекта"
+
 msgid "Запрос по объекту"
 msgstr "การเลือกทรัพย์สิน"
 
 #: apps/users/models.py:54
-#, fuzzy
-#| msgid "Выбор объекта"
 msgid "Запросы по объектам"
 msgstr "การเลือกทรัพย์สิน"
 
@@ -1790,8 +1767,6 @@ msgid "Быстрые консультации"
 msgstr "การให้คำปรึกษาอย่างรวดเร็ว"
 
 #: apps/users/models.py:89
-#, fuzzy
-#| msgid "Карта недвижимости"
 msgid "Вопрос о недвижимости"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
@@ -1804,7 +1779,7 @@ msgid "Сотрудничество"
 msgstr "ความร่วมมือ"
 
 #: apps/users/models.py:98 apps/users/views.py:244
-#: templates/core/contact.html:59
+#: templates/core/contact.html:105
 msgid "Тема"
 msgstr "หัวข้อ"
 
@@ -1818,13 +1793,11 @@ msgstr "คำขอจากแบบฟอร์มการติดต่อ
 
 #: apps/users/models.py:122 apps/users/views.py:317
 #: templates/core/includes/home/home_visit_office_section.html:140
-#: templates/properties/detail.html:696
+#: templates/properties/detail.html:764
 msgid "Дополнительная информация"
 msgstr "นามสกุล"
 
 #: apps/users/models.py:123 apps/users/models.py:147
-#, fuzzy
-#| msgid "Карта недвижимости"
 msgid "Согласие с политикой конфиденциальности"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
@@ -1869,15 +1842,11 @@ msgid "Дата отписки"
 msgstr "วันที่ยกเลิกการสมัคร"
 
 #: apps/users/models.py:178 apps/users/views.py:445 apps/users/views.py:475
-#: templates/properties/detail.html:787 templates/properties/detail.html:810
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
+#: templates/properties/detail.html:855 templates/properties/detail.html:878
 msgid "Подписка на новости"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
 #: apps/users/models.py:179
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
 msgid "Подписки на новости"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
@@ -1887,8 +1856,6 @@ msgid "Новая заявка: %(form)s"
 msgstr ""
 
 #: apps/users/notifications.py:86
-#, fuzzy
-#| msgid "Избранные объекты"
 msgid "Данные заявки:"
 msgstr "วัตถุที่เลือก"
 
@@ -1902,10 +1869,9 @@ msgid "Пожалуйста, заполните имя и телефон"
 msgstr "กรุณากรอกชื่อและเบอร์โทรศัพท์"
 
 #: apps/users/views.py:135
-#, fuzzy, python-format
-#| msgid "Ссылка на проект"
+#, python-format
 msgid "Ссылка на объект: %(url)s"
-msgstr "เชื่อมโยงไปยังโครงการ"
+msgstr "ลิงก์ไปยังอสังหาริมทรัพย์: %(url)s"
 
 #: apps/users/views.py:141
 msgid ""
@@ -1931,16 +1897,13 @@ msgid "Пожалуйста, заполните все обязательные 
 msgstr "กรุณากรอกข้อมูลให้ครบถ้วน"
 
 #: apps/users/views.py:254
-#, fuzzy
-#| msgid "Контактная информация"
 msgid "Контактная форма"
-msgstr "ข้อมูลการติดต่อ"
+msgstr "แบบฟอร์มติดต่อ"
 
 #: apps/users/views.py:260 apps/users/views.py:451 apps/users/views.py:481
-#, fuzzy, python-format
-#| msgid "Отправить запрос"
+#, python-format
 msgid "Источник запроса: %(url)s"
-msgstr "ส่งคำขอ"
+msgstr "แหล่งที่มาของคำขอ: %(url)s"
 
 #: apps/users/views.py:267
 msgid "Спасибо за обращение! Мы ответим вам в ближайшее время."
@@ -1971,19 +1934,14 @@ msgid "Вы уже подписаны на нашу рассылку"
 msgstr "คุณได้สมัครรับจดหมายข่าวของเราแล้ว"
 
 #: apps/users/views.py:433
-#, fuzzy
-#| msgid "Деактивировать подписки"
 msgid "Дата первоначальной подписки"
 msgstr "ปิดใช้งานการสมัครสมาชิก"
 
 #: apps/users/views.py:439
-#, fuzzy
-#| msgid "Дата публикации"
 msgid "Дата повторной активации"
 msgstr "วันที่เผยแพร่"
 
 #: apps/users/views.py:446
-#, fuzzy
 msgid "реактивация"
 msgstr "ใช้งาน"
 
@@ -2034,14 +1992,10 @@ msgid "Маппинг полей"
 msgstr "ฟิลด์การแม็พ"
 
 #: data_import/forms.py:137
-#, fuzzy
-#| msgid "Найдите идеальное расположение для вашей недвижимости"
 msgid "Выберите схему соответствия колонок Excel полям объектов недвижимости"
 msgstr "ค้นหาตำแหน่งที่เหมาะสำหรับอสังหาริมทรัพย์ของคุณ"
 
 #: data_import/forms.py:145
-#, fuzzy
-#| msgid "Все типы"
 msgid "-- Выберите действие --"
 msgstr "ทุกประเภท"
 
@@ -2066,8 +2020,6 @@ msgid "Неправильный формат выбранных файлов"
 msgstr "รูปแบบไฟล์ที่เลือกไม่ถูกต้อง"
 
 #: data_import/models.py:10
-#, fuzzy
-#| msgid "Загружаем карту..."
 msgid "Загружен"
 msgstr "กำลังโหลดแผนที่..."
 
@@ -2079,25 +2031,19 @@ msgstr "กำลังประมวลผล"
 msgid "Завершен"
 msgstr "เสร็จสมบูรณ์"
 
-#: data_import/models.py:13 data_import/models.py:83 templates/base.html:1010
+#: data_import/models.py:13 data_import/models.py:83 templates/base.html:1007
 msgid "Ошибка"
 msgstr "ผิดพลาด"
 
 #: data_import/models.py:17
-#, fuzzy
-#| msgid "Карта недвижимости"
 msgid "Обновление недвижимости"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
 #: data_import/models.py:18
-#, fuzzy
-#| msgid "Карта недвижимости"
 msgid "Создание недвижимости"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
 #: data_import/models.py:19
-#, fuzzy
-#| msgid "Обновлено"
 msgid "Обновление цен"
 msgstr "อัปเดต"
 
@@ -2118,8 +2064,6 @@ msgid "Загрузил"
 msgstr "อัพโหลดแล้ว"
 
 #: data_import/models.py:36
-#, fuzzy
-#| msgid "Всего объектов"
 msgid "Всего строк"
 msgstr "รวมทั้งหมด"
 
@@ -2128,8 +2072,6 @@ msgid "Обработано строк"
 msgstr "แถวประมวลผล"
 
 #: data_import/models.py:38
-#, fuzzy
-#| msgid "Всего объектов"
 msgid "Успешно обработано"
 msgstr "รวมทั้งหมด"
 
@@ -2178,14 +2120,10 @@ msgid "Уровень"
 msgstr "ระดับ"
 
 #: data_import/models.py:90
-#, fuzzy
-#| msgid "Год постройки:"
 msgid "Номер строки"
 msgstr "ปีที่ก่อสร้าง:"
 
 #: data_import/models.py:91
-#, fuzzy
-#| msgid "Детали объекта"
 msgid "Детали"
 msgstr "รายละเอียดอสังหาริมทรัพย์"
 
@@ -2198,8 +2136,6 @@ msgid "Логи импорта"
 msgstr "นำเข้าบันทึก"
 
 #: data_import/models.py:108
-#, fuzzy
-#| msgid "ID объекта:"
 msgid "ID объекта (legacy_id)"
 msgstr "รหัสอสังหาริมทรัพย์:"
 
@@ -2208,20 +2144,14 @@ msgid "Название (title)"
 msgstr "ชื่อ(ชื่อ)"
 
 #: data_import/models.py:110
-#, fuzzy
-#| msgid "На продажу"
 msgid "Цена продажи USD (price_sale_usd)"
 msgstr "ขาย"
 
 #: data_import/models.py:111
-#, fuzzy
-#| msgid "На продажу"
 msgid "Цена продажи THB (price_sale_thb)"
 msgstr "ขาย"
 
 #: data_import/models.py:112
-#, fuzzy
-#| msgid "На продажу"
 msgid "Цена продажи RUB (price_sale_rub)"
 msgstr "ขาย"
 
@@ -2258,8 +2188,6 @@ msgid "Ванные (bathrooms)"
 msgstr "ห้องน้ำ"
 
 #: data_import/models.py:121
-#, fuzzy
-#| msgid "Этаж:"
 msgid "Этаж (floor)"
 msgstr "ชั้น:"
 
@@ -2304,8 +2232,6 @@ msgid "Спортзал (gym)"
 msgstr "ห้องออกกำลังกาย"
 
 #: data_import/models.py:132
-#, fuzzy
-#| msgid "Год постройки:"
 msgid "Год постройки (year_built)"
 msgstr "ปีที่ก่อสร้าง:"
 
@@ -2338,8 +2264,6 @@ msgid "Площадь бассейна (pool_area)"
 msgstr "บริเวณสระว่ายน้ำ(บริเวณสระว่ายน้ำ_บริเวณ)"
 
 #: data_import/models.py:140
-#, fuzzy
-#| msgid "На продажу"
 msgid "Срочная продажа (is_urgent_sale)"
 msgstr "ขาย"
 
@@ -2431,22 +2355,22 @@ msgstr "การทำแผนที่\"{}\"ได้ถูกลบออก
 msgid "Выберите язык"
 msgstr "เลือกภาษา"
 
-#: templates/base.html:989
+#: templates/base.html:986
 msgid "Спасибо!"
 msgstr "ขอบคุณ!"
 
-#: templates/base.html:993 templates/base.html:1014
+#: templates/base.html:990 templates/base.html:1011
 msgid "Закрыть"
 msgstr "การปิด"
 
-#: templates/base.html:1029 templates/core/map.html:1731
+#: templates/base.html:1026 templates/core/map.html:2002
 #: templates/includes/list/list_data_injection.html:15
 #: templates/properties/includes/detail_bootstrap.js.html:52
 #: templates/properties/list_backup.html:1651
 msgid "Добавлено в избранное"
 msgstr "เพิ่มในรายการโปรด"
 
-#: templates/base.html:1030 templates/core/map.html:1726
+#: templates/base.html:1027 templates/core/map.html:1997
 #: templates/includes/list/list_data_injection.html:16
 #: templates/properties/includes/detail_bootstrap.js.html:51
 #: templates/properties/list_backup.html:1652
@@ -2500,8 +2424,8 @@ msgstr "มีคำถามไหม? เรามักจะมีควา�
 
 #: templates/blog/blog_detail.html:382
 #: templates/core/includes/home/home_visit_office_section.html:111
-#: templates/core/service_detail.html:143 templates/properties/detail.html:951
-#: templates/properties/detail.html:1040 templates/properties/detail.html:1156
+#: templates/core/service_detail.html:143 templates/properties/detail.html:1020
+#: templates/properties/detail.html:1102 templates/properties/detail.html:1218
 msgid "Ваше имя"
 msgstr "ชื่อของคุณ"
 
@@ -2514,8 +2438,6 @@ msgid "Ваш вопрос или комментарий"
 msgstr "คำถามหรือความคิดเห็นของคุณ"
 
 #: templates/blog/blog_detail.html:408 templates/blog/blog_detail.html:518
-#, fuzzy
-#| msgid "Отправить запрос"
 msgid "Отправить"
 msgstr "ส่งคำขอ"
 
@@ -2526,7 +2448,7 @@ msgid "Нажимая кнопку, вы соглашаетесь с"
 msgstr "โดยการคลิกที่ปุ่ม,คุณเห็นด้วยที่จะ"
 
 #: templates/blog/blog_detail.html:413
-#: templates/core/includes/home/home_faq_section.html:190
+#: templates/core/includes/home/home_faq_section.html:246
 #: templates/core/includes/home/home_phone_contact_form_section.html:34
 #: templates/core/includes/home/home_reviews_section.html:46
 #: templates/core/includes/home/home_visit_office_section.html:155
@@ -2549,8 +2471,6 @@ msgid "Рекомендуемые статьи"
 msgstr "บทความแนะนำ"
 
 #: templates/blog/blog_detail.html:482
-#, fuzzy
-#| msgid "Отправить запрос"
 msgid "Отправка..."
 msgstr "ส่งคำขอ"
 
@@ -2563,8 +2483,6 @@ msgid "Результаты поиска"
 msgstr "ผลการค้นหา"
 
 #: templates/blog/blog_list.html:29
-#, fuzzy
-#| msgid "Молодые и энергичные специалисты рынка недвижимости Пхукета"
 msgid "Новости, статьи, кейсы и события в мире недвижимости Пхукета"
 msgstr "ผู้เชี่ยวชาญด้านอสังหาริมทรัพย์ภูเก็ตที่หนุ่มสาวและกระตือรือร้น"
 
@@ -2573,8 +2491,6 @@ msgid "Поиск по статьям..."
 msgstr "ค้นหาบทความ.."
 
 #: templates/blog/blog_list.html:51
-#, fuzzy
-#| msgid "Выбор объекта"
 msgid "Все категории"
 msgstr "การเลือกทรัพย์สิน"
 
@@ -2587,8 +2503,6 @@ msgid "Сбросить"
 msgstr "โยนออก"
 
 #: templates/blog/blog_list.html:98 templates/blog/blog_list.html:120
-#, fuzzy
-#| msgid "Тип:"
 msgid "мин"
 msgstr "ประเภท:"
 
@@ -2611,8 +2525,6 @@ msgid "В данной категории пока нет статей."
 msgstr "ยังไม่มีบทความในหมวดหมู่นี้"
 
 #: templates/blog/blog_list.html:226
-#, fuzzy
-#| msgid "Все типы"
 msgid "Все статьи"
 msgstr "ทุกประเภท"
 
@@ -2734,10 +2646,10 @@ msgstr "บริการของเรา"
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:69
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:86
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:103
-#: templates/core/map.html:1589 templates/core/map.html:1606
+#: templates/core/map.html:1860 templates/core/map.html:1877
 #: templates/core/service_detail.html:228
 #: templates/includes/list/list_data_injection.html:18
-#: templates/locations/list.html:176 templates/properties/card.html:187
+#: templates/locations/list.html:178 templates/properties/card.html:191
 #: templates/properties/favorites.html:102
 #: templates/properties/list_backup.html:1263
 #: templates/properties/list_backup.html:1412
@@ -2760,67 +2672,71 @@ msgstr "ติดต่อเรา"
 msgid "Контакты"
 msgstr "ติดต่อ"
 
-#: templates/core/contact.html:37
+#: templates/core/contact.html:13
+msgid "Контакты Undersun Estate"
+msgstr "แผนที่ Undersun Estate"
+
+#: templates/core/contact.html:83
 msgid "Отправьте нам сообщение"
 msgstr "ส่งข้อความถึงเรา"
 
-#: templates/core/contact.html:61
+#: templates/core/contact.html:107
 msgid "Выберите тему"
 msgstr "เลือกธีม"
 
-#: templates/core/contact.html:62
+#: templates/core/contact.html:108
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:44
 msgid "Покупка недвижимости"
 msgstr "ซื้ออสังหาริมทรัพย์"
 
-#: templates/core/contact.html:63
+#: templates/core/contact.html:109
 msgid "Аренда недвижимости"
 msgstr "เช่าอสังหาริมทรัพย์"
 
-#: templates/core/contact.html:64
+#: templates/core/contact.html:110
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:61
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:63
 msgid "Продажа недвижимости"
 msgstr "การขายอสังหาริมทรัพย์"
 
-#: templates/core/contact.html:77
+#: templates/core/contact.html:123
 msgid "Отправить сообщение"
 msgstr "ส่งข้อความ"
 
-#: templates/core/contact.html:84
+#: templates/core/contact.html:130
 msgid "Наши контакты"
 msgstr "ติดต่อของเรา"
 
-#: templates/core/contact.html:122
+#: templates/core/contact.html:168
 msgid "Часы работы"
 msgstr "เวลาทำการ"
 
-#: templates/core/contact.html:123
+#: templates/core/contact.html:169
 msgid "Пн-Вс: 9:00 - 21:00"
 msgstr "จันทร์-อาทิตย์:9:00-21:00"
 
-#: templates/core/contact.html:130
+#: templates/core/contact.html:176
 msgid "Следите за нами"
 msgstr "ติดตามเรา"
 
-#: templates/core/contact.html:158
+#: templates/core/contact.html:204
 msgid "Наше расположение"
 msgstr "สถานที่ตั้งของเรา"
 
-#: templates/core/contact.html:159
+#: templates/core/contact.html:205
 msgid "Мы находимся в самом сердце Карона, Пхукет"
 msgstr "เราตั้งอยู่ในใจกลางของหาดกะรน,ภูเก็ต"
 
-#: templates/core/contact.html:183
-#: templates/core/includes/home/home_faq_section.html:11
+#: templates/core/contact.html:229
+#: templates/core/includes/home/home_faq_section.html:67
 msgid "Часто задаваемые вопросы"
 msgstr "คำถามที่พบบ่อย"
 
-#: templates/core/contact.html:188
+#: templates/core/contact.html:234
 msgid "Могу ли я как иностранец купить недвижимость в Таиланде?"
 msgstr "ฉันสามารถซื้ออสังหาริมทรัพย์ในประเทศไทยเป็นชาวต่างชาติ?"
 
-#: templates/core/contact.html:189
+#: templates/core/contact.html:235
 #, python-format
 msgid ""
 "Да, иностранцы могут покупать кондоминиумы (до 49%% от общей площади здания) "
@@ -2829,11 +2745,11 @@ msgstr ""
 "ใช่ชาวต่างชาติสามารถซื้อคอนโดมิเนียม(ไม่เกิน 49%%ของพื้นที่อาคารทั้งหมด)และบ้านในการเช่ "
 "เราจะช่วยให้คุณเข้าใจทุกด้านกฎหมาย"
 
-#: templates/core/contact.html:193
+#: templates/core/contact.html:239
 msgid "Какие дополнительные расходы при покупке?"
 msgstr "ค่าใช้จ่ายเพิ่มเติมในการซื้อมีอะไรบ้าง"
 
-#: templates/core/contact.html:194
+#: templates/core/contact.html:240
 #, python-format
 msgid ""
 "Обычно это 6-8%% от стоимости недвижимости: трансферный налог (2%%), "
@@ -2843,11 +2759,11 @@ msgstr ""
 "นี้มักจะเป็น "
 "6-8%%ของมูลค่าของทรัพย์สิน:ภาษีการโอน(2%%),อากรแสตมป์(0.5%%),ค่าธรรมเนียมการลงทะเบีย"
 
-#: templates/core/contact.html:198
+#: templates/core/contact.html:244
 msgid "Сколько времени занимает сделка?"
 msgstr "การทำธุรกรรมใช้เวลานานเท่าใด?"
 
-#: templates/core/contact.html:199
+#: templates/core/contact.html:245
 msgid ""
 "От 2 до 6 недель в зависимости от сложности сделки. Мы ведем весь процесс от "
 "начала до конца."
@@ -2855,19 +2771,17 @@ msgstr ""
 "2-6 สัปดาห์ขึ้นอยู่กับความซับซ้อนของการทำธุรกรรม "
 "เรากำลังดำเนินการกระบวนการทั้งหมดตั้งแต่ต้นจนจบ"
 
-#: templates/core/contact.html:203
+#: templates/core/contact.html:249
 msgid "Предоставляете ли вы услуги управления недвижимостью?"
 msgstr "คุณมีบริการจัดการอสังหาริมทรัพย์หรือไม่?"
 
-#: templates/core/contact.html:204
+#: templates/core/contact.html:250
 msgid ""
 "Да, мы предлагаем полный спектр услуг по управлению недвижимостью: уборка, "
 "ремонт, сдача в аренду и многое другое."
 msgstr "ใช่เรานำเสนอบริการการจัดการอสังหาริมทรัพย์อย่างเต็มรูปแบบ:ทำความสะอาด,ปรับปรุง,ให้เช่าและอื่นๆอีกมากมาย"
 
 #: templates/core/home.html:5
-#, fuzzy
-#| msgid "Недвижимость на Пхукете"
 msgid "Undersun Estate - Недвижимость на Пхукете, Таиланд"
 msgstr "ภูเก็ตอสังหาริมทรัพย์"
 
@@ -2882,23 +2796,21 @@ msgstr "สำรวจสถานที่ที่ดีที่สุดใ
 #: templates/core/includes/home/home_districts_section.html:18
 #: templates/core/includes/home/home_hero_section.html:102
 #: templates/core/includes/home/home_hero_section.html:174
-#: templates/locations/list.html:175
-#: templates/properties/includes/list/list_header_banner.html:28
+#: templates/locations/district_detail.html:89
+#: templates/locations/district_detail.html:120
+#: templates/locations/list.html:177
+#: templates/properties/includes/list/list_header_banner.html:20
 #: templates/properties/list_backup.html:34
 msgid "объектов"
 msgstr "วัตถุ"
 
-#: templates/core/includes/home/home_faq_section.html:15
-msgid "Найдите ответы на ключевые вопросы о покупке недвижимости на Пхукете"
-msgstr "ค้นหาคำตอบสำหรับคำถามสำคัญเกี่ยวกับการซื้ออสังหาริมทรัพย์ในภูเก็ต"
-
-#: templates/core/includes/home/home_faq_section.html:26
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
+#: templates/core/includes/home/home_faq_section.html:13
+#: templates/core/includes/home/home_faq_section.html:82
 msgid "Можно ли купить недвижимость удалённо?"
-msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
+msgstr "สามารถซื้ออสังหาริมทรัพย์ทางไกลได้หรือไม่?"
 
-#: templates/core/includes/home/home_faq_section.html:35
+#: templates/core/includes/home/home_faq_section.html:16
+#: templates/core/includes/home/home_faq_section.html:91
 msgid ""
 "Да. Дистанционная покупка недвижимости — это привычный, отлаженный и "
 "юридически безопасный процесс во многих странах, и Таиланд здесь не "
@@ -2906,35 +2818,96 @@ msgid ""
 "поможем с оформлением документов и при необходимости примем объект от вашего "
 "имени по доверенности."
 msgstr ""
+"ได้แน่นอน การซื้ออสังหาฯ ทางไกลเป็นกระบวนการที่คุ้นเคยและปลอดภัยตามกฎหมายในหลายประเทศ รวมทั้งประเทศไทย เราจัดชมโครงการแบบออนไลน์ เจรจาเงื่อนไขกับผู้ขาย ช่วยจัดการเอกสาร และถ้าจำเป็นสามารถรับโอนทรัพย์สินแทนคุณผ่านหนังสือมอบอำนาจ"
 "ใช่ การซื้อระยะไกลของอสังหาริมทรัพย์เป็นที่คุ้นเคยดีขึ้นและกระบวนการทางกฎหมายที่มีคว "
 "เราจะจัดให้มีการคัดกรองออนไลน์ประสานงานข้อตกลงกับผู้ขายช่วยในเอกสารและถ้าจำเป็นยอมรับวัตถุในนามของคุณโดยการมอบฉันทะ"
 
-#: templates/core/includes/home/home_faq_section.html:45
+#: templates/core/includes/home/home_faq_section.html:21
+#: templates/core/includes/home/home_faq_section.html:101
 msgid "Можно ли иностранцу купить недвижимость в собственность?"
 msgstr "มันเป็นไปได้สำหรับชาวต่างชาติที่จะซื้อทรัพย์สินหรือไม่?"
 
-#: templates/core/includes/home/home_faq_section.html:54
+#: templates/core/includes/home/home_faq_section.html:24
+#: templates/core/includes/home/home_faq_section.html:110
 msgid ""
 "Да. В Таиланде существуют две формы собственности — freehold (полная) и "
 "leasehold (долгосрочная аренда)."
 msgstr ""
 "ใช่ ในประเทศไทยมีสองรูปแบบของการเป็นเจ้าของ-ถือครองกรรมสิทธิ์(เต็ม)และสิทธิการเช่า(สั"
 
-#: templates/core/includes/home/home_faq_section.html:57
+#: templates/core/includes/home/home_faq_section.html:29
+#: templates/core/includes/home/home_faq_section.html:124
+msgid "Есть ли рассрочка?"
+msgstr "มีแผนการผ่อนชำระ?"
+
+#: templates/core/includes/home/home_faq_section.html:32
+msgid ""
+"Да. При покупке у застройщика рассрочка обычно беспроцентная и "
+"предоставляется на весь срок строительства. На вторичном рынке, как правило, "
+"требуется полная оплата."
+msgstr ""
+"ใช่ เมื่อซื้อจากนักพัฒนาแผนการผ่อนชำระปลอดดอกเบี้ยมักจะมีให้สำหรับระยะเวลาการก่อสร้ "
+"ในตลาดรองมักจะต้องชำระเงินเต็มจำนวน"
+
+#: templates/core/includes/home/home_faq_section.html:37
+msgid "Есть ли ограничения для иностранных покупателей?"
+msgstr "ชาวต่างชาติมีข้อจำกัดในการซื้ออสังหาฯ หรือไม่?"
+
+#: templates/core/includes/home/home_faq_section.html:40
+#, python-format
+msgid ""
+"Иностранцы могут владеть кондоминиумами в Таиланде, но есть ограничения по "
+"доле иностранцев в проекте (не более 49%% площади). Виллы чаще оформляются "
+"через leasehold или структуры с тайскими компаниями."
+msgstr ""
+"ชาวต่างชาติสามารถถือกรรมสิทธิ์คอนโดมิเนียมในไทยได้ แต่สัดส่วนกรรมสิทธิ์ของชาวต่างชาติในโครงการจำกัดไม่เกิน 49%% ของพื้นที่รวม ส่วนวิลล่าส่วนใหญ่จะจัดโครงสร้างผ่านสัญญาเช่าระยะยาว (leasehold) หรือบริษัทที่จดทะเบียนในไทย"
+
+#: templates/core/includes/home/home_faq_section.html:45
+#: templates/core/includes/home/home_faq_section.html:162
+msgid "Какие налоги есть при покупке недвижимости?"
+msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
+
+#: templates/core/includes/home/home_faq_section.html:48
+#, python-format
+msgid ""
+"При покупке от застройщика основной налог — регистрационный сбор в Земельном "
+"департаменте (1,1%% от стоимости), обычно делится поровну между покупателем "
+"и продавцом."
+msgstr ""
+"เมื่อซื้อจากผู้พัฒนา ภาษีหลักคือค่าธรรมเนียมจดทะเบียนกับกรมที่ดิน (1.1%% ของราคา) "
+"ซึ่งปกติผู้ซื้อและผู้ขายจะรับผิดชอบร่วมกันคนละครึ่ง"
+
+#: templates/core/includes/home/home_faq_section.html:53
+#: templates/core/includes/home/home_faq_section.html:143
+msgid "Сколько стоят услуги агента?"
+msgstr "ค่าบริการของตัวแทนเท่าไหร่?"
+
+#: templates/core/includes/home/home_faq_section.html:56
+msgid ""
+"Для покупателя — 0 THB. Вознаграждение агентства выплачивается застройщиком "
+"из маркетингового бюджета, поэтому сопровождение сделки для вас бесплатное."
+msgstr ""
+"สำหรับผู้ซื้อไม่มีค่าใช้จ่าย (0 บาท) ค่านายหน้าชำระโดยผู้พัฒนาจากงบการตลาด ดังนั้นการดูแลและการเจรจาต่อรองทั้งหมดจึงฟรีสำหรับคุณ"
+
+#: templates/core/includes/home/home_faq_section.html:71
+msgid "Найдите ответы на ключевые вопросы о покупке недвижимости на Пхукете"
+msgstr "ค้นหาคำตอบสำหรับคำถามสำคัญเกี่ยวกับการซื้ออสังหาริมทรัพย์ในภูเก็ต"
+
+#: templates/core/includes/home/home_faq_section.html:113
 msgid "Квартиры (кондоминиумы)"
 msgstr "อพาร์ทเม้นท์(คอนโดมิเนียม)"
 
-#: templates/core/includes/home/home_faq_section.html:57
+#: templates/core/includes/home/home_faq_section.html:113
 #, python-format
 msgid "иностранцам можно владеть до 49%% юнитов в freehold."
 msgstr "ชาวต่างชาติสามารถเป็นเจ้าของได้ถึง 49%% ของยูนิต"
 
-#: templates/core/includes/home/home_faq_section.html:58
+#: templates/core/includes/home/home_faq_section.html:114
 #: templates/core/includes/home/home_featured_properties_section.html:13
 msgid "Виллы"
 msgstr "วิลล่า"
 
-#: templates/core/includes/home/home_faq_section.html:58
+#: templates/core/includes/home/home_faq_section.html:114
 msgid ""
 "часто продаются с землёй в leasehold, при этом сама вилла может быть "
 "оформлена в полную собственность. При покупке у застройщика (юридического "
@@ -2945,11 +2918,7 @@ msgstr ""
 "เมื่อซื้อจากนักพัฒนา(นิติบุคคล)มีปัญหาใดๆกับการขยายสัญญาเช่าสำหรับ 30+30+30 "
 "ปีเป็นมาตรฐานและถูกต้องตามกฎหมายปฏิบัติ."
 
-#: templates/core/includes/home/home_faq_section.html:68
-msgid "Есть ли рассрочка?"
-msgstr "มีแผนการผ่อนชำระ?"
-
-#: templates/core/includes/home/home_faq_section.html:77
+#: templates/core/includes/home/home_faq_section.html:133
 msgid ""
 "Да. При покупке у застройщика обычно предоставляется беспроцентная рассрочка "
 "на весь срок строительства. На вторичном рынке, как правило, требуется "
@@ -2958,11 +2927,7 @@ msgstr ""
 "ใช่ เมื่อซื้อจากนักพัฒนาแผนการผ่อนชำระปลอดดอกเบี้ยมักจะมีให้สำหรับระยะเวลาการก่อสร้ "
 "ในตลาดรองมักจะต้องชำระเงินเต็มจำนวน"
 
-#: templates/core/includes/home/home_faq_section.html:87
-msgid "Сколько стоят услуги агента?"
-msgstr "ค่าบริการของตัวแทนเท่าไหร่?"
-
-#: templates/core/includes/home/home_faq_section.html:96
+#: templates/core/includes/home/home_faq_section.html:152
 msgid ""
 "Для покупателя — 0 THB. Вознаграждение агентства выплачивается застройщиком "
 "из своего маркетингового бюджета. Это даёт вам сопровождение, защиту "
@@ -2974,71 +2939,65 @@ msgstr ""
 "นับสนุนการป้องกันผลประโยชน์และการเข้าถึงฐานข้อมูลที่สมบูรณ์ของสิ่งอำนวยความสะดวกที่ "
 "ดันที่อาจเกิดขึ้นเมื่อทำงานร่วมกับนักพัฒนา'ฝ่ายขายในฐานะที่เป็นเหตุผลว่าทำไมนักพัฒนา"
 
-#: templates/core/includes/home/home_faq_section.html:106
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
-msgid "Какие налоги есть при покупке недвижимости?"
-msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
-
-#: templates/core/includes/home/home_faq_section.html:115
+#: templates/core/includes/home/home_faq_section.html:171
 #, python-format
 msgid ""
 "налог при регистрации — 1,1%% от стоимости, делится поровну между "
 "покупателем и продавцом."
 msgstr "ภาษีการลงทะเบียนคือ 1.1%%ของค่าใช้จ่ายแบ่งเท่ากันระหว่างผู้ซื้อและผู้ขาย"
 
-#: templates/core/includes/home/home_faq_section.html:116
+#: templates/core/includes/home/home_faq_section.html:172
 #, python-format
 msgid "налог при регистрации — 6,8%%, также делится пополам."
 msgstr "ภาษีการลงทะเบียนเป็น 6.8%%แบ่งออกในช่วงครึ่งปี"
 
-#: templates/core/includes/home/home_faq_section.html:119
+#: templates/core/includes/home/home_faq_section.html:175
 msgid ""
 "Мы заранее рассчитываем все расходы, чтобы для вас не было неожиданных "
 "платежей."
 msgstr "เราคำนวณค่าใช้จ่ายทั้งหมดล่วงหน้าเพื่อให้ไม่มีการชำระเงินที่ไม่คาดคิดสำหรับคุณ"
 
-#: templates/core/includes/home/home_faq_section.html:131
+#: templates/core/includes/home/home_faq_section.html:187
 msgid "Не нашли ответ?"
 msgstr "ยังไม่พบคำตอบใช่ไหม?"
 
-#: templates/core/includes/home/home_faq_section.html:134
+#: templates/core/includes/home/home_faq_section.html:190
 msgid ""
 "Свяжитесь с нами, и мы ответим на ваш вопрос в удобном для вас формате — по "
 "телефону или в мессенджере."
 msgstr "ติดต่อเราและเราจะตอบคำถามของคุณในรูปแบบที่สะดวกสำหรับคุณ—ทางโทรศัพท์หรือผู้ส่"
 
-#: templates/core/includes/home/home_faq_section.html:141
-#: templates/core/includes/home/home_faq_section.html:154
+#: templates/core/includes/home/home_faq_section.html:197
+#: templates/core/includes/home/home_faq_section.html:210
 msgid "Задать вопрос"
 msgstr "ถามคำถาม"
 
-#: templates/core/includes/home/home_faq_section.html:164
+#: templates/core/includes/home/home_faq_section.html:220
 #: templates/core/includes/home/home_visit_office_section.html:121
 msgid "Ваш телефон"
 msgstr "เบอร์โทรศัพท์"
 
-#: templates/core/includes/home/home_faq_section.html:168
+#: templates/core/includes/home/home_faq_section.html:224
 #: templates/core/includes/home/home_visit_office_section.html:125
 msgid "+7 (999) 123-45-67"
 msgstr "+7 (999) 123-45-67"
 
-#: templates/core/includes/home/home_faq_section.html:174
+#: templates/core/includes/home/home_faq_section.html:230
 #: templates/core/service_detail.html:158
 msgid "Ваш вопрос"
 msgstr "คำถามของคุณ"
 
-#: templates/core/includes/home/home_faq_section.html:176
+#: templates/core/includes/home/home_faq_section.html:232
 msgid "Опишите ваш вопрос подробно..."
 msgstr "อธิบายคำถามของคุณในรายละเอียด.."
 
-#: templates/core/includes/home/home_faq_section.html:190
+#: templates/core/includes/home/home_faq_section.html:246
 #: templates/core/includes/home/home_reviews_section.html:46
 #: templates/core/includes/home/home_visit_office_section.html:155
 msgid "Я согласен(на) с"
 msgstr "ฉันเห็นด้วยกับ"
 
-#: templates/core/includes/home/home_faq_section.html:196
+#: templates/core/includes/home/home_faq_section.html:252
 msgid "Получить ответ"
 msgstr "รับการตอบกลับ"
 
@@ -3087,14 +3046,14 @@ msgstr "ดูอสังหาริมทรัพย์ทั้งหมด
 
 #: templates/core/includes/home/home_hero_section.html:47
 #: templates/core/includes/home/home_hero_section.html:119
-#: templates/core/map.html:853 templates/core/search.html:47
+#: templates/core/map.html:1085 templates/core/search.html:47
 msgid "Все типы"
 msgstr "ทุกประเภท"
 
 #: templates/core/includes/home/home_hero_section.html:65
 #: templates/core/includes/home/home_hero_section.html:137
 #: templates/core/search.html:59
-#: templates/properties/includes/list/list_filters_sidebar.html:91
+#: templates/properties/includes/list/list_filters_sidebar.html:104
 #: templates/properties/list_backup.html:147
 msgid "Все районы"
 msgstr "ทุกพื้นที่"
@@ -3111,7 +3070,7 @@ msgstr "ราคาสูงสุด"
 
 #: templates/core/includes/home/home_hero_section.html:98
 #: templates/core/includes/home/home_hero_section.html:170
-#: templates/core/map.html:879
+#: templates/core/map.html:1111
 msgid "Показать"
 msgstr "แสดง"
 
@@ -3157,14 +3116,10 @@ msgid "Новые поступления"
 msgstr "สินค้ามาใหม่"
 
 #: templates/core/includes/home/home_new_arrivals_section.html:7
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
 msgid "Свежие предложения недвижимости"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
 #: templates/core/includes/home/home_new_arrivals_section.html:20
-#, fuzzy
-#| msgid "Смотреть каталог"
 msgid "Посмотреть все новинки"
 msgstr "ดูแคตตาล็อก"
 
@@ -3223,11 +3178,9 @@ msgstr "รับการเลือก"
 msgid "Современная недвижимость"
 msgstr "อสังหาริมทรัพย์สมัยใหม่"
 
-#: templates/core/includes/home/home_promotional_banner_section.html:24
-#: templates/core/includes/home/home_promotional_banner_section.html:35
-#: templates/core/includes/home/home_promotional_banner_section.html:43
-#, fuzzy
-#| msgid "Команда Undersun Estate"
+#: templates/core/includes/home/home_promotional_banner_section.html:25
+#: templates/core/includes/home/home_promotional_banner_section.html:36
+#: templates/core/includes/home/home_promotional_banner_section.html:44
 msgid "Рекламный баннер Undersun Estate"
 msgstr "ทีมงาน Undersun Estate"
 
@@ -3384,7 +3337,7 @@ msgid "Расскажите, что вы ищете"
 msgstr "บอกเราว่าคุณกำลังมองหาอะไร"
 
 #: templates/core/includes/home/home_reviews_section.html:52
-#: templates/core/service_detail.html:164 templates/properties/detail.html:706
+#: templates/core/service_detail.html:164 templates/properties/detail.html:774
 msgid "Отправить заявку"
 msgstr "ส่งคำขอ"
 
@@ -3438,8 +3391,6 @@ msgstr ""
 "กระบวนการไปอย่างราบรื่นโดยไม่ต้องประหลาดใจที่ไม่พึงประสงค์"
 
 #: templates/core/includes/home/home_reviews_section.html:158
-#, fuzzy
-#| msgid "Инвестиции"
 msgid "Инвестиционное кондо"
 msgstr "การลงทุน"
 
@@ -3457,8 +3408,6 @@ msgid "Хороший сервис, адекватные цены. Витали�
 msgstr "บริการที่ดีในราคาที่เหมาะสม วิทาลี่ช่วยฉันเลือกคอนโด.."
 
 #: templates/core/includes/home/home_reviews_section.html:167
-#, fuzzy
-#| msgid "На продажу"
 msgid "Новый проект"
 msgstr "ขาย"
 
@@ -3507,7 +3456,7 @@ msgid "офис"
 msgstr "สำนักงาน"
 
 #: templates/core/includes/home/home_visit_office_section.html:68
-#: templates/properties/detail.html:773
+#: templates/properties/detail.html:841
 msgid "Пн-Пт: 9:00-18:00"
 msgstr "จันทร์-ศุกร์:9:00-18:00"
 
@@ -3553,8 +3502,6 @@ msgid "Более 600 объектов на Пхукете — выберите 
 msgstr "กว่า 600 คุณสมบัติในภูเก็ต-เลือกหนึ่งที่จะเป็นของคุณ"
 
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:29
-#, fuzzy
-#| msgid "Карта недвижимости Пхукета"
 msgid "Недвижимость Пхукета"
 msgstr "แผนที่อสังหาริมทรัพย์ภูเก็ต"
 
@@ -3587,8 +3534,6 @@ msgid "Консультации"
 msgstr "การให้คำปรึกษา"
 
 #: templates/core/includes/home/home_what_we_do_for_you_section.html:80
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
 msgid "Консультации по покупке недвижимости"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
@@ -3619,15 +3564,25 @@ msgstr "พอร์ตโฟลิโอของเรารวมถึงท
 msgid "Карта недвижимости"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
-#: templates/core/map.html:768
+#: templates/core/map.html:13
+msgid "Интерактивная карта недвижимости Undersun Estate"
+msgstr "บริการตัวแทนอสังหาริมทรัพย์"
+
+#: templates/core/map.html:14
+msgid ""
+"Живые данные по объектам недвижимости Пхукета: виллы, квартиры, таунхаусы с "
+"фильтрами и актуальными ценами"
+msgstr ""
+
+#: templates/core/map.html:981
 msgid "Карта Undersun Estate"
 msgstr "แผนที่ Undersun Estate"
 
-#: templates/core/map.html:770
+#: templates/core/map.html:983
 msgid "Исследуйте Пхукет на карте и находите лучшие районы"
 msgstr "สำรวจภูเก็ตบนแผนที่และค้นหาย่านที่ดีที่สุด"
 
-#: templates/core/map.html:773
+#: templates/core/map.html:986
 msgid ""
 "Кастомные маркеры, продвинутые фильтры и брендовая аналитика помогают "
 "сравнивать объекты по локациям, цене и типу сделки гораздо быстрее."
@@ -3635,145 +3590,155 @@ msgstr ""
 "หมุดแบบกำหนดเอง ตัวกรองขั้นสูง และข้อมูลเชิงลึกของแบรนด์ช่วยให้คุณเปรียบเทียบทรัพย์ตามทำเล "
 "ราคา และประเภทดีลได้รวดเร็วยิ่งขึ้น"
 
-#: templates/core/map.html:779
+#: templates/core/map.html:992
 msgid "Каталог объектов"
 msgstr "แคตตาล็อกอสังหาริมทรัพย์"
 
-#: templates/core/map.html:789
+#: templates/core/map.html:1002
 msgid "Всего"
 msgstr "ทั้งหมด"
 
-#: templates/core/map.html:791
+#: templates/core/map.html:1004
 msgid "активных объектов"
 msgstr "รายการที่เปิดขาย"
 
-#: templates/core/map.html:796
+#: templates/core/map.html:1009
 msgid "виллы, кондо, земля"
 msgstr "วิลล่า คอนโด ที่ดิน"
 
-#: templates/core/map.html:801
+#: templates/core/map.html:1014
 msgid "от 1 месяца"
 msgstr "ตั้งแต่ 1 เดือน"
 
-#: templates/core/map.html:806
+#: templates/core/map.html:1019
 msgid "подготовлены к исследованию"
 msgstr "พร้อมให้สำรวจ"
 
-#: templates/core/map.html:818 templates/core/map.html:827
-#: templates/properties/includes/list/list_filters_sidebar.html:9
+#: templates/core/map.html:1031 templates/core/map.html:1040
+#: templates/properties/includes/list/list_filters_sidebar.html:11
 #: templates/properties/includes/list/list_mobile_filters_toggle.html:8
 #: templates/properties/list_backup.html:53
 #: templates/properties/list_backup.html:65
 msgid "Фильтры"
 msgstr "ตัวกรอง"
 
-#: templates/core/map.html:819
+#: templates/core/map.html:1032
 msgid "Настройте выдачу"
 msgstr "ปรับผลลัพธ์"
 
-#: templates/core/map.html:834 templates/core/search.html:40
+#: templates/core/map.html:1048 templates/core/map.html:1066
+#: templates/core/search.html:40
 msgid "Поиск"
 msgstr "ค้นหา"
 
-#: templates/core/map.html:837
+#: templates/core/map.html:1052 templates/core/search.html:69
+msgid "Сделка"
+msgstr "ตกลง"
+
+#: templates/core/map.html:1060 templates/properties/favorites.html:104
+msgid "Цена"
+msgstr "ราคา"
+
+#: templates/core/map.html:1069
 msgid "Введите район, проект или ID"
 msgstr "กรอกชื่ออำเภอ โครงการ หรือ ID"
 
-#: templates/core/map.html:844
+#: templates/core/map.html:1076
 msgid "Все"
 msgstr "ทั้งหมด"
 
-#: templates/core/map.html:845
+#: templates/core/map.html:1077
 msgid "Покупка"
 msgstr "ซื้อ"
 
-#: templates/core/map.html:861
+#: templates/core/map.html:1093
 msgid "Диапазон цены"
 msgstr "ช่วงราคา"
 
-#: templates/core/map.html:864
+#: templates/core/map.html:1096
 msgid "Максимум"
 msgstr "สูงสุด"
 
-#: templates/core/map.html:865 templates/core/map.html:940
+#: templates/core/map.html:1097 templates/core/map.html:1172
 #: templates/core/search.html:92
 msgid "Без ограничений"
 msgstr "โดยไม่มีข้อจำกัด"
 
-#: templates/core/map.html:868
+#: templates/core/map.html:1100
 msgid "Сбросить ограничение"
 msgstr "ล้างขีดจำกัด"
 
-#: templates/core/map.html:876
+#: templates/core/map.html:1108
 #: templates/properties/includes/list/list_no_results.html:11
 #: templates/properties/list_backup.html:336
 msgid "Сбросить фильтры"
 msgstr "รีเซ็ตตัวกรอง"
 
-#: templates/core/map.html:888 templates/core/map.html:918
+#: templates/core/map.html:1120 templates/core/map.html:1150
 msgid "Показано"
 msgstr "แสดง"
 
-#: templates/core/map.html:890
+#: templates/core/map.html:1122
 msgid "объектов на карте"
 msgstr "รายการบนแผนที่"
 
-#: templates/core/map.html:894
+#: templates/core/map.html:1126
 msgid "Фильтр"
 msgstr "ตัวกรอง"
 
-#: templates/core/map.html:903
+#: templates/core/map.html:1135
 msgid "Загружаем лучшие предложения"
 msgstr "กำลังโหลดข้อเสนอที่ดีที่สุด"
 
-#: templates/core/map.html:908
+#: templates/core/map.html:1140
 msgid "Определить местоположение"
 msgstr "ระบุตำแหน่งของฉัน"
 
-#: templates/core/map.html:911
+#: templates/core/map.html:1143
 msgid "Сбросить вид"
 msgstr "รีเซ็ตมุมมอง"
 
-#: templates/core/map.html:941
+#: templates/core/map.html:1173
 #: templates/includes/home/home_data_injection.html:36
-#: templates/properties/card.html:258
+#: templates/properties/card.html:262 templates/properties/detail.html:1258
 msgid "Цена по запросу"
 msgstr "ราคาตามคำขอ"
 
-#: templates/core/map.html:942
+#: templates/core/map.html:1174 templates/properties/detail.html:1259
 msgid "мес"
 msgstr "ต่อเดือน"
 
-#: templates/core/map.html:943
+#: templates/core/map.html:1175
 msgid "Геолокация не поддерживается"
 msgstr "ไม่รองรับการระบุตำแหน่ง"
 
-#: templates/core/map.html:944
+#: templates/core/map.html:1176
 msgid "Не удалось определить позицию"
 msgstr "ไม่สามารถระบุตำแหน่งได้"
 
-#: templates/core/map.html:1572
+#: templates/core/map.html:1843
 #: templates/includes/list/list_data_injection.html:19
 #: templates/properties/list_backup.html:1252
 #: templates/properties/list_backup.html:1401
 msgid "В избранное"
 msgstr "ไปยังรายการโปรด"
 
-#: templates/core/map.html:1596
+#: templates/core/map.html:1867
 msgid "спал."
 msgstr "ห้องนอน"
 
-#: templates/core/map.html:1597
+#: templates/core/map.html:1868
 msgid "ванн."
 msgstr "ห้องน้ำ"
 
-#: templates/core/map.html:1598 templates/core/service_detail.html:222
+#: templates/core/map.html:1869 templates/core/service_detail.html:222
 #: templates/includes/home/home_data_injection.html:37
-#: templates/properties/card.html:109 templates/properties/detail.html:328
+#: templates/properties/card.html:113 templates/properties/detail.html:395
+#: templates/properties/detail.html:1260
 msgid "м²"
 msgstr "ตร.ม."
 
-#: templates/core/map.html:1601
+#: templates/core/map.html:1872
 #: templates/includes/list/list_data_injection.html:17
 #: templates/properties/list_backup.html:1256
 #: templates/properties/list_backup.html:1405
@@ -3802,10 +3767,6 @@ msgstr[1] ""
 #: templates/core/search.html:41
 msgid "Введите ключевые слова..."
 msgstr "ป้อนคำหลัก.."
-
-#: templates/core/search.html:69
-msgid "Сделка"
-msgstr "ตกลง"
 
 #: templates/core/search.html:87
 msgid "Цена от"
@@ -3862,8 +3823,8 @@ msgid ""
 "параметры поиска."
 msgstr "ไม่พบวัตถุเดียวสำหรับการค้นหาของคุณ ลองเปลี่ยนพารามิเตอร์การค้นหา"
 
-#: templates/core/search.html:148 templates/locations/district_detail.html:67
-#: templates/properties/detail.html:835
+#: templates/core/search.html:148 templates/locations/district_detail.html:187
+#: templates/properties/detail.html:903
 msgid "Посмотреть все объекты"
 msgstr "ดูวัตถุทั้งหมด"
 
@@ -3891,8 +3852,8 @@ msgstr "ค้นหาราคา"
 msgid "Укажите ценовой диапазон для более точного поиска"
 msgstr "ระบุช่วงราคาสำหรับการค้นหาที่ถูกต้องมากขึ้น"
 
-#: templates/core/service_detail.html:133 templates/properties/detail.html:588
-#: templates/properties/detail.html:1021 templates/properties/detail.html:1103
+#: templates/core/service_detail.html:133 templates/properties/detail.html:655
+#: templates/properties/detail.html:1083 templates/properties/detail.html:1165
 msgid "Получить консультацию"
 msgstr "รับคำปรึกษา"
 
@@ -3917,9 +3878,9 @@ msgid ""
 "Свяжитесь с нами прямо сейчас для получения персональной консультации по"
 msgstr "ติดต่อเราตอนนี้เพื่อรับคำปรึกษาส่วนตัว"
 
-#: templates/core/service_detail.html:264 templates/properties/detail.html:598
-#: templates/properties/detail.html:603 templates/properties/detail.html:1001
-#: templates/properties/detail.html:1120
+#: templates/core/service_detail.html:264 templates/properties/detail.html:665
+#: templates/properties/detail.html:670 templates/properties/detail.html:1063
+#: templates/properties/detail.html:1182
 msgid "Позвонить"
 msgstr "การโทร"
 
@@ -3932,7 +3893,7 @@ msgid "Узнать подробнее"
 msgstr "ดูรายละเอียดเพิ่มเติม"
 
 #: templates/includes/home/home_data_injection.html:35
-#: templates/properties/card.html:129
+#: templates/properties/card.html:133
 msgid "Изменить валюту"
 msgstr "เปลี่ยนสกุลเงิน"
 
@@ -3954,8 +3915,8 @@ msgid "+66 XXX XXX XXX"
 msgstr "+66 XXX XXX XXX"
 
 #: templates/includes/home/home_data_injection.html:44
-#: templates/properties/detail.html:266 templates/properties/detail.html:288
-#: templates/properties/detail.html:1140 templates/properties/detail.html:1171
+#: templates/properties/detail.html:333 templates/properties/detail.html:355
+#: templates/properties/detail.html:1202 templates/properties/detail.html:1233
 msgid "Заказать звонок"
 msgstr "ขอให้โทรกลับ"
 
@@ -3964,7 +3925,7 @@ msgid "Напишите нам в WhatsApp для быстрой консуль�
 msgstr "ส่งข้อความถึงเราทาง WhatsApp เพื่อรับคำปรึกษาอย่างรวดเร็ว"
 
 #: templates/includes/home/home_data_injection.html:46
-#: templates/properties/detail.html:533 templates/properties/detail.html:571
+#: templates/properties/detail.html:600 templates/properties/detail.html:638
 msgid "Написать в WhatsApp"
 msgstr "แชทผ่าน WhatsApp"
 
@@ -3977,51 +3938,75 @@ msgid "Написать в Telegram"
 msgstr "แชทผ่าน Telegram"
 
 #: templates/includes/list/list_data_injection.html:20
-#: templates/properties/includes/list/list_filters_sidebar.html:106
+#: templates/properties/includes/list/list_filters_sidebar.html:119
 #: templates/properties/list_backup.html:162
 #: templates/properties/list_backup.html:1487
-#, fuzzy
-#| msgid "Выбор объекта"
 msgid "Все локации"
 msgstr "การเลือกทรัพย์สิน"
 
-#: templates/locations/district_detail.html:5 templates/locations/list.html:5
+#: templates/locations/district_detail.html:6 templates/locations/list.html:5
 #: templates/locations/list.html:14
 msgid "Районы Пхукета"
 msgstr "อำเภอภูเก็ต"
 
-#: templates/locations/district_detail.html:13
-msgid "Один из лучших районов Пхукета для жизни и инвестиций"
-msgstr "หนึ่งในพื้นที่ที่ดีที่สุดของภูเก็ตที่จะอาศัยอยู่และลงทุนใน"
-
-#: templates/locations/district_detail.html:32
-msgid "Объектов"
-msgstr "วัตถุ"
-
-#: templates/locations/district_detail.html:37
-msgid "Средняя цена"
-msgstr "ราคาเฉลี่ย"
-
-#: templates/locations/district_detail.html:56
+#: templates/locations/district_detail.html:34
+#: templates/locations/district_detail.html:176
 msgid "Недвижимость в районе"
 msgstr "อสังหาริมทรัพย์ในพื้นที่"
 
-#: templates/locations/district_detail.html:79
-#: templates/properties/detail.html:449
+#: templates/locations/district_detail.html:74
+#: templates/locations/district_detail.html:152
+msgid "район"
+msgstr "เขต"
+
+#: templates/locations/district_detail.html:82
+msgid "Один из лучших районов Пхукета для жизни и инвестиций"
+msgstr "หนึ่งในพื้นที่ที่ดีที่สุดของภูเก็ตที่จะอาศัยอยู่และลงทุนใน"
+
+#: templates/locations/district_detail.html:93
+msgid "пляжей рядом"
+msgstr "ชายทะเล"
+
+#: templates/locations/district_detail.html:124
+msgid "общественные зоны"
+msgstr "พื้นที่ส่วนกลาง"
+
+#: templates/locations/district_detail.html:129
+msgid "средняя цена"
+msgstr "ราคาเฉลี่ย"
+
+#: templates/locations/district_detail.html:134
+msgid "атмосфера"
+msgstr "บรรยากาศ"
+
+#: templates/locations/district_detail.html:135
+msgid "Премиальные резиденции"
+msgstr "ที่พักระดับพรีเมียม"
+
+#: templates/locations/district_detail.html:159
+msgid "Лучшее время"
+msgstr "ช่วงเวลาที่ดีที่สุด"
+
+#: templates/locations/district_detail.html:163
+msgid "Доступ"
+msgstr "การเดินทาง"
+
+#: templates/locations/district_detail.html:164
+msgid "15 мин до аэропорта"
+msgstr "15 นาทีถึงสนามบิน"
+
+#: templates/locations/district_detail.html:199
+#: templates/properties/detail.html:516
 msgid "Расположение"
 msgstr "สถานที่"
 
 #: templates/locations/list.html:18
-#, fuzzy
-#| msgid "Найдите идеальное расположение для вашей недвижимости"
 msgid "Выберите идеальное место для жизни"
 msgstr "ค้นหาตำแหน่งที่เหมาะสำหรับอสังหาริมทรัพย์ของคุณ"
 
 #: templates/locations/list.html:25
-#: templates/properties/includes/list/list_header_banner.html:32
+#: templates/properties/includes/list/list_header_banner.html:24
 #: templates/properties/list_backup.html:38
-#, fuzzy
-#| msgid "Районов"
 msgid "районов"
 msgstr "เขต"
 
@@ -4029,300 +4014,282 @@ msgstr "เขต"
 msgid "пляжей"
 msgstr "ชายทะเล"
 
-#: templates/locations/list.html:69
+#: templates/locations/list.html:71
 msgid "Цены от:"
 msgstr "ราคาเริ่มต้น:"
 
-#: templates/locations/list.html:77
+#: templates/locations/list.html:79
 msgid "Исследовать район"
 msgstr "สำรวจพื้นที่"
 
-#: templates/locations/list.html:91
+#: templates/locations/list.html:93
 msgid "Карта районов Пхукета"
 msgstr "แผนที่พื้นที่ภูเก็ต"
 
-#: templates/locations/list.html:92
+#: templates/locations/list.html:94
 msgid "Изучите расположение районов на интерактивной карте"
 msgstr "สำรวจสถานที่ตั้งของอำเภอบนแผนที่แบบโต้ตอบ"
 
-#: templates/locations/list.html:105
+#: templates/locations/list.html:107
 msgid "Почему Пхукет?"
 msgstr "ทำไมต้องภูเก็ต"
 
-#: templates/locations/list.html:113
+#: templates/locations/list.html:115
 msgid "Лучшие пляжи"
 msgstr "ชายหาดที่ดีที่สุด"
 
-#: templates/locations/list.html:114
+#: templates/locations/list.html:116
 msgid "Белоснежный песок и кристально чистая вода"
 msgstr "ทรายหิมะสีขาวและน้ำทะเลใส"
 
-#: templates/locations/list.html:121
+#: templates/locations/list.html:123
 msgid "Тропический климат"
 msgstr "ภูมิอากาศเขตร้อน"
 
-#: templates/locations/list.html:122
+#: templates/locations/list.html:124
 msgid "Солнце круглый год, комфортная температура"
 msgstr "อาทิตย์ตลอดทั้งปีอุณหภูมิสบาย"
 
-#: templates/locations/list.html:129
+#: templates/locations/list.html:131
 msgid "Удобная логистика"
 msgstr "โลจิสติกส์ที่สะดวก"
 
-#: templates/locations/list.html:130
+#: templates/locations/list.html:132
 msgid "Международный аэропорт и развитая инфраструктура"
 msgstr "สนามบินนานาชาติและการพัฒนาโครงสร้างพื้นฐาน"
 
-#: templates/locations/list.html:137
+#: templates/locations/list.html:139
 msgid "Качество жизни"
 msgstr "คุณภาพชีวิต"
 
-#: templates/locations/list.html:138
+#: templates/locations/list.html:140
 msgid "Безопасность, медицина, международное сообщество"
 msgstr "ความปลอดภัย,ยา,ประชาคมระหว่างประเทศ"
 
-#: templates/locations/location_detail.html:13
-msgid "Пхукет"
-msgstr "ภูเก็ต"
-
-#: templates/locations/location_detail.html:30
-msgid "Информация о локации"
-msgstr "ข้อมูลสถานที่ตั้ง"
-
-#: templates/locations/location_detail.html:33
-msgid "Район:"
-msgstr "อำเภอ:"
-
-#: templates/locations/location_detail.html:37
-msgid "Объектов:"
-msgstr "วัตถุ:"
-
-#: templates/locations/location_detail.html:59
+#: templates/locations/location_detail.html:40
+#: templates/locations/location_detail.html:119
 msgid "Недвижимость в"
 msgstr "อสังหาริมทรัพย์ใน"
 
-#: templates/properties/card.html:37
+#: templates/locations/location_detail.html:62
+msgid "Пхукет"
+msgstr "ภูเก็ต"
+
+#: templates/locations/location_detail.html:88
+msgid "Информация о локации"
+msgstr "ข้อมูลสถานที่ตั้ง"
+
+#: templates/locations/location_detail.html:91
+msgid "Район:"
+msgstr "อำเภอ:"
+
+#: templates/locations/location_detail.html:95
+msgid "Объектов:"
+msgstr "วัตถุ:"
+
+#: templates/properties/card.html:40
 msgid "Изображение недоступно"
 msgstr "ภาพไม่พร้อมใช้งาน"
 
-#: templates/properties/card.html:49
+#: templates/properties/card.html:52
 msgid "Рекомендуем"
 msgstr "เราขอแนะนำให้"
 
-#: templates/properties/detail.html:100
+#: templates/properties/detail.html:133
 msgid "фото"
 msgstr "งกัน"
 
-#: templates/properties/detail.html:124
+#: templates/properties/detail.html:157
 msgid "Изображения недоступны"
 msgstr "รูปภาพไม่พร้อมใช้งาน"
 
-#: templates/properties/detail.html:165
+#: templates/properties/detail.html:198
 msgid "Назад"
 msgstr "กลับ"
 
-#: templates/properties/detail.html:237
+#: templates/properties/detail.html:304
 msgid "На карте"
 msgstr "บนแผนที่"
 
-#: templates/properties/detail.html:295
+#: templates/properties/detail.html:362
 msgid "Основные характеристики"
 msgstr "คุณสมบัติหลัก"
 
-#: templates/properties/detail.html:304
+#: templates/properties/detail.html:371
 msgid "Спален"
 msgstr "ห้องนอน"
 
-#: templates/properties/detail.html:316
+#: templates/properties/detail.html:383
 msgid "Ванных"
 msgstr "ห้องน้ำ"
 
-#: templates/properties/detail.html:340
+#: templates/properties/detail.html:407
 msgid "Участок м²"
 msgstr "พื้นที่ที่ดิน ตร.ม."
 
-#: templates/properties/detail.html:366
+#: templates/properties/detail.html:433
 msgid "Год"
 msgstr "ปี"
 
-#: templates/properties/detail.html:377 templates/properties/detail.html:389
-msgid "Есть"
-msgstr "มี"
-
-#: templates/properties/detail.html:415
+#: templates/properties/detail.html:482
 #: templates/properties/includes/detail_bootstrap.js.html:54
-#, fuzzy
-#| msgid "Показано"
 msgid "Показать полностью"
 msgstr "แสดง"
 
-#: templates/properties/detail.html:427
+#: templates/properties/detail.html:494
 msgid "Особенности и удобства"
 msgstr "คุณสมบัติและสิ่งอำนวยความสะดวก"
 
-#: templates/properties/detail.html:473
+#: templates/properties/detail.html:540
 msgid "Остались вопросы по объекту?"
 msgstr "มีคำถามอื่นอีกไหมเกี่ยวกับสถานที่?"
 
-#: templates/properties/detail.html:476
-#, fuzzy
-#| msgid "Отправить запрос"
+#: templates/properties/detail.html:543
 msgid "Уточнить детали"
 msgstr "ส่งคำขอ"
 
-#: templates/properties/detail.html:485
+#: templates/properties/detail.html:552
 msgid "Заинтересовались объектом?"
 msgstr "สนใจอสังหาริมทรัพย์นี้หรือไม่?"
 
-#: templates/properties/detail.html:548
-#, fuzzy
-#| msgid "Карта недвижимости"
+#: templates/properties/detail.html:615
 msgid "Менеджер по недвижимости"
 msgstr "แผนที่อสังหาริมทรัพย์"
 
-#: templates/properties/detail.html:583 templates/properties/detail.html:932
-#: templates/properties/detail.html:984
-#, fuzzy
-#| msgid "Отправить запрос"
+#: templates/properties/detail.html:650 templates/properties/detail.html:1001
+#: templates/properties/detail.html:1046
 msgid "Записаться на просмотр"
 msgstr "ส่งคำขอ"
 
-#: templates/properties/detail.html:631
+#: templates/properties/detail.html:699
 msgid "Похожие объекты"
 msgstr "วัตถุที่คล้ายกัน"
 
-#: templates/properties/detail.html:646
+#: templates/properties/detail.html:714
 msgid "Не нашли подходящий вариант?"
 msgstr "ไม่พบตัวเลือกที่เหมาะสม?"
 
-#: templates/properties/detail.html:654
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
+#: templates/properties/detail.html:722
+
 msgid "Оставьте заявку на индивидуальный подбор недвижимости"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
-#: templates/properties/detail.html:687
+#: templates/properties/detail.html:755
 msgid "Удобное время для общения / Часовой пояс"
 msgstr "เวลาที่สะดวกสำหรับการสื่อสาร/เขตเวลา"
 
-#: templates/properties/detail.html:690
+#: templates/properties/detail.html:758
 msgid "Например: 10:00-18:00 UTC+7"
 msgstr "ตัวอย่างเช่น:10:00-18:00 ยูพีซี+7"
 
-#: templates/properties/detail.html:699
-#, fuzzy
-#| msgid "Найдите идеальное расположение для вашей недвижимости"
+#: templates/properties/detail.html:767
+
 msgid "Расскажите о ваших пожеланиях к недвижимости..."
 msgstr "ค้นหาตำแหน่งที่เหมาะสำหรับอสังหาริมทรัพย์ของคุณ"
 
-#: templates/properties/detail.html:723
+#: templates/properties/detail.html:791
 msgid "Или посетите наш офис на Пхукете"
 msgstr "หรือเยี่ยมชมสำนักงานของเราในจังหวัดภูเก็ต"
 
-#: templates/properties/detail.html:788
-#, fuzzy
-#| msgid "Найдите идеальное расположение для вашей недвижимости"
+#: templates/properties/detail.html:856
+
 msgid "Получить последние новости и интересные предложения о недвижимости"
 msgstr "ค้นหาตำแหน่งที่เหมาะสำหรับอสังหาริมทรัพย์ของคุณ"
 
-#: templates/properties/detail.html:795
+#: templates/properties/detail.html:863
 msgid "Введите ваш email"
 msgstr "ป้อนที่อยู่อีเมลของคุณ"
 
-#: templates/properties/detail.html:800
+#: templates/properties/detail.html:868
 #: templates/properties/includes/detail_bootstrap.js.html:59
 msgid "Подписаться"
 msgstr "สมัครสมาชิก"
 
-#: templates/properties/detail.html:827
+#: templates/properties/detail.html:895
 msgid "Похожие объекты не найдены"
 msgstr "ไม่พบวัตถุที่คล้ายคลึงกัน"
 
-#: templates/properties/detail.html:830
+#: templates/properties/detail.html:898
 msgid ""
 "К сожалению, в данный момент нет похожих объектов. Рекомендуем посмотреть "
 "другие варианты в нашем каталоге."
 msgstr ""
 "แต่น่าเสียดายที่ไม่มีวัตถุที่คล้ายกันในขณะนี้ เราขอแนะนำให้คุณดูตัวเลือกอื่นๆในแคตตาล็อกของเรา"
 
-#: templates/properties/detail.html:839
+#: templates/properties/detail.html:907
 msgid "Связаться с агентом"
 msgstr "ติดต่อตัวแทนจำหน่าย"
 
-#: templates/properties/detail.html:899
+#: templates/properties/detail.html:968
 msgid "Скачать"
 msgstr "ดาวน์โหลด"
 
-#: templates/properties/detail.html:903
+#: templates/properties/detail.html:972
 msgid "Поделиться"
 msgstr "เพื่อแบ่งปัน"
 
-#: templates/properties/detail.html:943
+#: templates/properties/detail.html:1012
 msgid ""
 "Укажите удобное время для просмотра объекта. Наш менеджер свяжется с вами "
 "для подтверждения встречи."
 msgstr "ระบุเวลาที่สะดวกในการดูสถานที่ ผู้จัดการของเราจะติดต่อคุณเพื่อยืนยันการนัดหมาย"
 
-#: templates/properties/detail.html:969
+#: templates/properties/detail.html:1038
 msgid "Желаемая дата и время"
 msgstr "วันที่และเวลาที่ต้องการ"
 
-#: templates/properties/detail.html:988 templates/properties/detail.html:1107
-#: templates/properties/detail.html:1175
+#: templates/properties/detail.html:1050 templates/properties/detail.html:1169
+#: templates/properties/detail.html:1237
 msgid "Отмена"
 msgstr "ยกเลิก"
 
-#: templates/properties/detail.html:997 templates/properties/detail.html:1116
+#: templates/properties/detail.html:1059 templates/properties/detail.html:1178
 msgid "Или свяжитесь с нами напрямую:"
 msgstr "หรือติดต่อเราโดยตรง:"
 
-#: templates/properties/detail.html:1032
+#: templates/properties/detail.html:1094
 msgid ""
 "Получите профессиональную консультацию по этому объекту недвижимости. Наш "
 "эксперт ответит на все ваши вопросы."
 msgstr "รายละเอียดเพิ่มเติมคอนโดที่สนใจติดต่อตัวแทน ผู้เชี่ยวชาญของเราจะตอบคำถามของคุณทั้งหมด"
 
-#: templates/properties/detail.html:1058
+#: templates/properties/detail.html:1120
 msgid "Что вас интересует?"
 msgstr "คุณสนใจอะไร?"
 
-#: templates/properties/detail.html:1061
-#, fuzzy
-#| msgid "Найдите идеальное расположение для вашей недвижимости"
+#: templates/properties/detail.html:1123
 msgid "Выберите тему консультации"
 msgstr "ค้นหาตำแหน่งที่เหมาะสำหรับอสังหาริมทรัพย์ของคุณ"
 
-#: templates/properties/detail.html:1062
+#: templates/properties/detail.html:1124
 msgid "Цена и условия покупки"
 msgstr "ราคาและเงื่อนไขการซื้อ"
 
-#: templates/properties/detail.html:1065
+#: templates/properties/detail.html:1127
 msgid "Район и инфраструктура"
 msgstr "พื้นที่และโครงสร้างพื้นฐาน"
 
-#: templates/properties/detail.html:1066
+#: templates/properties/detail.html:1128
 msgid "Финансирование покупки"
 msgstr "การจัดหาเงินทุนการซื้อ"
 
-#: templates/properties/detail.html:1067
-#, fuzzy
-#| msgid "В аренду"
+#: templates/properties/detail.html:1129
 msgid "Сдача в аренду"
 msgstr "เช่า"
 
-#: templates/properties/detail.html:1073
+#: templates/properties/detail.html:1135
 msgid "Ваши вопросы"
 msgstr "คำถามของคุณ"
 
-#: templates/properties/detail.html:1076
+#: templates/properties/detail.html:1138
 msgid "Опишите, что вас интересует об этом объекте..."
 msgstr "อธิบายสิ่งที่คุณสนใจเกี่ยวกับวัตถุนี้.."
 
-#: templates/properties/detail.html:1085
+#: templates/properties/detail.html:1147
 msgid "Телефонный звонок"
 msgstr "โทรศัพท์"
 
-#: templates/properties/detail.html:1149
+#: templates/properties/detail.html:1211
 msgid ""
 "Оставьте свой номер телефона, и наш менеджер свяжется с вами в ближайшее "
 "время."
@@ -4342,8 +4309,6 @@ msgid "Здесь собраны все объекты недвижимости,
 msgstr "นี่คือคุณสมบัติทั้งหมดที่คุณได้เพิ่มในรายการโปรดของคุณ"
 
 #: templates/properties/favorites.html:32
-#, fuzzy
-#| msgid "Всего объектов"
 msgid "Количество избранных объектов"
 msgstr "รวมทั้งหมด"
 
@@ -4384,8 +4349,6 @@ msgid "Вы уверены, что хотите удалить все избра
 msgstr "คุณแน่ใจหรือว่าต้องการลบรายการโปรดทั้งหมดของคุณ?"
 
 #: templates/properties/favorites.html:96
-#, fuzzy
-#| msgid "Всего объектов"
 msgid "Загрузка избранных объектов..."
 msgstr "รวมทั้งหมด"
 
@@ -4396,10 +4359,6 @@ msgstr "ไม่พบวัตถุที่เลือก"
 #: templates/properties/favorites.html:98
 msgid "Удалить из избранного"
 msgstr "ลบออกจากรายการโปรด"
-
-#: templates/properties/favorites.html:104
-msgid "Цена"
-msgstr "ราคา"
 
 #: templates/properties/favorites.html:105
 msgid "Цена за м²"
@@ -4442,14 +4401,10 @@ msgid "Нет"
 msgstr "ไม่"
 
 #: templates/properties/favorites.html:122
-#, fuzzy
-#| msgid "Показано"
 msgid "Не указано"
 msgstr "แสดง"
 
 #: templates/properties/favorites.html:123
-#, fuzzy
-#| msgid "На продажу"
 msgid "Только для продажи"
 msgstr "ขาย"
 
@@ -4462,8 +4417,6 @@ msgid "Избранное очищено"
 msgstr "รายการโปรดได้รับการล้างแล้ว"
 
 #: templates/properties/includes/detail_bootstrap.js.html:48
-#, fuzzy
-#| msgid "Этапы сделки по покупке недвижимости"
 msgid "Посмотрите на эту недвижимость"
 msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
 
@@ -4495,122 +4448,55 @@ msgstr "เราจะเซ็นมัน.."
 msgid "Спасибо за подписку! Мы будем держать вас в курсе последних новостей."
 msgstr "ขอบคุณสำหรับการสมัคร! เราจะให้คุณปรับปรุงกับข่าวล่าสุด"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:25
+#: templates/properties/includes/list/list_filters_sidebar.html:27
 #: templates/properties/list_backup.html:81
-#, fuzzy
-#| msgid "Выбор объекта"
 msgid "Все объекты"
 msgstr "การเลือกทรัพย์สิน"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:58
+#: templates/properties/includes/list/list_filters_sidebar.html:71
 #: templates/properties/list_backup.html:114
 msgid "Бюджет"
 msgstr "งบประมาณ"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:64
-#, fuzzy
-#| msgid "Нет"
+#: templates/properties/includes/list/list_filters_sidebar.html:77
 msgid "От"
 msgstr "ไม่"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:72
-#, fuzzy
-#| msgid "Да"
+#: templates/properties/includes/list/list_filters_sidebar.html:85
 msgid "До"
 msgstr "ใช่"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:80
+#: templates/properties/includes/list/list_filters_sidebar.html:93
 #: templates/properties/list_backup.html:136
 msgid "Укажите бюджет в"
 msgstr "ระบุงบประมาณใน"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:118
+#: templates/properties/includes/list/list_filters_sidebar.html:131
 #: templates/properties/list_backup.html:174
 msgid "Количество спален"
 msgstr "จำนวนห้องนอน"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:126
+#: templates/properties/includes/list/list_filters_sidebar.html:140
 #: templates/properties/list_backup.html:182
 msgid "спальня"
 msgstr "ห้องนอน"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:135
+#: templates/properties/includes/list/list_filters_sidebar.html:150
 #: templates/properties/list_backup.html:191
 msgid "Удобства"
 msgstr "สิ่งอำนวยความสะดวก"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:159
+#: templates/properties/includes/list/list_filters_sidebar.html:174
 #: templates/properties/list_backup.html:214
 msgid "Применить"
 msgstr "สมัครงาน"
 
-#: templates/properties/includes/list/list_filters_sidebar.html:162
+#: templates/properties/includes/list/list_filters_sidebar.html:177
 #: templates/properties/list_backup.html:217
 msgid "Очистить"
 msgstr "เคลียร์"
 
-#: templates/properties/includes/list/list_header_banner.html:10
-#: templates/properties/list_backup.html:16
-msgid "Недвижимость на продажу"
-msgstr "อสังหาริมทรัพย์สำหรับขาย"
-
-#: templates/properties/includes/list/list_header_banner.html:12
-#: templates/properties/list_backup.html:18
-msgid "Недвижимость в аренду"
-msgstr "อสังหาริมทรัพย์สำหรับเช่า"
-
-#: templates/properties/includes/list/list_header_banner.html:16
-#: templates/properties/list_backup.html:22
-#, fuzzy
-#| msgid "Карта недвижимости"
-msgid "Каталог недвижимости"
-msgstr "แคตตาล็อกอสังหาริมทรัพย์"
-
-#: apps/properties/models.py:202
-msgid "Приоритет в рекомендуемых"
-msgstr "ลำดับความสำคัญในรายการแนะนำ"
-
-#: apps/properties/models.py:204
-msgid "Чем выше значение, тем раньше объект отображается в блоках рекомендаций"
-msgstr "ค่าที่มากกว่าจะทำให้แสดงก่อนในบล็อกแนะนำ"
-
-#: apps/core/models.py:78
-msgid "Название баннера"
-msgstr "ชื่อแบนเนอร์"
-
-#: apps/core/models.py:81
-msgid "Внутреннее имя, чтобы не путаться между акциями в админке"
-msgstr "ชื่อภายในเพื่อไม่ให้สับสนระหว่างโปรโมชันในแอดมิน"
-
-#: apps/core/admin.py:190
-msgid "Основное"
-msgstr "ข้อมูลหลัก"
-
-#: apps/properties/views.py:323
-msgid "на продажу"
-msgstr "สำหรับขาย"
-
-#: apps/properties/views.py:324
-msgid "в аренду"
-msgstr "ให้เช่า"
-
-#: apps/properties/views.py:330
-msgid "в %(location)s, Пхукет, Таиланд"
-msgstr "ใน%(location)s ภูเก็ต ประเทศไทย"
-
-#: apps/properties/views.py:332
-msgid "в районе %(district)s, Пхукет, Таиланд"
-msgstr "ในย่าน%(district)s ภูเก็ต ประเทศไทย"
-
-#: apps/properties/views.py:334
-msgid "на Пхукете, Таиланд"
-msgstr "ในภูเก็ต ประเทศไทย"
-
-#: apps/properties/views.py:344
-msgid "Каталог недвижимости на Пхукете, Таиланд"
-msgstr "แคตตาล็อกอสังหาริมทรัพย์ในภูเก็ต ประเทศไทย"
-
-#: templates/properties/includes/list/list_header_banner.html:21
+#: templates/properties/includes/list/list_header_banner.html:13
 #: templates/properties/list_backup.html:27
 msgid "Пхукет, Таиланд"
 msgstr "ภูเก็ต,ประเทศไทย"
@@ -4665,9 +4551,21 @@ msgstr "กริด"
 msgid "Карта"
 msgstr "แผนที่"
 
+#: templates/properties/list.html:11 templates/properties/list_backup.html:22
+msgid "Каталог недвижимости"
+msgstr "แคตตาล็อกอสังหาริมทรัพย์"
+
 #: templates/properties/list_backup.html:6
 msgid "Недвижимость на Пхукете"
 msgstr "ภูเก็ตอสังหาริมทรัพย์"
+
+#: templates/properties/list_backup.html:16
+msgid "Недвижимость на продажу"
+msgstr "อสังหาริมทรัพย์สำหรับขาย"
+
+#: templates/properties/list_backup.html:18
+msgid "Недвижимость в аренду"
+msgstr "อสังหาริมทรัพย์สำหรับเช่า"
 
 #: templates/properties/list_backup.html:235
 #: templates/properties/list_backup.html:241
@@ -4730,6 +4628,10 @@ msgstr "เข้าสู่"
 msgid "Профиль"
 msgstr "โปรไฟล์"
 
+#: templates/users/profile.html:32
+msgid "Настройки"
+msgstr "การตั้งค่า"
+
 #: templates/users/profile.html:42
 msgid "Информация профиля"
 msgstr "ข้อมูลโปรไฟล์"
@@ -4785,6 +4687,18 @@ msgstr "ท่องเที่ยวฮานอย"
 #: templates/users/register.html:70
 msgid "Зарегистрироваться"
 msgstr "ลงทะเบียน"
+
+#~ msgid "Свяжите баннер с нужным языком и задайте целевую ссылку."
+#~ msgstr "เชื่อมโยงแบนเนอร์กับภาษาที่ต้องการและตั้งค่าการเชื่อมโยงเป้าหมาย"
+
+#~ msgid "Баннер"
+#~ msgstr "แบนเนอร์"
+
+#~ msgid "Объектов"
+#~ msgstr "วัตถุ"
+
+#~ msgid "Есть"
+#~ msgstr "มี"
 
 #~ msgid "Карта недвижимости Пхукета"
 #~ msgstr "แผนที่อสังหาริมทรัพย์ภูเก็ต"

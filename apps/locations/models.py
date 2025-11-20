@@ -8,6 +8,13 @@ class District(models.Model):
     name = models.CharField(_('Название'), max_length=100)
     slug = models.SlugField(_('URL'), unique=True)
     description = models.TextField(_('Описание'), blank=True)
+    image = models.ImageField(
+        _('Изображение'),
+        upload_to='locations/districts/',
+        blank=True,
+        null=True,
+        help_text=_('Добавьте обложку района (используется на странице детального описания и списке районов).')
+    )
 
     class Meta:
         verbose_name = _('Район')
@@ -26,6 +33,13 @@ class Location(models.Model):
     slug = models.SlugField(_('URL'))
     district = models.ForeignKey(District, on_delete=models.CASCADE, related_name='locations')
     description = models.TextField(_('Описание'), blank=True)
+    image = models.ImageField(
+        _('Изображение'),
+        upload_to='locations/locations/',
+        blank=True,
+        null=True,
+        help_text=_('Опциональная фотография локации для детальной страницы.')
+    )
 
     class Meta:
         verbose_name = _('Локация')

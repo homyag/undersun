@@ -42,6 +42,8 @@
                     <div class="relative">
                         {% if district.image %}
                             <img src="{{ district.image.url }}" alt="{{ district.name }}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300">
+                        {% elif district.static_image %}
+                            <img src="{{ district.static_image }}" alt="{{ district.name }}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300">
                         {% else %}
                             <div class="w-full h-56 bg-gradient-to-br from-primary to-tertiary flex items-center justify-center">
                                 <span class="text-white text-3xl font-bold">{{ district.name|first }}</span>

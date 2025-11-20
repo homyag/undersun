@@ -1,8 +1,47 @@
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
+from django.contrib.staticfiles.storage import staticfiles_storage
 from .models import District, Location
 from apps.properties.models import Property
+
+
+IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.webp')
+
+
+def _get_static_location_image(slug):
+    if not slug:
+        return None
+
+    base = slug.strip()
+    if not base:
+        return None
+
+    variants = {
+        base,
+        base.lower(),
+        base.upper(),
+        base.capitalize(),
+        base.replace('-', ''),
+        base.replace('-', '_'),
+        base.replace('-', ' '),
+        base.replace('-', ' ').title(),
+        base.replace('-', ' ').title().replace(' ', ''),
+        base.replace('-', ' ').title().replace(' ', '_'),
+    }
+
+    for variant in list(variants):
+        if not variant:
+            continue
+        for ext in IMAGE_EXTENSIONS:
+            path = f'images/locations/{variant}{ext}'
+            try:
+                if staticfiles_storage.exists(path):
+                    return staticfiles_storage.url(path)
+            except Exception:
+                continue
+
+    return None
 
 
 class LocationListView(ListView):
@@ -14,6 +53,12 @@ class LocationListView(ListView):
         return District.objects.annotate(
             properties_count=Count('property', filter=Q(property__is_active=True, property__status='available'))
         ).filter(properties_count__gt=0)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        for district in context['districts']:
+            district.static_image = _get_static_location_image(district.slug)
+        return context
 
 
 class DistrictDetailView(DetailView):
@@ -42,6 +87,7 @@ class DistrictDetailView(DetailView):
 
         # Локации в районе
         context['locations'] = self.object.locations.all()
+        context['district_static_image'] = _get_static_location_image(self.object.slug)
 
         return context
 
@@ -74,5 +120,10 @@ class LocationDetailView(DetailView):
 
         context['properties'] = page_obj
         context['district'] = self.object.district
+        context['location_static_image'] = (
+            _get_static_location_image(self.object.slug)
+            or _get_static_location_image(self.object.district.slug)
+        )
+        context['district_static_image'] = _get_static_location_image(self.object.district.slug)
 
         return context

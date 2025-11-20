@@ -218,26 +218,33 @@
                         {
                           "@type": "ListItem",
                           "position": 1,
-                          "name": "{% trans "Недвижимость" %}",
-                          "item": "{% if property.deal_type == 'rent' %}{{ rent_catalog_url|absolute_url:request|escapejs }}{% else %}{{ sale_catalog_url|absolute_url:request|escapejs }}{% endif %}"
+                          "item": {
+                            "@id": "{% if property.deal_type == 'rent' %}{{ rent_catalog_url|absolute_url:request|escapejs }}{% else %}{{ sale_catalog_url|absolute_url:request|escapejs }}{% endif %}",
+                            "name": "{% trans "Недвижимость" %}"
+                          }
                         }{% if property.district %},
                         {
                           "@type": "ListItem",
                           "position": 2,
-                          "name": "{{ property.district.name|escapejs }}",
-                          "item": "{{ property.district.get_absolute_url|absolute_url:request|escapejs }}"
+                          "item": {
+                            "@id": "{{ property.district.get_absolute_url|absolute_url:request|escapejs }}",
+                            "name": "{{ property.district.name|escapejs }}"
+                          }
                         }{% endif %}{% if property.location %},
                         {
                           "@type": "ListItem",
                           "position": 3,
-                          "name": "{{ property.location.name|escapejs }}",
-                          "item": "{{ property.location.get_absolute_url|absolute_url:request|escapejs }}"
-                        }{% endif %},
-                        {
+                          "item": {
+                            "@id": "{{ property.location.get_absolute_url|absolute_url:request|escapejs }}",
+                            "name": "{{ property.location.name|escapejs }}"
+                          }
+                        }{% endif %},{
                           "@type": "ListItem",
                           "position": {% if property.location %}4{% elif property.district %}3{% else %}2{% endif %},
-                          "name": "{{ property.title|escapejs }}",
-                          "item": "{{ property.get_absolute_url|absolute_url:request|escapejs }}"
+                          "item": {
+                            "@id": "{{ property.get_absolute_url|absolute_url:request|escapejs }}",
+                            "name": "{{ property.title|escapejs }}"
+                          }
                         }
                       ]
                     }
@@ -1254,6 +1261,11 @@
 <!-- Property data and configuration -->
 <script>
 {% include 'properties/includes/detail_bootstrap.js.html' %}
+window.propertyDetailTranslations = {
+    priceOnRequest: "{{ _('Цена по запросу')|escapejs }}",
+    perMonth: "{{ _('мес')|escapejs }}",
+    perSqm: "{{ _('м²')|escapejs }}"
+};
 </script>
 
 <!-- Property Detail Page Script -->
