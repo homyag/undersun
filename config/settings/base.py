@@ -73,6 +73,8 @@ MIDDLEWARE = [
     'apps.core.middleware.LanguageRedirectMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'apps.core.middleware.BadInquiryRequestLoggerMiddleware',
+    'apps.core.middleware.ForbiddenPathLoggerMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -229,6 +231,12 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
+        'bad_requests_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'bad_requests.log',
+            'formatter': 'verbose',
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -248,6 +256,11 @@ LOGGING = {
         'apps.users.notifications': {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
+            'propagate': False,
+        },
+        'bad_requests': {
+            'handlers': ['bad_requests_file'],
+            'level': 'INFO',
             'propagate': False,
         },
     },
