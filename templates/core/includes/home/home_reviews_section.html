@@ -9,8 +9,9 @@
       <h2 class="text-2xl font-bold text-gray-900 mb-6 leading-snug">
         {% trans "Подберём недвижимость " %}<br>{% trans "точно под ваши цели" %}
       </h2>
-      <form id="reviewsSectionContactForm" class="space-y-6">
+      <form id="reviewsSectionContactForm" class="space-y-6 js-recaptcha-form" data-recaptcha-action="reviews_contact">
         {% csrf_token %}
+        {% include 'core/includes/recaptcha_token_field.html' %}
         
         <input type="text" 
                name="name"

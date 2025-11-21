@@ -34,6 +34,20 @@ body {
     color: var(--text-dark);
 }
 
+.grecaptcha-badge {
+    right: auto !important;
+    left: 0 !important;
+    bottom: 16px !important;
+    width: 70px !important;
+    overflow: hidden;
+    transform-origin: left bottom;
+    transition: width 0.3s ease;
+}
+
+.grecaptcha-badge:hover {
+    width: 256px !important;
+}
+
 h1:not([class*="text-"]),
 h2:not([class*="text-"]),
 h3:not([class*="text-"]),
@@ -282,6 +296,21 @@ h6:not([class*="text-"]) {
         font-size: 20px;
         bottom: 85px; /* Поднимаем выше мобильной контактной панели */
         right: 15px;
+    }
+
+    .grecaptcha-badge {
+        bottom: 85px !important;
+        left: 0 !important;
+    }
+
+    #cookie-consent-overlay {
+        bottom: 90px !important;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    #cookie-consent-overlay > div {
+        max-height: none;
     }
 }
 

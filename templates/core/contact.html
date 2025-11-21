@@ -82,8 +82,9 @@
             <div>
                 <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Отправьте нам сообщение" %}</h2>
                 
-                <form id="contactForm" method="post" class="space-y-6">
+                <form id="contactForm" method="post" class="space-y-6 js-recaptcha-form" data-recaptcha-action="contact_form">
                     {% csrf_token %}
+                    {% include 'core/includes/recaptcha_token_field.html' %}
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
