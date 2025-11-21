@@ -102,6 +102,7 @@ def site_context(request):
         'language_urls': language_urls,
         'canonical_url': canonical_absolute_url,
         'search_schema_json': search_schema_json,
+        'recaptcha_site_key': getattr(settings, 'RECAPTCHA_SITE_KEY', ''),
     }
 
 PAGINATED_VIEW_NAMES = {

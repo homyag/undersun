@@ -25,6 +25,12 @@ SITE_NAME = env('SITE_NAME', default='Undersun Estate')
 SITE_COMPANY_NAME = env('SITE_COMPANY_NAME', default='Undersun Estate Co., Ltd.')
 SITE_URL = env('SITE_URL', default='https://undersunestate.com')
 
+# Google reCAPTCHA v3
+RECAPTCHA_SITE_KEY = env('RECAPTCHA_SITE_KEY', default='')
+RECAPTCHA_SECRET_KEY = env('RECAPTCHA_SECRET_KEY', default='')
+RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
+RECAPTCHA_MIN_SCORE = env.float('RECAPTCHA_MIN_SCORE', default=0.5)
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-change-me-in-production')
 

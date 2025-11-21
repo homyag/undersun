@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
 from apps.properties.models import Property
+from apps.core.recaptcha import verify_recaptcha
 from .models import (
     PropertyInquiry,
     QuickConsultationRequest,
@@ -31,10 +32,24 @@ def get_client_ip(request):
     return ip
 
 
+def _check_recaptcha(request):
+    """Проверяем токен reCAPTCHA и возвращаем JsonResponse при ошибке."""
+    token = request.POST.get('g-recaptcha-response')
+    action = request.POST.get('recaptcha_action')
+    result = verify_recaptcha(token, action=action)
+    if not result.success:
+        return JsonResponse({'success': False, 'message': result.message}, status=400)
+    return None
+
+
 @require_http_methods(["POST"])
 def property_inquiry_view(request, property_id):
     """Обработка запросов по конкретному объекту (просмотр/консультация)"""
     try:
+        recaptcha_error = _check_recaptcha(request)
+        if recaptcha_error:
+            return recaptcha_error
+
         property_obj = get_object_or_404(Property, id=property_id)
 
         # Получаем данные из формы
@@ -153,6 +168,10 @@ def property_inquiry_view(request, property_id):
 def quick_consultation_view(request):
     """Быстрый запрос консультации (форма с телефоном)"""
     try:
+        recaptcha_error = _check_recaptcha(request)
+        if recaptcha_error:
+            return recaptcha_error
+
         phone = request.POST.get('phone', '').strip()
 
         if not phone:
@@ -207,6 +226,10 @@ def quick_consultation_view(request):
 def contact_form_view(request):
     """Обработка общей контактной формы"""
     try:
+        recaptcha_error = _check_recaptcha(request)
+        if recaptcha_error:
+            return recaptcha_error
+
         logger.warning("contact_form_view POST: %s", dict(request.POST))
         name = request.POST.get('name', '').strip()
         email = request.POST.get('email', '').strip()
@@ -278,6 +301,10 @@ def contact_form_view(request):
 def office_visit_request_view(request):
     """Запись на встречу в офисе"""
     try:
+        recaptcha_error = _check_recaptcha(request)
+        if recaptcha_error:
+            return recaptcha_error
+
         name = request.POST.get('name', '').strip()
         phone = request.POST.get('phone', '').strip()
         preferred_date = request.POST.get('preferred_date', '').strip()
@@ -344,6 +371,10 @@ def office_visit_request_view(request):
 def faq_question_view(request):
     """Вопрос из секции FAQ"""
     try:
+        recaptcha_error = _check_recaptcha(request)
+        if recaptcha_error:
+            return recaptcha_error
+
         phone = request.POST.get('phone', '').strip()
         question = request.POST.get('question', '').strip()
 
@@ -396,6 +427,10 @@ def faq_question_view(request):
 def newsletter_subscribe_view(request):
     """Подписка на новости"""
     try:
+        recaptcha_error = _check_recaptcha(request)
+        if recaptcha_error:
+            return recaptcha_error
+
         email = request.POST.get('email', '').strip()
 
         # Валидация

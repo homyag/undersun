@@ -973,6 +973,97 @@
 
 <script src="{% static 'js/cookie-consent.js' %}"></script>
 
+{% if recaptcha_site_key %}
+<script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}&hl={{ LANGUAGE_CODE|default:'en' }}" async defer></script>
+<script>
+  (function() {
+    const siteKey = '{{ recaptcha_site_key|escapejs }}';
+    if (!siteKey) {
+      return;
+    }
+
+    function setupRecaptchaForms() {
+      const forms = document.querySelectorAll('form[data-recaptcha-action]');
+      if (!forms.length) {
+        return;
+      }
+
+      if (typeof window.grecaptcha === 'undefined') {
+        setTimeout(setupRecaptchaForms, 500);
+        return;
+      }
+
+      forms.forEach(form => {
+        if (form.dataset.recaptchaBound === 'true') {
+          return;
+        }
+        form.dataset.recaptchaBound = 'true';
+
+        let tokenInput = form.querySelector('input[name="g-recaptcha-response"]');
+        if (!tokenInput) {
+          tokenInput = document.createElement('input');
+          tokenInput.type = 'hidden';
+          tokenInput.name = 'g-recaptcha-response';
+          form.appendChild(tokenInput);
+        }
+
+        let actionInput = form.querySelector('input[name="recaptcha_action"]');
+        if (!actionInput) {
+          actionInput = document.createElement('input');
+          actionInput.type = 'hidden';
+          actionInput.name = 'recaptcha_action';
+          form.appendChild(actionInput);
+        }
+
+        const actionName = form.dataset.recaptchaAction || 'submit';
+        actionInput.value = actionName;
+        form.addEventListener('submit', function handleRecaptcha(event) {
+          if (!window.grecaptcha || !siteKey) {
+            return;
+          }
+
+          if (form.dataset.recaptchaVerified === 'true') {
+            form.dataset.recaptchaVerified = '';
+            return;
+          }
+
+          event.preventDefault();
+          if (typeof event.stopImmediatePropagation === 'function') {
+            event.stopImmediatePropagation();
+          }
+          if (typeof event.stopPropagation === 'function') {
+            event.stopPropagation();
+          }
+
+          grecaptcha.ready(function() {
+            grecaptcha.execute(siteKey, { action: actionName }).then(function(token) {
+              tokenInput.value = token;
+              form.dataset.recaptchaVerified = 'true';
+              form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            }).catch(function() {
+              form.dataset.recaptchaVerified = '';
+              tokenInput.value = '';
+              const errorMessage = form.dataset.recaptchaError || 'Не удалось подтвердить reCAPTCHA. Попробуйте ещё раз.';
+              if (window.showErrorPopup) {
+                window.showErrorPopup(errorMessage);
+              } else {
+                alert(errorMessage);
+              }
+            });
+          });
+        }, true);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupRecaptchaForms);
+    } else {
+      setupRecaptchaForms();
+    }
+  })();
+</script>
+{% endif %}
+
 <!-- Success Popup Modal -->
 <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
      style="display: none;">

@@ -729,8 +729,9 @@
                         {% trans "Оставьте заявку на индивидуальный подбор недвижимости" %}
                     </h3>
 
-                    <form id="customSelectionForm" class="space-y-4">
+                    <form id="customSelectionForm" class="space-y-4 js-recaptcha-form" data-recaptcha-action="custom_selection">
                         {% csrf_token %}
+                        {% include 'core/includes/recaptcha_token_field.html' %}
                         <input type="hidden" name="inquiry_type" value="custom_selection">
 
                         <div>
@@ -863,8 +864,9 @@
                             <p class="text-sm text-gray-600 mb-4">{% trans "Получить последние новости и интересные предложения о недвижимости" %}</p>
 
                             <!-- Newsletter Form -->
-                            <form id="newsletterForm" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto lg:mx-0">
+                            <form id="newsletterForm" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto lg:mx-0 js-recaptcha-form" data-recaptcha-action="newsletter_subscribe">
                                 {% csrf_token %}
+                                {% include 'core/includes/recaptcha_token_field.html' %}
                                 <input type="email"
                                        name="email"
                                        placeholder="{% trans 'Введите ваш email' %}"
@@ -1019,8 +1021,9 @@
                         <p class="text-gray-600">{% trans "Укажите удобное время для просмотра объекта. Наш менеджер свяжется с вами для подтверждения встречи." %}</p>
                     </div>
 
-                    <form id="viewingRequestForm" data-property-id="{{ property.id }}" class="space-y-4">
+                    <form id="viewingRequestForm" data-property-id="{{ property.id }}" class="space-y-4 js-recaptcha-form" data-recaptcha-action="viewing_request">
                         {% csrf_token %}
+                        {% include 'core/includes/recaptcha_token_field.html' %}
                         <input type="hidden" name="inquiry_type" value="viewing">
 
                         <div>
@@ -1101,8 +1104,9 @@
                         <p class="text-gray-600">{% trans "Получите профессиональную консультацию по этому объекту недвижимости. Наш эксперт ответит на все ваши вопросы." %}</p>
                     </div>
 
-                    <form id="consultationRequestForm" data-property-id="{{ property.id }}" class="space-y-4">
+                    <form id="consultationRequestForm" data-property-id="{{ property.id }}" class="space-y-4 js-recaptcha-form" data-recaptcha-action="property_consultation">
                         {% csrf_token %}
+                        {% include 'core/includes/recaptcha_token_field.html' %}
                         <input type="hidden" name="inquiry_type" value="consultation">
 
                         <div>
@@ -1217,8 +1221,9 @@
                 <div class="p-6">
                     <p class="text-gray-600 mb-6">{% trans "Оставьте свой номер телефона, и наш менеджер свяжется с вами в ближайшее время." %}</p>
 
-                    <form id="callbackRequestForm" data-property-id="{{ property.id }}" class="space-y-4">
+                    <form id="callbackRequestForm" data-property-id="{{ property.id }}" class="space-y-4 js-recaptcha-form" data-recaptcha-action="callback_request">
                         {% csrf_token %}
+                        {% include 'core/includes/recaptcha_token_field.html' %}
                         <input type="hidden" name="inquiry_type" value="callback">
 
                         <div>
