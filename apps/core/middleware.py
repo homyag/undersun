@@ -1,6 +1,8 @@
+import logging
+import re
+
 from django.conf import settings
 from django.http import HttpResponsePermanentRedirect
-from django.utils import translation
 from django.utils.deprecation import MiddlewareMixin
 from django.conf.urls.i18n import is_language_prefix_patterns_used
 
@@ -52,3 +54,78 @@ class LanguageRedirectMiddleware(MiddlewareMixin):
             return None
 
         return HttpResponsePermanentRedirect(target)
+
+
+class BadInquiryRequestLoggerMiddleware(MiddlewareMixin):
+    """Log подозрительные GET-запросы к AJAX-эндпоинту заявок по объектам."""
+
+    inquiry_pattern = re.compile(r'^/(?:[a-z]{2})?/property/ajax/inquiry/\d+/?$')
+
+    def __init__(self, get_response=None):
+        super().__init__(get_response)
+        self.logger = logging.getLogger('bad_requests')
+
+    def process_request(self, request):
+        if request.method != 'GET':
+            return None
+
+        if not self.inquiry_pattern.match(request.path):
+            return None
+
+        forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
+        client_ip = forwarded_for or request.META.get('REMOTE_ADDR', 'unknown')
+        user_agent = request.META.get('HTTP_USER_AGENT', 'unknown')
+        query_string = request.META.get('QUERY_STRING', '') or '-'
+
+        self.logger.warning(
+            'method=%s path=%s ip=%s ua="%s" query=%s',
+            request.method,
+            request.get_full_path(),
+            client_ip,
+            user_agent,
+            query_string,
+        )
+
+        return None
+
+
+class ForbiddenPathLoggerMiddleware(MiddlewareMixin):
+    """Фиксируем обращения к типичным бот-пуям (/administrator, /wp-login.php и т.д.)."""
+
+    forbidden_patterns = [
+        re.compile(r'^/administrator(?:/|$)'),
+        re.compile(r'^/wp-admin(?:/|$)'),
+        re.compile(r'^/wp-login\.php$'),
+        re.compile(r'^/wp-content(?:/|$)'),
+        re.compile(r'^/wp-includes(?:/|$)'),
+        re.compile(r'^/phpmyadmin(?:/|$)'),
+        re.compile(r'^/pma(?:/|$)'),
+        re.compile(r'^/adminer(?:/|$)'),
+        re.compile(r'^/manager/html(?:/|$)'),
+        re.compile(r'^/vendor/phpunit(?:/|$)'),
+    ]
+
+    def __init__(self, get_response=None):
+        super().__init__(get_response)
+        self.logger = logging.getLogger('bad_requests')
+
+    def process_request(self, request):
+        path = request.path.lower()
+        if not any(pattern.match(path) for pattern in self.forbidden_patterns):
+            return None
+
+        forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
+        client_ip = forwarded_for or request.META.get('REMOTE_ADDR', 'unknown')
+        user_agent = request.META.get('HTTP_USER_AGENT', 'unknown')
+        query_string = request.META.get('QUERY_STRING', '') or '-'
+
+        self.logger.warning(
+            'forbidden-path method=%s path=%s ip=%s ua="%s" query=%s',
+            request.method,
+            request.get_full_path(),
+            client_ip,
+            user_agent,
+            query_string,
+        )
+
+        return None
