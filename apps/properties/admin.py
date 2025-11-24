@@ -346,11 +346,6 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                         <p><small>Поддерживаемые форматы: JPG, PNG, GIF (максимум 10MB на файл)</small></p>
                     </div>
                     <div id="selected-images-preview"></div>
-                    <div id="upload-progress" style="display: none;">
-                        <div style="background: #007cba; color: white; padding: 10px; margin: 10px 0; border-radius: 4px;">
-                            <span id="progress-text">Загрузка...</span>
-                        </div>
-                    </div>
                 </div>
                 <div style="text-align: center; margin: 15px 0;">
                     <button type="button" id="upload-selected-btn" onclick="uploadSelectedImages()" 
@@ -363,6 +358,22 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                     </button>
                 </div>
             </div>
+
+            <div id="bulk-upload-status-modal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 9999; align-items: center; justify-content: center;">
+                <div style="background: #ffffff; padding: 25px 35px; border-radius: 12px; width: 420px; max-width: 90%; text-align: center; box-shadow: 0 20px 45px rgba(0,0,0,0.25);">
+                    <div class="bulk-upload-spinner" style="width: 48px; height: 48px; border-radius: 50%; border: 5px solid #e5e7eb; border-top-color: #007cba; margin: 0 auto 20px; animation: bulk-spin 0.9s linear infinite;"></div>
+                    <h4 style="margin-bottom: 10px; font-size: 20px; color: #111827;">Идёт загрузка изображений</h4>
+                    <p id="upload-status-text" style="margin: 0; color: #374151; font-size: 15px;">Передаём файлы на сервер...</p>
+                    <p id="upload-status-hint" style="margin-top: 10px; font-size: 13px; color: #6b7280;">Пожалуйста, не закрывайте страницу — изображения автоматически конвертируются в WebP.</p>
+                </div>
+            </div>
+
+            <style>
+                @keyframes bulk-spin {{
+                    0% {{ transform: rotate(0deg); }}
+                    100% {{ transform: rotate(360deg); }}
+                }}
+            </style>
             
             <script>
                 let selectedFiles = [];
@@ -370,6 +381,10 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                 const fileInput = document.getElementById('bulk-images-input');
                 const previewArea = document.getElementById('selected-images-preview');
                 const uploadBtn = document.getElementById('upload-selected-btn');
+                const statusModal = document.getElementById('bulk-upload-status-modal');
+                const statusTextEl = document.getElementById('upload-status-text');
+                const statusHintEl = document.getElementById('upload-status-hint');
+                let statusUpdateTimer = null;
                 
                 // Drag & Drop функциональность
                 uploadArea.addEventListener('dragover', function(e) {{
@@ -458,6 +473,39 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                     displaySelectedImages();
                     uploadBtn.style.display = 'none';
                 }}
+
+                function showUploadStatus(mainText, hintText) {{
+                    if (statusTextEl && mainText) {{
+                        statusTextEl.textContent = mainText;
+                    }}
+                    if (statusHintEl) {{
+                        statusHintEl.textContent = hintText || 'Пожалуйста, не закрывайте страницу — изображения автоматически конвертируются в WebP.';
+                    }}
+                    if (statusModal) {{
+                        statusModal.style.display = 'flex';
+                    }}
+                    if (statusUpdateTimer) {{
+                        clearTimeout(statusUpdateTimer);
+                    }}
+                    statusUpdateTimer = setTimeout(() => {{
+                        if (statusTextEl) {{
+                            statusTextEl.textContent = 'Конвертируем изображения в WebP...';
+                        }}
+                        if (statusHintEl) {{
+                            statusHintEl.textContent = 'Это займёт чуть дольше обычной загрузки. Просто дождитесь завершения.';
+                        }}
+                    }}, 4000);
+                }}
+
+                function hideUploadStatus() {{
+                    if (statusUpdateTimer) {{
+                        clearTimeout(statusUpdateTimer);
+                        statusUpdateTimer = null;
+                    }}
+                    if (statusModal) {{
+                        statusModal.style.display = 'none';
+                    }}
+                }}
                 
                 function uploadSelectedImages() {{
                     if (selectedFiles.length === 0) {{
@@ -473,8 +521,10 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                     }});
                     
                     // Показать прогресс
-                    document.getElementById('upload-progress').style.display = 'block';
-                    document.getElementById('progress-text').textContent = `Загружается ${{selectedFiles.length}} изображений...`;
+                    showUploadStatus(
+                        `Передаём ${{selectedFiles.length}} файл(ов) на сервер...`,
+                        'Этот процесс может занять до нескольких минут — не закрывайте страницу.'
+                    );
                     uploadBtn.disabled = true;
                     
                     fetch('{upload_url}', {{
@@ -486,7 +536,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                     }})
                     .then(response => response.json())
                     .then(data => {{
-                        document.getElementById('upload-progress').style.display = 'none';
+                        hideUploadStatus();
                         uploadBtn.disabled = false;
                         
                         if (data.success) {{
@@ -499,7 +549,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                         }}
                     }})
                     .catch(error => {{
-                        document.getElementById('upload-progress').style.display = 'none';
+                        hideUploadStatus();
                         uploadBtn.disabled = false;
                         console.error('Error:', error);
                         alert('Произошла ошибка при загрузке изображений');
