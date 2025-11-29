@@ -1,0 +1,173 @@
+{% load static %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- International Phone Input JS -->
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+<!-- Custom Phone Input Manager -->
+<script src="{% static 'js/phone-input.js' %}"></script>
+
+<!-- Mobile Menu Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function () {
+                mobileMenu.classList.toggle('hidden');
+            });
+        } else {
+            console.error('Mobile menu elements not found:', {button: !!mobileMenuButton, menu: !!mobileMenu});
+        }
+
+        // Mobile submenu toggle function
+        window.toggleMobileSubmenu = function (submenuId) {
+            const submenu = document.getElementById(submenuId);
+            const arrow = document.getElementById(submenuId.replace('-submenu', '-arrow'));
+
+            if (submenu) {
+                submenu.classList.toggle('hidden');
+            }
+
+            if (arrow) {
+                arrow.classList.toggle('rotate-180');
+            }
+        }
+
+        // Mobile search toggle function
+        window.toggleMobileSearch = function () {
+            const mobileSearch = document.getElementById('mobile-search');
+            if (mobileSearch) {
+                mobileSearch.classList.toggle('hidden');
+            }
+        }
+    });
+
+    // Scroll behavior for contact bar and navigation
+    let lastScrollTop = 0;
+    const contactBar = document.getElementById('contact-bar');
+    const mainNav = document.getElementById('main-nav');
+
+    window.addEventListener('scroll', function () {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        // Only apply scroll behavior on medium screens and up where contact bar is visible
+        if (window.innerWidth >= 768) {
+            // Determine scroll direction
+            const scrollingDown = scrollTop > lastScrollTop;
+            const scrollingUp = scrollTop < lastScrollTop;
+
+            if (scrollTop <= 50) {
+                // Always show contact bar when near the top
+                if (contactBar) {
+                    contactBar.style.transform = 'translateY(0)';
+                }
+                if (mainNav) {
+                    mainNav.style.top = '48px'; // Height of contact bar (12 * 4px = 48px)
+                }
+            } else if (scrollingUp && scrollTop > 100) {
+                // Show contact bar when scrolling up (but not immediately from the top)
+                if (contactBar) {
+                    contactBar.style.transform = 'translateY(0)';
+                }
+                if (mainNav) {
+                    mainNav.style.top = '48px'; // Height of contact bar (12 * 4px = 48px)
+                }
+            } else if (scrollingDown && scrollTop > 100) {
+                // Hide contact bar when scrolling down
+                if (contactBar) {
+                    contactBar.style.transform = 'translateY(-100%)';
+                }
+                if (mainNav) {
+                    mainNav.style.top = '0';
+                }
+            }
+
+            // Update last scroll position for next comparison
+            lastScrollTop = scrollTop;
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function () {
+        if (window.innerWidth < 1024) {
+            // Reset styles for mobile
+            if (contactBar) {
+                contactBar.style.transform = '';
+            }
+            if (mainNav) {
+                mainNav.style.top = '';
+            }
+        }
+    });
+
+    // Обработчик для мобильного селектора валют
+    document.addEventListener('DOMContentLoaded', function () {
+        const mobileCurrencyOptions = document.querySelectorAll('.mobile-currency-option');
+
+        mobileCurrencyOptions.forEach(option => {
+            option.addEventListener('click', function () {
+                const currency = this.dataset.currency;
+                const symbol = this.dataset.symbol;
+
+                // Отправляем запрос на смену валюты
+                const formData = new FormData();
+                formData.append('currency', currency);
+                formData.append('next', window.location.href);
+
+                fetch('/currency/change/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update mobile currency button text
+                            const mobileButton = document.querySelector('[onclick="toggleMobileSubmenu(\'currency-submenu\')"] span');
+                            if (mobileButton) {
+                                mobileButton.innerHTML = `<i class="fas fa-dollar-sign mr-2"></i>
+                                {% if LANGUAGE_CODE == 'en' %}Currency{% elif LANGUAGE_CODE == 'th' %}สกุลเงิน{% else %}
+                                    Валюта{% endif %} (${symbol}${currency})`;
+                            }
+
+                            // Close mobile menu
+                            document.getElementById('currency-submenu').classList.add('hidden');
+
+                            // Store currency in localStorage for persistence
+                            localStorage.setItem('selectedCurrency', currency);
+
+                            // Update Featured Properties prices if function exists (only on home page)
+                            if (typeof updateAllPricesToHeaderCurrency === 'function') {
+                                updateAllPricesToHeaderCurrency();
+                            }
+
+                            // Always trigger custom event for other components that might need to update
+                            window.dispatchEvent(new CustomEvent('currencyChanged', {
+                                detail: {currency: currency, symbol: symbol}
+                            }));
+
+                            // If no dynamic update handler exists, reload page
+                            if (typeof updateAllPricesToHeaderCurrency !== 'function' && typeof updatePricePerSqm !== 'function') {
+                                // On other pages (like property details), reload to update prices
+                                window.location.reload();
+                            }
+                        } else {
+                            console.error('Error changing currency:', data.error);
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        window.location.reload();
+                    });
+            });
+        });
+    });
+</script>
+

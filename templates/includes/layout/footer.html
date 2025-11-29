@@ -1,0 +1,92 @@
+<!-- Footer -->
+<footer class="text-white mt-12" style="background-color: #474B57;">
+    <div class="max-w-7xl mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="lg:col-span-1">
+                <h5 class="text-xl font-bold mb-4">Undersun Estate</h5>
+                <p class="text-gray-300 mb-4">{% if LANGUAGE_CODE == 'en' %}We make buying property in Phuket simple and
+                    secure: vetted developers, transparent deals, and support at every
+                    step.{% elif LANGUAGE_CODE == 'th' %}เราทำให้การซื้ออสังหาริมทรัพย์ในภูเก็ตง่ายและปลอดภัย
+                    ด้วยผู้พัฒนาที่ผ่านการคัดเลือก ข้อตกลงโปร่งใส และทีมสนับสนุนทุกขั้นตอน{% else %}делаем покупку
+                    недвижимости на Пхукете простой и безопасной. Проверенные застройщики, прозрачные сделки и поддержка
+                    на каждом этапе.{% endif %}</p>
+                <div class="flex space-x-4">
+                    <a href="https://www.facebook.com/mr.undersunestate/"
+                       class="text-gray-300 hover:text-white transition-colors" target="_blank"
+                       rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/undersun.estate/"
+                       class="text-gray-300 hover:text-white transition-colors" target="_blank"
+                       rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@undersun_estate"
+                       class="text-gray-300 hover:text-white transition-colors" target="_blank"
+                       rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h6 class="text-lg font-semibold mb-4">{% if LANGUAGE_CODE == 'en' %}
+                    Properties{% elif LANGUAGE_CODE == 'th' %}อสังหาริมทรัพย์{% else %}Недвижимость{% endif %}</h6>
+                <ul class="space-y-2">
+                    <li><a href="{% url 'properties:property_by_type' 'villa' %}"
+                           class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}
+                        Villas{% elif LANGUAGE_CODE == 'th' %}วิลล่า{% else %}Виллы{% endif %}</a></li>
+                    <li><a href="{% url 'properties:property_by_type' 'condo' %}"
+                           class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}
+                        Condo{% elif LANGUAGE_CODE == 'th' %}อพาร์ตเมนต์{% else %}Квартиры{% endif %}</a></li>
+                    <li><a href="{% url 'properties:property_by_type' 'townhouse' %}"
+                           class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}
+                        Townhouses{% elif LANGUAGE_CODE == 'th' %}ทาวน์เฮาส์{% else %}Таунхаусы{% endif %}</a></li>
+                    <li><a href="{% url 'properties:property_by_type' 'land' %}"
+                           class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}Land
+                        plots{% elif LANGUAGE_CODE == 'th' %}ที่ดิน{% else %}Земельные участки{% endif %}</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h6 class="text-lg font-semibold mb-4">{% if LANGUAGE_CODE == 'en' %}
+                    Services{% elif LANGUAGE_CODE == 'th' %}บริการ{% else %}Услуги{% endif %}</h6>
+                <ul class="space-y-2">
+                    {% for service in menu_services %}
+                        <li><a href="{{ service.get_absolute_url }}"
+                               class="text-gray-300 hover:text-white transition-colors">
+                            {% if LANGUAGE_CODE == 'en' %}
+                                {{ service.title_en|default:service.title }}{% elif LANGUAGE_CODE == 'th' %}
+                                {{ service.title_th|default:service.title }}{% else %}{{ service.title }}{% endif %}
+                        </a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div>
+                <h6 class="text-lg font-semibold mb-4">{% if LANGUAGE_CODE == 'en' %}
+                    Contacts{% elif LANGUAGE_CODE == 'th' %}ติดต่อเรา{% else %}Контакты{% endif %}</h6>
+                <div class="space-y-2 text-gray-300">
+                    <p><i class="fas fa-map-marker-alt mr-2"></i> 59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120</p>
+                    <p><i class="fas fa-phone mr-2"></i> +66 63 303 3133</p>
+                    <p><i class="fas fa-envelope mr-2"></i> info@undersunestate.com</p>
+                    <p><i class="fas fa-clock mr-2"></i> {% if LANGUAGE_CODE == 'en' %}Mon-Sun: 9:00 -
+                        21:00{% elif LANGUAGE_CODE == 'th' %}จันทร์-อาทิตย์: 9:00 - 21:00{% else %}Пн-Вс: 9:00 -
+                        21:00{% endif %}</p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-gray-700 my-8">
+
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <p class="text-gray-300 mb-4 md:mb-0">&copy; 2025 Undersun Estate. {% if LANGUAGE_CODE == 'en' %}All rights
+                reserved.{% elif LANGUAGE_CODE == 'th' %}สงวนลิขสิทธิ์ทั้งหมด{% else %}Все права
+                защищены.{% endif %}</p>
+            <div class="flex space-x-6">
+                <a href="{% url 'core:privacy' %}" class="text-gray-300 hover:text-white transition-colors">
+                    {% if LANGUAGE_CODE == 'en' %}Privacy Policy{% elif LANGUAGE_CODE == 'th' %}
+                        นโยบายความเป็นส่วนตัว{% else %}Политика конфиденциальности{% endif %}</a>
+                <a href="{% url 'core:terms' %}" class="text-gray-300 hover:text-white transition-colors">
+                    {% if LANGUAGE_CODE == 'en' %}Terms of Use{% elif LANGUAGE_CODE == 'th' %}
+                        เงื่อนไขการใช้งาน{% else %}Условия использования{% endif %}</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
