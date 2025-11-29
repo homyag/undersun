@@ -1,0 +1,188 @@
+{% load i18n %}
+<!-- Mobile Menu -->
+        <div id="mobile-menu" class="lg:hidden hidden bg-white border-t border-gray-200 max-h-screen overflow-y-auto">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <!-- Property dropdown -->
+                <div>
+                    <button onclick="toggleMobileSubmenu('property-submenu')"
+                            class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                        <span>{% if LANGUAGE_CODE == 'en' %}Properties{% elif LANGUAGE_CODE == 'th' %}
+                            อสังหาริมทรัพย์{% else %}Недвижимость{% endif %}</span>
+                        <svg class="w-4 h-4 transform transition-transform" id="property-arrow" fill="none"
+                             stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="property-submenu" class="hidden ml-4 mt-1 space-y-1">
+                        <a href="{% url 'properties:property_sale' %}"
+                           class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                            {% if LANGUAGE_CODE == 'en' %}Buy{% elif LANGUAGE_CODE == 'th' %}ซื้อ{% else %}
+                                Продажа{% endif %}</a>
+                        <a href="{% url 'properties:property_rent' %}"
+                           class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                            {% if LANGUAGE_CODE == 'en' %}Rent{% elif LANGUAGE_CODE == 'th' %}เช่า{% else %}
+                                Аренда{% endif %}</a>
+                        <div class="border-t border-gray-200 my-1"></div>
+                        <a href="{% url 'location_list' %}"
+                           class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                            {% if LANGUAGE_CODE == 'en' %}Areas{% elif LANGUAGE_CODE == 'th' %}ทำเล{% else %}
+                                Районы{% endif %}</a>
+                        <div class="border-t border-gray-200 my-1"></div>
+                        {% for type in property_types %}
+                            <a href="{% url 'properties:property_by_type' type.name %}"
+                               class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">{{ type.name_display }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <a href="{% url 'core:map' %}"
+                   class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                    {% if LANGUAGE_CODE == 'en' %}Map{% elif LANGUAGE_CODE == 'th' %}แผนที่{% else %}
+                        Карта{% endif %}</a>
+
+                <!-- Services dropdown -->
+                <div>
+                    <button onclick="toggleMobileSubmenu('services-submenu')"
+                            class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                        <span>{% if LANGUAGE_CODE == 'en' %}Services{% elif LANGUAGE_CODE == 'th' %}บริการ{% else %}
+                            Услуги{% endif %}</span>
+                        <svg class="w-4 h-4 transform transition-transform" id="services-arrow" fill="none"
+                             stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="services-submenu" class="hidden ml-4 mt-1 space-y-1">
+                        {% for service in menu_services %}
+                            <a href="{{ service.get_absolute_url }}"
+                               class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                                {% if LANGUAGE_CODE == 'en' %}
+                                    {{ service.title_en|default:service.title }}{% elif LANGUAGE_CODE == 'th' %}
+                                    {{ service.title_th|default:service.title }}{% else %}{{ service.title }}{% endif %}
+                            </a>
+                        {% endfor %}
+                        {% if not menu_services %}
+                            <div class="px-3 py-1 text-gray-500">{% if LANGUAGE_CODE == 'en' %}Services coming
+                                soon{% elif LANGUAGE_CODE == 'th' %}บริการจะพร้อมเร็วๆ นี้{% else %}Услуги скоро
+                                появятся{% endif %}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- About dropdown -->
+                <div>
+                    <button onclick="toggleMobileSubmenu('about-submenu')"
+                            class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                        <span>{% if LANGUAGE_CODE == 'en' %}About{% elif LANGUAGE_CODE == 'th' %}เกี่ยวกับเรา{% else %}О
+                            нас{% endif %}</span>
+                        <svg class="w-4 h-4 transform transition-transform" id="about-arrow" fill="none"
+                             stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="about-submenu" class="hidden ml-4 mt-1 space-y-1">
+                        <a href="{% url 'core:about' %}"
+                           class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                            {% if LANGUAGE_CODE == 'en' %}About Undersun Estate{% elif LANGUAGE_CODE == 'th' %}เกี่ยวกับ
+                                Undersun Estate{% else %}О компании{% endif %}</a>
+                        <a href="{% url 'core:contact' %}"
+                           class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                            {% if LANGUAGE_CODE == 'en' %}Contact{% elif LANGUAGE_CODE == 'th' %}ติดต่อเรา{% else %}
+                                Контакты{% endif %}</a>
+                    </div>
+                </div>
+
+                <!-- Mobile Blog Link -->
+                <a href="{% url 'blog:list' %}"
+                   class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                    {% if LANGUAGE_CODE == 'en' %}Blog{% elif LANGUAGE_CODE == 'th' %}บล็อก{% else %}Блог{% endif %}
+                </a>
+
+                <!-- Mobile Contact Info -->
+                <div class="border-t border-gray-200 pt-2 mt-2">
+                    <div class="px-3 py-2 space-y-2">
+                        <a href="https://wa.me/66633033133"
+                           class="flex items-center text-primary hover:text-accent transition-colors" target="_blank">
+                            <i class="fab fa-whatsapp mr-3 text-green-500"></i>
+                            <span class="text-sm">+66 63 303 3133</span>
+                        </a>
+                        <a href="mailto:info@undersunestate.com"
+                           class="flex items-center text-primary hover:text-accent transition-colors">
+                            <i class="fas fa-envelope mr-3"></i>
+                            <span class="text-sm">info@undersunestate.com</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mobile Favorites Menu -->
+                <div class="border-t border-gray-200 pt-2 mt-2">
+                    <a href="{% url 'properties:property_favorites' %}"
+                       class="block px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                        <i id="mobile-nav-favorites-heart" class="far fa-heart mr-2 text-gray-600"></i>
+                        {% if LANGUAGE_CODE == 'en' %}Favorites{% elif LANGUAGE_CODE == 'th' %}รายการโปรด{% else %}
+                            Избранное{% endif %}
+                        <span id="mobile-nav-favorites-count"
+                              class="favorites-count ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs font-bold hidden inline-flex items-center justify-center leading-none">0</span>
+                    </a>
+                </div>
+
+
+                <!-- Mobile Language Switcher -->
+                <div class="border-t border-gray-200 pt-2 mt-2">
+                    <button onclick="toggleMobileSubmenu('language-submenu')"
+                            class="w-full flex justify-between items-center px-3 py-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                        <span><i class="fas fa-globe mr-2"></i>{% if LANGUAGE_CODE == 'en' %}
+                            Language{% elif LANGUAGE_CODE == 'th' %}ภาษา{% else %}Язык{% endif %}</span>
+                        <svg class="w-4 h-4 transform transition-transform" id="language-arrow" fill="none"
+                             stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="language-submenu" class="hidden ml-6 mt-1 space-y-1">
+                        <a href="{{ language_urls.ru|default:'/ru/' }}"
+                           class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                            <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 mr-2 object-cover">
+                            {% trans "Русский" %}
+                        </a>
+                        <a href="{{ language_urls.en|default:'/en/' }}"
+                           class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                            <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 mr-2 object-cover">
+                            {% trans "English" %}
+                        </a>
+                        <a href="{{ language_urls.th|default:'/th/' }}"
+                           class="flex items-center px-3 py-1 text-tertiary hover:text-accent transition-colors">
+                            <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 mr-2 object-cover">
+                            {% trans "ไทย" %}
+                        </a>
+                    </div>
+
+                    <!-- Mobile Currency Switcher -->
+                    <button onclick="toggleMobileSubmenu('currency-submenu')"
+                            class="w-full flex justify-between items-center px-3 py-2 mt-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
+                        <span><i class="fas fa-dollar-sign mr-2"></i>{% if LANGUAGE_CODE == 'en' %}
+                            Currency{% elif LANGUAGE_CODE == 'th' %}สกุลเงิน{% else %}Валюта{% endif %}
+                            ({{ selected_currency.symbol }}{{ selected_currency.code }})</span>
+                        <svg class="w-4 h-4 transform transition-transform" id="currency-arrow" fill="none"
+                             stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="currency-submenu" class="hidden ml-6 mt-1 space-y-1">
+                        {% for currency in available_currencies %}
+                            <button type="button"
+                                    class="mobile-currency-option block w-full text-left px-3 py-1 text-tertiary hover:text-accent transition-colors {% if selected_currency.code == currency.code %}font-semibold text-accent{% endif %}"
+                                    data-currency="{{ currency.code }}"
+                                    data-symbol="{{ currency.symbol }}">
+                                {{ currency.symbol }} {{ currency.code }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+

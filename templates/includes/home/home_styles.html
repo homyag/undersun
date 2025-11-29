@@ -215,19 +215,20 @@
         z-index: 1000;
         position: relative;
     }
-    
-    @media (min-width: 768px) {
+
+    @media (min-width: 1024px) {
         #mobile-menu-button {
             display: none !important;
         }
     }
-    
+
     /* Обеспечиваем правильное позиционирование мобильного меню */
     #mobile-menu {
-        position: relative;
-        z-index: 999;
+        position: fixed;
+        inset: 0;
+        z-index: 40;
         width: 100%;
-        max-height: calc(100vh - 64px);
+        max-height: 100vh;
         overflow-y: auto;
     }
     
