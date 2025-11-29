@@ -3,7 +3,7 @@
 
 {% block title %}{{ category.meta_title|default:category.name }}{{ pagination_seo_suffix }} - {% trans "Недвижимость в Таиланде" %}{% endblock %}
 
-{% block meta_description %}{{ category.meta_description|default:category.description }}{% endblock %}
+{% block description %}{{ meta_description }}{{ pagination_seo_suffix }}{% endblock %}
 
 {% if category.meta_keywords %}
 {% block meta_keywords %}{{ category.meta_keywords }}{% endblock %}

@@ -4,7 +4,7 @@
 
 {% block title %}{{ meta_title }}{{ pagination_seo_suffix }} - Undersun Estate{% endblock %}
 
-{% block meta_description %}{{ meta_description }}{% endblock %}
+{% block description %}{{ meta_description }}{{ pagination_seo_suffix }}{% endblock %}
 
 {% block content %}
 <section class="py-12 bg-gray-50">
@@ -19,7 +19,7 @@
                 {% elif search_query %}
                     {% trans "Результаты поиска" %}
                 {% else %}
-                    {% trans "Блог" %}
+                    {% blocktrans %}Блог о недвижимости Пхукета и инвестициях от Undersun Estate{% endblocktrans %}
                 {% endif %}
             </h1>
             <p class="text-xl text-tertiary max-w-3xl mx-auto">

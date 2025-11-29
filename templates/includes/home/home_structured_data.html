@@ -1,6 +1,7 @@
 {% load static %}
 {% load i18n %}
 {% load url_utils %}
+{% load l10n %}
 {% static 'images/logo_fullscreen.svg' as logo_fullscreen_path %}
 {% url 'properties:property_by_type' 'condo' as condo_type_url %}
 {% url 'properties:property_by_type' 'villa' as villa_type_url %}
@@ -365,7 +366,7 @@
     {
       "@type": "Offer",
       {% if prop.price is not None %}
-      "price": {{ prop.price }},
+      "price": {{ prop.price|unlocalize }},
       "priceCurrency": "{{ prop.price_currency }}",
       {% endif %}
       "url": "{{ prop.url|escapejs }}",

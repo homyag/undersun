@@ -2415,6 +2415,10 @@ msgstr "Real estate in Thailand"
 msgid "Блог"
 msgstr "Blog"
 
+#: templates/blog/blog_list.html:22
+msgid "Блог о недвижимости Пхукета и инвестициях от Undersun Estate"
+msgstr "Undersun Estate blog about Phuket real estate and investments"
+
 #: templates/blog/blog_detail.html:217
 msgid "Автор"
 msgstr "Author"

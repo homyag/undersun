@@ -2386,6 +2386,10 @@ msgstr "อสังหาริมทรัพย์ในประเทศไ
 msgid "Блог"
 msgstr "บล็อก"
 
+#: templates/blog/blog_list.html:22
+msgid "Блог о недвижимости Пхукета и инвестициях от Undersun Estate"
+msgstr "บล็อกเกี่ยวกับอสังหาริมทรัพย์ภูเก็ตและการลงทุนจาก Undersun Estate"
+
 #: templates/blog/blog_detail.html:217
 msgid "Автор"
 msgstr "ผู้เขียน"
