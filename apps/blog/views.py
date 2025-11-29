@@ -10,12 +10,46 @@ from django.views.decorators.http import require_POST
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.utils.text import slugify
+
+from apps.core.models import SEOPage
+
 from .models import BlogPost, BlogCategory, BlogTag
+
+
+BLOG_SEO_DEFAULTS = {
+    'ru': {
+        'title': 'Блог Undersun Estate: недвижимость Пхукета и инвестиции',
+        'description': 'Аналитика рынка Пхукета, советы по покупке вилл и апартаментов, истории сделок и новости от экспертов Undersun Estate.',
+    },
+    'en': {
+        'title': 'Undersun Estate Blog — Phuket Real Estate & Investment Insights',
+        'description': 'Market news, purchase guides, ROI tips and agency stories about Phuket property investments from the Undersun Estate team.',
+    },
+    'th': {
+        'title': 'บล็อก Undersun Estate – อินไซต์อสังหาริมทรัพย์ภูเก็ตและการลงทุน',
+        'description': 'อัปเดตตลาด คู่มือการซื้อ และเคล็ดลับการลงทุนอสังหาริมทรัพย์ในภูเก็ตที่คัดสรรโดยทีม Undersun Estate.',
+    },
+}
+
+
+def _get_seo_page_meta(page_name, language_code='ru'):
+    """Забираем title/description/keywords для указанной SEO страницы."""
+    try:
+        seo_page = SEOPage.objects.get(page_name=page_name, is_active=True)
+    except SEOPage.DoesNotExist:
+        return {}
+
+    return {
+        'title': seo_page.get_title(language_code),
+        'description': seo_page.get_description(language_code),
+        'keywords': seo_page.get_keywords(language_code),
+    }
 
 
 def blog_list(request):
     """Список всех статей блога"""
     posts = BlogPost.get_published().prefetch_related('tags')
+    language_code = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
     
     # Фильтрация по категории
     category_slug = request.GET.get('category')
@@ -52,6 +86,9 @@ def blog_list(request):
     categories = BlogCategory.objects.filter(is_active=True)
     featured_posts = BlogPost.get_featured()
     
+    seo_meta = _get_seo_page_meta('blog', language_code)
+    defaults = BLOG_SEO_DEFAULTS.get(language_code, BLOG_SEO_DEFAULTS['ru'])
+
     context = {
         'page_obj': page_obj,
         'posts': page_obj.object_list,
@@ -60,8 +97,10 @@ def blog_list(request):
         'current_category': category,
         'current_tag': tag,
         'search_query': search_query,
-        'meta_title': 'Блог',
-        'meta_description': 'Статьи и новости о недвижимости',
+        'meta_title': seo_meta.get('title') or defaults['title'],
+        'meta_description': seo_meta.get('description') or defaults['description'],
+        'meta_keywords': seo_meta.get('keywords'),
+        'page_keywords': seo_meta.get('keywords'),
     }
     
     return render(request, 'blog/blog_list.html', context)

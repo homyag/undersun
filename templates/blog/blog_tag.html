@@ -3,4 +3,4 @@
 
 {% block title %}{% trans "Статьи с тегом" %} {{ tag.name }}{{ pagination_seo_suffix }} - {% trans "Недвижимость в Таиланде" %}{% endblock %}
 
-{% block meta_description %}{% trans "Все статьи с тегом" %} {{ tag.name }}{% endblock %}
+{% block description %}{{ meta_description }}{{ pagination_seo_suffix }}{% endblock %}
