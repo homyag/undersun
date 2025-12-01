@@ -51,6 +51,7 @@ THIRD_PARTY_APPS = [
     'django_filters',
     'crispy_forms',
     'crispy_tailwind',
+    'tailwind',
     'tinymce',
     # 'leaflet',  # Закомментировано до установки GDAL
 ]
@@ -64,6 +65,9 @@ LOCAL_APPS = [
     'apps.blog.apps.BlogConfig',
     'modeltranslation',  # Перемещаем после наших приложений
 ]
+
+if (BASE_DIR / 'theme').exists():
+    LOCAL_APPS.append('theme')
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -162,6 +166,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 CRISPY_TEMPLATE_PACK = "tailwind"
+
+# Tailwind via django-tailwind
+TAILWIND_APP_NAME = 'theme'
 
 # Leaflet Map
 LEAFLET_CONFIG = {

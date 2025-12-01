@@ -56,29 +56,29 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
     <link rel="stylesheet" href="{% static 'css/phone-input.css' %}">
     <!-- Tailwind CSS -->
-{#    {% if tailwind_use_cdn %}#}
+    {% if tailwind_use_cdn %}
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
                 theme: {
                     extend: {
                         colors: {
-                            'primary': '#474B57',
-                            'secondary': '#f8f9fa',
-                            'accent': '#F1B400',
-                            'tertiary': '#616677',
+                            primary: '#474B57',
+                            secondary: '#f8f9fa',
+                            accent: '#F1B400',
+                            tertiary: '#616677',
                         },
                         fontFamily: {
-                            'sans': ['Gilroy', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
-                            'gilroy': ['Gilroy', 'sans-serif']
+                            sans: ['Gilroy', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                            gilroy: ['Gilroy', 'sans-serif']
                         }
                     }
                 }
             }
         </script>
-{#    {% else %}#}
-{#        <link rel="stylesheet" href="{% static 'css/tailwind.min.css' %}">#}
-{#    {% endif %}#}
+    {% else %}
+        <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+    {% endif %}
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}">

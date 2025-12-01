@@ -31,4 +31,4 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 # DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
-TAILWIND_USE_CDN = True
+TAILWIND_USE_CDN = False
