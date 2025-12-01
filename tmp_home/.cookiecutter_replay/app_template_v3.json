@@ -1,0 +1,15 @@
+{
+  "cookiecutter": {
+    "app_name": "theme",
+    "_copy_without_render": [
+      "templates/base.html"
+    ],
+    "_template": "/Users/igorantonov/MyProjects/undersunestate_django/.venv/lib/python3.12/site-packages/tailwind",
+    "_output_dir": "/Users/igorantonov/MyProjects/undersunestate_django",
+    "_repo_dir": "/Users/igorantonov/MyProjects/undersunestate_django/.venv/lib/python3.12/site-packages/tailwind/app_template_v3",
+    "_checkout": null
+  },
+  "_cookiecutter": {
+    "app_name": "theme"
+  }
+}
