@@ -10,9 +10,9 @@ import re
 
 
 HERO_OG_IMAGE_PATHS = [
-    'images/home_page/homepage_hero_section/thailand_hero_section_1.jpg',
-    'images/home_page/homepage_hero_section/thailand_hero_section_2.jpg',
-    'images/home_page/homepage_hero_section/thailand_hero_section_3.jpg',
+    'images/home_page/homepage_hero_section/thailand_hero_section_1.webp',
+    'images/home_page/homepage_hero_section/thailand_hero_section_2.webp',
+    'images/home_page/homepage_hero_section/thailand_hero_section_3.webp',
 ]
 
 def site_context(request):

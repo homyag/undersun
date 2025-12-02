@@ -12,8 +12,15 @@
     {% include 'includes/home/home_styles.html' %}
 {% endblock %}
 {% block extra_meta %}
-      <meta name="google-site-verification" content="aP6xLXZRyd8rjDr9Pd3KDq61VSENUdQlEiup7f0TPIE">
-  {% endblock %}
+    {{ block.super }}
+    <meta name="google-site-verification" content="aP6xLXZRyd8rjDr9Pd3KDq61VSENUdQlEiup7f0TPIE">
+    <link rel="preload"
+          as="image"
+          href="{% static 'images/home_page/homepage_hero_section/thailand_hero_section_1.webp' %}"
+          fetchpriority="high"
+          imagesrcset="{% static 'images/home_page/homepage_hero_section/thailand_hero_section_1.webp' %} 1280w"
+          imagesizes="100vw">
+{% endblock %}
 
 {% block content %}
     <!-- Hero Section -->
@@ -47,12 +54,42 @@
 {% block extra_js %}
     <!-- Inject Django data for JavaScript -->
     {% include 'includes/home/home_data_injection.html' %}
-    
-    <!-- Load static JavaScript files -->
-    <script src="{% static 'js/home/hero.js' %}"></script>
-    <script src="{% static 'js/home/process-steps.js' %}"></script>
-    <script src="{% static 'js/home/featured-properties.js' %}"></script>
-    <script src="{% static 'js/home/consultation.js' %}"></script>
-    <script src="{% static 'js/home/search-counter.js' %}"></script>
-    <script src="{% static 'js/home/our-team.js' %}"></script>
+    {% static 'js/home/hero.js' as hero_js %}
+    {% static 'js/home/process-steps.js' as process_steps_js %}
+    {% static 'js/home/featured-properties.js' as featured_js %}
+    {% static 'js/home/consultation.js' as consultation_js %}
+    {% static 'js/home/search-counter.js' as search_counter_js %}
+    {% static 'js/home/our-team.js' as our_team_js %}
+    <script>
+        (function() {
+            const scripts = [
+                {src: '{{ hero_js }}', priority: 'high'},
+                {src: '{{ process_steps_js }}'},
+                {src: '{{ featured_js }}'},
+                {src: '{{ consultation_js }}'},
+                {src: '{{ search_counter_js }}'},
+                {src: '{{ our_team_js }}'}
+            ];
+
+            function loadScript(entry) {
+                if (!entry || document.querySelector(`script[src="${entry.src}"]`)) {
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = entry.src;
+                script.defer = true;
+                document.body.appendChild(script);
+            }
+
+            const criticalScripts = scripts.filter(item => item.priority === 'high');
+            criticalScripts.forEach(loadScript);
+
+            const restScripts = scripts.filter(item => item.priority !== 'high');
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(() => restScripts.forEach(loadScript), { timeout: 2000 });
+            } else {
+                setTimeout(() => restScripts.forEach(loadScript), 500);
+            }
+        })();
+    </script>
 {% endblock %}

@@ -386,6 +386,37 @@
             clearInterval(autoplayInterval);
         }
 
+        // cache in-flight exchange rate request to avoid spamming API
+        let exchangeRatesPromise = null;
+
+        function getExchangeRates() {
+            if (window.exchangeRates) {
+                return Promise.resolve(window.exchangeRates);
+            }
+
+            if (!exchangeRatesPromise) {
+                exchangeRatesPromise = fetch('/currency/rates/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.exchangeRates = data.rates || {};
+                            return window.exchangeRates;
+                        }
+                        throw new Error(data.error || 'Failed to load exchange rates');
+                    })
+                    .catch(error => {
+                        console.error('Error fetching exchange rates:', error);
+                        throw error;
+                    })
+                    .finally(() => {
+                        // allow future retries if request failed
+                        exchangeRatesPromise = null;
+                    });
+            }
+
+            return exchangeRatesPromise;
+        }
+
         // Update all prices to current header currency
         function updateAllPricesToHeaderCurrency() {
             // Get current currency from session/header
@@ -532,54 +563,25 @@
             // Convert currency using real exchange rates
             const rateKey = `${fromCurrency}_${toCurrency}`;
 
-            // Use global exchange rates if available, otherwise fetch them
-            if (window.exchangeRates && window.exchangeRates[rateKey]) {
-                const convertedPrice = basePrice * window.exchangeRates[rateKey];
+            // Use cached rates or request them once
+            const applyConvertedPrice = (rateValue) => {
                 const displayPrice = dealType === 'rent' ?
-                    `${formatPrice(convertedPrice)}/мес` :
-                    `${formatPrice(convertedPrice)}`;
+                    `${formatPrice(rateValue)}/мес` :
+                    `${formatPrice(rateValue)}`;
                 priceElement.innerHTML = displayPrice;
-
-                // Update price per sqm for sale properties
                 updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
+            };
+
+            if (window.exchangeRates && window.exchangeRates[rateKey]) {
+                applyConvertedPrice(basePrice * window.exchangeRates[rateKey]);
             } else {
-                // Fetch exchange rates from server
-                fetch('/currency/rates/')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            window.exchangeRates = data.rates;
-                            const rate = data.rates[rateKey] || 1;
-                            const convertedPrice = basePrice * rate;
-
-                            const displayPrice = dealType === 'rent' ?
-                                `${formatPrice(convertedPrice)}/мес` :
-                                `${formatPrice(convertedPrice)}`;
-                            priceElement.innerHTML = displayPrice;
-
-                            // Update price per sqm for sale properties
-                            updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
-                        } else {
-                            // Fallback to original price
-                            const displayPrice = dealType === 'rent' ?
-                                `${formatPrice(basePrice)}/мес` :
-                                `${formatPrice(basePrice)}`;
-                            priceElement.innerHTML = displayPrice;
-
-                            // Update price per sqm for sale properties
-                            updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
-                        }
+                getExchangeRates()
+                    .then(rates => {
+                        const rate = (rates && rates[rateKey]) || 1;
+                        applyConvertedPrice(basePrice * rate);
                     })
-                    .catch(error => {
-                        console.error('Error fetching exchange rates:', error);
-                        // Fallback to original price
-                        const displayPrice = dealType === 'rent' ?
-                            `${formatPrice(basePrice)}/мес` :
-                            `${formatPrice(basePrice)}`;
-                        priceElement.innerHTML = displayPrice;
-
-                        // Update price per sqm for sale properties
-                        updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
+                    .catch(() => {
+                        applyConvertedPrice(basePrice);
                     });
             }
         }

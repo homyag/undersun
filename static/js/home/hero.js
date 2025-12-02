@@ -22,38 +22,117 @@ function adjustHeroHeight() {
     }
 }
 
-// Hero Section Background Slideshow
-document.addEventListener('DOMContentLoaded', function () {
-    // Adjust height on load
+function initializeHeroSection() {
     adjustHeroHeight();
-
-    // Adjust height on resize
     window.addEventListener('resize', adjustHeroHeight);
 
     const slides = document.querySelectorAll('.hero-slide');
+    if (!slides.length) {
+        return;
+    }
+
+    const lazySlides = Array.from(slides).filter(slide => slide.dataset.lazyBg);
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
     let currentSlide = 0;
+    let slideInterval = null;
+
+    function ensureSlideBackground(slide) {
+        if (!slide || slide.dataset.bgLoaded === 'true') {
+            return;
+        }
+
+        const lazySrc = slide.dataset.lazyBg;
+        if (!lazySrc) {
+            return;
+        }
+
+        const img = new Image();
+        img.decoding = 'async';
+        img.loading = 'eager';
+        img.addEventListener('load', () => {
+            slide.style.backgroundImage = `url('${lazySrc}')`;
+            slide.dataset.bgLoaded = 'true';
+        });
+        img.src = lazySrc;
+    }
+
+    function hydrateLazyHeroSlides() {
+        lazySlides.forEach(slide => ensureSlideBackground(slide));
+    }
+
+    function scheduleHeroBackgroundHydration() {
+        if (!lazySlides.length) {
+            return;
+        }
+
+        const loadBackgrounds = () => {
+            if (document.readyState === 'complete') {
+                hydrateLazyHeroSlides();
+            } else {
+                window.addEventListener('load', () => hydrateLazyHeroSlides(), { once: true });
+            }
+        };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(hydrateLazyHeroSlides, { timeout: 2000 });
+        } else {
+            setTimeout(loadBackgrounds, 200);
+        }
+    }
 
     function nextSlide() {
-        // Hide current slide
+        if (!slides.length || slides.length === 1) {
+            return;
+        }
+
         slides[currentSlide].style.opacity = '0';
-
-        // Move to next slide
         currentSlide = (currentSlide + 1) % slides.length;
-
-        // Show next slide
+        ensureSlideBackground(slides[currentSlide]);
         slides[currentSlide].style.opacity = '1';
     }
 
-    // Auto change slides every 10 seconds
-    setInterval(nextSlide, 10000);
-
-    // Preload images for smoother transitions
-    slides.forEach(function (slide) {
-        const bgImage = slide.style.backgroundImage;
-        if (bgImage) {
-            const imageUrl = bgImage.match(/url\(['"]?(.*?)['"]?\)/)[1];
-            const img = new Image();
-            img.src = imageUrl;
+    function startSlider() {
+        if (slides.length <= 1 || (prefersReducedMotion && prefersReducedMotion.matches)) {
+            return;
         }
-    });
-});
+
+        if (!slideInterval) {
+            slideInterval = setInterval(nextSlide, 10000);
+        }
+    }
+
+    function stopSlider() {
+        if (slideInterval) {
+            clearInterval(slideInterval);
+            slideInterval = null;
+        }
+    }
+
+    const motionChangeHandler = (event) => {
+        if (event.matches) {
+            stopSlider();
+            slides.forEach((slide, index) => {
+                slide.style.opacity = index === 0 ? '1' : '0';
+            });
+        } else {
+            startSlider();
+        }
+    };
+
+    if (prefersReducedMotion && typeof prefersReducedMotion.addEventListener === 'function') {
+        prefersReducedMotion.addEventListener('change', motionChangeHandler);
+    } else if (prefersReducedMotion && typeof prefersReducedMotion.addListener === 'function') {
+        prefersReducedMotion.addListener(motionChangeHandler);
+    }
+
+    ensureSlideBackground(slides[currentSlide]);
+    scheduleHeroBackgroundHydration();
+    startSlider();
+}
+
+// Hero Section Background Slideshow
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeHeroSection);
+} else {
+    initializeHeroSection();
+}
