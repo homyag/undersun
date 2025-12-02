@@ -23,6 +23,27 @@ class PermissionsPolicyMiddleware(MiddlewareMixin):
         return response
 
 
+class FrameAncestorsMiddleware(MiddlewareMixin):
+    """Append a CSP frame-ancestors directive when configured."""
+
+    def process_response(self, request, response):
+        directives = getattr(settings, 'FRAME_ANCESTORS', None)
+        if not directives:
+            return response
+
+        frame_directive = f"frame-ancestors {directives}"
+        existing_csp = response.get('Content-Security-Policy')
+
+        if existing_csp:
+            if 'frame-ancestors' in existing_csp:
+                return response
+            response['Content-Security-Policy'] = f"{existing_csp}; {frame_directive}"
+        else:
+            response['Content-Security-Policy'] = frame_directive
+
+        return response
+
+
 class LanguageRedirectMiddleware(MiddlewareMixin):
     """Redirect root path to language-aware URL based on Accept-Language."""
 

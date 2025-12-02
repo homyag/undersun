@@ -122,36 +122,49 @@ window.handlePhoneCallback = function (event, consultationId) {
 
 // Phone mask functionality
 function initPhoneMask() {
-    const phoneInput = document.getElementById('phone');
+    const quickForm = document.getElementById('quickConsultationForm');
+    if (!quickForm) return;
+
+    const phoneInput = quickForm.querySelector('input[name="phone"]');
     if (!phoneInput) return;
 
-    phoneInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-        let formattedValue = '';
+    const placeholder = phoneInput.getAttribute('placeholder') || '+66 63 303 3133';
+    if (!phoneInput.getAttribute('placeholder')) {
+        phoneInput.setAttribute('placeholder', placeholder);
+    }
 
-        if (value.length > 0) {
-            if (value.startsWith('7') || value.startsWith('8')) {
-                // Russian format
-                if (value.startsWith('8')) value = '7' + value.slice(1);
-                formattedValue = '+7';
-                if (value.length > 1) formattedValue += ' (' + value.slice(1, 4);
-                if (value.length >= 4) formattedValue += ') ' + value.slice(4, 7);
-                if (value.length >= 7) formattedValue += '-' + value.slice(7, 9);
-                if (value.length >= 9) formattedValue += '-' + value.slice(9, 11);
-            } else {
-                // International format
-                formattedValue = '+' + value.slice(0, 15);
+    const allowedCharRegex = /[0-9+()\s-]/;
+
+    phoneInput.addEventListener('input', function (e) {
+        const { selectionStart } = e.target;
+        const sanitized = e.target.value.replace(/[^0-9+()\s-]/g, '');
+
+        if (sanitized !== e.target.value) {
+            e.target.value = sanitized;
+            if (selectionStart !== null) {
+                const newPos = Math.max(selectionStart - 1, 0);
+                requestAnimationFrame(() => {
+                    e.target.setSelectionRange(newPos, newPos);
+                });
             }
         }
-
-        e.target.value = formattedValue;
     });
 
     phoneInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Backspace' || e.key === 'Delete') {
+        if (
+            e.key === 'Backspace' ||
+            e.key === 'Delete' ||
+            e.key === 'Tab' ||
+            e.key === 'Enter' ||
+            e.key === 'ArrowLeft' ||
+            e.key === 'ArrowRight' ||
+            e.key === 'Home' ||
+            e.key === 'End'
+        ) {
             return;
         }
-        if (!/[0-9+]/.test(e.key) && !e.ctrlKey && !e.metaKey && e.key !== 'Tab' && e.key !== 'Enter') {
+
+        if (!allowedCharRegex.test(e.key) && !e.ctrlKey && !e.metaKey) {
             e.preventDefault();
         }
     });
