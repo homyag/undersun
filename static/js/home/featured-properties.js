@@ -23,7 +23,22 @@
     const TELEGRAM_BUTTON = translate('telegramButton', 'Написать в Telegram');
 
     function initFeaturedProperties() {
-        
+        const carouselHintId = 'featured-carousel-hint';
+
+        function hideCarouselHint() {
+            const hint = document.getElementById(carouselHintId);
+            if (!hint || hint.dataset.dismissed === 'true') {
+                return;
+            }
+            hint.dataset.dismissed = 'true';
+            hint.classList.add('opacity-0', 'translate-x-2');
+            setTimeout(() => {
+                if (hint) {
+                    hint.style.display = 'none';
+                }
+            }, 300);
+        }
+
         // Check if data is available
         if (!window.homePageData || !window.homePageData.featuredProperties) {
             console.error('Featured properties data not found!');
@@ -39,6 +54,8 @@
         // Switch property type
         window.switchPropertyType = function (type) {
             currentPropertyType = type;
+
+            hideCarouselHint();
 
             // Update tab buttons
             document.querySelectorAll('.property-tab').forEach(tab => {
@@ -101,7 +118,7 @@
 
             let html = '';
             allItems.forEach(item => {
-                html += `<div class="carousel-item flex-shrink-0" style="width: 100%; max-width: 350px; height: 450px; min-width: 280px;">${item}</div>`;
+                html += `<div class="carousel-item flex-shrink-0" style="width: 100%; max-width: 350px; min-height: 450px; min-width: 280px;">${item}</div>`;
             });
 
             container.innerHTML = html;
@@ -282,6 +299,7 @@
 
             if (prevBtn) {
                 prevBtn.onclick = () => {
+                    hideCarouselHint();
                     prevSlide();
                     resetAutoplay();
                 };
@@ -289,6 +307,7 @@
 
             if (nextBtn) {
                 nextBtn.onclick = () => {
+                    hideCarouselHint();
                     nextSlide();
                     resetAutoplay();
                 };
@@ -329,6 +348,7 @@
 
         function onTouchStart(event) {
             swipeStartX = event.changedTouches[0].clientX;
+            hideCarouselHint();
             stopAutoplay();
         }
 
@@ -341,6 +361,7 @@
         function onMouseDown(event) {
             swipeStartX = event.clientX;
             isMouseSwiping = true;
+            hideCarouselHint();
             stopAutoplay();
         }
 
@@ -1154,49 +1175,51 @@
                             </div>
                         </div>
                         
-                        <!-- Price Section -->
-                        <div class="mb-4">
-                            <!-- Price and Currency in one line -->
-                            <div class="flex items-center justify-center space-x-3 mb-2">
-                                <!-- Price -->
-                                <span class="text-2xl font-bold text-primary card-price-${property.id}" data-property-id="${property.id}" data-deal-type="${property.deal_type}">
-                                    ${(() => {
-                                        const initialPrice = getInitialPrice(property);
-                                        if (!initialPrice) {
-                                            return priceOnRequestLabel;
-                                        }
-                                        const formattedPrice = formatPrice(initialPrice);
-                                        return formattedPrice || priceOnRequestLabel;
-                                    })()}
-                                </span>
-                                
-                                <!-- Currency Dropdown -->
-                                <div class="relative">
-                                    <button class="currency-toggle-btn bg-gray-100 hover:bg-primary hover:text-white text-gray-500 transition-all duration-200 px-3 py-1.5 rounded-md text-sm border border-gray-200 hover:border-primary flex items-center"
-                                            data-property-id="${property.id}"
-                                            data-deal-type="${property.deal_type}"
-                                            title="${changeCurrencyLabel}">
-                                        <span class="current-currency-${property.id} font-mono mr-1">${getInitialCurrency(property).symbol}</span>
-                                        <span class="current-currency-code-${property.id} font-medium mr-1">${getInitialCurrency(property).code}</span>
-                                        <i class="fas fa-chevron-down text-xs"></i>
-                                    </button>
-
-                                </div>
-                            </div>
-                            
-                            ${property.area > 0 && property.deal_type === 'sale' ? `
-                                <div class="text-center">
-                                    <div class="text-sm text-gray-600 font-medium card-price-per-sqm-${property.id}">
-                                        ${property.price_per_sqm_thb || property.price_per_sqm_rub || property.price_per_sqm_usd || ''}
+                        <!-- Price + CTA -->
+                        <div class="mt-auto">
+                            <div class="mb-3 sm:mb-4">
+                                <!-- Price and Currency in one line -->
+                                <div class="flex items-center justify-center space-x-3 mb-2">
+                                    <!-- Price -->
+                                    <span class="text-2xl font-bold text-primary card-price-${property.id}" data-property-id="${property.id}" data-deal-type="${property.deal_type}">
+                                        ${(() => {
+                                            const initialPrice = getInitialPrice(property);
+                                            if (!initialPrice) {
+                                                return priceOnRequestLabel;
+                                            }
+                                            const formattedPrice = formatPrice(initialPrice);
+                                            return formattedPrice || priceOnRequestLabel;
+                                        })()}
+                                    </span>
+                                    
+                                    <!-- Currency Dropdown -->
+                                    <div class="relative">
+                                        <button class="currency-toggle-btn bg-gray-100 hover:bg-primary hover:text-white text-gray-500 transition-all duration-200 px-3 py-1.5 rounded-md text-sm border border-gray-200 hover:border-primary flex items-center"
+                                                data-property-id="${property.id}"
+                                                data-deal-type="${property.deal_type}"
+                                                title="${changeCurrencyLabel}">
+                                            <span class="current-currency-${property.id} font-mono mr-1">${getInitialCurrency(property).symbol}</span>
+                                            <span class="current-currency-code-${property.id} font-medium mr-1">${getInitialCurrency(property).code}</span>
+                                            <i class="fas fa-chevron-down text-xs"></i>
+                                        </button>
+    
                                     </div>
                                 </div>
-                            ` : ''}
+                                
+                                ${property.area > 0 && property.deal_type === 'sale' ? `
+                                    <div class="text-center">
+                                        <div class="text-sm text-gray-600 font-medium card-price-per-sqm-${property.id}">
+                                            ${property.price_per_sqm_thb || property.price_per_sqm_rub || property.price_per_sqm_usd || ''}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <a href="${property.url}" class="mb-0 block w-full bg-accent hover:bg-yellow-500 text-gray-900 py-2.5 sm:py-3 px-4 rounded-md font-semibold transition-all duration-300 text-center text-sm">
+                                ${learnMoreLabel}
+                            </a>
                         </div>
                     </div>
-                    
-                    <a href="${property.url}" class="block w-full bg-accent hover:bg-yellow-500 text-gray-900 py-2 px-4 rounded-md font-semibold transition-all duration-300 text-center text-sm">
-                        ${learnMoreLabel}
-                    </a>
                 </div>
             </div>
         `;
@@ -1204,6 +1227,7 @@
 
         // Initialize with villa properties
         renderProperties(featuredProperties.villa || []);
+        setTimeout(() => hideCarouselHint(), 4000);
         initializeHeroSearchPlaceholders();
 
         // Listen for currency changes from header

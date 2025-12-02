@@ -129,6 +129,11 @@ class HomeView(TemplateView):
         append_structured(featured_condo)
         append_structured(featured_townhouse)
         context['featured_properties_structured'] = structured_offers
+        context['featured_properties_initial'] = {
+            'villa': featured_villa[:4],
+            'condo': featured_condo[:4],
+            'townhouse': featured_townhouse[:4],
+        }
 
         # Сериализация для JavaScript
         context['featured_properties_villa'] = mark_safe(serialize_properties_for_js(featured_villa))
