@@ -23,7 +23,11 @@
                                 {% endif %}
                                 <source media="(min-width: 1024px)" srcset="{{ promotional_banner.desktop_image.url }}">
                                 <img src="{{ fallback_src }}" alt="{{ promotional_banner.name|default:_('Рекламный баннер Undersun Estate') }}"
-                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
+                                     width="{{ promotional_banner.desktop_image.width|default_if_none:'1920' }}"
+                                     height="{{ promotional_banner.desktop_image.height|default_if_none:'600' }}"
+                                     loading="lazy"
+                                     decoding="async"
+                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out">
                             </picture>
                         {% endwith %}
                     {% elif promotional_banner.tablet_image %}
@@ -34,7 +38,11 @@
                                 {% endif %}
                                 <source media="(min-width: 768px) and (max-width: 1023px)" srcset="{{ promotional_banner.tablet_image.url }}">
                                 <img src="{{ fallback_src }}" alt="{{ promotional_banner.name|default:_('Рекламный баннер Undersun Estate') }}"
-                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
+                                     width="{{ promotional_banner.tablet_image.width|default_if_none:'1536' }}"
+                                     height="{{ promotional_banner.tablet_image.height|default_if_none:'600' }}"
+                                     loading="lazy"
+                                     decoding="async"
+                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out">
                             </picture>
                         {% endwith %}
                     {% else %}
@@ -42,7 +50,11 @@
                             <picture class="block w-full overflow-hidden">
                                 <source media="(max-width: 767px)" srcset="{{ promotional_banner.mobile_image.url }}">
                                 <img src="{{ fallback_src }}" alt="{{ promotional_banner.name|default:_('Рекламный баннер Undersun Estate') }}"
-                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out" loading="lazy">
+                                     width="{{ promotional_banner.mobile_image.width|default_if_none:'768' }}"
+                                     height="{{ promotional_banner.mobile_image.height|default_if_none:'600' }}"
+                                     loading="lazy"
+                                     decoding="async"
+                                     class="w-full h-[150px] object-cover transition-transform duration-500 ease-out">
                             </picture>
                         {% endwith %}
                     {% endif %}

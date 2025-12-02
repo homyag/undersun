@@ -15,6 +15,10 @@
                             <div class="relative mb-6">
                                 {% if member.photo %}
                                     <img src="{{ member.photo.url }}" alt="{{ member.full_name }}"
+                                         width="{{ member.photo.width|default_if_none:'256' }}"
+                                         height="{{ member.photo.height|default_if_none:'256' }}"
+                                         loading="lazy"
+                                         decoding="async"
                                          class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
                                 {% else %}
                                     <div class="w-32 h-32 rounded-lg mx-auto bg-gray-300 flex items-center justify-center shadow-lg">
@@ -95,6 +99,10 @@
                                 <div class="relative mb-6">
                                     {% if member.photo %}
                                         <img src="{{ member.photo.url }}" alt="{{ member.full_name }}"
+                                             width="{{ member.photo.width|default_if_none:'256' }}"
+                                             height="{{ member.photo.height|default_if_none:'256' }}"
+                                             loading="lazy"
+                                             decoding="async"
                                              class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
                                     {% else %}
                                         <div class="w-32 h-32 rounded-lg mx-auto bg-gray-300 flex items-center justify-center shadow-lg">

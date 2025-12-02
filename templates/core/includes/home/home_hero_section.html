@@ -3,9 +3,18 @@
 <section class="hero-section relative flex items-start md:items-center overflow-hidden">
     <!-- Background Slideshow -->
     <div class="absolute inset-0">
-        <div id="hero-slide-1" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-100" style="background-image: url('{% static 'images/home_page/homepage_hero_section/thailand_hero_section_1.jpg' %}');"></div>
-        <div id="hero-slide-2" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-0" style="background-image: url('{% static 'images/home_page/homepage_hero_section/thailand_hero_section_2.jpg' %}');"></div>
-        <div id="hero-slide-3" class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-0" style="background-image: url('{% static 'images/home_page/homepage_hero_section/thailand_hero_section_3.jpg' %}');"></div>
+        <div id="hero-slide-1"
+             class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-100"
+             style="background-image: url('{% static 'images/home_page/homepage_hero_section/thailand_hero_section_1.webp' %}');"
+             aria-hidden="true"></div>
+        <div id="hero-slide-2"
+             class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-0"
+             data-lazy-bg="{% static 'images/home_page/homepage_hero_section/thailand_hero_section_2.webp' %}"
+             aria-hidden="true"></div>
+        <div id="hero-slide-3"
+             class="hero-slide absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 opacity-0"
+             data-lazy-bg="{% static 'images/home_page/homepage_hero_section/thailand_hero_section_3.webp' %}"
+             aria-hidden="true"></div>
     </div>
     <!-- Brand-consistent overl`ay -->
     <div class="absolute inset-0 bg-gradient-to-br from-primary/60 via-primary/50 to-tertiary/60"></div>

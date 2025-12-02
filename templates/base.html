@@ -47,13 +47,26 @@
         {% endif %}
     {% endif %}
 
+    <!-- Performance preconnects for external CDNs -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
     <!-- Font Awesome -->
 {#    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">#}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="preload" as="style"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    </noscript>
+
     <!-- International Phone Input CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+    <link rel="preload" as="style"
+          href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css"
+          onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css">
+    </noscript>
     <link rel="stylesheet" href="{% static 'css/phone-input.css' %}">
     <!-- Tailwind CSS -->
     {% if tailwind_use_cdn %}
@@ -141,15 +154,29 @@
 </head>
 <body class="overflow-x-hidden">
 <!-- Yandex.Metrika counter -->
-<script type="text/javascript">
-    (function(m,e,t,r,i,k,a){
-        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js', 'ym');
+<script>
+    (function() {
+        const initMetrika = function() {
+            if (window.ym) {
+                return;
+            }
 
-    ym(90630603, 'init', {webvisor:true, clickmap:true, accurateTrackBounce:true, trackLinks:true});
+            (function(m,e,t,r,i,k,a){
+                m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+                m[i].l=1*new Date();
+                for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+            })(window, document,'script','https://mc.yandex.ru/metrika/tag.js', 'ym');
+
+            ym(90630603, 'init', {webvisor:true, clickmap:true, accurateTrackBounce:true, trackLinks:true});
+        };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(initMetrika, { timeout: 3000 });
+        } else {
+            window.addEventListener('load', initMetrika, { once: true });
+        }
+    })();
 </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/90630603" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
@@ -218,7 +245,6 @@
 <script src="{% static 'js/cookie-consent.js' %}"></script>
 
 {% if recaptcha_site_key %}
-<script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}&hl={{ LANGUAGE_CODE|default:'en' }}" async defer></script>
 <script>
   (function() {
     const siteKey = '{{ recaptcha_site_key|escapejs }}';
@@ -226,14 +252,21 @@
       return;
     }
 
+    function loadRecaptchaApi() {
+      if (document.getElementById('recaptcha-api-script')) {
+        return;
+      }
+      const script = document.createElement('script');
+      script.id = 'recaptcha-api-script';
+      script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}&hl={{ LANGUAGE_CODE|default:'en' }}`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+
     function setupRecaptchaForms() {
       const forms = document.querySelectorAll('form[data-recaptcha-action]');
       if (!forms.length) {
-        return;
-      }
-
-      if (typeof window.grecaptcha === 'undefined') {
-        setTimeout(setupRecaptchaForms, 500);
         return;
       }
 
@@ -261,22 +294,11 @@
 
         const actionName = form.dataset.recaptchaAction || 'submit';
         actionInput.value = actionName;
-        form.addEventListener('submit', function handleRecaptcha(event) {
+
+        const executeRecaptcha = () => {
           if (!window.grecaptcha || !siteKey) {
+            setTimeout(executeRecaptcha, 200);
             return;
-          }
-
-          if (form.dataset.recaptchaVerified === 'true') {
-            form.dataset.recaptchaVerified = '';
-            return;
-          }
-
-          event.preventDefault();
-          if (typeof event.stopImmediatePropagation === 'function') {
-            event.stopImmediatePropagation();
-          }
-          if (typeof event.stopPropagation === 'function') {
-            event.stopPropagation();
           }
 
           grecaptcha.ready(function() {
@@ -295,6 +317,28 @@
               }
             });
           });
+        };
+
+        form.addEventListener('submit', function handleRecaptcha(event) {
+          if (!siteKey) {
+            return;
+          }
+
+          if (form.dataset.recaptchaVerified === 'true') {
+            form.dataset.recaptchaVerified = '';
+            return;
+          }
+
+          event.preventDefault();
+          if (typeof event.stopImmediatePropagation === 'function') {
+            event.stopImmediatePropagation();
+          }
+          if (typeof event.stopPropagation === 'function') {
+            event.stopPropagation();
+          }
+
+          loadRecaptchaApi();
+          executeRecaptcha();
         }, true);
       });
     }
@@ -350,10 +394,10 @@
 </div>
 
 <!-- Custom JS - Forms Handler (должен быть до main.js) -->
-<script src="{% static 'js/forms.js' %}"></script>
+<script src="{% static 'js/forms.js' %}" defer></script>
 
 <!-- Custom JS - Main Script -->
-<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/main.js' %}" defer></script>
 
 <!-- Favorites translations for JS -->
 <script>

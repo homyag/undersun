@@ -32,6 +32,11 @@
                   <img src="{{ news.featured_image.url }}" 
                        alt="{{ news.title }}"
                        itemprop="image"
+                       width="{{ news.featured_image.width|default_if_none:'1200' }}"
+                       height="{{ news.featured_image.height|default_if_none:'800' }}"
+                       loading="lazy"
+                       decoding="async"
+                       sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                 {% else %}
                   <div class="w-full h-full bg-gradient-to-br from-accent/20 to-yellow-100 flex items-center justify-center">
