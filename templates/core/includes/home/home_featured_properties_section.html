@@ -4,6 +4,16 @@
     <div class="w-full mx-auto px-4 md:px-6 lg:px-10">
         <div class="text-center mb-8 sm:mb-12">
             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-4 uppercase">{% trans "Избранные объекты недвижимости" %}</h2>
+            <p class="text-gray-600 max-w-3xl mx-auto text-sm sm:text-base leading-relaxed">
+                {% blocktrans %}Лучшие виллы, апартаменты и таунхаусы Пхукета для инвестиций, переезда и отдыха. Мы отбираем проекты с высокой ликвидностью, понятным управлением и прозрачной юридической проверкой.{% endblocktrans %}
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 mt-5 text-xs sm:text-sm font-medium text-primary">
+                <a href="{% url 'properties:property_by_type' 'villa' %}" class="hover:text-accent transition">{% trans "Виллы для инвестиций" %}</a>
+                <span class="text-gray-300">•</span>
+                <a href="{% url 'properties:property_by_type' 'condo' %}" class="hover:text-accent transition">{% trans "Квартиры у моря" %}</a>
+                <span class="text-gray-300">•</span>
+                <a href="{% url 'properties:property_by_type' 'townhouse' %}" class="hover:text-accent transition">{% trans "Дома для семейной жизни" %}</a>
+            </div>
 
             <!-- Property Type Tabs -->
             <div class="flex justify-center mb-8">
@@ -56,6 +66,14 @@
                class="bg-primary hover:bg-yellow-500 text-white font-bold py-3 px-8 rounded-md text-lg transition-colors">
                 {% trans "Смотреть каталог" %}
             </a>
+            <div class="flex flex-wrap justify-center gap-3 mt-4 text-xs sm:text-sm text-gray-600">
+                <span>{% trans "Или перейти к выбору:" %}</span>
+                <a href="{% url 'properties:property_by_type' 'villa' %}" class="font-medium text-primary hover:text-accent transition">{% trans "Виллы" %}</a>
+                <span class="text-gray-300">•</span>
+                <a href="{% url 'properties:property_by_type' 'condo' %}" class="font-medium text-primary hover:text-accent transition">{% trans "Квартиры" %}</a>
+                <span class="text-gray-300">•</span>
+                <a href="{% url 'properties:property_by_type' 'townhouse' %}" class="font-medium text-primary hover:text-accent transition">{% trans "Дома" %}</a>
+            </div>
         </div>
     </div>
 </section>
