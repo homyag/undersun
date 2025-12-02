@@ -84,6 +84,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.core.middleware.PermissionsPolicyMiddleware',  # Fix for admin permissions policy
+    'apps.core.middleware.FrameAncestorsMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -337,3 +338,6 @@ ADMINS = [tuple(admin.split(":")) for admin in env.list("ADMINS", default=[])]
 
 # ImageKit cache strategy
 IMAGEKIT_DEFAULT_CACHEFILE_STRATEGY = 'imagekit.cachefiles.strategies.JustInTime'
+
+# CSP frame-ancestors directive (override in production when needed)
+FRAME_ANCESTORS = None

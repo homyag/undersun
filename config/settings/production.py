@@ -28,7 +28,10 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
-X_FRAME_OPTIONS = 'DENY'
+X_FRAME_OPTIONS = 'ALLOWALL'
+
+# Allow embedding for Yandex Metrica/Webvisor only via CSP frame-ancestors
+FRAME_ANCESTORS = "'self' https://metrika.yandex.ru https://*.metrika.yandex.ru https://webvisor.com https://*.webvisor.com"
 
 SECURE_SSL_REDIRECT = True # раскомментировать после получения доступа по 443
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") # раскомментировать после получения доступа по 443
@@ -46,3 +49,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@undersunestate.com')
+
+
+# Tailwind
+TAILWIND_USE_CDN = False
