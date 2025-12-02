@@ -1,0 +1,55 @@
+{% load i18n %}
+{% load currency_tags %}
+{% if featured_properties_initial %}
+    {% for property_type, properties in featured_properties_initial.items %}
+        {% for property in properties %}
+            <article class="carousel-item flex-shrink-0 server-rendered" style="width: 100%; max-width: 350px; min-height: 450px; min-width: 280px;"
+                     itemscope itemtype="https://schema.org/Offer"
+                     data-property-type="{{ property_type }}"
+                     {% if not forloop.parentloop.first %}hidden{% endif %}>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col h-full">
+                    {% if property.main_image %}
+                        <a href="{{ property.get_absolute_url }}" class="block h-48 overflow-hidden" itemprop="url">
+                            <img src="{{ property.main_image.medium_url }}"
+                                 alt="{{ property.title }}"
+                                 class="w-full h-full object-cover"
+                                 loading="lazy"
+                                 decoding="async">
+                        </a>
+                    {% endif %}
+                    <div class="flex-1 p-4 flex flex-col">
+                        <h3 class="text-lg font-semibold text-primary mb-2" itemprop="name">
+                            <a href="{{ property.get_absolute_url }}" class="hover:text-accent transition-colors">{{ property.title }}</a>
+                        </h3>
+                        {% if property.district %}
+                            <p class="text-sm text-gray-500 mb-1">{{ property.district.name }}</p>
+                        {% endif %}
+                        <p class="text-sm text-gray-500 mb-3">{{ property.property_type.name_display }}</p>
+                        <div class="mt-auto">
+                            <div class="mb-3 sm:mb-4">
+                                {% if property.price_sale_usd %}
+                                    <span class="text-xl font-bold text-accent" itemprop="price">${{ property.price_sale_usd|floatformat:0 }}</span>
+                                    <meta itemprop="priceCurrency" content="USD">
+                                {% elif property.price_rent_monthly %}
+                                    <span class="text-xl font-bold text-accent" itemprop="price">${{ property.price_rent_monthly|floatformat:0 }}</span>
+                                    <span class="text-sm text-gray-500">/{% trans "мес" %}</span>
+                                    <meta itemprop="priceCurrency" content="USD">
+                                {% else %}
+                                    <span class="text-sm text-gray-500">{% trans "Цена по запросу" %}</span>
+                                {% endif %}
+                                {% if property.area_total %}
+                                    <div class="text-sm text-gray-600">{{ property.area_total }} {% trans "м²" %}</div>
+                                {% endif %}
+                            </div>
+                            <a href="{{ property.get_absolute_url }}"
+                               class="mb-0 block w-full bg-accent hover:bg-yellow-500 text-gray-900 py-2.5 sm:py-3 px-4 rounded-md font-semibold transition-all duration-300 text-center text-sm">
+                                {% trans "Узнать подробнее" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <meta itemprop="availability" content="https://schema.org/InStock">
+            </article>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
