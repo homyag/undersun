@@ -1,6 +1,10 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
+import re
+
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models
+from django.utils import translation
+from django.utils.translation import gettext_lazy as _
 from tinymce.models import HTMLField
 
 
@@ -140,6 +144,10 @@ class BlogPost(models.Model):
     # Счетчики
     views_count = models.PositiveIntegerField(_('Количество просмотров'), default=0)
     
+    META_DESCRIPTION_LIMIT = 180
+    META_DESCRIPTION_TOLERANCE = 20
+    META_DESCRIPTION_SUFFIX = " - Undersun Estate"
+
     class Meta:
         verbose_name = _('Статья блога')
         verbose_name_plural = _('Статьи блога')
@@ -153,13 +161,84 @@ class BlogPost(models.Model):
         from django.urls import reverse
         return reverse('blog:detail', kwargs={'slug': self.slug})
         
-    def get_meta_title(self):
+    def _get_translated_value(self, field_name, language_code=None):
+        """Возвращает значение поля с учётом языковой версии и fallback."""
+        lang = (language_code or translation.get_language() or settings.LANGUAGE_CODE or 'ru')[:2]
+        default_lang = (settings.LANGUAGE_CODE or 'ru')[:2]
+
+        if lang == default_lang:
+            value = getattr(self, field_name, '')
+        else:
+            translated_field = f"{field_name}_{lang}"
+            value = getattr(self, translated_field, '') or getattr(self, field_name, '')
+
+        if isinstance(value, str):
+            return value.strip()
+        return value
+
+    def get_meta_title(self, language_code=None):
         """Получить SEO заголовок или основной заголовок"""
-        return self.meta_title if self.meta_title else self.title
+        value = self._get_translated_value('meta_title', language_code)
+        if value:
+            return value
+        return self._get_translated_value('title', language_code)
         
-    def get_meta_description(self):
+    def get_meta_description(self, language_code=None):
         """Получить SEO описание или краткое описание"""
-        return self.meta_description if self.meta_description else self.excerpt
+        value = self._get_translated_value('meta_description', language_code)
+        if value:
+            return self._format_meta_description(value)
+        fallback = self._get_translated_value('excerpt', language_code)
+        return self._format_meta_description(fallback)
+
+    def get_meta_keywords(self, language_code=None):
+        """Получить ключевые слова для указанного языка"""
+        return self._get_translated_value('meta_keywords', language_code)
+
+    def _format_meta_description(self, text):
+        """Укращает описания, сохраняя целые предложения и обязательный суффикс."""
+        suffix = self.META_DESCRIPTION_SUFFIX or ''
+        limit = self.META_DESCRIPTION_LIMIT
+        tolerance = getattr(self, 'META_DESCRIPTION_TOLERANCE', 20)
+        total_limit = limit + max(tolerance, 0)
+
+        cleaned = (text or '').strip()
+        if not cleaned:
+            return suffix.strip() or ''
+
+        if suffix and cleaned.endswith(suffix):
+            cleaned = cleaned[:-len(suffix)].rstrip()
+
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', cleaned) if s.strip()]
+        max_base_len = max(total_limit - len(suffix), 0)
+        base = ''
+
+        for sentence in sentences:
+            candidate = f"{base} {sentence}".strip() if base else sentence
+            candidate_length = len(candidate) + len(suffix)
+
+            if candidate_length <= limit + len(suffix):
+                base = candidate
+                continue
+
+            if candidate_length <= total_limit:
+                base = candidate
+            break
+
+        if not base:
+            base = cleaned[:max_base_len]
+        elif len(base) > max_base_len:
+            base = base[:max_base_len].rstrip()
+
+        if not base:
+            return suffix.strip() or ''
+
+        result = f"{base}{suffix}" if suffix else base
+        if len(result) > total_limit:
+            allowed = max(total_limit - len(suffix), 0)
+            base = base[:allowed].rstrip()
+            result = f"{base}{suffix}" if suffix else base
+        return result.strip()
 
     def get_featured_image_for_language(self, language_code='ru'):
         """Вернуть изображение обложки с учетом локали и доступности."""

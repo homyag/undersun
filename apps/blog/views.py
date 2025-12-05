@@ -126,14 +126,21 @@ def blog_detail(request, slug):
     categories = BlogCategory.objects.filter(is_active=True)
     featured_posts = BlogPost.get_featured()
     
+    language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
+    meta_title = post.get_meta_title(language_code)
+    meta_description = post.get_meta_description(language_code)
+    meta_keywords = post.get_meta_keywords(language_code)
+
     context = {
         'post': post,
         'related_posts': related_posts,
         'categories': categories,
         'featured_posts': featured_posts,
-        'meta_title': post.get_meta_title(),
-        'meta_description': post.get_meta_description(),
-        'meta_keywords': post.meta_keywords,
+        'meta_title': meta_title,
+        'meta_description': meta_description,
+        'meta_keywords': meta_keywords,
+        'page_description': meta_description,
+        'page_keywords': meta_keywords,
     }
 
     og_image_url = post.get_featured_image_absolute_url(request, getattr(request, 'LANGUAGE_CODE', 'ru'))
