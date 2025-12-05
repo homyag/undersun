@@ -3,10 +3,10 @@
 
 {% block title %}{{ post.get_meta_title }} - {% trans "Недвижимость в Таиланде" %}{% endblock %}
 
-{% block meta_description %}{{ post.get_meta_description }}{% endblock %}
+{% block description %}{{ page_description|default:post.get_meta_description }}{% endblock %}
 
-{% if post.meta_keywords %}
-{% block meta_keywords %}{{ post.meta_keywords }}{% endblock %}
+{% if page_keywords %}
+{% block keywords %}{{ page_keywords }}{% endblock %}
 {% endif %}
 
 {% block extra_css %}
