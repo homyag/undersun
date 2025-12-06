@@ -6,6 +6,28 @@
         box-sizing: border-box !important;
     }
 
+    .hero-static-bg {
+        z-index: 0;
+        transition: opacity 1.2s ease;
+        overflow: hidden;
+    }
+
+    .hero-static-bg__image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .hero-static-bg--hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .hero-slideshow {
+        z-index: 0;
+    }
+
     .promotional-banner-section {
         padding: 0 !important;
     }

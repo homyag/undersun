@@ -31,53 +31,75 @@ function initializeHeroSection() {
         return;
     }
 
+    const staticBackground = document.querySelector('.hero-static-bg');
+    let currentSlide = 0;
+    const initialSlide = slides[currentSlide];
     const lazySlides = Array.from(slides).filter(slide => slide.dataset.lazyBg);
     const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
-    let currentSlide = 0;
     let slideInterval = null;
 
-    function ensureSlideBackground(slide) {
-        if (!slide || slide.dataset.bgLoaded === 'true') {
+    function ensureSlideBackground(slide, { highPriority = false, onLoad } = {}) {
+        if (!slide) {
             return;
         }
 
-        const lazySrc = slide.dataset.lazyBg;
+        const lazySrc = slide.dataset.lazyBg || slide.dataset.imageSrc || slide.dataset.placeholder || null;
         if (!lazySrc) {
+            if (typeof onLoad === 'function') {
+                onLoad();
+            }
             return;
+        }
+
+        const markLoaded = () => {
+            if (!slide.style.backgroundImage) {
+                slide.style.backgroundImage = `url('${lazySrc}')`;
+            }
+            slide.dataset.bgLoaded = 'true';
+            if (typeof onLoad === 'function') {
+                onLoad();
+            }
+        };
+
+        if (slide.dataset.bgLoaded === 'true') {
+            markLoaded();
+            return;
+        }
+
+        if (!slide.style.backgroundImage) {
+            slide.style.backgroundImage = `url('${lazySrc}')`;
         }
 
         const img = new Image();
         img.decoding = 'async';
         img.loading = 'eager';
-        img.addEventListener('load', () => {
-            slide.style.backgroundImage = `url('${lazySrc}')`;
-            slide.dataset.bgLoaded = 'true';
-        });
+        if (img.fetchPriority !== undefined) {
+            try {
+                img.fetchPriority = highPriority ? 'high' : 'low';
+            } catch (e) {
+                // ignore unsupported assignment
+            }
+        }
+        img.addEventListener('load', markLoaded, { once: true });
+        img.addEventListener('error', markLoaded, { once: true });
         img.src = lazySrc;
     }
 
-    function hydrateLazyHeroSlides() {
+    function hydrateHeroSlidesImmediately() {
         lazySlides.forEach(slide => ensureSlideBackground(slide));
     }
 
-    function scheduleHeroBackgroundHydration() {
-        if (!lazySlides.length) {
+    function setSlideVisibility() {
+        slides.forEach((slide, index) => {
+            slide.style.opacity = index === currentSlide ? '1' : '0';
+        });
+    }
+
+    function hideStaticBackground() {
+        if (!staticBackground) {
             return;
         }
-
-        const loadBackgrounds = () => {
-            if (document.readyState === 'complete') {
-                hydrateLazyHeroSlides();
-            } else {
-                window.addEventListener('load', () => hydrateLazyHeroSlides(), { once: true });
-            }
-        };
-
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(hydrateLazyHeroSlides, { timeout: 2000 });
-        } else {
-            setTimeout(loadBackgrounds, 200);
-        }
+        staticBackground.classList.add('hero-static-bg--hidden');
     }
 
     function nextSlide() {
@@ -87,7 +109,7 @@ function initializeHeroSection() {
 
         slides[currentSlide].style.opacity = '0';
         currentSlide = (currentSlide + 1) % slides.length;
-        ensureSlideBackground(slides[currentSlide]);
+        ensureSlideBackground(slides[currentSlide], { highPriority: true });
         slides[currentSlide].style.opacity = '1';
     }
 
@@ -125,8 +147,20 @@ function initializeHeroSection() {
         prefersReducedMotion.addListener(motionChangeHandler);
     }
 
-    ensureSlideBackground(slides[currentSlide]);
-    scheduleHeroBackgroundHydration();
+    ensureSlideBackground(staticBackground, { highPriority: true });
+    let staticHidden = false;
+    const hideStaticWhenReady = () => {
+        if (staticHidden) {
+            return;
+        }
+        staticHidden = true;
+        setTimeout(() => hideStaticBackground(), 500);
+    };
+
+    ensureSlideBackground(initialSlide, { highPriority: true, onLoad: hideStaticWhenReady });
+    hydrateHeroSlidesImmediately();
+    setSlideVisibility();
+    setTimeout(hideStaticWhenReady, 2000);
     startSlider();
 }
 
