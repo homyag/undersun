@@ -16,6 +16,13 @@ from apps.core.models import SEOPage
 from .models import BlogPost, BlogCategory, BlogTag
 
 
+PAGE_LABELS = {
+    'ru': 'Страница {page}',
+    'en': 'Page {page}',
+    'th': 'หน้า {page}',
+}
+
+
 BLOG_SEO_DEFAULTS = {
     'ru': {
         'title': 'Блог Undersun Estate: недвижимость Пхукета и инвестиции',
@@ -30,6 +37,44 @@ BLOG_SEO_DEFAULTS = {
         'description': 'อัปเดตตลาด คู่มือการซื้อ และเคล็ดลับการลงทุนอสังหาริมทรัพย์ในภูเก็ตที่คัดสรรโดยทีม Undersun Estate.',
     },
 }
+
+
+def _append_suffix_if_needed(value, suffix):
+    if not suffix:
+        return value
+
+    if not value:
+        return suffix.strip(' |')
+
+    normalized_value = value.lower()
+    normalized_suffix = suffix.lower().strip()
+    if normalized_suffix and normalized_suffix in normalized_value:
+        return value
+
+    return f"{value}{suffix}"
+
+
+def _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj):
+    if not page_obj:
+        return meta_title, meta_description
+
+    try:
+        page_number = int(page_obj.number)
+    except (TypeError, ValueError, AttributeError):
+        page_number = 1
+
+    if page_number <= 1:
+        return meta_title, meta_description
+
+    language = (language_code or 'ru')[:2]
+    label_template = PAGE_LABELS.get(language, PAGE_LABELS['en'])
+    pagination_label = label_template.format(page=page_number)
+    pagination_suffix = f" | {pagination_label}"
+
+    updated_title = _append_suffix_if_needed(meta_title, pagination_suffix)
+    updated_description = _append_suffix_if_needed(meta_description, pagination_suffix)
+
+    return updated_title, updated_description
 
 
 def _get_seo_page_meta(page_name, language_code='ru'):
@@ -89,6 +134,10 @@ def blog_list(request):
     seo_meta = _get_seo_page_meta('blog', language_code)
     defaults = BLOG_SEO_DEFAULTS.get(language_code, BLOG_SEO_DEFAULTS['ru'])
 
+    meta_title = seo_meta.get('title') or defaults['title']
+    meta_description = seo_meta.get('description') or defaults['description']
+    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+
     context = {
         'page_obj': page_obj,
         'posts': page_obj.object_list,
@@ -97,8 +146,8 @@ def blog_list(request):
         'current_category': category,
         'current_tag': tag,
         'search_query': search_query,
-        'meta_title': seo_meta.get('title') or defaults['title'],
-        'meta_description': seo_meta.get('description') or defaults['description'],
+        'meta_title': meta_title,
+        'meta_description': meta_description,
         'meta_keywords': seo_meta.get('keywords'),
         'page_keywords': seo_meta.get('keywords'),
     }
@@ -164,14 +213,19 @@ def blog_category(request, slug):
     categories = BlogCategory.objects.filter(is_active=True)
     featured_posts = BlogPost.get_featured()
     
+    language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
+    meta_title = category.meta_title or f'Статьи в категории {category.name}'
+    meta_description = category.meta_description or category.description
+    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+
     context = {
         'page_obj': page_obj,
         'posts': page_obj.object_list,
         'category': category,
         'categories': categories,
         'featured_posts': featured_posts,
-        'meta_title': category.meta_title or f'Статьи в категории {category.name}',
-        'meta_description': category.meta_description or category.description,
+        'meta_title': meta_title,
+        'meta_description': meta_description,
         'meta_keywords': category.meta_keywords,
     }
     
@@ -192,14 +246,19 @@ def blog_tag(request, slug):
     categories = BlogCategory.objects.filter(is_active=True)
     featured_posts = BlogPost.get_featured()
     
+    language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
+    meta_title = f'Статьи с тегом {tag.name}'
+    meta_description = f'Все статьи с тегом {tag.name}'
+    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+
     context = {
         'page_obj': page_obj,
         'posts': page_obj.object_list,
         'tag': tag,
         'categories': categories,
         'featured_posts': featured_posts,
-        'meta_title': f'Статьи с тегом {tag.name}',
-        'meta_description': f'Все статьи с тегом {tag.name}',
+        'meta_title': meta_title,
+        'meta_description': meta_description,
     }
     
     return render(request, 'blog/blog_tag.html', context)
