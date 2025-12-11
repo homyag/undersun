@@ -371,7 +371,11 @@
       {% endif %}
       "url": "{{ prop.url|escapejs }}",
       "itemOffered": {
-        "@type": "Residence",
+        "@type": "Product",
+        "additionalType": "{{ prop.property_type_slug|schema_additional_type }}",
+        {% if prop.property_type %}
+        "category": "{{ prop.property_type|escapejs }}",
+        {% endif %}
         "name": "{{ prop.name|escapejs }}",
         {% if prop.description %}
         "description": "{{ prop.description|truncatechars:200|escapejs }}",
