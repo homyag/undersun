@@ -122,6 +122,7 @@ class HomeView(TemplateView):
                     'price_currency': price_currency,
                     'deal_type': prop.get_deal_type_display(),
                     'property_type': prop.property_type.name_display if prop.property_type else '',
+                    'property_type_slug': prop.property_type.name if prop.property_type else '',
                     'address': prop.address or (str(prop.district) if prop.district else ''),
                 })
 
@@ -485,6 +486,15 @@ class TermsView(TemplateView):
 class SitemapView(View):
     languages = ['ru', 'en', 'th']
     static_names = ['core:home', 'core:about', 'core:contact', 'core:map', 'core:privacy', 'core:terms']
+    section_routes = [
+        ('blog:list', None),
+        ('properties:property_list', None),
+        ('properties:property_sale', None),
+        ('properties:property_rent', None),
+        ('properties:property_favorites', None),
+        ('location_list', None),
+    ]
+    property_type_slugs = ['condo', 'villa', 'townhouse', 'land']
 
     def get(self, request, *args, **kwargs):
         from django.urls import reverse
@@ -506,6 +516,19 @@ class SitemapView(View):
         # Static pages
         for name in self.static_names:
             alternates = build_alternates(lambda n=name: reverse(n))
+            entries.extend(self._expand_entries(alternates, None))
+
+        # Section landing pages without пагинации/фильтров
+        for route_name, route_kwargs in self.section_routes:
+            alternates = build_alternates(
+                lambda n=route_name, kw=route_kwargs: reverse(n, kwargs=kw) if kw else reverse(n)
+            )
+            entries.extend(self._expand_entries(alternates, None))
+
+        for slug in self.property_type_slugs:
+            alternates = build_alternates(
+                lambda type_slug=slug: reverse('properties:property_by_type', kwargs={'type_name': type_slug})
+            )
             entries.extend(self._expand_entries(alternates, None))
 
         # Services

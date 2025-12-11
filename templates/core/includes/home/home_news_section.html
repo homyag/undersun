@@ -24,7 +24,12 @@
           <article class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
                    itemscope itemtype="https://schema.org/BlogPosting">
             <meta itemprop="mainEntityOfPage" content="{{ news.get_absolute_url }}">
-            <meta itemprop="author" content="{{ news.get_author_display }}">
+            <div itemprop="author" itemscope itemtype="https://schema.org/Person" class="hidden">
+              <meta itemprop="name" content="{{ news.get_author_display }}">
+            </div>
+            <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization" class="hidden">
+              <meta itemprop="name" content="Undersun Estate">
+            </div>
             <!-- News Image with Link -->
             <div class="relative overflow-hidden h-64">
               <a href="{{ news.get_absolute_url }}" class="block w-full h-full" itemprop="url">

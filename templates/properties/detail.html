@@ -18,7 +18,11 @@
       "availability": "{% if property.status == 'available' %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
       "url": "{{ request.build_absolute_uri }}",
       "itemOffered": {
-        "@type": "{% if property.property_type.name == 'condo' %}Apartment{% elif property.property_type.name == 'villa' %}SingleFamilyResidence{% elif property.property_type.name == 'townhouse' %}House{% else %}Residence{% endif %}",
+        "@type": "Product",
+        {% if property.property_type %}
+        "category": "{{ property.property_type.name_display|escapejs }}",
+        {% endif %}
+        "additionalType": "{{ property.property_type|schema_additional_type }}",
         "name": "{{ property.title|escapejs }}",
         "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
         "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{% static 'images/no-image.svg' %}"{% endif %}],
