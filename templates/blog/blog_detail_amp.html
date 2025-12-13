@@ -1,0 +1,120 @@
+{% load i18n static url_utils %}
+<!doctype html>
+<html amp lang="{{ request.LANGUAGE_CODE|default:'ru' }}">
+<head>
+  {% static 'images/logo_fullscreen.svg' as amp_logo_path %}
+  <meta charset="utf-8">
+  <title>{{ meta_title }}</title>
+  <link rel="canonical" href="{{ canonical_url }}">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="description" content="{{ meta_description }}">
+  {% if meta_keywords %}
+  <meta name="keywords" content="{{ meta_keywords }}">
+  {% endif %}
+  <meta property="og:title" content="{{ meta_title }}">
+  <meta property="og:description" content="{{ meta_description }}">
+  {% if og_image_url %}
+  <meta property="og:image" content="{{ og_image_url }}">
+  {% endif %}
+  <meta property="og:url" content="{{ canonical_url }}">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }
+    header { background: linear-gradient(135deg,#0f172a,#1e293b); color: #fff; padding: 24px; }
+    .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+    h1 { font-size: 2.2rem; line-height: 1.2; margin: 0 0 16px; }
+    .meta { font-size: 0.95rem; color: rgba(255,255,255,0.8); }
+    .card { background: #fff; border-radius: 20px; box-shadow: 0 20px 60px rgba(15,23,42,0.07); padding: 28px; margin-top: -60px; position: relative; z-index: 2; }
+    .featured-image amp-img { border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(15,23,42,0.15); margin-bottom: 24px; }
+    .amp-content { font-size: 1.05rem; line-height: 1.8; color: #1e293b; }
+    .amp-content h2 { font-size: 1.6rem; margin: 32px 0 12px; border-left: 4px solid #f1b400; padding-left: 12px; }
+    .amp-content h3 { font-size: 1.3rem; margin: 24px 0 12px; }
+    .amp-content p { margin-bottom: 1.4rem; }
+    .amp-content ul { padding-left: 20px; margin-bottom: 1.4rem; }
+    .related { margin-top: 48px; }
+    .related h3 { font-size: 1.3rem; margin-bottom: 16px; }
+    .related-item { border-top: 1px solid #e2e8f0; padding: 12px 0; }
+    .cta { margin-top: 40px; padding: 24px; border-radius: 16px; background: linear-gradient(135deg,#f1b400,#ffd75e); color: #0f172a; text-align: center; }
+    .cta a { display: inline-block; margin-top: 12px; padding: 12px 24px; border-radius: 999px; background: #0f172a; color: #fff; text-decoration: none; font-weight: 600; }
+    footer { text-align: center; padding: 32px 0; font-size: 0.85rem; color: #475569; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "{{ canonical_url }}"
+    },
+    "headline": "{{ post.title|escapejs }}",
+    "image": [{% if og_image_url %}"{{ og_image_url }}"{% else %}"{{ default_amp_image }}"{% endif %}],
+    "datePublished": "{{ post.published_at|date:'c' }}",
+    "dateModified": "{{ post.updated_at|date:'c' }}",
+    "author": {
+      "@type": "Person",
+      "name": "{{ post.get_author_display|default:post.author.get_full_name|default:post.author }}",
+      "url": "{{ author_anchor_url }}"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Undersun Estate",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ amp_logo_path|absolute_url:request }}"
+      }
+    },
+    "description": "{{ meta_description|escapejs }}"
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="{{ canonical_url }}" style="color: rgba(255,255,255,0.7); text-decoration:none; font-size:0.9rem;">&larr; {% trans "Назад к статье" %}</a>
+      <h1>{{ post.title }}</h1>
+      <div class="meta" id="author">
+        {{ post.published_at|date:"d M Y" }} &middot; {{ post.category.name }}
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="card">
+      {% if post.featured_image %}
+      <div class="featured-image">
+        <amp-img src="{{ post.featured_image.url }}" width="1200" height="675" layout="responsive" alt="{{ post.title }}"></amp-img>
+      </div>
+      {% endif %}
+
+      <div class="amp-content">
+        {{ amp_content|safe }}
+      </div>
+
+      {% if related_posts %}
+      <section class="related">
+        <h3>{% trans "Вам также может понравиться" %}</h3>
+        {% for related in related_posts %}
+        <div class="related-item">
+          <a href="{{ related.get_absolute_url }}" style="text-decoration:none; color:#0f172a; font-weight:600;">
+            {{ related.title }}
+          </a>
+          <div style="font-size:0.9rem; color:#64748b;">{{ related.published_at|date:"d M Y" }}</div>
+        </div>
+        {% endfor %}
+      </section>
+      {% endif %}
+
+      <div class="cta">
+        <p>{% trans "Нужна консультация по недвижимости?" %}</p>
+        <a href="/property/" target="_blank">{% trans "Перейти в каталог" %}</a>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    &copy; Undersun Estate · {% trans "Найдите вашу недвижимость на Пхукете" %}
+  </footer>
+</body>
+</html>
