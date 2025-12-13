@@ -1,15 +1,22 @@
 import json
 import os
-from django.shortcuts import render, get_object_or_404
+
+from bs4 import BeautifulSoup
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.conf import settings
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.templatetags.static import static
+from django.urls import reverse
+from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
+from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.utils.text import slugify
+from urllib.parse import urlparse, parse_qs
 
 from apps.core.models import SEOPage
 
@@ -180,6 +187,10 @@ def blog_detail(request, slug):
     meta_description = post.get_meta_description(language_code)
     meta_keywords = post.get_meta_keywords(language_code)
 
+    amp_url = request.build_absolute_uri(
+        reverse('blog:detail_amp', kwargs={'slug': slug})
+    )
+
     context = {
         'post': post,
         'related_posts': related_posts,
@@ -190,6 +201,7 @@ def blog_detail(request, slug):
         'meta_keywords': meta_keywords,
         'page_description': meta_description,
         'page_keywords': meta_keywords,
+        'amp_url': amp_url,
     }
 
     og_image_url = post.get_featured_image_absolute_url(request, getattr(request, 'LANGUAGE_CODE', 'ru'))
@@ -197,6 +209,138 @@ def blog_detail(request, slug):
         context['og_image_url'] = og_image_url
 
     return render(request, 'blog/blog_detail.html', context)
+
+
+def _extract_youtube_id(src):
+    if not src:
+        return None
+    parsed = urlparse(src)
+    if 'youtu.be' in parsed.netloc:
+        return parsed.path.lstrip('/') or None
+    if 'youtube.com' in parsed.netloc:
+        if parsed.path.startswith('/embed/'):
+            return parsed.path.split('/')[-1]
+        query = parse_qs(parsed.query)
+        video_ids = query.get('v')
+        if video_ids:
+            return video_ids[0]
+    return None
+
+
+DEFAULT_IMG_WIDTH = 1200
+DEFAULT_IMG_HEIGHT = 675
+DEFAULT_VIDEO_WIDTH = 560
+DEFAULT_VIDEO_HEIGHT = 315
+
+
+def _convert_content_to_amp(html_content):
+    if not html_content:
+        return ''
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    for script in soup.find_all('script'):
+        script.decompose()
+
+    for iframe in soup.find_all('iframe'):
+        src = iframe.get('src', '')
+        youtube_id = _extract_youtube_id(src)
+        if youtube_id:
+            amp_tag = soup.new_tag('amp-youtube')
+            amp_tag['data-videoid'] = youtube_id
+            amp_tag['layout'] = 'responsive'
+            amp_tag['width'] = iframe.get('width', DEFAULT_VIDEO_WIDTH) or DEFAULT_VIDEO_WIDTH
+            amp_tag['height'] = iframe.get('height', DEFAULT_VIDEO_HEIGHT) or DEFAULT_VIDEO_HEIGHT
+            iframe.replace_with(amp_tag)
+        else:
+            link = soup.new_tag('a', href=src or '#')
+            link.string = strip_tags(iframe.text) or 'Open embedded content'
+            iframe.replace_with(link)
+
+    for img in soup.find_all('img'):
+        amp_img = soup.new_tag('amp-img')
+        for attr in ['src', 'alt', 'srcset', 'sizes']:
+            if img.has_attr(attr):
+                amp_img[attr] = img[attr]
+
+        width = img.get('width') or DEFAULT_IMG_WIDTH
+        height = img.get('height') or DEFAULT_IMG_HEIGHT
+
+        try:
+            width = int(str(width).replace('px', '').strip()) or DEFAULT_IMG_WIDTH
+        except Exception:
+            width = DEFAULT_IMG_WIDTH
+
+        try:
+            height = int(str(height).replace('px', '').strip()) or DEFAULT_IMG_HEIGHT
+        except Exception:
+            height = DEFAULT_IMG_HEIGHT
+
+        amp_img['width'] = width
+        amp_img['height'] = height
+        amp_img['layout'] = 'responsive'
+
+        img.replace_with(amp_img)
+
+    # Wrap video tags
+    for video in soup.find_all('video'):
+        amp_video = soup.new_tag('amp-video', controls='', layout='responsive')
+        amp_video['width'] = video.get('width', DEFAULT_VIDEO_WIDTH)
+        amp_video['height'] = video.get('height', DEFAULT_VIDEO_HEIGHT)
+        for source in video.find_all('source'):
+            amp_source = soup.new_tag('source')
+            if source.get('src'):
+                amp_source['src'] = source['src']
+            if source.get('type'):
+                amp_source['type'] = source['type']
+            amp_video.append(amp_source)
+        video.replace_with(amp_video)
+
+    # Ensure figcaption placement
+    for fig in soup.find_all('figure'):
+        fig['style'] = fig.get('style', '')
+
+    return mark_safe(str(soup))
+
+
+def blog_detail_amp(request, slug):
+    post = get_object_or_404(
+        BlogPost.objects.select_related('category', 'author').prefetch_related('tags'),
+        slug=slug,
+        status='published'
+    )
+
+    related_posts = BlogPost.get_published().filter(
+        category=post.category
+    ).exclude(id=post.id)[:3]
+
+    language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
+    meta_title = post.get_meta_title(language_code)
+    meta_description = post.get_meta_description(language_code)
+    meta_keywords = post.get_meta_keywords(language_code)
+
+    canonical_url = request.build_absolute_uri(
+        reverse('blog:detail', kwargs={'slug': slug})
+    )
+
+    og_image_url = post.get_featured_image_absolute_url(request, getattr(request, 'LANGUAGE_CODE', 'ru'))
+    default_amp_image = request.build_absolute_uri(static('images/og-image.jpg'))
+
+    context = {
+        'post': post,
+        'related_posts': related_posts,
+        'meta_title': meta_title,
+        'meta_description': meta_description,
+        'meta_keywords': meta_keywords,
+        'page_description': meta_description,
+        'canonical_url': canonical_url,
+        'amp_content': _convert_content_to_amp(post.content),
+        'og_image_url': og_image_url,
+        'default_amp_image': default_amp_image,
+        'author_anchor_url': f"{canonical_url}#author",
+    }
+
+    return render(request, 'blog/blog_detail_amp.html', context)
 
 
 def blog_category(request, slug):

@@ -9,6 +9,13 @@
 {% block keywords %}{{ page_keywords }}{% endblock %}
 {% endif %}
 
+{% block extra_meta %}
+    {{ block.super }}
+    {% if amp_url %}
+        <link rel="amphtml" href="{{ amp_url }}">
+    {% endif %}
+{% endblock %}
+
 {% block extra_css %}
 <style>
     /* Blog content styling */
