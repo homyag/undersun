@@ -36,6 +36,25 @@ window.handlePhoneCallback = function (event, consultationId) {
     event.preventDefault();
 
     const form = event.target;
+    const honeypotField = form.querySelector('input[name="website"]');
+    if (honeypotField && honeypotField.value.trim() !== '') {
+        showConsultationMessage('Обнаружена подозрительная активность. Попробуйте другой способ связи.', 'error');
+        return;
+    }
+
+    const renderedField = form.querySelector('input[name="form_rendered_at"]');
+    if (renderedField) {
+        const renderedTs = parseInt(renderedField.value, 10);
+        if (!Number.isNaN(renderedTs)) {
+            const nowTs = Math.floor(Date.now() / 1000);
+            if (nowTs - renderedTs < 2) {
+                renderedField.value = nowTs.toString();
+                showConsultationMessage('Пожалуйста, подождите пару секунд и отправьте форму снова.', 'error');
+                return;
+            }
+        }
+    }
+
     const phoneInput = form.querySelector('input[name="phone"]');
     const phone = phoneInput ? phoneInput.value.trim() : '';
 
@@ -76,6 +95,9 @@ window.handlePhoneCallback = function (event, consultationId) {
     }
 
     const formData = new FormData(form);
+    if (renderedField) {
+        renderedField.value = Math.floor(Date.now() / 1000).toString();
+    }
 
     const headers = { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' };
     const csrfToken = typeof getCSRFToken === 'function'

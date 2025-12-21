@@ -12,6 +12,7 @@
       <form id="reviewsSectionContactForm" class="space-y-6 js-recaptcha-form" data-recaptcha-action="reviews_contact">
         {% csrf_token %}
         {% include 'core/includes/recaptcha_token_field.html' %}
+        {% include 'core/includes/form_security_fields.html' with honeypot_id='reviews-contact-website' %}
         
         <input type="text" 
                name="name"

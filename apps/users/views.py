@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 
 from apps.properties.models import Property
 from apps.core.recaptcha import verify_recaptcha
+from apps.core.utils import validate_form_security
 from .models import (
     PropertyInquiry,
     QuickConsultationRequest,
@@ -49,6 +50,10 @@ def property_inquiry_view(request, property_id):
         recaptcha_error = _check_recaptcha(request)
         if recaptcha_error:
             return recaptcha_error
+
+        security_error = validate_form_security(request)
+        if security_error:
+            return security_error
 
         property_obj = get_object_or_404(Property, id=property_id)
 
@@ -172,6 +177,10 @@ def quick_consultation_view(request):
         if recaptcha_error:
             return recaptcha_error
 
+        security_error = validate_form_security(request)
+        if security_error:
+            return security_error
+
         phone = request.POST.get('phone', '').strip()
 
         if not phone:
@@ -229,6 +238,10 @@ def contact_form_view(request):
         recaptcha_error = _check_recaptcha(request)
         if recaptcha_error:
             return recaptcha_error
+
+        security_error = validate_form_security(request)
+        if security_error:
+            return security_error
 
         logger.warning("contact_form_view POST: %s", dict(request.POST))
         name = request.POST.get('name', '').strip()
@@ -305,6 +318,10 @@ def office_visit_request_view(request):
         if recaptcha_error:
             return recaptcha_error
 
+        security_error = validate_form_security(request)
+        if security_error:
+            return security_error
+
         name = request.POST.get('name', '').strip()
         phone = request.POST.get('phone', '').strip()
         preferred_date = request.POST.get('preferred_date', '').strip()
@@ -375,6 +392,10 @@ def faq_question_view(request):
         if recaptcha_error:
             return recaptcha_error
 
+        security_error = validate_form_security(request)
+        if security_error:
+            return security_error
+
         phone = request.POST.get('phone', '').strip()
         question = request.POST.get('question', '').strip()
 
@@ -430,6 +451,10 @@ def newsletter_subscribe_view(request):
         recaptcha_error = _check_recaptcha(request)
         if recaptcha_error:
             return recaptcha_error
+
+        security_error = validate_form_security(request)
+        if security_error:
+            return security_error
 
         email = request.POST.get('email', '').strip()
 

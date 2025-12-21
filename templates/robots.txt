@@ -3,6 +3,7 @@ Disallow: /admin/
 Disallow: /rosetta/
 Disallow: /data-import/
 Disallow: /media/private/
+Disallow: /*/property/ajax/inquiry/
 Allow: /
 
 Clean-param: etext&yadiscount

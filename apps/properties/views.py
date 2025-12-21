@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.translation import gettext, ngettext
 
 from apps.currency.services import CurrencyService
-from apps.core.utils import build_query_string
+from apps.core.utils import build_query_string, rate_limit, validate_form_security
 from .models import Property, PropertyType
 from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
@@ -778,8 +778,12 @@ def get_favorite_properties(request):
 
 
 @require_POST
+@rate_limit('property-inquiry', limit=5, timeout=60)
 def property_inquiry(request, property_id):
     """AJAX отправка запроса по недвижимости"""
+    security_error = validate_form_security(request)
+    if security_error:
+        return security_error
     name = request.POST.get('name')
     phone = request.POST.get('phone', '')
     email = request.POST.get('email', '')

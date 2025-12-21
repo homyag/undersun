@@ -85,7 +85,8 @@
                 <form id="contactForm" method="post" class="space-y-6 js-recaptcha-form" data-recaptcha-action="contact_form">
                     {% csrf_token %}
                     {% include 'core/includes/recaptcha_token_field.html' %}
-                    
+                    {% include 'core/includes/form_security_fields.html' with honeypot_id='contact-page-website' %}
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Имя" %}</label>

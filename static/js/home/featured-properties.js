@@ -1012,6 +1012,8 @@
         // Create consultation form card
         function createConsultationCard() {
             const consultationId = Math.random().toString(36).substr(2, 9); // Unique ID for each card
+            const renderTimestamp = Math.floor(Date.now() / 1000);
+            const honeypotId = `consultation-website-${consultationId}`;
             return `
             <div class="consultation-card bg-gradient-to-br from-primary to-tertiary rounded-lg p-4 text-white shadow-lg w-full h-full flex flex-col">
                 <div class="text-center mb-4">
@@ -1046,6 +1048,11 @@
                     <!-- Phone Tab -->
                     <div class="consultation-content active" data-tab="phone" data-consultation-id="${consultationId}">
                         <form onsubmit="handlePhoneCallback(event, '${consultationId}')" class="space-y-3">
+                            <div class="sr-only" aria-hidden="true">
+                                <label for="${honeypotId}">Website</label>
+                                <input type="text" name="website" id="${honeypotId}" tabindex="-1" autocomplete="off">
+                            </div>
+                            <input type="hidden" name="form_rendered_at" value="${renderTimestamp}">
                             <div>
                                 <input type="tel" 
                                        name="phone"

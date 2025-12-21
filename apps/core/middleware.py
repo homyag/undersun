@@ -2,7 +2,7 @@ import logging
 import re
 
 from django.conf import settings
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponsePermanentRedirect, JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from django.conf.urls.i18n import is_language_prefix_patterns_used
 
@@ -87,10 +87,10 @@ class BadInquiryRequestLoggerMiddleware(MiddlewareMixin):
         self.logger = logging.getLogger('bad_requests')
 
     def process_request(self, request):
-        if request.method != 'GET':
+        if not self.inquiry_pattern.match(request.path):
             return None
 
-        if not self.inquiry_pattern.match(request.path):
+        if request.method == 'POST':
             return None
 
         forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
@@ -99,7 +99,7 @@ class BadInquiryRequestLoggerMiddleware(MiddlewareMixin):
         query_string = request.META.get('QUERY_STRING', '') or '-'
 
         self.logger.warning(
-            'method=%s path=%s ip=%s ua="%s" query=%s',
+            'bad-inquiry-invalid-method method=%s path=%s ip=%s ua="%s" query=%s',
             request.method,
             request.get_full_path(),
             client_ip,
@@ -107,7 +107,14 @@ class BadInquiryRequestLoggerMiddleware(MiddlewareMixin):
             query_string,
         )
 
-        return None
+        # AJAX-инквайры работают только по POST. Возвращаем 405, но не блокируем Googlebot.
+        return JsonResponse(
+            {
+                'success': False,
+                'error': 'method_not_allowed',
+            },
+            status=405,
+        )
 
 
 class ForbiddenPathLoggerMiddleware(MiddlewareMixin):
@@ -124,6 +131,18 @@ class ForbiddenPathLoggerMiddleware(MiddlewareMixin):
         re.compile(r'^/adminer(?:/|$)'),
         re.compile(r'^/manager/html(?:/|$)'),
         re.compile(r'^/vendor/phpunit(?:/|$)'),
+        re.compile(r'^/wp-json(?:/|$)'),
+        re.compile(r'^/xmlrpc\.php$'),
+        re.compile(r'^/\.env'),
+        re.compile(r'^/\.git'),
+        re.compile(r'^/vendor(?:/|$)'),
+        re.compile(r'^/composer\.json$'),
+        re.compile(r'^/package-lock\.json$'),
+        re.compile(r'^/aws'),
+        re.compile(r'^/cgi-bin'),
+        re.compile(r'^/storage'),
+        re.compile(r'^/backup'),
+        re.compile(r'^/\.well-known/security\.txt'),
     ]
 
     def __init__(self, get_response=None):
