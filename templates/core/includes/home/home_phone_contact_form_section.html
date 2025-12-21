@@ -12,6 +12,7 @@
                     <form id="quickConsultationForm" class="space-y-4 sm:space-y-6 js-recaptcha-form" data-recaptcha-action="quick_consultation">
                         {% csrf_token %}
                         {% include 'core/includes/recaptcha_token_field.html' %}
+                        {% include 'core/includes/form_security_fields.html' with honeypot_id='quick-consultation-website' %}
                         <div>
                             <!-- Mobile: stacked layout -->
                             <div class="flex flex-col sm:flex-row gap-3">

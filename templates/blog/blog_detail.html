@@ -382,6 +382,7 @@
                 <form id="blogFeedbackForm" class="space-y-3 js-recaptcha-form" data-recaptcha-action="blog_feedback">
                     {% csrf_token %}
                     {% include 'core/includes/recaptcha_token_field.html' %}
+                    {% include 'core/includes/form_security_fields.html' with honeypot_id='blog-feedback-website' %}
                     <input type="hidden" name="source_page" value="{{ request.path }}">
                     <input type="hidden" name="inquiry_type" value="general">
 

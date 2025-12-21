@@ -296,6 +296,14 @@ def _convert_content_to_amp(html_content):
             amp_video.append(amp_source)
         video.replace_with(amp_video)
 
+    # Remove UIkit attributes (uk-grid, uk-scrollspy, etc.) that AMP не поддерживает
+    for tag in soup.find_all(True):
+        attrs = list(tag.attrs.keys())
+        for attr in attrs:
+            attr_lower = attr.lower()
+            if attr_lower == 'uk-grid' or attr_lower.startswith('uk-') or attr_lower.startswith('data-uk-'):
+                del tag.attrs[attr]
+
     # Ensure figcaption placement
     for fig in soup.find_all('figure'):
         fig['style'] = fig.get('style', '')
