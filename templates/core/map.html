@@ -764,22 +764,21 @@
     .property-marker-wrapper { background:none !important; border:none !important; }
 
     .marker-card {
-        min-width: 120px;
-        max-width: 140px;
-        background: white;
+        width: 132px;
+        background: #ffffff;
         border-radius: 16px;
-        padding: 0.4rem 0.65rem 0.2rem;
+        padding: 0;
         box-shadow: 0 18px 30px rgba(31, 41, 55, 0.35);
-        border: 2px solid rgba(255,255,255,0.6);
+        border: 2px solid rgba(255,255,255,0.7);
         font-family: inherit;
         position: relative;
-        text-align: left;
+        overflow: hidden;
     }
 
     .marker-card::after {
         content: '';
         position: absolute;
-        bottom: -10px;
+        bottom: -12px;
         left: 50%;
         transform: translateX(-50%);
         width: 0;
@@ -790,59 +789,55 @@
         filter: drop-shadow(0 6px 6px rgba(31,41,55,0.25));
     }
 
-    .marker-card-body {
-        display: flex;
-        flex-direction: column;
-        gap: 0.15rem;
+    .marker-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 96px;
+        overflow: hidden;
     }
 
-    .marker-price {
-        font-weight: 700;
-        font-size: 0.95rem;
-        color: #111827;
+    .marker-image {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        transition: transform 0.3s ease;
     }
 
-    .marker-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.5rem;
-        font-size: 0.72rem;
+    .marker-card:hover .marker-image {
+        transform: scale(1.03);
     }
 
-    .marker-type-pill {
-        padding: 0.1rem 0.45rem;
+    .marker-price-chip {
+        position: absolute;
+        left: 8px;
+        bottom: 8px;
+        padding: 0.15rem 0.55rem;
         border-radius: 999px;
-        font-weight: 600;
-        font-size: 0.7rem;
-        background: rgba(17,24,39,0.08);
-        color: var(--brand-primary);
-    }
-
-    .marker-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: #111827;
+        font-weight: 700;
+        font-size: 0.78rem;
+        color: #0f172a;
+        background: rgba(255,255,255,0.92);
+        box-shadow: 0 6px 16px rgba(15,23,42,0.25);
+        border: 1px solid rgba(255,255,255,0.7);
     }
 
     .marker-card.sale {
         border-color: rgba(16,185,129,0.45);
     }
 
-    .marker-card.sale .marker-type-pill {
-        background: rgba(16,185,129,0.15);
-        color: #047857;
+    .marker-card.sale .marker-price-chip {
+        border-color: rgba(16,185,129,0.7);
+        color: #065f46;
     }
 
     .marker-card.rent {
         border-color: rgba(59,130,246,0.45);
     }
 
-    .marker-card.rent .marker-type-pill {
-        background: rgba(59,130,246,0.15);
+    .marker-card.rent .marker-price-chip {
+        border-color: rgba(59,130,246,0.7);
         color: #1d4ed8;
     }
 
@@ -850,8 +845,8 @@
         border-color: rgba(139,92,246,0.45);
     }
 
-    .marker-card.both .marker-type-pill {
-        background: rgba(139,92,246,0.15);
+    .marker-card.both .marker-price-chip {
+        border-color: rgba(139,92,246,0.7);
         color: #6d28d9;
     }
 
@@ -1368,7 +1363,11 @@ function getPropertyIconSVG(type) {
 
 const markers = L.markerClusterGroup({
     showCoverageOnHover: false,
-    spiderfyDistanceMultiplier: 1.4,
+    spiderfyDistanceMultiplier: 2.8,
+    spiderLegPolylineOptions: {
+        weight: 0,
+        opacity: 0
+    },
     maxClusterRadius: 55,
     iconCreateFunction: function(cluster) {
         const count = cluster.getChildCount();
@@ -1808,32 +1807,26 @@ function createMarker(property) {
 }
 
 function buildMarkerIcon(property) {
-    const markerColor = getMarkerColor(property.deal_type);
-    const priceDisplay = formatPriceForMarker(property);
-    const propertyTypeLabel = property.property_type_label || '';
+    const priceDisplay = formatPriceForMarker(property) || PRICE_ON_REQUEST_LABEL;
+    const mainImage = (property.images && property.images.length ? property.images[0] : property.image) || '';
+    const safeImageUrl = (mainImage || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const safeTitle = escapeHtml(property.title || 'Undersun Estate');
 
     return L.divIcon({
         html: `
             <div class="marker-card marker-${property.deal_type || 'sale'}">
-                <div class="marker-card-body">
-                    <div class="marker-price">${priceDisplay}</div>
-                    <div class="marker-meta">
-                        <span class="marker-badge">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 9.5L12 4L21 9.5V20H3V9.5Z" stroke="${markerColor}" stroke-width="1.5" stroke-linejoin="round"/>
-                                <path d="M9 20V12H15V20" stroke="${markerColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            ${property.district || ''}
-                        </span>
-                        ${propertyTypeLabel ? `<span class="marker-type-pill">${propertyTypeLabel}</span>` : ''}
-                    </div>
+                <div class="marker-image-wrapper">
+                    <div class="marker-image" role="presentation" style="background-image: url('${safeImageUrl}');" aria-label="${safeTitle}"></div>
+                    <span class="marker-price-chip">
+                        ${priceDisplay}
+                    </span>
                 </div>
             </div>
         `,
         className: 'property-marker-wrapper',
-        iconSize: [140, 70],
-        iconAnchor: [70, 70],
-        popupAnchor: [0, -70]
+        iconSize: [132, 118],
+        iconAnchor: [66, 118],
+        popupAnchor: [0, -110]
     });
 }
 
@@ -1951,15 +1944,6 @@ function formatCurrencyAmount(amount, currencyCode) {
     });
     const prefix = currency.symbol || `${currency.code || ''} `;
     return `${prefix}${formatter.format(numericAmount)}`.trim();
-}
-
-function getMarkerColor(dealType) {
-    switch (dealType) {
-        case 'sale': return '#10b981';
-        case 'rent': return '#3b82f6';
-        case 'both': return '#8b5cf6';
-        default: return '#6b7280';
-    }
 }
 
 // Image carousel helpers remain the same as ранее

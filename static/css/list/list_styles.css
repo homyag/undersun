@@ -110,293 +110,276 @@ input[type="radio"]:focus {
     border: none !important;
 }
 
-.property-marker-container {
+.marker-card {
+    width: 132px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 18px 30px rgba(31, 41, 55, 0.35);
+    border: 2px solid rgba(255,255,255,0.7);
+    font-family: inherit;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: all 0.2s ease;
+    overflow: hidden;
+    transition: transform 0.25s ease;
 }
 
-.property-marker-container:hover {
-    transform: scale(1.05);
+.marker-card:hover {
+    transform: translateY(-2px);
 }
 
-.custom-marker {
+.marker-card::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 12px solid white;
+    filter: drop-shadow(0 6px 6px rgba(31,41,55,0.25));
+}
+
+.marker-image-wrapper {
     position: relative;
-    transition: all 0.2s ease;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    width: 100%;
+    height: 96px;
+    overflow: hidden;
 }
 
-.custom-marker:hover {
-    transform: scale(1.1);
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+.marker-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: transform 0.3s ease;
 }
 
-.custom-marker svg {
-    display: block;
+.marker-card:hover .marker-image {
+    transform: scale(1.03);
+}
+
+.marker-price-chip {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: #0f172a;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 6px 16px rgba(15,23,42,0.25);
+    border: 1px solid rgba(255,255,255,0.7);
+}
+
+.marker-card.sale {
+    border-color: rgba(16,185,129,0.45);
+}
+
+.marker-card.sale .marker-price-chip {
+    border-color: rgba(16,185,129,0.7);
+    color: #065f46;
+}
+
+.marker-card.rent {
+    border-color: rgba(59,130,246,0.45);
+}
+
+.marker-card.rent .marker-price-chip {
+    border-color: rgba(59,130,246,0.7);
+    color: #1d4ed8;
+}
+
+.marker-card.both {
+    border-color: rgba(139,92,246,0.45);
+}
+
+.marker-card.both .marker-price-chip {
+    border-color: rgba(139,92,246,0.7);
+    color: #6d28d9;
+}
+
+.marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+    background-color: rgba(241, 180, 0, 0.8) !important;
+    color: #1f1f1f !important;
+    border: 2px solid white !important;
+    box-shadow: 0 12px 25px rgba(241, 180, 0, 0.35);
 }
 
 /* Enhanced Popup Styles */
 .leaflet-popup-content-wrapper {
-    border-radius: 12px !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 25px 60px rgba(17, 24, 39, 0.25) !important;
     border: none !important;
-    background: white !important;
-    overflow: hidden !important;
     padding: 0 !important;
-    max-width: 300px !important;
-    width: 300px !important;
-    max-height: 500px !important;
-}
-
-.leaflet-popup {
-    margin-bottom: 20px !important;
-}
-
-/* Ensure popup stays within map bounds */
-.leaflet-popup-close-button {
-    color: #474B57 !important;
-    font-size: 18px !important;
-    font-weight: bold !important;
-    padding: 4px 8px !important;
+    background: transparent !important;
 }
 
 .leaflet-popup-content {
     margin: 0 !important;
-    padding: 0 !important;
-    width: 300px !important;
 }
 
 .leaflet-popup-tip {
-    background: white !important;
-    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.1) !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .property-popup {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    width: 300px;
-    background: white;
-    border-radius: 12px;
+    width: 320px;
+    background: #ffffff;
+    border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.popup-image-container {
+.popup-media {
     position: relative;
-    width: 100%;
-    height: 120px;
     overflow: hidden;
-    background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
-}
-
-.popup-image-link {
-    display: block;
-    height: 100%;
-}
-
-.popup-image-link:focus-visible {
-    outline: 2px solid #F1B400;
-    outline-offset: 2px;
+    height: 190px;
+    background: #f1f2f6;
 }
 
 .popup-image {
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    inset: 0;
     object-fit: cover;
-    object-position: center;
     display: block;
     transition: transform 0.3s ease;
 }
 
-.popup-image:hover {
-    transform: scale(1.02);
+.popup-media:hover .popup-image {
+    transform: scale(1.03);
 }
 
-.image-carousel-nav {
+.popup-media-chip {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    width: 32px;
-    height: 32px;
+    top: 12px;
+    left: 12px;
+    background: rgba(17, 24, 39, 0.75);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    z-index: 2;
+}
+
+.favorite-toggle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--brand-primary, #F1B400);
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    font-size: 14px;
-    color: #474B57;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 2;
 }
 
-.image-carousel-nav:hover {
-    background: rgba(255, 255, 255, 1);
-    transform: translateY(-50%) scale(1.1);
-    color: #F1B400;
+.favorite-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2);
 }
 
-.image-carousel-nav.prev {
-    left: 8px;
-}
-
-.image-carousel-nav.next {
-    right: 8px;
-}
-
-.image-indicators {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
+.popup-body {
     display: flex;
-    gap: 6px;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem 1.2rem;
 }
 
-.image-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.image-indicator.active {
-    background: #F1B400;
-    box-shadow: 0 0 0 2px rgba(241, 180, 0, 0.3);
-}
-
-/* Content Area */
-.popup-content {
-    padding: 16px;
-    background: white;
-}
-
-.popup-title {
-    font-weight: 700;
-    font-size: 16px;
-    color: #474B57;
-    margin-bottom: 8px;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+.popup-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 .popup-price {
-    color: #F1B400;
-    font-weight: 800;
-    font-size: 18px;
-    margin-bottom: 12px;
-    text-shadow: 0 1px 2px rgba(241, 180, 0, 0.1);
+    color: var(--brand-accent, #F1B400);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.popup-link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brand-primary, #0f172a);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.popup-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--brand-primary, #0f172a);
+    line-height: 1.3;
+    margin: 0;
 }
 
 .popup-location {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    color: #616677;
-    font-size: 13px;
-    margin-bottom: 12px;
+    gap: 0.35rem;
+    font-size: 0.84rem;
+    color: var(--brand-tertiary, #6b7280);
 }
 
-.popup-location i {
-    color: #F1B400;
-    margin-right: 6px;
-    font-size: 12px;
-}
-
-/* Property Details Grid */
-.popup-details-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.popup-detail-item {
+.popup-meta {
     display: flex;
+    gap: 0.85rem;
+    font-size: 0.82rem;
+    color: var(--brand-primary, #0f172a);
+}
+
+.popup-meta span {
+    display: inline-flex;
     align-items: center;
-    font-size: 12px;
-    color: #616677;
-    background: rgba(71, 75, 87, 0.05);
-    padding: 6px 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(71, 75, 87, 0.1);
-}
-
-.popup-detail-item i {
-    color: #F1B400;
-    margin-right: 6px;
-    font-size: 11px;
-    min-width: 12px;
-}
-
-/* Agent Info */
-.popup-agent {
-    background: linear-gradient(135deg, #474B57 0%, #616677 100%);
-    color: white;
-    padding: 10px 16px;
-    margin: -16px -16px 14px -16px;
-    border-bottom: 3px solid #F1B400;
-}
-
-.popup-agent-name {
+    gap: 0.3rem;
     font-weight: 600;
-    font-size: 13px;
-    margin-bottom: 2px;
 }
 
-.popup-agent-title {
-    font-size: 11px;
-    opacity: 0.8;
-}
-
-/* Action Buttons */
 .popup-actions {
     display: flex;
-    gap: 8px;
+    gap: 0.6rem;
 }
 
-.popup-button {
+.popup-action {
     flex: 1;
-    padding: 10px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 12px;
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    text-align: center;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
+    border: 1px solid rgba(71, 75, 87, 0.15);
+    background: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    text-decoration: none;
 }
 
-.popup-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.popup-button:hover::before {
-    left: 100%;
-}
-
-.popup-button-primary {
-    background: linear-gradient(135deg, #474B57 0%, #616677 100%);
+.popup-action.primary {
+    background: var(--brand-primary, #0f172a);
     color: white;
-    box-shadow: 0 4px 15px rgba(71, 75, 87, 0.3);
+    border-color: var(--brand-primary, #0f172a);
+}
+
+.popup-action.whatsapp {
+    color: #128C7E;
+    border-color: rgba(18, 140, 126, 0.3);
 }
 
 .popup-button-primary:hover {

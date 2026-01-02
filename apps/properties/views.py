@@ -14,6 +14,7 @@ from django.utils.translation import gettext, ngettext
 
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string, rate_limit, validate_form_security
+from apps.core.models import SEOContentBlock
 from .models import Property, PropertyType
 from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
@@ -281,6 +282,7 @@ class PropertyListView(ListView):
         }
 
         context['seo_heading'] = self.build_seo_heading(context)
+        context['catalog_seo_block'] = self.get_catalog_seo_block(context)
 
         return context
 
@@ -346,6 +348,68 @@ class PropertyListView(ListView):
 
         return heading
 
+    def get_catalog_seo_block(self, context):
+        """Возвращает SEO-блок для каталога с учётом языка и контекста."""
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        candidate_slugs = self.get_seo_block_candidates(context)
+        if not candidate_slugs:
+            return None
+
+        ordering = Case(
+            *[
+                When(slug=slug, then=Value(index))
+                for index, slug in enumerate(candidate_slugs)
+            ],
+            default=Value(len(candidate_slugs)),
+            output_field=IntegerField(),
+        )
+
+        blocks = (
+            SEOContentBlock.objects
+            .filter(is_active=True, slug__in=candidate_slugs)
+            .annotate(_candidate_order=ordering)
+            .order_by('_candidate_order')
+        )
+
+        for block in blocks:
+            content = block.get_content(language_code)
+            if content:
+                return {
+                    'title': block.title,
+                    'content': content,
+                    'slug': block.slug,
+                }
+
+        return None
+
+    def get_seo_block_candidates(self, context):
+        """Список возможных slug для SEO-блоков по убыванию специфичности."""
+        candidates = []
+        deal_type = context.get('deal_type') or self.request.GET.get('deal_type') or ''
+        property_type_obj = self._get_primary_property_type(context)
+
+        if property_type_obj:
+            type_slug = property_type_obj.name
+            if deal_type in {'sale', 'rent'}:
+                candidates.append(f'properties_type_{type_slug}_{deal_type}')
+            candidates.append(f'properties_type_{type_slug}')
+
+        if deal_type in {'sale', 'rent'}:
+            candidates.append(f'properties_{deal_type}')
+
+        candidates.append('properties_catalog')
+
+        # Удаляем дубликаты, сохраняя порядок
+        seen = set()
+        deduped = []
+        for slug in candidates:
+            if slug in seen:
+                continue
+            seen.add(slug)
+            deduped.append(slug)
+
+        return deduped
+
 
 class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
     template_name = 'properties/list.html'
@@ -382,6 +446,7 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
         if not self.request.GET.get('deal_type'):
             context['current_filters']['deal_type'] = 'sale'
         context['seo_heading'] = self.build_seo_heading(context)
+        context['catalog_seo_block'] = self.get_catalog_seo_block(context)
         return context
 
 
@@ -401,6 +466,7 @@ class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
         if not self.request.GET.get('deal_type'):
             context['current_filters']['deal_type'] = 'rent'
         context['seo_heading'] = self.build_seo_heading(context)
+        context['catalog_seo_block'] = self.get_catalog_seo_block(context)
         return context
 
 
@@ -471,6 +537,7 @@ class PropertyByTypeView(PropertyListView):
         context['current_property_type'] = self.property_type.name
         context['current_filters']['property_type'] = [self.property_type.name]
         context['seo_heading'] = self.build_seo_heading(context)
+        context['catalog_seo_block'] = self.get_catalog_seo_block(context)
         return context
 
 
@@ -946,7 +1013,7 @@ def map_properties_json(request):
         queryset = Property.objects.filter(
             is_active=True,
             status='available'
-        ).select_related('district', 'location', 'property_type').prefetch_related('images')
+        ).select_related('district', 'location', 'property_type', 'agent').prefetch_related('images')
         
         # Применяем все фильтры
         queryset = view.apply_filters(queryset)
@@ -984,6 +1051,9 @@ def map_properties_json(request):
             # Всегда используем языковой префикс, так как prefix_default_language=True
             property_url = f'/{current_language}/property/{prop.slug}/'
             
+            agent_phone = ''
+            if prop.agent and prop.agent.phone:
+                agent_phone = prop.agent.phone
             properties_data.append({
                 'id': prop.id,
                 'title': prop.title,
@@ -991,11 +1061,16 @@ def map_properties_json(request):
                 'lat': float(prop.latitude),
                 'lng': float(prop.longitude),
                 'property_type': prop.property_type.name if prop.property_type else '',
+                'property_type_label': prop.property_type.name_display if prop.property_type else '',
                 'deal_type': prop.deal_type,
                 'price': price_display,
                 'location': prop.location.name if prop.location else (prop.district.name if prop.district else ''),
                 'url': property_url,
-                'image_url': image_url
+                'image_url': image_url,
+                'bedrooms': prop.bedrooms or 0,
+                'bathrooms': prop.bathrooms or 0,
+                'area': float(prop.area_total) if prop.area_total else 0,
+                'agent_phone': agent_phone or '+66633033133'
             })
         
         return JsonResponse({

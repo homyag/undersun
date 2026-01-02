@@ -1,5 +1,5 @@
 // Our Team Section - Show/Hide functionality
-document.addEventListener('DOMContentLoaded', function() {
+function initOurTeamSection() {
     const showMoreBtn = document.getElementById('show-more-team');
     const additionalTeam = document.getElementById('additional-team');
     const chevronIcon = document.getElementById('chevron-icon');
@@ -37,4 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
             chevronIcon.classList.remove('rotate-180');
         }
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOurTeamSection);
+} else {
+    initOurTeamSection();
+}

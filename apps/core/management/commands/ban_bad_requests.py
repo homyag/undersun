@@ -1,8 +1,9 @@
 import subprocess
+import re
 from collections import Counter
 from datetime import datetime, timedelta, timezone as dt_timezone
+from ipaddress import ip_address
 from pathlib import Path
-import re
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
@@ -73,8 +74,16 @@ class Command(BaseCommand):
                 ip_match = IP_RE.search(message)
                 if not ip_match:
                     continue
-                ip = ip_match.group(1)
-                counter[ip] += 1
+                raw_ip = ip_match.group(1)
+                try:
+                    parsed_ip = ip_address(raw_ip)
+                except ValueError:
+                    continue
+
+                if parsed_ip.is_private or parsed_ip.is_loopback or parsed_ip.is_reserved:
+                    continue
+
+                counter[str(parsed_ip)] += 1
 
         suspects = {ip: count for ip, count in counter.items() if count >= min_count}
         if not suspects:
