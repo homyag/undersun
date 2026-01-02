@@ -1,6 +1,9 @@
 from django.contrib import admin, messages
+from django.db import models
 from django.utils.translation import gettext_lazy as _
-from .models import SEOPage, SEOTemplate, PromotionalBanner, Service, Team
+from tinymce.widgets import TinyMCE
+from .models import SEOPage, SEOTemplate, PromotionalBanner, Service, Team, SEOContentBlock
+from .services import translation_service
 from apps.properties.services import translate_service_entry
 
 
@@ -82,6 +85,129 @@ class SEOPageAdmin(admin.ModelAdmin):
             'all': ('admin/css/seo_admin.css',)
         }
         js = ('admin/js/seo_admin.js',)
+
+
+@admin.register(SEOContentBlock)
+class SEOContentBlockAdmin(admin.ModelAdmin):
+    list_display = ('slug', 'title', 'is_active', 'updated_at')
+    list_filter = ('is_active',)
+    search_fields = (
+        'slug', 'title', 'content_ru', 'content_en', 'content_th'
+    )
+    readonly_fields = ('created_at', 'updated_at')
+    prepopulated_fields = {'slug': ('title',)}
+    actions = ['auto_translate_blocks', 'force_retranslate_blocks']
+
+    fieldsets = (
+        (_('Основное'), {
+            'fields': ('slug', 'title', 'is_active'),
+        }),
+        (_('Контент (RU)'), {
+            'fields': ('content_ru',),
+        }),
+        (_('Контент (EN)'), {
+            'fields': ('content_en',),
+            'classes': ('collapse',),
+        }),
+        (_('Контент (TH)'), {
+            'fields': ('content_th',),
+            'classes': ('collapse',),
+        }),
+        (_('Системная информация'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+
+    formfield_overrides = {
+        models.TextField: {
+            'widget': TinyMCE(attrs={'class': 'tinymce-content seo-content-block'}),
+        },
+    }
+
+    def _translate_queryset(self, request, queryset, force=False):
+        if not translation_service.is_configured():
+            self.message_user(
+                request,
+                _('API перевода не настроен. Укажите YANDEX_TRANSLATE_API_KEY/Folder ID.'),
+                level=messages.ERROR,
+            )
+            return
+
+        target_languages = translation_service.translation_settings.get('target_languages', [])
+        success = 0
+        skipped = 0
+        errors = 0
+
+        for block in queryset:
+            source_text = (block.content_ru or '').strip()
+            if not source_text:
+                skipped += 1
+                continue
+
+            updated_fields = []
+            for lang in target_languages:
+                field_name = f'content_{lang}'
+                if not hasattr(block, field_name):
+                    continue
+
+                current_value = getattr(block, field_name, '')
+                if current_value and not force:
+                    continue
+
+                translated = translation_service.translate_text(
+                    source_text,
+                    lang,
+                    preserve_html=True,
+                )
+                if translated:
+                    setattr(block, field_name, translated)
+                    updated_fields.append(field_name)
+                else:
+                    errors += 1
+
+            if updated_fields:
+                block.save(update_fields=updated_fields + ['updated_at'])
+                success += 1
+            else:
+                skipped += 1
+
+        provider = translation_service.get_available_service()
+        if success:
+            self.message_user(
+                request,
+                _('Переведено %(count)s блоков через %(provider)s. Пропущено: %(skipped)s. Ошибок: %(errors)s.') % {
+                    'count': success,
+                    'provider': provider.upper() if provider else 'API',
+                    'skipped': skipped,
+                    'errors': errors,
+                },
+                level=messages.SUCCESS,
+            )
+        elif not errors:
+            self.message_user(
+                request,
+                _('Не удалось перевести выбранные блоки: нет текста на русском или поля уже заполнены.'),
+                level=messages.WARNING,
+            )
+        else:
+            self.message_user(
+                request,
+                _('Не удалось перевести выбранные блоки: проверьте настройки API.'),
+                level=messages.ERROR,
+            )
+
+    def auto_translate_blocks(self, request, queryset):
+        """Переводит пустые поля EN/TH на основе текста RU."""
+        self._translate_queryset(request, queryset, force=False)
+
+    auto_translate_blocks.short_description = _('🌐 Перевести блоки (не перезаписывать)')
+
+    def force_retranslate_blocks(self, request, queryset):
+        """Переводит блоки заново, перезаписывая существующий контент."""
+        self._translate_queryset(request, queryset, force=True)
+
+    force_retranslate_blocks.short_description = _('🔄 Перевести блоки заново (перезаписать)')
 
 
 @admin.register(SEOTemplate)

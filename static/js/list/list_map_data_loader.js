@@ -52,63 +52,58 @@ function updateMapMarkers() {
                 }
                 
                 // Create marker with property data
-                const marker = createCustomMarker(
-                    adjustedLat, 
-                    adjustedLng, 
-                    property.property_type, 
-                    property.deal_type, 
-                    property.price
-                ).addTo(markersGroup);
+                const marker = createCustomMarker({
+                    lat: adjustedLat,
+                    lng: adjustedLng,
+                    dealType: property.deal_type,
+                    priceText: property.price,
+                    imageUrl: property.image_url || window.djangoUrls.noImageSvg,
+                    title: property.title
+                }).addTo(markersGroup);
                 
-                // Create popup content with real image data
                 const imageUrl = property.image_url || window.djangoUrls.noImageSvg;
+                const propertyTypeLabel = property.property_type_label || property.property_type || '';
+                const locationLabel = property.location || '';
+                const bedrooms = parseInt(property.bedrooms, 10) || 0;
+                const bathrooms = parseInt(property.bathrooms, 10) || 0;
+                const areaValue = parseFloat(property.area) || 0;
+                const priceLabel = property.price || window.djangoTranslations.priceOnRequest;
+                const cleanPhone = (property.agent_phone || '+66633033133').replace(/[^0-9]/g, '') || '66633033133';
+
                 const popupContent = `
                     <div class="property-popup">
-                        <!-- Main Image -->
-                        <div class="popup-image-container">
-                            <a href="${property.url}" class="popup-image-link" aria-label="${property.title}">
-                                <img src="${imageUrl}" alt="${property.title}" class="popup-image" />
-                            </a>
+                        <div class="popup-media" data-property-id="${property.id}">
+                            <img src="${imageUrl}" alt="${escapeHtml(property.title)}" class="popup-image" loading="lazy">
+                            ${propertyTypeLabel ? `<span class="popup-media-chip">${escapeHtml(propertyTypeLabel)}</span>` : ''}
+                            <button class="favorite-toggle" type="button" onclick="toggleFavorite(${property.id})" title="${window.djangoTranslations.addToFavorites}">
+                                <i class="far fa-heart" id="favorite-${property.id}"></i>
+                            </button>
                         </div>
-                        
-                        <!-- Content -->
-                        <div class="popup-content">
-                            <!-- Title and Price -->
-                            <div class="popup-title">${property.title}</div>
-                            <div class="popup-price">${property.price}</div>
-                            
-                            <!-- Location -->
+                        <div class="popup-body">
+                            <div class="popup-price-row">
+                                <div class="popup-price">${priceLabel}</div>
+                                <a href="${property.url}" class="popup-link" target="_blank" rel="noopener">
+                                    ${window.djangoTranslations.moreDetails}
+                                    <i class="fas fa-arrow-right text-xs"></i>
+                                </a>
+                            </div>
+                            <p class="popup-title">${escapeHtml(property.title)}</p>
                             <div class="popup-location">
                                 <i class="fas fa-map-marker-alt"></i>
-                                ${property.location}
+                                ${escapeHtml(locationLabel)}
                             </div>
-                            
-                            <!-- Property Details Grid -->
-                            <div class="popup-details-grid">
-                                <div class="popup-detail-item">
-                                    <i class="fas fa-home"></i>
-                                    <span>${property.property_type}</span>
-                                </div>
-                                <div class="popup-detail-item">
-                                    <i class="fas fa-tag"></i>
-                                    <span>${property.deal_type}</span>
-                                </div>
+                            <div class="popup-meta">
+                                ${bedrooms ? `<span><i class="fas fa-bed"></i>${bedrooms} ${window.djangoTranslations.bedroomsShort}</span>` : ''}
+                                ${bathrooms ? `<span><i class="fas fa-shower"></i>${bathrooms} ${window.djangoTranslations.bathroomsShort}</span>` : ''}
+                                ${areaValue ? `<span><i class="fas fa-ruler-combined"></i>${Math.round(areaValue)} ${window.djangoTranslations.areaShort}</span>` : ''}
                             </div>
-                            
-                            <!-- Action Buttons -->
                             <div class="popup-actions">
-                                <button class="popup-button-icon" onclick="toggleFavorite(${property.id})" title="В избранное">
-                                    <i class="far fa-heart" id="favorite-${property.id}"></i>
-                                </button>
-                                
-                                <a href="https://wa.me/66123456789?text=Здравствуйте! Меня интересует объект: ${encodeURIComponent(property.title)}" 
-                                   class="popup-button popup-button-secondary" 
-                                   target="_blank">
-                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                <a href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(window.djangoTranslations.whatsappText + ': ' + property.title)}" class="popup-action whatsapp" target="_blank" rel="noopener">
+                                    <i class="fab fa-whatsapp"></i>
+                                    WhatsApp
                                 </a>
-                                
-                                <a href="${property.url}" class="popup-button popup-button-primary">
-                                    Подробнее
+                                <a href="${property.url}" class="popup-action primary" target="_blank" rel="noopener">
+                                    ${window.djangoTranslations.moreDetails}
                                 </a>
                             </div>
                         </div>
@@ -173,6 +168,7 @@ function loadCurrentPageProperties() {
         const bedrooms = card.dataset.bedrooms || '';
         const bathrooms = card.dataset.bathrooms || '';
         const area = card.dataset.area || '';
+        const areaValue = parseFloat(area) || 0;
         
         // Get current price from price element (respects currency conversion)
         const priceElement = card.querySelector(`[class*="card-price-${propertyId}"]`);
@@ -197,56 +193,54 @@ function loadCurrentPageProperties() {
         }
         
         // Create marker with adjusted coordinates using custom marker (include price)
-        const marker = createCustomMarker(adjustedLat, adjustedLng, propertyType, dealType, formattedPrice).addTo(markersGroup);
+        const marker = createCustomMarker({
+            lat: adjustedLat,
+            lng: adjustedLng,
+            dealType,
+            priceText: formattedPrice,
+            imageUrl: images[0] || window.djangoUrls.noImageSvg,
+            title
+        }).addTo(markersGroup);
         
+        const propertyTypeLabel = card.dataset.propertyTypeLabel || propertyType;
+        const cleanPhone = (card.dataset.agentPhone || '+66633033133').replace(/[^0-9]/g, '') || '66633033133';
+        const priceLabel = formattedPrice || window.djangoTranslations.priceOnRequest;
+
         // Create enhanced popup content
         const popupContent = `
             <div class="property-popup">
-                <!-- Main Image -->
-                <div class="popup-image-container">
-                    <a href="${link}" class="popup-image-link" aria-label="${title}">
-                        <img src="${mainImage}" alt="${title}" class="popup-image" />
-                    </a>
+                <div class="popup-media" data-property-id="${propertyId}">
+                    <img src="${mainImage}" alt="${escapeHtml(title)}" class="popup-image" loading="lazy">
+                    ${propertyTypeLabel ? `<span class="popup-media-chip">${escapeHtml(propertyTypeLabel)}</span>` : ''}
+                    <button class="favorite-toggle" type="button" onclick="toggleFavorite(${propertyId})" title="${window.djangoTranslations.addToFavorites}">
+                        <i class="far fa-heart" id="favorite-${propertyId}"></i>
+                    </button>
                 </div>
-                
-                <!-- Content -->
-                <div class="popup-content">
-                    <!-- Title and Price -->
-                    <div class="popup-title">${title}</div>
-                    <div class="popup-price">${formattedPrice}</div>
-                    
-                    <!-- Location -->
+                <div class="popup-body">
+                    <div class="popup-price-row">
+                        <div class="popup-price">${priceLabel}</div>
+                        <a href="${link}" class="popup-link" target="_blank" rel="noopener">
+                            ${window.djangoTranslations.moreDetails}
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                    <p class="popup-title">${escapeHtml(title)}</p>
                     <div class="popup-location">
                         <i class="fas fa-map-marker-alt"></i>
-                        ${location}
+                        ${escapeHtml(location)}
                     </div>
-                    
-                    <!-- Property Details Grid -->
-                    <div class="popup-details-grid">
-                        <div class="popup-detail-item">
-                            <i class="fas fa-home"></i>
-                            <span>${propertyType}</span>
-                        </div>
-                        <div class="popup-detail-item">
-                            <i class="fas fa-tag"></i>
-                            <span>${dealType}</span>
-                        </div>
+                    <div class="popup-meta">
+                        ${bedrooms ? `<span><i class="fas fa-bed"></i>${bedrooms} ${window.djangoTranslations.bedroomsShort}</span>` : ''}
+                        ${bathrooms ? `<span><i class="fas fa-shower"></i>${bathrooms} ${window.djangoTranslations.bathroomsShort}</span>` : ''}
+                        ${areaValue ? `<span><i class="fas fa-ruler-combined"></i>${Math.round(areaValue)} ${window.djangoTranslations.areaShort}</span>` : ''}
                     </div>
-                    
-                    <!-- Action Buttons -->
                     <div class="popup-actions">
-                        <button class="popup-button-icon" onclick="toggleFavorite(${propertyId})" title="В избранное">
-                            <i class="far fa-heart" id="favorite-${propertyId}"></i>
-                        </button>
-                        
-                        <a href="https://wa.me/66123456789?text=Здравствуйте! Меня интересует объект: ${encodeURIComponent(title)}" 
-                           class="popup-button popup-button-secondary" 
-                           target="_blank">
-                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        <a href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(window.djangoTranslations.whatsappText + ': ' + title)}" class="popup-action whatsapp" target="_blank" rel="noopener">
+                            <i class="fab fa-whatsapp"></i>
+                            WhatsApp
                         </a>
-                        
-                        <a href="${link}" class="popup-button popup-button-primary">
-                            Подробнее
+                        <a href="${link}" class="popup-action primary" target="_blank" rel="noopener">
+                            ${window.djangoTranslations.moreDetails}
                         </a>
                     </div>
                 </div>

@@ -9,6 +9,7 @@
      data-longitude="{{ property.longitude|unlocalize }}"
      data-property-type="{{ property.property_type.name }}"
      data-deal-type="{{ property.deal_type }}"
+     data-property-type-label="{{ property.property_type.name_display }}"
      data-title="{{ property.title }}"
      data-price-sale-usd="{{ property.price_sale_usd|default:0 }}"
      data-price-rent-usd="{{ property.price_rent_usd|default:0 }}"
@@ -22,7 +23,8 @@
      data-bathrooms="{{ property.bathrooms|default:'' }}"
      data-area="{{ property.area_total|default:'' }}"
      data-main-image="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium_url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}"
-     data-images="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium_url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}{% for image in property.images.all|slice:":2" %},{{ image.medium_url }}{% endfor %}">
+     data-images="{% if property.main_image and property.main_image.image %}{{ property.main_image.medium_url }}{% else %}{% static 'images/no-image.svg' %}{% endif %}{% for image in property.images.all|slice:":2" %},{{ image.medium_url }}{% endfor %}"
+     data-agent-phone="{% if property.agent and property.agent.phone %}{{ property.agent.phone }}{% else %}+66633033133{% endif %}">
     <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden max-w-sm mx-auto transform hover:-translate-y-2 hover:scale-[1.02] group h-full flex flex-col">
         <!-- Image Section -->
         <div class="relative">

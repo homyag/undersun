@@ -53,6 +53,48 @@ class SEOPage(models.Model):
         return getattr(self, field_name, '') or getattr(self, 'keywords_ru', '')
 
 
+class SEOContentBlock(models.Model):
+    """Гибкие SEO-тексты, которые можно выводить в шаблонах по slug."""
+
+    slug = models.SlugField(
+        _('Слаг'),
+        max_length=150,
+        unique=True,
+        help_text=_('Используется в шаблонах, например: properties_sale, properties_type_condo'),
+    )
+    title = models.CharField(
+        _('Заголовок'),
+        max_length=200,
+        blank=True,
+        help_text=_('Опциональный заголовок блока, можно оставить пустым.'),
+    )
+    content_ru = models.TextField(_('Контент (RU)'), blank=True)
+    content_en = models.TextField(_('Контент (EN)'), blank=True)
+    content_th = models.TextField(_('Контент (TH)'), blank=True)
+    is_active = models.BooleanField(_('Активен'), default=True)
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Обновлено'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('SEO блок')
+        verbose_name_plural = _('SEO блоки')
+        ordering = ['slug']
+
+    def __str__(self):
+        return self.title or self.slug
+
+    def get_content(self, language_code='ru'):
+        """Возвращает контент на нужном языке с fallback на русский."""
+        if not language_code:
+            language_code = 'ru'
+        language_code = language_code[:2]
+        field_name = f'content_{language_code}'
+        value = getattr(self, field_name, '')
+        if value:
+            return value
+        return self.content_ru
+
+
 class PromotionalBanner(models.Model):
     """Модель рекламного баннера главной страницы"""
 
