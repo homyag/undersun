@@ -72,55 +72,21 @@
           "geoRadius": "50000"
         },
         "makesOffer": [
+        {% for stat in property_stats %}
           {
             "@type": "Offer",
+            "priceCurrency": "THB",
+            "price": "",
+            "availability": "https://schema.org/InStock",
             "itemOffered": {
-              "@type": "Service",
-        {% if LANGUAGE_CODE == 'ru' %}
-            "name": "Покупка недвижимости",
-            "description": "Полное сопровождение сделки. Проведем экспертизу, индивидуально подберем объекты для вас, решим юридические вопросы."
-        {% elif LANGUAGE_CODE == 'en' %}
-            "name": "Real Estate Purchase",
-            "description": "Full transaction support. We will conduct expertise, individually select properties for you, solve legal issues."
-        {% elif LANGUAGE_CODE == 'th' %}
-            "name": "การซื้ออสังหาริมทรัพย์",
-            "description": "การสนับสนุนการทำธุรกรรมอย่างครบถ้วน เราจะทำการตรวจสอบ เลือกสรรทรัพย์สินให้คุณเป็นรายบุคคล แก้ไขปัญหาทางกฎหมาย"
-        {% endif %}
-        }
-      },
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-        {% if LANGUAGE_CODE == 'ru' %}
-            "name": "Продажа недвижимости",
-            "description": "Доверьте нам продажу вашей недвижимости. Найдем покупателя быстро и выгодно, избавив от лишних хлопот."
-        {% elif LANGUAGE_CODE == 'en' %}
-            "name": "Real Estate Sale",
-            "description": "Trust us to sell your real estate. We will find a buyer quickly and profitably, saving you from unnecessary hassle."
-        {% elif LANGUAGE_CODE == 'th' %}
-            "name": "การขายอสังหาริมทรัพย์",
-            "description": "มอบหมายให้เราขายอสังหาริมทรัพย์ของคุณ เราจะหาผู้ซื้ออย่างรวดเร็วและคุ้มค่า ช่วยให้คุณไม่ต้องยุ่งยาก"
-        {% endif %}
-        }
-      },
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-        {% if LANGUAGE_CODE == 'ru' %}
-            "name": "Аренда недвижимости",
-            "description": "Подберем жилье для средне- и долгосрочной аренды, чтобы ваше пребывание на Пхукете было максимально комфортным."
-        {% elif LANGUAGE_CODE == 'en' %}
-            "name": "Real Estate Rental",
-            "description": "We will select housing for medium- and long-term rental to make your stay in Phuket as comfortable as possible."
-        {% elif LANGUAGE_CODE == 'th' %}
-            "name": "การเช่าอสังหาริมทรัพย์",
-            "description": "เราจะเลือกที่อยู่อาศัยสำหรับการเช่าระยะกลางและระยะยาว เพื่อให้การพำนักของคุณในภูเก็ตสะดวกสบายที่สุด"
-        {% endif %}
-        }
-      }
-    ],
+              "@type": "Product",
+              "name": "{{ stat.localized_name|default:stat.name_display|escapejs }}",
+              "additionalType": "{{ stat|schema_additional_type }}",
+              "url": "{{ stat.get_absolute_url|absolute_url:request|escapejs }}"
+            }
+          }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+        ],
     "sameAs": [
       "https://www.facebook.com/undersunestate",
       "https://www.instagram.com/undersun.estate/",
