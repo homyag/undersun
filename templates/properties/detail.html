@@ -8,39 +8,11 @@
 {% block title %}{{ property.title }} - Undersun Estate{% endblock %}
 
 {% block structured_data %}
-    {% load l10n %}
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Offer",
-      "priceCurrency": "THB",
-      "price": "{% if property.deal_type == 'rent' and property.price_rent_monthly_thb %}{{ property.price_rent_monthly_thb|unlocalize }}{% else %}{{ property.price_sale_thb|default:'0'|unlocalize }}{% endif %}",
-      "availability": "{% if property.status == 'available' %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
-      "url": "{{ request.build_absolute_uri }}",
-      "itemOffered": {
-        "@type": "Product",
-        {% if property.property_type %}
-        "category": "{{ property.property_type.name_display|escapejs }}",
-        {% endif %}
-        "additionalType": "{{ property.property_type|schema_additional_type }}",
-        "name": "{{ property.title|escapejs }}",
-        "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
-        "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{% static 'images/no-image.svg' %}"{% endif %}],
-        "numberOfRooms": {{ property.bedrooms|default:0 }},
-        "floorSize": {
-          "@type": "QuantitativeValue",
-          "value": {{ property.area_total|default:'0'|unlocalize }},
-          "unitCode": "MTK"
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "{{ property.location.name|default:property.district.name|default:''|escapejs }}",
-          "addressRegion": "Phuket",
-          "addressCountry": "TH"
-        }
-      }
-    }
-    </script>
+    {% if property.deal_type == 'rent' and property.price_rent_monthly_thb %}
+        {% include 'properties/includes/detail_structured_data_product.html' with final_price=property.price_rent_monthly_thb %}
+    {% else %}
+        {% include 'properties/includes/detail_structured_data_product.html' with final_price=property.price_sale_thb|default:property.price_rent_monthly_thb|default:0 %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
