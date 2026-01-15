@@ -143,19 +143,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Track checkbox state before auto-submit
-        // Restore checkbox state if form submission is canceled
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('mousedown', function() {
-                checkbox.dataset.wasChecked = checkbox.checked ? 'true' : 'false';
-            });
-
-            checkbox.addEventListener('mouseup', function() {
-                if (checkbox.dataset.wasChecked) {
-                    checkbox.checked = checkbox.dataset.wasChecked !== 'true';
-                }
-            });
-        });
     }
     
     // Fix pagination to work with filters using event delegation  
