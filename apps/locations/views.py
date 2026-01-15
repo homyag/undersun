@@ -1,9 +1,12 @@
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Avg
+from statistics import median
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.utils.translation import gettext_lazy as _
 from .models import District, Location
 from apps.properties.models import Property
+from apps.currency.services import CurrencyService
 
 
 IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.webp')
@@ -71,23 +74,38 @@ class DistrictDetailView(DetailView):
         context = super().get_context_data(**kwargs)
 
         # Недвижимость в районе
-        properties = Property.objects.filter(
+        base_queryset = Property.objects.filter(
             district=self.object,
             is_active=True,
             status='available'
         ).select_related('property_type').prefetch_related('images')
 
+        currency_code = CurrencyService.get_selected_currency_code(self.request)
+        sale_field, _ = CurrencyService.get_price_field_names(currency_code)
+
+        sale_values = list(
+            base_queryset
+            .filter(**{f"{sale_field}__isnull": False})
+            .values_list(sale_field, flat=True)
+        )
+        median_price = median(sale_values) if sale_values else None
+
         # Пагинация
         from django.core.paginator import Paginator
-        paginator = Paginator(properties, 12)
+        paginator = Paginator(base_queryset, 12)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
         context['properties'] = page_obj
+        context['district_property_count'] = paginator.count
+        context['selected_currency'] = CurrencyService.get_currency_by_code(currency_code)
+        context['district_avg_price'] = median_price
 
         # Локации в районе
         context['locations'] = self.object.locations.all()
         context['district_static_image'] = _get_static_location_image(self.object.slug)
+        context['district_roi'] = DISTRICT_ROI_INFO.get(self.object.slug)
+        context['district_travel_time'] = DISTRICT_TRAVEL_TIMES.get(self.object.slug)
 
         return context
 
@@ -106,24 +124,73 @@ class LocationDetailView(DetailView):
         context = super().get_context_data(**kwargs)
 
         # Недвижимость в локации
-        properties = Property.objects.filter(
+        base_queryset = Property.objects.filter(
             location=self.object,
             is_active=True,
             status='available'
         ).select_related('property_type').prefetch_related('images')
 
+        currency_code = CurrencyService.get_selected_currency_code(self.request)
+        sale_field, _ = CurrencyService.get_price_field_names(currency_code)
+        sale_values = list(
+            base_queryset
+            .filter(**{f"{sale_field}__isnull": False})
+            .values_list(sale_field, flat=True)
+        )
+        median_price = median(sale_values) if sale_values else None
+
         # Пагинация
         from django.core.paginator import Paginator
-        paginator = Paginator(properties, 12)
+        paginator = Paginator(base_queryset, 12)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
         context['properties'] = page_obj
+        context['district_property_count'] = paginator.count
         context['district'] = self.object.district
+        context['selected_currency'] = CurrencyService.get_currency_by_code(currency_code)
+        context['district_avg_price'] = median_price
         context['location_static_image'] = (
             _get_static_location_image(self.object.slug)
             or _get_static_location_image(self.object.district.slug)
         )
         context['district_static_image'] = _get_static_location_image(self.object.district.slug)
+        context['district_roi'] = DISTRICT_ROI_INFO.get(self.object.district.slug)
+        context['district_travel_time'] = DISTRICT_TRAVEL_TIMES.get(self.object.district.slug)
 
         return context
+DISTRICT_ROI_INFO = {
+    'mueang-phuket-district': {
+        'title': 'Mueang Phuket',
+        'roi': _('4–6%/год'),
+        'note': _('Ставка на стабильный спрос (город + долгосрок), ниже сезонность.')
+    },
+    'kathu-district': {
+        'title': 'Kathu District',
+        'roi': _('7–8%/год'),
+        'note': _('Смешанный спрос + туристические зоны, доходность выше, но сезонность заметнее.')
+    },
+    'thalang-district': {
+        'title': 'Thalang',
+        'roi': _('6–9%+/год'),
+        'note': _('Курортные локации, премиальный спрос, иногда встречаются «гарантированные» программы.')
+    },
+}
+
+DISTRICT_TRAVEL_TIMES = {
+    'mueang-phuket-district': {
+        'car': '35–40',
+        'bus': '60–70',
+        'note': _('Такси или трансфер — около 35 минут; автобус дольше из-за остановок.')
+    },
+    'kathu-district': {
+        'car': '30–45',
+        'bus': '50–60',
+        'note': _('Среднее ~40 минут на автомобиле, автобусом чуть дольше.')
+    },
+    'thalang-district': {
+        'car': '10–15',
+        'bus': '15',
+        'note': _('Аэропорт находится в пределах района — самый быстрый доступ.')
+    },
+}
