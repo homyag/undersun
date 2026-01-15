@@ -70,7 +70,7 @@
 
     <div class="relative max-w-7xl mx-auto px-4 py-20 lg:py-28 text-white">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            <div>
+            <div class="max-w-3xl">
                 <p class="text-sm uppercase tracking-[0.3em] text-accent mb-4">{% trans "район" %}</p>
                 <h1 class="text-4xl lg:text-5xl font-bold mb-4 font-gilroy">{{ district.name }}</h1>
                 {% if district.description %}
@@ -82,15 +82,47 @@
                         {% trans "Один из лучших районов Пхукета для жизни и инвестиций" %}
                     </p>
                 {% endif %}
-            </div>
-            <div class="grid grid-cols-2 gap-4 text-center">
-                <div class="bg-white/10 backdrop-blur rounded-2xl px-6 py-4 border border-white/20">
-                    <div class="text-3xl font-bold">{{ district.properties_count }}</div>
-                    <p class="text-sm uppercase tracking-widest text-gray-200">{% trans "объектов" %}</p>
+                <div class="mt-6 flex flex-wrap gap-4">
+                    <a href="{% url 'properties:property_list' %}?district={{ district.slug }}"
+                       class="inline-flex items-center justify-center px-6 py-3 rounded-full font-semibold text-gray-900 bg-gradient-to-r from-accent to-yellow-400 hover:from-yellow-400 hover:to-accent transition-transform duration-300 hover:scale-105 shadow-lg">
+                        <i class="fas fa-map-marked-alt mr-2"></i>
+                        {% trans "Подобрать недвижимость" %}
+                    </a>
+                    <a href="#district-consultation"
+                       class="inline-flex items-center justify-center px-5 py-3 rounded-full border border-white/40 text-sm font-semibold text-white/90 hover:text-white hover:border-white transition-colors">
+                        <i class="fas fa-comments mr-2"></i>
+                        {% trans "Получить консультацию" %}
+                    </a>
                 </div>
-                <div class="bg-white/10 backdrop-blur rounded-2xl px-6 py-4 border border-white/20">
-                    <div class="text-3xl font-bold">25+</div>
-                    <p class="text-sm uppercase tracking-widest text-gray-200">{% trans "пляжей рядом" %}</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-white/15 backdrop-blur-lg rounded-3xl px-6 py-5 border border-white/30 shadow-xl flex flex-col gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent text-gray-900 shadow-inner">
+                            <i class="fas fa-home"></i>
+                        </span>
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.4em] text-gray-100">{% trans "объекты" %}</p>
+                            <p class="text-sm text-white/80">{% trans "в активном статусе" %}</p>
+                        </div>
+                    </div>
+                    <p class="text-5xl font-bold">{{ district_property_count }}</p>
+                    <p class="text-sm text-white/75">{% trans "Доступны для просмотра и покупки уже сейчас." %}</p>
+                </div>
+                <div class="bg-white/15 backdrop-blur-lg rounded-3xl px-6 py-5 border border-white/30 shadow-xl flex flex-col gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent text-gray-900 shadow-inner">
+                            <i class="fas fa-chart-line"></i>
+                        </span>
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.4em] text-gray-100">{% trans "инвестиционный рейтинг" %}</p>
+                            <p class="text-sm text-white/80">{{ district_roi.title|default:district.name }}</p>
+                        </div>
+                    </div>
+                    <p class="text-5xl font-bold">{{ district_roi.roi|default:"6–8%" }}</p>
+                    <p class="text-sm text-white/75 leading-relaxed">
+                        {{ district_roi.note|default:_('Сбалансированный спрос и стабильная доходность на длительном сроке.') }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -116,23 +148,22 @@
                     {% endif %}
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-br from-white to-gray-50">
-                            <p class="text-sm uppercase tracking-[0.3em] text-tertiary mb-2">{% trans "объектов" %}</p>
-                            <p class="text-4xl font-bold text-primary">{{ district.properties_count }}</p>
+                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-r from-white to-gray-50 flex flex-col gap-2">
+                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "объектов в каталоге" %}</p>
+                            <p class="text-4xl font-bold text-primary">{{ district_property_count }}</p>
+                            <p class="text-sm text-gray-500">{% trans "Включает виллы, апартаменты и готовый бизнес." %}</p>
                         </div>
-                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-br from-white to-gray-50">
-                            <p class="text-sm uppercase tracking-[0.3em] text-tertiary mb-2">{% trans "общественные зоны" %}</p>
-                            <p class="text-4xl font-bold text-primary">25+</p>
-                        </div>
-                        {% if district.avg_price %}
-                            <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-br from-accent/10 to-white">
-                                <p class="text-sm uppercase tracking-[0.3em] text-tertiary mb-2">{% trans "средняя цена" %}</p>
-                                <p class="text-3xl font-bold text-primary">${{ district.avg_price|floatformat:0 }}</p>
-                            </div>
-                        {% endif %}
-                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-br from-white to-gray-50">
-                            <p class="text-sm uppercase tracking-[0.3em] text-terтиary mb-2">{% trans "атмосфера" %}</p>
-                            <p class="text-lg font-semibold text-gray-800">{% trans "Премиальные резиденции" %}</p>
+                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-r from-accent/10 to-white flex flex-col gap-2">
+                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "медианная цена сделки" %}</p>
+                            {% if district_avg_price %}
+                                <p class="text-4xl font-bold text-primary">
+                                    {{ selected_currency.symbol|default:"$" }}{{ district_avg_price|floatformat:0 }}
+                                    <span class="text-base font-semibold text-tertiary ml-1">{{ selected_currency.code|default:"USD" }}</span>
+                                </p>
+                            {% else %}
+                                <p class="text-2xl font-semibold text-primary">{% trans "Цена по запросу" %}</p>
+                            {% endif %}
+                            <p class="text-sm text-gray-500">{% trans "Основана на активных объектах в каталоге." %}</p>
                         </div>
                     </div>
                 </div>
@@ -154,16 +185,65 @@
                     </div>
                 </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 rounded-2xl bg-white border border-gray-100">
-                            <p class="text-sm text-gray-500">{% trans "Лучшее время" %}</p>
-                            <p class="text-xl font-semibold text-gray-900">November – April</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-5 rounded-2xl bg-primary/5 border border-gray-100 flex flex-col gap-3">
+                        <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "Доступ до аэропорта" %}</p>
+                        <div class="flex items-center gap-3">
+                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-accent text-gray-900">
+                                <i class="fas fa-car"></i>
+                            </span>
+                            <div>
+                                <p class="text-sm text-gray-500">{% trans "На машине" %}</p>
+                                <p class="text-xl font-semibold text-gray-900">{{ district_travel_time.car|default:"15–20" }} {% trans "минут" %}</p>
+                            </div>
                         </div>
-                        <div class="p-4 rounded-2xl bg-white border border-gray-100">
-                            <p class="text-sm text-gray-500">{% trans "Доступ" %}</p>
-                            <p class="text-xl font-semibold text-gray-900">{% trans "15 мин до аэропорта" %}</p>
+                        <div class="flex items-center gap-3">
+                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/20 text-primary">
+                                <i class="fas fa-bus"></i>
+                            </span>
+                            <div>
+                                <p class="text-sm text-gray-500">{% trans "Общественный транспорт" %}</p>
+                                <p class="text-xl font-semibold text-gray-900">{{ district_travel_time.bus|default:"35–40" }} {% trans "минут" %}</p>
+                            </div>
                         </div>
+                        <p class="text-sm text-gray-500">{{ district_travel_time.note|default:_('Время зависит от маршрута и трафика.') }}</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Consultation CTA -->
+<section id="district-consultation" class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="rounded-3xl bg-gradient-to-r from-primary via-primary to-gray-900 text-white p-8 lg:p-10 shadow-2xl border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="max-w-2xl space-y-4">
+                <p class="text-xs uppercase tracking-[0.4em] text-accent">{% trans "консультация" %}</p>
+                <h2 class="text-3xl lg:text-4xl font-bold leading-tight">{% trans "Персональный подбор недвижимости" %}</h2>
+                <p class="text-base lg:text-lg text-white/85">{% trans "Менеджер Undersun свяжется в течение 15 минут и подберёт объекты в районе" %} {{ district.name }}.</p>
+                <div class="flex flex-col sm:flex-row gap-3 text-sm text-white/80">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-clock text-accent"></i>
+                        <span>{% trans "Ответ в мессенджере в течение 15 минут" %}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-file-alt text-accent"></i>
+                        <span>{% trans "Презентации объектов и расчёт доходности" %}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <a href="https://wa.me/66633033133" target="_blank" rel="noopener"
+                   class="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-2xl font-semibold bg-accent text-gray-900 shadow-lg transition-transform hover:-translate-y-0.5">
+                    <i class="fab fa-whatsapp mr-2"></i>
+                    {% trans "Написать в WhatsApp" %}
+                </a>
+                <a href="tel:+66633033133"
+                   class="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-2xl font-semibold border border-white/40 text-white hover:border-white">
+                    <i class="fas fa-phone mr-2"></i>
+                    {% trans "Позвонить" %}
+                </a>
             </div>
         </div>
     </div>
