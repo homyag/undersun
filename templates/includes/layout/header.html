@@ -272,8 +272,78 @@
                     {% currency_selector %}
                 </div>
 
-                <!-- Mobile menu button and search -->
-                <div class="lg:hidden flex items-center space-x-3 flex-shrink-0 mobile-menu-exception">
+                <!-- Mobile controls: unified locale switcher, search, menu -->
+                <div class="lg:hidden flex items-center space-x-1 sm:space-x-2 flex-shrink-0 mobile-menu-exception mobile-nav-controls ml-auto">
+                    <!-- Combined Language | Currency Dropdown -->
+                    <div class="relative" data-mobile-dropdown-wrapper>
+                        <button type="button"
+                                class="flex items-center px-3 py-1.5 rounded-full border border-gray-200 text-primary hover:text-accent hover:border-accent transition-colors text-sm font-semibold whitespace-nowrap"
+                                data-mobile-dropdown-toggle="mobile-locale-dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                            <span class="flex items-center space-x-3">
+                                <span class="flex items-center">
+                                    {% if LANGUAGE_CODE == 'ru' %}
+                                        <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 object-cover rounded-sm shadow-sm">
+                                    {% elif LANGUAGE_CODE == 'en' %}
+                                        <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 object-cover rounded-sm shadow-sm">
+                                    {% elif LANGUAGE_CODE == 'th' %}
+                                        <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 object-cover rounded-sm shadow-sm">
+                                    {% endif %}
+                                </span>
+                                <span class="text-gray-400 text-sm">|</span>
+                                <span class="flex items-center gap-1">
+                                    <span data-current-currency-symbol class="text-base">{{ selected_currency.symbol }}</span>
+                                    <span data-current-currency-code class="currency-code hidden">{{ selected_currency.code }}</span>
+                                </span>
+                            </span>
+                            <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="mobile-locale-dropdown"
+                             class="hidden absolute left-1/2 -translate-x-1/2 mt-2 w-[calc(100vw-2.5rem)] min-w-[16rem] sm:w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 py-4"
+                             data-mobile-dropdown>
+                            <div class="flex gap-6 px-4 text-sm">
+                                <div class="flex-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-400 mb-2">{% if LANGUAGE_CODE == 'en' %}Language{% elif LANGUAGE_CODE == 'th' %}ภาษา{% else %}Язык{% endif %}</p>
+                                    <div class="space-y-2 text-gray-800">
+                                        <a href="{{ language_urls.ru|default:'/ru/' }}"
+                                           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors {% if LANGUAGE_CODE == 'ru' %}font-semibold text-accent bg-gray-50{% endif %}">
+                                            <img src="https://flagcdn.com/w20/ru.png" alt="RU" class="w-5 h-3 mr-2 object-cover">
+                                            {% trans "Русский" %}
+                                        </a>
+                                        <a href="{{ language_urls.en|default:'/en/' }}"
+                                           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors {% if LANGUAGE_CODE == 'en' %}font-semibold text-accent bg-gray-50{% endif %}">
+                                            <img src="https://flagcdn.com/w20/us.png" alt="EN" class="w-5 h-3 mr-2 object-cover">
+                                            {% trans "English" %}
+                                        </a>
+                                        <a href="{{ language_urls.th|default:'/th/' }}"
+                                           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors {% if LANGUAGE_CODE == 'th' %}font-semibold text-accent bg-gray-50{% endif %}">
+                                            <img src="https://flagcdn.com/w20/th.png" alt="TH" class="w-5 h-3 mr-2 object-cover">
+                                            {% trans "ไทย" %}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-400 mb-2">{% if LANGUAGE_CODE == 'en' %}Currency{% elif LANGUAGE_CODE == 'th' %}สกุลเงิน{% else %}Валюта{% endif %}</p>
+                                    <div class="space-y-2 text-gray-800">
+                                        {% for currency in available_currencies %}
+                                            <button type="button"
+                                                    class="mobile-currency-option w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 {% if selected_currency.code == currency.code %}font-semibold text-accent bg-gray-50{% endif %}"
+                                                    data-currency="{{ currency.code }}"
+                                                    data-symbol="{{ currency.symbol }}"
+                                                    data-dropdown-container="mobile-locale-dropdown">
+                                                <span class="text-base">{{ currency.symbol }}</span>
+                                                <span class="tracking-wide">{{ currency.code }}</span>
+                                            </button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Mobile Search Button -->
                     <button onclick="toggleMobileSearch()" class="text-primary hover:text-accent transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

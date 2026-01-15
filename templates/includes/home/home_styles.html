@@ -252,6 +252,7 @@
         width: 100%;
         max-height: 100vh;
         overflow-y: auto;
+        padding-top: 32px;
     }
     
     /* Фикс для кнопок в мобильном меню */
@@ -260,6 +261,19 @@
         -webkit-tap-highlight-color: transparent;
     }
     
+
+    @media (max-width: 376px) {
+        .mobile-nav-controls {
+            gap: 2px !important;
+        }
+        .mobile-nav-controls > *:not(:first-child) {
+            margin-left: 2px !important;
+        }
+        .mobile-nav-controls .currency-code {
+            display: none !important;
+        }
+    }
+
     /* Убираем конфликтующие стили с мобильной навигации */
     @media (max-width: 768px) {
         .mobile-menu-exception button,
