@@ -11,10 +11,85 @@
     document.addEventListener('DOMContentLoaded', function () {
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
+        const mobileDropdownEntries = [];
+        const dropdownEntryMap = {};
+
+        const hideDropdownEntry = (entry) => {
+            entry.dropdown.classList.add('hidden');
+            entry.button.setAttribute('aria-expanded', 'false');
+        };
+
+        const closeOtherDropdowns = (currentId) => {
+            mobileDropdownEntries.forEach(entry => {
+                if (entry.dropdown.id !== currentId) {
+                    hideDropdownEntry(entry);
+                }
+            });
+        };
+
+        const hideDropdownById = (dropdownId) => {
+            if (!dropdownId) {
+                return;
+            }
+            const entry = dropdownEntryMap[dropdownId];
+            if (entry) {
+                hideDropdownEntry(entry);
+            } else {
+                const fallback = document.getElementById(dropdownId);
+                if (fallback) {
+                    fallback.classList.add('hidden');
+                }
+            }
+        };
+
+        window.hideMobileDropdownById = hideDropdownById;
+        window.closeAllMobileDropdowns = () => {
+            mobileDropdownEntries.forEach(entry => hideDropdownEntry(entry));
+        };
+
+        const mobileDropdownToggles = document.querySelectorAll('[data-mobile-dropdown-toggle]');
+        mobileDropdownToggles.forEach(button => {
+            const targetId = button.dataset.mobileDropdownToggle;
+            if (!targetId) {
+                return;
+            }
+            const dropdown = document.getElementById(targetId);
+            if (!dropdown) {
+                return;
+            }
+
+            const entry = {button, dropdown};
+            mobileDropdownEntries.push(entry);
+            dropdownEntryMap[targetId] = entry;
+
+            button.addEventListener('click', function (event) {
+                event.stopPropagation();
+                const isOpen = !dropdown.classList.contains('hidden');
+                if (isOpen) {
+                    hideDropdownEntry(entry);
+                } else {
+                    closeOtherDropdowns(targetId);
+                    dropdown.classList.remove('hidden');
+                    button.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            mobileDropdownEntries.forEach(entry => {
+                if (entry.dropdown.classList.contains('hidden')) {
+                    return;
+                }
+                if (!entry.dropdown.contains(event.target) && !entry.button.contains(event.target)) {
+                    hideDropdownEntry(entry);
+                }
+            });
+        });
 
         if (mobileMenuButton && mobileMenu) {
             mobileMenuButton.addEventListener('click', function () {
                 mobileMenu.classList.toggle('hidden');
+                window.closeAllMobileDropdowns();
             });
         } else {
             console.error('Mobile menu elements not found:', {button: !!mobileMenuButton, menu: !!mobileMenu});
@@ -104,11 +179,14 @@
     // Обработчик для мобильного селектора валют
     document.addEventListener('DOMContentLoaded', function () {
         const mobileCurrencyOptions = document.querySelectorAll('.mobile-currency-option');
+        const currencySymbolTargets = document.querySelectorAll('[data-current-currency-symbol]');
+        const currencyCodeTargets = document.querySelectorAll('[data-current-currency-code]');
 
         mobileCurrencyOptions.forEach(option => {
             option.addEventListener('click', function () {
                 const currency = this.dataset.currency;
                 const symbol = this.dataset.symbol;
+                const dropdownContainerId = this.dataset.dropdownContainer;
 
                 // Отправляем запрос на смену валюты
                 const formData = new FormData();
@@ -126,19 +204,31 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Update mobile currency button text
-                            const mobileButton = document.querySelector('[onclick="toggleMobileSubmenu(\'currency-submenu\')"] span');
-                            if (mobileButton) {
-                                mobileButton.innerHTML = `<i class="fas fa-dollar-sign mr-2"></i>
-                                {% if LANGUAGE_CODE == 'en' %}Currency{% elif LANGUAGE_CODE == 'th' %}สกุลเงิน{% else %}
-                                    Валюта{% endif %} (${symbol}${currency})`;
-                            }
+                            const previousActive = document.querySelectorAll('.mobile-currency-option.font-semibold');
+                            previousActive.forEach(btn => btn.classList.remove('font-semibold', 'text-accent', 'bg-gray-50'));
 
-                            // Close mobile menu
-                            document.getElementById('currency-submenu').classList.add('hidden');
+                            // Update visible currency labels
+                            currencySymbolTargets.forEach(label => {
+                                label.textContent = symbol;
+                            });
+                            currencyCodeTargets.forEach(label => {
+                                label.textContent = currency;
+                            });
+
+                            // Close dropdown that triggered the change
+                            if (typeof window.hideMobileDropdownById === 'function') {
+                                window.hideMobileDropdownById(dropdownContainerId || 'currency-submenu');
+                            } else {
+                                const fallbackDropdown = document.getElementById(dropdownContainerId || 'currency-submenu');
+                                if (fallbackDropdown) {
+                                    fallbackDropdown.classList.add('hidden');
+                                }
+                            }
 
                             // Store currency in localStorage for persistence
                             localStorage.setItem('selectedCurrency', currency);
+
+                            this.classList.add('font-semibold', 'text-accent', 'bg-gray-50');
 
                             // Update Featured Properties prices if function exists (only on home page)
                             if (typeof updateAllPricesToHeaderCurrency === 'function') {

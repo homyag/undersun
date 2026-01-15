@@ -162,9 +162,11 @@
                     <!-- Mobile Currency Switcher -->
                     <button onclick="toggleMobileSubmenu('currency-submenu')"
                             class="w-full flex justify-between items-center px-3 py-2 mt-2 text-primary hover:text-accent hover:bg-gray-50 rounded-md transition-colors font-medium">
-                        <span><i class="fas fa-dollar-sign mr-2"></i>{% if LANGUAGE_CODE == 'en' %}
-                            Currency{% elif LANGUAGE_CODE == 'th' %}สกุลเงิน{% else %}Валюта{% endif %}
-                            ({{ selected_currency.symbol }}{{ selected_currency.code }})</span>
+                        <span class="flex items-center">
+                            <i class="fas fa-dollar-sign mr-2"></i>
+                            {% if LANGUAGE_CODE == 'en' %}Currency{% elif LANGUAGE_CODE == 'th' %}สกุลเงิน{% else %}Валюта{% endif %}
+                            <span class="ml-2 font-semibold" data-current-currency>{{ selected_currency.symbol }}{{ selected_currency.code }}</span>
+                        </span>
                         <svg class="w-4 h-4 transform transition-transform" id="currency-arrow" fill="none"
                              stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -176,7 +178,8 @@
                             <button type="button"
                                     class="mobile-currency-option block w-full text-left px-3 py-1 text-tertiary hover:text-accent transition-colors {% if selected_currency.code == currency.code %}font-semibold text-accent{% endif %}"
                                     data-currency="{{ currency.code }}"
-                                    data-symbol="{{ currency.symbol }}">
+                                    data-symbol="{{ currency.symbol }}"
+                                    data-dropdown-container="currency-submenu">
                                 {{ currency.symbol }} {{ currency.code }}
                             </button>
                         {% endfor %}
@@ -185,4 +188,3 @@
             </div>
         </div>
         
-
