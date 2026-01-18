@@ -138,11 +138,25 @@
                                     <a href="{% url 'properties:property_rent' %}"
                                        class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}
                                         Rent{% elif lang == 'th' %}เช่า{% else %}Аренда{% endif %}</a>
-                                    <div class="border-t border-gray-200"></div>
-                                    <a href="{% url 'location_list' %}"
-                                       class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}
-                                        Areas{% elif lang == 'th' %}ทำเล{% else %}Районы{% endif %}</a>
-                                    <div class="border-t border-gray-200"></div>
+                                    <div class="border-t border-gray-200 my-1"></div>
+                                    <div class="relative nav-area-trigger">
+                                        <button type="button"
+                                                class="w-full flex items-center justify-between px-4 py-2 text-gray-900 font-semibold hover:bg-gray-50 transition-colors">
+                                            <span>{% if lang == 'en' %}Areas{% elif lang == 'th' %}ทำเล{% else %}Районы{% endif %}</span>
+                                            <i class="fas fa-chevron-right text-xs text-gray-400 ml-3"></i>
+                                        </button>
+                                        <div class="nav-area-panel absolute left-full top-0 ml-3 bg-white rounded-xl shadow-2xl border border-gray-100 min-w-[220px]">
+                                            <div class="py-2 max-h-64 overflow-y-auto">
+                                                {% for district in districts %}
+                                                    <a href="{{ district.get_absolute_url }}"
+                                                       class="block px-5 py-2 text-gray-800 hover:bg-gray-50 transition-colors">
+                                                        {{ district.name }}
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="border-t border-gray-200 my-1"></div>
                                     {% for type in property_types %}
                                         <a href="{% url 'properties:property_by_type' type.name %}"
                                            class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{{ type.name_display }}</a>
@@ -379,4 +393,44 @@
 
         {% include 'includes/layout/mobile_menu.html' %}
     </nav>
+
+    <script>
+        (function() {
+            function initAreasDropdown() {
+                const triggers = document.querySelectorAll('.nav-area-trigger');
+                if (!triggers.length) return;
+
+                const desktopQuery = window.matchMedia('(min-width: 1024px)');
+
+                triggers.forEach(trigger => {
+                    const panel = trigger.querySelector('.nav-area-panel');
+                    if (!panel) return;
+
+                    const openPanel = () => {
+                        if (!desktopQuery.matches) return;
+                        panel.classList.add('is-open');
+                    };
+
+                    const closePanel = evt => {
+                        if (evt && (panel.contains(evt.relatedTarget) || trigger.contains(evt.relatedTarget))) {
+                            return;
+                        }
+                        panel.classList.remove('is-open');
+                    };
+
+                    trigger.addEventListener('mouseenter', openPanel);
+                    trigger.addEventListener('focusin', openPanel);
+                    trigger.addEventListener('mouseleave', closePanel);
+                    trigger.addEventListener('focusout', closePanel);
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initAreasDropdown);
+            } else {
+                initAreasDropdown();
+            }
+        })();
+    </script>
+
 {% endwith %}
