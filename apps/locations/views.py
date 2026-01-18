@@ -5,7 +5,7 @@ from statistics import median
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils.translation import gettext_lazy as _
 from .models import District, Location
-from apps.properties.models import Property
+from apps.properties.models import Property, PropertyType
 from apps.currency.services import CurrencyService
 
 
@@ -102,7 +102,62 @@ class DistrictDetailView(DetailView):
         context['district_avg_price'] = median_price
 
         # Локации в районе
-        context['locations'] = self.object.locations.all()
+        locations = self.object.locations.all()
+        context['locations'] = locations
+
+        property_type_ids = (
+            base_queryset
+            .filter(property_type__isnull=False)
+            .values_list('property_type_id', flat=True)
+            .distinct()
+        )
+        property_types = list(
+            PropertyType.objects.filter(id__in=property_type_ids)
+            .order_by('name_display')
+        )
+        context['district_property_types'] = property_types
+        location_stats = []
+        for location in locations:
+            location_queryset = base_queryset.filter(location=location)
+            location_count = location_queryset.count()
+            if location_count == 0:
+                median_value = None
+            else:
+                location_values = list(
+                    location_queryset
+                    .filter(**{f"{sale_field}__isnull": False})
+                    .values_list(sale_field, flat=True)
+                )
+                median_value = median(location_values) if location_values else None
+
+            type_stats = []
+            for property_type in property_types:
+                type_queryset = location_queryset.filter(property_type=property_type)
+                type_count = type_queryset.count()
+                if type_count:
+                    type_values = list(
+                        type_queryset
+                        .filter(**{f"{sale_field}__isnull": False})
+                        .values_list(sale_field, flat=True)
+                    )
+                    type_median = median(type_values) if type_values else None
+                else:
+                    type_median = None
+
+                type_stats.append({
+                    'property_type': property_type,
+                    'count': type_count,
+                    'median_price': type_median,
+                })
+
+            location_stats.append({
+                'location': location,
+                'property_count': location_count,
+                'median_price': median_value,
+                'types': type_stats,
+            })
+
+        context['location_stats'] = location_stats
         context['district_static_image'] = _get_static_location_image(self.object.slug)
         context['district_roi'] = DISTRICT_ROI_INFO.get(self.object.slug)
         context['district_travel_time'] = DISTRICT_TRAVEL_TIMES.get(self.object.slug)
@@ -147,9 +202,11 @@ class LocationDetailView(DetailView):
 
         context['properties'] = page_obj
         context['district_property_count'] = paginator.count
+        context['location_property_count'] = paginator.count
         context['district'] = self.object.district
         context['selected_currency'] = CurrencyService.get_currency_by_code(currency_code)
         context['district_avg_price'] = median_price
+        context['location_avg_price'] = median_price
         context['location_static_image'] = (
             _get_static_location_image(self.object.slug)
             or _get_static_location_image(self.object.district.slug)

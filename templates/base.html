@@ -132,6 +132,22 @@
             background-color: #F1B400;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
+
+        /* Desktop areas panel */
+        .nav-area-panel {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .nav-area-panel.is-open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
     </style>
     {% block extra_css %}
 

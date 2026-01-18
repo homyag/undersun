@@ -211,6 +211,102 @@
                 </div>
             </div>
         </div>
+
+        {% if location_stats %}
+            <div class="mt-12">
+                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-2">{% trans "локации района" %}</p>
+                        <h3 class="text-2xl font-bold text-gray-900">{% trans "Статистика по локациям" %}</h3>
+                        <p class="text-gray-500 text-sm mt-1">{% trans "Актуальные данные по количеству объектов и медианной цене" %}</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto bg-white rounded-3xl border border-gray-100 shadow-lg" itemscope itemtype="https://schema.org/ItemList">
+                    <meta itemprop="name" content="{% blocktrans with district=district.name %}Локации района {{ district }}{% endblocktrans %}">
+                    <meta itemprop="numberOfItems" content="{{ location_stats|length }}">
+                    <meta itemprop="itemListOrder" content="https://schema.org/ItemListOrderAscending">
+                    <table class="min-w-full divide-y divide-gray-100">
+                        <thead class="bg-gray-50/60">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-[0.3em]">{% trans "Локация" %}</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-[0.3em]">{% trans "Всего объектов" %}</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-[0.3em]">{% trans "Медиана по локации" %}</th>
+                                {% for property_type in district_property_types %}
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-[0.3em]">
+                                        {{ property_type.name_display }}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            {% for stat in location_stats %}
+                                <tr class="hover:bg-gray-50 transition-colors" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                                    <meta itemprop="position" content="{{ forloop.counter }}">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center gap-3" itemprop="item" itemscope itemtype="https://schema.org/Place">
+                                            <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-primary/10 text-primary">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                            </span>
+                                            <div>
+                                                <a href="{{ stat.location.get_absolute_url }}" class="text-base font-semibold text-gray-900 hover:text-primary" itemprop="url">
+                                                    <span itemprop="name">{{ stat.location.name }}</span>
+                                                </a>
+                                                <p class="text-sm text-gray-500">{{ stat.location.district.name }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-lg font-semibold text-gray-900">{{ stat.property_count }}</p>
+                                        <p class="text-sm text-gray-500">{% trans "активных объектов" %}</p>
+                                        <meta itemprop="numberOfItems" content="{{ stat.property_count }}">
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {% if stat.median_price %}
+                                            <div itemprop="aggregateOffer" itemscope itemtype="https://schema.org/AggregateOffer">
+                                                <p class="text-lg font-semibold text-gray-900">
+                                                    {{ selected_currency.symbol|default:"$" }}{{ stat.median_price|floatformat:0 }}
+                                                    <span class="text-xs font-semibold text-tertiary ml-1">{{ selected_currency.code|default:"USD" }}</span>
+                                                </p>
+                                                <p class="text-sm text-gray-500">{% trans "по активным предложениям" %}</p>
+                                                <meta itemprop="priceCurrency" content="{{ selected_currency.code|default:'USD' }}">
+                                                <meta itemprop="lowPrice" content="{{ stat.median_price|floatformat:0 }}">
+                                            </div>
+                                        {% else %}
+                                            <p class="text-sm font-medium text-gray-500">{% trans "Цена по запросу" %}</p>
+                                        {% endif %}
+                                    </td>
+                                    {% for type_stat in stat.types %}
+                                        <td class="px-6 py-4 align-top">
+                                            {% if type_stat.count %}
+                                                <div itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                                                    <p class="text-base font-semibold text-gray-900">{{ type_stat.count }} {% trans "объектов" %}</p>
+                                                    <meta itemprop="eligibleRegion" content="{{ district.name }}">
+                                                    {% if type_stat.median_price %}
+                                                        <p class="text-sm text-gray-500">
+                                                            {{ selected_currency.symbol|default:"$" }}{{ type_stat.median_price|floatformat:0 }}
+                                                            <span class="text-xs font-semibold text-tertiary ml-1">{{ selected_currency.code|default:"USD" }}</span>
+                                                        </p>
+                                                        <meta itemprop="priceCurrency" content="{{ selected_currency.code|default:'USD' }}">
+                                                        <meta itemprop="price" content="{{ type_stat.median_price|floatformat:0 }}">
+                                                        <link itemprop="availability" href="https://schema.org/InStock">
+                                                    {% else %}
+                                                        <p class="text-sm text-gray-400">{% trans "Цена по запросу" %}</p>
+                                                        <meta itemprop="availability" content="https://schema.org/LimitedAvailability">
+                                                    {% endif %}
+                                                </div>
+                                            {% else %}
+                                                <p class="text-sm text-gray-400">{% trans "Нет объектов" %}</p>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </section>
 

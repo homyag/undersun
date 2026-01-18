@@ -54,59 +54,256 @@
 {% endblock %}
 
 {% block content %}
-<!-- Location Header -->
-<section class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-16">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center">
-            <h1 class="text-4xl lg:text-5xl font-bold mb-4">{{ location.name }}</h1>
-            <p class="text-xl opacity-90">{{ location.district.name }}, {% trans "Пхукет" %}</p>
+<!-- Location Hero -->
+<section class="relative overflow-hidden">
+    {% if location.image %}
+        <div class="absolute inset-0">
+            <img src="{{ location.image.url }}" alt="{{ location.name }}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/40"></div>
+            <div class="absolute inset-0 bg-[url('{% static 'images/patterns/noise.png' %}')] opacity-20 mix-blend-overlay"></div>
+        </div>
+    {% elif location_static_image %}
+        <div class="absolute inset-0">
+            <img src="{{ location_static_image }}" alt="{{ location.name }}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/40"></div>
+            <div class="absolute inset-0 bg-[url('{% static 'images/patterns/noise.png' %}')] opacity-20 mix-blend-overlay"></div>
+        </div>
+    {% elif district_static_image %}
+        <div class="absolute inset-0">
+            <img src="{{ district_static_image }}" alt="{{ location.district.name }}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/75 via-black/60 to-black/40"></div>
+            <div class="absolute inset-0 bg-[url('{% static 'images/patterns/noise.png' %}')] opacity-20 mix-blend-overlay"></div>
+        </div>
+    {% else %}
+        <div class="absolute inset-0 bg-gradient-to-r from-primary to-tertiary"></div>
+    {% endif %}
+
+    <div class="relative max-w-7xl mx-auto px-4 py-20 lg:py-28 text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+            <div class="max-w-3xl">
+                <p class="text-sm uppercase tracking-[0.3em] text-accent mb-4">{% trans "локация" %}</p>
+                <h1 class="text-4xl lg:text-5xl font-bold mb-4 font-gilroy">{{ location.name }}</h1>
+                {% if location.description %}
+                    <p class="text-lg lg:text-xl text-gray-100 max-w-2xl">
+                        {{ location.description|truncatewords:28 }}
+                    </p>
+                {% else %}
+                    <p class="text-lg lg:text-xl text-gray-100 max-w-2xl">
+                        {% blocktrans with district=location.district.name %}Локация внутри района {{ district }} на Пхукете с развитой инфраструктурой и инвестиционным спросом.{% endblocktrans %}
+                    </p>
+                {% endif %}
+                <div class="mt-6 flex flex-wrap gap-4">
+                    <a href="{% url 'properties:property_list' %}?district={{ location.district.slug }}&location={{ location.slug }}"
+                       class="inline-flex items-center justify-center px-6 py-3 rounded-full font-semibold text-gray-900 bg-gradient-to-r from-accent to-yellow-400 hover:from-yellow-400 hover:to-accent transition-transform duration-300 hover:scale-105 shadow-lg">
+                        <i class="fas fa-map-marked-alt mr-2"></i>
+                        {% trans "Подобрать недвижимость" %}
+                    </a>
+                    <a href="#location-consultation"
+                       class="inline-flex items-center justify-center px-5 py-3 rounded-full border border-white/40 text-sm font-semibold text-white/90 hover:text-white hover:border-white transition-colors">
+                        <i class="fas fa-comments mr-2"></i>
+                        {% trans "Получить консультацию" %}
+                    </a>
+                    <a href="{{ location.district.get_absolute_url }}"
+                       class="inline-flex items-center justify-center px-5 py-3 rounded-full text-sm font-semibold text-white/80 hover:text-white border border-transparent hover:border-white/40 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        {% trans "Вернуться к району" %}
+                    </a>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-white/15 backdrop-blur-lg rounded-3xl px-6 py-5 border border-white/30 shadow-xl flex flex-col gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent text-gray-900 shadow-inner">
+                            <i class="fas fa-home"></i>
+                        </span>
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.4em] text-gray-100">{% trans "объекты" %}</p>
+                            <p class="text-sm text-white/80">{% trans "в локации" %}</p>
+                        </div>
+                    </div>
+                    <p class="text-5xl font-bold">{{ location_property_count|default:district_property_count }}</p>
+                    <p class="text-sm text-white/75">{% trans "Все объекты проверены командой Undersun Estate." %}</p>
+                </div>
+                <div class="bg-white/15 backdrop-blur-lg rounded-3xl px-6 py-5 border border-white/30 shadow-xl flex flex-col gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent text-gray-900 shadow-inner">
+                            <i class="fas fa-chart-line"></i>
+                        </span>
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.4em] text-gray-100">{% trans "инвестиционный профиль" %}</p>
+                            <p class="text-sm text-white/80">{{ district_roi.title|default:location.district.name }}</p>
+                        </div>
+                    </div>
+                    <p class="text-5xl font-bold">{{ district_roi.roi|default:"6–8%" }}</p>
+                    <p class="text-sm text-white/75 leading-relaxed">
+                        {{ district_roi.note|default:_('Стабильный спрос на аренду и качественная застройка.') }}
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Location Content -->
-<section class="py-12">
+<!-- Location Info -->
+<section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="mb-4">
-            <nav class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 overflow-x-auto pb-2">
-                <a href="{% url 'properties:property_list' %}" class="hover:text-accent transition-colors duration-200 whitespace-nowrap">{% trans "Недвижимость" %}</a>
-                <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
-                <a href="{{ location.district.get_absolute_url }}" class="hover:text-accent transition-colors duration-200 whitespace-nowrap">{{ location.district.name }}</a>
-                <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
-                <span class="text-gray-900 font-medium whitespace-nowrap">{{ location.name|truncatechars:30 }}</span>
-            </nav>
+        <div class="flex items-center text-sm text-gray-500 space-x-2 mb-8 overflow-x-auto">
+            <a href="{% url 'properties:property_list' %}" class="hover:text-primary transition-colors whitespace-nowrap">{% trans "Недвижимость" %}</a>
+            <span>/</span>
+            <a href="{{ location.district.get_absolute_url }}" class="hover:text-primary transition-colors whitespace-nowrap">{{ location.district.name }}</a>
+            <span>/</span>
+            <span class="text-gray-900 font-medium whitespace-nowrap">{{ location.name|truncatechars:30 }}</span>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div>
-                {% if location.description %}
-                    <div class="prose lg:prose-lg max-w-none mb-8">
-                        {{ location.description|linebreaks }}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+                <div class="space-y-8">
+                    <div class="text-gray-700 leading-relaxed text-lg">
+                        {% if location.description %}
+                            {{ location.description|linebreaks }}
+                        {% else %}
+                        {% blocktrans with district=location.district.name name=location.name %}Локация {{ name }} — часть района {{ district }}, где сочетаются уютные резиденции и близость к ключевым точкам Пхукета.{% endblocktrans %}
+                        {% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-r from-white to-gray-50 flex flex-col gap-2">
+                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "объектов в каталоге" %}</p>
+                            <p class="text-4xl font-bold text-primary">{{ location_property_count|default:district_property_count }}</p>
+                            <p class="text-sm text-gray-500">{% trans "Виллы, апартаменты и клубные резиденции." %}</p>
+                        </div>
+                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-r from-accent/10 to-white flex flex-col gap-2">
+                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "медианная цена сделки" %}</p>
+                            {% if location_avg_price or district_avg_price %}
+                                {% with median_price=location_avg_price|default:district_avg_price %}
+                                <p class="text-4xl font-bold text-primary">
+                                    {{ selected_currency.symbol|default:"$" }}{{ median_price|floatformat:0 }}
+                                    <span class="text-base font-semibold text-tertiary ml-1">{{ selected_currency.code|default:"USD" }}</span>
+                                </p>
+                                {% endwith %}
+                            {% else %}
+                                <p class="text-2xl font-semibold text-primary">{% trans "Цена по запросу" %}</p>
+                            {% endif %}
+                            <p class="text-sm text-gray-500">{% trans "Расчёт основан на активных объявлениях." %}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                            <span class="text-gray-500 uppercase tracking-[0.3em]">{% trans "район" %}</span>
+                            <span class="font-semibold text-gray-900">{{ location.district.name }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                            <span class="text-gray-500 uppercase tracking-[0.3em]">{% trans "курорт" %}</span>
+                            <span class="font-semibold text-gray-900">{% trans "Пхукет" %}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                            <span class="text-gray-500 uppercase tracking-[0.3em]">{% trans "формат" %}</span>
+                            <span class="font-semibold text-gray-900">{% trans "Инвестиции + lifestyle" %}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                            <span class="text-gray-500 uppercase tracking-[0.3em]">{% trans "статус" %}</span>
+                            <span class="font-semibold text-gray-900">{% trans "Доступно к покупке" %}</span>
+                        </div>
+                    </div>
+
+                    {% if district_roi.note %}
+                        <div class="p-6 rounded-3xl bg-primary/5 border border-primary/10 text-gray-700 leading-relaxed">
+                            <p class="text-xs uppercase tracking-[0.4em] text-primary mb-2">{% trans "Комментарий аналитиков Undersun" %}</p>
+                            <p>{{ district_roi.note }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="relative rounded-[32px] overflow-hidden shadow-2xl">
+                    {% if location.image %}
+                        <img src="{{ location.image.url }}" alt="{{ location.name }}" class="w-full h-96 object-cover">
+                    {% elif location_static_image %}
+                        <img src="{{ location_static_image }}" alt="{{ location.name }}" class="w-full h-96 object-cover">
+                    {% elif district_static_image %}
+                        <img src="{{ district_static_image }}" alt="{{ location.district.name }}" class="w-full h-96 object-cover">
+                    {% else %}
+                        <div class="w-full h-96 bg-gradient-to-br from-primary to-tertiary"></div>
+                    {% endif %}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 text-white">
+                        <p class="uppercase text-xs tracking-[0.3em] text-white/80 mb-1">{% trans "локация" %}</p>
+                        <p class="text-2xl font-bold">{{ location.name }}</p>
+                        <p class="text-sm text-white/80">{{ location.district.name }}, {% trans "Пхукет" %}</p>
+                    </div>
+                    <a href="{{ location.district.get_absolute_url }}"
+                       class="absolute top-6 right-6 inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold bg-white/15 border border-white/40 text-white/90 hover:text-white hover:bg-white/25 transition">
+                        <i class="fas fa-map mr-2"></i>
+                        {% trans "О районе" %}
+                    </a>
+                </div>
+
+                {% if district_travel_time %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-5 rounded-2xl bg-primary/5 border border-gray-100 flex flex-col gap-3">
+                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "До аэропорта" %}</p>
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-accent text-gray-900">
+                                    <i class="fas fa-car"></i>
+                                </span>
+                                <div>
+                                    <p class="text-sm text-gray-500">{% trans "На машине" %}</p>
+                                    <p class="text-xl font-semibold text-gray-900">{{ district_travel_time.car|default:"15" }} {% trans "мин" %}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-primary/5 border border-gray-100 flex flex-col gap-3">
+                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "Общественный транспорт" %}</p>
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/20 text-primary">
+                                    <i class="fas fa-bus"></i>
+                                </span>
+                                <div>
+                                    <p class="text-sm text-gray-500">{% trans "Автобус" %}</p>
+                                    <p class="text-xl font-semibold text-gray-900">{{ district_travel_time.bus|default:"30" }} {% trans "мин" %}</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">{{ district_travel_time.note|default:_('Время зависит от маршрута и трафика.') }}</p>
+                        </div>
                     </div>
                 {% endif %}
-                
-                <div class="bg-gray-50 p-6 rounded-lg">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Информация о локации" %}</h3>
-                    <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">{% trans "Район:" %}</span>
-                            <span class="font-medium">{{ location.district.name }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">{% trans "Объектов:" %}</span>
-                            <span class="font-medium">{{ location.properties_count }}</span>
-                        </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Consultation CTA -->
+<section id="location-consultation" class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="rounded-3xl bg-gradient-to-r from-primary via-primary to-gray-900 text-white p-8 lg:p-10 shadow-2xl border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="max-w-2xl space-y-4">
+                <p class="text-xs uppercase tracking-[0.4em] text-accent">{% trans "консультация" %}</p>
+                <h2 class="text-3xl lg:text-4xl font-bold leading-tight">{% trans "Подбор недвижимости в локации" %} {{ location.name }}</h2>
+                <p class="text-base lg:text-lg text-white/85">{% trans "Расскажем про лучшие проекты, пришлём презентации и расчёт доходности." %}</p>
+                <div class="flex flex-col sm:flex-row gap-3 text-sm text-white/80">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-clock text-accent"></i>
+                        <span>{% trans "Ответим в мессенджере в течение 15 минут" %}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-file-alt text-accent"></i>
+                        <span>{% trans "Подготовим сравнительную таблицу по объектам" %}</span>
                     </div>
                 </div>
             </div>
-            
-            <div>
-                {% if location.image %}
-                    <img src="{{ location.image.url }}" alt="{{ location.name }}" class="w-full h-80 object-cover rounded-lg shadow-lg">
-                {% elif location_static_image %}
-                    <img src="{{ location_static_image }}" alt="{{ location.name }}" class="w-full h-80 object-cover rounded-lg shadow-lg">
-                {% elif location.latitude and location.longitude %}
-                    <div id="location-map" class="w-full h-80 rounded-lg shadow-lg"></div>
-                {% endif %}
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <a href="https://wa.me/66633033133" target="_blank" rel="noopener"
+                   class="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-2xl font-semibold bg-accent text-gray-900 shadow-lg transition-transform hover:-translate-y-0.5">
+                    <i class="fab fa-whatsapp mr-2"></i>
+                    {% trans "Написать в WhatsApp" %}
+                </a>
+                <a href="tel:+66633033133"
+                   class="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-2xl font-semibold border border-white/40 text-white hover:border-white">
+                    <i class="fas fa-phone mr-2"></i>
+                    {% trans "Позвонить" %}
+                </a>
             </div>
         </div>
     </div>
@@ -114,14 +311,50 @@
 
 <!-- Properties in Location -->
 {% if properties %}
-    <section class="py-12 bg-gray-50">
+    <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-gray-900 mb-8">{% trans "Недвижимость в" %} {{ location.name }}</h2>
-            
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-2">{% trans "каталог" %}</p>
+                    <h2 class="text-3xl font-bold text-gray-900">{% trans "Недвижимость в" %} {{ location.name }}</h2>
+                    <p class="text-gray-500 mt-2">{% trans "Только актуальные предложения в продаже или аренде." %}</p>
+                </div>
+                <a href="{% url 'properties:property_list' %}?district={{ location.district.slug }}&location={{ location.slug }}"
+                   class="inline-flex items-center px-5 py-3 rounded-2xl border border-gray-200 font-semibold text-gray-900 hover:border-gray-300">
+                    <i class="fas fa-sliders-h mr-2"></i>
+                    {% trans "Открыть расширенный поиск" %}
+                </a>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for property in properties %}
                     {% include 'properties/card.html' %}
                 {% endfor %}
+            </div>
+
+            {% if location_property_count|default:district_property_count > properties|length %}
+                <div class="text-center mt-10">
+                    <a href="{% url 'properties:property_list' %}?district={{ location.district.slug }}&location={{ location.slug }}"
+                       class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors">
+                        {% trans "Посмотреть все объекты" %}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endif %}
+
+<!-- Location Map -->
+{% if location.latitude and location.longitude %}
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-2">{% trans "карта" %}</p>
+                <h2 class="text-3xl font-bold text-gray-900">{% trans "Где находится" %} {{ location.name }}</h2>
+                <p class="text-gray-500 mt-2">{% trans "В нескольких минутах от пляжей, ресторанов и инфраструктуры" %}</p>
+            </div>
+            <div class="bg-white rounded-[32px] shadow-2xl overflow-hidden border border-gray-100">
+                <div id="location-map" class="w-full h-96 md:h-[480px]"></div>
             </div>
         </div>
     </section>
@@ -131,17 +364,17 @@
 {% block extra_js %}
 {% if location.latitude and location.longitude %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const map = L.map('location-map').setView([{{ location.latitude }}, {{ location.longitude }}], 15);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    
-    L.marker([{{ location.latitude }}, {{ location.longitude }}])
-        .addTo(map)
-        .bindPopup('{{ location.name|escapejs }}');
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        const map = L.map('location-map').setView([{{ location.latitude }}, {{ location.longitude }}], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        L.marker([{{ location.latitude }}, {{ location.longitude }}])
+            .addTo(map)
+            .bindPopup('{{ location.name|escapejs }}');
+    });
 </script>
 {% endif %}
 {% endblock %}
