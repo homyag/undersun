@@ -135,7 +135,7 @@
                     <p class="mb-6 opacity-90 text-sm">
                         {% trans "Оставьте заявку и наш специалист свяжется с вами в течение часа" %}
                     </p>
-                    <form class="space-y-4 js-recaptcha-form" method="post" action="{% url 'core:contact' %}" data-recaptcha-action="service_contact">
+                    <form id="serviceContactForm" class="space-y-4 js-recaptcha-form" method="post" action="{% url 'users:contact_form' %}" data-recaptcha-action="service_contact">
                         {% csrf_token %}
                         {% include 'core/includes/recaptcha_token_field.html' %}
                         {% include 'core/includes/form_security_fields.html' with honeypot_id='service-contact-website' %}

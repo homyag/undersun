@@ -286,6 +286,9 @@
         return;
       }
 
+      // Загружаем API заранее, чтобы пользователь не ждал при первом клике по форме
+      loadRecaptchaApi();
+
       forms.forEach(form => {
         if (form.dataset.recaptchaBound === 'true') {
           return;
