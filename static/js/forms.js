@@ -209,6 +209,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // 2.1 Контактная форма на страницах услуг
+    const serviceContactForm = document.getElementById('serviceContactForm');
+    if (serviceContactForm) {
+        serviceContactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitFormAjax(this, `${langPrefix}/users/contact/`);
+        });
+    }
+
     // 3. Запись на встречу в офисе
     const officeVisitForm = document.getElementById('officeVisitForm');
     if (officeVisitForm) {

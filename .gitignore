@@ -163,3 +163,6 @@ cleanup.log
 /FUNCTIONS.md
 /AGENT.md
 /tmp/test.offset
+/logs/nginx_logs/
+/logs/proxy_logs/
+/logs/
