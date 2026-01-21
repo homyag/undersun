@@ -85,12 +85,24 @@ class Property(models.Model):
         ('both', _('Продажа/Аренда')),
     ]
 
+    BUILD_STATUS_CHOICES = [
+        ('completed', _('Готовый объект')),
+        ('under_construction', _('Строящийся объект')),
+    ]
+
     # Основная информация
     title = models.CharField(_('Название'), max_length=200)
     slug = models.SlugField(_('URL'), unique=True, max_length=150)
     property_type = models.ForeignKey(PropertyType, on_delete=models.CASCADE, verbose_name=_('Тип'))
     deal_type = models.CharField(_('Тип сделки'), max_length=10, choices=DEAL_TYPES, default='sale')
     status = models.CharField(_('Статус'), max_length=10, choices=STATUS_CHOICES, default='available')
+    build_status = models.CharField(
+        _('Стадия готовности'),
+        max_length=20,
+        choices=BUILD_STATUS_CHOICES,
+        default='under_construction',
+        help_text=_('Выберите "Готовый объект" или "Строящийся объект"'),
+    )
 
     # Описание
     description = HTMLField(_('Описание'))
@@ -139,7 +151,7 @@ class Property(models.Model):
     # Удобства (amenities) теперь через PropertyFeature и PropertyFeatureRelation
 
     # Поля для совместимости со старой БД
-    legacy_id = models.CharField(_('ID старой системы'), max_length=20, blank=True, null=True,
+    legacy_id = models.CharField(_('ID объекта'), max_length=20, blank=True, null=True,
                                 help_text=_('Идентификатор из старой Joomla системы (например: VS82)'))
     complex_name = models.CharField(_('Название комплекса'), max_length=100, blank=True,
                                    help_text=_('Название жилого комплекса или проекта'))

@@ -315,8 +315,8 @@
                                         <i class="fas fa-phone mr-1"></i>
                                         {% trans "Заказать звонок" %}
                                     </button>
-                                    {% if property.contact_person and property.contact_person.whatsapp %}
-                                        <a href="https://wa.me/{{ property.contact_person.whatsapp }}" target="_blank"
+                                    {% if property.contact_person and property.contact_person.whatsapp_url %}
+                                        <a href="{{ property.contact_person.whatsapp_url }}" target="_blank"
                                            class="bg-green-500 hover:bg-green-600 text-white w-10 h-10 rounded-full transition-all duration-300 hover:scale-105 shadow-sm flex items-center justify-center">
                                             <i class="fab fa-whatsapp text-lg"></i>
                                         </a>
@@ -417,30 +417,6 @@
                                     </div>
                                 </div>
                             {% endif %}
-
-{#                            {% if property.parking %}#}
-{#                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">#}
-{#                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">#}
-{#                                        <i class="fas fa-car text-primary text-xl"></i>#}
-{#                                    </div>#}
-{#                                    <div class="flex-grow">#}
-{#                                        <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>#}
-{#                                        <div class="text-sm text-gray-600 font-medium">{% trans "Парковка" %}</div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            {% endif %}#}
-
-{#                            {% if property.pool %}#}
-{#                                <div class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-primary transition-all duration-300">#}
-{#                                    <div class="flex-shrink-0 w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-4">#}
-{#                                        <i class="fas fa-swimming-pool text-primary text-xl"></i>#}
-{#                                    </div>#}
-{#                                    <div class="flex-grow">#}
-{#                                        <div class="font-bold text-xl text-gray-900">{% trans "Есть" %}</div>#}
-{#                                        <div class="text-sm text-gray-600 font-medium">{% trans "Бассейн" %}</div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            {% endif %}#}
                         </div>
                     </div>
 
@@ -574,10 +550,10 @@
                                             </a>
                                         </div>
                                     {% endif %}
-                                    {% if property.contact_person.whatsapp %}
+                                    {% if property.contact_person.whatsapp_url %}
                                         <div class="flex items-center space-x-3">
                                             <i class="fab fa-whatsapp text-accent w-4"></i>
-                                            <a href="https://wa.me/{{ property.contact_person.whatsapp }}"
+                                            <a href="{{ property.contact_person.whatsapp_url }}"
                                                target="_blank"
                                                class="text-gray-700 hover:text-accent transition-colors">
                                                 {% trans "Написать в WhatsApp" %}
@@ -653,10 +629,10 @@
                                         <i class="fas fa-phone mr-2"></i>{% trans "Позвонить" %}
                                     </a>
                                 {% endif %}
-                                {% if property.contact_person and property.contact_person.whatsapp %}
-                                    <a href="https://wa.me/{{ property.contact_person.whatsapp }}" target="_blank"
+                                {% if property.contact_person and property.contact_person.whatsapp_url %}
+                                    <a href="{{ property.contact_person.whatsapp_url }}" target="_blank"
                                        class="flex items-center justify-center bg-accent hover:bg-yellow-500 text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium">
-                                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                                       <i class="fab fa-whatsapp mr-2"></i>WhatsApp
                                     </a>
                                 {% else %}
                                     <a href="https://wa.me/6663303313" target="_blank"

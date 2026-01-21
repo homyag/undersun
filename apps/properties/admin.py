@@ -149,7 +149,7 @@ class PropertyAdminForm(forms.ModelForm):
 class PropertyAdmin(BaseAdminWithRequiredFields):
     form = PropertyAdminForm
     list_display = (
-        'legacy_id', 'title', 'property_type', 'district', 'deal_type', 'status',
+        'legacy_id', 'title', 'property_type', 'district', 'deal_type', 'build_status',
         'price_sale_thb', 'special_offer', 'is_active', 'is_featured',
         'featured_priority', 'views_count', 'created_at', 'translation_status'
     )
@@ -160,7 +160,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     search_fields = ('legacy_id', 'title', 'description', 'address')
     prepopulated_fields = {'slug': ('title',)}
     inlines = [PropertyImageInline, PropertyFeatureInline]
-    list_editable = ('property_type', 'is_active', 'is_featured', 'featured_priority', 'status')
+    list_editable = ('property_type', 'is_active', 'is_featured', 'featured_priority', 'build_status')
     date_hierarchy = 'created_at'
     ordering = ('-featured_priority', '-created_at')
     
@@ -312,14 +312,14 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     
     def save_model(self, request, obj, form, change):
         if not change:  # Если это новый объект
-            # Устанавливаем Богдана как контактное лицо по умолчанию, если contact_person не указан
+            # Устанавливаем Кирилла как контактное лицо по умолчанию, если contact_person не указан
             if not obj.contact_person_id:
                 try:
                     from apps.core.models import Team
-                    bogdan = Team.objects.get(id=1)  # Bogdan Dyachuk
-                    obj.contact_person = bogdan
+                    default_manager = Team.objects.get(id=2)  # Kirill Dedyugin
+                    obj.contact_person = default_manager
                 except Team.DoesNotExist:
-                    pass  # Если Богдан не найден, оставляем пустым
+                    pass  # Если сотрудник не найден, оставляем пустым
         super().save_model(request, obj, form, change)
 
     def get_queryset(self, request):
@@ -573,6 +573,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                 'property_type',
                 'deal_type',
                 'status',
+                'build_status',
                 'is_featured',
                 'featured_priority',
                 'is_active'
