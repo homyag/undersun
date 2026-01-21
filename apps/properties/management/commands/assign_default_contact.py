@@ -4,18 +4,24 @@ from apps.core.models import Team
 
 
 class Command(BaseCommand):
-    help = 'Назначает контактное лицо по умолчанию всем объектам без менеджера'
+    help = 'Назначает контактное лицо по умолчанию объектам недвижимости'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--contact-id',
             type=int,
-            default=1,
-            help='ID сотрудника для назначения (по умолчанию: 1 - Bogdan)'
+            default=2,
+            help='ID сотрудника для назначения (по умолчанию: 2 - Kirill Dedyugin)'
+        )
+        parser.add_argument(
+            '--override-existing',
+            action='store_true',
+            help='Назначить выбранного менеджера всем объектам, даже если он уже указан'
         )
 
     def handle(self, *args, **options):
         contact_id = options['contact_id']
+        override_existing = options['override_existing']
 
         try:
             contact_person = Team.objects.get(id=contact_id)
@@ -23,16 +29,22 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f'Сотрудник с ID {contact_id} не найден'))
             return
 
-        # Находим все объекты без контактного лица
-        properties_without_contact = Property.objects.filter(contact_person__isnull=True)
-        count = properties_without_contact.count()
+        # Находим подходящие объекты
+        if override_existing:
+            properties_qs = Property.objects.all()
+        else:
+            properties_qs = Property.objects.filter(contact_person__isnull=True)
+
+        count = properties_qs.count()
 
         if count == 0:
-            self.stdout.write(self.style.SUCCESS('Все объекты уже имеют контактное лицо'))
+            message = 'Все объекты уже имеют контактное лицо' if not override_existing else \
+                'Объекты для обновления не найдены'
+            self.stdout.write(self.style.SUCCESS(message))
             return
 
         # Назначаем контактное лицо
-        updated = properties_without_contact.update(contact_person=contact_person)
+        updated = properties_qs.update(contact_person=contact_person)
 
         self.stdout.write(
             self.style.SUCCESS(
