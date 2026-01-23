@@ -21,10 +21,6 @@
     @apply transition-all duration-300 hover:transform hover:scale-105;
 }
 
-/* View Toggle */
-.view-toggle button.active {
-    @apply bg-primary text-white;
-}
 
 /* Custom Checkbox and Radio Styles */
 input[type="checkbox"]:checked,
@@ -200,6 +196,53 @@ input[type="radio"]:focus {
 .marker-card.both .marker-price-chip {
     border-color: rgba(139,92,246,0.7);
     color: #6d28d9;
+}
+
+/* Special Offer Ribbon on property cards */
+.special-offer-ribbon {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    z-index: 10;
+}
+
+.special-offer-ribbon .ribbon-content {
+    position: relative;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.special-offer-ribbon .ribbon-content::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+    border-right: 8px solid #991b1b;
+    transform: translateX(-100%);
+}
+
+.special-offer-ribbon .ribbon-content::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    bottom: 0;
+    width: calc(100% + 8px);
+    height: 4px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
+    transform: translateY(100%);
 }
 
 .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {

@@ -59,6 +59,7 @@ class PropertyListView(ListView):
     context_object_name = 'properties'
     paginate_by = 12
     PROPERTY_TYPE_PRIORITY = ['condo', 'villa', 'townhouse', 'land']
+    BUILD_STATUS_ALLOWED_PROPERTY_TYPES = {'condo', 'villa', 'townhouse'}
 
     FILTER_PARAM_NAMES = {
         'deal_type': 'single',
@@ -70,6 +71,7 @@ class PropertyListView(ListView):
         'bedrooms': 'multi',
         'amenities': 'multi',
         'q': 'single',
+        'build_status': 'single',
     }
 
     PAGINATION_ALLOWED_PARAMS = (
@@ -84,6 +86,7 @@ class PropertyListView(ListView):
         'q',
         'sort',
         'map_view',
+        'build_status',
     )
 
     def get_paginate_by(self, queryset):
@@ -150,7 +153,13 @@ class PropertyListView(ListView):
         property_types = self.request.GET.getlist('property_type')
         if property_types:
             queryset = queryset.filter(property_type__name__in=property_types)
-        
+
+        # Стадия готовности
+        build_status = self.request.GET.get('build_status')
+        valid_statuses = dict(Property.BUILD_STATUS_CHOICES)
+        if build_status and build_status in valid_statuses:
+            queryset = queryset.filter(build_status=build_status)
+
         # Район
         district = self.request.GET.get('district')
         if district:
@@ -270,6 +279,7 @@ class PropertyListView(ListView):
             'amenities': self.request.GET.getlist('amenities'),
             'q': self.request.GET.get('q', ''),
             'sort': self.request.GET.get('sort', '-created_at'),
+            'build_status': self.request.GET.get('build_status', ''),
         }
 
         context['pagination_query_string'] = self.get_pagination_query_string()
@@ -283,8 +293,28 @@ class PropertyListView(ListView):
 
         context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        context['build_status_choices'] = Property.BUILD_STATUS_CHOICES
+        context['show_build_status_filter'] = self.should_show_build_status_filter(context)
 
         return context
+
+    def should_show_build_status_filter(self, context):
+        """Показывать блок фильтрации по стадии готовности только для продажи condos/villas/townhouses."""
+        deal_type = context.get('deal_type') or context['current_filters'].get('deal_type')
+        if deal_type != 'sale':
+            return False
+
+        selected_types = set(context['current_filters'].get('property_type') or [])
+        current_type = context.get('current_property_type')
+        if current_type:
+            selected_types.add(current_type)
+        elif context.get('property_type'):
+            selected_types.add(context['property_type'].name)
+
+        if not selected_types:
+            return False
+
+        return all(pt in self.BUILD_STATUS_ALLOWED_PROPERTY_TYPES for pt in selected_types)
 
     def get_pagination_query_string(self):
         allowed_keys = list(self.PAGINATION_ALLOWED_PARAMS)
@@ -1122,7 +1152,13 @@ def apply_search_filters(queryset, filters, currency_code='USD'):
     property_type = filters.get('type')
     if property_type:
         queryset = queryset.filter(property_type__name=property_type)
-    
+
+    # Стадия готовности
+    build_status = filters.get('build_status')
+    valid_statuses = dict(Property.BUILD_STATUS_CHOICES)
+    if build_status and build_status in valid_statuses:
+        queryset = queryset.filter(build_status=build_status)
+
     # Район  
     district = filters.get('district')
     if district:

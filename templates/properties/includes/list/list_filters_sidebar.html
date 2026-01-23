@@ -65,6 +65,33 @@
                 </div>
             </div>
             
+            {% if show_build_status_filter %}
+            <!-- Build Status -->
+            <div class="mb-6">
+                <h4 class="font-semibold text-gray-900 mb-3">
+                    {% trans "Стадия готовности" %}
+                </h4>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="radio" name="build_status" value=""
+                               {% if not current_filters.build_status %}checked{% endif %}
+                               class="w-4 h-4 text-accent border-gray-300 focus:ring-accent"
+                               style="accent-color: #474B57;">
+                        <span class="ml-3 text-sm text-gray-700">{% trans "Все объекты" %}</span>
+                    </label>
+                    {% for status_value, status_label in build_status_choices %}
+                    <label class="flex items-center">
+                        <input type="radio" name="build_status" value="{{ status_value }}"
+                               {% if current_filters.build_status == status_value %}checked{% endif %}
+                               class="w-4 h-4 text-accent border-gray-300 focus:ring-accent"
+                               style="accent-color: #474B57;">
+                        <span class="ml-3 text-sm text-gray-700">{{ status_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Price Range -->
             <div class="mb-6">
                 <h4 class="font-semibold text-gray-900 mb-3">
