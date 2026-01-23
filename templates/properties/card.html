@@ -48,12 +48,12 @@
                     <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none"></div>
 
                     <!-- Popular Badge -->
-                    {% if property.is_featured %}
-                        <div class="absolute top-3 left-3">
-                            <span class="bg-gradient-to-r from-accent to-yellow-500 text-gray-900 px-3 py-1 rounded-full text-sm font-semibold flex items-center shadow-lg">
-                                <i class="fas fa-star mr-1 text-xs"></i>
-                                {% trans "Рекомендуем" %}
-                            </span>
+                    {% if property.special_offer %}
+                        <div class="special-offer-ribbon">
+                            <div class="ribbon-content">
+                                <i class="fas fa-tag mr-1"></i>
+                                {{ property.special_offer }}
+                            </div>
                         </div>
                     {% endif %}
 
