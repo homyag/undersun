@@ -16,7 +16,7 @@
           "@type": "ListItem",
           "position": 1,
           "name": "{% trans "Недвижимость" %}",
-          "item": "{{ property_catalog_url }}"
+          "item": "{{ property_catalog_url|absolute_url:request|escapejs }}"
         },
         {
           "@type": "ListItem",
