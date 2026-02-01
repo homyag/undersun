@@ -1,9 +1,9 @@
 {% extends "admin/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block extrahead %}
 {{ block.super }}
-<link rel="stylesheet" type="text/css" href="{% load static %}{% static 'admin/css/language_selector.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/language_selector.css' %}">
 
 <!-- Fix for permissions policy violations in Django admin -->
 <script src="{% static 'admin/js/fixes/permissions-policy-fix.js' %}"></script>
@@ -16,6 +16,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="{% static 'admin/js/sortable_images.js' %}"></script>
 <link rel="stylesheet" href="{% static 'admin/css/sortable_images.css' %}">
+<link rel="stylesheet" href="{% static 'admin/css/sticky_scrollbar.css' %}">
+<script src="{% static 'admin/js/sticky_scrollbar.js' %}"></script>
 {% endblock %}
 
 {% block usertools %}

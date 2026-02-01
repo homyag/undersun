@@ -18,6 +18,7 @@ from django.conf import settings
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string
 from apps.properties.models import Property, PropertyType
+from apps.properties.views import PropertyListView
 from apps.locations.models import District
 from apps.blog.models import BlogPost
 from .models import PromotionalBanner, Service, Team
@@ -368,7 +369,11 @@ class MapView(TemplateView):
             longitude__isnull=False
         ).select_related('district', 'property_type', 'agent', 'contact_person').prefetch_related('images')
 
-        properties = list(properties_qs)
+        property_list_view = PropertyListView()
+        property_list_view.request = self.request
+        filtered_qs = property_list_view.apply_filters(properties_qs)
+
+        properties = list(filtered_qs)
         language_code = (translation.get_language() or 'ru')[:2]
         supported_languages = {'ru', 'en', 'th'}
         if language_code not in supported_languages:
@@ -452,6 +457,18 @@ class MapView(TemplateView):
             }
             for currency in active_currencies
         ]
+
+        filter_context = property_list_view.build_filter_context()
+        context.update(filter_context)
+
+        current_deal_type = filter_context['current_filters'].get('deal_type')
+        selected_types = set(filter_context['current_filters'].get('property_type') or [])
+        if current_deal_type == 'sale':
+            if not selected_types or all(
+                pt in property_list_view.BUILD_STATUS_ALLOWED_PROPERTY_TYPES
+                for pt in selected_types
+            ):
+                context['show_build_status_filter'] = True
 
         return context
 

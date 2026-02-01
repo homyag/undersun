@@ -3920,6 +3920,10 @@ msgstr "ช่วงราคา"
 msgid "Максимум"
 msgstr "สูงสุด"
 
+#: templates/properties/includes/list/list_filters_card.html:101
+msgid "Минимум"
+msgstr "ขั้นต่ำ"
+
 #: templates/core/map.html:1100 templates/core/map.html:1175
 #: templates/core/search.html:92
 msgid "Без ограничений"

@@ -236,9 +236,26 @@ class PropertyListView(ListView):
         return queryset.distinct()
 
     def get_context_data(self, **kwargs):
-        from .models import PropertyFeature
-        
         context = super().get_context_data(**kwargs)
+        context.update(self.build_filter_context())
+
+        context['pagination_query_string'] = self.get_pagination_query_string()
+
+        context['results_count_i18n'] = {
+            'zero': gettext('Объекты не найдены'),
+            'one': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 1),
+            'few': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 2),
+            'many': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 5),
+        }
+
+        context['seo_heading'] = self.build_seo_heading(context)
+        context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+
+        return context
+
+    def build_filter_context(self):
+        from .models import PropertyFeature
+
         priority_case = Case(
             *[
                 When(name=property_type, then=Value(index))
@@ -248,27 +265,24 @@ class PropertyListView(ListView):
             output_field=IntegerField(),
         )
 
-        context['property_types'] = (
+        property_types = (
             PropertyType.objects
             .annotate(_type_priority=priority_case)
             .order_by('_type_priority', 'name_display')
         )
-        context['districts'] = District.objects.all()
-        
-        # Добавляем локации для выбранного района
+        districts = District.objects.all()
+
         selected_district = self.request.GET.get('district')
         if selected_district:
-            context['locations'] = Location.objects.filter(district__slug=selected_district)
+            locations = Location.objects.filter(district__slug=selected_district)
         else:
-            context['locations'] = Location.objects.all()
-        
-        # Добавляем популярные amenities (с количеством > 0 объектов)
-        context['amenities'] = PropertyFeature.objects.annotate(
+            locations = Location.objects.all()
+
+        amenities = PropertyFeature.objects.annotate(
             property_count=Count('propertyfeaturerelation')
         ).filter(property_count__gte=1).order_by('-property_count')[:12]
-        
-        # Передаем текущие фильтры в контекст для сохранения состояния формы
-        context['current_filters'] = {
+
+        current_filters = {
             'deal_type': self.request.GET.get('deal_type', ''),
             'property_type': self.request.GET.getlist('property_type'),
             'district': self.request.GET.get('district', ''),
@@ -282,21 +296,16 @@ class PropertyListView(ListView):
             'build_status': self.request.GET.get('build_status', ''),
         }
 
-        context['pagination_query_string'] = self.get_pagination_query_string()
-
-        context['results_count_i18n'] = {
-            'zero': gettext('Объекты не найдены'),
-            'one': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 1),
-            'few': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 2),
-            'many': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 5),
+        filter_context = {
+            'property_types': property_types,
+            'districts': districts,
+            'locations': locations,
+            'amenities': amenities,
+            'current_filters': current_filters,
+            'build_status_choices': Property.BUILD_STATUS_CHOICES,
         }
-
-        context['seo_heading'] = self.build_seo_heading(context)
-        context['catalog_seo_block'] = self.get_catalog_seo_block(context)
-        context['build_status_choices'] = Property.BUILD_STATUS_CHOICES
-        context['show_build_status_filter'] = self.should_show_build_status_filter(context)
-
-        return context
+        filter_context['show_build_status_filter'] = self.should_show_build_status_filter(filter_context)
+        return filter_context
 
     def should_show_build_status_filter(self, context):
         """Показывать блок фильтрации по стадии готовности только для продажи condos/villas/townhouses."""
