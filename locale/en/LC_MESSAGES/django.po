@@ -4003,6 +4003,10 @@ msgstr "Price range"
 msgid "Максимум"
 msgstr "Maximum"
 
+#: templates/properties/includes/list/list_filters_card.html:101
+msgid "Минимум"
+msgstr "Minimum"
+
 #: templates/core/map.html:1100 templates/core/map.html:1175
 #: templates/core/search.html:92
 msgid "Без ограничений"

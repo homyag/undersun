@@ -91,24 +91,23 @@
 
     .map-layout {
         display: grid;
-        grid-template-columns: minmax(0, 330px) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
         gap: 1.5rem;
         padding: 2rem 0;
         background: var(--brand-soft);
-        transition: grid-template-columns 0.3s ease;
+        align-items: flex-start;
     }
 
-    .map-layout.panel-hidden {
-        grid-template-columns: 1fr;
+    .map-filter-column {
+        width: 100%;
+        max-width: 360px;
     }
 
-    .map-layout.panel-hidden .map-panel {
-        display: none;
+    #map-filter-sidebar {
+        border-radius: 18px;
+        box-shadow: 0 20px 50px rgba(71, 75, 87, 0.15);
     }
 
-    .map-layout.panel-hidden .map-wrapper {
-        grid-column: 1 / -1;
-    }
 
     .map-panel {
         width: 330px;
@@ -869,26 +868,13 @@
 
     @media (max-width: 1024px) {
         .map-layout {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
+            grid-template-columns: 1fr;
             padding: 1.5rem 0;
         }
-        .map-panel {
-            width: calc(100% - 2rem);
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            right: 1rem;
-            height: calc(100vh - 2rem);
-            overflow: hidden;
-            z-index: 900;
-            padding: 1.25rem;
-            gap: 1rem;
+        .map-filter-column {
+            max-width: 100%;
+            order: 2;
         }
-        .map-panel.is-collapsed { transform: translateY(-130%); }
-        .map-panel-toggle { display: inline-flex; }
-        .map-panel-toggle-floating { display: inline-flex; }
         .map-wrapper {
             min-height: 70vh;
             height: auto;
@@ -898,34 +884,6 @@
             height: 70vh;
             min-height: 420px;
             border-radius: 18px;
-        }
-        .map-panel-body {
-            position: relative;
-            flex: 1;
-        }
-        .map-panel-body .panel-section {
-            display: none;
-        }
-        .map-panel-body .panel-section.is-active {
-            display: block;
-        }
-        .map-panel-mobile-close {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .map-panel-mobile-tabs {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0,1fr));
-        }
-        .map-panel-actions {
-            position: sticky;
-            bottom: 0;
-            background: white;
-            padding-top: 0.75rem;
-            padding-bottom: 0.25rem;
-            box-shadow: 0 -10px 25px rgba(17,24,39,0.1);
-            border-top: 1px solid rgba(71,75,87,0.1);
         }
     }
 
@@ -941,9 +899,6 @@
         }
         .map-toolbar-card {
             width: 100%;
-        }
-        .map-panel-toggle-floating {
-            align-self: flex-start;
         }
         .map-floating-actions,
         .map-floating-stats {
@@ -1028,94 +983,9 @@
 <!-- Map experience -->
 <section class="bg-brand-soft">
     <div class="max-w-7xl mx-auto px-4 map-layout" id="mapLayout">
-        <aside class="map-panel" id="mapPanel" aria-hidden="false">
-            <div class="map-panel-header">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.4em] text-brand-tertiary mb-1">{% trans "Фильтры" %}</p>
-                    <h2 class="text-xl font-bold text-brand-primary">{% trans "Настройте выдачу" %}</h2>
-                </div>
-                <div class="map-panel-header-actions">
-                    <button class="map-panel-mobile-close" data-close-panel>
-                        <i class="fas fa-times"></i>
-                    </button>
-                    <button class="map-panel-toggle" id="panelToggle">
-                        <i class="fas fa-sliders-h"></i>
-                        <span>{% trans "Фильтры" %}</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="map-panel-mobile-tabs" id="mapPanelTabs">
-                <button type="button" class="map-panel-tab is-active" data-panel-tab="search">
-                    <i class="fas fa-search"></i>
-                    <span>{% trans "Поиск" %}</span>
-                </button>
-                <button type="button" class="map-panel-tab" data-panel-tab="deal">
-                    <i class="fas fa-handshake"></i>
-                    <span>{% trans "Сделка" %}</span>
-                </button>
-                <button type="button" class="map-panel-tab" data-panel-tab="type">
-                    <i class="fas fa-building"></i>
-                    <span>{% trans "Тип" %}</span>
-                </button>
-                <button type="button" class="map-panel-tab" data-panel-tab="price">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <span>{% trans "Цена" %}</span>
-                </button>
-            </div>
-
-            <div class="map-panel-body" id="mapPanelBody">
-                <div class="panel-section is-active" data-panel-content="search">
-                    <div class="panel-label">{% trans "Поиск" %}</div>
-                    <div class="map-search">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="mapSearchInput" placeholder="{% trans 'Введите район, проект или ID' %}">
-                    </div>
-                </div>
-
-                <div class="panel-section" data-panel-content="deal">
-                    <div class="panel-label">{% trans "Тип сделки" %}</div>
-                    <select id="dealSelect" class="map-select">
-                        <option value="all">{% trans "Все" %}</option>
-                        <option value="sale">{% trans "Покупка" %}</option>
-                        <option value="rent">{% trans "Аренда" %}</option>
-                    </select>
-                </div>
-
-                <div class="panel-section" data-panel-content="type">
-                    <div class="panel-label">{% trans "Тип недвижимости" %}</div>
-                    <select id="typeSelect" class="map-select">
-                        <option value="all">{% trans "Все типы" %}</option>
-                        {% for property_type in property_types %}
-                            <option value="{{ property_type.name }}">{{ property_type.name_display }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="panel-section" data-panel-content="price">
-                    <div class="panel-label">{% trans "Диапазон цены" %}</div>
-                    <div class="map-price-control">
-                        <div class="map-price-values">
-                            <span>{% trans "Максимум" %}</span>
-                            <span id="priceRangeValue">{% trans "Без ограничений" %}</span>
-                        </div>
-                        <input type="range" id="priceRangeInput" min="0" max="100000000" step="500000">
-                        <div class="map-price-reset" id="priceResetBtn">{% trans "Сбросить ограничение" %}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="map-panel-actions">
-                <button class="map-reset-btn" id="resetFiltersBtn">
-                    <i class="fas fa-rotate mr-2"></i>
-                    {% trans "Сбросить фильтры" %}
-                </button>
-                <button class="map-apply-btn" id="closePanelBtn">
-                    <span>{% trans "Показать" %}</span>
-                    <span class="map-apply-count" id="map-panel-apply-count">{{ properties.count }}</span>
-                </button>
-            </div>
-        </aside>
+        <div class="map-filter-column">
+            {% include 'properties/includes/list/list_filters_card.html' with filter_wrapper_id='map-filter-sidebar' filter_wrapper_classes='bg-white rounded-2xl shadow-2xl border border-gray-200 w-full' filter_reset_url=request.path %}
+        </div>
 
         <div class="map-wrapper">
             <div class="map-toolbar">
@@ -1124,10 +994,6 @@
                     <div class="text-2xl font-bold text-brand-primary" id="map-toolbar-visible">{{ properties.count }}</div>
                     <p class="text-xs text-brand-tertiary">{% trans "объектов на карте" %}</p>
                 </div>
-                <button class="map-panel-toggle map-panel-toggle-floating" id="panelToggleFloating">
-                    <i class="fas fa-sliders-h"></i>
-                    <span>{% trans "Фильтр" %}</span>
-                </button>
             </div>
 
             <div id="property-map"></div>
@@ -1177,13 +1043,16 @@
 {% trans "мес" as i18n_month_short %}
 {% trans "Геолокация не поддерживается" as i18n_geo_unsupported %}
 {% trans "Не удалось определить позицию" as i18n_geo_failed %}
+{% trans "Все локации" as i18n_all_locations %}
+{% url 'properties:get_locations_for_district' as locations_endpoint %}
 {{ map_currency_settings|json_script:"map-currency-settings" }}
 <script>
 const MAP_DEFAULT_CENTER = [7.8804, 98.3923];
 const PRICE_UNLIMITED_LABEL = "{{ i18n_price_unlimited|escapejs }}";
 const PRICE_ON_REQUEST_LABEL = "{{ i18n_price_on_request|escapejs }}";
 const PER_MONTH_SUFFIX = "{{ i18n_month_short|escapejs }}";
-const defaultDealTypes = ['sale', 'rent', 'both'];
+const LOCATIONS_ENDPOINT = "{{ locations_endpoint }}";
+const ALL_LOCATIONS_LABEL = "{{ i18n_all_locations|escapejs }}";
 const priceFieldMap = {
     sale: { USD: 'price_sale_usd', THB: 'price_sale_thb', RUB: 'price_sale_rub' },
     rent: { USD: 'price_rent_usd', THB: 'price_rent_thb', RUB: 'price_rent_rub' }
@@ -1389,15 +1258,6 @@ const allMarkers = [];
 const markerById = new Map();
 
 properties.forEach(property => {
-    property.price_value = computePriceValue(property);
-    property.search_blob = [
-        property.title,
-        property.district,
-        property.location_name || '',
-        property.property_type || '',
-        property.property_type_label || ''
-    ]
-        .join(' ').toLowerCase();
     const marker = createMarker(property);
     marker.propertyData = property;
     allMarkers.push(marker);
@@ -1406,34 +1266,11 @@ properties.forEach(property => {
 });
 
 map.addLayer(markers);
-
-const filterState = {
-    search: '',
-    dealTypes: new Set(defaultDealTypes),
-    limitDeals: false,
-    propertyTypes: new Set(),
-    maxPrice: Infinity
-};
-
-const priceSlider = document.getElementById('priceRangeInput');
-const priceValueEl = document.getElementById('priceRangeValue');
-const priceResetBtn = document.getElementById('priceResetBtn');
-const resetFiltersBtn = document.getElementById('resetFiltersBtn');
-const searchInputEl = document.getElementById('mapSearchInput');
-const dealSelect = document.getElementById('dealSelect');
-const typeSelect = document.getElementById('typeSelect');
-
-initializePriceControls();
-setupSearch();
-setupDistrictFocus();
-setupPanelToggles();
-setupPanelTabs();
-setupFilterChips();
 setupFloatingButtons();
 updateFavoritesIcons();
-setupGlobalReset();
-applyMapFilters();
 refreshCurrencyViews();
+updateStats(properties);
+initMapFilterForm();
 
 map.whenReady(function() {
     const loader = document.getElementById('map-loading');
@@ -1442,9 +1279,7 @@ map.whenReady(function() {
 
 window.addEventListener('resize', function() {
     map.invalidateSize();
-    handlePanelOnResize();
 });
-handlePanelOnResize();
 
 window.addEventListener('currencyChanged', event => {
     const detail = event?.detail || {};
@@ -1453,222 +1288,6 @@ window.addEventListener('currencyChanged', event => {
     refreshCurrencyViews();
 });
 
-function initializePriceControls() {
-    if (!priceSlider) return;
-    const values = properties.map(p => p.price_value || 0).filter(Boolean);
-    const max = values.length ? Math.max(...values) : 100000000;
-    const min = values.length ? Math.min(...values) : 0;
-    priceSlider.min = Math.max(0, Math.floor(min));
-    priceSlider.max = Math.ceil(max);
-    priceSlider.value = priceSlider.max;
-    priceValueEl.textContent = PRICE_UNLIMITED_LABEL;
-    filterState.maxPrice = Infinity;
-
-    priceSlider.addEventListener('input', function() {
-        const value = parseInt(this.value, 10);
-        if (isNaN(value) || value <= 0) {
-            filterState.maxPrice = Infinity;
-            priceValueEl.textContent = PRICE_UNLIMITED_LABEL;
-        } else {
-            filterState.maxPrice = value;
-            priceValueEl.textContent = formatPriceLabel(value);
-        }
-        applyMapFilters();
-    });
-
-    if (priceResetBtn) {
-        priceResetBtn.addEventListener('click', function() {
-            filterState.maxPrice = Infinity;
-            priceValueEl.textContent = PRICE_UNLIMITED_LABEL;
-            priceSlider.value = priceSlider.max;
-            applyMapFilters();
-        });
-    }
-}
-
-function setupFilterChips() {
-    if (dealSelect) {
-        dealSelect.addEventListener('change', function() {
-            const value = this.value;
-            if (value === 'all') {
-                filterState.limitDeals = false;
-                filterState.dealTypes = new Set(defaultDealTypes);
-            } else {
-                filterState.limitDeals = true;
-                filterState.dealTypes = new Set([value]);
-            }
-            applyMapFilters();
-        });
-    }
-
-    if (typeSelect) {
-        typeSelect.addEventListener('change', function() {
-            const value = this.value;
-            if (value === 'all') {
-                filterState.propertyTypes = new Set();
-            } else {
-                filterState.propertyTypes = new Set([value]);
-            }
-            applyMapFilters();
-        });
-    }
-}
-
-function handleDealChipClick() {}
-function syncDealChips() {}
-function syncTypeChips() {}
-function setupSearch() {
-    const searchInput = searchInputEl;
-    if (!searchInput) return;
-    let timeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            filterState.search = this.value.trim().toLowerCase();
-            applyMapFilters();
-        }, 250);
-    });
-}
-
-function setupGlobalReset() {
-    if (!resetFiltersBtn) return;
-    resetFiltersBtn.addEventListener('click', () => {
-        filterState.search = '';
-        if (searchInputEl) {
-            searchInputEl.value = '';
-        }
-
-        filterState.limitDeals = false;
-        filterState.dealTypes = new Set(defaultDealTypes);
-        syncDealChips();
-
-        filterState.propertyTypes = new Set();
-        syncTypeChips();
-
-        filterState.maxPrice = Infinity;
-        if (priceSlider) {
-            priceSlider.value = priceSlider.max || priceSlider.value;
-        }
-        if (priceValueEl) {
-            priceValueEl.textContent = PRICE_UNLIMITED_LABEL;
-        }
-
-        applyMapFilters();
-    });
-}
-
-function setupDistrictFocus() {}
-
-function setupPanelToggles() {
-    const panel = document.getElementById('mapPanel');
-    const closeBtn = document.getElementById('closePanelBtn');
-    const toggleBtn = document.getElementById('panelToggle');
-    const floatingToggle = document.getElementById('panelToggleFloating');
-    if (!panel) return;
-
-    const overlay = document.createElement('div');
-    overlay.id = 'map-panel-overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.background = 'rgba(0,0,0,0.35)';
-    overlay.style.zIndex = '850';
-    overlay.style.display = 'none';
-    document.body.appendChild(overlay);
-
-    function updateFloatingToggle() {
-        if (!floatingToggle) return;
-        const shouldShow = window.innerWidth < 1024 || panel.classList.contains('is-collapsed');
-        floatingToggle.classList.toggle('is-visible', shouldShow);
-    }
-
-    function togglePanel(forceState) {
-        const layout = document.getElementById('mapLayout');
-        const shouldOpen = typeof forceState === 'boolean' ? forceState : panel.classList.contains('is-collapsed');
-        if (shouldOpen) {
-            panel.classList.remove('is-collapsed');
-            panel.setAttribute('aria-hidden', 'false');
-            layout?.classList.remove('panel-hidden');
-            overlay.style.display = window.innerWidth < 1024 ? 'block' : 'none';
-        } else {
-            panel.classList.add('is-collapsed');
-            panel.setAttribute('aria-hidden', 'true');
-            layout?.classList.add('panel-hidden');
-            overlay.style.display = 'none';
-        }
-        updateFloatingToggle();
-        requestAnimationFrame(() => map.invalidateSize());
-    }
-
-    closeBtn?.addEventListener('click', () => togglePanel(false));
-    document.querySelectorAll('[data-close-panel]').forEach(btn => {
-        btn.addEventListener('click', () => togglePanel(false));
-    });
-    toggleBtn?.addEventListener('click', () => togglePanel());
-    floatingToggle?.addEventListener('click', () => togglePanel(true));
-    overlay.addEventListener('click', () => togglePanel(false));
-
-    updateFloatingToggle();
-}
-
-function setupPanelTabs() {
-    const tabContainer = document.getElementById('mapPanelTabs');
-    const tabs = tabContainer ? tabContainer.querySelectorAll('[data-panel-tab]') : [];
-    const sections = document.querySelectorAll('[data-panel-content]');
-    if (!tabs.length || !sections.length) return;
-
-    function applyTab(target) {
-        tabs.forEach(tab => tab.classList.toggle('is-active', tab.dataset.panelTab === target));
-        sections.forEach(section => {
-            if (window.innerWidth <= 1024) {
-                section.classList.toggle('is-active', section.dataset.panelContent === target);
-            } else {
-                section.classList.add('is-active');
-            }
-        });
-    }
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            applyTab(tab.dataset.panelTab);
-        });
-    });
-
-    const initialTab = tabContainer.querySelector('.map-panel-tab.is-active')?.dataset.panelTab || tabs[0].dataset.panelTab;
-    applyTab(initialTab);
-
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 1024) {
-            sections.forEach(section => section.classList.add('is-active'));
-        } else {
-            const activeTab = tabContainer.querySelector('.map-panel-tab.is-active')?.dataset.panelTab || tabs[0].dataset.panelTab;
-            applyTab(activeTab);
-        }
-    });
-}
-
-function handlePanelOnResize() {
-    const panel = document.getElementById('mapPanel');
-    const overlay = document.getElementById('map-panel-overlay');
-    const floatingToggle = document.getElementById('panelToggleFloating');
-    const layout = document.querySelector('.map-layout');
-    if (!panel) return;
-    if (window.innerWidth >= 1024) {
-        panel.classList.remove('is-collapsed');
-        panel.setAttribute('aria-hidden', 'false');
-        layout?.classList.remove('panel-hidden');
-        if (overlay) overlay.style.display = 'none';
-    } else {
-        panel.classList.add('is-collapsed');
-        panel.setAttribute('aria-hidden', 'true');
-        layout?.classList.add('panel-hidden');
-        if (overlay) overlay.style.display = 'none';
-    }
-    if (floatingToggle) {
-        const shouldShow = window.innerWidth < 1024 || panel.classList.contains('is-collapsed');
-        floatingToggle.classList.toggle('is-visible', shouldShow);
-    }
-    requestAnimationFrame(() => map.invalidateSize());
-}
 
 function setupFloatingButtons() {
     document.getElementById('geoLocateBtn')?.addEventListener('click', locateUser);
@@ -1677,54 +1296,6 @@ function setupFloatingButtons() {
     });
 }
 
-
-function computePriceValue(property) {
-    const thbValues = [property.price_sale_thb, property.price_rent_thb];
-    const usdValues = [property.price_sale_usd, property.price_rent_usd];
-    const rubValues = [property.price_sale_rub, property.price_rent_rub];
-
-    for (const value of thbValues) {
-        if (value && value > 0) return value;
-    }
-    for (const value of usdValues) {
-        if (value && value > 0) return value * 36;
-    }
-    for (const value of rubValues) {
-        if (value && value > 0) return value / 2; // приблизительный пересчет RUB -> THB
-    }
-    return 0;
-}
-
-function applyMapFilters() {
-    markers.clearLayers();
-    const filtered = [];
-
-    allMarkers.forEach(marker => {
-        const property = marker.propertyData;
-        if (!property || !property.lat || !property.lng) return;
-        if (!passesFilters(property)) return;
-        markers.addLayer(marker);
-        filtered.push(property);
-    });
-
-    updateStats(filtered);
-}
-
-function passesFilters(property) {
-    if (filterState.limitDeals && !filterState.dealTypes.has(property.deal_type)) {
-        return false;
-    }
-    if (filterState.propertyTypes.size && !filterState.propertyTypes.has(property.property_type)) {
-        return false;
-    }
-    if (filterState.search && !property.search_blob.includes(filterState.search)) {
-        return false;
-    }
-    if (filterState.maxPrice !== Infinity && property.price_value && property.price_value > filterState.maxPrice) {
-        return false;
-    }
-    return true;
-}
 
 function refreshCurrencyViews() {
     markerById.forEach(marker => {
@@ -1747,7 +1318,6 @@ function updateStats(list) {
     setText('map-visible-sale', sale);
     setText('map-visible-rent', rent);
     setText('map-toolbar-visible', visible);
-    setText('map-panel-apply-count', visible);
 }
 
 function setText(id, value) {
@@ -1755,17 +1325,6 @@ function setText(id, value) {
     if (el) {
         el.textContent = value;
     }
-}
-
-function formatPriceLabel(value) {
-    if (!Number.isFinite(value) || value <= 0) return PRICE_UNLIMITED_LABEL;
-    if (value >= 1_000_000) {
-        return `до ${(value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1)}M ฿`;
-    }
-    if (value >= 1_000) {
-        return `до ${(value / 1_000).toFixed(value % 1_000 === 0 ? 0 : 1)}K ฿`;
-    }
-    return `до ${value.toLocaleString('ru-RU')} ฿`;
 }
 
 function escapeHtml(str) {
@@ -2002,6 +1561,56 @@ function updateFavoritesIcons() {
             icon.classList.add('fas');
         }
     });
+}
+
+function initMapFilterForm() {
+    const form = document.getElementById('filter-form');
+    if (!form) return;
+
+    const inputs = Array.from(form.querySelectorAll('input, select'));
+    inputs.forEach(input => {
+        if (input.name === 'sort' || input.name === 'current_property_type') {
+            return;
+        }
+        const eventName = (input.type === 'checkbox' || input.type === 'radio' || input.tagName === 'SELECT') ? 'change' : 'input';
+        input.addEventListener(eventName, () => {
+            clearTimeout(input._mapFilterTimeout);
+            const delay = (input.name === 'min_price' || input.name === 'max_price') ? 800 : 400;
+            input._mapFilterTimeout = setTimeout(() => {
+                form.submit();
+            }, delay);
+        });
+    });
+
+    const districtSelect = document.getElementById('district-select');
+    const locationSelect = document.getElementById('location-select');
+    if (districtSelect && locationSelect) {
+        const defaultOption = locationSelect.querySelector('option[value=""]');
+        const defaultLabel = defaultOption ? defaultOption.textContent : ALL_LOCATIONS_LABEL;
+        districtSelect.addEventListener('change', () => {
+            const districtSlug = districtSelect.value;
+            locationSelect.innerHTML = `<option value="">${defaultLabel}</option>`;
+            if (!districtSlug) {
+                form.submit();
+                return;
+            }
+            fetch(`${LOCATIONS_ENDPOINT}?district=${encodeURIComponent(districtSlug)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || !data.success || !Array.isArray(data.locations)) {
+                        return;
+                    }
+                    data.locations.forEach(location => {
+                        const option = document.createElement('option');
+                        option.value = location.slug;
+                        option.textContent = location.name;
+                        locationSelect.appendChild(option);
+                    });
+                    form.submit();
+                })
+                .catch(error => console.error('Failed to load locations for district:', error));
+        });
+    }
 }
 
 function showNotification(message) {
