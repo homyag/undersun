@@ -77,6 +77,26 @@ class LanguageRedirectMiddleware(MiddlewareMixin):
         return HttpResponsePermanentRedirect(target)
 
 
+class LegacyRealEstateRedirectMiddleware(MiddlewareMixin):
+    """301-редиректы со старых URL /{lang}/real-estate/... на актуальный каталог."""
+
+    legacy_pattern = re.compile(r'^/(ru|en|th)/real-estate(?:/.*)?$')
+
+    def process_request(self, request):
+        match = self.legacy_pattern.match(request.path)
+        if not match:
+            return None
+
+        language = match.group(1)
+        target = f'/{language}/property/'
+
+        query_string = request.META.get('QUERY_STRING')
+        if query_string:
+            target = f'{target}?{query_string}'
+
+        return HttpResponsePermanentRedirect(target)
+
+
 class BadInquiryRequestLoggerMiddleware(MiddlewareMixin):
     """Log подозрительные GET-запросы к AJAX-эндпоинту заявок по объектам."""
 

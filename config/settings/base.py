@@ -75,6 +75,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'apps.core.middleware.LanguageRedirectMiddleware',
+    'apps.core.middleware.LegacyRealEstateRedirectMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'apps.core.middleware.BadInquiryRequestLoggerMiddleware',
