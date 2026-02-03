@@ -6,6 +6,7 @@
 let currentImageIndex = 0;
 let currentSlidePairIndex = 0;
 let totalSlidePairs = Math.ceil(PROPERTY_IMAGES.length / 2);
+let slidePairCache = null;
 
 const PROPERTY_I18N = window.propertyDetailTranslations || {};
 const LABEL_PRICE_ON_REQUEST = PROPERTY_I18N.priceOnRequest || 'По запросу';
@@ -17,6 +18,26 @@ function isMobile() {
     return window.innerWidth < 768; // md breakpoint
 }
 
+function getSlidePairs() {
+    if (!slidePairCache) {
+        slidePairCache = Array.from(document.querySelectorAll('.property-slide-pair[data-slide-pair]'))
+            .map(node => ({
+                node,
+                index: parseInt(node.dataset.slidePair, 10) || 0,
+            }))
+            .sort((a, b) => a.index - b.index);
+    }
+    return slidePairCache;
+}
+
+function getCurrentPairPosition(pairs) {
+    if (!pairs.length) {
+        return -1;
+    }
+    const foundIndex = pairs.findIndex(pair => pair.index === currentSlidePairIndex);
+    return foundIndex >= 0 ? foundIndex : 0;
+}
+
 // Carousel functionality (works for both mobile and desktop)
 function nextSlide() {
     if (isMobile()) {
@@ -26,17 +47,18 @@ function nextSlide() {
         showMobileSlide((currentImageIndex + 1) % PROPERTY_IMAGES.length);
     } else {
         // Desktop: dual image navigation
-        if (totalSlidePairs <= 1) return;
+        const slidePairs = getSlidePairs();
+        if (slidePairs.length <= 1) return;
 
-        const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
-        currentSlidePairIndex = (currentSlidePairIndex + 2) % PROPERTY_IMAGES.length;
-        if (currentSlidePairIndex >= PROPERTY_IMAGES.length) currentSlidePairIndex = 0;
-
-        const nextSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+        const currentPosition = getCurrentPairPosition(slidePairs);
+        const nextPosition = (currentPosition + 1) % slidePairs.length;
+        const currentSlidePair = slidePairs[currentPosition]?.node;
+        const nextSlidePair = slidePairs[nextPosition]?.node;
 
         if (currentSlidePair && nextSlidePair) {
             currentSlidePair.style.opacity = '0';
             nextSlidePair.style.opacity = '1';
+            currentSlidePairIndex = slidePairs[nextPosition].index;
         }
     }
 
@@ -54,18 +76,18 @@ function previousSlide() {
         showMobileSlide(targetIndex);
     } else {
         // Desktop: dual image navigation
-        if (totalSlidePairs <= 1) return;
+        const slidePairs = getSlidePairs();
+        if (slidePairs.length <= 1) return;
 
-        const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
-        currentSlidePairIndex = (currentSlidePairIndex - 2 + PROPERTY_IMAGES.length);
-        while (currentSlidePairIndex >= PROPERTY_IMAGES.length) currentSlidePairIndex -= 2;
-        if (currentSlidePairIndex < 0) currentSlidePairIndex = PROPERTY_IMAGES.length - (PROPERTY_IMAGES.length % 2 === 0 ? 2 : 1);
-
-        const prevSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
+        const currentPosition = getCurrentPairPosition(slidePairs);
+        const prevPosition = (currentPosition - 1 + slidePairs.length) % slidePairs.length;
+        const currentSlidePair = slidePairs[currentPosition]?.node;
+        const prevSlidePair = slidePairs[prevPosition]?.node;
 
         if (currentSlidePair && prevSlidePair) {
             currentSlidePair.style.opacity = '0';
             prevSlidePair.style.opacity = '1';
+            currentSlidePairIndex = slidePairs[prevPosition].index;
         }
     }
 
@@ -92,17 +114,28 @@ function showMobileSlide(targetIndex) {
 }
 
 function goToSlidePair(pairIndex) {
-    if (totalSlidePairs <= 1 || pairIndex === currentSlidePairIndex) return;
+    const slidePairs = getSlidePairs();
+    if (slidePairs.length <= 1) return;
 
-    const currentSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + currentSlidePairIndex + '"]');
-    const targetSlidePair = document.querySelector('.property-slide-pair[data-slide-pair="' + pairIndex + '"]');
+    const targetPosition = slidePairs.findIndex(pair => pair.index === pairIndex);
+    if (targetPosition === -1) {
+        return;
+    }
+
+    const currentPosition = getCurrentPairPosition(slidePairs);
+    if (currentPosition === targetPosition) {
+        return;
+    }
+
+    const currentSlidePair = slidePairs[currentPosition]?.node;
+    const targetSlidePair = slidePairs[targetPosition]?.node;
 
     if (currentSlidePair && targetSlidePair) {
         currentSlidePair.style.opacity = '0';
         targetSlidePair.style.opacity = '1';
+        currentSlidePairIndex = slidePairs[targetPosition].index;
     }
 
-    currentSlidePairIndex = pairIndex;
     updateCarouselUI();
 }
 
