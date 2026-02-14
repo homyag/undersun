@@ -33,6 +33,10 @@ X_FRAME_OPTIONS = 'ALLOWALL'
 # Allow embedding for Yandex Metrica/Webvisor only via CSP frame-ancestors
 FRAME_ANCESTORS = "'self' https://metrika.yandex.ru https://*.metrika.yandex.ru https://webvisor.com https://*.webvisor.com"
 
+# CSP directives (consumed by FrameAncestorsMiddleware)
+DEFAULT_SRC = "'self'"
+CONNECT_SRC = "'self' https://mc.yandex.ru wss://mc.yandex.ru"
+
 SECURE_SSL_REDIRECT = True # раскомментировать после получения доступа по 443
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") # раскомментировать после получения доступа по 443
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin" # раскомментировать после получения доступа по 443

@@ -24,22 +24,50 @@ class PermissionsPolicyMiddleware(MiddlewareMixin):
 
 
 class FrameAncestorsMiddleware(MiddlewareMixin):
-    """Append a CSP frame-ancestors directive when configured."""
+    """Append CSP directives (frame-ancestors, connect-src, default-src) when configured."""
 
     def process_response(self, request, response):
-        directives = getattr(settings, 'FRAME_ANCESTORS', None)
-        if not directives:
+        csp_directives = {}
+
+        frame_ancestors = getattr(settings, 'FRAME_ANCESTORS', None)
+        if frame_ancestors:
+            csp_directives['frame-ancestors'] = frame_ancestors
+
+        connect_sources = getattr(settings, 'CONNECT_SRC', None)
+        if connect_sources:
+            csp_directives['connect-src'] = connect_sources
+
+        default_sources = getattr(settings, 'DEFAULT_SRC', None)
+        if default_sources:
+            csp_directives['default-src'] = default_sources
+
+        if not csp_directives:
             return response
 
-        frame_directive = f"frame-ancestors {directives}"
-        existing_csp = response.get('Content-Security-Policy')
+        existing_csp = response.get('Content-Security-Policy', '')
+        directive_map = {}
 
         if existing_csp:
-            if 'frame-ancestors' in existing_csp:
-                return response
-            response['Content-Security-Policy'] = f"{existing_csp}; {frame_directive}"
-        else:
-            response['Content-Security-Policy'] = frame_directive
+            for part in existing_csp.split(';'):
+                part = part.strip()
+                if not part:
+                    continue
+                bits = part.split(' ', 1)
+                directive = bits[0]
+                value = bits[1] if len(bits) > 1 else ''
+                directive_map[directive] = value
+
+        for directive_name, directive_value in csp_directives.items():
+            if directive_name in directive_map:
+                continue
+            directive_map[directive_name] = directive_value
+
+        if directive_map:
+            response['Content-Security-Policy'] = '; '.join(
+                f"{name} {value}".strip()
+                for name, value in directive_map.items()
+                if value
+            )
 
         return response
 
