@@ -18,11 +18,51 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileFiltersToggle = document.getElementById('mobile-filters-toggle');
     const mobileFiltersArrow = document.getElementById('mobile-filters-arrow');
     const filtersSidebar = document.getElementById('filters-sidebar');
+    const form = document.getElementById('filter-form');
+
+    const trackCatalogGoal = (goalName, params) => {
+        if (typeof window.dispatchMetrikaGoal === 'function' && goalName) {
+            window.dispatchMetrikaGoal(goalName, params);
+        }
+    };
+
+    const submitFilters = (options = {}) => {
+        if (!form) {
+            return;
+        }
+        const trigger = options.trigger || '';
+        const origin = options.origin || '';
+        form.dataset.lastFilterTrigger = trigger;
+        form.dataset.lastFilterOrigin = origin;
+
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+        } else {
+            trackCatalogGoal('catalog_filters_submit', {
+                trigger: trigger || 'auto',
+                origin: origin || (trigger ? 'auto' : 'manual')
+            });
+            form.submit();
+        }
+    };
+
+    window.submitPropertyFilters = submitFilters;
+
+    if (form) {
+        form.addEventListener('submit', function() {
+            const trigger = form.dataset.lastFilterTrigger || 'manual';
+            const origin = form.dataset.lastFilterOrigin || (trigger === 'manual' ? 'manual' : 'auto');
+            trackCatalogGoal('catalog_filters_submit', { trigger, origin });
+            form.dataset.lastFilterTrigger = '';
+            form.dataset.lastFilterOrigin = '';
+        });
+    }
     
     if (mobileFiltersToggle) {
         mobileFiltersToggle.addEventListener('click', function() {
             const isHidden = filtersSidebar.classList.contains('hidden');
-            
+            const nextState = isHidden ? 'open' : 'close';
+
             if (isHidden) {
                 filtersSidebar.classList.remove('hidden');
                 filtersSidebar.classList.add('mobile-open');
@@ -32,6 +72,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 filtersSidebar.classList.remove('mobile-open');
                 mobileFiltersArrow.style.transform = 'rotate(0deg)';
             }
+
+            trackCatalogGoal('catalog_mobile_filters_toggle', { state: nextState });
         });
     }
     
@@ -67,13 +109,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Auto-submit form after updating locations
             setTimeout(() => {
-                document.getElementById('filter-form').submit();
+                submitFilters({ trigger: 'district', origin: 'auto' });
             }, 100);
         });
     }
     
     // Auto-submit form when any filter changes
-    const form = document.getElementById('filter-form');
     if (form) {
         // Get all form inputs
         const inputs = Array.from(form.querySelectorAll('input, select'));
@@ -138,7 +179,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         localStorage.setItem('returnToMapView', 'true');
                     }
 
-                    form.submit();
+                    submitFilters({
+                        trigger: input.name || 'input',
+                        origin: 'auto'
+                    });
                 }, delay);
             });
         });

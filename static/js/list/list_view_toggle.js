@@ -46,5 +46,8 @@ function setView(viewType) {
 }
 
 function changeView(viewType) {
+    if (typeof window.dispatchMetrikaGoal === 'function') {
+        window.dispatchMetrikaGoal('catalog_view_change', { view: viewType });
+    }
     setView(viewType);
 }

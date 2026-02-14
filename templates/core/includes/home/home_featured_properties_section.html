@@ -8,26 +8,50 @@
                 {% blocktrans %}Лучшие виллы, апартаменты и таунхаусы Пхукета для инвестиций, переезда и отдыха. Мы отбираем проекты с высокой ликвидностью, понятным управлением и прозрачной юридической проверкой.{% endblocktrans %}
             </p>
             <div class="flex flex-wrap justify-center gap-4 mt-5 text-xs sm:text-sm font-medium text-primary">
-                <a href="{% url 'properties:property_by_type' 'villa' %}" class="hover:text-accent transition">{% trans "Виллы для инвестиций" %}</a>
+                <a href="{% url 'properties:property_by_type' 'villa' %}"
+                   class="hover:text-accent transition"
+                   data-ym-goal="featured_type_shortcut"
+                   data-ym-param-type="villa"
+                   data-ym-param-placement="top">
+                    {% trans "Виллы для инвестиций" %}
+                </a>
                 <span class="text-gray-300">•</span>
-                <a href="{% url 'properties:property_by_type' 'condo' %}" class="hover:text-accent transition">{% trans "Квартиры у моря" %}</a>
+                <a href="{% url 'properties:property_by_type' 'condo' %}"
+                   class="hover:text-accent transition"
+                   data-ym-goal="featured_type_shortcut"
+                   data-ym-param-type="condo"
+                   data-ym-param-placement="top">
+                    {% trans "Квартиры у моря" %}
+                </a>
                 <span class="text-gray-300">•</span>
-                <a href="{% url 'properties:property_by_type' 'townhouse' %}" class="hover:text-accent transition">{% trans "Дома для семейной жизни" %}</a>
+                <a href="{% url 'properties:property_by_type' 'townhouse' %}"
+                   class="hover:text-accent transition"
+                   data-ym-goal="featured_type_shortcut"
+                   data-ym-param-type="townhouse"
+                   data-ym-param-placement="top">
+                    {% trans "Дома для семейной жизни" %}
+                </a>
             </div>
 
             <!-- Property Type Tabs -->
             <div class="flex justify-center mb-8">
                 <div class="inline-flex bg-white rounded-lg p-1 shadow-md max-w-full overflow-x-auto featured-tabs">
                     <button onclick="switchPropertyType('villa')" id="tab-villa"
-                            class="px-4 sm:px-6 py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 property-tab active whitespace-nowrap">
+                            class="px-4 sm:px-6 py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 property-tab active whitespace-nowrap"
+                            data-ym-goal="featured_tab_switch"
+                            data-ym-param-type="villa">
                         <i class="fas fa-home mr-1 sm:mr-2"></i>{% trans "Виллы" %}
                     </button>
                     <button onclick="switchPropertyType('condo')" id="tab-condo"
-                            class="px-4 sm:px-6 py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 property-tab whitespace-nowrap">
+                            class="px-4 sm:px-6 py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 property-tab whitespace-nowrap"
+                            data-ym-goal="featured_tab_switch"
+                            data-ym-param-type="condo">
                         <i class="fas fa-building mr-1 sm:mr-2"></i>{% trans "Квартиры" %}
                     </button>
                     <button onclick="switchPropertyType('townhouse')" id="tab-townhouse"
-                            class="px-4 sm:px-6 py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 property-tab whitespace-nowrap">
+                            class="px-4 sm:px-6 py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 property-tab whitespace-nowrap"
+                            data-ym-goal="featured_tab_switch"
+                            data-ym-param-type="townhouse">
                         <i class="fas fa-city mr-1 sm:mr-2"></i>{% trans "Дома" %}
                     </button>
                 </div>
@@ -63,16 +87,35 @@
 
         <div class="text-center mt-8">
             <a href="{% url 'properties:property_list' %}"
-               class="bg-primary hover:bg-yellow-500 text-white font-bold py-3 px-8 rounded-md text-lg transition-colors">
+               class="bg-primary hover:bg-yellow-500 text-white font-bold py-3 px-8 rounded-md text-lg transition-colors"
+               data-ym-goal="featured_catalog_click">
                 {% trans "Смотреть каталог" %}
             </a>
             <div class="flex flex-wrap justify-center gap-3 mt-4 text-xs sm:text-sm text-gray-600">
                 <span>{% trans "Или перейти к выбору:" %}</span>
-                <a href="{% url 'properties:property_by_type' 'villa' %}" class="font-medium text-primary hover:text-accent transition">{% trans "Виллы" %}</a>
+                <a href="{% url 'properties:property_by_type' 'villa' %}"
+                   class="font-medium text-primary hover:text-accent transition"
+                   data-ym-goal="featured_type_shortcut"
+                   data-ym-param-type="villa"
+                   data-ym-param-placement="bottom">
+                    {% trans "Виллы" %}
+                </a>
                 <span class="text-gray-300">•</span>
-                <a href="{% url 'properties:property_by_type' 'condo' %}" class="font-medium text-primary hover:text-accent transition">{% trans "Квартиры" %}</a>
+                <a href="{% url 'properties:property_by_type' 'condo' %}"
+                   class="font-medium text-primary hover:text-accent transition"
+                   data-ym-goal="featured_type_shortcut"
+                   data-ym-param-type="condo"
+                   data-ym-param-placement="bottom">
+                    {% trans "Квартиры" %}
+                </a>
                 <span class="text-gray-300">•</span>
-                <a href="{% url 'properties:property_by_type' 'townhouse' %}" class="font-medium text-primary hover:text-accent transition">{% trans "Дома" %}</a>
+                <a href="{% url 'properties:property_by_type' 'townhouse' %}"
+                   class="font-medium text-primary hover:text-accent transition"
+                   data-ym-goal="featured_type_shortcut"
+                   data-ym-param-type="townhouse"
+                   data-ym-param-placement="bottom">
+                    {% trans "Дома" %}
+                </a>
             </div>
         </div>
     </div>

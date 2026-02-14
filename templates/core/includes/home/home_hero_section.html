@@ -53,7 +53,9 @@
 
                 <!-- Catalog Button -->
                 <div class="py-1">
-                    <a href="{% url 'properties:property_list' %}" class="inline-flex items-center px-7 py-3 bg-accent hover:bg-yellow-500 text-gray-900 text-xs sm:text-base lg:text-lg rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    <a href="{% url 'properties:property_list' %}"
+                       class="inline-flex items-center px-7 py-3 bg-accent hover:bg-yellow-500 text-gray-900 text-xs sm:text-base lg:text-lg rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                       data-ym-goal="hero_view_all">
                         {% trans "Смотреть все объекты" %}
                     </a>
                 </div>
@@ -61,7 +63,12 @@
                 <!-- Поисковая форма -->
                 <div class="w-full flex justify-center px-3 sm:px-4">
                     <!-- Desktop форма -->
-                    <form method="get" action="{% url 'core:search' %}" class="hidden lg:block w-full max-w-6xl">
+                    <form method="get"
+                          action="{% url 'core:search' %}"
+                          class="hidden lg:block w-full max-w-6xl"
+                          data-ym-goal="hero_search_submit"
+                          data-ym-event="submit"
+                          data-ym-param-device="desktop">
                         <div class="bg-white/95 backdrop-blur-sm rounded-md shadow-2xl px-6 py-6 xl:px-8 2xl:px-10 2xl:py-8">
                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1.2fr_1.2fr_1fr_1fr_0.8fr] items-end gap-3 xl:gap-5 2xl:gap-8">
                                 <!-- Поле "Тип" -->
@@ -135,7 +142,12 @@
 
                     <!-- Mobile форма -->
                     <div class="lg:hidden w-full max-w-md">
-                        <form method="get" action="{% url 'core:search' %}" class="mobile-search-form bg-white/95 backdrop-blur-sm rounded-md shadow-xl p-4 sm:p-5 space-y-3">
+                        <form method="get"
+                              action="{% url 'core:search' %}"
+                              class="mobile-search-form bg-white/95 backdrop-blur-sm rounded-md shadow-xl p-4 sm:p-5 space-y-3"
+                              data-ym-goal="hero_search_submit"
+                              data-ym-event="submit"
+                              data-ym-param-device="mobile">
                             <!-- Поле "Тип" -->
                             <div>
                                 <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Тип" %}</label>

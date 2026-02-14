@@ -7,7 +7,12 @@
         <section class="w-full promotional-banner-section">
             <div class="w-full">
             {% if banner_url %}
-                <a href="{{ banner_url }}" class="block group">
+                <a href="{{ banner_url }}"
+                   class="block group"
+                   data-ym-goal="promo_banner_click"
+                   data-ym-param-banner-id="{{ promotional_banner.pk }}"
+                   data-ym-param-lang="{{ promotional_banner.language_code }}"
+                   data-ym-param-name="{{ promotional_banner.name|default:'' }}">
             {% else %}
                 <div class="group">
             {% endif %}

@@ -48,6 +48,7 @@ def serialize_properties_for_js(properties):
         
         result.append({
             'id': prop.id,
+            'slug': prop.slug,
             'title': prop.title,
             'url': prop.get_absolute_url(),
             'main_image_url': main_image_url,
@@ -56,6 +57,7 @@ def serialize_properties_for_js(properties):
             'location_name': prop.location.name if prop.location else '',
             'property_type': prop.property_type.name_display if prop.property_type else '',
             'property_type_name': prop.property_type.name_display if prop.property_type else '',
+            'property_type_key': prop.property_type.name if prop.property_type else '',
             'deal_type': prop.deal_type,
             'bedrooms': prop.bedrooms or 0,
             'bathrooms': prop.bathrooms or 0,

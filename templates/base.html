@@ -205,6 +205,24 @@
         }
     })();
 </script>
+<script>
+    (function() {
+        const COUNTER_ID = 90630603;
+        window.METRIKA_COUNTER_ID = COUNTER_ID;
+        window.trackMetrikaGoal = function(goalName, params) {
+            if (!goalName || typeof window.ym !== 'function') {
+                return;
+            }
+            try {
+                window.ym(COUNTER_ID, 'reachGoal', goalName, params || {});
+            } catch (error) {
+                if (window.console && typeof window.console.warn === 'function') {
+                    console.warn('Не удалось отправить цель в Яндекс.Метрику', goalName, error);
+                }
+            }
+        };
+    })();
+</script>
 <noscript><div><img src="https://mc.yandex.ru/watch/90630603" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
 {% include 'includes/layout/header.html' with lang=LANGUAGE_CODE|default:'ru' %}
@@ -424,6 +442,7 @@
 </div>
 
 <!-- Custom JS - Forms Handler (должен быть до main.js) -->
+<script src="{% static 'js/analytics/metrika-goals.js' %}" defer></script>
 <script src="{% static 'js/forms.js' %}" defer></script>
 
 <!-- Custom JS - Main Script -->
