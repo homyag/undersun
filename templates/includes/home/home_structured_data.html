@@ -71,22 +71,6 @@
           },
           "geoRadius": "50000"
         },
-        "makesOffer": [
-        {% for stat in property_stats %}
-          {
-            "@type": "Offer",
-            "priceCurrency": "THB",
-            "price": "",
-            "availability": "https://schema.org/InStock",
-            "itemOffered": {
-              "@type": "Product",
-              "name": "{{ stat.localized_name|default:stat.name_display|escapejs }}",
-              "additionalType": "{{ stat|schema_additional_type }}",
-              "url": "{{ stat.get_absolute_url|absolute_url:request|escapejs }}"
-            }
-          }{% if not forloop.last %},{% endif %}
-        {% endfor %}
-        ],
     "sameAs": [
       "https://www.facebook.com/undersunestate",
       "https://www.instagram.com/undersun.estate/",
@@ -356,6 +340,14 @@
         },
         {% endif %}
         "url": "{{ prop.url|escapejs }}"
+        {% if prop.price is not None %}
+        ,"offers": {
+          "@type": "Offer",
+          "price": {{ prop.price|unlocalize }},
+          "priceCurrency": "{{ prop.price_currency }}",
+          "availability": "https://schema.org/InStock"
+        }
+        {% endif %}
       }
     }{% if not forloop.last %},{% endif %}
   {% endfor %}

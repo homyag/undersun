@@ -116,6 +116,8 @@ class HomeView(TemplateView):
         def append_structured(items):
             for prop in items[:3]:
                 price_value, price_currency = choose_price(prop)
+                if price_value is None or not price_currency:
+                    continue
                 structured_offers.append({
                     'name': prop.title,
                     'url': self.request.build_absolute_uri(prop.get_absolute_url()),
