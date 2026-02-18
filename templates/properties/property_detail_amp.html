@@ -1,0 +1,146 @@
+{% load i18n static %}
+<!doctype html>
+<html amp lang="{{ request.LANGUAGE_CODE|default:'ru' }}">
+<head>
+  <meta charset="utf-8">
+  <title>{{ meta_title }}</title>
+  <link rel="canonical" href="{{ canonical_url }}">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="description" content="{{ meta_description }}">
+  <meta property="og:title" content="{{ meta_title }}">
+  <meta property="og:description" content="{{ meta_description }}">
+  <meta property="og:url" content="{{ canonical_url }}">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    :root {
+      --primary:#0f172a;
+      --accent:#f1b400;
+      --muted:#475569;
+      --bg:#f8fafc;
+    }
+    body { font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--primary); margin:0; }
+    header { background:linear-gradient(135deg,#111827,#020617); color:#fff; padding:32px 20px 48px; }
+    .header-content { max-width:760px; margin:0 auto; }
+    .badge { display:inline-block; background:rgba(255,255,255,0.15); padding:6px 14px; border-radius:999px; font-size:0.85rem; letter-spacing:0.05em; text-transform:uppercase; }
+    h1 { font-size:2.4rem; margin:18px 0 12px; line-height:1.2; }
+    .price { font-size:1.8rem; font-weight:700; margin-bottom:10px; }
+    .location { color:rgba(255,255,255,0.8); font-size:1rem; }
+    main { max-width:760px; margin:-80px auto 0; padding:0 16px 40px; position:relative; z-index:2; }
+    .card { background:#fff; border-radius:24px; box-shadow:0 20px 60px rgba(15,23,42,0.1); padding:24px; margin-bottom:24px; }
+    amp-carousel { border-radius:20px; overflow:hidden; box-shadow:0 15px 45px rgba(15,23,42,0.2); }
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; }
+    .stat { background:#f1f5f9; border-radius:16px; padding:16px; text-align:center; }
+    .stat span { display:block; }
+    .stat .label { color:var(--muted); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; }
+    .stat .value { font-size:1.3rem; font-weight:600; margin-top:4px; }
+    .section-title { font-size:1.3rem; font-weight:700; margin-bottom:12px; }
+    .description { color:#1e293b; line-height:1.7; }
+    .amenities { display:flex; flex-wrap:wrap; gap:8px; }
+    .amenity { background:#eef2ff; color:#312e81; padding:8px 14px; border-radius:999px; font-size:0.95rem; }
+    .cta { text-align:center; background:linear-gradient(135deg,var(--accent),#ffe580); border-radius:24px; padding:24px; color:#1f2937; }
+    .cta-buttons { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+    .cta a { display:flex; align-items:center; justify-content:center; border-radius:999px; font-weight:600; text-decoration:none; padding:12px 20px; }
+    .cta a.primary { background:#111827; color:#fff; }
+    .cta a.secondary { border:1px solid rgba(17,24,39,0.2); color:#111827; }
+    .similar-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .similar-card { border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; background:#fff; }
+    .similar-card h3 { font-size:1rem; margin:12px 16px 8px; }
+    .similar-card p { margin:0 16px 16px; color:var(--muted); font-size:0.9rem; }
+    footer { text-align:center; padding:32px 16px; font-size:0.9rem; color:var(--muted); }
+    .amp-description h2 { font-size:1.4rem; margin-top:20px; }
+    .amp-description p { margin-bottom:1rem; }
+  </style>
+  {% include 'properties/includes/detail_structured_data_product.html' with final_price=final_price %}
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <span class="badge">{{ property.property_type.name_display }}</span>
+      <h1>{{ property.title }}</h1>
+      <div class="price">{{ price_display }}</div>
+      <div class="location">{{ location_label }}</div>
+      <div class="location" style="font-size:0.95rem; opacity:0.85;">
+        {{ deal_type_label }} · {{ status_label }}{% if developer_name %} · {{ developer_name }}{% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <amp-carousel width="720" height="450" layout="responsive" type="slides">
+        {% for image in gallery_images %}
+          <amp-img src="{{ image.url }}" width="720" height="450" layout="responsive" alt="{{ image.alt }}"></amp-img>
+        {% endfor %}
+      </amp-carousel>
+    </section>
+
+    {% if stats %}
+    <section class="card">
+      <h2 class="section-title">{% trans "Основные параметры" %}</h2>
+      <div class="stats">
+        {% for stat in stats %}
+          <div class="stat">
+            <span class="label">{{ stat.label }}</span>
+            <span class="value">{{ stat.value }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="card">
+      <h2 class="section-title">{% trans "Описание" %}</h2>
+      <div class="description amp-description">
+        {{ amp_description|safe }}
+      </div>
+    </section>
+
+    {% if amenities %}
+    <section class="card">
+      <h2 class="section-title">{% trans "Удобства" %}</h2>
+      <div class="amenities">
+        {% for amenity in amenities %}
+          <span class="amenity">{{ amenity }}</span>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="card cta">
+      <h2 class="section-title" style="color:#111827;">{% trans "Нужна консультация по объекту?" %}</h2>
+      <p>{% trans "Команда Undersun Estate оперативно свяжется с вами и отправит презентацию." %}</p>
+      <div class="cta-buttons">
+        <a class="primary" href="tel:{{ contact_phone }}">{% trans "Позвонить" %}</a>
+        <a class="secondary" href="{{ whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="secondary" href="{{ canonical_url }}" target="_blank" rel="noopener">{% trans "Открыть полную версию" %}</a>
+      </div>
+    </section>
+
+    {% if similar_properties %}
+    <section class="card">
+      <h2 class="section-title">{% trans "Похожие объекты" %}</h2>
+      <div class="similar-grid">
+        {% for similar in similar_properties|slice:':3' %}
+          <article class="similar-card">
+            {% if similar.images.first %}
+              <amp-img src="{{ similar.images.first.medium_url|default:similar.images.first.original_url }}" width="360" height="220" layout="responsive" alt="{{ similar.title }}"></amp-img>
+            {% endif %}
+            <h3>{{ similar.title }}</h3>
+            <p>{{ similar.location.name|default:similar.district.name }} · {{ similar.price_display }}</p>
+            <p style="margin-top:-8px;">
+              <a href="{{ similar.get_absolute_url }}" style="color:var(--accent); text-decoration:none; font-weight:600;">{% trans "Подробнее" %}</a>
+            </p>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </main>
+
+  <footer>
+    &copy; Undersun Estate · {% trans "Все права защищены" %}
+  </footer>
+</body>
+</html>

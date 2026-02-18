@@ -15,6 +15,13 @@
     {% endif %}
 {% endblock %}
 
+{% block extra_meta %}
+    {{ block.super }}
+    {% if amp_url %}
+        <link rel="amphtml" href="{{ amp_url }}">
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     <!-- Property Gallery Carousel -->
     <section class="py-4 sm:py-8 mt-6 sm:mt-10">

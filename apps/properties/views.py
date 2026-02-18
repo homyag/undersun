@@ -11,9 +11,13 @@ from django.db.models import Q, Count, Case, When, Value, IntegerField
 from django.core.paginator import Paginator
 from django.urls import reverse
 from django.utils.translation import gettext, ngettext
+from django.utils.html import strip_tags
+from django.templatetags.static import static
+from urllib.parse import quote_plus
 
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string, rate_limit, validate_form_security
+from apps.core.amp_utils import convert_html_to_amp
 from apps.core.models import SEOContentBlock
 from .models import Property, PropertyType
 from apps.locations.models import District, Location
@@ -679,6 +683,11 @@ class PropertyDetailView(DetailView):
         if main_image_url:
             context['og_image_url'] = main_image_url
 
+        amp_url = self.request.build_absolute_uri(
+            reverse('properties:property_detail_amp', kwargs={'slug': self.object.slug})
+        )
+        context['amp_url'] = amp_url
+
         return context
     
     def get_similar_properties(self):
@@ -756,6 +765,113 @@ def toggle_favorite(request):
 def favorites_view(request):
     """Страница избранного"""
     return render(request, 'properties/favorites.html')
+
+
+def _format_meta_description(value):
+    if not value:
+        return ''
+    text = value.strip()
+    if len(text) <= 280:
+        return text
+    truncated = text[:280]
+    last_space = truncated.rfind(' ')
+    if last_space > 200:
+        truncated = truncated[:last_space]
+    return truncated.rstrip(' .,;:')
+
+
+def _build_property_stats(property_obj):
+    stats = []
+    if property_obj.bedrooms:
+        stats.append({'label': gettext('Спальни'), 'value': property_obj.bedrooms})
+    if property_obj.bathrooms:
+        stats.append({'label': gettext('Ванные'), 'value': property_obj.bathrooms})
+    if property_obj.area_total:
+        stats.append({'label': gettext('Площадь'), 'value': f"{property_obj.area_total} m²"})
+    if property_obj.area_land:
+        stats.append({'label': gettext('Участок'), 'value': f"{property_obj.area_land} m²"})
+    if property_obj.floors_total:
+        stats.append({'label': gettext('Этажей'), 'value': property_obj.floors_total})
+    return stats
+
+
+def _build_final_price(property_obj):
+    if property_obj.deal_type == 'rent' and property_obj.price_rent_monthly_thb:
+        return property_obj.price_rent_monthly_thb
+    return property_obj.price_sale_thb or property_obj.price_rent_monthly_thb or 0
+
+
+def property_detail_amp(request, slug):
+    queryset = Property.objects.select_related(
+        'district', 'location', 'property_type', 'developer'
+    ).prefetch_related('images', 'features__feature')
+
+    property_obj = get_object_or_404(queryset, slug=slug)
+
+    detail_view = PropertyDetailView()
+    detail_view.request = request
+
+    if not property_obj.is_active:
+        return detail_view.handle_inactive_property(property_obj)
+
+    detail_view.object = property_obj
+    similar_properties = detail_view.get_similar_properties()
+
+    canonical_url = request.build_absolute_uri(property_obj.get_absolute_url())
+    meta_title = f"{property_obj.title} – Undersun Estate"
+    raw_description = property_obj.short_description or strip_tags(property_obj.description)
+    meta_description = _format_meta_description(raw_description)
+
+    gallery_images = []
+    for image in property_obj.images.all():
+        image_url = image.medium_url or image.thumbnail_url or image.original_url
+        if not image_url:
+            continue
+        gallery_images.append({
+            'url': image_url,
+            'alt': image.alt_text or property_obj.title,
+        })
+
+    if not gallery_images:
+        gallery_images.append({
+            'url': static('images/no-image.svg'),
+            'alt': property_obj.title,
+        })
+
+    amenities = [relation.feature.name for relation in property_obj.features.all() if relation.feature]
+    stats = _build_property_stats(property_obj)
+    location_label = property_obj.location.name if property_obj.location else property_obj.district.name
+
+    whatsapp_message = gettext('Здравствуйте! Меня интересует объект {title} ({url})').format(
+        title=property_obj.title,
+        url=canonical_url,
+    )
+    whatsapp_url = f"https://wa.me/66633033133?text={quote_plus(whatsapp_message)}"
+    contact_phone = '+66633033133'
+
+    final_price = _build_final_price(property_obj)
+
+    context = {
+        'property': property_obj,
+        'meta_title': meta_title,
+        'meta_description': meta_description,
+        'canonical_url': canonical_url,
+        'gallery_images': gallery_images,
+        'location_label': location_label,
+        'stats': stats,
+        'amenities': amenities,
+        'price_display': property_obj.price_display,
+        'contact_phone': contact_phone,
+        'whatsapp_url': whatsapp_url,
+        'similar_properties': similar_properties,
+        'amp_description': convert_html_to_amp(property_obj.description),
+        'final_price': final_price,
+        'status_label': property_obj.get_status_display(),
+        'deal_type_label': property_obj.get_deal_type_display(),
+        'developer_name': property_obj.developer.name if property_obj.developer else '',
+    }
+
+    return render(request, 'properties/property_detail_amp.html', context)
 
 @require_http_methods(["GET", "POST"])
 def get_favorite_properties(request):
