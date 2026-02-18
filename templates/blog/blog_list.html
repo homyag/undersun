@@ -6,9 +6,53 @@
 
 {% block description %}{{ meta_description }}{{ pagination_seo_suffix }}{% endblock %}
 
+{% block extra_meta %}
+    {{ block.super }}
+    {% if schema_blog_list_json %}
+        <script type="application/ld+json">
+            {{ schema_blog_list_json|safe }}
+        </script>
+    {% endif %}
+    {% if schema_blog_search_json %}
+        <script type="application/ld+json">
+            {{ schema_blog_search_json|safe }}
+        </script>
+    {% endif %}
+    {% if schema_blog_breadcrumb_json %}
+        <script type="application/ld+json">
+            {{ schema_blog_breadcrumb_json|safe }}
+        </script>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 <section class="py-12 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if category or tag %}
+        <nav class="text-sm mb-6" aria-label="{% trans 'Хлебные крошки' %}">
+            <ol class="flex flex-wrap items-center gap-2 text-gray-600">
+                <li>
+                    <a href="{% url 'core:home' %}" class="hover:text-accent transition-colors">
+                        {% trans "Главная" %}
+                    </a>
+                </li>
+                <li class="text-gray-400">/</li>
+                <li>
+                    <a href="{% url 'blog:list' %}" class="hover:text-accent transition-colors">
+                        {% trans "Блог" %}
+                    </a>
+                </li>
+                <li class="text-gray-400">/</li>
+                <li class="text-gray-900 font-medium">
+                    {% if category %}
+                        {{ category.name }}
+                    {% elif tag %}
+                        {% trans "Тег" %}: {{ tag.name }}
+                    {% endif %}
+                </li>
+            </ol>
+        </nav>
+        {% endif %}
         <!-- Header -->
         <div class="text-center mb-12">
             <h1 class="text-4xl font-bold text-primary mb-4">

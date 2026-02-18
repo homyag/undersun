@@ -2590,6 +2590,18 @@ msgstr "อสังหาริมทรัพย์ในประเทศไ
 msgid "Блог"
 msgstr "บล็อก"
 
+#: templates/blog/blog_detail.html:210 templates/blog/blog_list.html:35
+msgid "Главная"
+msgstr "หน้าหลัก"
+
+#: templates/blog/blog_list.html:32
+msgid "Хлебные крошки"
+msgstr "เส้นทางนำทาง"
+
+#: templates/blog/blog_list.html:49
+msgid "Тег"
+msgstr "แท็ก"
+
 #: templates/blog/blog_detail.html:224
 msgid "Автор"
 msgstr "ผู้เขียน"

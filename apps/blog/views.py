@@ -14,6 +14,7 @@ from django.urls import reverse
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from urllib.parse import urlparse, parse_qs
@@ -21,6 +22,12 @@ from urllib.parse import urlparse, parse_qs
 from apps.core.models import SEOPage
 
 from .models import BlogPost, BlogCategory, BlogTag
+from .services import (
+    build_blog_item_list_schema,
+    build_blog_post_schema,
+    build_blog_search_schema,
+    build_breadcrumb_schema,
+)
 
 
 PAGE_LABELS = {
@@ -158,6 +165,29 @@ def blog_list(request):
         'meta_keywords': seo_meta.get('keywords'),
         'page_keywords': seo_meta.get('keywords'),
     }
+
+    page_url = request.build_absolute_uri()
+    item_list_schema = build_blog_item_list_schema(
+        page_obj.object_list,
+        request,
+        language_code=language_code,
+        title=meta_title,
+        description=meta_description,
+        page_url=page_url,
+    )
+    if item_list_schema:
+        context['schema_blog_list_json'] = json.dumps(item_list_schema, ensure_ascii=False)
+
+    search_schema = build_blog_search_schema(request)
+    if search_schema:
+        context['schema_blog_search_json'] = json.dumps(search_schema, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
     
     return render(request, 'blog/blog_list.html', context)
 
@@ -204,9 +234,31 @@ def blog_detail(request, slug):
         'amp_url': amp_url,
     }
 
+    default_image_url = request.build_absolute_uri(static('images/og-image.jpg'))
     og_image_url = post.get_featured_image_absolute_url(request, getattr(request, 'LANGUAGE_CODE', 'ru'))
     if og_image_url:
         context['og_image_url'] = og_image_url
+
+    schema_image_url = og_image_url or default_image_url
+
+    schema_post = build_blog_post_schema(
+        post,
+        request,
+        language_code=language_code,
+        meta_description=meta_description,
+        image_url=schema_image_url,
+    )
+    if schema_post:
+        context['schema_blog_post_json'] = json.dumps(schema_post, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+        (post.category.name if post.category else None, post.category.get_absolute_url() if post.category else None),
+        (post.title, post.get_absolute_url()),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
 
     return render(request, 'blog/blog_detail.html', context)
 
@@ -345,8 +397,27 @@ def blog_detail_amp(request, slug):
         'amp_content': _convert_content_to_amp(post.content),
         'og_image_url': og_image_url,
         'default_amp_image': default_amp_image,
-        'author_anchor_url': f"{canonical_url}#author",
     }
+
+    schema_image_url = og_image_url or default_amp_image
+    schema_post = build_blog_post_schema(
+        post,
+        request,
+        language_code=language_code,
+        meta_description=meta_description,
+        image_url=schema_image_url,
+    )
+    if schema_post:
+        context['schema_blog_post_json'] = json.dumps(schema_post, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+        (post.category.name if post.category else None, post.category.get_absolute_url() if post.category else None),
+        (post.title, post.get_absolute_url()),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
 
     return render(request, 'blog/blog_detail_amp.html', context)
 
@@ -380,6 +451,34 @@ def blog_category(request, slug):
         'meta_description': meta_description,
         'meta_keywords': category.meta_keywords,
     }
+
+    page_url = request.build_absolute_uri()
+    about = {
+        '@type': 'Thing',
+        'name': category.name,
+        'url': page_url,
+    }
+    if category.description:
+        about['description'] = category.description
+    item_list_schema = build_blog_item_list_schema(
+        page_obj.object_list,
+        request,
+        language_code=language_code,
+        title=meta_title,
+        description=meta_description,
+        page_url=page_url,
+        about=about,
+    )
+    if item_list_schema:
+        context['schema_blog_list_json'] = json.dumps(item_list_schema, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+        (category.name, category.get_absolute_url()),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
     
     return render(request, 'blog/blog_category.html', context)
 
@@ -412,6 +511,32 @@ def blog_tag(request, slug):
         'meta_title': meta_title,
         'meta_description': meta_description,
     }
+
+    page_url = request.build_absolute_uri()
+    about = {
+        '@type': 'Thing',
+        'name': tag.name,
+        'url': page_url,
+    }
+    item_list_schema = build_blog_item_list_schema(
+        page_obj.object_list,
+        request,
+        language_code=language_code,
+        title=meta_title,
+        description=meta_description,
+        page_url=page_url,
+        about=about,
+    )
+    if item_list_schema:
+        context['schema_blog_list_json'] = json.dumps(item_list_schema, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+        (tag.name, tag.get_absolute_url()),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
     
     return render(request, 'blog/blog_tag.html', context)
 

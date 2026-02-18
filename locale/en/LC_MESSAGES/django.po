@@ -2628,6 +2628,18 @@ msgstr "Real estate in Thailand"
 msgid "Блог"
 msgstr "Blog"
 
+#: templates/blog/blog_detail.html:210 templates/blog/blog_list.html:35
+msgid "Главная"
+msgstr "Home"
+
+#: templates/blog/blog_list.html:32
+msgid "Хлебные крошки"
+msgstr "Breadcrumbs"
+
+#: templates/blog/blog_list.html:49
+msgid "Тег"
+msgstr "Tag"
+
 #: templates/blog/blog_detail.html:224
 msgid "Автор"
 msgstr "Author"

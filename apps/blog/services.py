@@ -1,6 +1,9 @@
-from django.contrib import messages
-from apps.core.services import translation_service
 import logging
+from django.templatetags.static import static
+from django.urls import reverse
+from django.utils.html import strip_tags
+
+from apps.core.services import translation_service
 
 logger = logging.getLogger(__name__)
 
@@ -108,3 +111,235 @@ def translate_blog_category(blog_category, target_languages=None, force_retransl
     # Сохраняем изменения
     blog_category.save()
     logger.info(f"Translation completed for blog category '{blog_category.name}'")
+
+
+DEFAULT_LOGO_PATH = 'images/logo_fullscreen.svg'
+DEFAULT_OG_IMAGE_PATH = 'images/og-image.jpg'
+
+
+def _absolute_url(url, request=None):
+    """Build absolute URL similar to template filter behaviour."""
+    if not url:
+        return ''
+
+    if isinstance(url, str) and url.startswith(('http://', 'https://')):
+        return url
+
+    if request is None:
+        return url
+
+    try:
+        return request.build_absolute_uri(url)
+    except Exception:
+        return url
+
+
+def _clean_text(value):
+    cleaned = strip_tags(value or '').strip()
+    if not cleaned:
+        return ''
+    return ' '.join(cleaned.split())
+
+
+def _build_author_schema(post, request=None, publisher=None):
+    author_name = post.get_author_display()
+    if not author_name:
+        return None
+
+    author_data = {
+        '@type': 'Person',
+        'name': author_name,
+    }
+
+    if post.team_author:
+        if post.team_author.position:
+            author_data['jobTitle'] = post.team_author.position
+        if post.team_author.photo:
+            try:
+                author_data['image'] = _absolute_url(post.team_author.photo.url, request)
+            except Exception:
+                author_data['image'] = None
+        if post.team_author.email:
+            author_data['email'] = post.team_author.email
+        if post.team_author.phone:
+            author_data['telephone'] = post.team_author.phone
+
+    if publisher:
+        works_for = {
+            '@type': 'Organization',
+            'name': publisher.get('name'),
+        }
+        if publisher.get('url'):
+            works_for['url'] = publisher['url']
+        if publisher.get('logo'):
+            works_for['logo'] = publisher['logo']
+        author_data['worksFor'] = works_for
+        author_data['affiliation'] = works_for
+
+    return {k: v for k, v in author_data.items() if v}
+
+
+def _build_publisher_schema(request=None):
+    return {
+        '@type': 'Organization',
+        'name': 'Undersun Estate',
+        'url': _absolute_url(reverse('core:home'), request) if request else None,
+        'logo': {
+            '@type': 'ImageObject',
+            'url': _absolute_url(static(DEFAULT_LOGO_PATH), request),
+        }
+    }
+
+
+def build_blog_post_schema(
+    post,
+    request=None,
+    *,
+    language_code='ru',
+    meta_description=None,
+    image_url=None,
+):
+    """Собираем JSON-LD BlogPosting для статьи."""
+    language = (language_code or getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
+    canonical_url = _absolute_url(post.get_absolute_url(), request)
+    description = meta_description or post.get_meta_description(language)
+
+    if not image_url:
+        image_url = post.get_featured_image_absolute_url(request, language)
+    if not image_url:
+        image_url = _absolute_url(static(DEFAULT_OG_IMAGE_PATH), request)
+
+    content_text = _clean_text(post.content)
+    keywords = post.get_meta_keywords(language)
+    if not keywords:
+        keywords = ', '.join(post.tags.values_list('name', flat=True))
+
+    publisher_schema = _build_publisher_schema(request)
+    author_schema = _build_author_schema(post, request, publisher_schema)
+    if publisher_schema and author_schema:
+        publisher_schema['employee'] = author_schema
+
+    schema = {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        'url': canonical_url,
+        'mainEntityOfPage': {
+            '@type': 'WebPage',
+            '@id': canonical_url,
+        },
+        'headline': post.get_meta_title(language),
+        'description': description,
+        'image': [image_url] if image_url else None,
+        'datePublished': post.published_at.isoformat() if post.published_at else None,
+        'dateModified': post.updated_at.isoformat() if post.updated_at else None,
+        'inLanguage': language,
+        'isAccessibleForFree': True,
+        'articleSection': post.category.name if post.category else None,
+        'articleBody': content_text or None,
+        'wordCount': len(content_text.split()) if content_text else None,
+        'timeRequired': f"PT{post.get_reading_time()}M",
+        'keywords': keywords or None,
+        'author': author_schema,
+        'publisher': {k: v for k, v in publisher_schema.items() if v not in (None, '', [], {})} if publisher_schema else None,
+        'interactionStatistic': {
+            '@type': 'InteractionCounter',
+            'interactionType': 'https://schema.org/ReadAction',
+            'userInteractionCount': post.views_count,
+        } if post.views_count else None,
+    }
+
+    return {k: v for k, v in schema.items() if v not in (None, '', [], {})}
+
+
+def build_breadcrumb_schema(items, request=None):
+    """Построить BreadcrumbList по списку (название, url)."""
+    if not items:
+        return None
+
+    element = []
+    for position, (name, url) in enumerate(items, start=1):
+        if not name:
+            continue
+        element.append({
+            '@type': 'ListItem',
+            'position': position,
+            'name': name,
+            'item': _absolute_url(url, request) if url else None,
+        })
+
+    if not element:
+        return None
+
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': element,
+    }
+
+
+def build_blog_item_list_schema(
+    posts,
+    request=None,
+    *,
+    language_code='ru',
+    title=None,
+    description=None,
+    page_url=None,
+    about=None,
+):
+    """ItemList для списков блога (главная, категория, тег)."""
+    if not posts:
+        return None
+
+    items = []
+    for idx, post in enumerate(posts, start=1):
+        post_schema = build_blog_post_schema(
+            post,
+            request,
+            language_code=language_code,
+            meta_description=post.get_meta_description(language_code),
+        )
+        items.append({
+            '@type': 'ListItem',
+            'position': idx,
+            'url': post_schema.get('url'),
+            'item': post_schema,
+        })
+
+    schema = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        'name': title,
+        'description': description,
+        'itemListElement': items,
+        'itemListOrder': 'https://schema.org/ItemListOrderDescending',
+        'numberOfItems': len(items),
+        'url': page_url or _absolute_url(getattr(request, 'get_full_path', lambda: '')(), request),
+    }
+
+    if about:
+        schema['about'] = about
+
+    return {k: v for k, v in schema.items() if v not in (None, '', [], {})}
+
+
+def build_blog_search_schema(request=None):
+    """WebSite schema с SearchAction для поиска по блогу."""
+    if request is None:
+        return None
+
+    blog_url = _absolute_url(reverse('blog:list'), request)
+    if not blog_url:
+        return None
+
+    target = f"{blog_url}?search={{search_term_string}}"
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        'url': blog_url,
+        'potentialAction': {
+            '@type': 'SearchAction',
+            'target': target,
+            'query-input': 'required name=search_term_string',
+        }
+    }

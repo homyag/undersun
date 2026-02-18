@@ -14,6 +14,16 @@
     {% if amp_url %}
         <link rel="amphtml" href="{{ amp_url }}">
     {% endif %}
+    {% if schema_blog_post_json %}
+        <script type="application/ld+json">
+            {{ schema_blog_post_json|safe }}
+        </script>
+    {% endif %}
+    {% if schema_blog_breadcrumb_json %}
+        <script type="application/ld+json">
+            {{ schema_blog_breadcrumb_json|safe }}
+        </script>
+    {% endif %}
 {% endblock %}
 
 {% block extra_css %}
@@ -195,11 +205,25 @@
         <div class="w-full lg:w-2/3 px-4">
             <!-- Хлебные крошки -->
             <nav class="text-sm mb-6">
-                <ol class="flex items-center space-x-2 text-gray-600">
-                    <li><a href="{% url 'blog:list' %}" style="color: var(--tertiary-color);" class="hover:opacity-80 transition-all duration-200">{% trans "Блог" %}</a></li>
-                    <li><span class="mx-2">→</span></li>
-                    <li><a href="{% url 'blog:category' post.category.slug %}" style="color: var(--tertiary-color);" class="hover:opacity-80 transition-all duration-200">{{ post.category.name }}</a></li>
-                    <li><span class="mx-2">→</span></li>
+                <ol class="flex flex-wrap items-center gap-2 text-gray-600">
+                    <li>
+                        <a href="{% url 'core:home' %}" style="color: var(--tertiary-color);" class="hover:opacity-80 transition-all duration-200">
+                            {% trans "Главная" %}
+                        </a>
+                    </li>
+                    <li class="text-gray-400">/</li>
+                    <li>
+                        <a href="{% url 'blog:list' %}" style="color: var(--tertiary-color);" class="hover:opacity-80 transition-all duration-200">
+                            {% trans "Блог" %}
+                        </a>
+                    </li>
+                    <li class="text-gray-400">/</li>
+                    <li>
+                        <a href="{% url 'blog:category' post.category.slug %}" style="color: var(--tertiary-color);" class="hover:opacity-80 transition-all duration-200">
+                            {{ post.category.name }}
+                        </a>
+                    </li>
+                    <li class="text-gray-400">/</li>
                     <li class="text-gray-900">{{ post.title|truncatechars:50 }}</li>
                 </ol>
             </nav>

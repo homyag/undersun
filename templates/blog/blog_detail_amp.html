@@ -1,8 +1,7 @@
-{% load i18n static url_utils %}
+{% load i18n static %}
 <!doctype html>
 <html amp lang="{{ request.LANGUAGE_CODE|default:'ru' }}">
 <head>
-  {% static 'images/logo_fullscreen.svg' as amp_logo_path %}
   <meta charset="utf-8">
   <title>{{ meta_title }}</title>
   <link rel="canonical" href="{{ canonical_url }}">
@@ -40,34 +39,16 @@
     .cta a { display: inline-block; margin-top: 12px; padding: 12px 24px; border-radius: 999px; background: #0f172a; color: #fff; text-decoration: none; font-weight: 600; }
     footer { text-align: center; padding: 32px 0; font-size: 0.85rem; color: #475569; }
   </style>
+  {% if schema_blog_post_json %}
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "{{ canonical_url }}"
-    },
-    "headline": "{{ post.title|escapejs }}",
-    "image": [{% if og_image_url %}"{{ og_image_url }}"{% else %}"{{ default_amp_image }}"{% endif %}],
-    "datePublished": "{{ post.published_at|date:'c' }}",
-    "dateModified": "{{ post.updated_at|date:'c' }}",
-    "author": {
-      "@type": "Person",
-      "name": "{{ post.get_author_display|default:post.author.get_full_name|default:post.author }}",
-      "url": "{{ author_anchor_url }}"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Undersun Estate",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "{{ amp_logo_path|absolute_url:request }}"
-      }
-    },
-    "description": "{{ meta_description|escapejs }}"
-  }
+    {{ schema_blog_post_json|safe }}
   </script>
+  {% endif %}
+  {% if schema_blog_breadcrumb_json %}
+  <script type="application/ld+json">
+    {{ schema_blog_breadcrumb_json|safe }}
+  </script>
+  {% endif %}
 </head>
 <body>
   <header>
