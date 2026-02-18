@@ -360,6 +360,10 @@ def _convert_content_to_amp(html_content):
     for fig in soup.find_all('figure'):
         fig['style'] = fig.get('style', '')
 
+    for list_tag in soup.find_all(['ul', 'ol']):
+        if 'type' in list_tag.attrs:
+            del list_tag['type']
+
     return mark_safe(str(soup))
 
 
