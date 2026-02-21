@@ -48,6 +48,7 @@ class BotDetectionService:
         self.rate_limit_max = rate_limit.get('MAX_REQUESTS', 5)
         self.skip_path_prefixes = tuple(config.get('SKIP_PATH_PREFIXES', []))
         self.skip_methods = set(config.get('SKIP_METHODS', []))
+        self.challenge_cookie = config.get('CHALLENGE_COOKIE', 'bot_challenge')
         self.thresholds = config.get('ACTION_THRESHOLDS', {})
         self.weights = config.get('RULE_WEIGHTS', {})
 
@@ -133,6 +134,16 @@ class BotDetectionService:
             score += self._add_match(matches, rule_key, 'accept')
         elif missing_sec:
             score += self._add_match(matches, 'missing_headers', 'sec')
+
+        # Rule: JS challenge presence
+        cookie_token = request.COOKIES.get(self.challenge_cookie)
+        field_token = request.POST.get('bot_challenge_token') or request.GET.get('bot_challenge_token')
+        if not cookie_token:
+            score += self._add_match(matches, 'js_challenge_missing', 'cookie')
+        elif request.method in {'POST', 'PUT', 'PATCH'} and not field_token:
+            score += self._add_match(matches, 'js_challenge_missing', 'field')
+        elif field_token and field_token != cookie_token:
+            score += self._add_match(matches, 'js_challenge_failed', 'mismatch')
 
         # Rule: no referer and requesting HTML (approx by missing file extension)
         no_referer_hit = False

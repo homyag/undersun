@@ -3,6 +3,7 @@ import re
 
 from django.conf import settings
 from django.http import HttpResponse, HttpResponsePermanentRedirect, JsonResponse
+from django.shortcuts import render
 from django.conf.urls.i18n import is_language_prefix_patterns_used
 from django.utils.deprecation import MiddlewareMixin
 
@@ -254,6 +255,9 @@ class BotDetectionMiddleware(MiddlewareMixin):
         if result.score <= 0 and result.action == 'allow':
             return None
 
+        if result.action == RequestLog.Action.CHALLENGE and not request.COOKIES.get(self.service.challenge_cookie):
+            return self._challenge_response(request)
+
         matched_rules = [
             {
                 'key': match.key,
@@ -350,3 +354,13 @@ class BotDetectionMiddleware(MiddlewareMixin):
         except Exception:
             logger.exception('Failed to check ManualIPBan for %s', client_ip)
             return False
+
+    def _challenge_response(self, request):
+        from django.shortcuts import render
+        target_url = request.build_absolute_uri()
+        response = render(request, 'challenge_challenge.html', {
+            'target_url': target_url,
+        })
+        response.status_code = 302
+        response['Refresh'] = '0;url=%s' % target_url
+        return response

@@ -200,6 +200,7 @@ BOT_PROTECTION = {
     'ENABLED': env.bool('BOT_PROTECTION_ENABLED', default=True),
     'WHITELIST_IPS': [
         '91.212.150.176',  # reverse proxy for RU traffic
+        '95.161.221.91',   # admin IP
     ],
     'WHITELIST_USER_AGENTS': [
         r'Googlebot',
@@ -306,11 +307,14 @@ BOT_PROTECTION = {
         'missing_headers_critical': 120,
         'no_referer': 10,
         'no_referer_combo': 90,
+        'js_challenge_missing': 15,
+        'js_challenge_failed': 120,
         'rate_limit': 20,
         'blacklist_ip': 40,
         'suspicious_payload': 30,
         'head_on_html': 10,
     },
+    'CHALLENGE_COOKIE': 'bot_challenge',
 }
 
 # Login/Logout URLs

@@ -400,6 +400,61 @@
 </script>
 {% endif %}
 
+<script>
+  (function() {
+    const TOKEN_KEY = 'bot_challenge_token';
+    const COOKIE_NAME = 'bot_challenge';
+    const storage = window.localStorage;
+
+    function generateToken() {
+      const data = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      return btoa(data).replace(/=/g, '');
+    }
+
+    function setCookie(name, value, days) {
+      const expires = new Date(Date.now() + days * 86400000).toUTCString();
+      document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+    }
+
+    function getCookie(name) {
+      const match = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+      return match ? match[1] : null;
+    }
+
+    function ensureToken() {
+      let token = storage.getItem(TOKEN_KEY);
+      if (!token) {
+        token = generateToken();
+        storage.setItem(TOKEN_KEY, token);
+      }
+      if (!getCookie(COOKIE_NAME)) {
+        setCookie(COOKIE_NAME, token, 7);
+      }
+      injectHiddenInputs(token);
+    }
+
+    function injectHiddenInputs(token) {
+      const forms = document.querySelectorAll('form');
+      forms.forEach(function(form) {
+        if (form.dataset.botChallengeBound === 'true') {
+          return;
+        }
+        form.dataset.botChallengeBound = 'true';
+        let hidden = form.querySelector('input[name="bot_challenge_token"]');
+        if (!hidden) {
+          hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = 'bot_challenge_token';
+          form.appendChild(hidden);
+        }
+        hidden.value = token;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', ensureToken);
+  })();
+</script>
+
 <!-- Success Popup Modal -->
 <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
      style="display: none;">
