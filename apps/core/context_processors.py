@@ -6,6 +6,7 @@ from urllib.parse import urlsplit, urlunsplit
 from apps.properties.models import PropertyType, Property
 from apps.locations.models import District, Location
 from apps.core.models import SEOPage, Service
+from apps.core.utils import truncate_meta
 import re
 
 
@@ -276,6 +277,9 @@ def seo_context(request):
 
         seo_data['page_title'] = _append_suffix_if_needed(seo_data.get('page_title'), pagination_suffix)
         seo_data['page_description'] = _append_suffix_if_needed(seo_data.get('page_description'), pagination_suffix)
+        seo_data['page_description'] = truncate_meta(seo_data.get('page_description'))
+    else:
+        seo_data['page_description'] = truncate_meta(seo_data.get('page_description'))
 
     seo_data['pagination_page_number'] = page_number
     seo_data['pagination_seo_label'] = pagination_label

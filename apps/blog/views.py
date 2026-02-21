@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from apps.core.models import SEOPage
+from apps.core.utils import truncate_meta
 from apps.core.amp_utils import convert_html_to_amp
 
 from .models import BlogPost, BlogCategory, BlogTag
@@ -149,6 +150,7 @@ def blog_list(request):
     meta_title = seo_meta.get('title') or defaults['title']
     meta_description = seo_meta.get('description') or defaults['description']
     meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    meta_description = truncate_meta(meta_description)
 
     context = {
         'page_obj': page_obj,
@@ -212,7 +214,7 @@ def blog_detail(request, slug):
     
     language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
     meta_title = post.get_meta_title(language_code)
-    meta_description = post.get_meta_description(language_code)
+    meta_description = truncate_meta(post.get_meta_description(language_code))
     meta_keywords = post.get_meta_keywords(language_code)
 
     amp_url = request.build_absolute_uri(
@@ -274,7 +276,7 @@ def blog_detail_amp(request, slug):
 
     language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
     meta_title = post.get_meta_title(language_code)
-    meta_description = post.get_meta_description(language_code)
+    meta_description = truncate_meta(post.get_meta_description(language_code))
     meta_keywords = post.get_meta_keywords(language_code)
 
     canonical_url = request.build_absolute_uri(
@@ -338,6 +340,7 @@ def blog_category(request, slug):
     meta_title = category.meta_title or f'Статьи в категории {category.name}'
     meta_description = category.meta_description or category.description
     meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    meta_description = truncate_meta(meta_description)
 
     context = {
         'page_obj': page_obj,
@@ -399,6 +402,7 @@ def blog_tag(request, slug):
     meta_title = f'Статьи с тегом {tag.name}'
     meta_description = f'Все статьи с тегом {tag.name}'
     meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    meta_description = truncate_meta(meta_description)
 
     context = {
         'page_obj': page_obj,

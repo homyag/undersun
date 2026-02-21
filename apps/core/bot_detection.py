@@ -1,0 +1,203 @@
+from __future__ import annotations
+
+import ipaddress
+import logging
+import re
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional
+
+from django.conf import settings
+from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class RuleMatch:
+    key: str
+    weight: int
+    detail: Optional[str] = None
+
+
+@dataclass
+class DetectionResult:
+    score: int
+    action: str
+    matched_rules: List[RuleMatch] = field(default_factory=list)
+    notify_fail2ban: bool = False
+    headers: Dict[str, str] = field(default_factory=dict)
+
+
+class BotDetectionService:
+    """Calculate bot score for incoming requests based on heuristics."""
+
+    def __init__(self) -> None:
+        self._load_config()
+
+    def _load_config(self) -> None:
+        config = getattr(settings, 'BOT_PROTECTION', {})
+        self.enabled = config.get('ENABLED', True)
+        self.whitelist_ips = self._compile_networks(config.get('WHITELIST_IPS', []))
+        self.whitelist_user_agents = self._compile_regex(config.get('WHITELIST_USER_AGENTS', []))
+        self.blacklist_ips = self._compile_networks(config.get('BLACKLIST_IPS', []))
+        self.suspicious_user_agents = self._compile_regex(config.get('SUSPICIOUS_USER_AGENTS', []))
+        self.forbidden_paths = self._compile_regex(config.get('FORBIDDEN_PATH_PATTERNS', []))
+        self.header_keys = config.get('HEADER_KEYS', [])
+        rate_limit = config.get('RATE_LIMIT', {})
+        self.rate_limit_window = rate_limit.get('WINDOW_SECONDS', 10)
+        self.rate_limit_max = rate_limit.get('MAX_REQUESTS', 5)
+        self.skip_path_prefixes = tuple(config.get('SKIP_PATH_PREFIXES', []))
+        self.skip_methods = set(config.get('SKIP_METHODS', []))
+        self.thresholds = config.get('ACTION_THRESHOLDS', {})
+        self.weights = config.get('RULE_WEIGHTS', {})
+
+    @staticmethod
+    def _compile_networks(values: List[str]) -> List[ipaddress._BaseNetwork]:
+        compiled = []
+        for value in values:
+            try:
+                if '/' in value:
+                    compiled.append(ipaddress.ip_network(value, strict=False))
+                else:
+                    compiled.append(ipaddress.ip_network(f'{value}/32', strict=False))
+            except ValueError:
+                logger.warning('Invalid IP/network in BOT_PROTECTION config: %s', value)
+        return compiled
+
+    @staticmethod
+    def _compile_regex(patterns: List[str]) -> List[re.Pattern]:
+        compiled = []
+        for pattern in patterns:
+            try:
+                compiled.append(re.compile(pattern, re.IGNORECASE))
+            except re.error:
+                logger.warning('Invalid regex pattern in BOT_PROTECTION config: %s', pattern)
+        return compiled
+
+    def is_ip_whitelisted(self, client_ip: str) -> bool:
+        return self._ip_matches(client_ip, self.whitelist_ips)
+
+    def is_ip_blacklisted(self, client_ip: str) -> bool:
+        return self._ip_matches(client_ip, self.blacklist_ips)
+
+    @staticmethod
+    def _ip_matches(ip_str: str, networks: List[ipaddress._BaseNetwork]) -> bool:
+        if not ip_str:
+            return False
+        try:
+            address = ipaddress.ip_address(ip_str)
+        except ValueError:
+            return False
+        return any(address in network for network in networks)
+
+    def is_user_agent_whitelisted(self, user_agent: str) -> bool:
+        return any(pattern.search(user_agent or '') for pattern in self.whitelist_user_agents)
+
+    def evaluate(self, request, client_ip: str, proxy_ip: Optional[str]) -> DetectionResult:
+        if not self.enabled:
+            return DetectionResult(score=0, action='allow')
+
+        matches: List[RuleMatch] = []
+        score = 0
+        user_agent = (request.META.get('HTTP_USER_AGENT') or '')[:512]
+        if request.method in self.skip_methods:
+            return DetectionResult(score=0, action='allow')
+
+        path = request.path or '/'
+        referer = (request.META.get('HTTP_REFERER') or '')[:2048]
+
+        if path.startswith(self.skip_path_prefixes):
+            return DetectionResult(score=0, action='allow')
+
+        # Rule: blacklist IP
+        if self.is_ip_blacklisted(client_ip):
+            score += self._add_match(matches, 'blacklist_ip')
+
+        # Rule: forbidden paths
+        if any(pattern.search(path) for pattern in self.forbidden_paths):
+            score += self._add_match(matches, 'forbidden_path', path)
+
+        # Rule: suspicious UA
+        if user_agent == '-' or any(pattern.search(user_agent) for pattern in self.suspicious_user_agents):
+            score += self._add_match(matches, 'suspicious_user_agent', user_agent or '-')
+
+        # Rule: missing headers typical for browsers
+        headers = self._collect_headers(request)
+        missing_accept = not headers.get('HTTP_ACCEPT_LANGUAGE') or not headers.get('HTTP_ACCEPT_ENCODING')
+        missing_sec = not headers.get('HTTP_SEC_CH_UA') and not headers.get('HTTP_SEC_FETCH_SITE')
+
+        if missing_accept:
+            rule_key = 'missing_headers_critical'
+            if self.is_ip_whitelisted(client_ip):
+                rule_key = 'missing_headers'
+            score += self._add_match(matches, rule_key, 'accept')
+        elif missing_sec:
+            score += self._add_match(matches, 'missing_headers', 'sec')
+
+        # Rule: no referer and requesting HTML (approx by missing file extension)
+        no_referer_hit = False
+        if not referer and not path.startswith(self.skip_path_prefixes) and '.' not in path.split('/')[-1]:
+            no_referer_hit = True
+            score += self._add_match(matches, 'no_referer')
+
+        # Rule: suspicious methods HEAD/OPTIONS on HTML
+        if request.method in {'HEAD', 'OPTIONS'} and not path.startswith(self.skip_path_prefixes):
+            score += self._add_match(matches, 'head_on_html', request.method)
+
+        # Rule: rate limiting
+        if self._is_rate_limited(client_ip):
+            score += self._add_match(matches, 'rate_limit')
+
+        if no_referer_hit and len(matches) > 1:
+            score += self._add_match(matches, 'no_referer_combo')
+
+        action = self._resolve_action(score)
+        notify_fail2ban = score >= self.thresholds.get('fail2ban', 100)
+        return DetectionResult(
+            score=score,
+            action=action,
+            matched_rules=matches,
+            notify_fail2ban=notify_fail2ban,
+            headers=headers,
+        )
+
+    def _collect_headers(self, request) -> Dict[str, str]:
+        collected = {}
+        for header in self.header_keys:
+            value = request.META.get(header)
+            if value:
+                collected[header] = value[:256]
+        return collected
+
+    def _is_rate_limited(self, client_ip: str) -> bool:
+        if not client_ip or not self.rate_limit_max:
+            return False
+        cache_key = f'botrate:{client_ip}'
+        try:
+            if cache.add(cache_key, 1, timeout=self.rate_limit_window):
+                return False
+            count = cache.incr(cache_key)
+        except ValueError:
+            count = 1
+        except Exception:  # pragma: no cover
+            logger.exception('Rate limit cache failure')
+            return False
+        return count >= self.rate_limit_max
+
+    def _add_match(self, matches: List[RuleMatch], key: str, detail: Optional[str] = None) -> int:
+        weight = self.weights.get(key, 0)
+        if weight:
+            matches.append(RuleMatch(key=key, weight=weight, detail=detail))
+        return weight
+
+    def _resolve_action(self, score: int) -> str:
+        if score >= self.thresholds.get('block', 90):
+            return 'block'
+        if score >= self.thresholds.get('challenge', 60):
+            return 'challenge'
+        if score >= self.thresholds.get('monitor', 30):
+            return 'monitor'
+        return 'allow'
+
+
+bot_detection_service = BotDetectionService()

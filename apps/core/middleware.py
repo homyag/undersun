@@ -2,9 +2,12 @@ import logging
 import re
 
 from django.conf import settings
-from django.http import HttpResponsePermanentRedirect, JsonResponse
-from django.utils.deprecation import MiddlewareMixin
+from django.http import HttpResponse, HttpResponsePermanentRedirect, JsonResponse
 from django.conf.urls.i18n import is_language_prefix_patterns_used
+from django.utils.deprecation import MiddlewareMixin
+
+from apps.core.bot_detection import BotDetectionService, bot_detection_service
+from apps.core.models import ManualIPBan, RequestLog
 
 
 class PermissionsPolicyMiddleware(MiddlewareMixin):
@@ -40,6 +43,10 @@ class FrameAncestorsMiddleware(MiddlewareMixin):
         default_sources = getattr(settings, 'DEFAULT_SRC', None)
         if default_sources:
             csp_directives['default-src'] = default_sources
+
+        extra_directives = getattr(settings, 'CSP_EXTRA_DIRECTIVES', {})
+        if isinstance(extra_directives, dict):
+            csp_directives.update(extra_directives)
 
         if not csp_directives:
             return response
@@ -217,3 +224,129 @@ class ForbiddenPathLoggerMiddleware(MiddlewareMixin):
         )
 
         return None
+
+
+class BotDetectionMiddleware(MiddlewareMixin):
+    """Score incoming requests and block/monitor bots."""
+
+    def __init__(self, get_response=None):
+        super().__init__(get_response)
+        self.service: BotDetectionService = bot_detection_service
+        self.logger = logging.getLogger('bad_requests')
+
+    def process_request(self, request):
+        if not self.service.enabled:
+            return None
+
+        client_ip, proxy_ip = self._extract_ips(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+        if not client_ip:
+            return None
+
+        if self._is_manually_banned(client_ip):
+            return HttpResponse('Forbidden', status=403)
+
+        if self.service.is_ip_whitelisted(client_ip) or self.service.is_user_agent_whitelisted(user_agent):
+            return None
+
+        result = self.service.evaluate(request, client_ip, proxy_ip)
+        if result.score <= 0 and result.action == 'allow':
+            return None
+
+        matched_rules = [
+            {
+                'key': match.key,
+                'weight': match.weight,
+                'detail': match.detail,
+            }
+            for match in result.matched_rules
+        ]
+
+        log_entry = RequestLog.objects.create(
+            client_ip=client_ip,
+            proxy_ip=proxy_ip,
+            method=request.method,
+            path=request.path[:2048],
+            referer=(request.META.get('HTTP_REFERER') or '')[:2048],
+            user_agent=user_agent[:512],
+            headers=result.headers,
+            bot_score=result.score,
+            matched_rules=matched_rules,
+            action=result.action,
+            source=RequestLog.Source.MIDDLEWARE,
+        )
+        request._bot_request_log = log_entry
+
+        if result.action in {RequestLog.Action.MONITOR, RequestLog.Action.BLOCK, RequestLog.Action.CHALLENGE}:
+            self.logger.warning(
+                'bot-detected score=%s action=%s ip=%s path=%s ua="%s" rules=%s',
+                result.score,
+                result.action,
+                client_ip,
+                request.path,
+                user_agent,
+                ','.join(match['key'] for match in matched_rules) or '-',
+            )
+
+        if result.action == RequestLog.Action.BLOCK:
+            self.logger.error(
+                'bot-fastban ip=%s score=%s path=%s rules=%s',
+                client_ip,
+                result.score,
+                request.path,
+                ','.join(match['key'] for match in matched_rules) or '-',
+            )
+            response = HttpResponse('Forbidden', status=403)
+            log_entry.status_code = response.status_code
+            log_entry.save(update_fields=['status_code'])
+            return response
+
+        if result.notify_fail2ban:
+            self.logger.warning(
+                'bot-fail2ban-trigger score=%s ip=%s path=%s',
+                result.score,
+                client_ip,
+                request.path,
+            )
+
+        return None
+
+    def process_response(self, request, response):
+        self._finalize_log(request, getattr(response, 'status_code', None))
+        return response
+
+    def process_exception(self, request, exception):
+        self._finalize_log(request, 500)
+        return None
+
+    def _finalize_log(self, request, status_code):
+        log_entry = getattr(request, '_bot_request_log', None)
+        if not log_entry or status_code is None or log_entry.status_code:
+            return
+        log_entry.status_code = status_code
+        log_entry.save(update_fields=['status_code'])
+
+    @staticmethod
+    def _extract_ips(request):
+        forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '')
+        client_ip = forwarded_for.split(',')[0].strip() if forwarded_for else request.META.get('REMOTE_ADDR', '')
+        proxy_ip = request.META.get('REMOTE_ADDR', '')
+        return client_ip, proxy_ip
+
+    @staticmethod
+    def _is_manually_banned(client_ip: str) -> bool:
+        if not client_ip:
+            return False
+        try:
+            ban = ManualIPBan.objects.filter(ip_address=client_ip, active=True).first()
+            if not ban:
+                return False
+            if not ban.is_active():
+                ban.active = False
+                ban.save(update_fields=['active'])
+                return False
+            return True
+        except Exception:
+            logger.exception('Failed to check ManualIPBan for %s', client_ip)
+            return False

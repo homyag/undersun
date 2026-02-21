@@ -16,7 +16,7 @@ from django.utils.translation import gettext, ngettext, get_language, get_langua
 from django.conf import settings
 
 from apps.currency.services import CurrencyService
-from apps.core.utils import build_query_string
+from apps.core.utils import build_query_string, truncate_meta
 from apps.properties.models import Property, PropertyType
 from apps.properties.views import PropertyListView
 from apps.locations.models import District
@@ -643,7 +643,7 @@ class ServiceDetailView(DetailView):
         # SEO данные
         service = self.get_object()
         context['page_title'] = service.get_meta_title()
-        context['page_description'] = service.get_meta_description()
+        context['page_description'] = truncate_meta(service.get_meta_description())
         context['page_keywords'] = service.meta_keywords
         
         # Добавляем рекомендуемые объекты в зависимости от типа услуги

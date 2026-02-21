@@ -16,7 +16,7 @@ from django.templatetags.static import static
 from urllib.parse import quote_plus
 
 from apps.currency.services import CurrencyService
-from apps.core.utils import build_query_string, rate_limit, validate_form_security
+from apps.core.utils import build_query_string, rate_limit, validate_form_security, truncate_meta
 from apps.core.amp_utils import convert_html_to_amp
 from apps.core.models import SEOContentBlock
 from .models import Property, PropertyType
@@ -787,21 +787,6 @@ def toggle_favorite(request):
 def favorites_view(request):
     """Страница избранного"""
     return render(request, 'properties/favorites.html')
-
-
-def _format_meta_description(value):
-    if not value:
-        return ''
-    text = value.strip()
-    if len(text) <= 280:
-        return text
-    truncated = text[:280]
-    last_space = truncated.rfind(' ')
-    if last_space > 200:
-        truncated = truncated[:last_space]
-    return truncated.rstrip(' .,;:')
-
-
 def _build_property_stats(property_obj):
     stats = []
     if property_obj.bedrooms:
@@ -842,7 +827,7 @@ def property_detail_amp(request, slug):
     canonical_url = request.build_absolute_uri(property_obj.get_absolute_url())
     meta_title = f"{property_obj.title} – Undersun Estate"
     raw_description = property_obj.short_description or strip_tags(property_obj.description)
-    meta_description = _format_meta_description(raw_description)
+    meta_description = truncate_meta(raw_description)
 
     gallery_images = []
     for image in property_obj.images.all():
@@ -894,6 +879,7 @@ def property_detail_amp(request, slug):
     }
 
     return render(request, 'properties/property_detail_amp.html', context)
+
 
 @require_http_methods(["GET", "POST"])
 def get_favorite_properties(request):

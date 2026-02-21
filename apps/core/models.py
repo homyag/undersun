@@ -1,4 +1,7 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 import re
 import random
@@ -6,6 +9,8 @@ import random
 
 class SEOPage(models.Model):
     """SEO метатеги для страниц сайта"""
+
+    META_DESCRIPTION_LIMIT = 160
     
     # URL паттерн для страницы (например: 'home', 'properties', 'about')
     page_name = models.CharField(_('Имя страницы'), max_length=100, unique=True)
@@ -36,6 +41,22 @@ class SEOPage(models.Model):
         
     def __str__(self):
         return self.page_name
+
+    def clean(self):
+        super().clean()
+        limit = getattr(settings, 'SEO_META_DESCRIPTION_LIMIT', self.META_DESCRIPTION_LIMIT)
+        errors = {}
+        for lang in ('ru', 'en', 'th'):
+            field = f'description_{lang}'
+            raw_value = getattr(self, field, '') or ''
+            normalized = re.sub(r'\s+', ' ', strip_tags(raw_value)).strip()
+            if normalized and len(normalized) > limit:
+                errors[field] = _('SEO описание не должно превышать %(limit)s символов (сейчас %(length)s).') % {
+                    'limit': limit,
+                    'length': len(normalized),
+                }
+        if errors:
+            raise ValidationError(errors)
         
     def get_title(self, language_code='ru'):
         """Получить заголовок для указанного языка"""
@@ -622,3 +643,81 @@ class Team(models.Model):
             })
         
         return social_media
+
+
+class RequestLog(models.Model):
+    """Хранилище событий антибот-скоринга."""
+
+    class Action(models.TextChoices):
+        ALLOW = 'allow', _('Разрешить')
+        MONITOR = 'monitor', _('Наблюдать')
+        CHALLENGE = 'challenge', _('Проверка')
+        BLOCK = 'block', _('Блокировка')
+
+    class Source(models.TextChoices):
+        MIDDLEWARE = 'middleware', _('Middleware')
+        NGINX = 'nginx', _('Парсер nginx')
+        MANAGEMENT = 'management', _('Management команда')
+
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True, db_index=True)
+    client_ip = models.GenericIPAddressField(_('IP клиента'))
+    proxy_ip = models.GenericIPAddressField(_('IP прокси'), blank=True, null=True)
+    method = models.CharField(_('Метод'), max_length=10)
+    path = models.CharField(_('Путь'), max_length=2048)
+    referer = models.CharField(_('Реферер'), max_length=2048, blank=True)
+    user_agent = models.TextField(_('User-Agent'), blank=True)
+    status_code = models.PositiveSmallIntegerField(_('HTTP статус'), blank=True, null=True)
+    headers = models.JSONField(_('Заголовки'), blank=True, null=True)
+    bot_score = models.PositiveSmallIntegerField(_('Bot score'), default=0)
+    matched_rules = models.JSONField(_('Совпавшие правила'), default=list, blank=True)
+    action = models.CharField(
+        _('Действие'),
+        max_length=16,
+        choices=Action.choices,
+        default=Action.ALLOW,
+    )
+    source = models.CharField(
+        _('Источник'),
+        max_length=16,
+        choices=Source.choices,
+        default=Source.MIDDLEWARE,
+    )
+
+    class Meta:
+        verbose_name = _('Лог антибот-защиты')
+        verbose_name_plural = _('Логи антибот-защиты')
+        ordering = ('-created_at',)
+        indexes = [
+            models.Index(fields=('client_ip', 'created_at'), name='requestlog_ip_created_idx'),
+            models.Index(fields=('bot_score',), name='requestlog_score_idx'),
+            models.Index(fields=('action',), name='requestlog_action_idx'),
+        ]
+
+    def __str__(self):
+        return f"{self.client_ip} {self.path} [{self.bot_score}]"
+
+
+class ManualIPBan(models.Model):
+    """Ручной бан IP через админку."""
+
+    ip_address = models.GenericIPAddressField(_('IP адрес'), unique=True)
+    reason = models.CharField(_('Причина'), max_length=255, blank=True)
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+    expires_at = models.DateTimeField(_('Действует до'), blank=True, null=True)
+    active = models.BooleanField(_('Активен'), default=True)
+
+    class Meta:
+        verbose_name = _('Ручной бан IP')
+        verbose_name_plural = _('Ручные баны IP')
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return f"{self.ip_address} ({'active' if self.active else 'inactive'})"
+
+    def is_active(self):
+        from django.utils import timezone
+        if not self.active:
+            return False
+        if self.expires_at and self.expires_at < timezone.now():
+            return False
+        return True
