@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
@@ -26,6 +26,21 @@ urlpatterns = [
     path('7cf6s6qd8qa7ba52pdgkstaekjtk28a2.txt', TemplateView.as_view(template_name='indexnow_key.txt', content_type='text/plain')),
     # Root handled by LanguageRedirectMiddleware
 ]
+
+LEGACY_ROOT_REDIRECTS = (
+    (r'^faqb2bquestions/?$', '/en/contact/'),
+    (r'^faqb2b/?$', '/en/contact/'),
+    (r'^faqb2bpromo/?$', '/en/contact/'),
+    (r'^faqconf/?$', '/en/contact/'),
+    (r'^faqconf2/?$', '/en/contact/'),
+    (r'^privacyen/?$', '/en/privacy/'),
+    (r'^gr/?$', '/en/'),
+)
+
+for pattern, target in LEGACY_ROOT_REDIRECTS:
+    urlpatterns.append(
+        re_path(pattern, RedirectView.as_view(url=target, permanent=True))
+    )
 
 # Многоязычные URL
 urlpatterns += i18n_patterns(

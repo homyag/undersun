@@ -2,7 +2,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.views.generic import ListView, DetailView, View
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
+from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse, HttpResponsePermanentRedirect
 # login_required decorator removed
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -23,6 +23,12 @@ from .models import Property, PropertyType
 from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
 from .yml_feed import YandexYmlFeedGenerator
+
+
+LEGACY_PROPERTY_SLUG_REDIRECTS = {
+    # Укороченный slug из старого каталога → актуальный slug
+    '1-bedroom-apart': '1-bedroom-apartment-in-a-deluxe-condominium-in-rawai',
+}
 
 
 class DealTypeRedirectMixin:
@@ -656,9 +662,13 @@ class PropertyDetailView(DetailView):
     
     def get(self, request, *args, **kwargs):
         """Переопределяем get метод для обработки редиректов"""
+        slug = kwargs.get('slug')
         try:
             self.object = self.get_object()
         except Http404:
+            legacy_redirect = self._maybe_redirect_legacy_slug(slug)
+            if legacy_redirect:
+                return legacy_redirect
             raise
         
         # Если объект найден, но неактивен - делаем редирект
@@ -689,6 +699,18 @@ class PropertyDetailView(DetailView):
         context['amp_url'] = amp_url
 
         return context
+
+    def _maybe_redirect_legacy_slug(self, slug):
+        """Проверяем, нужно ли перенаправить запрос со старого slug на актуальный."""
+        if not slug:
+            return None
+
+        target_slug = LEGACY_PROPERTY_SLUG_REDIRECTS.get(slug)
+        if not target_slug:
+            return None
+
+        target_url = reverse('properties:property_detail', kwargs={'slug': target_slug})
+        return HttpResponsePermanentRedirect(target_url)
     
     def get_similar_properties(self):
         """

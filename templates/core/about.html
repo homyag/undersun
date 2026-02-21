@@ -106,56 +106,56 @@
     </div>
 </section>
 
-<!-- Company Story -->
-<section class="py-16">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-                <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Наша история" %}</h2>
-                <div class="space-y-4 text-gray-600">
-                    <p>
-                        {% trans "Undersun Estate - это молодая и энергичная команда экспертов рынка недвижимости Таиланда с 3-летним опытом работы. Мы предлагаем разнообразные варианты недвижимости: от доступного жилья до роскошных вилл." %}
-                    </p>
-                    <p>
-                        {% trans "Наша команда предоставляет комплексную и бесплатную поддержку на всех этапах сделки. Мы тщательно отбираем объекты недвижимости, ориентируясь на потребности и пожелания клиентов." %}
-                    </p>
-                    <p>
-                        {% trans "Мы специализируемся на продаже и аренде вилл, таунхаусов, кондоминиумов и земельных участков в различных районах Пхукета: Муанг Пхукет, Катху и Таланг." %}
-                    </p>
-                </div>
-            </div>
-            <div>
-                <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="rounded-lg shadow-lg w-full">
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Statistics -->
-<section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши достижения" %}</h2>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center">
-                <div class="text-4xl font-bold text-primary mb-2">500</div>
-                <div class="text-gray-600">{% trans "Объектов в портфолио" %}</div>
-            </div>
-            <div class="text-center">
-                <div class="text-4xl font-bold text-primary mb-2">5</div>
-                <div class="text-gray-600">
-                    {% if LANGUAGE_CODE == 'en' %}Years of experience{% elif LANGUAGE_CODE == 'th' %}ปีแห่งประสบการณ์{% else %}{% trans "Лет опыта" %}{% endif %}
-                </div>
-            </div>
-            <div class="text-center">
-                <div class="text-4xl font-bold text-primary mb-2">3</div>
-                <div class="text-gray-600">{% trans "Языка обслуживания" %}</div>
-            </div>
-        </div>
-    </div>
-</section>
+{#<!-- Company Story -->#}
+{#<section class="py-16">#}
+{#    <div class="max-w-7xl mx-auto px-4">#}
+{#        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">#}
+{#            <div>#}
+{#                <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Наша история" %}</h2>#}
+{#                <div class="space-y-4 text-gray-600">#}
+{#                    <p>#}
+{#                        {% trans "Undersun Estate - это молодая и энергичная команда экспертов рынка недвижимости Таиланда с 3-летним опытом работы. Мы предлагаем разнообразные варианты недвижимости: от доступного жилья до роскошных вилл." %}#}
+{#                    </p>#}
+{#                    <p>#}
+{#                        {% trans "Наша команда предоставляет комплексную и бесплатную поддержку на всех этапах сделки. Мы тщательно отбираем объекты недвижимости, ориентируясь на потребности и пожелания клиентов." %}#}
+{#                    </p>#}
+{#                    <p>#}
+{#                        {% trans "Мы специализируемся на продаже и аренде вилл, таунхаусов, кондоминиумов и земельных участков в различных районах Пхукета: Муанг Пхукет, Катху и Таланг." %}#}
+{#                    </p>#}
+{#                </div>#}
+{#            </div>#}
+{#            <div>#}
+{#                <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="rounded-lg shadow-lg w-full">#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</section>#}
+{##}
+{#<!-- Statistics -->#}
+{#<section class="py-16 bg-gray-50">#}
+{#    <div class="max-w-7xl mx-auto px-4">#}
+{#        <div class="text-center mb-12">#}
+{#            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши достижения" %}</h2>#}
+{#        </div>#}
+{#        #}
+{#        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">#}
+{#            <div class="text-center">#}
+{#                <div class="text-4xl font-bold text-primary mb-2">500</div>#}
+{#                <div class="text-gray-600">{% trans "Объектов в портфолио" %}</div>#}
+{#            </div>#}
+{#            <div class="text-center">#}
+{#                <div class="text-4xl font-bold text-primary mb-2">5</div>#}
+{#                <div class="text-gray-600">#}
+{#                    {% if LANGUAGE_CODE == 'en' %}Years of experience{% elif LANGUAGE_CODE == 'th' %}ปีแห่งประสบการณ์{% else %}{% trans "Лет опыта" %}{% endif %}#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="text-center">#}
+{#                <div class="text-4xl font-bold text-primary mb-2">3</div>#}
+{#                <div class="text-gray-600">{% trans "Языка обслуживания" %}</div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</section>#}
 
 <!-- Team -->
 <section class="py-16">

@@ -6,10 +6,11 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 from django.templatetags.static import static
 from django.urls import reverse
+from urllib.parse import unquote
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
@@ -436,6 +437,28 @@ def blog_tag(request, slug):
         context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
     
     return render(request, 'blog/blog_tag.html', context)
+
+
+def legacy_blog_article_redirect(request, legacy_slug):
+    """Преобразуем legacy URL вида /blog/articles/123-slug/ в актуальный /blog/slug/."""
+    raw_slug = unquote(legacy_slug or '').strip('/').lower()
+    if not raw_slug:
+        return HttpResponsePermanentRedirect(reverse('blog:list'))
+
+    # Некоторые legacy-URL содержат несколько сегментов, поэтому берем последний.
+    slug_candidate = raw_slug.split('/')[-1]
+
+    if '-' in slug_candidate:
+        possible_id, remainder = slug_candidate.split('-', 1)
+        if possible_id.isdigit() and remainder:
+            slug_candidate = remainder
+
+    target_url = reverse('blog:detail', kwargs={'slug': slug_candidate})
+    query_string = request.META.get('QUERY_STRING')
+    if query_string:
+        target_url = f"{target_url}?{query_string}"
+
+    return HttpResponsePermanentRedirect(target_url)
 
 
 @csrf_exempt

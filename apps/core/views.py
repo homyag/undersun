@@ -610,6 +610,18 @@ def legacy_real_estate_redirect(request, *args, **kwargs):
     return HttpResponsePermanentRedirect(target_url)
 
 
+def legacy_team_member_redirect(request, *args, **kwargs):
+    """Командные страницы из старого сайта перенаправляем на текущий раздел «О компании»"""
+    target_url = reverse('core:about')
+    return HttpResponsePermanentRedirect(target_url)
+
+
+def legacy_privacy_policy_redirect(request, *args, **kwargs):
+    """Все варианты /privacy-policy/ ведем на актуальную страницу /privacy/."""
+    target_url = reverse('core:privacy')
+    return HttpResponsePermanentRedirect(target_url)
+
+
 class ServiceDetailView(DetailView):
     """Детальная страница услуги"""
     model = Service
