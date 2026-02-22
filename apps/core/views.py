@@ -7,7 +7,7 @@ from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
-from django.http import HttpResponse, HttpResponsePermanentRedirect
+from django.http import HttpResponse, HttpResponsePermanentRedirect, JsonResponse
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import translation
@@ -25,6 +25,11 @@ from .models import PromotionalBanner, Service, Team
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def metrika_loaded_ping(request):
+    """Простой endpoint для фиксации факта загрузки Метрики (используется sendBeacon)."""
+    return JsonResponse({'status': 'ok'})
 
 
 def serialize_properties_for_js(properties):

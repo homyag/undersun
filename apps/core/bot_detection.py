@@ -155,6 +155,10 @@ class BotDetectionService:
         if request.method in {'HEAD', 'OPTIONS'} and not path.startswith(self.skip_path_prefixes):
             score += self._add_match(matches, 'head_on_html', request.method)
 
+        # Rule: single HTML hit without static follow-up
+        if request.method == 'GET' and self._is_single_html_hit(client_ip, path):
+            score += self._add_match(matches, 'single_html_hit')
+
         # Rule: rate limiting
         if self._is_rate_limited(client_ip):
             score += self._add_match(matches, 'rate_limit')
@@ -194,6 +198,20 @@ class BotDetectionService:
             logger.exception('Rate limit cache failure')
             return False
         return count >= self.rate_limit_max
+
+    def _is_single_html_hit(self, client_ip: str, path: str) -> bool:
+        """Считать одиночные HTML-запросы без последующих статических обращений."""
+        if not client_ip:
+            return False
+        # анализируем только HTML пути (без расширения), избегая статики
+        leaf = path.split('/')[-1]
+        if '.' in leaf:
+            return False
+        cache_key = f'bouncehit:{client_ip}'
+        if cache.get(cache_key):
+            return False
+        cache.set(cache_key, True, timeout=getattr(settings, 'BOT_PROTECTION', {}).get('BOUNCE_WINDOW_SECONDS', 5))
+        return True
 
     def _add_match(self, matches: List[RuleMatch], key: str, detail: Optional[str] = None) -> int:
         weight = self.weights.get(key, 0)

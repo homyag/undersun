@@ -199,7 +199,7 @@ PAGINATE_BY = 12
 BOT_PROTECTION = {
     'ENABLED': env.bool('BOT_PROTECTION_ENABLED', default=True),
     'WHITELIST_IPS': [
-        '91.212.150.176',  # reverse proxy for RU traffic
+        #'91.212.150.176',  # reverse proxy for RU traffic
         '95.161.221.91',   # admin IP
     ],
     'WHITELIST_USER_AGENTS': [
@@ -219,12 +219,14 @@ BOT_PROTECTION = {
         r'PetalBot',
         r'LinkedInBot',
         r'facebookexternalhit',
+        r'meta-externalagent',
         r'Twitterbot',
         r'Applebot',
         r'AhrefsBot',
         r'AhrefsSiteAudit',
         r'Screaming Frog',
         r'SemrushBot',
+        r'Amazonbot',
         r'OpenAI-SearchBot',
         r'GPTBot',
         r'ClaudeBot',
@@ -233,6 +235,14 @@ BOT_PROTECTION = {
         r'CensysInspect',
         r'Palo Alto Networks',
         r'ChatGPT-User',
+        r'Slackbot',
+        r'TelegramBot',
+        r'newsai/1\.0',
+        r'MJ12bot',
+        r'SERankingBacklinksBot',
+        r'PerplexityBot',
+        r'TikTokSpider',
+        r'BusinessValidator',
     ],
     'BLACKLIST_IPS': [
         '20.205.115.105',
@@ -300,15 +310,17 @@ BOT_PROTECTION = {
     },
     'SKIP_PATH_PREFIXES': ['/static/', '/media/'],
     'SKIP_METHODS': ['OPTIONS'],
+    'BOUNCE_WINDOW_SECONDS': 5,
     'RULE_WEIGHTS': {
         'forbidden_path': 120,
         'suspicious_user_agent': 25,
         'missing_headers': 10,
         'missing_headers_critical': 120,
-        'no_referer': 10,
+        'no_referer': 20,
         'no_referer_combo': 90,
-        'js_challenge_missing': 15,
+        'js_challenge_missing': 40,
         'js_challenge_failed': 120,
+        'single_html_hit': 30,
         'rate_limit': 20,
         'blacklist_ip': 40,
         'suspicious_payload': 30,

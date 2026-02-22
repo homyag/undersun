@@ -180,35 +180,109 @@
 <script src="https://analytics.ahrefs.com/analytics.js" data-key="TFchQZ1UuanbAlCbMnbBbg" async></script>
 </head>
 <body class="overflow-x-hidden">
-<!-- Yandex.Metrika counter -->
+<!-- Deferred Yandex.Metrika loading -->
 <script>
     (function() {
-        const initMetrika = function() {
-            if (window.ym) {
+        const COUNTER_ID = 90630603;
+        const COOKIE_NAME = 'bot_challenge';
+        const METRIKA_PING_URL = "{% url 'core:metrika_loaded' %}";
+        const ACTIVE_EVENTS = ['scroll', 'mousemove', 'keydown', 'touchstart'];
+        let userInteracted = false;
+        let metrikaInjected = false;
+
+        window.METRIKA_COUNTER_ID = COUNTER_ID;
+
+        function hasChallengeCookie() {
+            return document.cookie.split(';').some(cookie => cookie.trim().startsWith(COOKIE_NAME + '='));
+        }
+
+        function notifyBackend() {
+            if (!METRIKA_PING_URL) {
                 return;
             }
+            try {
+                if (navigator.sendBeacon) {
+                    const data = new Blob([], { type: 'text/plain' });
+                    navigator.sendBeacon(METRIKA_PING_URL, data);
+                    return;
+                }
+            } catch (error) {
+                // fallback to fetch
+            }
+            fetch(METRIKA_PING_URL, { method: 'GET', keepalive: true, credentials: 'same-origin' }).catch(() => {});
+        }
+
+        function injectMetrika() {
+            if (metrikaInjected) {
+                return;
+            }
+            metrikaInjected = true;
 
             (function(m,e,t,r,i,k,a){
                 m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
                 m[i].l=1*new Date();
-                for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+                for (let j = 0; j < document.scripts.length; j++) {
+                    if (document.scripts[j].src === r) {
+                        return;
+                    }
+                }
+                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a);
             })(window, document,'script','https://mc.yandex.ru/metrika/tag.js', 'ym');
 
-            ym(90630603, 'init', {webvisor:true, clickmap:true, accurateTrackBounce:true, trackLinks:true});
-        };
-
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(initMetrika, { timeout: 3000 });
-        } else {
-            window.addEventListener('load', initMetrika, { once: true });
+            window.ym(COUNTER_ID, 'init', { webvisor: true, clickmap: true, accurateTrackBounce: true, trackLinks: true });
+            notifyBackend();
         }
-    })();
-</script>
-<script>
-    (function() {
-        const COUNTER_ID = 90630603;
-        window.METRIKA_COUNTER_ID = COUNTER_ID;
+
+        function readyToLoad() {
+            if (metrikaInjected) {
+                return false;
+            }
+            if (!userInteracted) {
+                return false;
+            }
+            if (!hasChallengeCookie()) {
+                return false;
+            }
+            if (document.visibilityState === 'hidden') {
+                return false;
+            }
+            return true;
+        }
+
+        function tryLoadMetrika() {
+            if (readyToLoad()) {
+                injectMetrika();
+            }
+        }
+
+        function markInteraction() {
+            userInteracted = true;
+            tryLoadMetrika();
+        }
+
+        ACTIVE_EVENTS.forEach((eventName) => {
+            const options = { once: true };
+            if (eventName === 'scroll' || eventName === 'touchstart') {
+                options.passive = true;
+            }
+            document.addEventListener(eventName, markInteraction, options);
+        });
+
+        document.addEventListener('visibilitychange', tryLoadMetrika);
+
+        const cookieCheckInterval = setInterval(() => {
+            if (metrikaInjected) {
+                clearInterval(cookieCheckInterval);
+                return;
+            }
+            if (hasChallengeCookie()) {
+                tryLoadMetrika();
+                if (metrikaInjected) {
+                    clearInterval(cookieCheckInterval);
+                }
+            }
+        }, 500);
+
         window.trackMetrikaGoal = function(goalName, params) {
             if (!goalName || typeof window.ym !== 'function') {
                 return;
@@ -223,8 +297,7 @@
         };
     })();
 </script>
-<noscript><div><img src="https://mc.yandex.ru/watch/90630603" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<!-- /Yandex.Metrika counter -->
+<!-- /Deferred Yandex.Metrika -->
 {% include 'includes/layout/header.html' with lang=LANGUAGE_CODE|default:'ru' %}
 
 <!-- CSRF Token for AJAX -->
