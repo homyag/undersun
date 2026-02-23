@@ -136,14 +136,17 @@ class BotDetectionService:
 
         # Rule: missing headers typical for browsers
         headers = self._collect_headers(request)
-        missing_accept = not headers.get('HTTP_ACCEPT_LANGUAGE') or not headers.get('HTTP_ACCEPT_ENCODING')
+        missing_accept_lang = not headers.get('HTTP_ACCEPT_LANGUAGE')
+        missing_accept_encoding = not headers.get('HTTP_ACCEPT_ENCODING')
         missing_sec = not headers.get('HTTP_SEC_CH_UA') and not headers.get('HTTP_SEC_FETCH_SITE')
 
-        if missing_accept:
+        if missing_accept_lang and missing_accept_encoding:
             rule_key = 'missing_headers_critical'
             if self.is_ip_whitelisted(client_ip):
                 rule_key = 'missing_headers'
             score += self._add_match(matches, rule_key, 'accept')
+        elif missing_accept_lang or missing_accept_encoding:
+            score += self._add_match(matches, 'missing_headers', 'accept')
         elif missing_sec:
             score += self._add_match(matches, 'missing_headers', 'sec')
 

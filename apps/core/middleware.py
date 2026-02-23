@@ -256,7 +256,10 @@ class BotDetectionMiddleware(MiddlewareMixin):
             return None
 
         if result.action == RequestLog.Action.CHALLENGE and not request.COOKIES.get(self.service.challenge_cookie):
-            return self._challenge_response(request)
+            if self._is_basic_first_visit(result.matched_rules):
+                result.action = RequestLog.Action.MONITOR
+            else:
+                return self._challenge_response(request)
 
         matched_rules = [
             {
@@ -366,3 +369,8 @@ class BotDetectionMiddleware(MiddlewareMixin):
         response.status_code = 302
         response['Refresh'] = '0;url=%s' % target_url
         return response
+
+    @staticmethod
+    def _is_basic_first_visit(matched_rules):
+        basic_rules = {'js_challenge_missing', 'no_referer', 'single_html_hit'}
+        return all(getattr(match, 'key', None) in basic_rules for match in matched_rules)
