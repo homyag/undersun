@@ -279,6 +279,8 @@ class BotDetectionMiddleware(MiddlewareMixin):
             matched_rules=matched_rules,
             action=result.action,
             source=RequestLog.Source.MIDDLEWARE,
+            asn=result.asn or '',
+            asn_organization=result.asn_organization or '',
         )
         request._bot_request_log = log_entry
 

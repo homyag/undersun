@@ -4,10 +4,13 @@ import ipaddress
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.core.cache import cache
+
+from apps.core.asn_resolver import get_resolver
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +29,8 @@ class DetectionResult:
     matched_rules: List[RuleMatch] = field(default_factory=list)
     notify_fail2ban: bool = False
     headers: Dict[str, str] = field(default_factory=dict)
+    asn: Optional[str] = None
+    asn_organization: Optional[str] = None
 
 
 class BotDetectionService:
@@ -51,6 +56,10 @@ class BotDetectionService:
         self.challenge_cookie = config.get('CHALLENGE_COOKIE', 'bot_challenge')
         self.thresholds = config.get('ACTION_THRESHOLDS', {})
         self.weights = config.get('RULE_WEIGHTS', {})
+        asn_db = config.get('ASN_DB_PATH')
+        self.asn_db_path = Path(asn_db) if asn_db else None
+        self.asn_weights = config.get('ASN_WEIGHTS', {})
+        self.asn_org_patterns = {k.lower(): v for k, v in config.get('ASN_ORG_PATTERNS', {}).items()}
 
     @staticmethod
     def _compile_networks(values: List[str]) -> List[ipaddress._BaseNetwork]:
@@ -111,6 +120,9 @@ class BotDetectionService:
             return DetectionResult(score=0, action='allow')
 
         # Rule: blacklist IP
+        asn_value = None
+        asn_org_value = None
+
         if self.is_ip_blacklisted(client_ip):
             score += self._add_match(matches, 'blacklist_ip')
 
@@ -159,6 +171,21 @@ class BotDetectionService:
         if request.method == 'GET' and self._is_single_html_hit(client_ip, path):
             score += self._add_match(matches, 'single_html_hit')
 
+        # Rule: ASN reputation
+        asn_record = self._lookup_asn(client_ip)
+        if asn_record:
+            asn_value = asn_record.asn
+            asn_org_value = asn_record.organization
+            asn_weight = self._asn_weight(asn_record)
+            if asn_weight:
+                detail = f"{asn_record.asn} {asn_record.organization}".strip()
+                score += self._add_match(
+                    matches,
+                    'asn_datacenter',
+                    detail=detail,
+                    weight_override=asn_weight,
+                )
+
         # Rule: rate limiting
         if self._is_rate_limited(client_ip):
             score += self._add_match(matches, 'rate_limit')
@@ -174,6 +201,8 @@ class BotDetectionService:
             matched_rules=matches,
             notify_fail2ban=notify_fail2ban,
             headers=headers,
+            asn=asn_value,
+            asn_organization=asn_org_value,
         )
 
     def _collect_headers(self, request) -> Dict[str, str]:
@@ -213,11 +242,37 @@ class BotDetectionService:
         cache.set(cache_key, True, timeout=getattr(settings, 'BOT_PROTECTION', {}).get('BOUNCE_WINDOW_SECONDS', 5))
         return True
 
-    def _add_match(self, matches: List[RuleMatch], key: str, detail: Optional[str] = None) -> int:
-        weight = self.weights.get(key, 0)
+    def _add_match(
+        self,
+        matches: List[RuleMatch],
+        key: str,
+        detail: Optional[str] = None,
+        weight_override: Optional[int] = None,
+    ) -> int:
+        weight = weight_override if weight_override is not None else self.weights.get(key, 0)
         if weight:
             matches.append(RuleMatch(key=key, weight=weight, detail=detail))
         return weight
+
+    def _lookup_asn(self, client_ip: str):
+        if not client_ip or not self.asn_db_path:
+            return None
+        try:
+            resolver = get_resolver(self.asn_db_path)
+            return resolver.lookup(client_ip)
+        except Exception:  # pragma: no cover
+            return None
+
+    def _asn_weight(self, record) -> int:
+        if not record:
+            return 0
+        if record.asn in self.asn_weights:
+            return self.asn_weights[record.asn]
+        org_lower = record.organization.lower()
+        for pattern, weight in self.asn_org_patterns.items():
+            if pattern in org_lower:
+                return weight
+        return 0
 
     def _resolve_action(self, score: int) -> str:
         if score >= self.thresholds.get('block', 90):

@@ -224,6 +224,7 @@ class RequestLogAdmin(admin.ModelAdmin):
     list_display = (
         'created_at',
         'client_ip',
+        'asn',
         'path_short',
         'method',
         'bot_score',
@@ -247,6 +248,8 @@ class RequestLogAdmin(admin.ModelAdmin):
         'action',
         'source',
         'auto_block_threshold',
+        'asn',
+        'asn_organization',
     )
     ordering = ('-created_at',)
     actions = ['ban_ip']

@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+IP2ASN_DB_PATH = BASE_DIR / 'tmp' / 'ip2asn.tsv'
 
 # Добавляем apps в Python path
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -311,6 +312,19 @@ BOT_PROTECTION = {
     'SKIP_PATH_PREFIXES': ['/static/', '/media/'],
     'SKIP_METHODS': ['OPTIONS'],
     'BOUNCE_WINDOW_SECONDS': 5,
+    'ASN_DB_PATH': IP2ASN_DB_PATH,
+    'ASN_WEIGHTS': {
+        'AS16509': 40,  # Amazon AWS
+        'AS14618': 40,
+        'AS14061': 35,  # DigitalOcean
+        'AS16276': 35,  # OVH
+        'AS24940': 35,  # Hetzner
+        'AS61317': 35,  # DigitalEnergy
+    },
+    'ASN_ORG_PATTERNS': {
+        'google': 15,
+        'facebook': 15,
+    },
     'RULE_WEIGHTS': {
         'forbidden_path': 120,
         'suspicious_user_agent': 25,
@@ -321,6 +335,7 @@ BOT_PROTECTION = {
         'js_challenge_missing': 40,
         'js_challenge_failed': 120,
         'single_html_hit': 30,
+        'asn_datacenter': 40,
         'rate_limit': 20,
         'blacklist_ip': 40,
         'suspicious_payload': 30,

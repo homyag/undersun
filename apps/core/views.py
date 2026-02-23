@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
 from django.http import HttpResponse, HttpResponsePermanentRedirect, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import translation
@@ -27,6 +28,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@csrf_exempt
 def metrika_loaded_ping(request):
     """Простой endpoint для фиксации факта загрузки Метрики (используется sendBeacon)."""
     return JsonResponse({'status': 'ok'})

@@ -670,6 +670,8 @@ class RequestLog(models.Model):
     headers = models.JSONField(_('Заголовки'), blank=True, null=True)
     bot_score = models.PositiveSmallIntegerField(_('Bot score'), default=0)
     matched_rules = models.JSONField(_('Совпавшие правила'), default=list, blank=True)
+    asn = models.CharField(_('ASN'), max_length=32, blank=True)
+    asn_organization = models.CharField(_('ASN организация'), max_length=255, blank=True)
     action = models.CharField(
         _('Действие'),
         max_length=16,
