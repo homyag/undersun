@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -71,6 +72,30 @@ if (BASE_DIR / 'theme').exists():
     LOCAL_APPS.append('theme')
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+
+def _load_googlebot_ip_ranges():
+    base_path = BASE_DIR / 'seo' / 'googlebot-ip-ranges'
+    if not base_path.exists():
+        return []
+
+    ranges = set()
+    for json_path in base_path.glob('*.json'):
+        try:
+            data = json.loads(json_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+
+        for prefix in data.get('prefixes', []):
+            for key in ('ipv4Prefix', 'ipv6Prefix'):
+                value = prefix.get(key)
+                if value:
+                    ranges.add(value.strip())
+
+    return sorted(ranges)
+
+
+GOOGLEBOT_IP_RANGES = _load_googlebot_ip_ranges()
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -202,7 +227,7 @@ BOT_PROTECTION = {
     'WHITELIST_IPS': [
         #'91.212.150.176',  # reverse proxy for RU traffic
         '95.161.221.91',   # admin IP
-    ],
+    ] + GOOGLEBOT_IP_RANGES,
     'WHITELIST_USER_AGENTS': [
         r'Googlebot',
         r'Chrome-Lighthouse',
