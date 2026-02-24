@@ -187,8 +187,10 @@
         const COOKIE_NAME = 'bot_challenge';
         const METRIKA_PING_URL = "{% url 'core:metrika_loaded' %}";
         const ACTIVE_EVENTS = ['scroll', 'mousemove', 'keydown', 'touchstart'];
+        const FALLBACK_DELAY = 2000;
         let userInteracted = false;
         let metrikaInjected = false;
+        let fallbackTimeoutId = null;
 
         window.METRIKA_COUNTER_ID = COUNTER_ID;
 
@@ -217,6 +219,9 @@
                 return;
             }
             metrikaInjected = true;
+            if (window.console && typeof window.console.info === 'function') {
+                console.info('[BotProtection] Yandex.Metrika initialized');
+            }
 
             (function(m,e,t,r,i,k,a){
                 m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -233,11 +238,8 @@
             notifyBackend();
         }
 
-        function readyToLoad() {
+        function readyToLoad(requireInteraction = true) {
             if (metrikaInjected) {
-                return false;
-            }
-            if (!userInteracted) {
                 return false;
             }
             if (!hasChallengeCookie()) {
@@ -246,17 +248,39 @@
             if (document.visibilityState === 'hidden') {
                 return false;
             }
+            if (requireInteraction && !userInteracted) {
+                return false;
+            }
             return true;
         }
 
-        function tryLoadMetrika() {
-            if (readyToLoad()) {
+        function tryLoadMetrika(requireInteraction = true) {
+            if (readyToLoad(requireInteraction)) {
                 injectMetrika();
             }
         }
 
+        function scheduleFallbackCheck() {
+            if (fallbackTimeoutId || metrikaInjected) {
+                return;
+            }
+            if (!hasChallengeCookie() || userInteracted) {
+                return;
+            }
+            fallbackTimeoutId = setTimeout(() => {
+                fallbackTimeoutId = null;
+                if (!userInteracted) {
+                    tryLoadMetrika(false);
+                }
+            }, FALLBACK_DELAY);
+        }
+
         function markInteraction() {
             userInteracted = true;
+            if (fallbackTimeoutId) {
+                clearTimeout(fallbackTimeoutId);
+                fallbackTimeoutId = null;
+            }
             tryLoadMetrika();
         }
 
@@ -268,7 +292,7 @@
             document.addEventListener(eventName, markInteraction, options);
         });
 
-        document.addEventListener('visibilitychange', tryLoadMetrika);
+        document.addEventListener('visibilitychange', () => tryLoadMetrika());
 
         const cookieCheckInterval = setInterval(() => {
             if (metrikaInjected) {
@@ -277,11 +301,16 @@
             }
             if (hasChallengeCookie()) {
                 tryLoadMetrika();
+                scheduleFallbackCheck();
                 if (metrikaInjected) {
                     clearInterval(cookieCheckInterval);
                 }
             }
         }, 500);
+
+        if (hasChallengeCookie()) {
+            scheduleFallbackCheck();
+        }
 
         window.trackMetrikaGoal = function(goalName, params) {
             if (!goalName || typeof window.ym !== 'function') {
