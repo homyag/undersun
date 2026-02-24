@@ -224,6 +224,7 @@ class RequestLogAdmin(admin.ModelAdmin):
     list_display = (
         'created_at',
         'client_ip',
+        'referer_short',
         'asn',
         'path_short',
         'method',
@@ -258,6 +259,14 @@ class RequestLogAdmin(admin.ModelAdmin):
         return (obj.path or '/')[:60]
 
     path_short.short_description = _('Путь')
+
+    def referer_short(self, obj):
+        if not obj.referer:
+            return '-'
+        return obj.referer[:80]
+
+    referer_short.short_description = _('Referer')
+
 
     def matched_rules_display(self, obj):
         rules = obj.matched_rules or []

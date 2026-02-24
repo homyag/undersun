@@ -18,7 +18,7 @@ class ASNRecord:
 class ASNResolver:
     """Simple resolver built on top of iptoasn/db-ip TSV file."""
 
-    def __init__(self, db_path: Path) -> None:
+    def __init__(self, db_path: Optional[Path]) -> None:
         self.db_path = db_path
         self.records: List[ASNRecord] = []
         if db_path and db_path.exists():
@@ -26,17 +26,20 @@ class ASNResolver:
 
     def _load(self) -> None:
         records: List[ASNRecord] = []
+        if not self.db_path:
+            return
         with self.db_path.open('r', encoding='utf-8', errors='ignore') as fh:
             for line in fh:
                 if not line or line.startswith('#'):
                     continue
                 parts = line.strip().split('\t')
-                if len(parts) < 7:
+                if len(parts) < 5:
                     continue
-                start_ip, end_ip, asn, _cc, _registry, _allocated, org = parts[:7]
+                start_ip, end_ip, asn, *_rest = parts
+                org = _rest[-1] if _rest else ''
                 try:
-                    start_int = int(start_ip)
-                    end_int = int(end_ip)
+                    start_int = int(ipaddress.ip_address(start_ip))
+                    end_int = int(ipaddress.ip_address(end_ip))
                 except ValueError:
                     continue
                 asn = asn.strip()
@@ -62,12 +65,32 @@ class ASNResolver:
                 return record
         return None
 
-
 _resolver: Optional[ASNResolver] = None
+_resolver_mtime: Optional[float] = None
 
 
 def get_resolver(db_path: Path) -> ASNResolver:
-    global _resolver
-    if _resolver is None or (_resolver and _resolver.db_path != db_path):
-        _resolver = ASNResolver(db_path)
+    global _resolver, _resolver_mtime
+    target_path = Path(db_path) if db_path else None
+    mtime = None
+    if target_path and target_path.exists():
+        try:
+            mtime = target_path.stat().st_mtime
+        except OSError:
+            mtime = None
+
+    needs_reload = False
+    if _resolver is None:
+        needs_reload = True
+    elif target_path and _resolver.db_path != target_path:
+        needs_reload = True
+    elif mtime is not None and _resolver_mtime != mtime:
+        needs_reload = True
+    elif mtime is not None and not _resolver.records:
+        needs_reload = True
+
+    if needs_reload:
+        _resolver = ASNResolver(target_path)
+        _resolver_mtime = mtime
+
     return _resolver
