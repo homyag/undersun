@@ -232,6 +232,14 @@ def blog_detail(request, slug):
         'page_description': meta_description,
         'page_keywords': meta_keywords,
         'amp_url': amp_url,
+        'metrika_counter_id': getattr(settings, 'METRIKA_COUNTER_ID', 90630603),
+        'amp_metrika_params': json.dumps({
+            'post_id': post.id,
+            'slug': post.slug,
+            'category': post.category.slug if post.category else '',
+            'language': language_code,
+            'is_amp': True,
+        }, ensure_ascii=False),
     }
 
     default_image_url = request.build_absolute_uri(static('images/og-image.jpg'))
@@ -297,6 +305,14 @@ def blog_detail_amp(request, slug):
         'amp_content': convert_html_to_amp(post.content),
         'og_image_url': og_image_url,
         'default_amp_image': default_amp_image,
+        'metrika_counter_id': getattr(settings, 'METRIKA_COUNTER_ID', 90630603),
+        'amp_metrika_params': json.dumps({
+            'post_id': post.id,
+            'slug': post.slug,
+            'category': post.category.slug if post.category else '',
+            'language': language_code,
+            'is_amp': True,
+        }, ensure_ascii=False),
     }
 
     schema_image_url = og_image_url or default_amp_image

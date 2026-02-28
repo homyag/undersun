@@ -1,5 +1,7 @@
+import json
 from decimal import Decimal, InvalidOperation
 
+from django.conf import settings
 from django.views.generic import ListView, DetailView, View
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse, HttpResponsePermanentRedirect
@@ -858,6 +860,17 @@ def property_detail_amp(request, slug):
 
     final_price = _build_final_price(property_obj)
 
+    metrika_counter_id = getattr(settings, 'METRIKA_COUNTER_ID', 90630603)
+    ya_params = {
+        'property_id': property_obj.id,
+        'slug': property_obj.slug,
+        'deal_type': property_obj.deal_type,
+        'property_type': property_obj.property_type.slug if property_obj.property_type else '',
+        'district': property_obj.district.slug if property_obj.district else '',
+        'language': getattr(request, 'LANGUAGE_CODE', 'ru'),
+        'is_amp': True,
+    }
+
     context = {
         'property': property_obj,
         'meta_title': meta_title,
@@ -876,6 +889,8 @@ def property_detail_amp(request, slug):
         'status_label': property_obj.get_status_display(),
         'deal_type_label': property_obj.get_deal_type_display(),
         'developer_name': property_obj.developer.name if property_obj.developer else '',
+        'metrika_counter_id': metrika_counter_id,
+        'amp_metrika_params': json.dumps(ya_params, ensure_ascii=False),
     }
 
     return render(request, 'properties/property_detail_amp.html', context)

@@ -306,6 +306,10 @@ BOT_PROTECTION = {
         r'HeadlessChrome',
         r'zgrab',
     ],
+    'HIGH_RISK_USER_AGENT_PATTERNS': [
+        r'Chrome/13[0-9]\.0\.0\.0 Safari/537\.36$',
+        r'Mozilla/5\.0 \(Windows NT 10\.0; Win64; x64\).*Chrome/139\.0\.0\.0',
+    ],
     'FORBIDDEN_PATH_PATTERNS': [
         r'^/administrator(?:/|$)',
         r'^/wp-admin',
@@ -361,6 +365,13 @@ BOT_PROTECTION = {
         'AS16276': 35,  # OVH
         'AS24940': 35,  # Hetzner
         'AS61317': 35,  # DigitalEnergy
+        'AS4837': 45,   # China169 Backbone
+        'AS9808': 45,   # China Mobile
+        'AS4811': 45,   # China Telecom Shanghai
+        'AS4134': 45,   # ChinaNet Backbone
+        'AS58563': 45,  # China Telecom Hubei
+        'AS134763': 40, # CT Dongguan IDC
+        'AS134760': 40, # ChinaNet Hebei
     },
     'ASN_ORG_PATTERNS': {
         'google': 15,
@@ -369,12 +380,14 @@ BOT_PROTECTION = {
     'RULE_WEIGHTS': {
         'forbidden_path': 120,
         'suspicious_user_agent': 25,
+        'high_risk_user_agent': 35,
         'missing_headers': 10,
         'missing_headers_critical': 120,
-        'no_referer': 10,
+        'no_referer': 15,
+        'no_referer_combo': 25,
         'js_challenge_missing': 40,
         'js_challenge_failed': 120,
-        'single_html_hit': 20,
+        'single_html_hit': 35,
         'asn_datacenter': 40,
         'rate_limit': 20,
         'blacklist_ip': 40,

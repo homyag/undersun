@@ -46,6 +46,7 @@ class BotDetectionService:
         self.whitelist_user_agents = self._compile_regex(config.get('WHITELIST_USER_AGENTS', []))
         self.blacklist_ips = self._compile_networks(config.get('BLACKLIST_IPS', []))
         self.suspicious_user_agents = self._compile_regex(config.get('SUSPICIOUS_USER_AGENTS', []))
+        self.high_risk_user_agents = self._compile_regex(config.get('HIGH_RISK_USER_AGENT_PATTERNS', []))
         self.forbidden_paths = self._compile_regex(config.get('FORBIDDEN_PATH_PATTERNS', []))
         self.header_keys = config.get('HEADER_KEYS', [])
         rate_limit = config.get('RATE_LIMIT', {})
@@ -133,6 +134,8 @@ class BotDetectionService:
         # Rule: suspicious UA
         if user_agent == '-' or any(pattern.search(user_agent) for pattern in self.suspicious_user_agents):
             score += self._add_match(matches, 'suspicious_user_agent', user_agent or '-')
+        elif any(pattern.search(user_agent) for pattern in self.high_risk_user_agents):
+            score += self._add_match(matches, 'high_risk_user_agent', user_agent[:120])
 
         # Rule: missing headers typical for browsers
         headers = self._collect_headers(request)

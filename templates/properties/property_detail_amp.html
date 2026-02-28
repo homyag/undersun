@@ -12,6 +12,7 @@
   <meta property="og:url" content="{{ canonical_url }}">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
     :root {
@@ -112,9 +113,9 @@
       <h2 class="section-title" style="color:#111827;">{% trans "Нужна консультация по объекту?" %}</h2>
       <p>{% trans "Команда Undersun Estate оперативно свяжется с вами и отправит презентацию." %}</p>
       <div class="cta-buttons">
-        <a class="primary" href="tel:{{ contact_phone }}">{% trans "Позвонить" %}</a>
-        <a class="secondary" href="{{ whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a>
-        <a class="secondary" href="{{ canonical_url }}" target="_blank" rel="noopener">{% trans "Открыть полную версию" %}</a>
+        <a class="primary" href="tel:{{ contact_phone }}" data-amp-analytics="call">{% trans "Позвонить" %}</a>
+        <a class="secondary" href="{{ whatsapp_url }}" target="_blank" rel="noopener" data-amp-analytics="whatsapp">WhatsApp</a>
+        <a class="secondary" href="{{ canonical_url }}" target="_blank" rel="noopener" data-amp-analytics="open-full">{% trans "Открыть полную версию" %}</a>
       </div>
     </section>
 
@@ -130,7 +131,7 @@
             <h3>{{ similar.title }}</h3>
             <p>{{ similar.location.name|default:similar.district.name }} · {{ similar.price_display }}</p>
             <p style="margin-top:-8px;">
-              <a href="{{ similar.get_absolute_url }}" style="color:var(--accent); text-decoration:none; font-weight:600;">{% trans "Подробнее" %}</a>
+              <a href="{{ similar.get_absolute_url }}" style="color:var(--accent); text-decoration:none; font-weight:600;" data-amp-analytics="similar-link">{% trans "Подробнее" %}</a>
             </p>
           </article>
         {% endfor %}
@@ -142,5 +143,89 @@
   <footer>
     &copy; Undersun Estate · {% trans "Все права защищены" %}
   </footer>
+  {% if metrika_counter_id %}
+  {% with property_id=property.id deal_type=property.deal_type|default_if_none:'' %}
+  <amp-analytics type="metrika">
+    <script type="application/json">
+      {
+        "vars": {
+          "counterId": "{{ metrika_counter_id }}"{% if amp_metrika_params %},
+          "yaParams": "{{ amp_metrika_params|escapejs }}"
+          {% endif %}
+        },
+        "triggers": {
+          "notBounce": {
+            "on": "timer",
+            "timerSpec": {
+              "immediate": false,
+              "interval": 15,
+              "maxTimerLength": 14
+            },
+            "request": "notBounce"
+          },
+          "halfScroll": {
+            "on": "scroll",
+            "scrollSpec": {
+              "verticalBoundaries": [50]
+            },
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_property_half_scroll",
+              "yaParams": "{\"propertyId\": {{ property_id }}, \"boundary\": 50}"
+            }
+          },
+          "deepScroll": {
+            "on": "scroll",
+            "scrollSpec": {
+              "verticalBoundaries": [90]
+            },
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_property_full_scroll",
+              "yaParams": "{\"propertyId\": {{ property_id }}, \"boundary\": 90}"
+            }
+          },
+          "callClick": {
+            "on": "click",
+            "selector": ".cta a[data-amp-analytics='call']",
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "property_call_click",
+              "yaParams": "{\"propertyId\": {{ property_id }}, \"context\": \"amp_primary_cta\", \"dealType\": \"{{ deal_type|escapejs }}\"}"
+            }
+          },
+          "whatsappClick": {
+            "on": "click",
+            "selector": ".cta a[data-amp-analytics='whatsapp']",
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "property_whatsapp_click",
+              "yaParams": "{\"propertyId\": {{ property_id }}, \"context\": \"amp_primary_cta\", \"dealType\": \"{{ deal_type|escapejs }}\"}"
+            }
+          },
+          "openFull": {
+            "on": "click",
+            "selector": ".cta a[data-amp-analytics='open-full']",
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_property_open_full",
+              "yaParams": "{\"propertyId\": {{ property_id }}, \"dealType\": \"{{ deal_type|escapejs }}\"}"
+            }
+          },
+          "similarClick": {
+            "on": "click",
+            "selector": ".similar-card a[data-amp-analytics='similar-link']",
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_property_similar_click",
+              "yaParams": "{\"propertyId\": {{ property_id }}}"
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+  {% endwith %}
+  {% endif %}
 </body>
 </html>
