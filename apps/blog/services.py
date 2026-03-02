@@ -5,6 +5,19 @@ from django.utils.html import strip_tags
 
 from apps.core.services import translation_service
 
+
+BLOG_WEBSITE_NAMES = {
+    'ru': 'Блог Undersun Estate',
+    'en': 'Undersun Estate Blog',
+    'th': 'บล็อก Undersun Estate',
+}
+
+BLOG_WEBSITE_DESCRIPTIONS = {
+    'ru': 'Новости и статьи об инвестициях и недвижимости Пхукета от агентства Undersun Estate.',
+    'en': 'News and articles about Phuket real estate and investments by Undersun Estate.',
+    'th': 'ข่าวและบทความเกี่ยวกับอสังหาริมทรัพย์และการลงทุนในภูเก็ตจาก Undersun Estate.',
+}
+
 logger = logging.getLogger(__name__)
 
 
@@ -333,9 +346,15 @@ def build_blog_search_schema(request=None):
         return None
 
     target = f"{blog_url}?search={{search_term_string}}"
+    language = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
+    name = BLOG_WEBSITE_NAMES.get(language, BLOG_WEBSITE_NAMES['en'])
+    description = BLOG_WEBSITE_DESCRIPTIONS.get(language, BLOG_WEBSITE_DESCRIPTIONS['en'])
+
     return {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
+        'name': name,
+        'description': description,
         'url': blog_url,
         'potentialAction': {
             '@type': 'SearchAction',

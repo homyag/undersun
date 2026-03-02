@@ -15,6 +15,7 @@
     {% else %}
         {% include 'properties/includes/detail_structured_data_product.html' with final_price=property.price_sale_thb|default:property.price_rent_monthly_thb|default:0 %}
     {% endif %}
+    {% include 'properties/includes/detail_structured_data_place.html' %}
 {% endblock %}
 
 {% block extra_meta %}

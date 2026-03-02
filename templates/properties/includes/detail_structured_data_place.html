@@ -1,0 +1,53 @@
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Place",
+  "@id": "{{ request.build_absolute_uri }}#place",
+  "name": "{{ property.title|escapejs }}",
+  "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
+  "url": "{{ request.build_absolute_uri }}",
+  "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{% static 'images/no-image.svg' %}"{% endif %}]
+  {% if property.address or property.location or property.district %},
+  "address": {
+    "@type": "PostalAddress",
+    {% if property.address %}"streetAddress": "{{ property.address|escapejs }}"{% if property.location or property.district %}, {% endif %}{% endif %}
+    {% with address_locality=property.location.name|default:property.district.name %}
+    {% if address_locality %}"addressLocality": "{{ address_locality|escapejs }}",{% endif %}
+    {% endwith %}
+    "addressRegion": "{{ property.district.name|default:'Phuket'|escapejs }}",
+    "addressCountry": "TH"
+  }
+  {% endif %}
+  {% if property.latitude and property.longitude %},
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": {{ property.latitude|unlocalize }},
+    "longitude": {{ property.longitude|unlocalize }}
+  },
+  "hasMap": "https://www.google.com/maps?q={{ property.latitude|unlocalize }},{{ property.longitude|unlocalize }}"
+  {% endif %}
+  {% if property.bedrooms or property.bathrooms or property.area_total %},
+  "additionalProperty": [
+    {% if property.bedrooms %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Количество спален" %}",
+      "value": {{ property.bedrooms }}
+    }{% if property.bathrooms or property.area_total %}, {% endif %}{% endif %}
+    {% if property.bathrooms %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Количество ванных" %}",
+      "value": {{ property.bathrooms }}
+    }{% if property.area_total %}, {% endif %}{% endif %}
+    {% if property.area_total %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Площадь" %}",
+      "value": {{ property.area_total|unlocalize }},
+      "unitCode": "MTK"
+    }{% endif %}
+  ]
+  {% endif %}
+}
+</script>
