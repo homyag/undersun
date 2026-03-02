@@ -105,6 +105,7 @@ def site_context(request):
         'canonical_url': canonical_absolute_url,
         'search_schema_json': search_schema_json,
         'recaptcha_site_key': getattr(settings, 'RECAPTCHA_SITE_KEY', ''),
+        'twitter_username': getattr(settings, 'SOCIAL_TWITTER_USERNAME', ''),
     }
 
 PAGINATED_VIEW_NAMES = {
