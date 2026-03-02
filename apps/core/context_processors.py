@@ -94,6 +94,7 @@ def site_context(request):
         'property_types': PropertyType.ordered_for_navigation(),
         'districts': District.objects.prefetch_related('locations').all(),
         'current_language': language_code,
+        'site_name': getattr(settings, 'SITE_NAME', 'Undersun Estate'),
         'menu_services': Service.get_menu_services(),
         'tailwind_use_cdn': getattr(settings, 'TAILWIND_USE_CDN', False),
         'default_og_image_url': default_og_image_url,

@@ -7,6 +7,8 @@
 
 {% block title %}{{ property.title }} - Undersun Estate{% endblock %}
 
+{% block og_type %}product{% endblock %}
+
 {% block structured_data %}
     {% if property.deal_type == 'rent' and property.price_rent_monthly_thb %}
         {% include 'properties/includes/detail_structured_data_product.html' with final_price=property.price_rent_monthly_thb %}

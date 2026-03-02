@@ -9,6 +9,8 @@
 {% block keywords %}{{ page_keywords }}{% endblock %}
 {% endif %}
 
+{% block og_type %}article{% endblock %}
+
 {% block extra_meta %}
     {{ block.super }}
     {% if amp_url %}
