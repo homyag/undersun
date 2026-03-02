@@ -861,12 +861,14 @@ def property_detail_amp(request, slug):
     final_price = _build_final_price(property_obj)
 
     metrika_counter_id = getattr(settings, 'METRIKA_COUNTER_ID', 90630603)
+    property_type_value = property_obj.property_type.name if property_obj.property_type else ''
+    district_slug = property_obj.district.slug if property_obj.district else ''
     ya_params = {
         'property_id': property_obj.id,
         'slug': property_obj.slug,
         'deal_type': property_obj.deal_type,
-        'property_type': property_obj.property_type.slug if property_obj.property_type else '',
-        'district': property_obj.district.slug if property_obj.district else '',
+        'property_type': property_type_value,
+        'district': district_slug,
         'language': getattr(request, 'LANGUAGE_CODE', 'ru'),
         'is_amp': True,
     }

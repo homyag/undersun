@@ -395,6 +395,7 @@ BOT_PROTECTION = {
         'head_on_html': 10,
     },
     'CHALLENGE_COOKIE': 'bot_challenge',
+    'CHALLENGE_QUERY_PARAM': 'bot_challenge_token',
 }
 
 # Login/Logout URLs

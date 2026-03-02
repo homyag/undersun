@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpResponsePermanentRedirect, JsonRespons
 from django.shortcuts import render
 from django.conf.urls.i18n import is_language_prefix_patterns_used
 from django.utils.deprecation import MiddlewareMixin
+from urllib.parse import urlsplit, urlencode, parse_qsl, urlunsplit
 
 from apps.core.bot_detection import BotDetectionService, bot_detection_service
 from apps.core.models import ManualIPBan, RequestLog
@@ -234,10 +235,15 @@ class BotDetectionMiddleware(MiddlewareMixin):
         super().__init__(get_response)
         self.service: BotDetectionService = bot_detection_service
         self.logger = logging.getLogger('bad_requests')
+        self.challenge_query_param = settings.BOT_PROTECTION.get('CHALLENGE_QUERY_PARAM')
 
     def process_request(self, request):
         if not self.service.enabled:
             return None
+
+        cleaned = self._remove_challenge_param(request)
+        if cleaned:
+            return cleaned
 
         client_ip, proxy_ip = self._extract_ips(request)
         user_agent = request.META.get('HTTP_USER_AGENT', '')
@@ -374,3 +380,25 @@ class BotDetectionMiddleware(MiddlewareMixin):
     def _is_basic_first_visit(matched_rules):
         basic_rules = {'js_challenge_missing', 'no_referer', 'single_html_hit'}
         return all(getattr(match, 'key', None) in basic_rules for match in matched_rules)
+
+    def _remove_challenge_param(self, request):
+        if request.method != 'GET':
+            return None
+        token_param = self.challenge_query_param
+        if not token_param or token_param not in request.GET:
+            return None
+        parsed = urlsplit(request.get_full_path())
+        params = parse_qsl(parsed.query, keep_blank_values=True)
+        filtered = [(k, v) for k, v in params if k != token_param]
+        if len(filtered) == len(params):
+            return None
+        new_query = urlencode(filtered, doseq=True)
+        new_url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, new_query, parsed.fragment))
+        if not new_url:
+            new_path = parsed.path or '/'
+            if new_query:
+                new_path = f"{new_path}?{new_query}"
+            if parsed.fragment:
+                new_path = f"{new_path}#{parsed.fragment}"
+            new_url = new_path
+        return HttpResponsePermanentRedirect(new_url)
