@@ -7,6 +7,7 @@ from apps.properties.models import PropertyType, Property
 from apps.locations.models import District, Location
 from apps.core.models import SEOPage, Service
 from apps.core.utils import truncate_meta
+from apps.core.seo_utils import build_canonical_url
 import re
 
 
@@ -32,9 +33,12 @@ def site_context(request):
         default_og_image_url = default_hero_image
 
     current_absolute_url = request.build_absolute_uri()
-    split_current = urlsplit(current_absolute_url)
-    canonical_path = split_current.path or '/'
-    canonical_absolute_url = urlunsplit((split_current.scheme, split_current.netloc, canonical_path, '', ''))
+    try:
+        canonical_absolute_url = build_canonical_url(request)
+    except Exception:
+        split_current = urlsplit(current_absolute_url)
+        canonical_path = split_current.path or '/'
+        canonical_absolute_url = urlunsplit((split_current.scheme, split_current.netloc, canonical_path, '', ''))
     language_code = getattr(request, 'LANGUAGE_CODE', 'ru')
     language_urls = {}
     hreflang_items = []
@@ -264,7 +268,15 @@ def seo_context(request):
             'page_description': lang_defaults['description'],
             'page_keywords': lang_defaults['keywords'],
         }
-    
+
+    override_title = getattr(request, 'seo_page_title', None)
+    if override_title:
+        seo_data['page_title'] = override_title
+
+    override_description = getattr(request, 'seo_page_description', None)
+    if override_description:
+        seo_data['page_description'] = override_description
+
     resolver_match = getattr(request, 'resolver_match', None)
     view_name = resolver_match.view_name if resolver_match else ''
     should_append, page_number = _should_append_pagination_suffix(request, view_name)

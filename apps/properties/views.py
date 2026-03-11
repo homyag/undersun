@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.db.models import Q, Count, Case, When, Value, IntegerField
 from django.core.paginator import Paginator
 from django.urls import reverse
-from django.utils.translation import gettext, ngettext
+from django.utils.translation import gettext, ngettext, override
 from django.utils.html import strip_tags
 from django.templatetags.static import static
 from urllib.parse import quote_plus
@@ -21,6 +21,7 @@ from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string, rate_limit, validate_form_security, truncate_meta
 from apps.core.amp_utils import convert_html_to_amp
 from apps.core.models import SEOContentBlock
+from apps.core.seo_utils import build_property_meta
 from .models import Property, PropertyType
 from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
@@ -260,8 +261,32 @@ class PropertyListView(ListView):
             'many': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 5),
         }
 
-        context['seo_heading'] = self.build_seo_heading(context)
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+
+        with override(language_code):
+            context['seo_heading'] = self.build_seo_heading(context)
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+
+        with override(language_code):
+            meta = build_property_meta(
+                heading=context.get('seo_heading'),
+                results_count=self._get_results_count(context),
+                property_type_name=property_type_obj.name_display if property_type_obj else '',
+                district_name=district_obj.name if district_obj else '',
+                location_name=location_obj.name if location_obj else '',
+                min_price=self._parse_price_value(context['current_filters'].get('min_price')),
+                max_price=self._parse_price_value(context['current_filters'].get('max_price')),
+                currency_code=CurrencyService.get_selected_currency_code(self.request),
+            bedrooms=context['current_filters'].get('bedrooms') or [],
+            build_status_label=self._resolve_build_status_label(context['current_filters'].get('build_status')),
+            language_code=language_code,
+        )
+        context['page_title'] = meta.title
+        context['page_description'] = meta.description
+        self.request.seo_page_title = meta.title
+        self.request.seo_page_description = meta.description
 
         return context
 
@@ -356,22 +381,7 @@ class PropertyListView(ListView):
         """Builds an SEO-friendly H1 based on selected filters."""
         deal_type = context.get('deal_type') or self.request.GET.get('deal_type', '')
         property_type_obj = self._get_primary_property_type(context)
-
-        location_slug = self.request.GET.get('location')
-        district_slug = self.request.GET.get('district')
-        location_obj = None
-        district_obj = None
-
-        if location_slug:
-            location_qs = Location.objects.select_related('district').filter(slug=location_slug)
-            if district_slug:
-                location_qs = location_qs.filter(district__slug=district_slug)
-            location_obj = location_qs.first()
-            if location_obj:
-                district_obj = location_obj.district
-
-        if not district_obj and district_slug:
-            district_obj = District.objects.filter(slug=district_slug).first()
+        location_obj, district_obj = self._get_location_and_district()
 
         subject = property_type_obj.name_display if property_type_obj else gettext('Недвижимость')
         deal_phrase_map = {
@@ -398,6 +408,25 @@ class PropertyListView(ListView):
             heading = gettext('Каталог недвижимости на Пхукете, Таиланд')
 
         return heading
+
+    def _get_location_and_district(self):
+        location_slug = self.request.GET.get('location')
+        district_slug = self.request.GET.get('district')
+        location_obj = None
+        district_obj = None
+
+        if location_slug:
+            location_qs = Location.objects.select_related('district').filter(slug=location_slug)
+            if district_slug:
+                location_qs = location_qs.filter(district__slug=district_slug)
+            location_obj = location_qs.first()
+            if location_obj:
+                district_obj = location_obj.district
+
+        if not district_obj and district_slug:
+            district_obj = District.objects.filter(slug=district_slug).first()
+
+        return location_obj, district_obj
 
     def get_catalog_seo_block(self, context):
         """Возвращает SEO-блок для каталога с учётом языка и контекста."""
@@ -432,6 +461,32 @@ class PropertyListView(ListView):
                 }
 
         return None
+
+    def _get_results_count(self, context):
+        paginator = context.get('paginator')
+        if paginator:
+            return paginator.count
+        properties = context.get(self.context_object_name)
+        if properties is not None:
+            try:
+                return len(properties)
+            except TypeError:
+                return None
+        return None
+
+    def _parse_price_value(self, value):
+        if not value:
+            return None
+        try:
+            return Decimal(value)
+        except (InvalidOperation, ValueError):
+            return None
+
+    def _resolve_build_status_label(self, value):
+        if not value:
+            return ''
+        choices = dict(Property.BUILD_STATUS_CHOICES)
+        return choices.get(value, '')
 
     def get_seo_block_candidates(self, context):
         """Список возможных slug для SEO-блоков по убыванию специфичности."""

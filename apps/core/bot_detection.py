@@ -206,7 +206,16 @@ class BotDetectionService:
         action = self._resolve_action(score)
         matched_keys = {match.key for match in matches}
         basic_rules = {'js_challenge_missing', 'single_html_hit', 'no_referer', 'no_referer_combo'}
-        if matched_keys and matched_keys.issubset(basic_rules) and action in {'block', 'challenge'}:
+        only_basic = matched_keys and matched_keys.issubset(basic_rules)
+        only_basic_plus_asn = matched_keys and matched_keys.issubset(basic_rules | {'asn_datacenter'})
+        if only_basic and action in {'block', 'challenge'}:
+            action = 'monitor'
+        elif (
+            only_basic_plus_asn
+            and 'asn_datacenter' in matched_keys
+            and self._is_search_referer(referer)
+            and action in {'block', 'challenge'}
+        ):
             action = 'monitor'
         notify_fail2ban = score >= self.thresholds.get('fail2ban', 100)
         return DetectionResult(
@@ -287,6 +296,28 @@ class BotDetectionService:
             return False
         host = request.get_host()
         return parsed.netloc.endswith(host)
+
+    @staticmethod
+    def _is_search_referer(referer: str) -> bool:
+        if not referer:
+            return False
+        try:
+            parsed = urlparse(referer)
+        except ValueError:
+            return False
+        if not parsed.netloc:
+            return False
+        trusted_domains = (
+            'google.com',
+            'google.ru',
+            'google.co.th',
+            'bing.com',
+            'yandex.ru',
+            'yandex.com',
+            'duckduckgo.com',
+            'search.brave.com',
+        )
+        return any(parsed.netloc.endswith(domain) for domain in trusted_domains)
 
     def _lookup_asn(self, client_ip: str):
         if not client_ip or not self.asn_db_path:
