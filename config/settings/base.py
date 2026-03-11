@@ -272,6 +272,7 @@ BOT_PROTECTION = {
         r'Screaming Frog',
         r'SemrushBot',
         r'Amazonbot',
+        r'Instagram',
         r'OpenAI-SearchBot',
         r'GPTBot',
         r'ClaudeBot',
@@ -399,6 +400,7 @@ BOT_PROTECTION = {
     },
     'CHALLENGE_COOKIE': 'bot_challenge',
     'CHALLENGE_QUERY_PARAM': 'bot_challenge_token',
+    'CHALLENGE_COOKIE_MAX_AGE_DAYS': 7,
 }
 
 # Login/Logout URLs

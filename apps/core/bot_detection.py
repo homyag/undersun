@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.core.cache import cache
@@ -159,7 +160,10 @@ class BotDetectionService:
         if not cookie_token:
             score += self._add_match(matches, 'js_challenge_missing', 'cookie')
         elif request.method in {'POST', 'PUT', 'PATCH'} and not field_token:
-            score += self._add_match(matches, 'js_challenge_missing', 'field')
+            if self._is_metrika_ping(path) and self._is_internal_referer(referer, request):
+                pass
+            else:
+                score += self._add_match(matches, 'js_challenge_missing', 'field')
         elif field_token and field_token != cookie_token:
             score += self._add_match(matches, 'js_challenge_failed', 'mismatch')
 
@@ -200,6 +204,10 @@ class BotDetectionService:
             score += self._add_match(matches, 'no_referer_combo')
 
         action = self._resolve_action(score)
+        matched_keys = {match.key for match in matches}
+        basic_rules = {'js_challenge_missing', 'single_html_hit', 'no_referer', 'no_referer_combo'}
+        if matched_keys and matched_keys.issubset(basic_rules) and action in {'block', 'challenge'}:
+            action = 'monitor'
         notify_fail2ban = score >= self.thresholds.get('fail2ban', 100)
         return DetectionResult(
             score=score,
@@ -259,6 +267,26 @@ class BotDetectionService:
         if weight:
             matches.append(RuleMatch(key=key, weight=weight, detail=detail))
         return weight
+
+    @staticmethod
+    def _is_metrika_ping(path: str) -> bool:
+        if not path:
+            return False
+        normalized = path.rstrip('/') or '/'
+        return normalized.endswith('/bot/metrika-loaded')
+
+    @staticmethod
+    def _is_internal_referer(referer: str, request) -> bool:
+        if not referer:
+            return False
+        try:
+            parsed = urlparse(referer)
+        except ValueError:
+            return False
+        if not parsed.netloc:
+            return False
+        host = request.get_host()
+        return parsed.netloc.endswith(host)
 
     def _lookup_asn(self, client_ip: str):
         if not client_ip or not self.asn_db_path:

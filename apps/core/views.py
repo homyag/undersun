@@ -529,6 +529,7 @@ class SitemapView(View):
 
         base_url = request.build_absolute_uri('/')[:-1]
         entries = []
+        stylesheet_url = f"{base_url}/static/core/sitemaps/sitemap.xsl"
 
         def build_alternates(resolve_func):
             alternates = []

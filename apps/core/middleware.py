@@ -1,5 +1,6 @@
 import logging
 import re
+import secrets
 
 from django.conf import settings
 from django.http import HttpResponse, HttpResponsePermanentRedirect, JsonResponse
@@ -236,6 +237,9 @@ class BotDetectionMiddleware(MiddlewareMixin):
         self.service: BotDetectionService = bot_detection_service
         self.logger = logging.getLogger('bad_requests')
         self.challenge_query_param = settings.BOT_PROTECTION.get('CHALLENGE_QUERY_PARAM')
+        self.challenge_cookie_max_age = int(
+            settings.BOT_PROTECTION.get('CHALLENGE_COOKIE_MAX_AGE_DAYS', 7) * 86400
+        )
 
     def process_request(self, request):
         if not self.service.enabled:
@@ -258,8 +262,10 @@ class BotDetectionMiddleware(MiddlewareMixin):
             return None
 
         result = self.service.evaluate(request, client_ip, proxy_ip)
-        if result.score <= 0 and result.action == 'allow':
-            return None
+        if result.action == RequestLog.Action.ALLOW:
+            self._schedule_challenge_cookie(request)
+            if result.score <= 0:
+                return None
 
         if result.action == RequestLog.Action.CHALLENGE and not request.COOKIES.get(self.service.challenge_cookie):
             if self._is_basic_first_visit(result.matched_rules):
@@ -292,6 +298,9 @@ class BotDetectionMiddleware(MiddlewareMixin):
             asn_organization=result.asn_organization or '',
         )
         request._bot_request_log = log_entry
+
+        if result.action == RequestLog.Action.MONITOR:
+            self._schedule_challenge_cookie(request)
 
         if result.action in {RequestLog.Action.MONITOR, RequestLog.Action.BLOCK, RequestLog.Action.CHALLENGE}:
             self.logger.warning(
@@ -328,6 +337,7 @@ class BotDetectionMiddleware(MiddlewareMixin):
         return None
 
     def process_response(self, request, response):
+        response = self._apply_challenge_cookie(request, response)
         self._finalize_log(request, getattr(response, 'status_code', None))
         return response
 
@@ -402,3 +412,44 @@ class BotDetectionMiddleware(MiddlewareMixin):
                 new_path = f"{new_path}#{parsed.fragment}"
             new_url = new_path
         return HttpResponsePermanentRedirect(new_url)
+
+    def _schedule_challenge_cookie(self, request):
+        if not self._should_issue_cookie(request):
+            return
+        if getattr(request, '_bot_challenge_cookie_value', None):
+            return
+        request._bot_challenge_cookie_value = self._generate_challenge_token()
+
+    def _should_issue_cookie(self, request):
+        if not request:
+            return False
+        if request.COOKIES.get(self.service.challenge_cookie):
+            return False
+        if request.method not in {'GET', 'HEAD'}:
+            return False
+        return True
+
+    @staticmethod
+    def _generate_challenge_token():
+        return secrets.token_urlsafe(32)
+
+    def _apply_challenge_cookie(self, request, response):
+        token = getattr(request, '_bot_challenge_cookie_value', None)
+        if not token or not response:
+            return response
+        secure_flag = False
+        if request is not None:
+            try:
+                secure_flag = request.is_secure()
+            except Exception:
+                secure_flag = False
+        response.set_cookie(
+            self.service.challenge_cookie,
+            token,
+            max_age=self.challenge_cookie_max_age,
+            secure=secure_flag,
+            path='/',
+            httponly=False,
+            samesite='Lax',
+        )
+        return response

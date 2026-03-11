@@ -536,13 +536,22 @@
 
     function ensureToken() {
       let token = storage.getItem(TOKEN_KEY);
+      const cookieToken = getCookie(COOKIE_NAME);
+
+      if (cookieToken && token !== cookieToken) {
+        token = cookieToken;
+        storage.setItem(TOKEN_KEY, token);
+      }
+
       if (!token) {
         token = generateToken();
         storage.setItem(TOKEN_KEY, token);
       }
-      if (!getCookie(COOKIE_NAME)) {
+
+      if (!cookieToken || cookieToken !== token) {
         setCookie(COOKIE_NAME, token, 7);
       }
+
       injectHiddenInputs(token);
     }
 
