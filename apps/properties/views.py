@@ -265,9 +265,18 @@ class PropertyListView(ListView):
 
         with override(language_code):
             context['seo_heading'] = self.build_seo_heading(context)
+        context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+
+        self.update_page_meta(context, language_code)
+
+        return context
+
+    def update_page_meta(self, context, language_code=None):
+        """Recalculate SEO meta based on the latest context values."""
+        language_code = (language_code or getattr(self.request, 'LANGUAGE_CODE', 'ru'))[:2]
+        current_filters = context.get('current_filters', {})
         property_type_obj = self._get_primary_property_type(context)
         location_obj, district_obj = self._get_location_and_district()
-        context['catalog_seo_block'] = self.get_catalog_seo_block(context)
 
         with override(language_code):
             meta = build_property_meta(
@@ -276,13 +285,14 @@ class PropertyListView(ListView):
                 property_type_name=property_type_obj.name_display if property_type_obj else '',
                 district_name=district_obj.name if district_obj else '',
                 location_name=location_obj.name if location_obj else '',
-                min_price=self._parse_price_value(context['current_filters'].get('min_price')),
-                max_price=self._parse_price_value(context['current_filters'].get('max_price')),
+                min_price=self._parse_price_value(current_filters.get('min_price')),
+                max_price=self._parse_price_value(current_filters.get('max_price')),
                 currency_code=CurrencyService.get_selected_currency_code(self.request),
-            bedrooms=context['current_filters'].get('bedrooms') or [],
-            build_status_label=self._resolve_build_status_label(context['current_filters'].get('build_status')),
-            language_code=language_code,
-        )
+                bedrooms=current_filters.get('bedrooms') or [],
+                build_status_label=self._resolve_build_status_label(current_filters.get('build_status')),
+                language_code=language_code,
+            )
+
         context['page_title'] = meta.title
         context['page_description'] = meta.description
         self.request.seo_page_title = meta.title
@@ -553,6 +563,7 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
             context['current_filters']['deal_type'] = 'sale'
         context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        self.update_page_meta(context)
         return context
 
 
@@ -573,6 +584,7 @@ class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
             context['current_filters']['deal_type'] = 'rent'
         context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        self.update_page_meta(context)
         return context
 
 
@@ -644,6 +656,7 @@ class PropertyByTypeView(PropertyListView):
         context['current_filters']['property_type'] = [self.property_type.name]
         context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        self.update_page_meta(context)
         return context
 
 
