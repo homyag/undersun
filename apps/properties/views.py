@@ -355,12 +355,13 @@ class PropertyListView(ListView):
         return filter_context
 
     def should_show_build_status_filter(self, context):
-        """Показывать блок фильтрации по стадии готовности только для продажи condos/villas/townhouses."""
-        deal_type = context.get('deal_type') or context['current_filters'].get('deal_type')
-        if deal_type != 'sale':
+        """Показываем фильтр "Готово/стройка" всегда, кроме аренды и типов без стадии строительства."""
+        current_filters = context.get('current_filters', {})
+        deal_type = context.get('deal_type') or current_filters.get('deal_type')
+        if deal_type == 'rent':
             return False
 
-        selected_types = set(context['current_filters'].get('property_type') or [])
+        selected_types = set(current_filters.get('property_type') or [])
         current_type = context.get('current_property_type')
         if current_type:
             selected_types.add(current_type)
@@ -368,7 +369,8 @@ class PropertyListView(ListView):
             selected_types.add(context['property_type'].name)
 
         if not selected_types:
-            return False
+            # Тип объекта не выбран — показываем фильтр по умолчанию
+            return True
 
         return all(pt in self.BUILD_STATUS_ALLOWED_PROPERTY_TYPES for pt in selected_types)
 

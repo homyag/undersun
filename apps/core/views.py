@@ -471,15 +471,7 @@ class MapView(TemplateView):
 
         filter_context = property_list_view.build_filter_context()
         context.update(filter_context)
-
-        current_deal_type = filter_context['current_filters'].get('deal_type')
-        selected_types = set(filter_context['current_filters'].get('property_type') or [])
-        if current_deal_type == 'sale':
-            if not selected_types or all(
-                pt in property_list_view.BUILD_STATUS_ALLOWED_PROPERTY_TYPES
-                for pt in selected_types
-            ):
-                context['show_build_status_filter'] = True
+        context['show_build_status_filter'] = property_list_view.should_show_build_status_filter(context)
 
         return context
 
@@ -569,26 +561,37 @@ class SitemapView(View):
         # Properties
         for prop in Property.objects.filter(is_active=True, status='available'):
             alternates = build_alternates(prop.get_absolute_url)
+            amp_alternates = build_alternates(
+                lambda slug=prop.slug: reverse('properties:property_detail_amp', kwargs={'slug': slug})
+            )
             lastmod = prop.updated_at.isoformat() if prop.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod))
+            entries.extend(self._expand_entries(alternates, lastmod, amp_alternates))
 
         # Blog
         for post in BlogPost.get_published():
             alternates = build_alternates(post.get_absolute_url)
+            amp_alternates = build_alternates(
+                lambda slug=post.slug: reverse('blog:detail_amp', kwargs={'slug': slug})
+            )
             lastmod = post.updated_at.isoformat() if post.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod))
+            entries.extend(self._expand_entries(alternates, lastmod, amp_alternates))
 
         xml_content = render_to_string('core/sitemaps/sitemap.xml', {'entries': entries})
         return HttpResponse(xml_content, content_type='application/xml')
 
     @staticmethod
-    def _expand_entries(alternates, lastmod):
+    def _expand_entries(alternates, lastmod, amp_alternates=None):
+        amp_lookup = {}
+        if amp_alternates:
+            amp_lookup = {amp['lang']: amp['url'] for amp in amp_alternates}
+
         expanded = []
         for alt in alternates:
             expanded.append({
                 'loc': alt['url'],
                 'lastmod': lastmod,
-                'alternates': [a for a in alternates if a['url'] != alt['url']]
+                'alternates': [a for a in alternates if a['url'] != alt['url']],
+                'amp_url': amp_lookup.get(alt['lang'])
             })
         return expanded
 
