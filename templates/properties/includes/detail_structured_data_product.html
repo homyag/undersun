@@ -2,17 +2,18 @@
 {% load i18n %}
 {% load l10n %}
 {% load url_utils %}
+{% static 'images/no-image.svg' as fallback_property_image_url %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Product",
-  "name": "{{ property.title|escapejs }}",
+  "name": "{{ property_title_display|default:property.title|escapejs }}",
   "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
   {% if property.property_type %}
   "category": "{{ property.property_type.name_display|escapejs }}",
   {% endif %}
   "additionalType": "{{ property.property_type|schema_additional_type }}",
-  "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{% static 'images/no-image.svg' %}"{% endif %}],
+  "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|absolute_url:request|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{{ fallback_property_image_url|absolute_url:request|escape }}"{% endif %}],
   "offers": {
     "@type": "Offer",
     "priceCurrency": "THB",

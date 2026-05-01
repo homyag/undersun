@@ -59,7 +59,7 @@
   <header>
     <div class="header-content">
       <span class="badge">{{ property.property_type.name_display }}</span>
-      <h1>{{ property.title }}</h1>
+      <h1>{{ property_title_display|default:property.title }}</h1>
       <div class="price">{{ price_display }}</div>
       <div class="location">{{ location_label }}</div>
       <div class="location" style="font-size:0.95rem; opacity:0.85;">
@@ -129,7 +129,7 @@
               <amp-img src="{{ similar.images.first.medium_url|default:similar.images.first.original_url }}" width="360" height="220" layout="responsive" alt="{{ similar.title }}"></amp-img>
             {% endif %}
             <h3>{{ similar.title }}</h3>
-            <p>{{ similar.location.name|default:similar.district.name }} · {{ similar.price_display }}</p>
+            <p>{{ similar.localized_location_label|default:similar.location.name|default:similar.district.name }} · {{ similar.price_display }}</p>
             <p style="margin-top:-8px;">
               <a href="{{ similar.get_absolute_url }}" style="color:var(--accent); text-decoration:none; font-weight:600;" data-amp-analytics="similar-link">{% trans "Подробнее" %}</a>
             </p>

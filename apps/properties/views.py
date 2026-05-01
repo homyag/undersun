@@ -33,6 +33,102 @@ LEGACY_PROPERTY_SLUG_REDIRECTS = {
     '1-bedroom-apart': '1-bedroom-apartment-in-a-deluxe-condominium-in-rawai',
 }
 
+PROPERTY_TYPE_NAV_LABELS = {
+    'condo': {
+        'ru': 'Квартиры',
+        'en': 'Condos',
+        'th': 'คอนโดมิเนียม',
+    },
+    'villa': {
+        'ru': 'Виллы',
+        'en': 'Villas',
+        'th': 'วิลล่า',
+    },
+    'townhouse': {
+        'ru': 'Дома',
+        'en': 'Townhouses',
+        'th': 'ทาวน์เฮาส์',
+    },
+    'land': {
+        'ru': 'Земельные участки',
+        'en': 'Land plots',
+        'th': 'ที่ดิน',
+    },
+    'investment': {
+        'ru': 'Инвестиционная недвижимость',
+        'en': 'Investment properties',
+        'th': 'อสังหาริมทรัพย์เพื่อการลงทุน',
+    },
+    'business': {
+        'ru': 'Готовый бизнес',
+        'en': 'Businesses',
+        'th': 'ธุรกิจพร้อมดำเนินการ',
+    },
+}
+
+
+def _normalize_whitespace(value):
+    if not isinstance(value, str):
+        return value
+    return ' '.join(value.split())
+
+
+def _get_translated_attr(instance, field_name, language_code='ru', fallback=''):
+    if instance is None:
+        return fallback
+
+    localized_field_name = field_name if language_code == 'ru' else f'{field_name}_{language_code}'
+    localized_value = getattr(instance, localized_field_name, None)
+    base_value = getattr(instance, field_name, None)
+    value = localized_value or base_value or fallback
+    return _normalize_whitespace(value)
+
+
+def _get_property_catalog_type_url(property_obj):
+    if property_obj.property_type:
+        return reverse('properties:property_by_type', args=[property_obj.property_type.name])
+
+    return reverse('properties:property_list')
+
+
+def _get_property_type_nav_label(property_obj, language_code='ru'):
+    if not property_obj.property_type:
+        return gettext('Недвижимость')
+
+    type_slug = property_obj.property_type.name
+    mapped_label = PROPERTY_TYPE_NAV_LABELS.get(type_slug, {}).get(language_code)
+    if mapped_label:
+        return mapped_label
+
+    return _get_translated_attr(
+        property_obj.property_type,
+        'name_display',
+        language_code,
+        gettext('Недвижимость'),
+    )
+
+
+def _build_property_location_context(property_obj, language_code='ru'):
+    district_label = _get_translated_attr(property_obj.district, 'name', language_code, 'Phuket')
+    location_label = _get_translated_attr(property_obj.location, 'name', language_code, '') if property_obj.location else ''
+    full_location_label = district_label
+    if location_label:
+        full_location_label = f'{district_label}, {location_label}'
+
+    return {
+        'property_district_label': district_label,
+        'property_location_label': location_label,
+        'property_full_location_label': full_location_label,
+    }
+
+
+def _annotate_property_labels(property_obj, language_code='ru'):
+    labels = _build_property_location_context(property_obj, language_code)
+    property_obj.localized_district_label = labels['property_district_label']
+    property_obj.localized_location_name = labels['property_location_label']
+    property_obj.localized_location_label = labels['property_full_location_label']
+    return property_obj
+
 
 class DealTypeRedirectMixin:
     """Перенаправляет на корректный раздел каталога при смене типа сделки."""
@@ -753,9 +849,12 @@ class PropertyDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')
 
         # Похожие объекты с приоритетом по локации
         similar_properties = self.get_similar_properties()
+        for similar_property in similar_properties:
+            _annotate_property_labels(similar_property, language_code)
         context['similar_properties'] = similar_properties
 
         # Favorite functionality removed
@@ -769,6 +868,10 @@ class PropertyDetailView(DetailView):
             reverse('properties:property_detail_amp', kwargs={'slug': self.object.slug})
         )
         context['amp_url'] = amp_url
+        context['property_title_display'] = _normalize_whitespace(self.object.title)
+        context['property_type_nav_label'] = _get_property_type_nav_label(self.object, language_code)
+        context['property_catalog_type_url'] = _get_property_catalog_type_url(self.object)
+        context.update(_build_property_location_context(self.object, language_code))
 
         return context
 
@@ -895,9 +998,13 @@ def property_detail_amp(request, slug):
 
     detail_view.object = property_obj
     similar_properties = detail_view.get_similar_properties()
+    language_code = getattr(request, 'LANGUAGE_CODE', 'ru')
+    for similar_property in similar_properties:
+        _annotate_property_labels(similar_property, language_code)
 
     canonical_url = request.build_absolute_uri(property_obj.get_absolute_url())
-    meta_title = f"{property_obj.title} – Undersun Estate"
+    property_title_display = _normalize_whitespace(property_obj.title)
+    meta_title = f"{property_title_display} – Undersun Estate"
     raw_description = property_obj.short_description or strip_tags(property_obj.description)
     meta_description = truncate_meta(raw_description)
 
@@ -908,21 +1015,22 @@ def property_detail_amp(request, slug):
             continue
         gallery_images.append({
             'url': image_url,
-            'alt': image.alt_text or property_obj.title,
+            'alt': image.alt_text or property_title_display,
         })
 
     if not gallery_images:
         gallery_images.append({
             'url': static('images/no-image.svg'),
-            'alt': property_obj.title,
+            'alt': property_title_display,
         })
 
     amenities = [relation.feature.name for relation in property_obj.features.all() if relation.feature]
     stats = _build_property_stats(property_obj)
-    location_label = property_obj.location.name if property_obj.location else property_obj.district.name
+    location_context = _build_property_location_context(property_obj, language_code)
+    location_label = location_context['property_full_location_label']
 
     whatsapp_message = gettext('Здравствуйте! Меня интересует объект {title} ({url})').format(
-        title=property_obj.title,
+        title=property_title_display,
         url=canonical_url,
     )
     whatsapp_url = f"https://wa.me/66633033133?text={quote_plus(whatsapp_message)}"
@@ -950,6 +1058,7 @@ def property_detail_amp(request, slug):
         'canonical_url': canonical_url,
         'gallery_images': gallery_images,
         'location_label': location_label,
+        'property_title_display': property_title_display,
         'stats': stats,
         'amenities': amenities,
         'price_display': property_obj.price_display,
@@ -964,6 +1073,7 @@ def property_detail_amp(request, slug):
         'metrika_counter_id': metrika_counter_id,
         'amp_metrika_params': json.dumps(ya_params, ensure_ascii=False),
     }
+    context.update(location_context)
 
     return render(request, 'properties/property_detail_amp.html', context)
 

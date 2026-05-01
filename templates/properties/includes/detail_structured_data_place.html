@@ -1,23 +1,25 @@
 {% load static %}
 {% load i18n %}
 {% load l10n %}
+{% load url_utils %}
+{% static 'images/no-image.svg' as fallback_property_image_url %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Place",
   "@id": "{{ request.build_absolute_uri }}#place",
-  "name": "{{ property.title|escapejs }}",
+  "name": "{{ property_title_display|default:property.title|escapejs }}",
   "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
   "url": "{{ request.build_absolute_uri }}",
-  "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{% static 'images/no-image.svg' %}"{% endif %}]
+  "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|absolute_url:request|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{{ fallback_property_image_url|absolute_url:request|escape }}"{% endif %}]
   {% if property.address or property.location or property.district %},
   "address": {
     "@type": "PostalAddress",
     {% if property.address %}"streetAddress": "{{ property.address|escapejs }}"{% if property.location or property.district %}, {% endif %}{% endif %}
-    {% with address_locality=property.location.name|default:property.district.name %}
+    {% with address_locality=property_location_label|default:property_district_label %}
     {% if address_locality %}"addressLocality": "{{ address_locality|escapejs }}",{% endif %}
     {% endwith %}
-    "addressRegion": "{{ property.district.name|default:'Phuket'|escapejs }}",
+    "addressRegion": "{{ property_district_label|default:'Phuket'|escapejs }}",
     "addressCountry": "TH"
   }
   {% endif %}

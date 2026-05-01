@@ -5,7 +5,7 @@
 {% load currency_tags %}
 {% load url_utils %}
 
-{% block title %}{{ property.title }} - Undersun Estate{% endblock %}
+{% block title %}{{ property_title_display|default:property.title }} - Undersun Estate{% endblock %}
 
 {% block og_type %}product{% endblock %}
 
@@ -36,7 +36,8 @@
                     <div class="property-carousel relative h-64 sm:h-80 lg:h-[500px]">
                         {% for image in property.images.all %}
                             <!-- Mobile: Single Image Slides -->
-                            <div class="property-slide-single md:hidden absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100{% else %}opacity-0{% endif %}"
+                            <div class="property-slide-single md:hidden absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
+                                 aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
                                  data-slide-single="{{ forloop.counter0 }}">
                                 <img src="{{ image.medium_url }}" alt="{{ property.title }}"
                                      class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-lg"
@@ -45,7 +46,8 @@
 
                             <!-- Desktop: Dual Image Slides -->
                             {% if forloop.counter0|divisibleby:2 %}
-                                <div class="property-slide-pair hidden md:block absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100{% else %}opacity-0{% endif %}"
+                                <div class="property-slide-pair hidden md:block absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
+                                     aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
                                      data-slide-pair="{{ forloop.counter0|floatformat:0 }}">
                                     <div class="flex h-full gap-2">
                                         <!-- First Image -->
@@ -153,7 +155,7 @@
                         {% for image in property.images.all %}
                             <div class="flex-shrink-0 relative cursor-pointer group"
                                  onclick="goToSlidePairByImage({{ forloop.counter0 }})">
-                                <img src="{{ image.thumbnail_url }}" alt="{{ property.title }}"
+                                <img src="{{ image.thumbnail_url }}" alt="{{ property_title_display|default:property.title }}"
                                      class="w-20 h-20 object-cover rounded-lg transition-all duration-300 border-2 {% if forloop.counter0 == 0 or forloop.counter0 == 1 %}border-accent shadow-lg{% else %}border-transparent hover:border-accent/50{% endif %}"
                                      data-thumb="{{ forloop.counter0 }}">
                                 <!-- Special indicator for cycled display -->
@@ -184,10 +186,9 @@
                     {% trans "Назад" %}
                 </button>
 
-                <a href="
-                        {% if property.deal_type == 'rent' %}{% url 'properties:property_rent' %}{% else %}{% url 'properties:property_sale' %}{% endif %}"
+                <a href="{{ property_catalog_type_url }}"
                    class="text-accent hover:text-yellow-600 font-semibold text-base sm:text-lg transition-colors duration-300 hover:underline uppercase text-center sm:text-left">
-                    {{ property.property_type.name_plural|default:property.property_type.name_display }}
+                    {{ property_type_nav_label }}
                 </a>
             </div>
 
@@ -214,7 +215,7 @@
                           "position": 2,
                           "item": {
                             "@id": "{{ property.district.get_absolute_url|absolute_url:request|escapejs }}",
-                            "name": "{{ property.district.name|escapejs }}"
+                            "name": "{{ property_district_label|escapejs }}"
                           }
                         }{% endif %}{% if property.location %},
                         {
@@ -222,14 +223,14 @@
                           "position": 3,
                           "item": {
                             "@id": "{{ property.location.get_absolute_url|absolute_url:request|escapejs }}",
-                            "name": "{{ property.location.name|escapejs }}"
+                            "name": "{{ property_location_label|escapejs }}"
                           }
                         }{% endif %},{
                           "@type": "ListItem",
                           "position": {% if property.location %}4{% elif property.district %}3{% else %}2{% endif %},
                           "item": {
                             "@id": "{{ property.get_absolute_url|absolute_url:request|escapejs }}",
-                            "name": "{{ property.title|escapejs }}"
+                            "name": "{{ property_title_display|default:property.title|escapejs }}"
                           }
                         }
                       ]
@@ -244,19 +245,19 @@
 
                     <a href="{{ property.district.get_absolute_url }}"
                        class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
-                        {{ property.district.name }}
+                        {{ property_district_label }}
                     </a>
 
                     {% if property.location %}
                         <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
                         <a href="{{ property.location.get_absolute_url }}"
                            class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
-                            {{ property.location.name }}
+                            {{ property_location_label }}
                         </a>
                     {% endif %}
 
                     <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
-                    <span class="text-gray-900 font-medium whitespace-nowrap">{{ property.title|truncatechars:30 }}</span>
+                    <span class="text-gray-900 font-medium whitespace-nowrap">{{ property_title_display|default:property.title|truncatechars:30 }}</span>
                 </nav>
             </div>
         </div>
@@ -272,7 +273,7 @@
                     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0">
                             <div class="flex-1">
-                                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">{{ property.title }}</h1>
+                                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">{{ property_title_display|default:property.title }}</h1>
 
                                 <div class="flex flex-col sm:flex-row sm:items-center text-gray-600 mb-4 space-y-2 sm:space-y-0 sm:space-x-4">
                                     {% if property.legacy_id %}
@@ -351,7 +352,7 @@
 
                         <!-- Mobile Call Button -->
                         <div class="lg:hidden mt-4">
-                            <button onclick="openViewingModal()"
+                            <button onclick="openCallbackModal()"
                                     class="w-full bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 shadow-md flex items-center justify-center">
                                 <i class="fas fa-phone mr-2"></i>
                                 {% trans "Заказать звонок" %}
@@ -651,7 +652,7 @@
                             <div class="grid grid-cols-2 gap-3">
                                 {% if property.contact_person and property.contact_person.phone %}
                                     <a href="tel:{{ property.contact_person.phone }}"
-                                       class="flex items-center justify-center bg-primary hover:bg-terтиary text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium"
+                                       class="flex items-center justify-center bg-primary hover:bg-tertiary text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium"
                                        data-ym-goal="property_call_click"
                                        data-ym-param-context="cta_buttons"
                                        data-ym-param-property-id="{{ property.id }}">
@@ -659,7 +660,7 @@
                                     </a>
                                 {% else %}
                                     <a href="tel:+6663303313"
-                                       class="flex items-center justify-center bg-primary hover:bg-terтиary text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium"
+                                       class="flex items-center justify-center bg-primary hover:bg-tertiary text-white py-2 px-3 rounded-lg transition-colors text-sm font-medium"
                                        data-ym-goal="property_call_click"
                                        data-ym-param-context="cta_buttons"
                                        data-ym-param-property-id="{{ property.id }}">

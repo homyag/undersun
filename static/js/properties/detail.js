@@ -46,6 +46,17 @@ function getCurrentPairPosition(pairs) {
     return foundIndex >= 0 ? foundIndex : 0;
 }
 
+function setSlideVisibility(slide, isActive) {
+    if (!slide) {
+        return;
+    }
+
+    slide.style.opacity = isActive ? '1' : '0';
+    slide.classList.toggle('pointer-events-none', !isActive);
+    slide.classList.toggle('pointer-events-auto', isActive);
+    slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+}
+
 // Carousel functionality (works for both mobile and desktop)
 function nextSlide() {
     if (isMobile()) {
@@ -64,8 +75,8 @@ function nextSlide() {
         const nextSlidePair = slidePairs[nextPosition]?.node;
 
         if (currentSlidePair && nextSlidePair) {
-            currentSlidePair.style.opacity = '0';
-            nextSlidePair.style.opacity = '1';
+            setSlideVisibility(currentSlidePair, false);
+            setSlideVisibility(nextSlidePair, true);
             currentSlidePairIndex = slidePairs[nextPosition].index;
         }
     }
@@ -93,8 +104,8 @@ function previousSlide() {
         const prevSlidePair = slidePairs[prevPosition]?.node;
 
         if (currentSlidePair && prevSlidePair) {
-            currentSlidePair.style.opacity = '0';
-            prevSlidePair.style.opacity = '1';
+            setSlideVisibility(currentSlidePair, false);
+            setSlideVisibility(prevSlidePair, true);
             currentSlidePairIndex = slidePairs[prevPosition].index;
         }
     }
@@ -113,10 +124,10 @@ function showMobileSlide(targetIndex) {
     const targetSlide = document.querySelector('.property-slide-single[data-slide-single="' + normalizedIndex + '"]');
 
     if (currentSlide) {
-        currentSlide.style.opacity = '0';
+        setSlideVisibility(currentSlide, false);
     }
     if (targetSlide) {
-        targetSlide.style.opacity = '1';
+        setSlideVisibility(targetSlide, true);
         currentImageIndex = normalizedIndex;
     }
 }
@@ -139,8 +150,8 @@ function goToSlidePair(pairIndex) {
     const targetSlidePair = slidePairs[targetPosition]?.node;
 
     if (currentSlidePair && targetSlidePair) {
-        currentSlidePair.style.opacity = '0';
-        targetSlidePair.style.opacity = '1';
+        setSlideVisibility(currentSlidePair, false);
+        setSlideVisibility(targetSlidePair, true);
         currentSlidePairIndex = slidePairs[targetPosition].index;
     }
 

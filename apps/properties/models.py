@@ -568,6 +568,10 @@ class Property(models.Model):
     def _with_truncated_description(self, seo_data):
         """Убеждаемся, что meta description не превышает лимит."""
         seo_data = seo_data or {}
+        for field_name in ('title', 'description', 'keywords'):
+            value = seo_data.get(field_name)
+            if isinstance(value, str):
+                seo_data[field_name] = ' '.join(value.split())
         description = seo_data.get('description')
         if description:
             seo_data['description'] = truncate_meta(description)
