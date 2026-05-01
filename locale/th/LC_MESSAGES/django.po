@@ -2590,6 +2590,54 @@ msgstr "อสังหาริมทรัพย์ในประเทศไ
 msgid "Блог"
 msgstr "บล็อก"
 
+#: templates/blog/blog_detail.html:210 templates/blog/blog_list.html:35
+msgid "Главная"
+msgstr "หน้าหลัก"
+
+#: templates/blog/blog_list.html:32
+msgid "Хлебные крошки"
+msgstr "เส้นทางนำทาง"
+
+#: templates/blog/blog_list.html:49
+msgid "Тег"
+msgstr "แท็ก"
+
+#: templates/properties/property_detail_amp.html:48
+msgid "Основные параметры"
+msgstr "ข้อมูลหลัก"
+
+#: templates/properties/property_detail_amp.html:70
+msgid "Нужна консультация по объекту?"
+msgstr "ต้องการคำปรึกษาเกี่ยวกับทรัพย์นี้หรือไม่?"
+
+#: templates/properties/property_detail_amp.html:71
+msgid "Команда Undersun Estate оперативно свяжется с вами и отправит презентацию."
+msgstr "ทีม Undersun Estate จะติดต่อคุณอย่างรวดเร็วและส่งเอกสารนำเสนอ"
+
+#: templates/properties/property_detail_amp.html:74
+msgid "Открыть полную версию"
+msgstr "เปิดเวอร์ชันเต็ม"
+
+#: templates/properties/property_detail_amp.html:96
+msgid "Все права защищены"
+msgstr "สงวนลิขสิทธิ์"
+
+#: apps/properties/views.py:738
+msgid "Площадь"
+msgstr "พื้นที่"
+
+#: apps/properties/views.py:740
+msgid "Участок"
+msgstr "พื้นที่ที่ดิน"
+
+#: apps/properties/views.py:742
+msgid "Этажей"
+msgstr "จำนวนชั้น"
+
+#: apps/properties/views.py:749
+msgid "Здравствуйте! Меня интересует объект {title} ({url})"
+msgstr "สวัสดี! ฉันสนใจทรัพย์ {title} ({url})"
+
 #: templates/blog/blog_detail.html:224
 msgid "Автор"
 msgstr "ผู้เขียน"

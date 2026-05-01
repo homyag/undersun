@@ -13,18 +13,6 @@
   {% endif %}
   "additionalType": "{{ property.property_type|schema_additional_type }}",
   "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{% static 'images/no-image.svg' %}"{% endif %}],
-  "numberOfRooms": {{ property.bedrooms|default:0 }},
-  "floorSize": {
-    "@type": "QuantitativeValue",
-    "value": {{ property.area_total|default:'0'|unlocalize }},
-    "unitCode": "MTK"
-  },
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "{{ property.location.name|default:property.district.name|default:''|escapejs }}",
-    "addressRegion": "Phuket",
-    "addressCountry": "TH"
-  },
   "offers": {
     "@type": "Offer",
     "priceCurrency": "THB",

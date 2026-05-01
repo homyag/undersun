@@ -1,26 +1,32 @@
 import json
 import os
 
-from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 from django.templatetags.static import static
 from django.urls import reverse
-from django.utils.html import strip_tags
-from django.utils.safestring import mark_safe
+from urllib.parse import unquote
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from urllib.parse import urlparse, parse_qs
 
 from apps.core.models import SEOPage
+from apps.core.utils import truncate_meta
+from apps.core.amp_utils import convert_html_to_amp
 
 from .models import BlogPost, BlogCategory, BlogTag
+from .services import (
+    build_blog_item_list_schema,
+    build_blog_post_schema,
+    build_blog_search_schema,
+    build_breadcrumb_schema,
+)
 
 
 PAGE_LABELS = {
@@ -144,6 +150,7 @@ def blog_list(request):
     meta_title = seo_meta.get('title') or defaults['title']
     meta_description = seo_meta.get('description') or defaults['description']
     meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    meta_description = truncate_meta(meta_description)
 
     context = {
         'page_obj': page_obj,
@@ -158,6 +165,29 @@ def blog_list(request):
         'meta_keywords': seo_meta.get('keywords'),
         'page_keywords': seo_meta.get('keywords'),
     }
+
+    page_url = request.build_absolute_uri()
+    item_list_schema = build_blog_item_list_schema(
+        page_obj.object_list,
+        request,
+        language_code=language_code,
+        title=meta_title,
+        description=meta_description,
+        page_url=page_url,
+    )
+    if item_list_schema:
+        context['schema_blog_list_json'] = json.dumps(item_list_schema, ensure_ascii=False)
+
+    search_schema = build_blog_search_schema(request)
+    if search_schema:
+        context['schema_blog_search_json'] = json.dumps(search_schema, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
     
     return render(request, 'blog/blog_list.html', context)
 
@@ -184,7 +214,7 @@ def blog_detail(request, slug):
     
     language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
     meta_title = post.get_meta_title(language_code)
-    meta_description = post.get_meta_description(language_code)
+    meta_description = truncate_meta(post.get_meta_description(language_code))
     meta_keywords = post.get_meta_keywords(language_code)
 
     amp_url = request.build_absolute_uri(
@@ -202,113 +232,43 @@ def blog_detail(request, slug):
         'page_description': meta_description,
         'page_keywords': meta_keywords,
         'amp_url': amp_url,
+        'metrika_counter_id': getattr(settings, 'METRIKA_COUNTER_ID', 90630603),
+        'amp_metrika_params': json.dumps({
+            'post_id': post.id,
+            'slug': post.slug,
+            'category': post.category.slug if post.category else '',
+            'language': language_code,
+            'is_amp': True,
+        }, ensure_ascii=False),
     }
 
+    default_image_url = request.build_absolute_uri(static('images/og-image.jpg'))
     og_image_url = post.get_featured_image_absolute_url(request, getattr(request, 'LANGUAGE_CODE', 'ru'))
     if og_image_url:
         context['og_image_url'] = og_image_url
 
+    schema_image_url = og_image_url or default_image_url
+
+    schema_post = build_blog_post_schema(
+        post,
+        request,
+        language_code=language_code,
+        meta_description=meta_description,
+        image_url=schema_image_url,
+    )
+    if schema_post:
+        context['schema_blog_post_json'] = json.dumps(schema_post, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+        (post.category.name if post.category else None, post.category.get_absolute_url() if post.category else None),
+        (post.title, post.get_absolute_url()),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
+
     return render(request, 'blog/blog_detail.html', context)
-
-
-def _extract_youtube_id(src):
-    if not src:
-        return None
-    parsed = urlparse(src)
-    if 'youtu.be' in parsed.netloc:
-        return parsed.path.lstrip('/') or None
-    if 'youtube.com' in parsed.netloc:
-        if parsed.path.startswith('/embed/'):
-            return parsed.path.split('/')[-1]
-        query = parse_qs(parsed.query)
-        video_ids = query.get('v')
-        if video_ids:
-            return video_ids[0]
-    return None
-
-
-DEFAULT_IMG_WIDTH = 1200
-DEFAULT_IMG_HEIGHT = 675
-DEFAULT_VIDEO_WIDTH = 560
-DEFAULT_VIDEO_HEIGHT = 315
-
-
-def _convert_content_to_amp(html_content):
-    if not html_content:
-        return ''
-
-    soup = BeautifulSoup(html_content, 'html.parser')
-
-    for script in soup.find_all('script'):
-        script.decompose()
-
-    for iframe in soup.find_all('iframe'):
-        src = iframe.get('src', '')
-        youtube_id = _extract_youtube_id(src)
-        if youtube_id:
-            amp_tag = soup.new_tag('amp-youtube')
-            amp_tag['data-videoid'] = youtube_id
-            amp_tag['layout'] = 'responsive'
-            amp_tag['width'] = iframe.get('width', DEFAULT_VIDEO_WIDTH) or DEFAULT_VIDEO_WIDTH
-            amp_tag['height'] = iframe.get('height', DEFAULT_VIDEO_HEIGHT) or DEFAULT_VIDEO_HEIGHT
-            iframe.replace_with(amp_tag)
-        else:
-            link = soup.new_tag('a', href=src or '#')
-            link.string = strip_tags(iframe.text) or 'Open embedded content'
-            iframe.replace_with(link)
-
-    for img in soup.find_all('img'):
-        amp_img = soup.new_tag('amp-img')
-        for attr in ['src', 'alt', 'srcset', 'sizes']:
-            if img.has_attr(attr):
-                amp_img[attr] = img[attr]
-
-        width = img.get('width') or DEFAULT_IMG_WIDTH
-        height = img.get('height') or DEFAULT_IMG_HEIGHT
-
-        try:
-            width = int(str(width).replace('px', '').strip()) or DEFAULT_IMG_WIDTH
-        except Exception:
-            width = DEFAULT_IMG_WIDTH
-
-        try:
-            height = int(str(height).replace('px', '').strip()) or DEFAULT_IMG_HEIGHT
-        except Exception:
-            height = DEFAULT_IMG_HEIGHT
-
-        amp_img['width'] = width
-        amp_img['height'] = height
-        amp_img['layout'] = 'responsive'
-
-        img.replace_with(amp_img)
-
-    # Wrap video tags
-    for video in soup.find_all('video'):
-        amp_video = soup.new_tag('amp-video', controls='', layout='responsive')
-        amp_video['width'] = video.get('width', DEFAULT_VIDEO_WIDTH)
-        amp_video['height'] = video.get('height', DEFAULT_VIDEO_HEIGHT)
-        for source in video.find_all('source'):
-            amp_source = soup.new_tag('source')
-            if source.get('src'):
-                amp_source['src'] = source['src']
-            if source.get('type'):
-                amp_source['type'] = source['type']
-            amp_video.append(amp_source)
-        video.replace_with(amp_video)
-
-    # Remove UIkit attributes (uk-grid, uk-scrollspy, etc.) that AMP не поддерживает
-    for tag in soup.find_all(True):
-        attrs = list(tag.attrs.keys())
-        for attr in attrs:
-            attr_lower = attr.lower()
-            if attr_lower == 'uk-grid' or attr_lower.startswith('uk-') or attr_lower.startswith('data-uk-'):
-                del tag.attrs[attr]
-
-    # Ensure figcaption placement
-    for fig in soup.find_all('figure'):
-        fig['style'] = fig.get('style', '')
-
-    return mark_safe(str(soup))
 
 
 def blog_detail_amp(request, slug):
@@ -324,7 +284,7 @@ def blog_detail_amp(request, slug):
 
     language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
     meta_title = post.get_meta_title(language_code)
-    meta_description = post.get_meta_description(language_code)
+    meta_description = truncate_meta(post.get_meta_description(language_code))
     meta_keywords = post.get_meta_keywords(language_code)
 
     canonical_url = request.build_absolute_uri(
@@ -342,11 +302,38 @@ def blog_detail_amp(request, slug):
         'meta_keywords': meta_keywords,
         'page_description': meta_description,
         'canonical_url': canonical_url,
-        'amp_content': _convert_content_to_amp(post.content),
+        'amp_content': convert_html_to_amp(post.content),
         'og_image_url': og_image_url,
         'default_amp_image': default_amp_image,
-        'author_anchor_url': f"{canonical_url}#author",
+        'metrika_counter_id': getattr(settings, 'METRIKA_COUNTER_ID', 90630603),
+        'amp_metrika_params': json.dumps({
+            'post_id': post.id,
+            'slug': post.slug,
+            'category': post.category.slug if post.category else '',
+            'language': language_code,
+            'is_amp': True,
+        }, ensure_ascii=False),
     }
+
+    schema_image_url = og_image_url or default_amp_image
+    schema_post = build_blog_post_schema(
+        post,
+        request,
+        language_code=language_code,
+        meta_description=meta_description,
+        image_url=schema_image_url,
+    )
+    if schema_post:
+        context['schema_blog_post_json'] = json.dumps(schema_post, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+        (post.category.name if post.category else None, post.category.get_absolute_url() if post.category else None),
+        (post.title, post.get_absolute_url()),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
 
     return render(request, 'blog/blog_detail_amp.html', context)
 
@@ -369,6 +356,7 @@ def blog_category(request, slug):
     meta_title = category.meta_title or f'Статьи в категории {category.name}'
     meta_description = category.meta_description or category.description
     meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    meta_description = truncate_meta(meta_description)
 
     context = {
         'page_obj': page_obj,
@@ -380,6 +368,34 @@ def blog_category(request, slug):
         'meta_description': meta_description,
         'meta_keywords': category.meta_keywords,
     }
+
+    page_url = request.build_absolute_uri()
+    about = {
+        '@type': 'Thing',
+        'name': category.name,
+        'url': page_url,
+    }
+    if category.description:
+        about['description'] = category.description
+    item_list_schema = build_blog_item_list_schema(
+        page_obj.object_list,
+        request,
+        language_code=language_code,
+        title=meta_title,
+        description=meta_description,
+        page_url=page_url,
+        about=about,
+    )
+    if item_list_schema:
+        context['schema_blog_list_json'] = json.dumps(item_list_schema, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+        (category.name, category.get_absolute_url()),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
     
     return render(request, 'blog/blog_category.html', context)
 
@@ -402,6 +418,7 @@ def blog_tag(request, slug):
     meta_title = f'Статьи с тегом {tag.name}'
     meta_description = f'Все статьи с тегом {tag.name}'
     meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    meta_description = truncate_meta(meta_description)
 
     context = {
         'page_obj': page_obj,
@@ -412,8 +429,56 @@ def blog_tag(request, slug):
         'meta_title': meta_title,
         'meta_description': meta_description,
     }
+
+    page_url = request.build_absolute_uri()
+    about = {
+        '@type': 'Thing',
+        'name': tag.name,
+        'url': page_url,
+    }
+    item_list_schema = build_blog_item_list_schema(
+        page_obj.object_list,
+        request,
+        language_code=language_code,
+        title=meta_title,
+        description=meta_description,
+        page_url=page_url,
+        about=about,
+    )
+    if item_list_schema:
+        context['schema_blog_list_json'] = json.dumps(item_list_schema, ensure_ascii=False)
+
+    breadcrumb_schema = build_breadcrumb_schema([
+        (_('Главная'), reverse('core:home')),
+        (_('Блог'), reverse('blog:list')),
+        (tag.name, tag.get_absolute_url()),
+    ], request)
+    if breadcrumb_schema:
+        context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
     
     return render(request, 'blog/blog_tag.html', context)
+
+
+def legacy_blog_article_redirect(request, legacy_slug):
+    """Преобразуем legacy URL вида /blog/articles/123-slug/ в актуальный /blog/slug/."""
+    raw_slug = unquote(legacy_slug or '').strip('/').lower()
+    if not raw_slug:
+        return HttpResponsePermanentRedirect(reverse('blog:list'))
+
+    # Некоторые legacy-URL содержат несколько сегментов, поэтому берем последний.
+    slug_candidate = raw_slug.split('/')[-1]
+
+    if '-' in slug_candidate:
+        possible_id, remainder = slug_candidate.split('-', 1)
+        if possible_id.isdigit() and remainder:
+            slug_candidate = remainder
+
+    target_url = reverse('blog:detail', kwargs={'slug': slug_candidate})
+    query_string = request.META.get('QUERY_STRING')
+    if query_string:
+        target_url = f"{target_url}?{query_string}"
+
+    return HttpResponsePermanentRedirect(target_url)
 
 
 @csrf_exempt

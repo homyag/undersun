@@ -1,8 +1,10 @@
+import json
 from decimal import Decimal, InvalidOperation
 
+from django.conf import settings
 from django.views.generic import ListView, DetailView, View
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
+from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse, HttpResponsePermanentRedirect
 # login_required decorator removed
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -10,15 +12,26 @@ from django.contrib import messages
 from django.db.models import Q, Count, Case, When, Value, IntegerField
 from django.core.paginator import Paginator
 from django.urls import reverse
-from django.utils.translation import gettext, ngettext
+from django.utils.translation import gettext, ngettext, override
+from django.utils.html import strip_tags
+from django.templatetags.static import static
+from urllib.parse import quote_plus
 
 from apps.currency.services import CurrencyService
-from apps.core.utils import build_query_string, rate_limit, validate_form_security
+from apps.core.utils import build_query_string, rate_limit, validate_form_security, truncate_meta
+from apps.core.amp_utils import convert_html_to_amp
 from apps.core.models import SEOContentBlock
+from apps.core.seo_utils import build_property_meta
 from .models import Property, PropertyType
 from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
 from .yml_feed import YandexYmlFeedGenerator
+
+
+LEGACY_PROPERTY_SLUG_REDIRECTS = {
+    # Укороченный slug из старого каталога → актуальный slug
+    '1-bedroom-apart': '1-bedroom-apartment-in-a-deluxe-condominium-in-rawai',
+}
 
 
 class DealTypeRedirectMixin:
@@ -248,8 +261,42 @@ class PropertyListView(ListView):
             'many': ngettext('Найден %(count)s объект', 'Найдено %(count)s объектов', 5),
         }
 
-        context['seo_heading'] = self.build_seo_heading(context)
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+
+        with override(language_code):
+            context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+
+        self.update_page_meta(context, language_code)
+
+        return context
+
+    def update_page_meta(self, context, language_code=None):
+        """Recalculate SEO meta based on the latest context values."""
+        language_code = (language_code or getattr(self.request, 'LANGUAGE_CODE', 'ru'))[:2]
+        current_filters = context.get('current_filters', {})
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
+
+        with override(language_code):
+            meta = build_property_meta(
+                heading=context.get('seo_heading'),
+                results_count=self._get_results_count(context),
+                property_type_name=property_type_obj.name_display if property_type_obj else '',
+                district_name=district_obj.name if district_obj else '',
+                location_name=location_obj.name if location_obj else '',
+                min_price=self._parse_price_value(current_filters.get('min_price')),
+                max_price=self._parse_price_value(current_filters.get('max_price')),
+                currency_code=CurrencyService.get_selected_currency_code(self.request),
+                bedrooms=current_filters.get('bedrooms') or [],
+                build_status_label=self._resolve_build_status_label(current_filters.get('build_status')),
+                language_code=language_code,
+            )
+
+        context['page_title'] = meta.title
+        context['page_description'] = meta.description
+        self.request.seo_page_title = meta.title
+        self.request.seo_page_description = meta.description
 
         return context
 
@@ -308,12 +355,13 @@ class PropertyListView(ListView):
         return filter_context
 
     def should_show_build_status_filter(self, context):
-        """Показывать блок фильтрации по стадии готовности только для продажи condos/villas/townhouses."""
-        deal_type = context.get('deal_type') or context['current_filters'].get('deal_type')
-        if deal_type != 'sale':
+        """Показываем фильтр "Готово/стройка" всегда, кроме аренды и типов без стадии строительства."""
+        current_filters = context.get('current_filters', {})
+        deal_type = context.get('deal_type') or current_filters.get('deal_type')
+        if deal_type == 'rent':
             return False
 
-        selected_types = set(context['current_filters'].get('property_type') or [])
+        selected_types = set(current_filters.get('property_type') or [])
         current_type = context.get('current_property_type')
         if current_type:
             selected_types.add(current_type)
@@ -321,7 +369,8 @@ class PropertyListView(ListView):
             selected_types.add(context['property_type'].name)
 
         if not selected_types:
-            return False
+            # Тип объекта не выбран — показываем фильтр по умолчанию
+            return True
 
         return all(pt in self.BUILD_STATUS_ALLOWED_PROPERTY_TYPES for pt in selected_types)
 
@@ -344,22 +393,7 @@ class PropertyListView(ListView):
         """Builds an SEO-friendly H1 based on selected filters."""
         deal_type = context.get('deal_type') or self.request.GET.get('deal_type', '')
         property_type_obj = self._get_primary_property_type(context)
-
-        location_slug = self.request.GET.get('location')
-        district_slug = self.request.GET.get('district')
-        location_obj = None
-        district_obj = None
-
-        if location_slug:
-            location_qs = Location.objects.select_related('district').filter(slug=location_slug)
-            if district_slug:
-                location_qs = location_qs.filter(district__slug=district_slug)
-            location_obj = location_qs.first()
-            if location_obj:
-                district_obj = location_obj.district
-
-        if not district_obj and district_slug:
-            district_obj = District.objects.filter(slug=district_slug).first()
+        location_obj, district_obj = self._get_location_and_district()
 
         subject = property_type_obj.name_display if property_type_obj else gettext('Недвижимость')
         deal_phrase_map = {
@@ -386,6 +420,25 @@ class PropertyListView(ListView):
             heading = gettext('Каталог недвижимости на Пхукете, Таиланд')
 
         return heading
+
+    def _get_location_and_district(self):
+        location_slug = self.request.GET.get('location')
+        district_slug = self.request.GET.get('district')
+        location_obj = None
+        district_obj = None
+
+        if location_slug:
+            location_qs = Location.objects.select_related('district').filter(slug=location_slug)
+            if district_slug:
+                location_qs = location_qs.filter(district__slug=district_slug)
+            location_obj = location_qs.first()
+            if location_obj:
+                district_obj = location_obj.district
+
+        if not district_obj and district_slug:
+            district_obj = District.objects.filter(slug=district_slug).first()
+
+        return location_obj, district_obj
 
     def get_catalog_seo_block(self, context):
         """Возвращает SEO-блок для каталога с учётом языка и контекста."""
@@ -420,6 +473,32 @@ class PropertyListView(ListView):
                 }
 
         return None
+
+    def _get_results_count(self, context):
+        paginator = context.get('paginator')
+        if paginator:
+            return paginator.count
+        properties = context.get(self.context_object_name)
+        if properties is not None:
+            try:
+                return len(properties)
+            except TypeError:
+                return None
+        return None
+
+    def _parse_price_value(self, value):
+        if not value:
+            return None
+        try:
+            return Decimal(value)
+        except (InvalidOperation, ValueError):
+            return None
+
+    def _resolve_build_status_label(self, value):
+        if not value:
+            return ''
+        choices = dict(Property.BUILD_STATUS_CHOICES)
+        return choices.get(value, '')
 
     def get_seo_block_candidates(self, context):
         """Список возможных slug для SEO-блоков по убыванию специфичности."""
@@ -486,6 +565,7 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
             context['current_filters']['deal_type'] = 'sale'
         context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        self.update_page_meta(context)
         return context
 
 
@@ -506,6 +586,7 @@ class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
             context['current_filters']['deal_type'] = 'rent'
         context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        self.update_page_meta(context)
         return context
 
 
@@ -577,6 +658,7 @@ class PropertyByTypeView(PropertyListView):
         context['current_filters']['property_type'] = [self.property_type.name]
         context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        self.update_page_meta(context)
         return context
 
 
@@ -652,9 +734,13 @@ class PropertyDetailView(DetailView):
     
     def get(self, request, *args, **kwargs):
         """Переопределяем get метод для обработки редиректов"""
+        slug = kwargs.get('slug')
         try:
             self.object = self.get_object()
         except Http404:
+            legacy_redirect = self._maybe_redirect_legacy_slug(slug)
+            if legacy_redirect:
+                return legacy_redirect
             raise
         
         # Если объект найден, но неактивен - делаем редирект
@@ -679,7 +765,24 @@ class PropertyDetailView(DetailView):
         if main_image_url:
             context['og_image_url'] = main_image_url
 
+        amp_url = self.request.build_absolute_uri(
+            reverse('properties:property_detail_amp', kwargs={'slug': self.object.slug})
+        )
+        context['amp_url'] = amp_url
+
         return context
+
+    def _maybe_redirect_legacy_slug(self, slug):
+        """Проверяем, нужно ли перенаправить запрос со старого slug на актуальный."""
+        if not slug:
+            return None
+
+        target_slug = LEGACY_PROPERTY_SLUG_REDIRECTS.get(slug)
+        if not target_slug:
+            return None
+
+        target_url = reverse('properties:property_detail', kwargs={'slug': target_slug})
+        return HttpResponsePermanentRedirect(target_url)
     
     def get_similar_properties(self):
         """
@@ -756,6 +859,114 @@ def toggle_favorite(request):
 def favorites_view(request):
     """Страница избранного"""
     return render(request, 'properties/favorites.html')
+def _build_property_stats(property_obj):
+    stats = []
+    if property_obj.bedrooms:
+        stats.append({'label': gettext('Спальни'), 'value': property_obj.bedrooms})
+    if property_obj.bathrooms:
+        stats.append({'label': gettext('Ванные'), 'value': property_obj.bathrooms})
+    if property_obj.area_total:
+        stats.append({'label': gettext('Площадь'), 'value': f"{property_obj.area_total} m²"})
+    if property_obj.area_land:
+        stats.append({'label': gettext('Участок'), 'value': f"{property_obj.area_land} m²"})
+    if property_obj.floors_total:
+        stats.append({'label': gettext('Этажей'), 'value': property_obj.floors_total})
+    return stats
+
+
+def _build_final_price(property_obj):
+    if property_obj.deal_type == 'rent' and property_obj.price_rent_monthly_thb:
+        return property_obj.price_rent_monthly_thb
+    return property_obj.price_sale_thb or property_obj.price_rent_monthly_thb or 0
+
+
+def property_detail_amp(request, slug):
+    queryset = Property.objects.select_related(
+        'district', 'location', 'property_type', 'developer'
+    ).prefetch_related('images', 'features__feature')
+
+    property_obj = get_object_or_404(queryset, slug=slug)
+
+    detail_view = PropertyDetailView()
+    detail_view.request = request
+
+    if not property_obj.is_active:
+        return detail_view.handle_inactive_property(property_obj)
+
+    detail_view.object = property_obj
+    similar_properties = detail_view.get_similar_properties()
+
+    canonical_url = request.build_absolute_uri(property_obj.get_absolute_url())
+    meta_title = f"{property_obj.title} – Undersun Estate"
+    raw_description = property_obj.short_description or strip_tags(property_obj.description)
+    meta_description = truncate_meta(raw_description)
+
+    gallery_images = []
+    for image in property_obj.images.all():
+        image_url = image.medium_url or image.thumbnail_url or image.original_url
+        if not image_url:
+            continue
+        gallery_images.append({
+            'url': image_url,
+            'alt': image.alt_text or property_obj.title,
+        })
+
+    if not gallery_images:
+        gallery_images.append({
+            'url': static('images/no-image.svg'),
+            'alt': property_obj.title,
+        })
+
+    amenities = [relation.feature.name for relation in property_obj.features.all() if relation.feature]
+    stats = _build_property_stats(property_obj)
+    location_label = property_obj.location.name if property_obj.location else property_obj.district.name
+
+    whatsapp_message = gettext('Здравствуйте! Меня интересует объект {title} ({url})').format(
+        title=property_obj.title,
+        url=canonical_url,
+    )
+    whatsapp_url = f"https://wa.me/66633033133?text={quote_plus(whatsapp_message)}"
+    contact_phone = '+66633033133'
+
+    final_price = _build_final_price(property_obj)
+
+    metrika_counter_id = getattr(settings, 'METRIKA_COUNTER_ID', 90630603)
+    property_type_value = property_obj.property_type.name if property_obj.property_type else ''
+    district_slug = property_obj.district.slug if property_obj.district else ''
+    ya_params = {
+        'property_id': property_obj.id,
+        'slug': property_obj.slug,
+        'deal_type': property_obj.deal_type,
+        'property_type': property_type_value,
+        'district': district_slug,
+        'language': getattr(request, 'LANGUAGE_CODE', 'ru'),
+        'is_amp': True,
+    }
+
+    context = {
+        'property': property_obj,
+        'meta_title': meta_title,
+        'meta_description': meta_description,
+        'canonical_url': canonical_url,
+        'gallery_images': gallery_images,
+        'location_label': location_label,
+        'stats': stats,
+        'amenities': amenities,
+        'price_display': property_obj.price_display,
+        'contact_phone': contact_phone,
+        'whatsapp_url': whatsapp_url,
+        'similar_properties': similar_properties,
+        'amp_description': convert_html_to_amp(property_obj.description),
+        'final_price': final_price,
+        'status_label': property_obj.get_status_display(),
+        'deal_type_label': property_obj.get_deal_type_display(),
+        'developer_name': property_obj.developer.name if property_obj.developer else '',
+        'metrika_counter_id': metrika_counter_id,
+        'amp_metrika_params': json.dumps(ya_params, ensure_ascii=False),
+    }
+
+    return render(request, 'properties/property_detail_amp.html', context)
+
 
 @require_http_methods(["GET", "POST"])
 def get_favorite_properties(request):

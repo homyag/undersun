@@ -2628,6 +2628,54 @@ msgstr "Real estate in Thailand"
 msgid "Блог"
 msgstr "Blog"
 
+#: templates/blog/blog_detail.html:210 templates/blog/blog_list.html:35
+msgid "Главная"
+msgstr "Home"
+
+#: templates/blog/blog_list.html:32
+msgid "Хлебные крошки"
+msgstr "Breadcrumbs"
+
+#: templates/blog/blog_list.html:49
+msgid "Тег"
+msgstr "Tag"
+
+#: templates/properties/property_detail_amp.html:48
+msgid "Основные параметры"
+msgstr "Key facts"
+
+#: templates/properties/property_detail_amp.html:70
+msgid "Нужна консультация по объекту?"
+msgstr "Need advice on this property?"
+
+#: templates/properties/property_detail_amp.html:71
+msgid "Команда Undersun Estate оперативно свяжется с вами и отправит презентацию."
+msgstr "The Undersun Estate team will contact you promptly and send a brochure."
+
+#: templates/properties/property_detail_amp.html:74
+msgid "Открыть полную версию"
+msgstr "Open full version"
+
+#: templates/properties/property_detail_amp.html:96
+msgid "Все права защищены"
+msgstr "All rights reserved"
+
+#: apps/properties/views.py:738
+msgid "Площадь"
+msgstr "Area"
+
+#: apps/properties/views.py:740
+msgid "Участок"
+msgstr "Land plot"
+
+#: apps/properties/views.py:742
+msgid "Этажей"
+msgstr "Floors"
+
+#: apps/properties/views.py:749
+msgid "Здравствуйте! Меня интересует объект {title} ({url})"
+msgstr "Hello! I'm interested in the property {title} ({url})"
+
 #: templates/blog/blog_detail.html:224
 msgid "Автор"
 msgstr "Author"

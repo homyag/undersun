@@ -70,6 +70,11 @@ function updateMapMarkers() {
                 const priceLabel = property.price || window.djangoTranslations.priceOnRequest;
                 const cleanPhone = (property.agent_phone || '+66633033133').replace(/[^0-9]/g, '') || '66633033133';
 
+                const propertySlug = property.slug || '';
+                const propertyTypeKey = property.property_type || '';
+                const safeSlugAttr = escapeAttribute(propertySlug);
+                const safeTypeAttr = escapeAttribute(propertyTypeKey);
+
                 const popupContent = `
                     <div class="property-popup">
                         <div class="popup-media" data-property-id="${property.id}">
@@ -82,7 +87,12 @@ function updateMapMarkers() {
                         <div class="popup-body">
                             <div class="popup-price-row">
                                 <div class="popup-price">${priceLabel}</div>
-                                <a href="${property.url}" class="popup-link" target="_blank" rel="noopener">
+                                <a href="${property.url}" class="popup-link" target="_blank" rel="noopener"
+                                   data-ym-goal="catalog_map_popup_click"
+                                   data-ym-param-id="${property.id}"
+                                   data-ym-param-slug="${safeSlugAttr}"
+                                   data-ym-param-type="${safeTypeAttr}"
+                                   data-ym-param-link="price">
                                     ${window.djangoTranslations.moreDetails}
                                     <i class="fas fa-arrow-right text-xs"></i>
                                 </a>
@@ -98,11 +108,20 @@ function updateMapMarkers() {
                                 ${areaValue ? `<span><i class="fas fa-ruler-combined"></i>${Math.round(areaValue)} ${window.djangoTranslations.areaShort}</span>` : ''}
                             </div>
                             <div class="popup-actions">
-                                <a href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(window.djangoTranslations.whatsappText + ': ' + property.title)}" class="popup-action whatsapp" target="_blank" rel="noopener">
+                                <a href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(window.djangoTranslations.whatsappText + ': ' + property.title)}" class="popup-action whatsapp" target="_blank" rel="noopener"
+                                   data-ym-goal="catalog_map_whatsapp_click"
+                                   data-ym-param-id="${property.id}"
+                                   data-ym-param-slug="${safeSlugAttr}"
+                                   data-ym-param-type="${safeTypeAttr}">
                                     <i class="fab fa-whatsapp"></i>
                                     WhatsApp
                                 </a>
-                                <a href="${property.url}" class="popup-action primary" target="_blank" rel="noopener">
+                                <a href="${property.url}" class="popup-action primary" target="_blank" rel="noopener"
+                                   data-ym-goal="catalog_map_popup_click"
+                                   data-ym-param-id="${property.id}"
+                                   data-ym-param-slug="${safeSlugAttr}"
+                                   data-ym-param-type="${safeTypeAttr}"
+                                   data-ym-param-link="cta">
                                     ${window.djangoTranslations.moreDetails}
                                 </a>
                             </div>

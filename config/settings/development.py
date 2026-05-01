@@ -32,3 +32,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
 TAILWIND_USE_CDN = False
+
+# Отключаем антибот-защиту на локальной разработке, чтобы не получать 403
+BOT_PROTECTION['ENABLED'] = False

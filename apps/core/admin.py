@@ -2,7 +2,16 @@ from django.contrib import admin, messages
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from tinymce.widgets import TinyMCE
-from .models import SEOPage, SEOTemplate, PromotionalBanner, Service, Team, SEOContentBlock
+from .models import (
+    SEOPage,
+    SEOTemplate,
+    PromotionalBanner,
+    Service,
+    Team,
+    SEOContentBlock,
+    RequestLog,
+    ManualIPBan,
+)
 from .services import translation_service
 from apps.properties.services import translate_service_entry
 
@@ -208,6 +217,108 @@ class SEOContentBlockAdmin(admin.ModelAdmin):
         self._translate_queryset(request, queryset, force=True)
 
     force_retranslate_blocks.short_description = _('🔄 Перевести блоки заново (перезаписать)')
+
+
+@admin.register(RequestLog)
+class RequestLogAdmin(admin.ModelAdmin):
+    list_display = (
+        'created_at',
+        'client_ip',
+        'referer_short',
+        'asn',
+        'path_short',
+        'method',
+        'bot_score',
+        'action',
+        'source',
+    )
+    list_filter = ('action', 'source', 'created_at')
+    search_fields = ('client_ip', 'user_agent', 'path')
+    readonly_fields = (
+        'created_at',
+        'client_ip',
+        'proxy_ip',
+        'method',
+        'path',
+        'referer',
+        'user_agent',
+        'status_code',
+        'headers',
+        'bot_score',
+        'matched_rules_display',
+        'action',
+        'source',
+        'auto_block_threshold',
+        'asn',
+        'asn_organization',
+    )
+    ordering = ('-created_at',)
+    actions = ['ban_ip']
+
+    def path_short(self, obj):
+        return (obj.path or '/')[:60]
+
+    path_short.short_description = _('Путь')
+
+    def referer_short(self, obj):
+        if not obj.referer:
+            return '-'
+        return obj.referer[:80]
+
+    referer_short.short_description = _('Referer')
+
+
+    def matched_rules_display(self, obj):
+        rules = obj.matched_rules or []
+        if not rules:
+            return '-'
+        lines = []
+        for rule in rules:
+            detail = rule.get('detail') or ''
+            if detail:
+                lines.append(f"{rule.get('key')} (+{rule.get('weight')}): {detail}")
+            else:
+                lines.append(f"{rule.get('key')} (+{rule.get('weight')})")
+        return '\n'.join(lines)
+
+    matched_rules_display.short_description = _('Совпавшие правила')
+
+    def auto_block_threshold(self, obj):
+        from django.conf import settings
+        threshold = settings.BOT_PROTECTION.get('ACTION_THRESHOLDS', {}).get('block', 90)
+        fail2ban = settings.BOT_PROTECTION.get('ACTION_THRESHOLDS', {}).get('fail2ban', 100)
+        return f"Block ≥ {threshold}, Fail2ban ≥ {fail2ban}"
+
+    auto_block_threshold.short_description = _('Пороги блокировки')
+
+    def ban_ip(self, request, queryset):
+        created = 0
+        for log in queryset:
+            ban, made = ManualIPBan.objects.get_or_create(
+                ip_address=log.client_ip,
+                defaults={'reason': f'Admin ban via RequestLog #{log.pk}'},
+            )
+            if not ban.active:
+                ban.active = True
+                ban.reason = ban.reason or f'Re-activated via RequestLog #{log.pk}'
+                ban.save(update_fields=['active', 'reason'])
+            if made:
+                created += 1
+        self.message_user(
+            request,
+            _('Добавлено/активировано банов: %(count)s') % {'count': created},
+            level=messages.SUCCESS,
+        )
+
+    ban_ip.short_description = _('Забанить выбранные IP')
+
+
+@admin.register(ManualIPBan)
+class ManualIPBanAdmin(admin.ModelAdmin):
+    list_display = ('ip_address', 'reason', 'active', 'created_at', 'expires_at')
+    list_filter = ('active',)
+    search_fields = ('ip_address', 'reason')
+    readonly_fields = ('created_at',)
 
 
 @admin.register(SEOTemplate)

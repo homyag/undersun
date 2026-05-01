@@ -9,7 +9,12 @@
                     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary mb-4">{% trans "Нужна подборка недвижимости на Пхукете?" %}</h2>
                     <p class="text-gray-600 mb-8 text-base sm:text-lg">{% trans "Оставьте телефон — за 24 часа пришлём 3 актуальных варианта под ваш запрос" %}</p>
 
-                    <form id="quickConsultationForm" class="space-y-4 sm:space-y-6 js-recaptcha-form" data-recaptcha-action="quick_consultation">
+                    <form id="quickConsultationForm"
+                          class="space-y-4 sm:space-y-6 js-recaptcha-form"
+                          data-recaptcha-action="quick_consultation"
+                          data-ym-goal="phone_form_submit"
+                          data-ym-event="submit"
+                          data-ym-param-form="hero_phone">
                         {% csrf_token %}
                         {% include 'core/includes/recaptcha_token_field.html' %}
                         {% include 'core/includes/form_security_fields.html' with honeypot_id='quick-consultation-website' %}

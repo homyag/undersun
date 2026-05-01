@@ -12,6 +12,8 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill, ResizeToFit
 from PIL import Image
 from tinymce.models import HTMLField
+
+from apps.core.utils import truncate_meta
 from apps.locations.models import District, Location
 
 
@@ -551,15 +553,25 @@ class Property(models.Model):
         """Получить финальные SEO данные с учетом приоритетов"""
         # 1. Проверяем кастомные SEO поля
         if self.has_custom_seo(language_code):
-            return self.get_custom_seo(language_code)
+            return self._with_truncated_description(self.get_custom_seo(language_code))
         
         # 2. Ищем подходящий шаблон
         template = self.get_seo_template()
         if template:
-            return template.generate_seo_for_property(self, language_code)
+            return self._with_truncated_description(
+                template.generate_seo_for_property(self, language_code)
+            )
         
         # 3. Fallback - автогенерация
-        return self.generate_auto_seo(language_code)
+        return self._with_truncated_description(self.generate_auto_seo(language_code))
+
+    def _with_truncated_description(self, seo_data):
+        """Убеждаемся, что meta description не превышает лимит."""
+        seo_data = seo_data or {}
+        description = seo_data.get('description')
+        if description:
+            seo_data['description'] = truncate_meta(description)
+        return seo_data
 
 
 class Agent(models.Model):

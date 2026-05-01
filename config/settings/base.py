@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -6,6 +7,7 @@ from django.urls import reverse_lazy
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+IP2ASN_DB_PATH = BASE_DIR / 'tmp' / 'ip2asn.tsv'
 
 # Добавляем apps в Python path
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -71,6 +73,30 @@ if (BASE_DIR / 'theme').exists():
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
+
+def _load_googlebot_ip_ranges():
+    base_path = BASE_DIR / 'seo' / 'googlebot-ip-ranges'
+    if not base_path.exists():
+        return []
+
+    ranges = set()
+    for json_path in base_path.glob('*.json'):
+        try:
+            data = json.loads(json_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+
+        for prefix in data.get('prefixes', []):
+            for key in ('ipv4Prefix', 'ipv6Prefix'):
+                value = prefix.get(key)
+                if value:
+                    ranges.add(value.strip())
+
+    return sorted(ranges)
+
+
+GOOGLEBOT_IP_RANGES = _load_googlebot_ip_ranges()
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -80,6 +106,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'apps.core.middleware.BadInquiryRequestLoggerMiddleware',
     'apps.core.middleware.ForbiddenPathLoggerMiddleware',
+    'apps.core.middleware.BotDetectionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -193,6 +220,188 @@ LEAFLET_CONFIG = {
 
 # Pagination
 PAGINATE_BY = 12
+
+# Bot protection (Phase 1 defaults)
+BOT_PROTECTION = {
+    'ENABLED': env.bool('BOT_PROTECTION_ENABLED', default=True),
+    'WHITELIST_IPS': [
+        #'91.212.150.176',  # reverse proxy for RU traffic
+        '95.161.221.91',   # admin IP
+        '5.45.192.0/18',
+        '5.255.192.0/18',
+        '37.9.64.0/18',
+        '37.140.128.0/18',
+        '77.88.0.0/18',
+        '84.252.160.0/19',
+        '87.250.224.0/19',
+        '90.156.176.0/20',
+        '92.255.112.0/20',
+        '93.158.128.0/18',
+        '95.108.128.0/17',
+        '141.8.128.0/18',
+        '178.154.128.0/18',
+        '185.32.187.0/24',
+        '213.180.192.0/19',
+        '2a02:6b8::/29',
+    ] + GOOGLEBOT_IP_RANGES,
+    'WHITELIST_USER_AGENTS': [
+        r'Googlebot',
+        r'Chrome-Lighthouse',
+        r'Google-InspectionTool',
+        r'Google-Structured-Data-Testing-Tool',
+        r'Structured-Data-Testing-Tool',
+        r'Schema-Markup-Validator',
+        r'Google-Read-Aloud',
+        r'Bingbot',
+        r'BingPreview',
+        r'Slurp',
+        r'DuckDuckBot',
+        r'YandexBot',
+        r'YandexMetrika',
+        r'Mail\.RU_Bot',
+        r'Baiduspider',
+        r'Sogou',
+        r'PetalBot',
+        r'LinkedInBot',
+        r'facebookexternalhit',
+        r'meta-externalagent',
+        r'Twitterbot',
+        r'Applebot',
+        r'AhrefsBot',
+        r'AhrefsSiteAudit',
+        r'Screaming Frog',
+        r'SemrushBot',
+        r'Amazonbot',
+        r'Instagram',
+        r'OpenAI-SearchBot',
+        r'GPTBot',
+        r'ClaudeBot',
+        r'AnthropicAI',
+        r'Bytespider',
+        r'CensysInspect',
+        r'Palo Alto Networks',
+        r'ChatGPT-User',
+        r'Slackbot',
+        r'TelegramBot',
+        r'newsai/1\.0',
+        r'MJ12bot',
+        r'SERankingBacklinksBot',
+        r'PerplexityBot',
+        r'TikTokSpider',
+        r'BusinessValidator',
+    ],
+    'BLACKLIST_IPS': [
+        '20.205.115.105',
+        '20.220.148.239',
+        '20.203.201.174',
+        '104.208.81.121',
+        '4.194.217.214',
+        '20.27.221.169',
+        '20.151.2.11',
+        '20.69.252.116',
+        '20.151.224.91',
+        '20.123.25.77',
+    ],
+    'SUSPICIOUS_USER_AGENTS': [
+        r'curl',
+        r'python-requests',
+        r'Go-http-client',
+        r'Go-http-client/2\.0',
+        r'HeadlessChrome',
+        r'zgrab',
+    ],
+    'HIGH_RISK_USER_AGENT_PATTERNS': [
+        r'Chrome/13[0-9]\.0\.0\.0 Safari/537\.36$',
+        r'Mozilla/5\.0 \(Windows NT 10\.0; Win64; x64\).*Chrome/139\.0\.0\.0',
+    ],
+    'FORBIDDEN_PATH_PATTERNS': [
+        r'^/administrator(?:/|$)',
+        r'^/wp-admin',
+        r'^/wp-login\.php$',
+        r'^/wp-content',
+        r'^/wp-includes',
+        r'^/phpmyadmin',
+        r'^/pma',
+        r'^/adminer',
+        r'^/manager/html',
+        r'^/vendor/phpunit',
+        r'^/wp-json',
+        r'^/xmlrpc\.php$',
+        r'^/\.env',
+        r'^/\.git',
+        r'^/vendor(?:/|$)',
+        r'^/composer\.json$',
+        r'^/package-lock\.json$',
+        r'^/aws',
+        r'^/cgi-bin',
+        r'^/storage',
+        r'^/backup',
+        r'^/\.well-known/security\.txt',
+        r'/wp-content/plugins/hellopress',
+        r'/wp-content/plugins',
+    ],
+    'HEADER_KEYS': [
+        'HTTP_ACCEPT_LANGUAGE',
+        'HTTP_ACCEPT_ENCODING',
+        'HTTP_SEC_CH_UA',
+        'HTTP_SEC_CH_UA_PLATFORM',
+        'HTTP_SEC_FETCH_DEST',
+        'HTTP_SEC_FETCH_SITE',
+    ],
+    'RATE_LIMIT': {
+        'WINDOW_SECONDS': 10,
+        'MAX_REQUESTS': 5,
+    },
+    'ACTION_THRESHOLDS': {
+        'monitor': 30,
+        'challenge': 60,
+        'block': 90,
+        'fail2ban': 100,
+    },
+    'SKIP_PATH_PREFIXES': ['/static/', '/media/'],
+    'SKIP_METHODS': ['OPTIONS'],
+    'BOUNCE_WINDOW_SECONDS': 5,
+    'ASN_DB_PATH': IP2ASN_DB_PATH,
+    'ASN_WEIGHTS': {
+        'AS16509': 40,  # Amazon AWS
+        'AS14618': 40,
+        'AS14061': 35,  # DigitalOcean
+        'AS16276': 35,  # OVH
+        'AS24940': 35,  # Hetzner
+        'AS61317': 35,  # DigitalEnergy
+        'AS4837': 45,   # China169 Backbone
+        'AS9808': 45,   # China Mobile
+        'AS4811': 45,   # China Telecom Shanghai
+        'AS4134': 45,   # ChinaNet Backbone
+        'AS58563': 45,  # China Telecom Hubei
+        'AS134763': 40, # CT Dongguan IDC
+        'AS134760': 40, # ChinaNet Hebei
+    },
+    'ASN_ORG_PATTERNS': {
+        'google': 15,
+        'facebook': 15,
+    },
+    'RULE_WEIGHTS': {
+        'forbidden_path': 120,
+        'suspicious_user_agent': 25,
+        'high_risk_user_agent': 35,
+        'missing_headers': 10,
+        'missing_headers_critical': 120,
+        'no_referer': 15,
+        'no_referer_combo': 25,
+        'js_challenge_missing': 40,
+        'js_challenge_failed': 120,
+        'single_html_hit': 35,
+        'asn_datacenter': 40,
+        'rate_limit': 20,
+        'blacklist_ip': 40,
+        'suspicious_payload': 30,
+        'head_on_html': 10,
+    },
+    'CHALLENGE_COOKIE': 'bot_challenge',
+    'CHALLENGE_QUERY_PARAM': 'bot_challenge_token',
+    'CHALLENGE_COOKIE_MAX_AGE_DAYS': 7,
+}
 
 # Login/Logout URLs
 LOGIN_URL = '/users/login/'

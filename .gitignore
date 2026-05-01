@@ -166,3 +166,5 @@ cleanup.log
 /logs/nginx_logs/
 /logs/proxy_logs/
 /logs/
+/seo/
+/tmp/ip2asn.tsv

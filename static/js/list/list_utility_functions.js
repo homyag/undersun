@@ -15,14 +15,26 @@ function setPriceRange(min, max) {
 function updateSort(value) {
     // Update sort field in form
     const form = document.getElementById('filter-form');
+    if (!form) {
+        return;
+    }
     const sortInput = form.querySelector('input[name="sort"]');
     
     if (sortInput) {
         sortInput.value = value;
     }
-    
-    // Submit the form directly
-    form.submit();
+
+    if (typeof window.dispatchMetrikaGoal === 'function') {
+        window.dispatchMetrikaGoal('catalog_sort_change', { sort: value });
+    }
+
+    if (typeof window.submitPropertyFilters === 'function') {
+        window.submitPropertyFilters({ trigger: 'sort', origin: 'sort' });
+    } else if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit();
+    } else {
+        form.submit();
+    }
 }
 
 function getResultsCountTranslations() {

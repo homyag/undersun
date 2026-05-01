@@ -13,6 +13,14 @@ const LABEL_PRICE_ON_REQUEST = PROPERTY_I18N.priceOnRequest || 'По запро�
 const LABEL_PER_MONTH = PROPERTY_I18N.perMonth || 'мес';
 const LABEL_PER_SQM = PROPERTY_I18N.perSqm || 'м²';
 
+function firePropertyGoal(goalName, params = {}) {
+    if (typeof window.dispatchMetrikaGoal !== 'function' || !goalName) {
+        return;
+    }
+    const payload = Object.assign({ propertyId: PROPERTY_ID }, params || {});
+    window.dispatchMetrikaGoal(goalName, payload);
+}
+
 // Check if we're on mobile or desktop
 function isMobile() {
     return window.innerWidth < 768; // md breakpoint
@@ -210,7 +218,9 @@ function updateCarouselUI() {
 }
 
 function openGallery(index) {
-    currentImageIndex = index;
+    const normalizedIndex = typeof index === 'number' ? index : currentImageIndex;
+    currentImageIndex = normalizedIndex;
+    firePropertyGoal('property_gallery_open', { index: normalizedIndex });
     updateGalleryImage();
     document.getElementById('gallery-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -298,11 +308,13 @@ function downloadImage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        firePropertyGoal('property_gallery_download', { index: currentImageIndex });
     }
 }
 
 // Share property function (for carousel button)
 function shareProperty() {
+    firePropertyGoal('property_share_click');
     if (navigator.share) {
         navigator.share({
             title: PROPERTY_TITLE,
@@ -377,11 +389,17 @@ function toggleFavoriteDetail(propertyId) {
         isFavoriteNow = !wasFavorite;
     }
 
-    setDetailFavoriteState(parseInt(propertyId, 10), Boolean(isFavoriteNow));
+    const numericId = parseInt(propertyId, 10);
+    const favoriteState = Boolean(isFavoriteNow);
+    setDetailFavoriteState(numericId, favoriteState);
+    firePropertyGoal('property_favorite_toggle', {
+        status: favoriteState ? 'add' : 'remove'
+    });
 }
 
 // Share image function
 function shareImage() {
+    firePropertyGoal('property_gallery_share', { index: currentImageIndex });
     if (navigator.share && PROPERTY_IMAGES.length > 0) {
         navigator.share({
             title: PROPERTY_TITLE,
@@ -577,6 +595,7 @@ function updatePrices() {
 
 // Modal functions
 function openDetailsModal() {
+    firePropertyGoal('property_details_modal_open');
     document.getElementById('consultation-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
@@ -593,6 +612,7 @@ function closeDetailsModal() {
 }
 
 function openViewingModal() {
+    firePropertyGoal('property_viewing_modal_open');
     document.getElementById('viewing-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
@@ -609,6 +629,7 @@ function closeViewingModal() {
 }
 
 function openConsultationModal() {
+    firePropertyGoal('property_consultation_modal_open');
     document.getElementById('consultation-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }

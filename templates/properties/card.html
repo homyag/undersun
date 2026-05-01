@@ -31,7 +31,13 @@
             <div class="relative w-full" style="padding-top:66%;">
                 <a href="{{ property.get_absolute_url }}"
                    class="absolute inset-0 block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent"
-                   aria-label="{{ property.title }}">
+                   aria-label="{{ property.title }}"
+                   data-ym-goal="catalog_card_click"
+                   data-ym-param-id="{{ property.id }}"
+                   data-ym-param-slug="{{ property.slug }}"
+                   data-ym-param-type="{{ property.property_type.name|default:'' }}"
+                   data-ym-param-position="{{ forloop.counter|default:'' }}"
+                   data-ym-param-link="image">
                     {% if property.main_image %}
                         <img src="{{ property.main_image.medium_url }}"
                              class="absolute inset-0 w-full h-full object-cover"
@@ -81,7 +87,13 @@
             <!-- Title -->
             <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight line-clamp-2">
                 <a href="{{ property.get_absolute_url }}"
-                   class="hover:text-primary transition-colors group-hover:text-accent">
+                   class="hover:text-primary transition-colors group-hover:text-accent"
+                   data-ym-goal="catalog_card_click"
+                   data-ym-param-id="{{ property.id }}"
+                   data-ym-param-slug="{{ property.slug }}"
+                   data-ym-param-type="{{ property.property_type.name|default:'' }}"
+                   data-ym-param-position="{{ forloop.counter|default:'' }}"
+                   data-ym-param-link="title">
                     {{ property.title }}
                 </a>
             </h3>
@@ -191,7 +203,14 @@
             </div>
 
             <!-- Action Button - Full Width -->
-            <a href="{{ property.get_absolute_url }}" class="block w-full bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-center text-base sm:text-sm group-hover:shadow-xl mt-auto">
+            <a href="{{ property.get_absolute_url }}"
+               class="block w-full bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-center text-base sm:text-sm group-hover:shadow-xl mt-auto"
+               data-ym-goal="catalog_card_click"
+               data-ym-param-id="{{ property.id }}"
+               data-ym-param-slug="{{ property.slug }}"
+               data-ym-param-type="{{ property.property_type.name|default:'' }}"
+               data-ym-param-position="{{ forloop.counter|default:'' }}"
+               data-ym-param-link="cta">
                 {% trans "Подробнее" %}
                 <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-200"></i>
             </a>

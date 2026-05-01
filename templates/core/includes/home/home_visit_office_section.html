@@ -82,13 +82,15 @@
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 mb-4">
           <button id="contact-meeting-btn"
-                  class="flex items-center justify-center px-8 py-3 bg-accent hover:bg-yellow-500 text-gray-900 font-bold rounded-md transition-all duration-300 transform hover:scale-105 shadow-lg">
+                  class="flex items-center justify-center px-8 py-3 bg-accent hover:bg-yellow-500 text-gray-900 font-bold rounded-md transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  data-ym-goal="visit_open_meeting_modal">
             <i class="fas fa-handshake mr-2"></i>
             <span>{% trans "Связаться для встречи" %}</span>
           </button>
           
           <button id="show-map-btn"
-                  class="flex items-center justify-center px-8 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold rounded-md transition-all duration-300 transform hover:scale-105">
+                  class="flex items-center justify-center px-8 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold rounded-md transition-all duration-300 transform hover:scale-105"
+                  data-ym-goal="visit_show_map">
             <i class="fas fa-map mr-2"></i>
             <span>{% trans "Показать на карте" %}</span>
           </button>
@@ -113,7 +115,12 @@
         </button>
       </div>
       
-      <form id="officeVisitForm" class="space-y-6 js-recaptcha-form" data-recaptcha-action="office_visit">
+      <form id="officeVisitForm"
+            class="space-y-6 js-recaptcha-form"
+            data-recaptcha-action="office_visit"
+            data-ym-goal="visit_office_form_submit"
+            data-ym-event="submit"
+            data-ym-param-form="office_visit">
         {% csrf_token %}
         {% include 'core/includes/recaptcha_token_field.html' %}
         {% include 'core/includes/form_security_fields.html' with honeypot_id='office-visit-website' %}

@@ -18,7 +18,8 @@
                         <!-- Button -->
                         <div class="mb-6">
                             <a href="{% url 'properties:property_list' %}"
-                               class="inline-block w-full bg-accent hover:bg-yellow-500 text-gray-900 font-bold px-8 py-3 rounded-md text-center transition-all duration-300 transform hover:scale-105 shadow-lg">
+                               class="inline-block w-full bg-accent hover:bg-yellow-500 text-gray-900 font-bold px-8 py-3 rounded-md text-center transition-all duration-300 transform hover:scale-105 shadow-lg"
+                               data-ym-goal="what_section_catalog_click">
                                 {% trans "Смотреть все объекты" %}
                             </a>
                         </div>
@@ -57,7 +58,11 @@
                         <p class="text-gray-600 mb-4 text-center">{% trans "Тщательный отбор объектов под ваши цели, полная проверка и сопровождение до получения ключей." %}</p>
                         <div class="text-center">
                             <a href="{% url 'core:service_detail' slug='buying-property' %}"
-                               class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                               class="text-primary hover:text-accent transition-colors font-medium"
+                               data-ym-goal="what_service_click"
+                               data-ym-param-service="buying-property">
+                                {% trans "Подробнее" %}
+                            </a>
                         </div>
                     </div>
 
@@ -78,7 +83,11 @@
                         <p class="text-gray-600 mb-4 text-center">{% trans "Используем эффективные каналы, чтобы найти покупателя и закрыть сделку на лучших условиях." %}</p>
                         <div class="text-center">
                             <a href="{% url 'core:service_detail' slug='selling-property' %}"
-                               class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                               class="text-primary hover:text-accent transition-colors font-medium"
+                               data-ym-goal="what_service_click"
+                               data-ym-param-service="selling-property">
+                                {% trans "Подробнее" %}
+                            </a>
                         </div>
                     </div>
 
@@ -99,7 +108,11 @@
                         <p class="text-gray-600 mb-4 text-center">{% trans "Разъясним ключевые юридические нюансы и организуем процесс оформления сделки в Таиланде." %}</p>
                         <div class="text-center">
                             <a href="{% url 'core:service_detail' slug='legal-services' %}"
-                               class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                               class="text-primary hover:text-accent transition-colors font-medium"
+                               data-ym-goal="what_service_click"
+                               data-ym-param-service="legal-services">
+                                {% trans "Подробнее" %}
+                            </a>
                         </div>
                     </div>
 
@@ -120,7 +133,11 @@
                         <p class="text-gray-600 mb-4 text-center">{% trans "В нашем портфеле — земля в перспективных районах Пхукета." %}</p>
                         <div class="text-center">
                             <a href="{% url 'core:service_detail' slug='land-sale' %}"
-                               class="text-primary hover:text-accent transition-colors font-medium">{% trans "Подробнее" %}</a>
+                               class="text-primary hover:text-accent transition-colors font-medium"
+                               data-ym-goal="what_service_click"
+                               data-ym-param-service="land-sale">
+                                {% trans "Подробнее" %}
+                            </a>
                         </div>
                     </div>
                 </div>

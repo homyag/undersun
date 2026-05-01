@@ -7,7 +7,8 @@ from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
-from django.http import HttpResponse, HttpResponsePermanentRedirect
+from django.http import HttpResponse, HttpResponsePermanentRedirect, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import translation
@@ -16,7 +17,7 @@ from django.utils.translation import gettext, ngettext, get_language, get_langua
 from django.conf import settings
 
 from apps.currency.services import CurrencyService
-from apps.core.utils import build_query_string
+from apps.core.utils import build_query_string, truncate_meta
 from apps.properties.models import Property, PropertyType
 from apps.properties.views import PropertyListView
 from apps.locations.models import District
@@ -25,6 +26,12 @@ from .models import PromotionalBanner, Service, Team
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+@csrf_exempt
+def metrika_loaded_ping(request):
+    """Простой endpoint для фиксации факта загрузки Метрики (используется sendBeacon)."""
+    return JsonResponse({'status': 'ok'})
 
 
 def serialize_properties_for_js(properties):
@@ -48,6 +55,7 @@ def serialize_properties_for_js(properties):
         
         result.append({
             'id': prop.id,
+            'slug': prop.slug,
             'title': prop.title,
             'url': prop.get_absolute_url(),
             'main_image_url': main_image_url,
@@ -56,6 +64,7 @@ def serialize_properties_for_js(properties):
             'location_name': prop.location.name if prop.location else '',
             'property_type': prop.property_type.name_display if prop.property_type else '',
             'property_type_name': prop.property_type.name_display if prop.property_type else '',
+            'property_type_key': prop.property_type.name if prop.property_type else '',
             'deal_type': prop.deal_type,
             'bedrooms': prop.bedrooms or 0,
             'bathrooms': prop.bathrooms or 0,
@@ -114,6 +123,8 @@ class HomeView(TemplateView):
         def append_structured(items):
             for prop in items[:3]:
                 price_value, price_currency = choose_price(prop)
+                if price_value is None or not price_currency:
+                    continue
                 structured_offers.append({
                     'name': prop.title,
                     'url': self.request.build_absolute_uri(prop.get_absolute_url()),
@@ -460,15 +471,7 @@ class MapView(TemplateView):
 
         filter_context = property_list_view.build_filter_context()
         context.update(filter_context)
-
-        current_deal_type = filter_context['current_filters'].get('deal_type')
-        selected_types = set(filter_context['current_filters'].get('property_type') or [])
-        if current_deal_type == 'sale':
-            if not selected_types or all(
-                pt in property_list_view.BUILD_STATUS_ALLOWED_PROPERTY_TYPES
-                for pt in selected_types
-            ):
-                context['show_build_status_filter'] = True
+        context['show_build_status_filter'] = property_list_view.should_show_build_status_filter(context)
 
         return context
 
@@ -518,6 +521,7 @@ class SitemapView(View):
 
         base_url = request.build_absolute_uri('/')[:-1]
         entries = []
+        stylesheet_url = f"{base_url}/static/core/sitemaps/sitemap.xsl"
 
         def build_alternates(resolve_func):
             alternates = []
@@ -557,26 +561,37 @@ class SitemapView(View):
         # Properties
         for prop in Property.objects.filter(is_active=True, status='available'):
             alternates = build_alternates(prop.get_absolute_url)
+            amp_alternates = build_alternates(
+                lambda slug=prop.slug: reverse('properties:property_detail_amp', kwargs={'slug': slug})
+            )
             lastmod = prop.updated_at.isoformat() if prop.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod))
+            entries.extend(self._expand_entries(alternates, lastmod, amp_alternates))
 
         # Blog
         for post in BlogPost.get_published():
             alternates = build_alternates(post.get_absolute_url)
+            amp_alternates = build_alternates(
+                lambda slug=post.slug: reverse('blog:detail_amp', kwargs={'slug': slug})
+            )
             lastmod = post.updated_at.isoformat() if post.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod))
+            entries.extend(self._expand_entries(alternates, lastmod, amp_alternates))
 
         xml_content = render_to_string('core/sitemaps/sitemap.xml', {'entries': entries})
         return HttpResponse(xml_content, content_type='application/xml')
 
     @staticmethod
-    def _expand_entries(alternates, lastmod):
+    def _expand_entries(alternates, lastmod, amp_alternates=None):
+        amp_lookup = {}
+        if amp_alternates:
+            amp_lookup = {amp['lang']: amp['url'] for amp in amp_alternates}
+
         expanded = []
         for alt in alternates:
             expanded.append({
                 'loc': alt['url'],
                 'lastmod': lastmod,
-                'alternates': [a for a in alternates if a['url'] != alt['url']]
+                'alternates': [a for a in alternates if a['url'] != alt['url']],
+                'amp_url': amp_lookup.get(alt['lang'])
             })
         return expanded
 
@@ -606,6 +621,18 @@ def legacy_real_estate_redirect(request, *args, **kwargs):
     return HttpResponsePermanentRedirect(target_url)
 
 
+def legacy_team_member_redirect(request, *args, **kwargs):
+    """Командные страницы из старого сайта перенаправляем на текущий раздел «О компании»"""
+    target_url = reverse('core:about')
+    return HttpResponsePermanentRedirect(target_url)
+
+
+def legacy_privacy_policy_redirect(request, *args, **kwargs):
+    """Все варианты /privacy-policy/ ведем на актуальную страницу /privacy/."""
+    target_url = reverse('core:privacy')
+    return HttpResponsePermanentRedirect(target_url)
+
+
 class ServiceDetailView(DetailView):
     """Детальная страница услуги"""
     model = Service
@@ -627,7 +654,7 @@ class ServiceDetailView(DetailView):
         # SEO данные
         service = self.get_object()
         context['page_title'] = service.get_meta_title()
-        context['page_description'] = service.get_meta_description()
+        context['page_description'] = truncate_meta(service.get_meta_description())
         context['page_keywords'] = service.meta_keywords
         
         # Добавляем рекомендуемые объекты в зависимости от типа услуги

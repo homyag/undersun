@@ -1,8 +1,7 @@
-{% load i18n static url_utils %}
+{% load i18n static %}
 <!doctype html>
 <html amp lang="{{ request.LANGUAGE_CODE|default:'ru' }}">
 <head>
-  {% static 'images/logo_fullscreen.svg' as amp_logo_path %}
   <meta charset="utf-8">
   <title>{{ meta_title }}</title>
   <link rel="canonical" href="{{ canonical_url }}">
@@ -19,6 +18,7 @@
   <meta property="og:url" content="{{ canonical_url }}">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
     body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }
@@ -40,34 +40,16 @@
     .cta a { display: inline-block; margin-top: 12px; padding: 12px 24px; border-radius: 999px; background: #0f172a; color: #fff; text-decoration: none; font-weight: 600; }
     footer { text-align: center; padding: 32px 0; font-size: 0.85rem; color: #475569; }
   </style>
+  {% if schema_blog_post_json %}
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "{{ canonical_url }}"
-    },
-    "headline": "{{ post.title|escapejs }}",
-    "image": [{% if og_image_url %}"{{ og_image_url }}"{% else %}"{{ default_amp_image }}"{% endif %}],
-    "datePublished": "{{ post.published_at|date:'c' }}",
-    "dateModified": "{{ post.updated_at|date:'c' }}",
-    "author": {
-      "@type": "Person",
-      "name": "{{ post.get_author_display|default:post.author.get_full_name|default:post.author }}",
-      "url": "{{ author_anchor_url }}"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Undersun Estate",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "{{ amp_logo_path|absolute_url:request }}"
-      }
-    },
-    "description": "{{ meta_description|escapejs }}"
-  }
+    {{ schema_blog_post_json|safe }}
   </script>
+  {% endif %}
+  {% if schema_blog_breadcrumb_json %}
+  <script type="application/ld+json">
+    {{ schema_blog_breadcrumb_json|safe }}
+  </script>
+  {% endif %}
 </head>
 <body>
   <header>
@@ -96,8 +78,8 @@
       <section class="related">
         <h3>{% trans "Вам также может понравиться" %}</h3>
         {% for related in related_posts %}
-        <div class="related-item">
-          <a href="{{ related.get_absolute_url }}" style="text-decoration:none; color:#0f172a; font-weight:600;">
+          <div class="related-item">
+          <a href="{{ related.get_absolute_url }}" style="text-decoration:none; color:#0f172a; font-weight:600;" data-amp-analytics="related-link">
             {{ related.title }}
           </a>
           <div style="font-size:0.9rem; color:#64748b;">{{ related.published_at|date:"d M Y" }}</div>
@@ -108,7 +90,7 @@
 
       <div class="cta">
         <p>{% trans "Нужна консультация по недвижимости?" %}</p>
-        <a href="/property/" target="_blank">{% trans "Перейти в каталог" %}</a>
+        <a href="/property/" target="_blank" data-amp-analytics="blog-cta">{% trans "Перейти в каталог" %}</a>
       </div>
     </article>
   </main>
@@ -116,5 +98,69 @@
   <footer>
     &copy; Undersun Estate · {% trans "Найдите вашу недвижимость на Пхукете" %}
   </footer>
+  {% if metrika_counter_id %}
+  <amp-analytics type="metrika">
+    <script type="application/json">
+      {
+        "vars": {
+          "counterId": "{{ metrika_counter_id }}"{% if amp_metrika_params %},
+          "yaParams": "{{ amp_metrika_params|escapejs }}"
+          {% endif %}
+        },
+        "triggers": {
+          "notBounce": {
+            "on": "timer",
+            "timerSpec": {
+              "immediate": false,
+              "interval": 15,
+              "maxTimerLength": 14
+            },
+            "request": "notBounce"
+          },
+          "halfScroll": {
+            "on": "scroll",
+            "scrollSpec": {
+              "verticalBoundaries": [50]
+            },
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_blog_half_scroll",
+              "yaParams": "{\"postId\": {{ post.id }}, \"boundary\": 50}"
+            }
+          },
+          "deepScroll": {
+            "on": "scroll",
+            "scrollSpec": {
+              "verticalBoundaries": [90]
+            },
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_blog_full_scroll",
+              "yaParams": "{\"postId\": {{ post.id }}, \"boundary\": 90}"
+            }
+          },
+          "catalogCta": {
+            "on": "click",
+            "selector": ".cta a[data-amp-analytics='blog-cta']",
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_blog_catalog_cta",
+              "yaParams": "{\"postId\": {{ post.id }}, \"slug\": \"{{ post.slug|escapejs }}\"}"
+            }
+          },
+          "relatedClick": {
+            "on": "click",
+            "selector": ".related a[data-amp-analytics='related-link']",
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_blog_related_click",
+              "yaParams": "{\"postId\": {{ post.id }}, \"slug\": \"{{ post.slug|escapejs }}\"}"
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+  {% endif %}
 </body>
 </html>

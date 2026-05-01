@@ -1,9 +1,11 @@
+import re
 import time
 from functools import wraps
 from urllib.parse import urlencode
 
 from django.core.cache import cache
 from django.http import JsonResponse
+from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 
 
@@ -35,6 +37,28 @@ def build_query_string(querydict, allowed_keys):
         return ''
 
     return urlencode(params, doseq=True)
+
+
+def truncate_meta(value, limit=155, ellipsis='...'):
+    """Очистить HTML, нормализовать пробелы и обрезать описание до лимита."""
+    if not value:
+        return ''
+
+    text = strip_tags(str(value))
+    text = re.sub(r'\s+', ' ', text).strip()
+    if not text or len(text) <= limit:
+        return text
+
+    truncated = text[:limit]
+    last_space = truncated.rfind(' ')
+    if last_space > 0:
+        truncated = truncated[:last_space]
+
+    truncated = truncated.rstrip(' .,;:-')
+    if not truncated:
+        truncated = text[:limit].rstrip()
+
+    return f"{truncated}{ellipsis}" if ellipsis else truncated
 
 
 def rate_limit(key_prefix, limit=5, timeout=60):

@@ -20,6 +20,8 @@
     <meta property="og:description" content="{% block og_description %}{{ page_description }}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="{{ site_name|default:'Undersun Estate' }}">
     <meta property="og:locale"
           content="{% if LANGUAGE_CODE == 'ru' %}ru_RU{% elif LANGUAGE_CODE == 'en' %}en_US{% elif LANGUAGE_CODE == 'th' %}th_TH{% endif %}">
     {% if LANGUAGE_CODE == 'ru' %}
@@ -31,6 +33,15 @@
     {% elif LANGUAGE_CODE == 'th' %}
         <meta property="og:locale:alternate" content="ru_RU">
         <meta property="og:locale:alternate" content="en_US">
+    {% endif %}
+
+    <!-- X (Twitter) Cards -->
+    <meta name="twitter:card" content="{% block twitter_card_type %}summary_large_image{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ page_title }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ page_description }}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
+    {% if twitter_username %}
+        <meta name="twitter:site" content="{{ twitter_username }}">
     {% endif %}
 
     <!-- Canonical URL -->
@@ -180,33 +191,153 @@
 <script src="https://analytics.ahrefs.com/analytics.js" data-key="TFchQZ1UuanbAlCbMnbBbg" async></script>
 </head>
 <body class="overflow-x-hidden">
-<!-- Yandex.Metrika counter -->
+<!-- Deferred Yandex.Metrika loading -->
 <script>
     (function() {
-        const initMetrika = function() {
-            if (window.ym) {
+        const COUNTER_ID = 90630603;
+        const COOKIE_NAME = 'bot_challenge';
+        const METRIKA_PING_URL = "{% url 'core:metrika_loaded' %}";
+        const ACTIVE_EVENTS = ['scroll', 'mousemove', 'keydown', 'touchstart'];
+        const FALLBACK_DELAY = 2000;
+        let userInteracted = false;
+        let metrikaInjected = false;
+        let fallbackTimeoutId = null;
+
+        window.METRIKA_COUNTER_ID = COUNTER_ID;
+
+        function hasChallengeCookie() {
+            return document.cookie.split(';').some(cookie => cookie.trim().startsWith(COOKIE_NAME + '='));
+        }
+
+        function notifyBackend() {
+            if (!METRIKA_PING_URL) {
                 return;
+            }
+            try {
+                if (navigator.sendBeacon) {
+                    const data = new Blob([], { type: 'text/plain' });
+                    navigator.sendBeacon(METRIKA_PING_URL, data);
+                    return;
+                }
+            } catch (error) {
+                // fallback to fetch
+            }
+            fetch(METRIKA_PING_URL, { method: 'GET', keepalive: true, credentials: 'same-origin' }).catch(() => {});
+        }
+
+        function injectMetrika() {
+            if (metrikaInjected) {
+                return;
+            }
+            metrikaInjected = true;
+            if (window.console && typeof window.console.info === 'function') {
+                console.info('[BotProtection] Yandex.Metrika initialized');
             }
 
             (function(m,e,t,r,i,k,a){
                 m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
                 m[i].l=1*new Date();
-                for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+                for (let j = 0; j < document.scripts.length; j++) {
+                    if (document.scripts[j].src === r) {
+                        return;
+                    }
+                }
+                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a);
             })(window, document,'script','https://mc.yandex.ru/metrika/tag.js', 'ym');
 
-            ym(90630603, 'init', {webvisor:true, clickmap:true, accurateTrackBounce:true, trackLinks:true});
-        };
-
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(initMetrika, { timeout: 3000 });
-        } else {
-            window.addEventListener('load', initMetrika, { once: true });
+            window.ym(COUNTER_ID, 'init', { webvisor: true, clickmap: true, accurateTrackBounce: true, trackLinks: true });
+            notifyBackend();
         }
+
+        function readyToLoad(requireInteraction = true) {
+            if (metrikaInjected) {
+                return false;
+            }
+            if (!hasChallengeCookie()) {
+                return false;
+            }
+            if (document.visibilityState === 'hidden') {
+                return false;
+            }
+            if (requireInteraction && !userInteracted) {
+                return false;
+            }
+            return true;
+        }
+
+        function tryLoadMetrika(requireInteraction = true) {
+            if (readyToLoad(requireInteraction)) {
+                injectMetrika();
+            }
+        }
+
+        function scheduleFallbackCheck() {
+            if (fallbackTimeoutId || metrikaInjected) {
+                return;
+            }
+            if (!hasChallengeCookie() || userInteracted) {
+                return;
+            }
+            fallbackTimeoutId = setTimeout(() => {
+                fallbackTimeoutId = null;
+                if (!userInteracted) {
+                    tryLoadMetrika(false);
+                }
+            }, FALLBACK_DELAY);
+        }
+
+        function markInteraction() {
+            userInteracted = true;
+            if (fallbackTimeoutId) {
+                clearTimeout(fallbackTimeoutId);
+                fallbackTimeoutId = null;
+            }
+            tryLoadMetrika();
+        }
+
+        ACTIVE_EVENTS.forEach((eventName) => {
+            const options = { once: true };
+            if (eventName === 'scroll' || eventName === 'touchstart') {
+                options.passive = true;
+            }
+            document.addEventListener(eventName, markInteraction, options);
+        });
+
+        document.addEventListener('visibilitychange', () => tryLoadMetrika());
+
+        const cookieCheckInterval = setInterval(() => {
+            if (metrikaInjected) {
+                clearInterval(cookieCheckInterval);
+                return;
+            }
+            if (hasChallengeCookie()) {
+                tryLoadMetrika();
+                scheduleFallbackCheck();
+                if (metrikaInjected) {
+                    clearInterval(cookieCheckInterval);
+                }
+            }
+        }, 500);
+
+        if (hasChallengeCookie()) {
+            scheduleFallbackCheck();
+        }
+
+        window.trackMetrikaGoal = function(goalName, params) {
+            if (!goalName || typeof window.ym !== 'function') {
+                return;
+            }
+            try {
+                window.ym(COUNTER_ID, 'reachGoal', goalName, params || {});
+            } catch (error) {
+                if (window.console && typeof window.console.warn === 'function') {
+                    console.warn('Не удалось отправить цель в Яндекс.Метрику', goalName, error);
+                }
+            }
+        };
     })();
 </script>
-<noscript><div><img src="https://mc.yandex.ru/watch/90630603" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<!-- /Yandex.Metrika counter -->
+<!-- /Deferred Yandex.Metrika -->
 {% include 'includes/layout/header.html' with lang=LANGUAGE_CODE|default:'ru' %}
 
 <!-- CSRF Token for AJAX -->
@@ -382,6 +513,70 @@
 </script>
 {% endif %}
 
+<script>
+  (function() {
+    const TOKEN_KEY = 'bot_challenge_token';
+    const COOKIE_NAME = 'bot_challenge';
+    const storage = window.localStorage;
+
+    function generateToken() {
+      const data = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      return btoa(data).replace(/=/g, '');
+    }
+
+    function setCookie(name, value, days) {
+      const expires = new Date(Date.now() + days * 86400000).toUTCString();
+      document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+    }
+
+    function getCookie(name) {
+      const match = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+      return match ? match[1] : null;
+    }
+
+    function ensureToken() {
+      let token = storage.getItem(TOKEN_KEY);
+      const cookieToken = getCookie(COOKIE_NAME);
+
+      if (cookieToken && token !== cookieToken) {
+        token = cookieToken;
+        storage.setItem(TOKEN_KEY, token);
+      }
+
+      if (!token) {
+        token = generateToken();
+        storage.setItem(TOKEN_KEY, token);
+      }
+
+      if (!cookieToken || cookieToken !== token) {
+        setCookie(COOKIE_NAME, token, 7);
+      }
+
+      injectHiddenInputs(token);
+    }
+
+    function injectHiddenInputs(token) {
+      const forms = document.querySelectorAll('form');
+      forms.forEach(function(form) {
+        if (form.dataset.botChallengeBound === 'true') {
+          return;
+        }
+        form.dataset.botChallengeBound = 'true';
+        let hidden = form.querySelector('input[name="bot_challenge_token"]');
+        if (!hidden) {
+          hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = 'bot_challenge_token';
+          form.appendChild(hidden);
+        }
+        hidden.value = token;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', ensureToken);
+  })();
+</script>
+
 <!-- Success Popup Modal -->
 <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
      style="display: none;">
@@ -424,6 +619,7 @@
 </div>
 
 <!-- Custom JS - Forms Handler (должен быть до main.js) -->
+<script src="{% static 'js/analytics/metrika-goals.js' %}" defer></script>
 <script src="{% static 'js/forms.js' %}" defer></script>
 
 <!-- Custom JS - Main Script -->

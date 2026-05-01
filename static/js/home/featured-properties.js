@@ -102,7 +102,7 @@
             let items = [];
 
             properties.forEach((property, index) => {
-                items.push(createPropertyCard(property));
+                items.push(createPropertyCard(property, index + 1));
 
                 if ((index + 1) % 4 === 0) {
                     items.push(createConsultationCard());
@@ -1099,13 +1099,17 @@
         }
 
         // Create property card
-        function createPropertyCard(property) {
+        function createPropertyCard(property, position) {
             const imageUrl = property.main_image_url || '/static/images/no-image.svg';
             const priceDisplay = property.price_formatted || PRICE_ON_REQUEST;
             const unitSqm = UNIT_SQM;
             const changeCurrencyLabel = CHANGE_CURRENCY;
             const learnMoreLabel = LEARN_MORE;
             const priceOnRequestLabel = PRICE_ON_REQUEST;
+            const propertyTypeKey = property.property_type_key || property.property_type || currentPropertyType || '';
+            const propertySlug = property.slug || '';
+            const cardPosition = position || '';
+            const buildYmAttributes = (linkType) => `data-ym-goal="featured_card_click" data-ym-param-id="${property.id}" data-ym-param-slug="${propertySlug}" data-ym-param-type="${propertyTypeKey}" data-ym-param-position="${cardPosition}" data-ym-param-render="client" data-ym-param-link="${linkType}"`;
 
             // Safely check favorites - use window.isFavorite if available
             let isFav = false;
@@ -1123,7 +1127,7 @@
             return `
             <div class="property-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden w-full h-full">
                 <div class="relative h-48">
-                    <a href="${property.url}" class="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent" aria-label="${property.title}">
+                    <a href="${property.url}" class="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent" aria-label="${property.title}" ${buildYmAttributes('image')}>
                         <img src="${imageUrl}" class="w-full h-full object-cover" alt="${property.title}" loading="lazy">
 
                         <!-- Special Offer Ribbon -->
@@ -1148,7 +1152,7 @@
                 <div class="p-4 flex flex-col justify-between flex-1">
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight line-clamp-2">
-                            <a href="${property.url}" class="hover:text-primary transition-colors">
+                            <a href="${property.url}" class="hover:text-primary transition-colors" ${buildYmAttributes('title')}>
                                 ${property.title.length > 60 ? property.title.substring(0, 60) + '...' : property.title}
                             </a>
                         </h3>
@@ -1222,7 +1226,7 @@
                                 ` : ''}
                             </div>
                             
-                            <a href="${property.url}" class="mb-0 block w-full bg-accent hover:bg-yellow-500 text-gray-900 py-2.5 sm:py-3 px-4 rounded-md font-semibold transition-all duration-300 text-center text-sm">
+                            <a href="${property.url}" class="mb-0 block w-full bg-accent hover:bg-yellow-500 text-gray-900 py-2.5 sm:py-3 px-4 rounded-md font-semibold transition-all duration-300 text-center text-sm" ${buildYmAttributes('cta')}>
                                 ${learnMoreLabel}
                             </a>
                         </div>
