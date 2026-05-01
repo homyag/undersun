@@ -206,6 +206,7 @@ class BotDetectionService:
         action = self._resolve_action(score)
         matched_keys = {match.key for match in matches}
         basic_rules = {'js_challenge_missing', 'single_html_hit', 'no_referer', 'no_referer_combo'}
+        soft_missing_headers_rules = basic_rules | {'missing_headers_critical'}
         only_basic = matched_keys and matched_keys.issubset(basic_rules)
         only_basic_plus_asn = matched_keys and matched_keys.issubset(basic_rules | {'asn_datacenter'})
         if only_basic and action in {'block', 'challenge'}:
@@ -217,7 +218,24 @@ class BotDetectionService:
             and action in {'block', 'challenge'}
         ):
             action = 'monitor'
-        notify_fail2ban = score >= self.thresholds.get('fail2ban', 100)
+        elif (
+            matched_keys
+            and 'missing_headers_critical' in matched_keys
+            and matched_keys.issubset(soft_missing_headers_rules)
+            and action == 'block'
+        ):
+            # Keep the strong signal in score/logs, but force a softer first step
+            # when the request only looks like a header-poor first visit.
+            action = 'challenge'
+
+        notify_fail2ban = (
+            score >= self.thresholds.get('fail2ban', 100)
+            and not (
+                matched_keys
+                and 'missing_headers_critical' in matched_keys
+                and matched_keys.issubset(soft_missing_headers_rules)
+            )
+        )
         return DetectionResult(
             score=score,
             action=action,
