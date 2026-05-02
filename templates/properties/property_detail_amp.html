@@ -54,6 +54,9 @@
     .amp-description p { margin-bottom:1rem; }
   </style>
   {% include 'properties/includes/detail_structured_data_product.html' with final_price=final_price %}
+  {% if property_faq.has_items %}
+  {% include 'properties/includes/detail_structured_data_faq.html' %}
+  {% endif %}
 </head>
 <body>
   <header>
@@ -98,6 +101,46 @@
       </div>
     </section>
 
+    {% if property_seo_section.has_content %}
+    <section class="card">
+      <h2 class="section-title">{{ property_seo_section.heading }}</h2>
+      {% if property_seo_section.intro %}
+        <p class="description">{{ property_seo_section.intro }}</p>
+      {% endif %}
+      {% if property_seo_section.highlights %}
+        <h3 class="section-title" style="font-size:1.05rem; margin-top:20px;">{{ property_seo_section.highlights_heading }}</h3>
+        <ul class="description" style="padding-left:18px; margin:0;">
+          {% for highlight in property_seo_section.highlights %}
+            <li style="margin-bottom:8px;">{{ highlight }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if property_seo_section.suitable_for %}
+        <h3 class="section-title" style="font-size:1.05rem; margin-top:20px;">{{ property_seo_section.suitable_for_heading }}</h3>
+        <p class="description">{{ property_seo_section.suitable_for }}</p>
+      {% endif %}
+      {% if property_seo_section.investment_potential %}
+        <h3 class="section-title" style="font-size:1.05rem; margin-top:20px;">{{ property_seo_section.investment_heading }}</h3>
+        <p class="description">{{ property_seo_section.investment_potential|linebreaksbr }}</p>
+      {% endif %}
+      {% if property_seo_section.supporting_text %}
+        <p class="description">{{ property_seo_section.supporting_text }}</p>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if property_faq.has_items %}
+    <section class="card">
+      <h2 class="section-title">{{ property_faq.heading }}</h2>
+      {% for faq in property_faq.entries %}
+        <div style="padding:16px 0;{% if not forloop.last %} border-bottom:1px solid #e2e8f0;{% endif %}">
+          <h3 class="section-title" style="font-size:1.05rem; margin:0 0 10px;">{{ faq.question }}</h3>
+          <p class="description" style="margin:0;">{{ faq.answer }}</p>
+        </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+
     {% if amenities %}
     <section class="card">
       <h2 class="section-title">{% trans "Удобства" %}</h2>
@@ -126,7 +169,7 @@
         {% for similar in similar_properties|slice:':3' %}
           <article class="similar-card">
             {% if similar.images.first %}
-              <amp-img src="{{ similar.images.first.medium_url|default:similar.images.first.original_url }}" width="360" height="220" layout="responsive" alt="{{ similar.title }}"></amp-img>
+              <amp-img src="{{ similar.images.first.medium_url|default:similar.images.first.original_url }}" width="360" height="220" layout="responsive" alt="{{ similar.localized_location_label|default:similar.title }}"></amp-img>
             {% endif %}
             <h3>{{ similar.title }}</h3>
             <p>{{ similar.localized_location_label|default:similar.location.name|default:similar.district.name }} · {{ similar.price_display }}</p>

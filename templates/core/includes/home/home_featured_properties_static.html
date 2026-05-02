@@ -20,7 +20,7 @@
                            data-ym-param-render="server"
                            data-ym-param-link="image">
                             <img src="{{ property.main_image.medium_url }}"
-                                 alt="{{ property.title }}"
+                                 alt="{{ property.get_card_image_alt }}"
                                  class="w-full h-full object-cover"
                                  loading="lazy"
                                  decoding="async">
@@ -37,11 +37,11 @@
                                data-ym-param-position="{{ forloop.counter }}"
                                data-ym-param-render="server"
                                data-ym-param-link="title">
-                                {{ property.title }}
+                                {{ property.get_display_title }}
                             </a>
                         </h3>
                         {% if property.district %}
-                            <p class="text-sm text-gray-500 mb-1">{{ property.district.name }}</p>
+                            <p class="text-sm text-gray-500 mb-1">{{ property.get_display_location_label }}</p>
                         {% endif %}
                         <p class="text-sm text-gray-500 mb-3">{{ property.property_type.name_display }}</p>
                         <div class="mt-auto">

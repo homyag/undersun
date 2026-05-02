@@ -15,6 +15,12 @@ const PROPERTY_IMAGES = [
     {% endfor %}
 ];
 
+const PROPERTY_IMAGE_ALTS = [
+    {% for image in property.images.all %}
+        "{{ property_image_alt_base|escapejs }} {{ forloop.counter }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
 // Property data for JavaScript
 const PROPERTY_ID = {{ property.id }};
 const PROPERTY_TITLE = '{{ property.title|escapejs }}';

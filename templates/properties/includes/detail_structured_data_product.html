@@ -7,19 +7,65 @@
 {
   "@context": "https://schema.org",
   "@type": "Product",
+  "@id": "{{ request.build_absolute_uri }}#product",
   "name": "{{ property_title_display|default:property.title|escapejs }}",
   "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
+  "url": "{{ request.build_absolute_uri }}",
+  {% if property.legacy_id %}
+  "sku": "{{ property.legacy_id|escapejs }}",
+  {% else %}
+  "sku": "{{ property.slug|escapejs }}",
+  {% endif %}
   {% if property.property_type %}
   "category": "{{ property.property_type.name_display|escapejs }}",
   {% endif %}
+  "brand": {
+    "@type": "Brand",
+    "name": "Undersun Estate"
+  },
   "additionalType": "{{ property.property_type|schema_additional_type }}",
   "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|absolute_url:request|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{{ fallback_property_image_url|absolute_url:request|escape }}"{% endif %}],
+  {% if property.bedrooms or property.bathrooms or property.area_total or property.build_status or property.suitable_for %}
+  "additionalProperty": [
+    {% if property.bedrooms %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Количество спален" %}",
+      "value": {{ property.bedrooms }}
+    }{% if property.bathrooms or property.area_total or property.build_status or property.suitable_for %}, {% endif %}{% endif %}
+    {% if property.bathrooms %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Количество ванных" %}",
+      "value": {{ property.bathrooms }}
+    }{% if property.area_total or property.build_status or property.suitable_for %}, {% endif %}{% endif %}
+    {% if property.area_total %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Площадь" %}",
+      "value": {{ property.area_total|unlocalize }},
+      "unitCode": "MTK"
+    }{% if property.build_status or property.suitable_for %}, {% endif %}{% endif %}
+    {% if property.build_status %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Стадия готовности" %}",
+      "value": "{{ property.get_build_status_display|escapejs }}"
+    }{% if property.suitable_for %}, {% endif %}{% endif %}
+    {% if property.suitable_for %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Подходит для" %}",
+      "value": "{{ property.suitable_for|escapejs }}"
+    }{% endif %}
+  ],
+  {% endif %}
   "offers": {
     "@type": "Offer",
     "priceCurrency": "THB",
     "price": "{{ final_price|default:'0'|unlocalize }}",
     "availability": "{% if property.status == 'available' %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
-    "url": "{{ request.build_absolute_uri }}"
+    "url": "{{ request.build_absolute_uri }}",
+    "seller": {
+      "@type": "RealEstateAgent",
+      "name": "Undersun Estate",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/"
+    }
   }
 }
 </script>

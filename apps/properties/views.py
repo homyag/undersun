@@ -869,6 +869,9 @@ class PropertyDetailView(DetailView):
         )
         context['amp_url'] = amp_url
         context['property_title_display'] = _normalize_whitespace(self.object.title)
+        context['property_image_alt_base'] = self.object.get_seo_image_alt_base(language_code)
+        context['property_seo_section'] = self.object.get_detail_seo_section(language_code)
+        context['property_faq'] = self.object.get_detail_faq_items(language_code)
         context['property_type_nav_label'] = _get_property_type_nav_label(self.object, language_code)
         context['property_catalog_type_url'] = _get_property_catalog_type_url(self.object)
         context.update(_build_property_location_context(self.object, language_code))
@@ -1004,24 +1007,25 @@ def property_detail_amp(request, slug):
 
     canonical_url = request.build_absolute_uri(property_obj.get_absolute_url())
     property_title_display = _normalize_whitespace(property_obj.title)
-    meta_title = f"{property_title_display} – Undersun Estate"
-    raw_description = property_obj.short_description or strip_tags(property_obj.description)
+    seo_data = property_obj.get_seo_data(language_code)
+    meta_title = seo_data.get('title') or f"{property_title_display} – Undersun Estate"
+    raw_description = seo_data.get('description') or property_obj.short_description or strip_tags(property_obj.description)
     meta_description = truncate_meta(raw_description)
 
     gallery_images = []
-    for image in property_obj.images.all():
+    for index, image in enumerate(property_obj.images.all(), start=1):
         image_url = image.medium_url or image.thumbnail_url or image.original_url
         if not image_url:
             continue
         gallery_images.append({
             'url': image_url,
-            'alt': image.alt_text or property_title_display,
+            'alt': property_obj.get_seo_image_alt(image=image, language_code=language_code, position=index),
         })
 
     if not gallery_images:
         gallery_images.append({
             'url': static('images/no-image.svg'),
-            'alt': property_title_display,
+            'alt': property_obj.get_seo_image_alt(language_code=language_code),
         })
 
     amenities = [relation.feature.name for relation in property_obj.features.all() if relation.feature]
@@ -1059,6 +1063,9 @@ def property_detail_amp(request, slug):
         'gallery_images': gallery_images,
         'location_label': location_label,
         'property_title_display': property_title_display,
+        'property_image_alt_base': property_obj.get_seo_image_alt_base(language_code),
+        'property_seo_section': property_obj.get_detail_seo_section(language_code),
+        'property_faq': property_obj.get_detail_faq_items(language_code),
         'stats': stats,
         'amenities': amenities,
         'price_display': property_obj.price_display,

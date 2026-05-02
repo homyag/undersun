@@ -294,17 +294,26 @@ function updateGalleryImage() {
         };
 
         galleryImage.src = PROPERTY_IMAGES[currentImageIndex];
-        document.getElementById('gallery-counter').textContent = `${currentImageIndex + 1} / ${PROPERTY_IMAGES.length}`;
+        galleryImage.alt = PROPERTY_IMAGE_ALTS[currentImageIndex] || PROPERTY_TITLE;
+        const galleryCounter = document.getElementById('gallery-counter');
+        if (galleryCounter) {
+            galleryCounter.textContent = `${currentImageIndex + 1} / ${PROPERTY_IMAGES.length}`;
+        }
 
         // Update thumbnail highlights
         const thumbs = document.querySelectorAll('.gallery-thumb');
         thumbs.forEach((thumb, index) => {
             if (index === currentImageIndex) {
-                thumb.classList.add('border-accent', 'border-4');
-                thumb.classList.remove('border-transparent', 'border-2');
+                thumb.classList.add('border-accent', 'scale-105', 'shadow-lg');
+                thumb.classList.remove('border-transparent');
+                thumb.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center',
+                });
             } else {
-                thumb.classList.remove('border-accent', 'border-4');
-                thumb.classList.add('border-transparent', 'border-2');
+                thumb.classList.remove('border-accent', 'scale-105', 'shadow-lg');
+                thumb.classList.add('border-transparent');
             }
         });
     }

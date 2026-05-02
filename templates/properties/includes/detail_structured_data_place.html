@@ -12,6 +12,9 @@
   "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
   "url": "{{ request.build_absolute_uri }}",
   "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|absolute_url:request|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{{ fallback_property_image_url|absolute_url:request|escape }}"{% endif %}]
+  {% if property.year_built %},
+  "yearBuilt": "{{ property.year_built }}"
+  {% endif %}
   {% if property.address or property.location or property.district %},
   "address": {
     "@type": "PostalAddress",
@@ -31,7 +34,7 @@
   },
   "hasMap": "https://www.google.com/maps?q={{ property.latitude|unlocalize }},{{ property.longitude|unlocalize }}"
   {% endif %}
-  {% if property.bedrooms or property.bathrooms or property.area_total %},
+  {% if property.bedrooms or property.bathrooms or property.area_total or property.build_status %},
   "additionalProperty": [
     {% if property.bedrooms %}{
       "@type": "PropertyValue",
@@ -48,6 +51,40 @@
       "name": "{% trans "Площадь" %}",
       "value": {{ property.area_total|unlocalize }},
       "unitCode": "MTK"
+    }{% if property.build_status %}, {% endif %}{% endif %}
+    {% if property.build_status %}{
+      "@type": "PropertyValue",
+      "name": "{% trans "Стадия готовности" %}",
+      "value": "{{ property.get_build_status_display|escapejs }}"
+    }{% endif %}
+  ]
+  {% endif %}
+  {% if property.pool or property.parking or property.security or property.gym or property.furnished %},
+  "amenityFeature": [
+    {% if property.pool %}{
+      "@type": "LocationFeatureSpecification",
+      "name": "{% trans "Бассейн" %}",
+      "value": true
+    }{% if property.parking or property.security or property.gym or property.furnished %}, {% endif %}{% endif %}
+    {% if property.parking %}{
+      "@type": "LocationFeatureSpecification",
+      "name": "{% trans "Парковка" %}",
+      "value": true
+    }{% if property.security or property.gym or property.furnished %}, {% endif %}{% endif %}
+    {% if property.security %}{
+      "@type": "LocationFeatureSpecification",
+      "name": "{% trans "Охрана" %}",
+      "value": true
+    }{% if property.gym or property.furnished %}, {% endif %}{% endif %}
+    {% if property.gym %}{
+      "@type": "LocationFeatureSpecification",
+      "name": "{% trans "Спортзал" %}",
+      "value": true
+    }{% if property.furnished %}, {% endif %}{% endif %}
+    {% if property.furnished %}{
+      "@type": "LocationFeatureSpecification",
+      "name": "{% trans "С мебелью" %}",
+      "value": true
     }{% endif %}
   ]
   {% endif %}

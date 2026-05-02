@@ -5,7 +5,7 @@
 {% load currency_tags %}
 {% load url_utils %}
 
-{% block title %}{{ property_title_display|default:property.title }} - Undersun Estate{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 
 {% block og_type %}product{% endblock %}
 
@@ -16,6 +16,9 @@
         {% include 'properties/includes/detail_structured_data_product.html' with final_price=property.price_sale_thb|default:property.price_rent_monthly_thb|default:0 %}
     {% endif %}
     {% include 'properties/includes/detail_structured_data_place.html' %}
+    {% if property_faq.has_items %}
+        {% include 'properties/includes/detail_structured_data_faq.html' %}
+    {% endif %}
 {% endblock %}
 
 {% block extra_meta %}
@@ -23,6 +26,21 @@
     {% if amp_url %}
         <link rel="amphtml" href="{{ amp_url }}">
     {% endif %}
+    <style>
+        #gallery-thumbs-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        #gallery-image {
+            max-height: calc(100dvh - 11rem);
+        }
+
+        @media (min-width: 768px) {
+            #gallery-image {
+                max-height: calc(100dvh - 15rem);
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -39,7 +57,7 @@
                             <div class="property-slide-single md:hidden absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
                                  aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
                                  data-slide-single="{{ forloop.counter0 }}">
-                                <img src="{{ image.medium_url }}" alt="{{ property.title }}"
+                                <img src="{{ image.medium_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
                                      class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-lg"
                                      onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
                             </div>
@@ -52,7 +70,7 @@
                                     <div class="flex h-full gap-2">
                                         <!-- First Image -->
                                         <div class="flex-1">
-                                            <img src="{{ image.medium_url }}" alt="{{ property.title }}"
+                                            <img src="{{ image.medium_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
                                                  class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-l-lg"
                                                  onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
                                         </div>
@@ -64,7 +82,7 @@
                                                     {% for next_image in property.images.all %}
                                                         {% if forloop.counter0 == next_index %}
                                                             <img src="{{ next_image.medium_url }}"
-                                                                 alt="{{ property.title }}"
+                                                                 alt="{{ property_image_alt_base }} {{ next_index|add:1 }}"
                                                                  class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
                                                                  onclick="openGallery({{ next_index }})" loading="lazy">
                                                         {% endif %}
@@ -75,7 +93,7 @@
                                             <!-- Show first image if we're at the last image (odd count) -->
                                             <div class="flex-1">
                                                 {% with first_image=property.images.all|first %}
-                                                    <img src="{{ first_image.medium_url }}" alt="{{ property.title }}"
+                                                    <img src="{{ first_image.medium_url }}" alt="{{ property_image_alt_base }} 1"
                                                          class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
                                                          onclick="openGallery(0)" loading="lazy">
                                                 {% endwith %}
@@ -155,7 +173,7 @@
                         {% for image in property.images.all %}
                             <div class="flex-shrink-0 relative cursor-pointer group"
                                  onclick="goToSlidePairByImage({{ forloop.counter0 }})">
-                                <img src="{{ image.thumbnail_url }}" alt="{{ property_title_display|default:property.title }}"
+                                <img src="{{ image.thumbnail_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
                                      class="w-20 h-20 object-cover rounded-lg transition-all duration-300 border-2 {% if forloop.counter0 == 0 or forloop.counter0 == 1 %}border-accent shadow-lg{% else %}border-transparent hover:border-accent/50{% endif %}"
                                      data-thumb="{{ forloop.counter0 }}">
                                 <!-- Special indicator for cycled display -->
@@ -285,10 +303,10 @@
                                             {% if property.location %}{{ property.location.get_absolute_url }}{% else %}{{ property.district.get_absolute_url }}{% endif %}"
                                        class="flex items-center space-x-1 text-primary hover:text-accent font-medium hover:underline transition-colors duration-200">
                                         <span>{% trans "Адрес" %}:</span>
-                                        <span>{{ property.district.name }}</span>
+                                        <span>{{ property_district_label }}</span>
                                         {% if property.location %}
                                             <span class="text-gray-400">,</span>
-                                            <span>{{ property.location.name }}</span>
+                                            <span>{{ property_location_label }}</span>
                                         {% endif %}
                                     </a>
                                                                     <a href="#property-map"
@@ -467,6 +485,57 @@
                         </div>
                     {% endif %}
 
+                    {% if property_seo_section.has_content %}
+                        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                            <div class="prose max-w-none">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-3">{{ property_seo_section.heading }}</h2>
+
+                                {% if property_seo_section.intro %}
+                                    <p class="text-gray-700 leading-relaxed">{{ property_seo_section.intro }}</p>
+                                {% endif %}
+
+                                {% if property_seo_section.highlights %}
+                                    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ property_seo_section.highlights_heading }}</h3>
+                                    <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                        {% for highlight in property_seo_section.highlights %}
+                                            <li>{{ highlight }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+
+                                {% if property_seo_section.suitable_for %}
+                                    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ property_seo_section.suitable_for_heading }}</h3>
+                                    <p class="text-gray-700 leading-relaxed">{{ property_seo_section.suitable_for }}</p>
+                                {% endif %}
+
+                                {% if property_seo_section.investment_potential %}
+                                    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ property_seo_section.investment_heading }}</h3>
+                                    <p class="text-gray-700 leading-relaxed">{{ property_seo_section.investment_potential|linebreaksbr }}</p>
+                                {% endif %}
+
+                                {% if property_seo_section.supporting_text %}
+                                    <p class="text-gray-700 leading-relaxed mt-4">{{ property_seo_section.supporting_text }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if property_faq.has_items %}
+                        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                            <div class="prose max-w-none">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ property_faq.heading }}</h2>
+                                <div class="space-y-4">
+                                    {% for faq in property_faq.entries %}
+                                        <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
+                                            <h3 class="text-base font-semibold text-gray-900 mb-2">{{ faq.question }}</h3>
+                                            <p class="text-gray-700 leading-relaxed mb-0">{{ faq.answer }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
                     <!-- Features & Amenities -->
                     {% if property.features.exists %}
                         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -498,14 +567,14 @@
                             <div class="space-y-2 mb-4">
                                 <div class="flex items-center justify-between text-gray-700">
                                     <span class="font-medium">{% trans "Район" %}</span>
-                                    <span class="flex-1 border-b border-dotted border-gray-300 mx-3"></span>
-                                    <span class="text-primary font-medium">{{ property.district.name }}</span>
+                                        <span class="flex-1 border-b border-dotted border-gray-300 mx-3"></span>
+                                    <span class="text-primary font-medium">{{ property_district_label }}</span>
                                 </div>
                                 {% if property.location %}
                                     <div class="flex items-center justify-between text-gray-700">
                                         <span class="font-medium">{% trans "Локация" %}</span>
                                         <span class="flex-1 border-b border-dotted border-gray-300 mx-3"></span>
-                                        <span class="text-primary font-medium">{{ property.location.name }}</span>
+                                        <span class="text-primary font-medium">{{ property_location_label }}</span>
                                     </div>
                                 {% endif %}
                             </div>
@@ -938,24 +1007,25 @@
 
     <!-- Gallery Modal -->
     <div id="gallery-modal"
-         class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden transition-opacity duration-300 backdrop-blur-sm"
+         class="fixed inset-0 z-50 hidden bg-slate-950/95 transition-opacity duration-300 backdrop-blur-md"
          onclick="closeGallery()" data-gallery-backdrop>
         <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="relative max-w-6xl w-full" data-gallery-content onclick="event.stopPropagation()">
+            <div class="relative max-h-[calc(100dvh-2rem)] w-full max-w-6xl" data-gallery-content onclick="event.stopPropagation()">
                 <!-- Header -->
                 <button onclick="closeGallery()"
-                        class="absolute top-4 right-4 z-30 text-white text-xl bg-black bg-opacity-50 hover:bg-opacity-70 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110">
+                        class="absolute top-4 right-4 z-30 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-lg text-white/90 shadow-xl backdrop-blur-xl transition-all duration-200 hover:scale-105 hover:bg-white/16 hover:text-white md:h-12 md:w-12">
                     <i class="fas fa-times"></i>
                 </button>
 
                 <!-- Main Image -->
-                <div class="relative">
-                    <img id="gallery-image" src="" alt="{{ property.title }}"
-                         class="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl">
+                <div class="relative overflow-hidden rounded-[28px] border border-white/8 bg-white/[0.03] p-3 shadow-[0_28px_90px_rgba(0,0,0,0.45)] md:p-4">
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-24 rounded-t-[28px] bg-gradient-to-b from-white/[0.06] to-transparent"></div>
+                    <img id="gallery-image" src="" alt="{{ property_image_alt_base }}"
+                         class="mx-auto block h-auto max-w-full object-contain rounded-[22px] shadow-2xl">
 
                     <!-- Loading Indicator -->
                     <div id="gallery-loading"
-                         class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-lg hidden">
+                         class="absolute inset-0 hidden items-center justify-center rounded-[22px] bg-slate-950/55">
                         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
                     </div>
                 </div>
@@ -963,45 +1033,34 @@
                 <!-- Navigation Buttons -->
                 <div class="absolute inset-y-0 left-4 hidden md:flex items-center z-20">
                     <button onclick="previousImage()"
-                            class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm">
+                            class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-xl text-white/90 shadow-xl backdrop-blur-xl transition-all duration-200 hover:scale-105 hover:bg-white/16 hover:text-white">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 </div>
 
                 <div class="absolute inset-y-0 right-4 hidden md:flex items-center z-20">
                     <button onclick="nextImage()"
-                            class="text-white text-2xl bg-black bg-opacity-50 hover:bg-opacity-70 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm">
+                            class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-xl text-white/90 shadow-xl backdrop-blur-xl transition-all duration-200 hover:scale-105 hover:bg-white/16 hover:text-white">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
 
-                <!-- Footer Info -->
-                <div class="absolute bottom-4 left-0 right-0 z-20 hidden md:flex justify-between items-center px-6">
-                    <div class="text-white text-sm bg-black bg-opacity-50 px-4 py-2 rounded-full backdrop-blur-sm">
-                        <span id="gallery-counter">1 / 1</span>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button onclick="downloadImage()"
-                                class="text-white text-sm bg-black bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm">
-                            <i class="fas fa-download mr-2"></i>{% trans "Скачать" %}
-                        </button>
-                        <button onclick="shareImage()"
-                                class="text-white text-sm bg-black bg-opacity-50 hover:bg-opacity-70 px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm">
-                            <i class="fas fa-share mr-2"></i>{% trans "Поделиться" %}
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Thumbnail Navigation -->
                 {% if property.images.count > 1 %}
-                    <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20 hidden md:block">
-                        <div class="flex space-x-2 bg-black bg-opacity-50 p-2 rounded-full backdrop-blur-sm overflow-x-auto max-w-xs md:max-w-md">
-                            {% for image in property.images.all %}
-                                <img src="{{ image.thumbnail_url }}" alt="{{ property.title }}"
-                                     class="w-12 h-12 object-cover rounded cursor-pointer border-2 border-transparent hover:border-white transition-all duration-200 gallery-thumb"
-                                     data-index="{{ forloop.counter0 }}"
-                                     onclick="openGallery({{ forloop.counter0 }})">
-                            {% endfor %}
+                    <div class="absolute bottom-4 left-1/2 z-20 hidden w-[min(92vw,760px)] -translate-x-1/2 md:block">
+                        <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-black/50 shadow-2xl backdrop-blur-md">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-black/70 to-transparent"></div>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-black/70 to-transparent"></div>
+                            <div id="gallery-thumbs-track"
+                                 class="flex items-center gap-2 overflow-x-auto px-4 py-3 scroll-smooth"
+                                 style="-ms-overflow-style:none; scrollbar-width:none;">
+                                {% for image in property.images.all %}
+                                    <img src="{{ image.thumbnail_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
+                                         class="gallery-thumb h-14 w-14 shrink-0 cursor-pointer rounded-xl border-2 border-transparent object-cover transition-all duration-200 hover:-translate-y-0.5 hover:border-white/80 hover:shadow-lg"
+                                         data-index="{{ forloop.counter0 }}"
+                                         onclick="openGallery({{ forloop.counter0 }})">
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                 {% endif %}

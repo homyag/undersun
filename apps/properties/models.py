@@ -5,9 +5,10 @@ from io import BytesIO
 from django.db import models
 from django.db.models import Case, When, Value, IntegerField
 from django.contrib.auth.models import User
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override, get_language
 from django.urls import reverse
 from django.core.files.base import ContentFile
+from django.utils.html import strip_tags
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill, ResizeToFit
 from PIL import Image
@@ -15,6 +16,166 @@ from tinymce.models import HTMLField
 
 from apps.core.utils import truncate_meta
 from apps.locations.models import District, Location
+
+
+PROPERTY_TYPE_SEO_LABELS = {
+    'condo': {'ru': 'Кондоминиум', 'en': 'Condo', 'th': 'คอนโดมิเนียม'},
+    'villa': {'ru': 'Вилла', 'en': 'Villa', 'th': 'วิลล่า'},
+    'townhouse': {'ru': 'Таунхаус', 'en': 'Townhouse', 'th': 'ทาวน์เฮาส์'},
+    'land': {'ru': 'Участок', 'en': 'Land plot', 'th': 'ที่ดิน'},
+    'investment': {'ru': 'Инвестиционная недвижимость', 'en': 'Investment property', 'th': 'อสังหาริมทรัพย์เพื่อการลงทุน'},
+    'business': {'ru': 'Готовый бизнес', 'en': 'Business', 'th': 'ธุรกิจพร้อมดำเนินการ'},
+}
+
+PROPERTY_FALLBACK_LABELS = {
+    'ru': {
+        'title_template': '{property_type}{bedroom_suffix} в {location} | {deal_type} | Undersun Estate',
+        'description_template': '{deal_type}: {property_type}{bedroom_suffix} в {location}. {facts}',
+        'keywords_real_estate': 'недвижимость пхукет',
+        'price': 'Цена {price}.',
+        'price_on_request': 'Цена по запросу',
+        'per_month': '/мес',
+        'area': 'Площадь {area} м².',
+        'land_area': 'Участок {area} м².',
+        'bathrooms': '{count} ванных.',
+        'build_status': 'Статус: {status}.',
+        'year_built': 'Год постройки: {year}.',
+        'complex_name': 'Комплекс: {value}.',
+        'beach_distance': 'До пляжа {value} мин.',
+        'airport_distance': 'До аэропорта {value} мин.',
+        'school_distance': 'До школы {value} мин.',
+        'suitable_for': 'Подходит для: {value}.',
+        'furnished': 'С мебелью.',
+        'pool': 'С бассейном.',
+        'parking': 'С парковкой.',
+        'security': 'С охраной.',
+        'gym': 'Со спортзалом.',
+        'investment': 'Инвестиционный потенциал: {value}.',
+        'section_heading': 'Почему стоит рассмотреть этот объект',
+        'section_intro_template': '{property_type}{bedroom_suffix} в {location}.',
+        'highlights_heading': 'Ключевые преимущества',
+        'investment_heading': 'Инвестиционный потенциал',
+        'suitable_for_heading': 'Подходит для',
+        'faq_heading': 'Частые вопросы об объекте',
+        'faq_price_question': 'Сколько стоит этот объект?',
+        'faq_price_answer_sale': 'Стоимость этого объекта составляет {price}.',
+        'faq_price_answer_rent': 'Стоимость аренды этого объекта составляет {price}.',
+        'faq_price_answer_both': 'Объект доступен для продажи и аренды. Актуальная стоимость начинается от {price}.',
+        'faq_price_on_request_answer': 'Стоимость объекта предоставляется по запросу. Мы подготовим актуальную цену и условия сделки после обращения.',
+        'faq_location_question': 'Где находится объект?',
+        'faq_location_answer': 'Объект расположен в {location_sentence}.',
+        'faq_specs_question': 'Какие основные характеристики у объекта?',
+        'faq_specs_answer': 'В объекте предусмотрены {specs}.',
+        'faq_amenities_question': 'Какие удобства есть у объекта?',
+        'faq_amenities_answer': 'В объекте предусмотрены {amenities}.',
+        'faq_suitable_for_question': 'Для кого подойдет этот объект?',
+        'faq_suitable_for_answer': 'Этот объект хорошо подойдет для {value}.',
+        'faq_investment_question': 'Подходит ли объект для инвестиций?',
+        'faq_investment_answer': '{value}',
+        'faq_distances_question': 'Что находится рядом с объектом?',
+        'faq_distances_answer': 'Рядом с объектом: {distances}.',
+        'bedroom_suffix': ' с {count} спальнями',
+        'bedroom_keyword': '{count} спальни',
+    },
+    'en': {
+        'title_template': '{property_type}{bedroom_suffix} in {location} | {deal_type} | Undersun Estate',
+        'description_template': '{deal_type}: {property_type}{bedroom_suffix} in {location}. {facts}',
+        'keywords_real_estate': 'phuket real estate',
+        'price': 'Price {price}.',
+        'price_on_request': 'Price on request',
+        'per_month': '/month',
+        'area': 'Total area {area} m².',
+        'land_area': 'Land plot {area} m².',
+        'bathrooms': '{count} bathrooms.',
+        'build_status': 'Status: {status}.',
+        'year_built': 'Built in {year}.',
+        'complex_name': 'Project: {value}.',
+        'beach_distance': '{value} min to the beach.',
+        'airport_distance': '{value} min to the airport.',
+        'school_distance': '{value} min to schools.',
+        'suitable_for': 'Best suited for: {value}.',
+        'furnished': 'Fully furnished.',
+        'pool': 'Includes a pool.',
+        'parking': 'Parking available.',
+        'security': 'Security on site.',
+        'gym': 'Gym access available.',
+        'investment': 'Investment potential: {value}.',
+        'section_heading': 'Why this property deserves attention',
+        'section_intro_template': '{property_type}{bedroom_suffix} in {location}.',
+        'highlights_heading': 'Key highlights',
+        'investment_heading': 'Investment potential',
+        'suitable_for_heading': 'Best suited for',
+        'faq_heading': 'Frequently asked questions about this property',
+        'faq_price_question': 'What is the price of this property?',
+        'faq_price_answer_sale': 'The asking price for this property is {price}.',
+        'faq_price_answer_rent': 'The monthly rental price for this property is {price}.',
+        'faq_price_answer_both': 'This property is available for sale and rent. Current pricing starts from {price}.',
+        'faq_price_on_request_answer': 'The price is available on request. We can provide the current price and deal terms after inquiry.',
+        'faq_location_question': 'Where is the property located?',
+        'faq_location_answer': 'The property is located in {location_sentence}.',
+        'faq_specs_question': 'What are the main specifications of the property?',
+        'faq_specs_answer': 'The property includes {specs}.',
+        'faq_amenities_question': 'What amenities are available?',
+        'faq_amenities_answer': 'The property offers {amenities}.',
+        'faq_suitable_for_question': 'Who is this property best suited for?',
+        'faq_suitable_for_answer': 'This property is best suited for {value}.',
+        'faq_investment_question': 'Is this property suitable for investment?',
+        'faq_investment_answer': '{value}',
+        'faq_distances_question': 'What is nearby?',
+        'faq_distances_answer': 'Nearby highlights include {distances}.',
+        'bedroom_suffix': ' with {count} bedrooms',
+        'bedroom_keyword': '{count} bedroom',
+    },
+    'th': {
+        'title_template': '{deal_type} {property_type}{bedroom_suffix} ใน {location} | Undersun Estate',
+        'description_template': '{deal_type} {property_type}{bedroom_suffix} ใน {location} {facts}',
+        'keywords_real_estate': 'อสังหาริมทรัพย์ภูเก็ต',
+        'price': 'ราคา {price}',
+        'price_on_request': 'สอบถามราคา',
+        'per_month': '/เดือน',
+        'area': 'พื้นที่ใช้สอย {area} ตร.ม.',
+        'land_area': 'ที่ดิน {area} ตร.ม.',
+        'bathrooms': '{count} ห้องน้ำ',
+        'build_status': 'สถานะ: {status}',
+        'year_built': 'ปีที่สร้าง {year}',
+        'complex_name': 'โครงการ: {value}',
+        'beach_distance': 'ห่างชายหาด {value} นาที',
+        'airport_distance': 'ห่างสนามบิน {value} นาที',
+        'school_distance': 'ห่างโรงเรียน {value} นาที',
+        'suitable_for': 'เหมาะสำหรับ: {value}',
+        'furnished': 'พร้อมเฟอร์นิเจอร์',
+        'pool': 'มีสระว่ายน้ำ',
+        'parking': 'มีที่จอดรถ',
+        'security': 'มีระบบรักษาความปลอดภัย',
+        'gym': 'มีฟิตเนส',
+        'investment': 'ศักยภาพการลงทุน: {value}',
+        'section_heading': 'จุดเด่นของอสังหาริมทรัพย์นี้',
+        'section_intro_template': '{property_type}{bedroom_suffix} ใน {location}',
+        'highlights_heading': 'จุดเด่นสำคัญ',
+        'investment_heading': 'ศักยภาพการลงทุน',
+        'suitable_for_heading': 'เหมาะสำหรับ',
+        'faq_heading': 'คำถามที่พบบ่อยเกี่ยวกับอสังหาริมทรัพย์นี้',
+        'faq_price_question': 'อสังหาริมทรัพย์นี้ราคาเท่าไร?',
+        'faq_price_answer_sale': 'ราคาขายของอสังหาริมทรัพย์นี้คือ {price}',
+        'faq_price_answer_rent': 'ค่าเช่ารายเดือนของอสังหาริมทรัพย์นี้คือ {price}',
+        'faq_price_answer_both': 'อสังหาริมทรัพย์นี้มีทั้งขายและให้เช่า โดยราคาเริ่มต้นที่ {price}',
+        'faq_price_on_request_answer': 'สามารถสอบถามราคาและเงื่อนไขการซื้อขายล่าสุดได้โดยตรง',
+        'faq_location_question': 'อสังหาริมทรัพย์นี้ตั้งอยู่ที่ไหน?',
+        'faq_location_answer': 'อสังหาริมทรัพย์นี้ตั้งอยู่ใน {location_sentence}',
+        'faq_specs_question': 'รายละเอียดหลักของอสังหาริมทรัพย์มีอะไรบ้าง?',
+        'faq_specs_answer': 'อสังหาริมทรัพย์นี้มี {specs}',
+        'faq_amenities_question': 'มีสิ่งอำนวยความสะดวกอะไรบ้าง?',
+        'faq_amenities_answer': 'อสังหาริมทรัพย์นี้มี {amenities}',
+        'faq_suitable_for_question': 'อสังหาริมทรัพย์นี้เหมาะกับใคร?',
+        'faq_suitable_for_answer': 'อสังหาริมทรัพย์นี้เหมาะสำหรับ {value}',
+        'faq_investment_question': 'อสังหาริมทรัพย์นี้เหมาะสำหรับการลงทุนหรือไม่?',
+        'faq_investment_answer': '{value}',
+        'faq_distances_question': 'มีสถานที่สำคัญอะไรอยู่ใกล้เคียง?',
+        'faq_distances_answer': 'สถานที่สำคัญใกล้เคียง ได้แก่ {distances}',
+        'bedroom_suffix': ' {count} ห้องนอน',
+        'bedroom_keyword': '{count} ห้องนอน',
+    },
+}
 
 
 class PropertyType(models.Model):
@@ -436,54 +597,364 @@ class Property(models.Model):
             ).order_by('priority').first()
         
         return template
-    
-    def generate_auto_seo(self, language_code='ru'):
-        """Автоматическая генерация SEO данных как fallback"""
-        # Получаем переведённые значения
-        type_name = self._get_translated_type_name(language_code)
+
+    @staticmethod
+    def _normalize_whitespace(value):
+        if not isinstance(value, str):
+            return value
+        return ' '.join(value.split())
+
+    def _get_seo_texts(self, language_code='ru'):
+        return PROPERTY_FALLBACK_LABELS.get(language_code, PROPERTY_FALLBACK_LABELS['ru'])
+
+    def _get_translated_property_field(self, field_name, language_code='ru', fallback=''):
+        translated_field = field_name if language_code == 'ru' else f'{field_name}_{language_code}'
+        value = getattr(self, translated_field, None)
+        if value in (None, ''):
+            value = getattr(self, field_name, None)
+        if value in (None, ''):
+            value = fallback
+        return self._normalize_whitespace(value)
+
+    def _get_translated_location_name(self, language_code='ru'):
+        if not self.location:
+            return ''
+
+        field_name = 'name' if language_code == 'ru' else f'name_{language_code}'
+        value = getattr(self.location, field_name, None) or self.location.name
+        return self._normalize_whitespace(value)
+
+    def _get_primary_location_label(self, language_code='ru'):
+        location_name = self._get_translated_location_name(language_code)
         district_name = self._get_translated_district_name(language_code)
-        deal_type_name = self._get_translated_deal_type(language_code)
-        price_str = self.price_display
-        
-        # Переведённые статические тексты
-        static_texts = {
+        return location_name or district_name
+
+    def _get_seo_property_type_name(self, language_code='ru'):
+        if not self.property_type:
+            defaults = {'ru': 'Недвижимость', 'en': 'Property', 'th': 'อสังหาริมทรัพย์'}
+            return defaults.get(language_code, defaults['ru'])
+
+        mapped_label = PROPERTY_TYPE_SEO_LABELS.get(self.property_type.name, {}).get(language_code)
+        if mapped_label:
+            return mapped_label
+
+        return self._normalize_whitespace(self._get_translated_type_name(language_code))
+
+    def _get_bedroom_suffix(self, language_code='ru'):
+        if not self.bedrooms:
+            return ''
+
+        count = self.bedrooms
+        if language_code == 'en':
+            noun = 'bedroom' if count == 1 else 'bedrooms'
+            return f' with {count} {noun}'
+        if language_code == 'th':
+            return f' {count} ห้องนอน'
+        if count == 1:
+            return f' с {count} спальней'
+        return f' с {count} спальнями'
+
+    def _get_keyword_bedroom_label(self, language_code='ru'):
+        if not self.bedrooms:
+            return ''
+        count = self.bedrooms
+        if language_code == 'en':
+            noun = 'bedroom' if count == 1 else 'bedrooms'
+            return f'{count} {noun}'
+        if language_code == 'th':
+            return f'{count} ห้องนอน'
+        if count == 1:
+            return f'{count} спальня'
+        return f'{count} спальни'
+
+    @staticmethod
+    def _format_number(value):
+        if value in (None, ''):
+            return ''
+        numeric_value = float(value)
+        if numeric_value.is_integer():
+            return str(int(numeric_value))
+        return f'{numeric_value:.1f}'.rstrip('0').rstrip('.')
+
+    def _get_localized_price_display(self, language_code='ru'):
+        texts = self._get_seo_texts(language_code)
+
+        if self.deal_type == 'sale' and self.price_sale_thb:
+            return f"฿{self.price_sale_thb:,.0f}".replace(',', ',')
+
+        if self.deal_type == 'rent' and self.price_rent_monthly_thb:
+            base_value = f"฿{self.price_rent_monthly_thb:,.0f}".replace(',', ',')
+            return f"{base_value}{texts['per_month']}"
+
+        if self.deal_type == 'both':
+            if self.price_sale_thb:
+                return f"฿{self.price_sale_thb:,.0f}".replace(',', ',')
+            if self.price_rent_monthly_thb:
+                base_value = f"฿{self.price_rent_monthly_thb:,.0f}".replace(',', ',')
+                return f"{base_value}{texts['per_month']}"
+
+        return texts['price_on_request']
+
+    def _get_translated_build_status(self, language_code='ru'):
+        with override(language_code):
+            return self._normalize_whitespace(self.get_build_status_display())
+
+    def _get_translated_bool_labels(self, language_code='ru'):
+        texts = self._get_seo_texts(language_code)
+        highlights = []
+        if self.furnished:
+            highlights.append(texts['furnished'])
+        if self.pool:
+            highlights.append(texts['pool'])
+        if self.parking:
+            highlights.append(texts['parking'])
+        if self.security:
+            highlights.append(texts['security'])
+        if self.gym:
+            highlights.append(texts['gym'])
+        return highlights
+
+    def _get_translated_amenity_names(self, language_code='ru'):
+        labels = {
             'ru': {
-                'in_preposition': 'в',
-                'real_estate': 'недвижимость пхукет',
-                'default_location': 'Пхукет'
+                'furnished': 'мебель',
+                'pool': 'бассейн',
+                'parking': 'парковка',
+                'security': 'охрана',
+                'gym': 'спортзал',
             },
             'en': {
-                'in_preposition': 'in',
-                'real_estate': 'phuket real estate',
-                'default_location': 'Phuket'
+                'furnished': 'furniture',
+                'pool': 'a pool',
+                'parking': 'parking',
+                'security': 'security',
+                'gym': 'a gym',
             },
             'th': {
-                'in_preposition': 'ใน',
-                'real_estate': 'อสังหาริมทรัพย์ภูเก็ต',
-                'default_location': 'ภูเก็ต'
-            }
+                'furnished': 'เฟอร์นิเจอร์',
+                'pool': 'สระว่ายน้ำ',
+                'parking': 'ที่จอดรถ',
+                'security': 'ระบบรักษาความปลอดภัย',
+                'gym': 'ฟิตเนส',
+            },
         }
-        
-        texts = static_texts.get(language_code, static_texts['ru'])
-        in_prep = texts['in_preposition']
-        real_estate = texts['real_estate']
-        
-        # Генерируем SEO данные
-        title = f"{self.title} - {type_name} {in_prep} {district_name}"
-        
-        description_parts = [
-            f"{deal_type_name} {type_name} {in_prep} {district_name}",
-            price_str,
-            self.short_description or ''
+        translated = labels.get(language_code, labels['ru'])
+        amenities = []
+        if self.furnished:
+            amenities.append(translated['furnished'])
+        if self.pool:
+            amenities.append(translated['pool'])
+        if self.parking:
+            amenities.append(translated['parking'])
+        if self.security:
+            amenities.append(translated['security'])
+        if self.gym:
+            amenities.append(translated['gym'])
+        return amenities
+
+    def _join_localized_list(self, values, language_code='ru'):
+        items = [self._normalize_whitespace(value).rstrip('.').strip() for value in values if value]
+        if not items:
+            return ''
+        if len(items) == 1:
+            return items[0]
+
+        conjunctions = {
+            'ru': 'и',
+            'en': 'and',
+            'th': 'และ',
+        }
+        conjunction = conjunctions.get(language_code, conjunctions['ru'])
+        if language_code == 'th':
+            return ' '.join([', '.join(items[:-1]), conjunction, items[-1]])
+        return f"{', '.join(items[:-1])} {conjunction} {items[-1]}"
+
+    def _get_room_phrase(self, room_type, count, language_code='ru'):
+        if not count:
+            return ''
+
+        if room_type == 'bedrooms':
+            if language_code == 'en':
+                noun = 'bedroom' if count == 1 else 'bedrooms'
+                return f'{count} {noun}'
+            if language_code == 'th':
+                return f'{count} ห้องนอน'
+            if count == 1:
+                return '1 спальню'
+            if count % 10 in (2, 3, 4) and count % 100 not in (12, 13, 14):
+                return f'{count} спальни'
+            return f'{count} спален'
+
+        if language_code == 'en':
+            noun = 'bathroom' if count == 1 else 'bathrooms'
+            return f'{count} {noun}'
+        if language_code == 'th':
+            return f'{count} ห้องน้ำ'
+        if count == 1:
+            return '1 ванную комнату'
+        if count % 10 in (2, 3, 4) and count % 100 not in (12, 13, 14):
+            return f'{count} ванные комнаты'
+        return f'{count} ванных комнат'
+
+    def _get_location_sentence(self, language_code='ru'):
+        district_name = self._get_translated_district_name(language_code)
+        location_name = self._get_translated_location_name(language_code)
+
+        if language_code == 'ru':
+            if location_name and location_name != district_name:
+                return f'{location_name}, {district_name} на Пхукете'
+            return f'{district_name} на Пхукете'
+        if language_code == 'en':
+            if location_name and location_name != district_name:
+                return f'{location_name}, {district_name}, Phuket'
+            return f'{district_name}, Phuket'
+        if location_name and location_name != district_name:
+            return f'{location_name}, {district_name}, ภูเก็ต'
+        return f'{district_name}, ภูเก็ต'
+
+    def _get_specs_faq_answer(self, language_code='ru'):
+        spec_parts = []
+        if self.bedrooms:
+            spec_parts.append(self._get_room_phrase('bedrooms', self.bedrooms, language_code))
+        if self.bathrooms:
+            spec_parts.append(self._get_room_phrase('bathrooms', self.bathrooms, language_code))
+        if self.area_total:
+            area_value = self._format_number(self.area_total)
+            if language_code == 'ru':
+                spec_parts.append(f'общую площадь {area_value} м²')
+            elif language_code == 'en':
+                spec_parts.append(f'a total area of {area_value} m²')
+            else:
+                spec_parts.append(f'พื้นที่ใช้สอย {area_value} ตร.ม.')
+        if self.build_status:
+            build_status = self._get_translated_build_status(language_code)
+            if language_code == 'ru':
+                spec_parts.append(f'статус {build_status.lower()}')
+            elif language_code == 'en':
+                spec_parts.append(f'status {build_status.lower()}')
+            else:
+                spec_parts.append(f'สถานะ {build_status}')
+        if self.year_built:
+            if language_code == 'ru':
+                spec_parts.append(f'год постройки {self.year_built}')
+            elif language_code == 'en':
+                spec_parts.append(f'year built {self.year_built}')
+            else:
+                spec_parts.append(f'ปีที่สร้าง {self.year_built}')
+
+        if not spec_parts:
+            return ''
+
+        texts = self._get_seo_texts(language_code)
+        return texts['faq_specs_answer'].format(
+            specs=self._join_localized_list(spec_parts, language_code)
+        )
+
+    def _get_distances_faq_answer(self, language_code='ru'):
+        distance_parts = []
+        texts = self._get_seo_texts(language_code)
+        if self.distance_to_beach:
+            distance_parts.append(texts['beach_distance'].format(value=self.distance_to_beach).rstrip('.'))
+        if self.distance_to_airport:
+            distance_parts.append(texts['airport_distance'].format(value=self.distance_to_airport).rstrip('.'))
+        if self.distance_to_school:
+            distance_parts.append(texts['school_distance'].format(value=self.distance_to_school).rstrip('.'))
+
+        if not distance_parts:
+            return ''
+
+        return texts['faq_distances_answer'].format(
+            distances=self._join_localized_list(distance_parts, language_code)
+        )
+
+    @staticmethod
+    def _to_plain_text(value):
+        if not value:
+            return ''
+        return ' '.join(strip_tags(str(value)).split())
+
+    def _build_seo_fact_sentences(self, language_code='ru'):
+        texts = self._get_seo_texts(language_code)
+        facts = []
+        price_display = self._get_localized_price_display(language_code)
+
+        if self.area_total:
+            facts.append(texts['area'].format(area=self._format_number(self.area_total)))
+        if self.area_land:
+            facts.append(texts['land_area'].format(area=self._format_number(self.area_land)))
+        if self.bathrooms:
+            facts.append(texts['bathrooms'].format(count=self.bathrooms))
+        if self.build_status:
+            facts.append(texts['build_status'].format(status=self._get_translated_build_status(language_code)))
+        if self.year_built:
+            facts.append(texts['year_built'].format(year=self.year_built))
+        if self.complex_name:
+            facts.append(texts['complex_name'].format(
+                value=self._get_translated_property_field('complex_name', language_code)
+            ))
+        if self.distance_to_beach:
+            facts.append(texts['beach_distance'].format(value=self.distance_to_beach))
+        if self.distance_to_airport:
+            facts.append(texts['airport_distance'].format(value=self.distance_to_airport))
+        if self.distance_to_school:
+            facts.append(texts['school_distance'].format(value=self.distance_to_school))
+        facts.extend(self._get_translated_bool_labels(language_code))
+
+        if price_display != texts['price_on_request']:
+            facts.append(texts['price'].format(price=price_display))
+
+        suitable_for = self._get_translated_property_field('suitable_for', language_code)
+        if suitable_for:
+            facts.append(texts['suitable_for'].format(value=suitable_for))
+
+        investment_potential = self._get_translated_property_field('investment_potential', language_code)
+        short_description = self._get_translated_property_field('short_description', language_code)
+        if investment_potential:
+            facts.append(texts['investment'].format(value=investment_potential))
+        elif short_description:
+            facts.append(short_description)
+
+        return [self._normalize_whitespace(fact) for fact in facts if fact]
+
+    def generate_auto_seo(self, language_code='ru'):
+        """Автоматическая генерация SEO данных как fallback"""
+        texts = self._get_seo_texts(language_code)
+        type_name = self._get_seo_property_type_name(language_code)
+        location_name = self._get_primary_location_label(language_code)
+        district_name = self._get_translated_district_name(language_code)
+        deal_type_name = self._get_translated_deal_type(language_code)
+        bedroom_suffix = self._get_bedroom_suffix(language_code)
+
+        title = texts['title_template'].format(
+            property_type=type_name,
+            bedroom_suffix=bedroom_suffix,
+            location=location_name,
+            deal_type=deal_type_name,
+        )
+
+        facts = ' '.join(self._build_seo_fact_sentences(language_code))
+        description = texts['description_template'].format(
+            deal_type=deal_type_name,
+            property_type=type_name.lower() if language_code != 'th' else type_name,
+            bedroom_suffix=bedroom_suffix,
+            location=location_name,
+            facts=facts,
+        ).strip()
+
+        keywords = [
+            type_name,
+            self._get_translated_type_name(language_code),
+            location_name,
+            district_name,
+            texts['keywords_real_estate'],
+            deal_type_name,
+            self._get_keyword_bedroom_label(language_code),
         ]
-        description = '. '.join(filter(None, description_parts)).strip()
-        
-        keywords = f"{type_name}, {district_name}, {real_estate}, {deal_type_name}"
-        
+
         return {
             'title': title,
             'description': description,
-            'keywords': keywords,
+            'keywords': ', '.join(self._normalize_whitespace(value) for value in keywords if value),
         }
     
     def _get_translated_type_name(self, language_code='ru'):
@@ -548,6 +1019,178 @@ class Property(models.Model):
         
         deal_translations = deal_type_translations.get(self.deal_type, {})
         return deal_translations.get(language_code, deal_translations.get('ru', self.deal_type))
+
+    def _get_active_language_code(self):
+        language_code = (get_language() or 'ru').split('-')[0]
+        return language_code if language_code in {'ru', 'en', 'th'} else 'ru'
+
+    def get_detail_seo_section(self, language_code='ru'):
+        texts = self._get_seo_texts(language_code)
+        property_type_name = self._get_seo_property_type_name(language_code)
+        location_name = self._get_primary_location_label(language_code)
+        bedroom_suffix = self._get_bedroom_suffix(language_code)
+        suitable_for = self._get_translated_property_field('suitable_for', language_code)
+        investment_potential = self._get_translated_property_field('investment_potential', language_code)
+        short_description = self._get_translated_property_field('short_description', language_code)
+        highlights = self._build_seo_fact_sentences(language_code)
+
+        intro = texts['section_intro_template'].format(
+            property_type=property_type_name,
+            bedroom_suffix=bedroom_suffix,
+            location=location_name,
+        )
+
+        return {
+            'has_content': any([intro, highlights, suitable_for, investment_potential, short_description]),
+            'heading': texts['section_heading'],
+            'intro': intro,
+            'highlights_heading': texts['highlights_heading'],
+            'highlights': highlights[:8],
+            'suitable_for_heading': texts['suitable_for_heading'],
+            'suitable_for': suitable_for,
+            'investment_heading': texts['investment_heading'],
+            'investment_potential': investment_potential,
+            'supporting_text': short_description if short_description and short_description != investment_potential else '',
+        }
+
+    def get_detail_faq_items(self, language_code='ru'):
+        texts = self._get_seo_texts(language_code)
+        faq_items = []
+
+        price_display = self._get_localized_price_display(language_code)
+        if price_display == texts['price_on_request']:
+            price_answer = texts['faq_price_on_request_answer']
+        elif self.deal_type == 'rent':
+            price_answer = texts['faq_price_answer_rent'].format(price=price_display)
+        elif self.deal_type == 'both':
+            price_answer = texts['faq_price_answer_both'].format(price=price_display)
+        else:
+            price_answer = texts['faq_price_answer_sale'].format(price=price_display)
+        faq_items.append({
+            'question': texts['faq_price_question'],
+            'answer': self._to_plain_text(price_answer),
+        })
+
+        location_answer = texts['faq_location_answer'].format(
+            location_sentence=self._get_location_sentence(language_code)
+        )
+        faq_items.append({
+            'question': texts['faq_location_question'],
+            'answer': self._to_plain_text(location_answer),
+        })
+
+        specs_answer = self._get_specs_faq_answer(language_code)
+        if specs_answer:
+            faq_items.append({
+                'question': texts['faq_specs_question'],
+                'answer': self._to_plain_text(specs_answer),
+            })
+
+        amenities = self._get_translated_amenity_names(language_code)
+        if amenities:
+            faq_items.append({
+                'question': texts['faq_amenities_question'],
+                'answer': self._to_plain_text(
+                    texts['faq_amenities_answer'].format(
+                        amenities=self._join_localized_list(amenities, language_code)
+                    )
+                ),
+            })
+
+        suitable_for = self._get_translated_property_field('suitable_for', language_code)
+        if suitable_for:
+            faq_items.append({
+                'question': texts['faq_suitable_for_question'],
+                'answer': self._to_plain_text(texts['faq_suitable_for_answer'].format(value=suitable_for)),
+            })
+
+        investment_potential = self._get_translated_property_field('investment_potential', language_code)
+        if investment_potential:
+            faq_items.append({
+                'question': texts['faq_investment_question'],
+                'answer': self._to_plain_text(texts['faq_investment_answer'].format(value=investment_potential)),
+            })
+
+        distances_answer = self._get_distances_faq_answer(language_code)
+        if distances_answer:
+            faq_items.append({
+                'question': texts['faq_distances_question'],
+                'answer': self._to_plain_text(distances_answer),
+            })
+
+        return {
+            'has_items': bool(faq_items),
+            'heading': texts['faq_heading'],
+            'entries': faq_items[:6],
+        }
+
+    def get_display_title(self):
+        return self._get_translated_property_field('title', self._get_active_language_code(), self.title)
+
+    def get_display_location_label(self):
+        language_code = self._get_active_language_code()
+        district_label = self._get_translated_district_name(language_code)
+        location_label = self._get_translated_location_name(language_code)
+        if location_label and location_label != district_label:
+            return f'{district_label}, {location_label}'
+        return district_label
+
+    def get_display_district_label(self):
+        return self._get_translated_district_name(self._get_active_language_code())
+
+    def get_card_image_alt(self):
+        language_code = self._get_active_language_code()
+        return self.get_seo_image_alt(
+            image=self.main_image,
+            language_code=language_code,
+            position=1,
+        )
+
+    def get_seo_image_alt_base(self, language_code='ru'):
+        property_type_name = self._get_seo_property_type_name(language_code)
+        location_name = self._get_primary_location_label(language_code)
+        bedroom_suffix = self._get_bedroom_suffix(language_code)
+
+        templates = {
+            'ru': '{property_type}{bedroom_suffix} в {location}',
+            'en': '{property_type}{bedroom_suffix} in {location}',
+            'th': '{property_type}{bedroom_suffix} ใน {location}',
+        }
+
+        template = templates.get(language_code, templates['ru'])
+        return self._normalize_whitespace(template.format(
+            property_type=property_type_name,
+            bedroom_suffix=bedroom_suffix,
+            location=location_name,
+        ))
+
+    def get_seo_image_alt(self, image=None, language_code='ru', position=None):
+        base_alt = self.get_seo_image_alt_base(language_code)
+
+        if image:
+            candidate = getattr(image, 'alt_text', '') or getattr(image, 'title', '')
+            candidate = self._normalize_whitespace(candidate)
+            generic_prefixes = (
+                'image', 'images', 'photo', 'photos', 'picture',
+                'изображение', 'изображения', 'фото', 'картинка',
+            )
+            normalized_candidate = candidate.strip().lower()
+            is_generic = any(
+                normalized_candidate == prefix or normalized_candidate.startswith(f'{prefix} ')
+                for prefix in generic_prefixes
+            )
+            if candidate and not is_generic:
+                return candidate
+
+        if position is None:
+            return base_alt
+
+        suffixes = {
+            'ru': f'фото {position}',
+            'en': f'photo {position}',
+            'th': f'ภาพที่ {position}',
+        }
+        return f"{base_alt} {suffixes.get(language_code, suffixes['ru'])}"
     
     def get_seo_data(self, language_code='ru'):
         """Получить финальные SEO данные с учетом приоритетов"""
