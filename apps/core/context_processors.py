@@ -39,6 +39,16 @@ def site_context(request):
         split_current = urlsplit(current_absolute_url)
         canonical_path = split_current.path or '/'
         canonical_absolute_url = urlunsplit((split_current.scheme, split_current.netloc, canonical_path, '', ''))
+
+    canonical_override = getattr(request, 'canonical_url_override', '')
+    if canonical_override:
+        try:
+            if canonical_override.startswith('http://') or canonical_override.startswith('https://'):
+                canonical_absolute_url = canonical_override
+            else:
+                canonical_absolute_url = request.build_absolute_uri(canonical_override)
+        except Exception:
+            canonical_absolute_url = canonical_override
     language_code = getattr(request, 'LANGUAGE_CODE', 'ru')
     language_urls = {}
     hreflang_items = []
@@ -107,6 +117,7 @@ def site_context(request):
         'hreflang_x_default': hreflang_x_default,
         'language_urls': language_urls,
         'canonical_url': canonical_absolute_url,
+        'meta_robots': getattr(request, 'seo_meta_robots', ''),
         'search_schema_json': search_schema_json,
         'recaptcha_site_key': getattr(settings, 'RECAPTCHA_SITE_KEY', ''),
         'twitter_username': getattr(settings, 'SOCIAL_TWITTER_USERNAME', ''),
@@ -283,8 +294,9 @@ def seo_context(request):
 
     pagination_label = ''
     pagination_suffix = ''
+    pagination_customized = getattr(request, 'seo_pagination_customized', False)
 
-    if should_append and page_number:
+    if should_append and page_number and not pagination_customized:
         label_template = PAGE_LABELS.get(language_code[:2], PAGE_LABELS['en'])
         pagination_label = label_template.format(page=page_number)
         pagination_suffix = f" | {pagination_label}"

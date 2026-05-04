@@ -1,13 +1,109 @@
 {% load i18n %}
 
 <!-- No Results -->
-<div class="no-results text-center py-12">
-    <div class="text-gray-400 text-6xl mb-4">
-        <i class="fas fa-home"></i>
+<div class="no-results py-12">
+    <div class="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-primary/10 bg-white shadow-xl">
+        <div class="border-b border-primary/10 bg-gradient-to-br from-primary/5 via-white to-accent/10 px-8 py-10 text-center">
+            <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <i class="fas fa-compass text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-900">{% trans "Объекты не найдены" %}</h3>
+            <p class="mx-auto mt-3 max-w-2xl text-gray-600">
+                {% trans "По текущим параметрам в каталоге нет подходящих предложений. Попробуйте ослабить фильтры или перейти к соседним подборкам." %}
+            </p>
+
+            <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                <a href="{{ no_results_recovery.reset_section_url }}"
+                   class="inline-flex items-center justify-center rounded-md bg-accent px-6 py-3 text-sm font-bold text-gray-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-yellow-500">
+                    {% trans "Показать все объекты в этом разделе" %}
+                </a>
+                <a href="{{ no_results_recovery.reset_all_url }}"
+                   class="inline-flex items-center justify-center rounded-md border-2 border-primary px-6 py-3 text-sm font-bold text-primary transition-all duration-300 hover:scale-105 hover:bg-primary hover:text-white">
+                    {% trans "Сбросить все фильтры" %}
+                </a>
+            </div>
+        </div>
+
+        <div class="grid gap-8 px-8 py-8 lg:grid-cols-2">
+            <div>
+                <h4 class="text-lg font-semibold text-gray-900">{% trans "Попробовать с более мягкими условиями" %}</h4>
+                {% if no_results_recovery.actions %}
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        {% for action in no_results_recovery.actions %}
+                            <a href="{{ action.url }}"
+                               class="inline-flex items-center justify-center rounded-md bg-accent px-5 py-2.5 text-sm font-bold text-gray-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-yellow-500">
+                                {{ action.label }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="mt-4 text-sm leading-relaxed text-gray-600">
+                        {% trans "Попробуйте убрать часть фильтров, изменить район или посмотреть соседние подборки ниже." %}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div>
+                <h4 class="text-lg font-semibold text-gray-900">{% trans "Соседние подборки" %}</h4>
+                {% if no_results_recovery.district_links or no_results_recovery.type_links or no_results_recovery.deal_links %}
+                    <div class="mt-4 space-y-5">
+                        {% if no_results_recovery.district_links %}
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">{{ no_results_recovery.district_heading }}</p>
+                                <div class="mt-3 flex flex-wrap gap-3">
+                                    {% for link in no_results_recovery.district_links %}
+                                        <a href="{{ link.url }}"
+                                           class="inline-flex items-center gap-2 rounded-md border-2 border-primary px-4 py-2.5 text-sm font-bold text-primary transition-all duration-300 hover:scale-105 hover:bg-primary hover:text-white">
+                                            <span>{{ link.label }}</span>
+                                            {% if link.count %}
+                                                <span class="text-xs opacity-70">{{ link.count }}</span>
+                                            {% endif %}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if no_results_recovery.type_links %}
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">{{ no_results_recovery.type_heading }}</p>
+                                <div class="mt-3 flex flex-wrap gap-3">
+                                    {% for link in no_results_recovery.type_links %}
+                                        <a href="{{ link.url }}"
+                                           class="inline-flex items-center gap-2 rounded-md border-2 border-primary px-4 py-2.5 text-sm font-bold text-primary transition-all duration-300 hover:scale-105 hover:bg-primary hover:text-white">
+                                            <span>{{ link.label }}</span>
+                                            {% if link.count %}
+                                                <span class="text-xs opacity-70">{{ link.count }}</span>
+                                            {% endif %}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if no_results_recovery.deal_links %}
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">{{ no_results_recovery.deal_heading }}</p>
+                                <div class="mt-3 flex flex-wrap gap-3">
+                                    {% for link in no_results_recovery.deal_links %}
+                                        <a href="{{ link.url }}"
+                                           class="inline-flex items-center gap-2 rounded-md border-2 border-primary px-4 py-2.5 text-sm font-bold text-primary transition-all duration-300 hover:scale-105 hover:bg-primary hover:text-white">
+                                            <span>{{ link.label }}</span>
+                                            {% if link.count %}
+                                                <span class="text-xs opacity-70">{{ link.count }}</span>
+                                            {% endif %}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p class="mt-4 text-sm leading-relaxed text-gray-600">
+                        {% trans "Перейдите к более общему разделу каталога и попробуйте выбрать другой тип недвижимости или район." %}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
     </div>
-    <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Объекты не найдены" %}</h3>
-    <p class="text-gray-600 mb-6">{% trans "Попробуйте изменить параметры поиска или сбросить фильтры" %}</p>
-    <a href="{% url 'properties:property_list' %}" class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition-colors">
-        {% trans "Сбросить фильтры" %}
-    </a>
 </div>

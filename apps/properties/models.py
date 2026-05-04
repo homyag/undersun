@@ -105,7 +105,7 @@ PROPERTY_FALLBACK_LABELS = {
         'highlights_heading': 'Key highlights',
         'investment_heading': 'Investment potential',
         'suitable_for_heading': 'Best suited for',
-        'faq_heading': 'Frequently asked questions about this property',
+        'faq_heading': 'Frequently asked questions about property',
         'faq_price_question': 'What is the price of this property?',
         'faq_price_answer_sale': 'The asking price for this property is {price}.',
         'faq_price_answer_rent': 'The monthly rental price for this property is {price}.',

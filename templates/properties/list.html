@@ -4,24 +4,49 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block structured_data %}
+    {% if catalog_breadcrumbs %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "ItemList",
-      "name": "{{ page_title|default:_('Каталог недвижимости')|escapejs }}",
-      "numberOfItems": {{ properties|length|default:0 }},
+      "@type": "BreadcrumbList",
       "itemListElement": [
-        {% for property in properties|slice:":20" %}
+        {% for crumb in catalog_breadcrumbs %}
         {
           "@type": "ListItem",
           "position": {{ forloop.counter }},
-          "url": "{{ property.get_absolute_url|absolute_url:request|escapejs }}",
-          "name": "{{ property.title|escapejs }}"
+          "item": {
+            "@id": "{% if crumb.url %}{{ crumb.url|absolute_url:request|escapejs }}{% else %}{{ request.build_absolute_uri|escapejs }}{% endif %}",
+            "name": "{{ crumb.label|escapejs }}"
+          }
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
       ]
     }
     </script>
+    {% endif %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "{{ page_title|default:_('Каталог недвижимости')|escapejs }}",
+      "numberOfItems": {{ catalog_results_count|default:0 }},
+      "itemListElement": [
+        {% for property in properties|slice:":20" %}
+        {
+          "@type": "ListItem",
+          "position": {{ forloop.counter }},
+          "item": {
+            "@type": "Product",
+            "url": "{{ property.get_absolute_url|absolute_url:request|escapejs }}",
+            "name": "{{ property.get_display_title|default:property.title|escapejs }}"{% if property.main_image %},
+            "image": "{{ property.main_image.medium_url|default:property.main_image.thumbnail_url|absolute_url:request|escapejs }}"{% endif %}
+          }
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }
+    </script>
+    {% include 'properties/includes/list/list_structured_data_faq.html' %}
 {% endblock %}
 
 {% block content %}
@@ -31,6 +56,27 @@
 <!-- Main Content -->
 <section class="py-8 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4">
+        {% if catalog_breadcrumbs %}
+        <nav class="mb-6 overflow-x-auto pb-2 text-sm text-gray-600" aria-label="{% trans 'Хлебные крошки' %}">
+            <div class="flex min-w-max items-center gap-2">
+                {% for crumb in catalog_breadcrumbs %}
+                    {% if not forloop.first %}
+                        <i class="fas fa-chevron-right text-[10px] text-gray-400"></i>
+                    {% endif %}
+                    {% if crumb.url and not forloop.last %}
+                        <a href="{{ crumb.url }}" class="whitespace-nowrap transition-colors duration-200 hover:text-accent">
+                            {{ crumb.label }}
+                        </a>
+                    {% else %}
+                        <span class="whitespace-nowrap {% if forloop.last %}font-medium text-gray-900{% endif %}">
+                            {{ crumb.label }}
+                        </span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </nav>
+        {% endif %}
+
         <!-- Mobile Filters Toggle -->
         {% include 'properties/includes/list/list_mobile_filters_toggle.html' %}
         
@@ -53,8 +99,14 @@
                     <!-- Pagination -->
                     {% include 'properties/includes/list/list_pagination.html' %}
 
+                    {% include 'properties/includes/list/list_generated_seo_section.html' %}
+
                     <!-- SEO Text Block -->
                     {% include 'properties/includes/list/list_seo_block.html' %}
+
+                    {% include 'properties/includes/list/list_faq_block.html' %}
+
+                    {% include 'properties/includes/list/list_internal_links.html' %}
                     
                 {% else %}
                     <!-- No Results -->

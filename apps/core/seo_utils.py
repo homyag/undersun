@@ -205,10 +205,10 @@ def build_property_meta(
 ) -> MetaData:
     """Construct SEO meta for property listing, prioritising type, geography and price."""
 
-    site_name = getattr(settings, 'SITE_NAME', 'Undersun Estate')
-    base_heading = heading or phrases['heading_fallback']
     lang_key = (language_code or 'ru')[:2]
     phrases = PROPERTY_META_STRINGS.get(lang_key, PROPERTY_META_STRINGS['en'])
+    site_name = getattr(settings, 'SITE_NAME', 'Undersun Estate')
+    base_heading = heading or phrases['heading_fallback']
     price_text = _format_price_text(min_price, max_price, currency_code, phrases)
 
     bedrooms_text = _format_bedrooms_text(bedrooms, phrases)

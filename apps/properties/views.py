@@ -1,5 +1,6 @@
 import json
 from decimal import Decimal, InvalidOperation
+from urllib.parse import quote_plus, urlencode
 
 from django.conf import settings
 from django.views.generic import ListView, DetailView, View
@@ -15,13 +16,13 @@ from django.urls import reverse
 from django.utils.translation import gettext, ngettext, override
 from django.utils.html import strip_tags
 from django.templatetags.static import static
-from urllib.parse import quote_plus
 
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string, rate_limit, validate_form_security, truncate_meta
 from apps.core.amp_utils import convert_html_to_amp
 from apps.core.models import SEOContentBlock
 from apps.core.seo_utils import build_property_meta
+from .seo_landings import resolve_landing_signature, build_candidate_slugs
 from .models import Property, PropertyType
 from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
@@ -63,6 +64,114 @@ PROPERTY_TYPE_NAV_LABELS = {
         'ru': 'Готовый бизнес',
         'en': 'Businesses',
         'th': 'ธุรกิจพร้อมดำเนินการ',
+    },
+}
+
+CATALOG_SEO_TEXTS = {
+    'ru': {
+        'subject_fallback': 'Недвижимость',
+        'heading_fallback': 'Каталог недвижимости на Пхукете',
+        'deal_sale': 'на продажу',
+        'deal_rent': 'в аренду',
+        'geo_location': 'в %(location)s, Пхукет',
+        'geo_district': 'в районе %(district)s, Пхукет',
+        'geo_fallback': 'на Пхукете',
+        'intro_heading': 'Что важно по этой подборке',
+        'intro_template': 'В этой подборке собраны %(subject)s%(deal)s%(geo)s. Сейчас доступно %(count)s актуальных предложений.',
+        'budget_sentence': 'По выбранным фильтрам бюджет %(budget)s.',
+        'bedrooms_sentence': 'Фильтр по спальням: %(bedrooms)s.',
+        'stage_sentence': 'В подборке показаны объекты со статусом "%(status)s".',
+        'follow_up': 'Каталог обновляется по мере появления новых предложений, поэтому подборка подходит для первичного отбора и сравнения объектов.',
+        'faq_heading': 'Частые вопросы о подборке',
+        'faq_count_q': 'Сколько объектов представлено на этой странице?',
+        'faq_count_a': 'Сейчас на странице %(count)s актуальных предложений.',
+        'faq_geo_q': 'Какая локация представлена в подборке?',
+        'faq_geo_a': 'Подборка посвящена объектам %(subject)s%(deal)s%(geo)s.',
+        'faq_budget_q': 'Какой бюджет выбран в фильтрах?',
+        'faq_budget_a': 'На странице применен бюджет %(budget)s.',
+        'faq_bedrooms_q': 'Есть ли отбор по количеству спален?',
+        'faq_bedrooms_a': 'Да, сейчас выбраны варианты %(bedrooms)s.',
+        'faq_stage_q': 'Какая стадия строительства выбрана?',
+        'faq_stage_a': 'Сейчас показаны объекты со статусом "%(status)s".',
+        'popular_types_heading': 'Популярные типы недвижимости',
+        'popular_districts_heading': 'Популярные районы',
+        'page_title_template': '{base_title} — страница {page} | Undersun Estate',
+        'page_description_template': 'Страница {page} каталога: {base_heading}. Смотрите дополнительные объекты в этой подборке.',
+        'results_single': '%(count)s предложение',
+        'results_plural': '%(count)s предложений',
+        'bedroom_single': '%(count)s спальней',
+        'bedroom_plural': '%(count)s спальнями',
+        'bedroom_plus': '%(count)s+ спальнями',
+    },
+    'en': {
+        'subject_fallback': 'Property',
+        'heading_fallback': 'Phuket property catalogue',
+        'deal_sale': 'for sale',
+        'deal_rent': 'for rent',
+        'geo_location': 'in %(location)s, Phuket',
+        'geo_district': 'in %(district)s district, Phuket',
+        'geo_fallback': 'in Phuket',
+        'intro_heading': 'About this selection',
+        'intro_template': 'This selection features %(subject)s%(deal)s%(geo)s. There are currently %(count)s active listings available.',
+        'budget_sentence': 'The selected budget range is %(budget)s.',
+        'bedrooms_sentence': 'Bedroom filter: %(bedrooms)s.',
+        'stage_sentence': 'The page currently shows properties with status "%(status)s".',
+        'follow_up': 'The catalogue is updated as new listings appear, so this page works well for shortlisting and comparing properties.',
+        'faq_heading': 'Frequently asked questions about selection',
+        'faq_count_q': 'How many listings are shown on this page?',
+        'faq_count_a': 'There are currently %(count)s active listings on this page.',
+        'faq_geo_q': 'Which area does this selection cover?',
+        'faq_geo_a': 'This page focuses on %(subject)s%(deal)s%(geo)s.',
+        'faq_budget_q': 'What budget is selected in the filters?',
+        'faq_budget_a': 'The current filter uses a budget of %(budget)s.',
+        'faq_bedrooms_q': 'Is there a bedroom filter applied?',
+        'faq_bedrooms_a': 'Yes, the current selection includes %(bedrooms)s.',
+        'faq_stage_q': 'Which construction stage is selected?',
+        'faq_stage_a': 'The current selection shows properties with status "%(status)s".',
+        'popular_types_heading': 'Popular property types',
+        'popular_districts_heading': 'Popular districts',
+        'page_title_template': '{base_title} — page {page} | Undersun Estate',
+        'page_description_template': 'Page {page} of the catalogue: {base_heading}. Browse more listings in this collection.',
+        'results_single': '%(count)s listing',
+        'results_plural': '%(count)s listings',
+        'bedroom_single': '%(count)s bedroom',
+        'bedroom_plural': '%(count)s bedrooms',
+        'bedroom_plus': '%(count)s+ bedrooms',
+    },
+    'th': {
+        'subject_fallback': 'อสังหาริมทรัพย์',
+        'heading_fallback': 'แค็ตตาล็อกอสังหาริมทรัพย์ในภูเก็ต',
+        'deal_sale': 'สำหรับขาย',
+        'deal_rent': 'สำหรับเช่า',
+        'geo_location': 'ใน %(location)s, ภูเก็ต',
+        'geo_district': 'ในเขต %(district)s, ภูเก็ต',
+        'geo_fallback': 'ในภูเก็ต',
+        'intro_heading': 'ภาพรวมของคัดสรรนี้',
+        'intro_template': 'หน้านี้รวบรวม %(subject)s%(deal)s%(geo)s ขณะนี้มีข้อเสนอที่พร้อมอยู่ %(count)s รายการ.',
+        'budget_sentence': 'ช่วงงบประมาณที่เลือกคือ %(budget)s.',
+        'bedrooms_sentence': 'ตัวกรองห้องนอน: %(bedrooms)s.',
+        'stage_sentence': 'หน้านี้แสดงเฉพาะอสังหาริมทรัพย์ที่มีสถานะ "%(status)s".',
+        'follow_up': 'แค็ตตาล็อกจะอัปเดตเมื่อมีข้อเสนอใหม่ เหมาะสำหรับคัดเลือกและเปรียบเทียบอสังหาริมทรัพย์เบื้องต้น.',
+        'faq_heading': 'คำถามที่พบบ่อยเกี่ยวกับคัดสรรนี้',
+        'faq_count_q': 'หน้านี้มีอสังหาริมทรัพย์กี่รายการ?',
+        'faq_count_a': 'ขณะนี้หน้านี้มีข้อเสนอที่พร้อมอยู่ %(count)s รายการ.',
+        'faq_geo_q': 'คัดสรรนี้ครอบคลุมพื้นที่ใด?',
+        'faq_geo_a': 'หน้านี้เน้น %(subject)s%(deal)s%(geo)s.',
+        'faq_budget_q': 'ตัวกรองงบประมาณที่ใช้คืออะไร?',
+        'faq_budget_a': 'ตัวกรองปัจจุบันใช้งบประมาณ %(budget)s.',
+        'faq_bedrooms_q': 'มีการกรองตามจำนวนห้องนอนหรือไม่?',
+        'faq_bedrooms_a': 'มี โดยคัดเลือกเป็น %(bedrooms)s.',
+        'faq_stage_q': 'เลือกสถานะการก่อสร้างแบบใด?',
+        'faq_stage_a': 'ขณะนี้แสดงอสังหาริมทรัพย์ที่มีสถานะ "%(status)s".',
+        'popular_types_heading': 'ประเภทอสังหาริมทรัพย์ยอดนิยม',
+        'popular_districts_heading': 'ย่านยอดนิยม',
+        'page_title_template': '{base_title} — หน้า {page} | Undersun Estate',
+        'page_description_template': 'หน้า {page} ของแค็ตตาล็อก {base_heading} ดูรายการเพิ่มเติมในคัดสรรนี้',
+        'results_single': '%(count)s รายการ',
+        'results_plural': '%(count)s รายการ',
+        'bedroom_single': '%(count)s ห้องนอน',
+        'bedroom_plural': '%(count)s ห้องนอน',
+        'bedroom_plus': '%(count)s+ ห้องนอน',
     },
 }
 
@@ -128,6 +237,10 @@ def _annotate_property_labels(property_obj, language_code='ru'):
     property_obj.localized_location_name = labels['property_location_label']
     property_obj.localized_location_label = labels['property_full_location_label']
     return property_obj
+
+
+def _get_catalog_texts(language_code='ru'):
+    return CATALOG_SEO_TEXTS.get((language_code or 'ru')[:2], CATALOG_SEO_TEXTS['ru'])
 
 
 class DealTypeRedirectMixin:
@@ -197,6 +310,8 @@ class PropertyListView(ListView):
         'map_view',
         'build_status',
     )
+
+    NON_INDEX_FILTER_KEYS = ('min_price', 'max_price', 'bedrooms', 'amenities', 'q', 'build_status')
 
     def get_paginate_by(self, queryset):
         """Отключить пагинацию для карты"""
@@ -361,7 +476,14 @@ class PropertyListView(ListView):
 
         with override(language_code):
             context['seo_heading'] = self.build_seo_heading(context)
+        context['catalog_results_count'] = self._get_results_count(context) or 0
+        context['generated_catalog_seo'] = self.build_generated_catalog_seo(context, language_code)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        context['catalog_faq'] = self.build_catalog_faq(context, language_code)
+        context['catalog_breadcrumbs'] = self.build_catalog_breadcrumbs(context, language_code)
+        context['catalog_internal_links'] = self.build_catalog_internal_links(context, language_code)
+        context['no_results_recovery'] = self.build_no_results_recovery(context, language_code)
+        self.apply_catalog_indexation_strategy(context, language_code)
 
         self.update_page_meta(context, language_code)
 
@@ -378,9 +500,9 @@ class PropertyListView(ListView):
             meta = build_property_meta(
                 heading=context.get('seo_heading'),
                 results_count=self._get_results_count(context),
-                property_type_name=property_type_obj.name_display if property_type_obj else '',
-                district_name=district_obj.name if district_obj else '',
-                location_name=location_obj.name if location_obj else '',
+                property_type_name=self._get_catalog_subject_label(property_type_obj, language_code) if property_type_obj else '',
+                district_name=_get_translated_attr(district_obj, 'name', language_code, '') if district_obj else '',
+                location_name=_get_translated_attr(location_obj, 'name', language_code, '') if location_obj else '',
                 min_price=self._parse_price_value(current_filters.get('min_price')),
                 max_price=self._parse_price_value(current_filters.get('max_price')),
                 currency_code=CurrencyService.get_selected_currency_code(self.request),
@@ -391,10 +513,49 @@ class PropertyListView(ListView):
 
         context['page_title'] = meta.title
         context['page_description'] = meta.description
-        self.request.seo_page_title = meta.title
-        self.request.seo_page_description = meta.description
+
+        page_number = self._get_catalog_page_number()
+        if context.get('catalog_is_indexable') and page_number and page_number > 1:
+            meta = self._refine_paginated_catalog_meta(
+                meta.title,
+                meta.description,
+                context.get('seo_heading') or meta.title,
+                page_number,
+                language_code,
+            )
+            context['page_title'] = meta['title']
+            context['page_description'] = meta['description']
+            self.request.seo_pagination_customized = True
+        else:
+            self.request.seo_pagination_customized = False
+
+        self.request.seo_page_title = context['page_title']
+        self.request.seo_page_description = context['page_description']
 
         return context
+
+    def _refine_paginated_catalog_meta(self, base_title, base_description, base_heading, page_number, language_code='ru'):
+        texts = _get_catalog_texts(language_code)
+        site_name = getattr(settings, 'SITE_NAME', 'Undersun Estate')
+        base_title_without_site = base_title or base_heading or texts['heading_fallback']
+
+        site_suffix = f' | {site_name}'
+        if base_title_without_site.endswith(site_suffix):
+            base_title_without_site = base_title_without_site[:-len(site_suffix)]
+
+        title = texts['page_title_template'].format(
+            base_title=base_title_without_site.strip(),
+            page=page_number,
+        )
+        description = truncate_meta(texts['page_description_template'].format(
+            page=page_number,
+            base_heading=(base_heading or texts['heading_fallback']).strip(),
+        ))
+
+        return {
+            'title': title,
+            'description': description,
+        }
 
     def build_filter_context(self):
         from .models import PropertyFeature
@@ -487,33 +648,52 @@ class PropertyListView(ListView):
 
     def build_seo_heading(self, context):
         """Builds an SEO-friendly H1 based on selected filters."""
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        texts = _get_catalog_texts(language_code)
         deal_type = context.get('deal_type') or self.request.GET.get('deal_type', '')
         property_type_obj = self._get_primary_property_type(context)
+        current_filters = context.get('current_filters', {})
         location_obj, district_obj = self._get_location_and_district()
 
-        subject = property_type_obj.name_display if property_type_obj else gettext('Недвижимость')
-        deal_phrase_map = {
-            'sale': gettext('на продажу'),
-            'rent': gettext('в аренду'),
-        }
-        deal_phrase = deal_phrase_map.get(deal_type, '')
+        subject = self._get_catalog_subject_label(property_type_obj, language_code) or texts['subject_fallback']
+        deal_phrase = self._get_catalog_deal_phrase(deal_type, language_code)
+        bedrooms_phrase = self._get_catalog_bedrooms_phrase(
+            current_filters.get('bedrooms') or [],
+            language_code,
+            with_preposition=(language_code == 'ru'),
+        )
+        geo_phrase = self._get_catalog_geo_phrase(location_obj, district_obj, language_code)
 
-        if location_obj:
-            geo_phrase = gettext('в %(location)s, Пхукет, Таиланд') % {'location': location_obj.name}
-        elif district_obj:
-            geo_phrase = gettext('в районе %(district)s, Пхукет, Таиланд') % {'district': district_obj.name}
+        if language_code == 'en':
+            segments = [subject]
+            if bedrooms_phrase:
+                segments.append(bedrooms_phrase)
+            if deal_phrase:
+                segments.append(deal_phrase)
+            if geo_phrase:
+                segments.append(geo_phrase)
+            heading = ' '.join(seg for seg in segments if seg).strip()
+        elif language_code == 'th':
+            segments = [subject]
+            if bedrooms_phrase:
+                segments.append(bedrooms_phrase)
+            if deal_phrase:
+                segments.append(deal_phrase)
+            if geo_phrase:
+                segments.append(geo_phrase)
+            heading = ' '.join(seg for seg in segments if seg).strip()
         else:
-            geo_phrase = gettext('на Пхукете, Таиланд')
+            segments = [subject]
+            if bedrooms_phrase:
+                segments.append(bedrooms_phrase)
+            if deal_phrase:
+                segments.append(deal_phrase)
+            if geo_phrase:
+                segments.append(geo_phrase)
+            heading = ' '.join(seg for seg in segments if seg).strip()
 
-        segments = [subject]
-        if deal_phrase:
-            segments.append(deal_phrase)
-        if geo_phrase:
-            segments.append(geo_phrase)
-
-        heading = ' '.join(seg for seg in segments if seg).strip()
         if not heading:
-            heading = gettext('Каталог недвижимости на Пхукете, Таиланд')
+            heading = texts['heading_fallback']
 
         return heading
 
@@ -538,6 +718,9 @@ class PropertyListView(ListView):
 
     def get_catalog_seo_block(self, context):
         """Возвращает SEO-блок для каталога с учётом языка и контекста."""
+        if not self.is_base_indexable_filter_page(context):
+            return None
+
         language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
         candidate_slugs = self.get_seo_block_candidates(context)
         if not candidate_slugs:
@@ -596,33 +779,743 @@ class PropertyListView(ListView):
         choices = dict(Property.BUILD_STATUS_CHOICES)
         return choices.get(value, '')
 
-    def get_seo_block_candidates(self, context):
-        """Список возможных slug для SEO-блоков по убыванию специфичности."""
-        candidates = []
-        deal_type = context.get('deal_type') or self.request.GET.get('deal_type') or ''
-        property_type_obj = self._get_primary_property_type(context)
+    def _get_catalog_deal_label(self, deal_type, language_code='ru'):
+        labels = {
+            'sale': {'ru': 'Продажа', 'en': 'Sale', 'th': 'ขาย'},
+            'rent': {'ru': 'Аренда', 'en': 'Rent', 'th': 'เช่า'},
+        }
+        return labels.get(deal_type, {}).get(language_code, '')
 
-        if property_type_obj:
-            type_slug = property_type_obj.name
-            if deal_type in {'sale', 'rent'}:
-                candidates.append(f'properties_type_{type_slug}_{deal_type}')
-            candidates.append(f'properties_type_{type_slug}')
+    def _build_catalog_url(self, base_url, params=None):
+        if not params:
+            return base_url
+        normalized = {key: value for key, value in params.items() if value not in (None, '', [], ())}
+        if not normalized:
+            return base_url
+        return f"{base_url}?{urlencode(normalized, doseq=True)}"
+
+    def build_catalog_breadcrumbs(self, context, language_code='ru'):
+        breadcrumbs = [{
+            'label': gettext('Главная'),
+            'url': reverse('core:home'),
+        }]
+
+        current_filters = context.get('current_filters', {})
+        deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
+
+        breadcrumbs.append({
+            'label': gettext('Недвижимость'),
+            'url': reverse('properties:property_list'),
+        })
+
+        current_base_url = reverse('properties:property_list')
 
         if deal_type in {'sale', 'rent'}:
-            candidates.append(f'properties_{deal_type}')
+            current_base_url = reverse(f'properties:property_{deal_type}')
+            breadcrumbs.append({
+                'label': self._get_catalog_deal_label(deal_type, language_code),
+                'url': current_base_url,
+            })
 
-        candidates.append('properties_catalog')
+        if property_type_obj:
+            current_base_url = reverse('properties:property_by_type', args=[property_type_obj.name])
+            query_params = {}
+            if deal_type in {'sale', 'rent'}:
+                query_params['deal_type'] = deal_type
+            breadcrumbs.append({
+                'label': self._get_catalog_subject_label(property_type_obj, language_code),
+                'url': self._build_catalog_url(current_base_url, query_params),
+            })
 
-        # Удаляем дубликаты, сохраняя порядок
-        seen = set()
-        deduped = []
-        for slug in candidates:
-            if slug in seen:
+        if district_obj:
+            district_params = {'district': district_obj.slug}
+            if location_obj:
+                district_params['location'] = ''
+            breadcrumbs.append({
+                'label': _get_translated_attr(district_obj, 'name', language_code, district_obj.name),
+                'url': self._build_catalog_url(current_base_url, district_params),
+            })
+
+        if location_obj:
+            breadcrumbs.append({
+                'label': _get_translated_attr(location_obj, 'name', language_code, location_obj.name),
+                'url': self._build_catalog_url(
+                    current_base_url,
+                    {'district': location_obj.district.slug, 'location': location_obj.slug},
+                ),
+            })
+
+        breadcrumbs.append({
+            'label': context.get('seo_heading') or _get_catalog_texts(language_code)['heading_fallback'],
+            'url': '',
+        })
+
+        return breadcrumbs
+
+    def is_indexable_filter_page(self, context):
+        if not self.is_base_indexable_filter_page(context):
+            return False
+
+        page_number = self._get_catalog_page_number()
+        if page_number is None:
+            return False
+
+        return True
+
+    def is_base_indexable_filter_page(self, context):
+        current_filters = context.get('current_filters', {})
+        results_count = context.get('catalog_results_count') or 0
+        if results_count <= 0:
+            return False
+
+        if self.request.GET.get('map_view') == 'true':
+            return False
+
+        if self.request.GET.get('sort') and self.request.GET.get('sort') != '-created_at':
+            return False
+
+        for key in self.NON_INDEX_FILTER_KEYS:
+            value = current_filters.get(key)
+            if isinstance(value, list):
+                if any(item not in (None, '') for item in value):
+                    return False
+            elif value not in (None, ''):
+                return False
+
+        property_types = [value for value in current_filters.get('property_type', []) if value]
+        if len(property_types) > 1:
+            return False
+
+        return self.get_catalog_landing_signature(context) is not None
+
+    def _get_catalog_page_number(self):
+        page_param = self.request.GET.get('page')
+        if not page_param:
+            return 1
+        try:
+            page_number = int(page_param)
+        except (TypeError, ValueError):
+            return None
+        return page_number if page_number >= 1 else None
+
+    def build_catalog_canonical_url(self, context, *, include_pagination=False):
+        current_filters = context.get('current_filters', {})
+        deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
+
+        if property_type_obj:
+            base_url = reverse('properties:property_by_type', args=[property_type_obj.name])
+            params = {}
+            if deal_type in {'sale', 'rent'}:
+                params['deal_type'] = deal_type
+        elif deal_type in {'sale', 'rent'}:
+            base_url = reverse(f'properties:property_{deal_type}')
+            params = {}
+        else:
+            base_url = reverse('properties:property_list')
+            params = {}
+
+        if district_obj:
+            params['district'] = district_obj.slug
+        if location_obj:
+            params['district'] = location_obj.district.slug
+            params['location'] = location_obj.slug
+
+        page_number = self._get_catalog_page_number()
+        if include_pagination and page_number and page_number > 1:
+            params['page'] = page_number
+
+        return self.request.build_absolute_uri(self._build_catalog_url(base_url, params))
+
+    def apply_catalog_indexation_strategy(self, context, language_code='ru'):
+        base_indexable = self.is_base_indexable_filter_page(context)
+        is_indexable = self.is_indexable_filter_page(context)
+        canonical_url = self.build_catalog_canonical_url(
+            context,
+            include_pagination=base_indexable,
+        )
+
+        context['meta_robots'] = '' if is_indexable else 'noindex, follow'
+        context['canonical_url'] = canonical_url
+        context['catalog_is_indexable'] = is_indexable
+        context['catalog_base_indexable'] = base_indexable
+
+        self.request.canonical_url_override = canonical_url
+        self.request.seo_meta_robots = context['meta_robots']
+
+        return context
+
+    def get_catalog_landing_signature(self, context):
+        current_filters = context.get('current_filters', {})
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
+        deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+
+        property_type_slug = property_type_obj.name if property_type_obj else ''
+        district_slug = district_obj.slug if district_obj else ''
+        location_slug = location_obj.slug if location_obj else ''
+
+        return resolve_landing_signature(
+            deal_type=deal_type,
+            property_type=property_type_slug,
+            district=district_slug,
+            location=location_slug,
+        )
+
+    def _get_catalog_subject_label(self, property_type_obj, language_code='ru'):
+        if not property_type_obj:
+            return _get_catalog_texts(language_code)['subject_fallback']
+        mapped_label = PROPERTY_TYPE_NAV_LABELS.get(property_type_obj.name, {}).get(language_code)
+        if mapped_label:
+            return mapped_label
+        return _get_translated_attr(property_type_obj, 'name_display', language_code, property_type_obj.name_display)
+
+    def _get_catalog_deal_phrase(self, deal_type, language_code='ru'):
+        texts = _get_catalog_texts(language_code)
+        if deal_type == 'sale':
+            return texts['deal_sale']
+        if deal_type == 'rent':
+            return texts['deal_rent']
+        return ''
+
+    def _get_catalog_geo_phrase(self, location_obj, district_obj, language_code='ru'):
+        texts = _get_catalog_texts(language_code)
+        if location_obj:
+            return texts['geo_location'] % {'location': _get_translated_attr(location_obj, 'name', language_code, location_obj.name)}
+        if district_obj:
+            return texts['geo_district'] % {'district': _get_translated_attr(district_obj, 'name', language_code, district_obj.name)}
+        return texts['geo_fallback']
+
+    def _format_catalog_budget_text(self, min_price, max_price, currency_code, language_code='ru'):
+        texts = _get_catalog_texts(language_code)
+        formatted_min = CurrencyService.format_price(min_price, currency_code) if min_price else None
+        formatted_max = CurrencyService.format_price(max_price, currency_code) if max_price else None
+        if formatted_min and formatted_max:
+            return f'{formatted_min} - {formatted_max}'
+        return formatted_min or formatted_max or ''
+
+    def _get_catalog_bedrooms_phrase(self, bedrooms, language_code='ru', *, with_preposition=False):
+        if not bedrooms or len(bedrooms) != 1:
+            return ''
+
+        value = bedrooms[0]
+        texts = _get_catalog_texts(language_code)
+        if value == '4+':
+            base_value = texts['bedroom_plus'] % {'count': 4}
+            if language_code == 'ru' and with_preposition:
+                return f'с {base_value}'
+            return base_value
+
+        try:
+            count = int(value)
+        except (TypeError, ValueError):
+            return ''
+
+        if language_code == 'en':
+            key = 'bedroom_single' if count == 1 else 'bedroom_plural'
+            return texts[key] % {'count': count}
+        if language_code == 'th':
+            return texts['bedroom_single'] % {'count': count}
+        key = 'bedroom_single' if count == 1 else 'bedroom_plural'
+        base_value = texts[key] % {'count': count}
+        if with_preposition:
+            return f'с {base_value}'
+        return base_value
+
+    def build_generated_catalog_seo(self, context, language_code='ru'):
+        texts = _get_catalog_texts(language_code)
+        current_filters = context.get('current_filters', {})
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
+        results_count = context.get('catalog_results_count') or 0
+
+        if not self.is_base_indexable_filter_page(context):
+            return {
+                'has_content': False,
+                'heading': texts['intro_heading'],
+                'intro': '',
+                'highlights': [],
+                'follow_up': '',
+            }
+
+        subject = self._get_catalog_subject_label(property_type_obj, language_code)
+        deal_phrase = self._get_catalog_deal_phrase(current_filters.get('deal_type') or context.get('deal_type'), language_code)
+        geo_phrase = self._get_catalog_geo_phrase(location_obj, district_obj, language_code)
+        bedrooms_phrase = self._get_catalog_bedrooms_phrase(current_filters.get('bedrooms') or [], language_code)
+        build_status_label = self._resolve_build_status_label(current_filters.get('build_status'))
+        budget_text = self._format_catalog_budget_text(
+            self._parse_price_value(current_filters.get('min_price')),
+            self._parse_price_value(current_filters.get('max_price')),
+            CurrencyService.get_selected_currency_code(self.request),
+            language_code,
+        )
+
+        intro = texts['intro_template'] % {
+            'subject': subject,
+            'deal': f' {deal_phrase}' if deal_phrase else '',
+            'geo': f' {geo_phrase}' if geo_phrase else '',
+            'count': results_count,
+        }
+
+        highlights = []
+        if budget_text:
+            highlights.append(texts['budget_sentence'] % {'budget': budget_text})
+        if bedrooms_phrase:
+            highlights.append(texts['bedrooms_sentence'] % {'bedrooms': bedrooms_phrase})
+        if build_status_label:
+            highlights.append(texts['stage_sentence'] % {'status': build_status_label})
+
+        return {
+            'has_content': bool(results_count > 0 and (intro or highlights)),
+            'heading': texts['intro_heading'],
+            'intro': intro,
+            'highlights': highlights,
+            'follow_up': texts['follow_up'],
+        }
+
+    def build_catalog_faq(self, context, language_code='ru'):
+        texts = _get_catalog_texts(language_code)
+        current_filters = context.get('current_filters', {})
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
+        subject = self._get_catalog_subject_label(property_type_obj, language_code)
+        deal_phrase = self._get_catalog_deal_phrase(current_filters.get('deal_type') or context.get('deal_type'), language_code)
+        geo_phrase = self._get_catalog_geo_phrase(location_obj, district_obj, language_code)
+        results_count = context.get('catalog_results_count') or 0
+        budget_text = self._format_catalog_budget_text(
+            self._parse_price_value(current_filters.get('min_price')),
+            self._parse_price_value(current_filters.get('max_price')),
+            CurrencyService.get_selected_currency_code(self.request),
+            language_code,
+        )
+        bedrooms_phrase = self._get_catalog_bedrooms_phrase(current_filters.get('bedrooms') or [], language_code)
+        build_status_label = self._resolve_build_status_label(current_filters.get('build_status'))
+
+        if results_count <= 0 or not self.is_base_indexable_filter_page(context):
+            return {
+                'has_items': False,
+                'heading': texts['faq_heading'],
+                'entries': [],
+            }
+
+        entries = [{
+            'question': texts['faq_count_q'],
+            'answer': texts['faq_count_a'] % {'count': results_count},
+        }]
+
+        entries.append({
+            'question': texts['faq_geo_q'],
+            'answer': texts['faq_geo_a'] % {
+                'subject': subject,
+                'deal': f' {deal_phrase}' if deal_phrase else '',
+                'geo': f' {geo_phrase}' if geo_phrase else '',
+            },
+        })
+
+        if budget_text:
+            entries.append({
+                'question': texts['faq_budget_q'],
+                'answer': texts['faq_budget_a'] % {'budget': budget_text},
+            })
+
+        if bedrooms_phrase:
+            entries.append({
+                'question': texts['faq_bedrooms_q'],
+                'answer': texts['faq_bedrooms_a'] % {'bedrooms': bedrooms_phrase},
+            })
+
+        if build_status_label:
+            entries.append({
+                'question': texts['faq_stage_q'],
+                'answer': texts['faq_stage_a'] % {'status': build_status_label},
+            })
+
+        return {
+            'has_items': bool(entries),
+            'heading': texts['faq_heading'],
+            'entries': entries[:5],
+        }
+
+    def _get_catalog_link_base(self, context, deal_type=None, property_type_obj=None):
+        resolved_deal_type = deal_type if deal_type is not None else (context.get('deal_type') or context.get('current_filters', {}).get('deal_type') or '')
+        resolved_property_type = property_type_obj if property_type_obj is not None else self._get_primary_property_type(context)
+
+        if resolved_property_type:
+            base_url = reverse('properties:property_by_type', args=[resolved_property_type.name])
+            params = {}
+            if resolved_deal_type in {'sale', 'rent'}:
+                params['deal_type'] = resolved_deal_type
+            return base_url, params
+
+        if resolved_deal_type in {'sale', 'rent'}:
+            return reverse(f'properties:property_{resolved_deal_type}'), {}
+
+        return reverse('properties:property_list'), {}
+
+    def _build_catalog_suggestion_queryset(self, *, deal_type='', property_type_obj=None, district_obj=None, location_obj=None):
+        queryset = Property.objects.filter(
+            is_active=True,
+            status='available',
+        )
+
+        if deal_type in {'sale', 'rent'}:
+            queryset = queryset.filter(deal_type__in=[deal_type, 'both'])
+
+        if property_type_obj:
+            queryset = queryset.filter(property_type=property_type_obj)
+
+        if district_obj:
+            queryset = queryset.filter(district=district_obj)
+
+        if location_obj:
+            queryset = queryset.filter(location=location_obj)
+
+        return queryset
+
+    def _build_related_deal_link_label(self, property_type_obj, deal_type, language_code='ru'):
+        if deal_type == 'all':
+            return {
+                'ru': gettext('Все объекты'),
+                'en': 'All properties',
+                'th': 'อสังหาริมทรัพย์ทั้งหมด',
+            }.get(language_code, gettext('Все объекты'))
+
+        subject = self._get_catalog_subject_label(property_type_obj, language_code) if property_type_obj else ''
+        if not subject:
+            return self._get_catalog_deal_label(deal_type, language_code)
+
+        deal_phrase = self._get_catalog_deal_phrase(deal_type, language_code)
+        if language_code == 'en':
+            return f'{subject} {deal_phrase}'.strip()
+        if language_code == 'th':
+            return f'{subject} {deal_phrase}'.strip()
+        return f'{subject} {deal_phrase}'.strip()
+
+    def _build_no_results_district_links(self, context, language_code='ru'):
+        current_filters = context.get('current_filters', {})
+        property_type_obj = self._get_primary_property_type(context)
+        selected_deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+        location_obj, district_obj = self._get_location_and_district()
+        queryset = self._build_catalog_suggestion_queryset(
+            deal_type=selected_deal_type,
+            property_type_obj=property_type_obj,
+        )
+
+        rows = (
+            queryset.values('district__slug')
+            .annotate(property_count=Count('id'))
+            .order_by('-property_count', 'district__slug')
+        )
+
+        district_map = District.objects.in_bulk(
+            [row['district__slug'] for row in rows if row.get('district__slug')],
+            field_name='slug',
+        )
+        links = []
+        for row in rows:
+            slug = row.get('district__slug')
+            if not slug:
                 continue
-            seen.add(slug)
-            deduped.append(slug)
+            if district_obj and slug == district_obj.slug:
+                continue
+            item = district_map.get(slug)
+            if not item:
+                continue
 
-        return deduped
+            base_url, params = self._get_catalog_link_base(
+                context,
+                deal_type=selected_deal_type,
+                property_type_obj=property_type_obj,
+            )
+            params['district'] = slug
+            links.append({
+                'label': _get_translated_attr(item, 'name', language_code, item.name),
+                'url': self._build_catalog_url(base_url, params),
+                'count': row['property_count'],
+            })
+
+        return links[:4]
+
+    def _build_no_results_type_links(self, context, language_code='ru'):
+        current_filters = context.get('current_filters', {})
+        property_type_obj = self._get_primary_property_type(context)
+        selected_deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+        location_obj, district_obj = self._get_location_and_district()
+        queryset = self._build_catalog_suggestion_queryset(
+            deal_type=selected_deal_type,
+            district_obj=district_obj,
+            location_obj=location_obj,
+        )
+
+        rows = (
+            queryset.values('property_type__name')
+            .annotate(property_count=Count('id'))
+            .order_by('-property_count', 'property_type__name')
+        )
+
+        property_type_map = PropertyType.objects.in_bulk(
+            [row['property_type__name'] for row in rows if row.get('property_type__name')],
+            field_name='name',
+        )
+        links = []
+        for row in rows:
+            slug = row.get('property_type__name')
+            if not slug:
+                continue
+            if property_type_obj and slug == property_type_obj.name:
+                continue
+            item = property_type_map.get(slug)
+            if not item:
+                continue
+
+            base_url, params = self._get_catalog_link_base(
+                context,
+                deal_type=selected_deal_type,
+                property_type_obj=item,
+            )
+            if district_obj:
+                params['district'] = district_obj.slug
+            if location_obj:
+                params['district'] = location_obj.district.slug
+                params['location'] = location_obj.slug
+            links.append({
+                'label': self._get_catalog_subject_label(item, language_code),
+                'url': self._build_catalog_url(base_url, params),
+                'count': row['property_count'],
+            })
+
+        return links[:4]
+
+    def _build_no_results_deal_links(self, context, language_code='ru'):
+        current_filters = context.get('current_filters', {})
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
+        selected_deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+        options = ['sale', 'rent', 'all']
+        links = []
+
+        for option in options:
+            if option == selected_deal_type:
+                continue
+
+            option_deal_type = '' if option == 'all' else option
+            queryset = self._build_catalog_suggestion_queryset(
+                deal_type=option_deal_type,
+                property_type_obj=property_type_obj,
+                district_obj=district_obj,
+                location_obj=location_obj,
+            )
+            count = queryset.count()
+            if count <= 0:
+                continue
+
+            base_url, params = self._get_catalog_link_base(
+                context,
+                deal_type=option_deal_type,
+                property_type_obj=property_type_obj,
+            )
+            if district_obj:
+                params['district'] = district_obj.slug
+            if location_obj:
+                params['district'] = location_obj.district.slug
+                params['location'] = location_obj.slug
+
+            links.append({
+                'label': self._build_related_deal_link_label(property_type_obj, option, language_code),
+                'url': self._build_catalog_url(base_url, params),
+                'count': count,
+            })
+
+        return links[:3]
+
+    def build_catalog_internal_links(self, context, language_code='ru'):
+        current_filters = context.get('current_filters', {})
+        property_type_obj = self._get_primary_property_type(context)
+        location_obj, district_obj = self._get_location_and_district()
+        selected_deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+
+        type_links = []
+        base_query = Q(property__is_active=True, property__status='available')
+        property_types = (
+            PropertyType.objects
+            .annotate(property_count=Count('property', filter=base_query))
+            .filter(property_count__gt=0)
+            .order_by('-property_count', 'name_display')[:4]
+        )
+
+        for item in property_types:
+            if property_type_obj and item.id == property_type_obj.id:
+                continue
+            base_url, params = self._get_catalog_link_base(context, deal_type=selected_deal_type, property_type_obj=item)
+            if district_obj:
+                params['district'] = district_obj.slug
+            if location_obj:
+                params['district'] = location_obj.district.slug
+                params['location'] = location_obj.slug
+            type_links.append({
+                'label': self._get_catalog_subject_label(item, language_code),
+                'url': self._build_catalog_url(base_url, params),
+                'count': item.property_count,
+            })
+
+        district_links = []
+        district_queryset = (
+            District.objects
+            .annotate(property_count=Count('property', filter=base_query))
+            .filter(property_count__gt=0)
+            .order_by('-property_count', 'name')[:6]
+        )
+        base_url, base_params = self._get_catalog_link_base(context, deal_type=selected_deal_type, property_type_obj=property_type_obj)
+        for item in district_queryset:
+            if district_obj and item.id == district_obj.id:
+                continue
+            params = dict(base_params)
+            params['district'] = item.slug
+            district_links.append({
+                'label': _get_translated_attr(item, 'name', language_code, item.name),
+                'url': self._build_catalog_url(base_url, params),
+                'count': item.property_count,
+            })
+
+        return {
+            'has_content': bool(type_links or district_links),
+            'type_heading': _get_catalog_texts(language_code)['popular_types_heading'],
+            'district_heading': _get_catalog_texts(language_code)['popular_districts_heading'],
+            'type_links': type_links[:4],
+            'district_links': district_links[:6],
+        }
+
+    def build_no_results_recovery(self, context, language_code='ru'):
+        current_filters = context.get('current_filters', {})
+        base_url, base_params = self._get_catalog_link_base(
+            context,
+            deal_type=context.get('deal_type') or current_filters.get('deal_type') or '',
+            property_type_obj=self._get_primary_property_type(context),
+        )
+
+        def make_url(params):
+            return self._build_catalog_url(base_url, params)
+
+        actions = []
+        if current_filters.get('min_price') or current_filters.get('max_price'):
+            params = dict(base_params)
+            if current_filters.get('district'):
+                params['district'] = current_filters['district']
+            if current_filters.get('location'):
+                params['location'] = current_filters['location']
+            actions.append({
+                'label': gettext('Убрать ограничение по бюджету'),
+                'url': make_url(params),
+            })
+
+        if current_filters.get('bedrooms'):
+            params = dict(base_params)
+            if current_filters.get('district'):
+                params['district'] = current_filters['district']
+            if current_filters.get('location'):
+                params['location'] = current_filters['location']
+            if current_filters.get('min_price'):
+                params['min_price'] = current_filters['min_price']
+            if current_filters.get('max_price'):
+                params['max_price'] = current_filters['max_price']
+            actions.append({
+                'label': gettext('Убрать фильтр по спальням'),
+                'url': make_url(params),
+            })
+
+        if current_filters.get('amenities'):
+            params = dict(base_params)
+            for key in ('district', 'location', 'min_price', 'max_price', 'build_status'):
+                value = current_filters.get(key)
+                if value:
+                    params[key] = value
+            actions.append({
+                'label': gettext('Убрать фильтр по удобствам'),
+                'url': make_url(params),
+            })
+
+        if current_filters.get('build_status'):
+            params = dict(base_params)
+            for key in ('district', 'location', 'min_price', 'max_price'):
+                value = current_filters.get(key)
+                if value:
+                    params[key] = value
+            actions.append({
+                'label': gettext('Показать все стадии готовности'),
+                'url': make_url(params),
+            })
+
+        if current_filters.get('location'):
+            params = dict(base_params)
+            if current_filters.get('district'):
+                params['district'] = current_filters['district']
+            actions.append({
+                'label': gettext('Расширить поиск до всего района'),
+                'url': make_url(params),
+            })
+
+        if current_filters.get('q'):
+            params = dict(base_params)
+            for key in ('district', 'location', 'min_price', 'max_price'):
+                value = current_filters.get(key)
+                if value:
+                    params[key] = value
+            actions.append({
+                'label': gettext('Убрать поисковый запрос'),
+                'url': make_url(params),
+            })
+
+        seen_urls = set()
+        deduped_actions = []
+        for action in actions:
+            if action['url'] in seen_urls:
+                continue
+            seen_urls.add(action['url'])
+            deduped_actions.append(action)
+
+        reset_section_url = make_url(base_params)
+        reset_all_url = reverse('properties:property_list')
+        district_links = self._build_no_results_district_links(context, language_code)
+        type_links = self._build_no_results_type_links(context, language_code)
+        deal_links = self._build_no_results_deal_links(context, language_code)
+
+        seen_related_urls = {reset_section_url, reset_all_url}
+
+        def dedupe_links(links):
+            cleaned = []
+            for link in links:
+                if link['url'] in seen_related_urls:
+                    continue
+                seen_related_urls.add(link['url'])
+                cleaned.append(link)
+            return cleaned
+
+        district_links = dedupe_links(district_links)
+        type_links = dedupe_links(type_links)
+        deal_links = dedupe_links(deal_links)
+
+        return {
+            'has_content': bool(deduped_actions or district_links or type_links or deal_links),
+            'reset_section_url': reset_section_url,
+            'reset_all_url': reset_all_url,
+            'actions': deduped_actions[:4],
+            'district_heading': gettext('Соседние районы'),
+            'type_heading': gettext('Похожие типы недвижимости'),
+            'deal_heading': gettext('Похожие разделы продажи и аренды'),
+            'district_links': district_links[:4],
+            'type_links': type_links[:4],
+            'deal_links': deal_links[:3],
+        }
+
+    def get_seo_block_candidates(self, context):
+        """Список возможных slug для SEO-блоков по убыванию специфичности."""
+        signature = self.get_catalog_landing_signature(context)
+        if not signature:
+            return ['properties_catalog']
+        return build_candidate_slugs(signature)
 
 
 class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
@@ -660,7 +1553,14 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
         if not self.request.GET.get('deal_type'):
             context['current_filters']['deal_type'] = 'sale'
         context['seo_heading'] = self.build_seo_heading(context)
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        context['generated_catalog_seo'] = self.build_generated_catalog_seo(context, language_code)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        context['catalog_faq'] = self.build_catalog_faq(context, language_code)
+        context['catalog_breadcrumbs'] = self.build_catalog_breadcrumbs(context, language_code)
+        context['catalog_internal_links'] = self.build_catalog_internal_links(context, language_code)
+        context['no_results_recovery'] = self.build_no_results_recovery(context, language_code)
+        self.apply_catalog_indexation_strategy(context, language_code)
         self.update_page_meta(context)
         return context
 
@@ -681,7 +1581,14 @@ class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
         if not self.request.GET.get('deal_type'):
             context['current_filters']['deal_type'] = 'rent'
         context['seo_heading'] = self.build_seo_heading(context)
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        context['generated_catalog_seo'] = self.build_generated_catalog_seo(context, language_code)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        context['catalog_faq'] = self.build_catalog_faq(context, language_code)
+        context['catalog_breadcrumbs'] = self.build_catalog_breadcrumbs(context, language_code)
+        context['catalog_internal_links'] = self.build_catalog_internal_links(context, language_code)
+        context['no_results_recovery'] = self.build_no_results_recovery(context, language_code)
+        self.apply_catalog_indexation_strategy(context, language_code)
         self.update_page_meta(context)
         return context
 
@@ -753,7 +1660,14 @@ class PropertyByTypeView(PropertyListView):
         context['current_property_type'] = self.property_type.name
         context['current_filters']['property_type'] = [self.property_type.name]
         context['seo_heading'] = self.build_seo_heading(context)
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        context['generated_catalog_seo'] = self.build_generated_catalog_seo(context, language_code)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
+        context['catalog_faq'] = self.build_catalog_faq(context, language_code)
+        context['catalog_breadcrumbs'] = self.build_catalog_breadcrumbs(context, language_code)
+        context['catalog_internal_links'] = self.build_catalog_internal_links(context, language_code)
+        context['no_results_recovery'] = self.build_no_results_recovery(context, language_code)
+        self.apply_catalog_indexation_strategy(context, language_code)
         self.update_page_meta(context)
         return context
 

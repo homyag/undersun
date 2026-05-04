@@ -1,0 +1,37 @@
+{% if catalog_internal_links.has_content %}
+<section class="mt-12">
+    <div class="rounded-3xl border border-primary/10 bg-white shadow-xl">
+        <div class="grid gap-8 p-8 lg:grid-cols-2">
+            {% if catalog_internal_links.type_links %}
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900">{{ catalog_internal_links.type_heading }}</h2>
+                    <div class="mt-5 flex flex-wrap gap-3">
+                        {% for link in catalog_internal_links.type_links %}
+                            <a href="{{ link.url }}"
+                               class="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-bold text-gray-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-yellow-500">
+                                <span>{{ link.label }}</span>
+                                <span class="text-xs opacity-70">{{ link.count }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if catalog_internal_links.district_links %}
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900">{{ catalog_internal_links.district_heading }}</h2>
+                    <div class="mt-5 flex flex-wrap gap-3">
+                        {% for link in catalog_internal_links.district_links %}
+                            <a href="{{ link.url }}"
+                               class="inline-flex items-center gap-2 rounded-md border-2 border-primary px-4 py-2.5 text-sm font-bold text-primary transition-all duration-300 hover:scale-105 hover:bg-primary hover:text-white">
+                                <span>{{ link.label }}</span>
+                                <span class="text-xs opacity-70">{{ link.count }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}

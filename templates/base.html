@@ -46,6 +46,9 @@
 
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ canonical_url|default:request.build_absolute_uri }}">
+    {% if meta_robots %}
+        <meta name="robots" content="{{ meta_robots }}">
+    {% endif %}
 
     <!-- Hreflang Tags -->
     {% load i18n %}
