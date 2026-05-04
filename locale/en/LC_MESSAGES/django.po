@@ -4434,49 +4434,37 @@ msgid "Время зависит от маршрута и трафика."
 msgstr "Timing depends on the route and traffic."
 
 #: templates/locations/district_detail.html:219
-#, fuzzy
-#| msgid "Поиск по району"
 msgid "локации района"
-msgstr "Search by District"
+msgstr "district locations"
 
 #: templates/locations/district_detail.html:220
-#, fuzzy
-#| msgid "Список по локации"
 msgid "Статистика по локациям"
-msgstr "List by Location"
+msgstr "Location statistics"
 
 #: templates/locations/district_detail.html:221
 msgid "Актуальные данные по количеству объектов и медианной цене"
-msgstr ""
+msgstr "Current data on listing volume and median price"
 
 #: templates/locations/district_detail.html:226
 #, python-format
 msgid "Локации района %(district)s"
-msgstr ""
+msgstr "Locations in %(district)s district"
 
 #: templates/locations/district_detail.html:233
-#, fuzzy
-#| msgid "Каталог объектов"
 msgid "Всего объектов"
-msgstr "Property catalog"
+msgstr "Total properties"
 
 #: templates/locations/district_detail.html:234
-#, fuzzy
-#| msgid "Список по локации"
 msgid "Медиана по локации"
-msgstr "List by Location"
+msgstr "Location median"
 
 #: templates/locations/district_detail.html:271
-#, fuzzy
-#| msgid "Специальное предложение"
 msgid "по активным предложениям"
-msgstr "Special offer"
+msgstr "based on active listings"
 
 #: templates/locations/district_detail.html:299
-#, fuzzy
-#| msgid "объектов"
 msgid "Нет объектов"
-msgstr "properties"
+msgstr "No properties"
 
 #: templates/locations/district_detail.html:318
 #: templates/locations/list.html:160
@@ -4607,8 +4595,6 @@ msgstr "Real estate in"
 
 #: templates/locations/location_detail.html:84
 #: templates/locations/location_detail.html:232
-#, fuzzy
-#| msgid "Локация"
 msgid "локация"
 msgstr "Location"
 
@@ -4618,34 +4604,28 @@ msgid ""
 "Локация внутри района %(district)s на Пхукете с развитой инфраструктурой и "
 "инвестиционным спросом."
 msgstr ""
+"A location within %(district)s district in Phuket with developed "
+"infrastructure and strong investment demand."
 
 #: templates/locations/location_detail.html:109
-#, fuzzy
-#| msgid "Поиск по району"
 msgid "Вернуться к району"
-msgstr "Search by District"
+msgstr "Back to district"
 
 #: templates/locations/location_detail.html:121
-#, fuzzy
-#| msgid "Все локации"
 msgid "в локации"
-msgstr "All locations"
+msgstr "in this location"
 
 #: templates/locations/location_detail.html:125
-#, fuzzy
-#| msgid "Услуги агентства недвижимости Undersun Estate"
 msgid "Все объекты проверены командой Undersun Estate."
-msgstr "UnderSun Estate Real Estate Agency Services"
+msgstr "All properties are verified by the Undersun Estate team."
 
 #: templates/locations/location_detail.html:133
-#, fuzzy
-#| msgid "инвестиционный рейтинг"
 msgid "инвестиционный профиль"
-msgstr "Investment rating"
+msgstr "investment profile"
 
 #: templates/locations/location_detail.html:139
 msgid "Стабильный спрос на аренду и качественная застройка."
-msgstr ""
+msgstr "Stable rental demand and quality development."
 
 #: templates/locations/location_detail.html:165
 #, python-format
@@ -4653,56 +4633,44 @@ msgid ""
 "Локация %(name)s — часть района %(district)s, где сочетаются уютные "
 "резиденции и близость к ключевым точкам Пхукета."
 msgstr ""
+"%(name)s is part of %(district)s district, combining comfortable residences "
+"with proximity to Phuket's key destinations."
 
 #: templates/locations/location_detail.html:173
-#, fuzzy
-#| msgid "Включает виллы, апартаменты и готовый бизнес."
 msgid "Виллы, апартаменты и клубные резиденции."
-msgstr "Includes villas, apartments, and turnkey businesses."
+msgstr "Villas, apartments, and club residences."
 
 #: templates/locations/location_detail.html:187
-#, fuzzy
-#| msgid "Основана на активных объектах в каталоге."
 msgid "Расчёт основан на активных объявлениях."
-msgstr "Based on active listings in the catalog."
+msgstr "Calculated from active listings."
 
 #: templates/locations/location_detail.html:197
 msgid "курорт"
-msgstr ""
+msgstr "resort"
 
 #: templates/locations/location_detail.html:201
-#, fuzzy
-#| msgid "Информация"
 msgid "формат"
-msgstr "Information"
+msgstr "format"
 
 #: templates/locations/location_detail.html:202
-#, fuzzy
-#| msgid "Инвестиции"
 msgid "Инвестиции + lifestyle"
-msgstr "Investments"
+msgstr "Investment + lifestyle"
 
 #: templates/locations/location_detail.html:205
-#, fuzzy
-#| msgid "Статус"
 msgid "статус"
 msgstr "Status"
 
 #: templates/locations/location_detail.html:206
-#, fuzzy
-#| msgid "Доступ до аэропорта"
 msgid "Доступно к покупке"
-msgstr "Airport access"
+msgstr "Available to buy"
 
 #: templates/locations/location_detail.html:212
 msgid "Комментарий аналитиков Undersun"
-msgstr ""
+msgstr "Undersun analyst comment"
 
 #: templates/locations/location_detail.html:239
-#, fuzzy
-#| msgid "район"
 msgid "О районе"
-msgstr "District"
+msgstr "About the district"
 
 #: templates/locations/location_detail.html:246
 #, fuzzy
@@ -4717,40 +4685,32 @@ msgid "Автобус"
 msgstr "Author"
 
 #: templates/locations/location_detail.html:283
-#, fuzzy
-#| msgid "Подберём недвижимость "
 msgid "Подбор недвижимости в локации"
-msgstr "We'll find a property "
+msgstr "Property selection in the location"
 
 #: templates/locations/location_detail.html:284
-#, fuzzy
-#| msgid "Презентации объектов и расчёт доходности"
 msgid "Расскажем про лучшие проекты, пришлём презентации и расчёт доходности."
-msgstr "Property presentations and yield calculations"
+msgstr "We will tell you about the best projects, send presentations, and provide yield calculations."
 
 #: templates/locations/location_detail.html:288
-#, fuzzy
-#| msgid "Ответ в мессенджере в течение 15 минут"
 msgid "Ответим в мессенджере в течение 15 минут"
 msgstr "Messenger reply within 15 minutes"
 
 #: templates/locations/location_detail.html:292
 msgid "Подготовим сравнительную таблицу по объектам"
-msgstr ""
+msgstr "We will prepare a comparative table for the properties."
 
 #: templates/locations/location_detail.html:318
-#, fuzzy
-#| msgid "в одном каталоге"
 msgid "каталог"
-msgstr "in one catalog"
+msgstr "catalog"
 
 #: templates/locations/location_detail.html:320
 msgid "Только актуальные предложения в продаже или аренде."
-msgstr ""
+msgstr "Only current listings for sale or rent."
 
 #: templates/locations/location_detail.html:325
 msgid "Открыть расширенный поиск"
-msgstr ""
+msgstr "Open advanced search"
 
 #: templates/locations/location_detail.html:352
 #, fuzzy
