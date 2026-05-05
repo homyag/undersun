@@ -3,12 +3,16 @@ function setPriceRange(min, max) {
     const minInput = document.querySelector('input[name="min_price"]');
     const maxInput = document.querySelector('input[name="max_price"]');
     
-    if (minInput) minInput.value = min || '';
-    if (maxInput) maxInput.value = max || '';
-    
-    // Trigger filter update
-    if (typeof updatePropertyFilters === 'function') {
-        updatePropertyFilters();
+    if (minInput) {
+        minInput.value = min || '';
+        minInput.dispatchEvent(new Event('input', { bubbles: true }));
+        minInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    if (maxInput) {
+        maxInput.value = max || '';
+        maxInput.dispatchEvent(new Event('input', { bubbles: true }));
+        maxInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
 }
 

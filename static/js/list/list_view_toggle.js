@@ -1,3 +1,15 @@
+function syncCatalogViewUrl(viewType) {
+    const currentUrl = new URL(window.location.href);
+
+    if (viewType === 'map') {
+        currentUrl.searchParams.set('map_view', 'true');
+    } else {
+        currentUrl.searchParams.delete('map_view');
+    }
+
+    window.history.replaceState(window.history.state, '', `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`);
+}
+
 function setView(viewType) {
     // Update button states
     const toggleButtons = document.querySelectorAll('#grid-view, #map-view');
@@ -37,6 +49,7 @@ function setView(viewType) {
 
     // Save preference
     localStorage.setItem('propertyViewType', viewType);
+    syncCatalogViewUrl(viewType);
 
     // Update dropdown label if present
     const selectEl = document.querySelector('[data-view-select]');

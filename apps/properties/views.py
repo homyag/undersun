@@ -10,7 +10,8 @@ from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpRespons
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.db.models import Q, Count, Case, When, Value, IntegerField
+from django.db.models import Q, Count, Case, When, Value, IntegerField, F
+from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
 from django.urls import reverse
 from django.utils.translation import gettext, ngettext, override
@@ -346,7 +347,8 @@ class PropertyListView(ListView):
         sort_param = self.request.GET.get('sort')
         sort_by = sort_param or '-created_at'
         allowed_sorts = [
-            'price_sale_usd', '-price_sale_usd', 
+            'price_asc', 'price_desc',
+            'price_sale_usd', '-price_sale_usd',
             'price_sale_thb', '-price_sale_thb',
             'price_rent_monthly', '-price_rent_monthly',
             'area_total', '-area_total',
@@ -358,13 +360,79 @@ class PropertyListView(ListView):
             ordering.extend(['-featured_priority', '-is_featured'])
 
         if sort_by in allowed_sorts:
-            ordering.append(sort_by)
+            if self._is_price_sort(sort_by):
+                ordering.append(self.get_catalog_price_sort_expression(descending=self._is_descending_price_sort(sort_by)))
+            else:
+                ordering.append(sort_by)
         else:
             ordering.append('-created_at')
 
         queryset = queryset.order_by(*ordering)
 
         return queryset
+
+    def get_effective_catalog_deal_type(self):
+        request_deal_type = self.request.GET.get('deal_type')
+        if request_deal_type in {'sale', 'rent'}:
+            return request_deal_type
+
+        return getattr(self, 'forced_deal_type', '') or ''
+
+    def _is_price_sort(self, sort_value):
+        return sort_value in {
+            'price_asc',
+            'price_desc',
+            'price_sale_usd',
+            '-price_sale_usd',
+            'price_sale_thb',
+            '-price_sale_thb',
+            'price_rent_monthly',
+            '-price_rent_monthly',
+        }
+
+    def _is_descending_price_sort(self, sort_value):
+        return sort_value in {'price_desc', '-price_sale_usd', '-price_sale_thb', '-price_rent_monthly'}
+
+    def get_catalog_price_sort_expression(self, descending=False):
+        currency_code = CurrencyService.get_selected_currency_code(self.request)
+        sale_expression = self._build_catalog_price_expression(currency_code, 'sale')
+        rent_expression = self._build_catalog_price_expression(currency_code, 'rent')
+        effective_deal_type = self.get_effective_catalog_deal_type()
+
+        if effective_deal_type == 'sale':
+            expression = sale_expression
+        elif effective_deal_type == 'rent':
+            expression = rent_expression
+        else:
+            expression = Case(
+                When(deal_type='rent', then=rent_expression),
+                default=Coalesce(sale_expression, rent_expression),
+            )
+
+        return expression.desc(nulls_last=True) if descending else expression.asc(nulls_last=True)
+
+    def _build_catalog_price_expression(self, currency_code, deal_type):
+        price_field_map = {
+            'sale': {
+                'USD': ['price_sale_usd', 'price_sale_thb', 'price_sale_rub'],
+                'THB': ['price_sale_thb', 'price_sale_usd', 'price_sale_rub'],
+                'RUB': ['price_sale_rub', 'price_sale_thb', 'price_sale_usd'],
+            },
+            'rent': {
+                'USD': ['price_rent_monthly', 'price_rent_monthly_thb', 'price_rent_monthly_rub'],
+                'THB': ['price_rent_monthly_thb', 'price_rent_monthly', 'price_rent_monthly_rub'],
+                'RUB': ['price_rent_monthly_rub', 'price_rent_monthly_thb', 'price_rent_monthly'],
+            },
+        }
+
+        normalized_currency = (currency_code or 'USD').upper()
+        field_candidates = price_field_map.get(deal_type, {}).get(normalized_currency) or price_field_map[deal_type]['USD']
+        ordered_fields = []
+        for field_name in field_candidates:
+            if field_name not in ordered_fields:
+                ordered_fields.append(field_name)
+
+        return Coalesce(*[F(field_name) for field_name in ordered_fields])
 
     def apply_filters(self, queryset):
         """Применяет фильтры на основе GET параметров"""
@@ -481,6 +549,10 @@ class PropertyListView(ListView):
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
         context['catalog_faq'] = self.build_catalog_faq(context, language_code)
         context['catalog_breadcrumbs'] = self.build_catalog_breadcrumbs(context, language_code)
+        context['property_type_filter_links'] = self.build_property_type_filter_links(context, language_code)
+        context['active_filter_chips'] = self.build_active_filter_chips(context)
+        context['active_filters_summary'] = self.build_active_filters_summary(context['active_filter_chips'], language_code)
+        context['active_filters_reset_url'] = self.build_active_filters_reset_url(context)
         context['catalog_internal_links'] = self.build_catalog_internal_links(context, language_code)
         context['no_results_recovery'] = self.build_no_results_recovery(context, language_code)
         self.apply_catalog_indexation_strategy(context, language_code)
@@ -584,7 +656,7 @@ class PropertyListView(ListView):
 
         amenities = PropertyFeature.objects.annotate(
             property_count=Count('propertyfeaturerelation')
-        ).filter(property_count__gte=1).order_by('-property_count')[:12]
+        ).filter(property_count__gte=1).order_by('-property_count', 'name')
 
         current_filters = {
             'deal_type': self.request.GET.get('deal_type', ''),
@@ -793,6 +865,281 @@ class PropertyListView(ListView):
         if not normalized:
             return base_url
         return f"{base_url}?{urlencode(normalized, doseq=True)}"
+
+    def _build_catalog_url_from_pairs(self, base_url, params):
+        normalized = [
+            (key, value)
+            for key, value in params
+            if value not in (None, '', [], ())
+        ]
+        if not normalized:
+            return base_url
+        return f"{base_url}?{urlencode(normalized, doseq=True)}"
+
+    def _get_catalog_base_url(self, context, *, include_route_type=True, include_route_deal=True):
+        current_filters = context.get('current_filters', {})
+        deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+        property_type_obj = self._get_primary_property_type(context)
+
+        if include_route_type and property_type_obj:
+            return reverse('properties:property_by_type', args=[property_type_obj.name]), {'property_type'}
+
+        if include_route_deal and deal_type in {'sale', 'rent'}:
+            return reverse(f'properties:property_{deal_type}'), {'deal_type'}
+
+        return reverse('properties:property_list'), set()
+
+    def _build_querydict_url(self, base_url, querydict):
+        if not querydict:
+            return base_url
+        query_string = build_query_string(querydict, list(querydict.keys()))
+        return f'{base_url}?{query_string}' if query_string else base_url
+
+    def _build_filter_removal_url(self, context, key, value=None):
+        include_route_type = True
+        include_route_deal = True
+
+        if key == 'property_type':
+            include_route_type = False
+        elif key == 'deal_type':
+            include_route_deal = False
+
+        base_url, route_keys = self._get_catalog_base_url(
+            context,
+            include_route_type=include_route_type,
+            include_route_deal=include_route_deal,
+        )
+
+        query_params = self.request.GET.copy()
+        query_params.pop('page', None)
+        query_params.pop('current_property_type', None)
+
+        if value is None:
+            query_params.pop(key, None)
+        else:
+            remaining_values = [
+                current_value for current_value in query_params.getlist(key)
+                if str(current_value) != str(value)
+            ]
+            query_params.pop(key, None)
+            if remaining_values:
+                query_params.setlist(key, remaining_values)
+
+        for route_key in route_keys:
+            query_params.pop(route_key, None)
+
+        return self._build_querydict_url(base_url, query_params)
+
+    def build_active_filters_reset_url(self, context):
+        base_url, _route_keys = self._get_catalog_base_url(context)
+        return base_url
+
+    def _build_catalog_preserved_query_params(self, exclude_keys=None):
+        exclude = {'page', 'current_property_type'}
+        if exclude_keys:
+            exclude.update(exclude_keys)
+
+        params = []
+        for key in self.request.GET.keys():
+            if key in exclude:
+                continue
+            for value in self.request.GET.getlist(key):
+                if value in (None, ''):
+                    continue
+                params.append((key, value))
+        return params
+
+    def build_property_type_filter_links(self, context, language_code='ru'):
+        if not context.get('current_property_type'):
+            return []
+
+        current_filters = context.get('current_filters', {})
+        selected_deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
+        current_property_type = context.get('current_property_type')
+        preserved_params = self._build_catalog_preserved_query_params({'property_type'})
+        links = []
+
+        all_base_url, all_base_params = self._get_catalog_link_base(
+            context,
+            deal_type=selected_deal_type,
+            property_type_obj=None,
+        )
+        all_params = list(all_base_params.items()) + preserved_params
+        links.append({
+            'label': gettext('Все объекты'),
+            'url': self._build_catalog_url_from_pairs(all_base_url, all_params),
+            'is_active': False,
+        })
+
+        for property_type in context.get('property_types', []):
+            base_url, base_params = self._get_catalog_link_base(
+                context,
+                deal_type=selected_deal_type,
+                property_type_obj=property_type,
+            )
+            params = list(base_params.items()) + preserved_params
+            links.append({
+                'label': _get_translated_attr(
+                    property_type,
+                    'name_display',
+                    language_code,
+                    property_type.name_display,
+                ),
+                'url': self._build_catalog_url_from_pairs(base_url, params),
+                'is_active': property_type.name == current_property_type,
+            })
+
+        return links
+
+    def build_active_filters_summary(self, chips, language_code='ru'):
+        if not chips:
+            return ''
+
+        labels = [chip.get('label', '').strip() for chip in chips if chip.get('label')]
+        labels = [label for label in labels if label]
+        if not labels:
+            return ''
+
+        max_items = 3
+        summary = ' · '.join(labels[:max_items])
+        remaining = len(labels) - max_items
+        if remaining > 0:
+            summary = f'{summary} · +{remaining}'
+        return summary
+
+    def build_active_filter_chips(self, context):
+        current_filters = context.get('current_filters', {})
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        chips = []
+
+        def get_bedroom_chip_label(value):
+            raw_value = str(value)
+            if raw_value in {'4', '4+'}:
+                return {
+                    'ru': '4+ спальни',
+                    'en': '4+ bedrooms',
+                    'th': '4+ ห้องนอน',
+                }.get(language_code, '4+ bedrooms')
+
+            try:
+                count = int(raw_value)
+            except (TypeError, ValueError):
+                return raw_value
+
+            if language_code == 'en':
+                return f'{count} bedroom' if count == 1 else f'{count} bedrooms'
+            if language_code == 'th':
+                return f'{count} ห้องนอน'
+            if count == 1:
+                return '1 спальня'
+            if count in {2, 3, 4}:
+                return f'{count} спальни'
+            return f'{count} спален'
+
+        property_types_by_name = {
+            property_type.name: _get_translated_attr(property_type, 'name_display', language_code, property_type.name)
+            for property_type in context.get('property_types', [])
+        }
+        districts_by_slug = {
+            district.slug: _get_translated_attr(district, 'name', language_code, district.slug)
+            for district in context.get('districts', [])
+        }
+        locations_by_slug = {
+            location.slug: _get_translated_attr(location, 'name', language_code, location.slug)
+            for location in context.get('locations', [])
+        }
+        amenities_by_id = {
+            str(amenity.id): _get_translated_attr(amenity, 'name', language_code, str(amenity.id))
+            for amenity in context.get('amenities', [])
+        }
+
+        location_obj, district_obj = self._get_location_and_district()
+        if district_obj:
+            districts_by_slug.setdefault(district_obj.slug, _get_translated_attr(district_obj, 'name', language_code, district_obj.slug))
+        if location_obj:
+            locations_by_slug.setdefault(location_obj.slug, _get_translated_attr(location_obj, 'name', language_code, location_obj.slug))
+
+        deal_type = context.get('deal_type') or current_filters.get('deal_type')
+        deal_label = self._get_catalog_deal_label(deal_type, language_code) if deal_type else ''
+        if deal_label:
+            chips.append({
+                'key': 'deal_type',
+                'label': deal_label,
+                'remove_url': self._build_filter_removal_url(context, 'deal_type'),
+            })
+
+        for property_type in current_filters.get('property_type') or []:
+            label = property_types_by_name.get(property_type, property_type)
+            chips.append({
+                'key': 'property_type',
+                'label': label,
+                'remove_url': self._build_filter_removal_url(context, 'property_type', property_type),
+            })
+
+        district_slug = current_filters.get('district')
+        if district_slug:
+            chips.append({
+                'key': 'district',
+                'label': districts_by_slug.get(district_slug, district_slug),
+                'remove_url': self._build_filter_removal_url(context, 'district'),
+            })
+
+        location_slug = current_filters.get('location')
+        if location_slug:
+            chips.append({
+                'key': 'location',
+                'label': locations_by_slug.get(location_slug, location_slug),
+                'remove_url': self._build_filter_removal_url(context, 'location'),
+            })
+
+        min_price = current_filters.get('min_price')
+        if min_price:
+            chips.append({
+                'key': 'min_price',
+                'label': f"{gettext('Минимум')}: {min_price}",
+                'remove_url': self._build_filter_removal_url(context, 'min_price'),
+            })
+
+        max_price = current_filters.get('max_price')
+        if max_price:
+            chips.append({
+                'key': 'max_price',
+                'label': f"{gettext('Максимум')}: {max_price}",
+                'remove_url': self._build_filter_removal_url(context, 'max_price'),
+            })
+
+        for bedroom in current_filters.get('bedrooms') or []:
+            chips.append({
+                'key': 'bedrooms',
+                'label': get_bedroom_chip_label(bedroom),
+                'remove_url': self._build_filter_removal_url(context, 'bedrooms', bedroom),
+            })
+
+        build_status_label = self._resolve_build_status_label(current_filters.get('build_status'))
+        if build_status_label:
+            chips.append({
+                'key': 'build_status',
+                'label': build_status_label,
+                'remove_url': self._build_filter_removal_url(context, 'build_status'),
+            })
+
+        for amenity_id in current_filters.get('amenities') or []:
+            label = amenities_by_id.get(str(amenity_id), str(amenity_id))
+            chips.append({
+                'key': 'amenities',
+                'label': label,
+                'remove_url': self._build_filter_removal_url(context, 'amenities', amenity_id),
+            })
+
+        query = (current_filters.get('q') or '').strip()
+        if query:
+            chips.append({
+                'key': 'q',
+                'label': f"{gettext('Поиск')}: {query}",
+                'remove_url': self._build_filter_removal_url(context, 'q'),
+            })
+
+        return chips
 
     def build_catalog_breadcrumbs(self, context, language_code='ru'):
         breadcrumbs = [{
@@ -1520,6 +1867,7 @@ class PropertyListView(ListView):
 
 class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
     template_name = 'properties/list.html'
+    forced_deal_type = 'sale'
     deal_type_redirects = {
         'rent': 'properties:property_rent',
         '': 'properties:property_list',
@@ -1558,6 +1906,10 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
         context['catalog_faq'] = self.build_catalog_faq(context, language_code)
         context['catalog_breadcrumbs'] = self.build_catalog_breadcrumbs(context, language_code)
+        context['property_type_filter_links'] = self.build_property_type_filter_links(context, language_code)
+        context['active_filter_chips'] = self.build_active_filter_chips(context)
+        context['active_filters_summary'] = self.build_active_filters_summary(context['active_filter_chips'], language_code)
+        context['active_filters_reset_url'] = self.build_active_filters_reset_url(context)
         context['catalog_internal_links'] = self.build_catalog_internal_links(context, language_code)
         context['no_results_recovery'] = self.build_no_results_recovery(context, language_code)
         self.apply_catalog_indexation_strategy(context, language_code)
@@ -1567,6 +1919,7 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
 
 class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
     template_name = 'properties/list.html'
+    forced_deal_type = 'rent'
     deal_type_redirects = {
         'sale': 'properties:property_sale',
         '': 'properties:property_list',
@@ -1586,6 +1939,10 @@ class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
         context['catalog_faq'] = self.build_catalog_faq(context, language_code)
         context['catalog_breadcrumbs'] = self.build_catalog_breadcrumbs(context, language_code)
+        context['property_type_filter_links'] = self.build_property_type_filter_links(context, language_code)
+        context['active_filter_chips'] = self.build_active_filter_chips(context)
+        context['active_filters_summary'] = self.build_active_filters_summary(context['active_filter_chips'], language_code)
+        context['active_filters_reset_url'] = self.build_active_filters_reset_url(context)
         context['catalog_internal_links'] = self.build_catalog_internal_links(context, language_code)
         context['no_results_recovery'] = self.build_no_results_recovery(context, language_code)
         self.apply_catalog_indexation_strategy(context, language_code)
@@ -1665,6 +2022,10 @@ class PropertyByTypeView(PropertyListView):
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
         context['catalog_faq'] = self.build_catalog_faq(context, language_code)
         context['catalog_breadcrumbs'] = self.build_catalog_breadcrumbs(context, language_code)
+        context['property_type_filter_links'] = self.build_property_type_filter_links(context, language_code)
+        context['active_filter_chips'] = self.build_active_filter_chips(context)
+        context['active_filters_summary'] = self.build_active_filters_summary(context['active_filter_chips'], language_code)
+        context['active_filters_reset_url'] = self.build_active_filters_reset_url(context)
         context['catalog_internal_links'] = self.build_catalog_internal_links(context, language_code)
         context['no_results_recovery'] = self.build_no_results_recovery(context, language_code)
         self.apply_catalog_indexation_strategy(context, language_code)
@@ -2199,14 +2560,18 @@ def property_list_ajax(request):
     # Сортировка
     sort_by = request.GET.get('sort', '-created_at')
     allowed_sorts = [
-        'price_sale_usd', '-price_sale_usd', 
+        'price_asc', 'price_desc',
+        'price_sale_usd', '-price_sale_usd',
         'price_sale_thb', '-price_sale_thb',
         'price_rent_monthly', '-price_rent_monthly',
         'area_total', '-area_total',
         'created_at', '-created_at'
     ]
     if sort_by in allowed_sorts:
-        queryset = queryset.order_by(sort_by)
+        if view._is_price_sort(sort_by):
+            queryset = queryset.order_by(view.get_catalog_price_sort_expression(descending=view._is_descending_price_sort(sort_by)))
+        else:
+            queryset = queryset.order_by(sort_by)
     else:
         queryset = queryset.order_by('-created_at')
     
@@ -2269,17 +2634,24 @@ def property_list_ajax(request):
 def get_locations_for_district(request):
     """AJAX endpoint для получения локаций по району"""
     from apps.locations.models import Location
-    
+
+    language_code = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
     district_slug = request.GET.get('district')
-    
+
     if district_slug:
-        locations = Location.objects.filter(district__slug=district_slug).values('slug', 'name')
+        locations = Location.objects.filter(district__slug=district_slug).order_by('name')
     else:
-        locations = Location.objects.all().values('slug', 'name')
-    
+        locations = Location.objects.all().order_by('name')
+
     return JsonResponse({
         'success': True,
-        'locations': list(locations)
+        'locations': [
+            {
+                'slug': location.slug,
+                'name': _get_translated_attr(location, 'name', language_code, location.name),
+            }
+            for location in locations
+        ]
     })
 
 
@@ -2398,11 +2770,25 @@ def ajax_search_count(request):
 
 def apply_search_filters(queryset, filters, currency_code='USD'):
     """Применяет поисковые фильтры к queryset (работает с POST и GET данными)"""
-    
+
+    def get_values(key):
+        if hasattr(filters, 'getlist'):
+            values = [value for value in filters.getlist(key) if value not in (None, '')]
+            if values:
+                return values
+        value = filters.get(key)
+        return [value] if value not in (None, '') else []
+
     # Тип недвижимости
-    property_type = filters.get('type')
-    if property_type:
-        queryset = queryset.filter(property_type__name=property_type)
+    property_types = get_values('property_type')
+    legacy_property_type = filters.get('type')
+    current_property_type = filters.get('current_property_type')
+    if legacy_property_type and legacy_property_type not in property_types:
+        property_types.append(legacy_property_type)
+    if not property_types and current_property_type:
+        property_types.append(current_property_type)
+    if property_types:
+        queryset = queryset.filter(property_type__name__in=property_types)
 
     # Стадия готовности
     build_status = filters.get('build_status')
@@ -2416,9 +2802,12 @@ def apply_search_filters(queryset, filters, currency_code='USD'):
         queryset = queryset.filter(district__slug=district)
     
     # Локация
-    location = filters.get('location')  
+    location = filters.get('location')
     if location:
-        queryset = queryset.filter(location__id=location)
+        if str(location).isdigit():
+            queryset = queryset.filter(location__id=location)
+        else:
+            queryset = queryset.filter(location__slug=location)
     
     # Ценовые фильтры (в USD по умолчанию)
     min_price = filters.get('min_price')
@@ -2447,15 +2836,19 @@ def apply_search_filters(queryset, filters, currency_code='USD'):
             pass
     
     # Количество спален
-    bedrooms = filters.get('bedrooms')
+    bedrooms = get_values('bedrooms')
     if bedrooms:
-        try:
-            if bedrooms == '4+':
-                queryset = queryset.filter(bedrooms__gte=4)
-            else:
-                queryset = queryset.filter(bedrooms=int(bedrooms))
-        except ValueError:
-            pass
+        bedroom_filters = Q()
+        for bedroom in bedrooms:
+            try:
+                if str(bedroom) in ('4', '4+'):
+                    bedroom_filters |= Q(bedrooms__gte=4)
+                else:
+                    bedroom_filters |= Q(bedrooms=int(bedroom))
+            except ValueError:
+                continue
+        if bedroom_filters:
+            queryset = queryset.filter(bedroom_filters)
     
     # Тип сделки
     deal_type = filters.get('deal_type')
@@ -2463,7 +2856,7 @@ def apply_search_filters(queryset, filters, currency_code='USD'):
         queryset = queryset.filter(deal_type__in=[deal_type, 'both'])
     
     # Удобства/особенности
-    amenities = filters.getlist('amenities') if hasattr(filters, 'getlist') else [filters.get('amenities')] if filters.get('amenities') else []
+    amenities = get_values('amenities')
     if amenities:
         for amenity_id in amenities:
             try:

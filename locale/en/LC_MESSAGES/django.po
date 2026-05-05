@@ -4188,6 +4188,10 @@ msgstr[1] ""
 msgid "Сортировка:"
 msgstr "Sort by:"
 
+#: templates/properties/includes/list/list_sort_results_header.html:37
+msgid "Сортировка"
+msgstr "Sorting"
+
 #: templates/core/search.html:117
 #: templates/properties/includes/list/list_sort_results_header.html:34
 #: templates/properties/list_backup.html:257
@@ -5189,6 +5193,10 @@ msgstr "Square ↓"
 msgid "Режим:"
 msgstr "View:"
 
+#: templates/properties/includes/list/list_sort_results_header.html:59
+msgid "Режим"
+msgstr "View"
+
 #: templates/properties/includes/list/list_sort_results_header.html:43
 msgid "Режим просмотра"
 msgstr "View mode"
@@ -5196,6 +5204,24 @@ msgstr "View mode"
 #: templates/properties/includes/list/list_sort_results_header.html:44
 msgid "Список"
 msgstr "List"
+
+#: templates/properties/includes/list/list_active_filter_chips.html:5
+msgid "Активные фильтры"
+msgstr "Active filters"
+
+#: templates/properties/includes/list/list_active_filter_chips.html:23
+msgid "Сбросить всё"
+msgstr "Reset all"
+
+#: templates/properties/includes/list/list_filters_card.html:237
+#: templates/properties/includes/list/list_filters_card.html:239
+msgid "Показать ещё"
+msgstr "Show more"
+
+#: templates/properties/includes/list/list_filters_card.html:250
+#: templates/properties/includes/list/list_filters_card.html:268
+msgid "Показать результаты"
+msgstr "Show results"
 
 #: templates/properties/includes/list/list_sort_results_header.html:45
 #: templates/properties/list_backup.html:267
@@ -5456,3 +5482,8 @@ msgstr "Register"
 
 #~ msgid "Отправить запрос"
 #~ msgstr "Send a request"
+
+#: templates/includes/list/list_data_injection.html:24
+#: templates/properties/list.html:81
+msgid "Обновляем каталог..."
+msgstr "Loading catalog..."

@@ -5,6 +5,7 @@
 window.djangoUrls = {
     mapPropertiesJson: "{% url 'properties:map_properties_json' %}",
     getLocationsForDistrict: "{% url 'properties:get_locations_for_district' %}",
+    ajaxSearchCount: "{% url 'properties:ajax_search_count' %}",
     staticImages: "{% static 'images/' %}",
     noImageSvg: "{% static 'images/no-image.svg' %}"
 };
@@ -18,6 +19,9 @@ window.djangoTranslations = {
     moreDetails: "{% trans 'Подробнее' %}",
     addToFavorites: "{% trans 'В избранное' %}",
     allLocations: "{% trans 'Все локации' %}",
+    loadingLocations: "{% trans 'Загрузка локаций...' %}",
+    noLocationsAvailable: "{% trans 'Локации не найдены' %}",
+    loadingCatalog: "{% trans 'Обновляем каталог...' %}",
     priceOnRequest: "{% trans 'Цена по запросу' %}",
     bedroomsShort: "{% trans 'спал.' %}",
     bathroomsShort: "{% trans 'ванн.' %}",

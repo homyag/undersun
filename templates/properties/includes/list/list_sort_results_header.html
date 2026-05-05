@@ -1,7 +1,7 @@
 {% load i18n %}
 
 <!-- Sort & Results Count -->
-<div class="flex flex-col gap-4 sm:flex-row justify-between items-start sm:items-center mb-6">
+<div class="flex flex-col gap-4 sm:flex-row justify-between items-start sm:items-center mb-4">
     <div class="mb-4 sm:mb-0">
         <h2 class="text-xl font-semibold text-gray-900 results-count"
             data-heading-tag="H2"
@@ -27,23 +27,56 @@
     </div>
     
     {% if properties %}
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-        <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-600 whitespace-nowrap">{% trans "Сортировка:" %}</span>
-            <select onchange="updateSort(this.value)" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-accent focus:border-accent">
-            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>{% trans "По дате" %}</option>
-            <option value="price_sale_usd" {% if request.GET.sort == 'price_sale_usd' %}selected{% endif %}>{% trans "Цена ↑" %}</option>
-            <option value="-price_sale_usd" {% if request.GET.sort == '-price_sale_usd' %}selected{% endif %}>{% trans "Цена ↓" %}</option>
-            <option value="-area_total" {% if request.GET.sort == '-area_total' %}selected{% endif %}>{% trans "Площадь ↓" %}</option>
-            </select>
-        </div>
+    <div class="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
+        <div class="flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex h-7 items-center justify-center rounded-full border border-primary/10 bg-accent/10 px-2 text-primary">
+                    <i class="fas fa-arrow-down-wide-short text-[9px]"></i>
+                </span>
+                <div class="min-w-0">
+                    <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">{% trans "Сортировка" %}</div>
+                    <div class="relative mt-1">
+                        <select onchange="updateSort(this.value)" class="min-w-[9rem] appearance-none rounded-full border border-gray-200 bg-gray-50 py-1.5 pl-3 pr-9 text-sm font-medium text-gray-700 transition-colors focus:border-primary/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10">
+                            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>{% trans "По дате" %}</option>
+                            <option value="price_asc" {% if request.GET.sort == 'price_asc' or request.GET.sort == 'price_sale_usd' or request.GET.sort == 'price_sale_thb' or request.GET.sort == 'price_rent_monthly' %}selected{% endif %}>{% trans "Цена ↑" %}</option>
+                            <option value="price_desc" {% if request.GET.sort == 'price_desc' or request.GET.sort == '-price_sale_usd' or request.GET.sort == '-price_sale_thb' or request.GET.sort == '-price_rent_monthly' %}selected{% endif %}>{% trans "Цена ↓" %}</option>
+                            <option value="-area_total" {% if request.GET.sort == '-area_total' %}selected{% endif %}>{% trans "Площадь ↓" %}</option>
+                        </select>
+                        <span class="pointer-events-none absolute inset-y-0 right-3 inline-flex items-center text-gray-400">
+                            <i class="fas fa-chevron-down text-[10px]"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-        <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-600 whitespace-nowrap">{% trans "Режим:" %}</span>
-            <select onchange="changeView(this.value)" class="px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-accent focus:border-accent min-w-[9rem]" aria-label="{% trans 'Режим просмотра' %}" data-view-select>
-                <option value="grid" {% if request.GET.map_view != 'true' %}selected{% endif %}>{% trans "Список" %}</option>
-                <option value="map" {% if request.GET.map_view == 'true' %}selected{% endif %}>{% trans "Карта" %}</option>
-            </select>
+            <div class="hidden h-8 w-px bg-gray-200 sm:block"></div>
+
+            <div class="flex items-center gap-2">
+                <span class="inline-flex h-7 items-center gap-1 rounded-full border border-primary/10 bg-accent/10 px-2 text-primary">
+                    <i class="fas fa-list-ul text-[9px]"></i>
+                    <span class="h-3 w-px bg-primary/20"></span>
+                    <i class="fas fa-location-dot text-[9px]"></i>
+                </span>
+                <div class="min-w-0">
+                    <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">{% trans "Режим" %}</div>
+                    <div class="inline-flex items-center gap-1 rounded-full bg-gray-100 p-1">
+                        <button id="grid-view"
+                                type="button"
+                                onclick="changeView('grid')"
+                                class="view-toggle-btn rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors"
+                                aria-pressed="{% if request.GET.map_view != 'true' %}true{% else %}false{% endif %}">
+                            {% trans "Список" %}
+                        </button>
+                        <button id="map-view"
+                                type="button"
+                                onclick="changeView('map')"
+                                class="view-toggle-btn rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors"
+                                aria-pressed="{% if request.GET.map_view == 'true' %}true{% else %}false{% endif %}">
+                            {% trans "Карта" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}

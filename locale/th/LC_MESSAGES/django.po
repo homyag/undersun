@@ -4093,6 +4093,10 @@ msgstr[1] ""
 msgid "Сортировка:"
 msgstr "การเรียงลำดับ:"
 
+#: templates/properties/includes/list/list_sort_results_header.html:37
+msgid "Сортировка"
+msgstr "การเรียงลำดับ"
+
 #: templates/core/search.html:117
 #: templates/properties/includes/list/list_sort_results_header.html:34
 #: templates/properties/list_backup.html:257
@@ -5081,6 +5085,10 @@ msgstr "ส↓"
 msgid "Режим:"
 msgstr "โหมด:"
 
+#: templates/properties/includes/list/list_sort_results_header.html:59
+msgid "Режим"
+msgstr "โหมด"
+
 #: templates/properties/includes/list/list_sort_results_header.html:43
 msgid "Режим просмотра"
 msgstr "โหมดการแสดงผล"
@@ -5088,6 +5096,24 @@ msgstr "โหมดการแสดงผล"
 #: templates/properties/includes/list/list_sort_results_header.html:44
 msgid "Список"
 msgstr "รายการ"
+
+#: templates/properties/includes/list/list_active_filter_chips.html:5
+msgid "Активные фильтры"
+msgstr "ตัวกรองที่ใช้งาน"
+
+#: templates/properties/includes/list/list_active_filter_chips.html:23
+msgid "Сбросить всё"
+msgstr "ล้างทั้งหมด"
+
+#: templates/properties/includes/list/list_filters_card.html:237
+#: templates/properties/includes/list/list_filters_card.html:239
+msgid "Показать ещё"
+msgstr "แสดงเพิ่มเติม"
+
+#: templates/properties/includes/list/list_filters_card.html:250
+#: templates/properties/includes/list/list_filters_card.html:268
+msgid "Показать результаты"
+msgstr "แสดงผลลัพธ์"
 
 #: templates/properties/includes/list/list_sort_results_header.html:45
 #: templates/properties/list_backup.html:267
@@ -5382,3 +5408,8 @@ msgstr "ลงทะเบียน"
 
 #~ msgid "Обновлено:"
 #~ msgstr "อัปเดตเมื่อ:"
+
+#: templates/includes/list/list_data_injection.html:24
+#: templates/properties/list.html:81
+msgid "Обновляем каталог..."
+msgstr "กำลังอัปเดตแคตตาล็อก..."

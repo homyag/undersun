@@ -14,7 +14,7 @@
 
 {% with lang_code=LANGUAGE_CODE|default:'ru' %}
 {% with type_prefix='/'|add:lang_code|add:'/property/type/' %}
-    <form method="get" action="{{ filter_form_action|default:'' }}" id="{{ filter_form_id|default:'filter-form' }}" class="p-6" data-type-url-prefix="{{ filter_type_url_prefix|default:type_prefix }}">
+    <form method="get" action="{{ filter_form_action|default:'' }}" id="{{ filter_form_id|default:'filter-form' }}" class="p-6 pb-24 lg:pb-6" data-type-url-prefix="{{ filter_type_url_prefix|default:type_prefix }}" data-current-property-type="{{ current_property_type|default:'' }}">
         <input type="hidden" name="sort" value="{{ request.GET.sort|default:'-created_at' }}">
 
         <div class="mb-6">
@@ -41,6 +41,21 @@
             <h4 class="font-semibold text-gray-900 mb-3">
                 {% trans "Тип недвижимости" %}
             </h4>
+            {% if current_property_type and property_type_filter_links %}
+            <div class="space-y-2">
+                {% for type_link in property_type_filter_links %}
+                <a href="{{ type_link.url }}"
+                   data-property-type-link
+                   data-active="{% if type_link.is_active %}true{% else %}false{% endif %}"
+                   class="flex items-center justify-between rounded-md border px-3 py-2 text-sm font-medium transition-colors {% if type_link.is_active %}border-primary bg-primary/5 text-primary{% else %}border-gray-200 text-gray-700 hover:border-primary/30 hover:bg-primary/5 hover:text-primary{% endif %}">
+                    <span>{{ type_link.label }}</span>
+                    {% if type_link.is_active %}
+                    <i class="fas fa-check text-xs"></i>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
             <div class="space-y-2">
                 {% with selected_types=request.GET|get_list:'property_type' %}
                 {% with selected_has_types=selected_types|length %}
@@ -62,6 +77,7 @@
                     <input type="hidden" name="current_property_type" value="{{ current_property_type }}">
                 {% endif %}
             </div>
+            {% endif %}
         </div>
 
         {% if show_build_status_filter %}
@@ -185,13 +201,24 @@
             <h4 class="font-semibold text-gray-900 mb-3">
                 {% trans "Удобства" %}
             </h4>
-            <div class="space-y-2">
+            <div class="mb-3">
+                <div class="relative">
+                    <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text"
+                           class="w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
+                           placeholder="{% trans 'Найти удобство' %}"
+                           data-amenities-search>
+                </div>
+            </div>
+            <div class="space-y-2" data-amenities-list>
                 {% for amenity in amenities %}
-                <label class="flex items-center">
+                <label class="flex items-center {% if forloop.counter > 6 and amenity.id|stringformat:"s" not in current_filters.amenities %}hidden{% endif %}"
+                       data-amenity-item
+                       data-default-hidden="{% if forloop.counter > 6 and amenity.id|stringformat:"s" not in current_filters.amenities %}true{% else %}false{% endif %}">
                     <input type="checkbox" name="amenities" value="{{ amenity.id }}"
                            {% if amenity.id|stringformat:"s" in current_filters.amenities %}checked{% endif %}
                            class="w-4 h-4 text-primary border-gray-300 focus:ring-primary rounded" style="accent-color: #474B57;">
-                    <span class="ml-3 text-sm text-gray-700 flex items-center">
+                    <span class="ml-3 text-sm text-gray-700 flex items-center" data-amenity-label>
                         {% if amenity.icon %}
                             <i class="{{ amenity.icon }} mr-2 text-accent text-sm"></i>
                         {% endif %}
@@ -200,17 +227,53 @@
                 </label>
                 {% endfor %}
             </div>
+            <p class="mt-3 hidden text-sm text-gray-500" data-amenities-empty>
+                {% trans "Подходящие удобства не найдены" %}
+            </p>
+            {% if amenities|length > 6 %}
+            <button type="button"
+                    class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors duration-200 hover:text-accent"
+                    data-amenities-toggle
+                    data-more-label="{% trans 'Показать ещё' %}"
+                    data-less-label="{% trans 'Свернуть' %}">
+                <span data-amenities-toggle-label>{% trans "Показать ещё" %}</span>
+                <i class="fas fa-chevron-down text-xs" data-amenities-toggle-icon></i>
+            </button>
+            {% endif %}
         </div>
 
-        <div class="border-t border-gray-200 pt-4 mt-4">
+        <div class="border-t border-gray-200 pt-4 mt-4 hidden lg:block">
             <div class="space-y-2">
                 <button type="submit" class="w-full bg-primary hover:bg-[#616677] text-white font-medium py-2 px-4 rounded-md transition-colors">
-                    {% trans "Применить" %}
+                    <span data-filters-apply-label
+                          data-default-label="{% trans 'Применить' %}"
+                          data-show-results-label="{% trans 'Показать результаты' %}"
+                          data-loading-label="{% trans 'Считаем...' %}">
+                        {% trans "Применить" %}
+                    </span>
                 </button>
                 <a href="{{ filter_reset_url|default:default_reset_url }}"
                    class="w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors block"
                    data-ym-goal="catalog_filters_reset">
                     {% trans "Очистить" %}
+                </a>
+            </div>
+        </div>
+
+        <div class="sticky bottom-0 left-0 right-0 -mx-6 mt-6 border-t border-gray-200 bg-white/95 px-6 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur lg:hidden">
+            <div class="flex items-center gap-3">
+                <button type="submit" class="inline-flex flex-1 items-center justify-center rounded-md bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#616677]">
+                    <span data-filters-apply-label
+                          data-default-label="{% trans 'Применить' %}"
+                          data-show-results-label="{% trans 'Показать результаты' %}"
+                          data-loading-label="{% trans 'Считаем...' %}">
+                        {% trans "Применить" %}
+                    </span>
+                </button>
+                <a href="{{ filter_reset_url|default:default_reset_url }}"
+                   class="inline-flex shrink-0 items-center justify-center rounded-md border border-primary px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+                   data-ym-goal="catalog_filters_reset">
+                    {% trans "Сбросить" %}
                 </a>
             </div>
         </div>

@@ -86,8 +86,15 @@
             
             <!-- Properties Grid -->
             <div class="lg:col-span-3 properties-container">
+                <div class="loading-overlay" id="catalog-loading-overlay" aria-hidden="true">
+                    <div class="loading-overlay-panel">
+                        <div class="spinner" aria-hidden="true"></div>
+                        <p class="loading-overlay-text">{% trans "Обновляем каталог..." %}</p>
+                    </div>
+                </div>
                 <!-- Sort & Results Count -->
                 {% include 'properties/includes/list/list_sort_results_header.html' %}
+                {% include 'properties/includes/list/list_active_filter_chips.html' %}
                 
                 {% if properties %}
                     <!-- Properties Grid -->
