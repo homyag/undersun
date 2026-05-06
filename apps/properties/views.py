@@ -35,6 +35,8 @@ LEGACY_PROPERTY_SLUG_REDIRECTS = {
     '1-bedroom-apart': '1-bedroom-apartment-in-a-deluxe-condominium-in-rawai',
 }
 
+CATALOG_LINK_UNSET = object()
+
 PROPERTY_TYPE_NAV_LABELS = {
     'condo': {
         'ru': 'Квартиры',
@@ -1486,9 +1488,9 @@ class PropertyListView(ListView):
             'entries': entries[:5],
         }
 
-    def _get_catalog_link_base(self, context, deal_type=None, property_type_obj=None):
+    def _get_catalog_link_base(self, context, deal_type=None, property_type_obj=CATALOG_LINK_UNSET):
         resolved_deal_type = deal_type if deal_type is not None else (context.get('deal_type') or context.get('current_filters', {}).get('deal_type') or '')
-        resolved_property_type = property_type_obj if property_type_obj is not None else self._get_primary_property_type(context)
+        resolved_property_type = self._get_primary_property_type(context) if property_type_obj is CATALOG_LINK_UNSET else property_type_obj
 
         if resolved_property_type:
             base_url = reverse('properties:property_by_type', args=[resolved_property_type.name])

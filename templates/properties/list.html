@@ -35,12 +35,7 @@
         {
           "@type": "ListItem",
           "position": {{ forloop.counter }},
-          "item": {
-            "@type": "Product",
-            "url": "{{ property.get_absolute_url|absolute_url:request|escapejs }}",
-            "name": "{{ property.get_display_title|default:property.title|escapejs }}"{% if property.main_image %},
-            "image": "{{ property.main_image.medium_url|default:property.main_image.thumbnail_url|absolute_url:request|escapejs }}"{% endif %}
-          }
+          "url": "{{ property.get_absolute_url|absolute_url:request|escapejs }}"
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
       ]
