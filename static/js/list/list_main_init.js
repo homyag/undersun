@@ -218,6 +218,17 @@ document.addEventListener('DOMContentLoaded', function() {
             params.append(key, trimmedValue);
         }
 
+        const currentPropertyType = (form.dataset.currentPropertyType || '').trim();
+        const hasSelectedPropertyTypes = params.has('property_type');
+        if (currentPropertyType && !hasSelectedPropertyTypes) {
+            params.set('current_property_type', currentPropertyType);
+        }
+
+        const routeDealType = (form.dataset.routeDealType || '').trim();
+        if (routeDealType && !params.has('deal_type')) {
+            params.set('deal_type', routeDealType);
+        }
+
         fetch(`${window.djangoUrls.ajaxSearchCount}?${params.toString()}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
