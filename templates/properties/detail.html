@@ -31,6 +31,30 @@
             display: none;
         }
 
+        .property-slide {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.03) 100%);
+        }
+
+        .gallery-hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .property-slide--contain {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at top, rgba(255, 255, 255, 0.22), transparent 48%),
+                linear-gradient(180deg, rgba(15, 23, 42, 0.10) 0%, rgba(15, 23, 42, 0.05) 100%);
+        }
+
+        .property-slide--contain .gallery-hero-image {
+            object-fit: contain;
+            padding: 0.5rem;
+        }
+
         #gallery-image {
             max-height: calc(100dvh - 11rem);
         }
@@ -51,105 +75,61 @@
             <div class="relative overflow-hidden rounded-lg sm:rounded-xl shadow-lg sm:shadow-2xl group">
                 {% if property.images.exists %}
                     <!-- Carousel with Single/Dual Image Display -->
-                    <div class="property-carousel relative h-64 sm:h-80 lg:h-[500px]">
+                    <div class="property-carousel relative h-64 sm:h-80 lg:h-[560px] xl:h-[620px]">
                         {% for image in property.images.all %}
-                            <!-- Mobile: Single Image Slides -->
-                            <div class="property-slide-single md:hidden absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
+                            <div class="property-slide absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
                                  aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
-                                 data-slide-single="{{ forloop.counter0 }}">
+                                 data-slide-index="{{ forloop.counter0 }}">
                                 <img src="{{ image.medium_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
-                                     class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-lg"
+                                     class="gallery-hero-image cursor-pointer hover:scale-105 transition-transform duration-300 rounded-lg sm:rounded-xl"
                                      onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
                             </div>
-
-                            <!-- Desktop: Dual Image Slides -->
-                            {% if forloop.counter0|divisibleby:2 %}
-                                <div class="property-slide-pair hidden md:block absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
-                                     aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
-                                     data-slide-pair="{{ forloop.counter0|floatformat:0 }}">
-                                    <div class="flex h-full gap-2">
-                                        <!-- First Image -->
-                                        <div class="flex-1">
-                                            <img src="{{ image.medium_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
-                                                 class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-l-lg"
-                                                 onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
-                                        </div>
-
-                                        <!-- Second Image (if exists) -->
-                                        {% if forloop.counter0|add:1 < property.images.count %}
-                                            {% with next_index=forloop.counter0|add:1 %}
-                                                <div class="flex-1">
-                                                    {% for next_image in property.images.all %}
-                                                        {% if forloop.counter0 == next_index %}
-                                                            <img src="{{ next_image.medium_url }}"
-                                                                 alt="{{ property_image_alt_base }} {{ next_index|add:1 }}"
-                                                                 class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
-                                                                 onclick="openGallery({{ next_index }})" loading="lazy">
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </div>
-                                            {% endwith %}
-                                        {% else %}
-                                            <!-- Show first image if we're at the last image (odd count) -->
-                                            <div class="flex-1">
-                                                {% with first_image=property.images.all|first %}
-                                                    <img src="{{ first_image.medium_url }}" alt="{{ property_image_alt_base }} 1"
-                                                         class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300 rounded-r-lg"
-                                                         onclick="openGallery(0)" loading="lazy">
-                                                {% endwith %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endif %}
                         {% endfor %}
 
                         <!-- Carousel Navigation -->
                         {% if property.images.count > 1 %}
                             <!-- Previous Button -->
                             <button onclick="previousSlide()"
-                                    class="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-700 hover:text-gray-900 w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all duration-300 opacity-70 sm:opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg z-10 flex items-center justify-center">
-                                <i class="fas fa-chevron-left text-base sm:text-lg"></i>
+                                    class="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/18 bg-white/12 text-sm text-white/88 shadow-[0_10px_28px_rgba(15,23,42,0.22)] backdrop-blur-md transition-all duration-300 hover:bg-white/18 hover:text-white sm:left-4 sm:h-11 sm:w-11 sm:opacity-0 sm:group-hover:opacity-100">
+                                <i class="fas fa-chevron-left"></i>
                             </button>
 
                             <!-- Next Button -->
                             <button onclick="nextSlide()"
-                                    class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-700 hover:text-gray-900 w-10 h-10 sm:w-12 sm:h-12 rounded-full transition-all duration-300 opacity-70 sm:opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg z-10 flex items-center justify-center">
-                                <i class="fas fa-chevron-right text-base sm:text-lg"></i>
+                                    class="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/18 bg-white/12 text-sm text-white/88 shadow-[0_10px_28px_rgba(15,23,42,0.22)] backdrop-blur-md transition-all duration-300 hover:bg-white/18 hover:text-white sm:right-4 sm:h-11 sm:w-11 sm:opacity-0 sm:group-hover:opacity-100">
+                                <i class="fas fa-chevron-right"></i>
                             </button>
 
-                            <!-- Slide Indicators for Image Pairs -->
-                            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                            <!-- Slide Indicators -->
+                            <div class="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm">
                                 {% for image in property.images.all %}
-                                    {% if forloop.counter0|divisibleby:2 %}
-                                        <button onclick="goToSlidePair({{ forloop.counter0|floatformat:0 }})"
-                                                class="property-pair-indicator w-3 h-3 rounded-full transition-all duration-300 {% if forloop.counter0 == 0 %}bg-accent shadow-lg{% else %}bg-white bg-opacity-60 hover:bg-opacity-100{% endif %}"
-                                                data-slide-pair="{{ forloop.counter0|floatformat:0 }}">
-                                        </button>
-                                    {% endif %}
+                                    <button onclick="goToSlideByImage({{ forloop.counter0 }})"
+                                            class="property-slide-indicator h-2.5 w-2.5 rounded-full ring-1 ring-white/20 transition-all duration-300 {% if forloop.counter0 == 0 %}bg-accent shadow-[0_0_0_4px_rgba(255,255,255,0.12)]{% else %}bg-white/35 hover:bg-white/60{% endif %}"
+                                            data-slide-index="{{ forloop.counter0 }}">
+                                    </button>
                                 {% endfor %}
                             </div>
                         {% endif %}
 
 
                         <!-- Photo Counter Badge -->
-                        <div class="absolute top-2 sm:top-4 right-2 sm:right-4 bg-black bg-opacity-70 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium z-10">
-                            <i class="fas fa-images mr-1 sm:mr-2 text-xs sm:text-sm"></i>
+                        <div class="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/14 bg-black/35 px-2.5 py-1 text-[11px] font-medium text-white/86 shadow-[0_10px_24px_rgba(15,23,42,0.16)] backdrop-blur-sm sm:right-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs">
+                            <i class="fas fa-images text-[10px] sm:text-[11px]"></i>
                             <span id="current-photo">1</span> / {{ property.images.count }} <span
                                 class="hidden sm:inline">{% trans "фото" %}</span>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 flex space-x-1 sm:space-x-2 z-10">
+                        <div class="absolute bottom-2 left-2 z-10 flex items-center gap-1.5 rounded-full border border-white/12 bg-black/28 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.16)] backdrop-blur-sm sm:bottom-4 sm:left-4 sm:gap-2 sm:p-2">
                             <!-- Share Button -->
                             <button onclick="shareProperty()"
-                                    class="bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-2 sm:p-3 rounded-full text-xs sm:text-sm transition-all duration-300 hover:scale-110">
+                                    class="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-xs text-white/84 transition-all duration-300 hover:bg-white/16 hover:text-white sm:h-10 sm:w-10 sm:text-sm">
                                 <i class="fas fa-share-alt"></i>
                             </button>
 
                             <!-- Favorite Button -->
                             <button onclick="toggleFavoriteDetail({{ property.id }})"
-                                    class="bg-black bg-opacity-70 hover:bg-opacity-90 text-white p-2 sm:p-3 rounded-full text-xs sm:text-sm transition-all duration-300 hover:scale-110 carousel-favorite-btn">
+                                    class="carousel-favorite-btn flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-xs text-white/84 transition-all duration-300 hover:bg-white/16 hover:text-white sm:h-10 sm:w-10 sm:text-sm">
                                 <i class="far fa-heart"></i>
                             </button>
                         </div>
@@ -169,21 +149,15 @@
             <!-- Thumbnail Navigation -->
             {% if property.images.count > 1 %}
                 <div class="mt-4 overflow-x-auto">
-                    <div class="flex space-x-3 pb-2">
+                    <div class="inline-flex min-w-full items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-sm ring-1 ring-gray-200/80 backdrop-blur-sm pb-2">
                         {% for image in property.images.all %}
                             <div class="flex-shrink-0 relative cursor-pointer group"
-                                 onclick="goToSlidePairByImage({{ forloop.counter0 }})">
+                                 onclick="goToSlideByImage({{ forloop.counter0 }})">
                                 <img src="{{ image.thumbnail_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
-                                     class="w-20 h-20 object-cover rounded-lg transition-all duration-300 border-2 {% if forloop.counter0 == 0 or forloop.counter0 == 1 %}border-accent shadow-lg{% else %}border-transparent hover:border-accent/50{% endif %}"
+                                     class="h-16 w-16 object-cover rounded-xl transition-all duration-300 border-2 {% if forloop.counter0 == 0 %}border-accent shadow-md{% else %}border-transparent hover:border-accent/40{% endif %} sm:h-[4.25rem] sm:w-[4.25rem]"
                                      data-thumb="{{ forloop.counter0 }}">
-                                <!-- Special indicator for cycled display -->
-                                {% if property.images.count|divisibleby:2 == False and forloop.last %}
-                                    <div class="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                                        ↻
-                                    </div>
-                                {% endif %}
                                 <!-- Hover Overlay -->
-                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 rounded-lg flex items-center justify-center">
+                                <div class="absolute inset-0 rounded-xl bg-black bg-opacity-0 transition-all duration-300 group-hover:bg-opacity-20 flex items-center justify-center">
                                     <i class="fas fa-eye text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
                                 </div>
                             </div>
@@ -1010,7 +984,7 @@
          class="fixed inset-0 z-50 hidden bg-slate-950/95 transition-opacity duration-300 backdrop-blur-md"
          onclick="closeGallery()" data-gallery-backdrop>
         <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="relative max-h-[calc(100dvh-2rem)] w-full max-w-6xl" data-gallery-content onclick="event.stopPropagation()">
+            <div class="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-6xl flex-col gap-4" data-gallery-content onclick="event.stopPropagation()">
                 <!-- Header -->
                 <button onclick="closeGallery()"
                         class="absolute top-4 right-4 z-30 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-lg text-white/90 shadow-xl backdrop-blur-xl transition-all duration-200 hover:scale-105 hover:bg-white/16 hover:text-white md:h-12 md:w-12">
@@ -1018,7 +992,7 @@
                 </button>
 
                 <!-- Main Image -->
-                <div class="relative overflow-hidden rounded-[28px] border border-white/8 bg-white/[0.03] p-3 shadow-[0_28px_90px_rgba(0,0,0,0.45)] md:p-4">
+                <div class="relative flex-1 overflow-hidden rounded-[28px] border border-white/8 bg-white/[0.03] p-3 shadow-[0_28px_90px_rgba(0,0,0,0.45)] md:p-4">
                     <div class="pointer-events-none absolute inset-x-0 top-0 h-24 rounded-t-[28px] bg-gradient-to-b from-white/[0.06] to-transparent"></div>
                     <img id="gallery-image" src="" alt="{{ property_image_alt_base }}"
                          class="mx-auto block h-auto max-w-full object-contain rounded-[22px] shadow-2xl">
@@ -1047,8 +1021,8 @@
 
                 <!-- Thumbnail Navigation -->
                 {% if property.images.count > 1 %}
-                    <div class="absolute bottom-4 left-1/2 z-20 hidden w-[min(92vw,760px)] -translate-x-1/2 md:block">
-                        <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-black/50 shadow-2xl backdrop-blur-md">
+                    <div class="hidden md:block">
+                        <div class="relative mx-auto w-[min(92vw,760px)] overflow-hidden rounded-2xl border border-white/10 bg-black/50 shadow-2xl backdrop-blur-md">
                             <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-black/70 to-transparent"></div>
                             <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-black/70 to-transparent"></div>
                             <div id="gallery-thumbs-track"
@@ -1070,7 +1044,7 @@
         <!-- Mobile Close Button -->
         <div class="absolute bottom-6 inset-x-0 flex justify-center md:hidden">
             <button onclick="closeGallery()"
-                    class="w-10 h-10 bg-white/80 text-gray-900 rounded-full shadow-lg flex items-center justify-center">
+                    class="flex h-10 w-10 items-center justify-center rounded-full border border-white/18 bg-white/14 text-sm text-white/90 shadow-[0_10px_24px_rgba(15,23,42,0.18)] backdrop-blur-md transition-all duration-200 hover:bg-white/18 hover:text-white">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -1078,13 +1052,13 @@
         <!-- Mobile Navigation -->
         <div class="absolute top-1/2 left-3 transform -translate-y-1/2 md:hidden">
             <button onclick="event.stopPropagation(); previousImage();"
-                    class="w-9 h-9 bg-black/60 text-white rounded-full flex items-center justify-center shadow-lg">
+                    class="flex h-9 w-9 items-center justify-center rounded-full border border-white/16 bg-white/12 text-xs text-white/88 shadow-[0_10px_24px_rgba(15,23,42,0.18)] backdrop-blur-md transition-all duration-200 hover:bg-white/18 hover:text-white">
                 <i class="fas fa-chevron-left"></i>
             </button>
         </div>
         <div class="absolute top-1/2 right-3 transform -translate-y-1/2 md:hidden">
             <button onclick="event.stopPropagation(); nextImage();"
-                    class="w-9 h-9 bg-black/60 text-white rounded-full flex items-center justify-center shadow-lg">
+                    class="flex h-9 w-9 items-center justify-center rounded-full border border-white/16 bg-white/12 text-xs text-white/88 shadow-[0_10px_24px_rgba(15,23,42,0.18)] backdrop-blur-md transition-all duration-200 hover:bg-white/18 hover:text-white">
                 <i class="fas fa-chevron-right"></i>
             </button>
         </div>

@@ -4,9 +4,7 @@
  */
 
 let currentImageIndex = 0;
-let currentSlidePairIndex = 0;
-let totalSlidePairs = Math.ceil(PROPERTY_IMAGES.length / 2);
-let slidePairCache = null;
+const preloadedGalleryImages = new Set();
 
 const PROPERTY_I18N = window.propertyDetailTranslations || {};
 const LABEL_PRICE_ON_REQUEST = PROPERTY_I18N.priceOnRequest || 'По запросу';
@@ -21,29 +19,42 @@ function firePropertyGoal(goalName, params = {}) {
     window.dispatchMetrikaGoal(goalName, payload);
 }
 
-// Check if we're on mobile or desktop
-function isMobile() {
-    return window.innerWidth < 768; // md breakpoint
+function getCarouselSlide(index) {
+    return document.querySelector(`.property-slide[data-slide-index="${index}"]`);
 }
 
-function getSlidePairs() {
-    if (!slidePairCache) {
-        slidePairCache = Array.from(document.querySelectorAll('.property-slide-pair[data-slide-pair]'))
-            .map(node => ({
-                node,
-                index: parseInt(node.dataset.slidePair, 10) || 0,
-            }))
-            .sort((a, b) => a.index - b.index);
+function normalizeImageIndex(index) {
+    if (!PROPERTY_IMAGES.length) {
+        return 0;
     }
-    return slidePairCache;
+
+    return ((index % PROPERTY_IMAGES.length) + PROPERTY_IMAGES.length) % PROPERTY_IMAGES.length;
 }
 
-function getCurrentPairPosition(pairs) {
-    if (!pairs.length) {
-        return -1;
+function preloadImageAtIndex(index) {
+    if (!PROPERTY_IMAGES.length) {
+        return;
     }
-    const foundIndex = pairs.findIndex(pair => pair.index === currentSlidePairIndex);
-    return foundIndex >= 0 ? foundIndex : 0;
+
+    const normalizedIndex = normalizeImageIndex(index);
+    const imageUrl = PROPERTY_IMAGES[normalizedIndex];
+    if (!imageUrl || preloadedGalleryImages.has(imageUrl)) {
+        return;
+    }
+
+    const image = new Image();
+    image.src = imageUrl;
+    preloadedGalleryImages.add(imageUrl);
+}
+
+function preloadAdjacentImages(index) {
+    if (PROPERTY_IMAGES.length <= 1) {
+        return;
+    }
+
+    preloadImageAtIndex(index);
+    preloadImageAtIndex(index + 1);
+    preloadImageAtIndex(index - 1);
 }
 
 function setSlideVisibility(slide, isActive) {
@@ -59,69 +70,29 @@ function setSlideVisibility(slide, isActive) {
 
 // Carousel functionality (works for both mobile and desktop)
 function nextSlide() {
-    if (isMobile()) {
-        // Mobile: single image navigation
-        if (PROPERTY_IMAGES.length <= 1) return;
-
-        showMobileSlide((currentImageIndex + 1) % PROPERTY_IMAGES.length);
-    } else {
-        // Desktop: dual image navigation
-        const slidePairs = getSlidePairs();
-        if (slidePairs.length <= 1) return;
-
-        const currentPosition = getCurrentPairPosition(slidePairs);
-        const nextPosition = (currentPosition + 1) % slidePairs.length;
-        const currentSlidePair = slidePairs[currentPosition]?.node;
-        const nextSlidePair = slidePairs[nextPosition]?.node;
-
-        if (currentSlidePair && nextSlidePair) {
-            setSlideVisibility(currentSlidePair, false);
-            setSlideVisibility(nextSlidePair, true);
-            currentSlidePairIndex = slidePairs[nextPosition].index;
-        }
-    }
-
+    if (PROPERTY_IMAGES.length <= 1) return;
+    showCarouselSlide((currentImageIndex + 1) % PROPERTY_IMAGES.length);
     updateCarouselUI();
 }
 
 function previousSlide() {
-    if (isMobile()) {
-        // Mobile: single image navigation
-        if (PROPERTY_IMAGES.length <= 1) return;
-        let targetIndex = currentImageIndex - 1;
-        if (targetIndex < 0) {
-            targetIndex = PROPERTY_IMAGES.length - 1;
-        }
-        showMobileSlide(targetIndex);
-    } else {
-        // Desktop: dual image navigation
-        const slidePairs = getSlidePairs();
-        if (slidePairs.length <= 1) return;
-
-        const currentPosition = getCurrentPairPosition(slidePairs);
-        const prevPosition = (currentPosition - 1 + slidePairs.length) % slidePairs.length;
-        const currentSlidePair = slidePairs[currentPosition]?.node;
-        const prevSlidePair = slidePairs[prevPosition]?.node;
-
-        if (currentSlidePair && prevSlidePair) {
-            setSlideVisibility(currentSlidePair, false);
-            setSlideVisibility(prevSlidePair, true);
-            currentSlidePairIndex = slidePairs[prevPosition].index;
-        }
+    if (PROPERTY_IMAGES.length <= 1) return;
+    let targetIndex = currentImageIndex - 1;
+    if (targetIndex < 0) {
+        targetIndex = PROPERTY_IMAGES.length - 1;
     }
-
+    showCarouselSlide(targetIndex);
     updateCarouselUI();
 }
 
-function showMobileSlide(targetIndex) {
-    const slides = document.querySelectorAll('.property-slide-single[data-slide-single]');
-    if (!slides.length) {
+function showCarouselSlide(targetIndex) {
+    if (!PROPERTY_IMAGES.length) {
         return;
     }
 
-    const normalizedIndex = ((targetIndex % PROPERTY_IMAGES.length) + PROPERTY_IMAGES.length) % PROPERTY_IMAGES.length;
-    const currentSlide = document.querySelector('.property-slide-single[data-slide-single="' + currentImageIndex + '"]');
-    const targetSlide = document.querySelector('.property-slide-single[data-slide-single="' + normalizedIndex + '"]');
+    const normalizedIndex = normalizeImageIndex(targetIndex);
+    const currentSlide = getCarouselSlide(currentImageIndex);
+    const targetSlide = getCarouselSlide(normalizedIndex);
 
     if (currentSlide) {
         setSlideVisibility(currentSlide, false);
@@ -130,72 +101,29 @@ function showMobileSlide(targetIndex) {
         setSlideVisibility(targetSlide, true);
         currentImageIndex = normalizedIndex;
     }
+
+    preloadAdjacentImages(normalizedIndex);
 }
 
-function goToSlidePair(pairIndex) {
-    const slidePairs = getSlidePairs();
-    if (slidePairs.length <= 1) return;
-
-    const targetPosition = slidePairs.findIndex(pair => pair.index === pairIndex);
-    if (targetPosition === -1) {
-        return;
-    }
-
-    const currentPosition = getCurrentPairPosition(slidePairs);
-    if (currentPosition === targetPosition) {
-        return;
-    }
-
-    const currentSlidePair = slidePairs[currentPosition]?.node;
-    const targetSlidePair = slidePairs[targetPosition]?.node;
-
-    if (currentSlidePair && targetSlidePair) {
-        setSlideVisibility(currentSlidePair, false);
-        setSlideVisibility(targetSlidePair, true);
-        currentSlidePairIndex = slidePairs[targetPosition].index;
-    }
-
+function goToSlideByImage(imageIndex) {
+    showCarouselSlide(imageIndex);
     updateCarouselUI();
 }
 
-function goToSlidePairByImage(imageIndex) {
-    if (isMobile()) {
-        showMobileSlide(imageIndex);
-        return;
-    }
-
-    // Calculate which pair this image belongs to
-    const pairIndex = Math.floor(imageIndex / 2) * 2;
-    goToSlidePair(pairIndex);
+function syncHeroCarouselToCurrentImage() {
+    showCarouselSlide(currentImageIndex);
+    updateCarouselUI();
 }
 
 function updateCarouselUI() {
-    // Update photo counter - show range of photos visible
     const counter = document.getElementById('current-photo');
     if (counter) {
-        const firstPhoto = currentSlidePairIndex + 1;
-        let secondPhoto;
-
-        // Handle the case where we're showing the last image paired with first image
-        if (currentSlidePairIndex + 1 >= PROPERTY_IMAGES.length) {
-            // Show last image + first image
-            secondPhoto = 1;
-            counter.textContent = `${PROPERTY_IMAGES.length}, 1`;
-        } else {
-            secondPhoto = Math.min(currentSlidePairIndex + 2, PROPERTY_IMAGES.length);
-            if (firstPhoto === secondPhoto) {
-                counter.textContent = firstPhoto;
-            } else {
-                counter.textContent = `${firstPhoto}-${secondPhoto}`;
-            }
-        }
+        counter.textContent = currentImageIndex + 1;
     }
 
-    // Update pair indicators
-    const indicators = document.querySelectorAll('.property-pair-indicator');
+    const indicators = document.querySelectorAll('.property-slide-indicator');
     indicators.forEach((indicator, index) => {
-        const pairIndex = index * 2;
-        if (pairIndex === currentSlidePairIndex) {
+        if (index === currentImageIndex) {
             indicator.classList.remove('bg-white', 'bg-opacity-60');
             indicator.classList.add('bg-accent', 'shadow-lg');
         } else {
@@ -204,21 +132,9 @@ function updateCarouselUI() {
         }
     });
 
-    // Update thumbnails
     const thumbs = document.querySelectorAll('img[data-thumb]');
     thumbs.forEach((thumb, index) => {
-        const isFirstInPair = index === currentSlidePairIndex;
-        let isSecondInPair;
-
-        // Handle zipped display for odd number of images
-        if (currentSlidePairIndex + 1 >= PROPERTY_IMAGES.length && PROPERTY_IMAGES.length % 2 === 1) {
-            // We're showing last image + first image
-            isSecondInPair = index === 0; // First image as second in pair
-        } else {
-            isSecondInPair = index === currentSlidePairIndex + 1 && index < PROPERTY_IMAGES.length;
-        }
-
-        if (isFirstInPair || isSecondInPair) {
+        if (index === currentImageIndex) {
             thumb.classList.remove('border-transparent', 'hover:border-accent/50');
             thumb.classList.add('border-accent', 'shadow-lg');
         } else {
@@ -229,8 +145,9 @@ function updateCarouselUI() {
 }
 
 function openGallery(index) {
-    const normalizedIndex = typeof index === 'number' ? index : currentImageIndex;
+    const normalizedIndex = normalizeImageIndex(typeof index === 'number' ? index : currentImageIndex);
     currentImageIndex = normalizedIndex;
+    syncHeroCarouselToCurrentImage();
     firePropertyGoal('property_gallery_open', { index: normalizedIndex });
     updateGalleryImage();
     document.getElementById('gallery-modal').classList.remove('hidden');
@@ -240,6 +157,7 @@ function openGallery(index) {
 function closeGallery() {
     document.getElementById('gallery-modal').classList.add('hidden');
     document.body.style.overflow = 'auto';
+    syncHeroCarouselToCurrentImage();
 }
 
 function setupContactSidebarScroll() {
@@ -295,6 +213,7 @@ function updateGalleryImage() {
 
         galleryImage.src = PROPERTY_IMAGES[currentImageIndex];
         galleryImage.alt = PROPERTY_IMAGE_ALTS[currentImageIndex] || PROPERTY_TITLE;
+        preloadAdjacentImages(currentImageIndex);
         const galleryCounter = document.getElementById('gallery-counter');
         if (galleryCounter) {
             galleryCounter.textContent = `${currentImageIndex + 1} / ${PROPERTY_IMAGES.length}`;
@@ -435,12 +354,14 @@ function shareImage() {
 }
 
 function nextImage() {
-    currentImageIndex = (currentImageIndex + 1) % PROPERTY_IMAGES.length;
+    currentImageIndex = normalizeImageIndex(currentImageIndex + 1);
+    syncHeroCarouselToCurrentImage();
     updateGalleryImage();
 }
 
 function previousImage() {
-    currentImageIndex = (currentImageIndex - 1 + PROPERTY_IMAGES.length) % PROPERTY_IMAGES.length;
+    currentImageIndex = normalizeImageIndex(currentImageIndex - 1);
+    syncHeroCarouselToCurrentImage();
     updateGalleryImage();
 }
 
@@ -740,6 +661,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize carousel auto-play
     startAutoCarousel();
+    preloadAdjacentImages(currentImageIndex);
+    updateCarouselUI();
 
     // Initialize prices
     updatePrices();
