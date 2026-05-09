@@ -5,24 +5,9 @@
     <div class="mb-4 sm:mb-0">
         <h2 class="text-xl font-semibold text-gray-900 results-count"
             data-heading-tag="H2"
-            data-total-count="{% if properties %}{% if is_paginated %}{{ paginator.count }}{% else %}{{ properties|length }}{% endif %}{% else %}0{% endif %}">
-            {% if properties %}
-                {% if is_paginated %}
-                    {% blocktrans count counter=paginator.count %}
-                        Найден {{ counter }} объект
-                    {% plural %}
-                        Найдено {{ counter }} объектов
-                    {% endblocktrans %}
-                {% else %}
-                    {% blocktrans count counter=properties|length %}
-                        Найден {{ counter }} объект
-                    {% plural %}
-                        Найдено {{ counter }} объектов
-                    {% endblocktrans %}
-                {% endif %}
-            {% else %}
-                {% trans "Объекты не найдены" %}
-            {% endif %}
+            data-total-count="{% if properties %}{% if is_paginated %}{{ paginator.count }}{% else %}{{ properties|length }}{% endif %}{% else %}0{% endif %}"
+            data-contextual-heading="{{ catalog_results_heading|default:_('Объекты не найдены') }}">
+            {{ catalog_results_heading|default:_("Объекты не найдены") }}
         </h2>
     </div>
     

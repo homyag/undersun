@@ -23,6 +23,98 @@ function getCarouselSlide(index) {
     return document.querySelector(`.property-slide[data-slide-index="${index}"]`);
 }
 
+function isDesktopDualMode() {
+    return window.matchMedia('(min-width: 1024px)').matches;
+}
+
+function getHeroIndex(index = currentImageIndex) {
+    const normalizedIndex = normalizeImageIndex(index);
+    if (!isDesktopDualMode()) {
+        return normalizedIndex;
+    }
+
+    return Math.floor(normalizedIndex / 2) * 2;
+}
+
+function getDesktopSecondaryIndex(primaryIndex = getHeroIndex()) {
+    if (PROPERTY_IMAGES.length <= 1) {
+        return null;
+    }
+
+    const secondaryIndex = primaryIndex + 1;
+    return secondaryIndex < PROPERTY_IMAGES.length ? secondaryIndex : 0;
+}
+
+function getImageAspectRatio(imageIndex) {
+    const dimensions = Array.isArray(PROPERTY_IMAGE_DIMENSIONS) ? PROPERTY_IMAGE_DIMENSIONS[imageIndex] : null;
+    if (!dimensions || !dimensions.width || !dimensions.height) {
+        return null;
+    }
+
+    return dimensions.width / dimensions.height;
+}
+
+function shouldContainDesktopImage(imageIndex) {
+    const aspectRatio = getImageAspectRatio(imageIndex);
+    if (!aspectRatio) {
+        return false;
+    }
+
+    return aspectRatio >= 0.85 && aspectRatio <= 1.15;
+}
+
+function isPortraitDesktopImage(imageIndex) {
+    const aspectRatio = getImageAspectRatio(imageIndex);
+    if (!aspectRatio) {
+        return false;
+    }
+
+    return aspectRatio < 0.85;
+}
+
+function updateDesktopFrameMode(frameElement, imageIndex) {
+    if (!frameElement) {
+        return;
+    }
+}
+
+function applyDesktopImage(frameElement, imageElement, imageIndex) {
+    if (!frameElement || !imageElement || imageIndex === null || imageIndex === undefined) {
+        return;
+    }
+
+    const src = PROPERTY_IMAGES[imageIndex] || '';
+    imageElement.src = src;
+    imageElement.alt = PROPERTY_IMAGE_ALTS[imageIndex] || PROPERTY_TITLE;
+    updateDesktopFrameMode(frameElement, imageIndex);
+}
+
+function syncDesktopDualFrame() {
+    const primaryTrigger = document.getElementById('desktop-primary-trigger');
+    const primaryImage = document.getElementById('desktop-primary-image');
+    const secondaryTrigger = document.getElementById('desktop-secondary-trigger');
+    const secondaryImage = document.getElementById('desktop-secondary-image');
+
+    if (!primaryTrigger || !primaryImage || !secondaryTrigger || !secondaryImage) {
+        return;
+    }
+
+    const heroIndex = getHeroIndex();
+    const secondaryIndex = getDesktopSecondaryIndex(heroIndex);
+
+    primaryTrigger.dataset.imageIndex = heroIndex;
+    applyDesktopImage(primaryTrigger, primaryImage, heroIndex);
+    primaryTrigger.classList.toggle('desktop-frame-primary--single', secondaryIndex === null);
+
+    if (secondaryIndex === null) {
+        secondaryTrigger.classList.add('hidden');
+    } else {
+        secondaryTrigger.classList.remove('hidden');
+        secondaryTrigger.dataset.imageIndex = secondaryIndex;
+        applyDesktopImage(secondaryTrigger, secondaryImage, secondaryIndex);
+    }
+}
+
 function normalizeImageIndex(index) {
     if (!PROPERTY_IMAGES.length) {
         return 0;
@@ -71,17 +163,31 @@ function setSlideVisibility(slide, isActive) {
 // Carousel functionality (works for both mobile and desktop)
 function nextSlide() {
     if (PROPERTY_IMAGES.length <= 1) return;
-    showCarouselSlide((currentImageIndex + 1) % PROPERTY_IMAGES.length);
+    if (isDesktopDualMode()) {
+        const nextIndex = getHeroIndex() + 2;
+        showCarouselSlide(nextIndex >= PROPERTY_IMAGES.length ? 0 : nextIndex);
+    } else {
+        showCarouselSlide((currentImageIndex + 1) % PROPERTY_IMAGES.length);
+    }
     updateCarouselUI();
 }
 
 function previousSlide() {
     if (PROPERTY_IMAGES.length <= 1) return;
-    let targetIndex = currentImageIndex - 1;
-    if (targetIndex < 0) {
-        targetIndex = PROPERTY_IMAGES.length - 1;
+    if (isDesktopDualMode()) {
+        const heroIndex = getHeroIndex();
+        let targetIndex = heroIndex - 2;
+        if (targetIndex < 0) {
+            targetIndex = PROPERTY_IMAGES.length % 2 === 0 ? PROPERTY_IMAGES.length - 2 : PROPERTY_IMAGES.length - 1;
+        }
+        showCarouselSlide(targetIndex);
+    } else {
+        let targetIndex = currentImageIndex - 1;
+        if (targetIndex < 0) {
+            targetIndex = PROPERTY_IMAGES.length - 1;
+        }
+        showCarouselSlide(targetIndex);
     }
-    showCarouselSlide(targetIndex);
     updateCarouselUI();
 }
 
@@ -91,6 +197,18 @@ function showCarouselSlide(targetIndex) {
     }
 
     const normalizedIndex = normalizeImageIndex(targetIndex);
+    if (isDesktopDualMode()) {
+        currentImageIndex = normalizedIndex;
+        syncDesktopDualFrame();
+        preloadImageAtIndex(getHeroIndex(normalizedIndex));
+        const secondaryIndex = getDesktopSecondaryIndex(getHeroIndex(normalizedIndex));
+        if (secondaryIndex !== null) {
+            preloadImageAtIndex(secondaryIndex);
+        }
+        preloadAdjacentImages(getHeroIndex(normalizedIndex));
+        return;
+    }
+
     const currentSlide = getCarouselSlide(currentImageIndex);
     const targetSlide = getCarouselSlide(normalizedIndex);
 
@@ -110,6 +228,11 @@ function goToSlideByImage(imageIndex) {
     updateCarouselUI();
 }
 
+function goToHeroPair(imageIndex) {
+    showCarouselSlide(imageIndex);
+    updateCarouselUI();
+}
+
 function syncHeroCarouselToCurrentImage() {
     showCarouselSlide(currentImageIndex);
     updateCarouselUI();
@@ -117,8 +240,10 @@ function syncHeroCarouselToCurrentImage() {
 
 function updateCarouselUI() {
     const counter = document.getElementById('current-photo');
+    const heroIndex = getHeroIndex();
+    const secondaryHeroIndex = isDesktopDualMode() ? getDesktopSecondaryIndex(heroIndex) : null;
     if (counter) {
-        counter.textContent = currentImageIndex + 1;
+        counter.textContent = secondaryHeroIndex !== null ? `${heroIndex + 1}-${secondaryHeroIndex + 1}` : `${heroIndex + 1}`;
     }
 
     const indicators = document.querySelectorAll('.property-slide-indicator');
@@ -132,9 +257,24 @@ function updateCarouselUI() {
         }
     });
 
+    const pairIndicators = document.querySelectorAll('.property-slide-pair-indicator');
+    pairIndicators.forEach((indicator) => {
+        const indicatorIndex = parseInt(indicator.dataset.slideIndex || '-1', 10);
+        const isActive = indicatorIndex === heroIndex;
+        indicator.classList.toggle('w-7', isActive);
+        indicator.classList.toggle('bg-accent', isActive);
+        indicator.classList.toggle('shadow-lg', isActive);
+        indicator.classList.toggle('bg-white/35', !isActive);
+        indicator.classList.toggle('w-2.5', !isActive);
+    });
+
     const thumbs = document.querySelectorAll('img[data-thumb]');
     thumbs.forEach((thumb, index) => {
-        if (index === currentImageIndex) {
+        const isActive = isDesktopDualMode()
+            ? index === heroIndex || index === secondaryHeroIndex
+            : index === currentImageIndex;
+
+        if (isActive) {
             thumb.classList.remove('border-transparent', 'hover:border-accent/50');
             thumb.classList.add('border-accent', 'shadow-lg');
         } else {
@@ -661,6 +801,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize carousel auto-play
     startAutoCarousel();
+    syncDesktopDualFrame();
     preloadAdjacentImages(currentImageIndex);
     updateCarouselUI();
 
@@ -676,6 +817,22 @@ document.addEventListener('DOMContentLoaded', function () {
         carouselContainer.addEventListener('mouseenter', stopAutoCarousel);
         carouselContainer.addEventListener('mouseleave', startAutoCarousel);
     }
+
+    const desktopPrimaryTrigger = document.getElementById('desktop-primary-trigger');
+    const desktopSecondaryTrigger = document.getElementById('desktop-secondary-trigger');
+    [desktopPrimaryTrigger, desktopSecondaryTrigger].forEach(trigger => {
+        if (!trigger) {
+            return;
+        }
+        trigger.addEventListener('click', function () {
+            const targetIndex = parseInt(this.dataset.imageIndex || `${currentImageIndex}`, 10);
+            openGallery(Number.isNaN(targetIndex) ? currentImageIndex : targetIndex);
+        });
+    });
+
+    ['resize', 'orientationchange'].forEach(eventName => {
+        window.addEventListener(eventName, syncHeroCarouselToCurrentImage, { passive: true });
+    });
 
     // Initialize favorite buttons state
     const propertyId = PROPERTY_ID;

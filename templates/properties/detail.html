@@ -36,9 +36,11 @@
         }
 
         .gallery-hero-image {
+            display: block;
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center center;
         }
 
         .property-slide--contain {
@@ -52,7 +54,45 @@
 
         .property-slide--contain .gallery-hero-image {
             object-fit: contain;
-            padding: 0.5rem;
+            padding: 0.3rem;
+        }
+
+        .desktop-frame-primary,
+        .desktop-frame-secondary {
+            flex: 1 1 0;
+            min-width: 0;
+            display: grid;
+            place-items: center;
+            padding: 0.4rem;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top, rgba(255, 255, 255, 0.34), transparent 52%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(244, 247, 251, 0.96) 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.75),
+                inset 0 0 0 1px rgba(148, 163, 184, 0.10);
+        }
+
+        .desktop-preview-frame {
+            height: clamp(300px, 31vw, 430px);
+        }
+
+        .desktop-frame-primary.desktop-frame-primary--single {
+            flex-basis: 100%;
+        }
+
+        .desktop-frame-primary .gallery-hero-image,
+        .desktop-frame-secondary .gallery-hero-image {
+            width: auto;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            padding: 0;
+            border-radius: 1.1rem;
+            outline: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow:
+                0 18px 34px rgba(15, 23, 42, 0.14),
+                0 6px 14px rgba(15, 23, 42, 0.08);
         }
 
         #gallery-image {
@@ -75,9 +115,9 @@
             <div class="relative overflow-hidden rounded-lg sm:rounded-xl shadow-lg sm:shadow-2xl group">
                 {% if property.images.exists %}
                     <!-- Carousel with Single/Dual Image Display -->
-                    <div class="property-carousel relative h-64 sm:h-80 lg:h-[560px] xl:h-[620px]">
+                    <div class="property-carousel relative h-64 sm:h-80 lg:h-auto">
                         {% for image in property.images.all %}
-                            <div class="property-slide absolute inset-0 transition-opacity duration-1000 {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
+                            <div class="property-slide absolute inset-0 transition-opacity duration-1000 lg:hidden {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
                                  aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
                                  data-slide-index="{{ forloop.counter0 }}">
                                 <img src="{{ image.medium_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
@@ -85,6 +125,25 @@
                                      onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
                             </div>
                         {% endfor %}
+
+                        <div class="hidden items-start gap-4 p-4 lg:flex xl:gap-5 xl:p-5">
+                            <div id="desktop-primary-trigger"
+                                 class="property-slide desktop-frame-primary desktop-preview-frame group relative cursor-pointer overflow-hidden rounded-[1.75rem] border border-white/15 shadow-[0_20px_48px_rgba(15,23,42,0.2)]"
+                                 data-image-index="0">
+                                <img id="desktop-primary-image"
+                                     src="{{ property.images.first.medium_url }}"
+                                     alt="{{ property_image_alt_base }} 1"
+                                     class="gallery-hero-image transition-transform duration-300">
+                            </div>
+                            <div id="desktop-secondary-trigger"
+                                 class="property-slide desktop-frame-secondary desktop-preview-frame group relative cursor-pointer overflow-hidden rounded-[1.75rem] border border-white/15 shadow-[0_18px_42px_rgba(15,23,42,0.16)]"
+                                 data-image-index="1">
+                                <img id="desktop-secondary-image"
+                                     src="{% if property.images.count > 1 %}{{ property.images.all.1.medium_url }}{% else %}{{ property.images.first.medium_url }}{% endif %}"
+                                     alt="{{ property_image_alt_base }} 2"
+                                     class="gallery-hero-image transition-transform duration-300">
+                            </div>
+                        </div>
 
                         <!-- Carousel Navigation -->
                         {% if property.images.count > 1 %}
@@ -101,12 +160,23 @@
                             </button>
 
                             <!-- Slide Indicators -->
-                            <div class="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm">
+                            <div class="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm lg:hidden">
                                 {% for image in property.images.all %}
                                     <button onclick="goToSlideByImage({{ forloop.counter0 }})"
                                             class="property-slide-indicator h-2.5 w-2.5 rounded-full ring-1 ring-white/20 transition-all duration-300 {% if forloop.counter0 == 0 %}bg-accent shadow-[0_0_0_4px_rgba(255,255,255,0.12)]{% else %}bg-white/35 hover:bg-white/60{% endif %}"
                                             data-slide-index="{{ forloop.counter0 }}">
                                     </button>
+                                {% endfor %}
+                            </div>
+
+                            <div class="absolute bottom-5 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-2 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm lg:flex">
+                                {% for image in property.images.all %}
+                                    {% if forloop.counter0|divisibleby:2 %}
+                                        <button onclick="goToHeroPair({{ forloop.counter0 }})"
+                                                class="property-slide-pair-indicator h-2.5 rounded-full ring-1 ring-white/20 transition-all duration-300 {% if forloop.counter0 == 0 %}w-7 bg-accent shadow-[0_0_0_4px_rgba(255,255,255,0.12)]{% else %}w-2.5 bg-white/35 hover:w-5 hover:bg-white/60{% endif %}"
+                                                data-slide-index="{{ forloop.counter0 }}">
+                                        </button>
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                         {% endif %}
@@ -186,71 +256,43 @@
 
             <!-- Breadcrumbs -->
             <div class="mt-4">
-                <nav class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 overflow-x-auto pb-2">
-                    {% url 'properties:property_rent' as rent_catalog_url %}
-                    {% url 'properties:property_sale' as sale_catalog_url %}
+                {% if detail_breadcrumbs %}
+                <nav class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 overflow-x-auto pb-2" aria-label="{% trans 'Хлебные крошки' %}">
                     <script type="application/ld+json">
                     {
                       "@context": "https://schema.org",
                       "@type": "BreadcrumbList",
                       "itemListElement": [
+                        {% for crumb in detail_breadcrumbs %}
                         {
                           "@type": "ListItem",
-                          "position": 1,
+                          "position": {{ forloop.counter }},
                           "item": {
-                            "@id": "{% if property.deal_type == 'rent' %}{{ rent_catalog_url|absolute_url:request|escapejs }}{% else %}{{ sale_catalog_url|absolute_url:request|escapejs }}{% endif %}",
-                            "name": "{% trans "Недвижимость" %}"
+                            "@id": "{% if crumb.url %}{{ crumb.url|absolute_url:request|escapejs }}{% else %}{{ request.build_absolute_uri|escapejs }}{% endif %}",
+                            "name": "{{ crumb.label|escapejs }}"
                           }
-                        }{% if property.district %},
-                        {
-                          "@type": "ListItem",
-                          "position": 2,
-                          "item": {
-                            "@id": "{{ property.district.get_absolute_url|absolute_url:request|escapejs }}",
-                            "name": "{{ property_district_label|escapejs }}"
-                          }
-                        }{% endif %}{% if property.location %},
-                        {
-                          "@type": "ListItem",
-                          "position": 3,
-                          "item": {
-                            "@id": "{{ property.location.get_absolute_url|absolute_url:request|escapejs }}",
-                            "name": "{{ property_location_label|escapejs }}"
-                          }
-                        }{% endif %},{
-                          "@type": "ListItem",
-                          "position": {% if property.location %}4{% elif property.district %}3{% else %}2{% endif %},
-                          "item": {
-                            "@id": "{{ property.get_absolute_url|absolute_url:request|escapejs }}",
-                            "name": "{{ property_title_display|default:property.title|escapejs }}"
-                          }
-                        }
+                        }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
                       ]
                     }
                     </script>
-                    <a href="
-                            {% if property.deal_type == 'rent' %}{% url 'properties:property_rent' %}{% else %}{% url 'properties:property_sale' %}{% endif %}"
-                       class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
-                        {% trans "Недвижимость" %}
-                    </a>
-                    <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
-
-                    <a href="{{ property.district.get_absolute_url }}"
-                       class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
-                        {{ property_district_label }}
-                    </a>
-
-                    {% if property.location %}
-                        <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
-                        <a href="{{ property.location.get_absolute_url }}"
-                           class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
-                            {{ property_location_label }}
-                        </a>
-                    {% endif %}
-
-                    <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
-                    <span class="text-gray-900 font-medium whitespace-nowrap">{{ property_title_display|default:property.title|truncatechars:30 }}</span>
+                    {% for crumb in detail_breadcrumbs %}
+                        {% if not forloop.first %}
+                            <i class="fas fa-chevron-right text-xs text-gray-400 flex-shrink-0"></i>
+                        {% endif %}
+                        {% if crumb.url and not forloop.last %}
+                            <a href="{{ crumb.url }}"
+                               class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
+                                {{ crumb.label }}
+                            </a>
+                        {% else %}
+                            <span class="text-gray-900 {% if forloop.last %}font-medium{% endif %} whitespace-nowrap">
+                                {{ crumb.label|truncatechars:30 }}
+                            </span>
+                        {% endif %}
+                    {% endfor %}
                 </nav>
+                {% endif %}
             </div>
         </div>
     </section>

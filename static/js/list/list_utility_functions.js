@@ -104,6 +104,14 @@ function updateResultsCounter() {
     if (!resultsCountElement) return;
 
     const totalCount = parseInt(resultsCountElement.dataset.totalCount) || 0;
+    const contextualHeading = (resultsCountElement.dataset.contextualHeading || '').trim();
+
+    if (contextualHeading) {
+        resultsCountElement.textContent = contextualHeading;
+        resultsCountElement.dataset.totalCount = totalCount;
+        return;
+    }
+
     const localizedText = getLocalizedResultsCountText(resultsCountElement, totalCount);
 
     if (localizedText) {

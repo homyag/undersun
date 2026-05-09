@@ -694,6 +694,13 @@ function updateResultsCount(count) {
         return;
     }
 
+    const contextualHeading = (element.dataset.contextualHeading || '').trim();
+    if (contextualHeading) {
+        element.textContent = contextualHeading;
+        element.dataset.totalCount = count;
+        return;
+    }
+
     if (typeof window.getLocalizedResultsCountText === 'function') {
         const localizedText = window.getLocalizedResultsCountText(element, count);
         if (localizedText) {

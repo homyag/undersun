@@ -220,6 +220,90 @@ def _get_property_type_nav_label(property_obj, language_code='ru'):
     )
 
 
+def _get_catalog_deal_breadcrumb_label(deal_type, language_code='ru'):
+    labels = {
+        'sale': {'ru': 'Продажа', 'en': 'Sale', 'th': 'ขาย'},
+        'rent': {'ru': 'Аренда', 'en': 'Rent', 'th': 'เช่า'},
+    }
+    return labels.get(deal_type, {}).get(language_code, '')
+
+
+def _build_catalog_breadcrumb_url(base_url, params=None):
+    if not params:
+        return base_url
+    normalized = {key: value for key, value in params.items() if value not in (None, '', [], ())}
+    if not normalized:
+        return base_url
+    return f"{base_url}?{urlencode(normalized, doseq=True)}"
+
+
+def _build_catalog_breadcrumbs_common(
+    *,
+    language_code='ru',
+    deal_type='',
+    property_type_obj=None,
+    district_obj=None,
+    location_obj=None,
+    current_label='',
+    current_url='',
+):
+    breadcrumbs = [{
+        'label': gettext('Главная'),
+        'url': reverse('core:home'),
+    }, {
+        'label': gettext('Недвижимость'),
+        'url': reverse('properties:property_list'),
+    }]
+
+    current_base_url = reverse('properties:property_list')
+
+    if deal_type in {'sale', 'rent'}:
+        current_base_url = reverse(f'properties:property_{deal_type}')
+        breadcrumbs.append({
+            'label': _get_catalog_deal_breadcrumb_label(deal_type, language_code),
+            'url': current_base_url,
+        })
+
+    if district_obj:
+        breadcrumbs.append({
+            'label': _get_translated_attr(district_obj, 'name', language_code, district_obj.name),
+            'url': _build_catalog_breadcrumb_url(current_base_url, {'district': district_obj.slug}),
+        })
+
+    if location_obj:
+        breadcrumbs.append({
+            'label': _get_translated_attr(location_obj, 'name', language_code, location_obj.name),
+            'url': _build_catalog_breadcrumb_url(
+                current_base_url,
+                {'district': location_obj.district.slug, 'location': location_obj.slug},
+            ),
+        })
+
+    if property_type_obj:
+        type_base_url = reverse('properties:property_by_type', args=[property_type_obj.name])
+        type_params = {}
+        if deal_type in {'sale', 'rent'}:
+            type_params['deal_type'] = deal_type
+        if district_obj:
+            type_params['district'] = district_obj.slug
+        if location_obj:
+            type_params['location'] = location_obj.slug
+        breadcrumbs.append({
+            'label': PROPERTY_TYPE_NAV_LABELS.get(property_type_obj.name, {}).get(language_code)
+                     or _get_translated_attr(property_type_obj, 'name_display', language_code, property_type_obj.name_display),
+            'url': _build_catalog_breadcrumb_url(type_base_url, type_params),
+        })
+
+    current_label = _normalize_whitespace(current_label or '')
+    if current_label and current_label != breadcrumbs[-1]['label']:
+        breadcrumbs.append({
+            'label': current_label,
+            'url': current_url or '',
+        })
+
+    return breadcrumbs
+
+
 def _build_property_location_context(property_obj, language_code='ru'):
     district_label = _get_translated_attr(property_obj.district, 'name', language_code, 'Phuket')
     location_label = _get_translated_attr(property_obj.location, 'name', language_code, '') if property_obj.location else ''
@@ -547,6 +631,7 @@ class PropertyListView(ListView):
         with override(language_code):
             context['seo_heading'] = self.build_seo_heading(context)
         context['catalog_results_count'] = self._get_results_count(context) or 0
+        context['catalog_results_heading'] = self.build_catalog_results_heading(context)
         context['generated_catalog_seo'] = self.build_generated_catalog_seo(context, language_code)
         context['catalog_seo_block'] = self.get_catalog_seo_block(context)
         context['catalog_faq'] = self.build_catalog_faq(context, language_code)
@@ -770,6 +855,36 @@ class PropertyListView(ListView):
             heading = texts['heading_fallback']
 
         return heading
+
+    def build_catalog_results_heading(self, context):
+        language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        results_count = context.get('catalog_results_count') or 0
+        property_type_obj = self._get_primary_property_type(context)
+        current_filters = context.get('current_filters', {})
+        deal_type = context.get('deal_type') or current_filters.get('deal_type', '')
+        location_obj, district_obj = self._get_location_and_district()
+
+        subject = self._get_catalog_subject_label(property_type_obj, language_code)
+        deal_phrase = self._get_catalog_deal_phrase(deal_type, language_code)
+        geo_phrase = self._get_catalog_geo_phrase(location_obj, district_obj, language_code)
+
+        if language_code == 'en':
+            context_parts = [subject, deal_phrase, geo_phrase]
+            context_label = ' '.join(part for part in context_parts if part).strip() or 'properties in the catalogue'
+            return f'{results_count} {context_label}' if results_count else 'No properties found'
+
+        if language_code == 'th':
+            context_parts = [subject, deal_phrase, geo_phrase]
+            context_label = ' '.join(part for part in context_parts if part).strip() or 'รายการในแคตตาล็อก'
+            return f'{context_label} {results_count} รายการ' if results_count else 'ไม่พบรายการ'
+
+        context_parts = [subject, deal_phrase, geo_phrase]
+        context_label = ' '.join(part for part in context_parts if part).strip() or 'объектов в каталоге'
+        if not results_count:
+            return 'Объекты не найдены'
+
+        count_label = ngettext('%(count)s объект', '%(count)s объектов', results_count) % {'count': results_count}
+        return f'{count_label} {context_label}'.strip()
 
     def _get_location_and_district(self):
         location_slug = self.request.GET.get('location')
@@ -1144,64 +1259,18 @@ class PropertyListView(ListView):
         return chips
 
     def build_catalog_breadcrumbs(self, context, language_code='ru'):
-        breadcrumbs = [{
-            'label': gettext('Главная'),
-            'url': reverse('core:home'),
-        }]
-
         current_filters = context.get('current_filters', {})
         deal_type = context.get('deal_type') or current_filters.get('deal_type') or ''
         property_type_obj = self._get_primary_property_type(context)
         location_obj, district_obj = self._get_location_and_district()
-
-        breadcrumbs.append({
-            'label': gettext('Недвижимость'),
-            'url': reverse('properties:property_list'),
-        })
-
-        current_base_url = reverse('properties:property_list')
-
-        if deal_type in {'sale', 'rent'}:
-            current_base_url = reverse(f'properties:property_{deal_type}')
-            breadcrumbs.append({
-                'label': self._get_catalog_deal_label(deal_type, language_code),
-                'url': current_base_url,
-            })
-
-        if property_type_obj:
-            current_base_url = reverse('properties:property_by_type', args=[property_type_obj.name])
-            query_params = {}
-            if deal_type in {'sale', 'rent'}:
-                query_params['deal_type'] = deal_type
-            breadcrumbs.append({
-                'label': self._get_catalog_subject_label(property_type_obj, language_code),
-                'url': self._build_catalog_url(current_base_url, query_params),
-            })
-
-        if district_obj:
-            district_params = {'district': district_obj.slug}
-            if location_obj:
-                district_params['location'] = ''
-            breadcrumbs.append({
-                'label': _get_translated_attr(district_obj, 'name', language_code, district_obj.name),
-                'url': self._build_catalog_url(current_base_url, district_params),
-            })
-
-        if location_obj:
-            breadcrumbs.append({
-                'label': _get_translated_attr(location_obj, 'name', language_code, location_obj.name),
-                'url': self._build_catalog_url(
-                    current_base_url,
-                    {'district': location_obj.district.slug, 'location': location_obj.slug},
-                ),
-            })
-
-        breadcrumbs.append({
-            'label': context.get('seo_heading') or _get_catalog_texts(language_code)['heading_fallback'],
-            'url': '',
-        })
-
-        return breadcrumbs
+        return _build_catalog_breadcrumbs_common(
+            language_code=language_code,
+            deal_type=deal_type,
+            property_type_obj=property_type_obj,
+            district_obj=district_obj,
+            location_obj=location_obj,
+            current_label=context.get('seo_heading') or _get_catalog_texts(language_code)['heading_fallback'],
+        )
 
     def is_indexable_filter_page(self, context):
         if not self.is_base_indexable_filter_page(context):
@@ -2152,6 +2221,15 @@ class PropertyDetailView(DetailView):
         context['property_type_nav_label'] = _get_property_type_nav_label(self.object, language_code)
         context['property_catalog_type_url'] = _get_property_catalog_type_url(self.object)
         context.update(_build_property_location_context(self.object, language_code))
+        context['detail_breadcrumbs'] = _build_catalog_breadcrumbs_common(
+            language_code=language_code,
+            deal_type=self.object.deal_type,
+            property_type_obj=self.object.property_type,
+            district_obj=self.object.district,
+            location_obj=self.object.location,
+            current_label=context['property_title_display'],
+            current_url=self.object.get_absolute_url(),
+        )
 
         return context
 

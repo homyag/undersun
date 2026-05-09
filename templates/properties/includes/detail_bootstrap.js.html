@@ -21,6 +21,15 @@ const PROPERTY_IMAGE_ALTS = [
     {% endfor %}
 ];
 
+const PROPERTY_IMAGE_DIMENSIONS = [
+    {% for image in property.images.all %}
+        {
+            width: {% if image.image and image.image.width %}{{ image.image.width }}{% else %}null{% endif %},
+            height: {% if image.image and image.image.height %}{{ image.image.height }}{% else %}null{% endif %}
+        }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
 // Property data for JavaScript
 const PROPERTY_ID = {{ property.id }};
 const PROPERTY_TITLE = '{{ property.title|escapejs }}';
