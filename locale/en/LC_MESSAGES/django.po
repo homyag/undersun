@@ -2700,6 +2700,31 @@ msgstr "The author of the article"
 msgid "Похожие статьи"
 msgstr "Related articles"
 
+#: templates/blog/blog_detail.html:280
+msgid "Содержание"
+msgstr "Contents"
+
+#: templates/blog/blog_detail.html:281
+msgid "Быстрый переход по основным разделам статьи"
+msgstr "Quick navigation through the main sections of the article"
+
+#: templates/blog/blog_detail.html:410
+msgid "Ещё по теме"
+msgstr "More on this topic"
+
+#: templates/blog/blog_detail.html:413
+#, python-format
+msgid "Больше материалов из категории “%(category_name)s”"
+msgstr "More posts from the “%(category_name)s” category"
+
+#: templates/blog/blog_detail.html:418
+msgid "Все статьи категории"
+msgstr "All category posts"
+
+#: templates/blog/blog_detail.html:440
+msgid "Открыть статью"
+msgstr "Open article"
+
 #: templates/blog/blog_detail.html:351 templates/blog/blog_list.html:273
 msgid "Категории"
 msgstr "Categories"
@@ -2763,41 +2788,31 @@ msgstr "Recommended articles"
 
 #: templates/blog/blog_detail.html:491
 msgid "Отправка..."
-msgstr "Shipment..."
+msgstr "Sending..."
 
 #: templates/blog/blog_detail_amp.html:75
-#, fuzzy
-#| msgid "Похожие статьи"
 msgid "Назад к статье"
-msgstr "Related articles"
+msgstr "Back to article"
 
 #: templates/blog/blog_detail_amp.html:97
-#, fuzzy
-#| msgid "Где вам удобнее общаться"
 msgid "Вам также может понравиться"
-msgstr "Choose the channel that suits you"
+msgstr "You may also like"
 
 #: templates/blog/blog_detail_amp.html:110
-#, fuzzy
-#| msgid "Консультации по покупке недвижимости"
 msgid "Нужна консультация по недвижимости?"
-msgstr "Consultations on the purchase of real estate"
+msgstr "Need property advice?"
 
 #: templates/blog/blog_detail_amp.html:111
-#, fuzzy
-#| msgid "Смотреть каталог"
 msgid "Перейти в каталог"
-msgstr "View catalog"
+msgstr "Go to the catalogue"
 
 #: templates/blog/blog_detail_amp.html:117
-#, fuzzy
-#| msgid "Недвижимость на Пхукете"
 msgid "Найдите вашу недвижимость на Пхукете"
-msgstr "Phuket Real Estate"
+msgstr "Find your property in Phuket"
 
 #: templates/blog/blog_list.html:18 templates/blog/blog_tag.html:4
 msgid "Статьи с тегом"
-msgstr "Articles with a tag"
+msgstr "Posts tagged"
 
 #: templates/blog/blog_list.html:20 templates/core/search.html:19
 msgid "Результаты поиска"
@@ -2813,7 +2828,7 @@ msgstr "News, articles, cases and events in the Phuket real estate world"
 
 #: templates/blog/blog_list.html:43
 msgid "Поиск по статьям..."
-msgstr "Article search..."
+msgstr "Search articles..."
 
 #: templates/blog/blog_list.html:51
 msgid "Все категории"
@@ -2821,11 +2836,11 @@ msgstr "All categories"
 
 #: templates/blog/blog_list.html:62 templates/core/search.html:79
 msgid "Найти"
-msgstr "Find"
+msgstr "Search"
 
 #: templates/blog/blog_list.html:69
 msgid "Сбросить"
-msgstr "Throw off"
+msgstr "Reset"
 
 #: templates/blog/blog_list.html:98 templates/blog/blog_list.html:120
 #: templates/locations/location_detail.html:253
@@ -2850,6 +2865,10 @@ msgstr "Nothing was found for your search. Try changing the search parameters."
 #: templates/blog/blog_list.html:219
 msgid "В данной категории пока нет статей."
 msgstr "There are no articles in this category yet."
+
+#: templates/blog/blog_list.html:31
+msgid "Статьи из данной категории"
+msgstr "Articles from this category"
 
 #: templates/blog/blog_list.html:226
 msgid "Все статьи"

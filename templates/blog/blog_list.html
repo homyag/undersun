@@ -2,9 +2,13 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{{ meta_title }}{{ pagination_seo_suffix }} - Undersun Estate{% endblock %}
+{% block title %}{{ meta_title }}{% endblock %}
 
-{% block description %}{{ meta_description }}{{ pagination_seo_suffix }}{% endblock %}
+{% block description %}{{ meta_description }}{% endblock %}
+
+{% if page_keywords %}
+{% block keywords %}{{ page_keywords }}{% endblock %}
+{% endif %}
 
 {% block extra_meta %}
     {{ block.super }}
@@ -56,24 +60,45 @@
         <!-- Header -->
         <div class="text-center mb-12">
             <h1 class="text-4xl font-bold text-primary mb-4">
-                {% if current_category %}
-                    {{ current_category.name }}
-                {% elif current_tag %}
-                    {% trans "Статьи с тегом" %} "{{ current_tag.name }}"
-                {% elif search_query %}
-                    {% trans "Результаты поиска" %}
-                {% else %}
-                    {% blocktrans %}Блог о недвижимости Пхукета и инвестициях от Undersun Estate{% endblocktrans %}
-                {% endif %}
+                {{ page_h1 }}
             </h1>
             <p class="text-xl text-tertiary max-w-3xl mx-auto">
                 {% if current_category %}
-                    {{ current_category.description|default:"Статьи из данной категории" }}
+                    {% if current_category.description %}
+                        {{ current_category.description }}
+                    {% else %}
+                        {% trans "Статьи из данной категории" %}
+                    {% endif %}
                 {% else %}
                     {% trans "Новости, статьи, кейсы и события в мире недвижимости Пхукета" %}
                 {% endif %}
             </p>
         </div>
+
+        {% if blog_intro %}
+        <section class="mb-10 rounded-3xl border border-gray-200 bg-white px-6 py-6 shadow-sm sm:px-8">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div class="max-w-3xl">
+                    <div class="mb-3 inline-flex items-center rounded-full bg-accent/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                        {{ blog_intro.eyebrow }}
+                    </div>
+                    <p class="text-lg font-medium leading-8 text-gray-900">
+                        {{ blog_intro.lead }}
+                    </p>
+                    {% if blog_intro.body and blog_intro.body != blog_intro.lead %}
+                    <p class="mt-3 text-base leading-7 text-gray-600">
+                        {{ blog_intro.body }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% if blog_intro.meta %}
+                <div class="inline-flex items-center rounded-2xl bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 ring-1 ring-gray-200">
+                    {{ blog_intro.meta }}
+                </div>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <!-- Main Content -->
@@ -122,10 +147,10 @@
                         {% for post in posts %}
                             <article class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col">
                                 <!-- Featured Image -->
-                                {% if post.featured_image %}
+                                {% if post.get_localized_featured_image %}
                                     <div class="relative overflow-hidden flex-shrink-0">
-                                        <img src="{{ post.featured_image.url }}"
-                                             alt="{{ post.featured_image_alt|default:post.title }}"
+                                        <img src="{{ post.get_localized_featured_image.url }}"
+                                             alt="{{ post.get_featured_image_alt_text }}"
                                              class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                                         
                                         <!-- Category Badge -->
@@ -286,8 +311,8 @@
                             {% for post in featured_posts %}
                                 <article class="flex space-x-3">
                                     <div class="flex-shrink-0">
-                                        {% if post.featured_image %}
-                                            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" 
+                                        {% if post.get_localized_featured_image %}
+                                            <img src="{{ post.get_localized_featured_image.url }}" alt="{{ post.get_featured_image_alt_text }}" 
                                                  class="w-16 h-16 object-cover rounded-lg">
                                         {% else %}
                                             <div class="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">

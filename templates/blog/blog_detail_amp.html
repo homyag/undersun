@@ -64,9 +64,9 @@
 
   <main class="container">
     <article class="card">
-      {% if post.featured_image %}
+      {% if post.get_localized_featured_image %}
       <div class="featured-image">
-        <amp-img src="{{ post.featured_image.url }}" width="1200" height="675" layout="responsive" alt="{{ post.title }}"></amp-img>
+        <amp-img src="{{ post.get_localized_featured_image.url }}" width="{{ post.get_localized_featured_image.width|default:1200 }}" height="{{ post.get_localized_featured_image.height|default:675 }}" layout="responsive" alt="{{ post.get_featured_image_alt_text }}"></amp-img>
       </div>
       {% endif %}
 

@@ -56,7 +56,7 @@ const MAP_DATA = {% if property.latitude and property.longitude %}{
 }{% else %}null{% endif %};
 
 // API endpoints
-const INQUIRY_ENDPOINT = '{% url "properties:property_inquiry" property.pk %}';
+const INQUIRY_ENDPOINT = '{% url "users:property_inquiry" property.pk %}';
 
 // Translations
 const TRANSLATIONS = {

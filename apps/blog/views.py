@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -12,6 +13,7 @@ from django.templatetags.static import static
 from django.urls import reverse
 from urllib.parse import unquote
 from django.utils.text import slugify
+from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -35,6 +37,81 @@ PAGE_LABELS = {
     'th': 'หน้า {page}',
 }
 
+BLOG_META_STRINGS = {
+    'ru': {
+        'site_title': 'Блог Undersun Estate',
+        'site_h1': 'Блог Undersun Estate',
+        'category_title': '{name} — блог Undersun Estate',
+        'category_description': 'Материалы категории {name} в блоге Undersun Estate: обзоры рынка, инвестиционные советы и новости недвижимости Пхукета.',
+        'tag_title': 'Статьи о {name} — блог Undersun Estate',
+        'tag_description': 'Подборка статей с тегом {name} в блоге Undersun Estate о недвижимости, инвестициях и жизни на Пхукете.',
+        'search_title': 'Поиск по блогу: {query} — Undersun Estate',
+        'search_description': 'Результаты поиска по запросу “{query}” в блоге Undersun Estate.',
+        'post_title': '{title} — блог Undersun Estate',
+    },
+    'en': {
+        'site_title': 'Undersun Estate Blog',
+        'site_h1': 'Undersun Estate Blog',
+        'category_title': '{name} — Undersun Estate Blog',
+        'category_description': 'Posts in the {name} category from the Undersun Estate blog: Phuket property insights, investment tips and market updates.',
+        'tag_title': 'Articles about {name} — Undersun Estate Blog',
+        'tag_description': 'A selection of blog posts tagged {name} covering Phuket real estate, investment and lifestyle topics.',
+        'search_title': 'Blog search: {query} — Undersun Estate',
+        'search_description': 'Search results for “{query}” in the Undersun Estate blog.',
+        'post_title': '{title} — Undersun Estate Blog',
+    },
+    'th': {
+        'site_title': 'บล็อก Undersun Estate',
+        'site_h1': 'บล็อก Undersun Estate',
+        'category_title': '{name} — บล็อก Undersun Estate',
+        'category_description': 'บทความในหมวด {name} จากบล็อก Undersun Estate ครอบคลุมอินไซต์ตลาด อสังหาริมทรัพย์ภูเก็ต และคำแนะนำด้านการลงทุน.',
+        'tag_title': 'บทความเกี่ยวกับ {name} — บล็อก Undersun Estate',
+        'tag_description': 'รวมบทความที่ติดแท็ก {name} เกี่ยวกับอสังหาริมทรัพย์ การลงทุน และไลฟ์สไตล์ในภูเก็ต.',
+        'search_title': 'ค้นหาในบล็อก: {query} — Undersun Estate',
+        'search_description': 'ผลการค้นหา “{query}” ในบล็อก Undersun Estate.',
+        'post_title': '{title} — บล็อก Undersun Estate',
+    },
+}
+
+BLOG_INTRO_STRINGS = {
+    'ru': {
+        'root_eyebrow': 'Экспертиза Undersun Estate',
+        'root_lead': 'В блоге мы публикуем аналитические обзоры рынка Пхукета, практические рекомендации по покупке недвижимости и материалы для инвесторов.',
+        'root_body': 'Используйте статьи для ориентира по районам, форматам объектов, доходности и текущим изменениям рынка.',
+        'category_eyebrow': 'Категория блога',
+        'category_body': 'В этом разделе собраны материалы по теме {name}: актуальные обзоры, кейсы и комментарии команды Undersun Estate.',
+        'tag_eyebrow': 'Подборка по теме',
+        'tag_lead': 'На этой странице собраны статьи с тегом {name}.',
+        'tag_body': 'Подборка помогает быстро перейти к связанным публикациям и изучить тему глубже.',
+        'posts_count_one': '{count} статья',
+        'posts_count_few': '{count} статьи',
+        'posts_count_many': '{count} статей',
+    },
+    'en': {
+        'root_eyebrow': 'Undersun Estate Insights',
+        'root_lead': 'Our blog covers Phuket market analysis, practical buying guidance and editorial content for property investors.',
+        'root_body': 'Use these articles to navigate areas, property formats, investment considerations and current market changes.',
+        'category_eyebrow': 'Blog category',
+        'category_body': 'This section gathers content about {name}: market reviews, case studies and commentary from the Undersun Estate team.',
+        'tag_eyebrow': 'Topic collection',
+        'tag_lead': 'This page features blog posts tagged {name}.',
+        'tag_body': 'It helps readers move through related publications and explore the topic in more depth.',
+        'posts_count_one': '{count} article',
+        'posts_count_many': '{count} articles',
+    },
+    'th': {
+        'root_eyebrow': 'อินไซต์จาก Undersun Estate',
+        'root_lead': 'บล็อกของเรานำเสนอการวิเคราะห์ตลาดภูเก็ต คำแนะนำเชิงปฏิบัติในการซื้ออสังหาริมทรัพย์ และบทความสำหรับนักลงทุน.',
+        'root_body': 'ใช้บทความเหล่านี้เพื่อทำความเข้าใจทำเล ประเภททรัพย์ ประเด็นการลงทุน และการเปลี่ยนแปลงของตลาดปัจจุบัน.',
+        'category_eyebrow': 'หมวดหมู่บล็อก',
+        'category_body': 'ส่วนนี้รวบรวมเนื้อหาเกี่ยวกับ {name} ทั้งบทวิเคราะห์ เคสศึกษา และมุมมองจากทีม Undersun Estate.',
+        'tag_eyebrow': 'รวมบทความตามหัวข้อ',
+        'tag_lead': 'หน้านี้รวบรวมบทความที่ติดแท็ก {name}.',
+        'tag_body': 'ช่วยให้ผู้อ่านเข้าถึงบทความที่เกี่ยวข้องและศึกษาหัวข้อนี้ได้ลึกขึ้น.',
+        'posts_count_many': '{count} บทความ',
+    },
+}
+
 
 BLOG_SEO_DEFAULTS = {
     'ru': {
@@ -50,6 +127,51 @@ BLOG_SEO_DEFAULTS = {
         'description': 'อัปเดตตลาด คู่มือการซื้อ และเคล็ดลับการลงทุนอสังหาริมทรัพย์ในภูเก็ตที่คัดสรรโดยทีม Undersun Estate.',
     },
 }
+
+
+HEADING_PATTERN = re.compile(r'<h([23])([^>]*)>(.*?)</h\1>', re.IGNORECASE | re.DOTALL)
+HEADING_ID_PATTERN = re.compile(r'\sid=(["\'])(.*?)\1', re.IGNORECASE)
+
+
+def _extract_blog_toc_and_content(html_content):
+    """Добавляет id к h2/h3 и возвращает TOC для статьи."""
+    if not html_content:
+        return [], html_content
+
+    toc_items = []
+    used_ids = set()
+
+    def _replace(match):
+        level = int(match.group(1))
+        attrs = match.group(2) or ''
+        inner_html = match.group(3) or ''
+        heading_text = strip_tags(inner_html).strip()
+
+        if not heading_text:
+            return match.group(0)
+
+        existing_id_match = HEADING_ID_PATTERN.search(attrs)
+        if existing_id_match:
+            heading_id = existing_id_match.group(2)
+        else:
+            base_id = slugify(heading_text) or f'section-{len(toc_items) + 1}'
+            heading_id = base_id
+            suffix = 2
+            while heading_id in used_ids:
+                heading_id = f'{base_id}-{suffix}'
+                suffix += 1
+            attrs = f'{attrs} id="{heading_id}"'
+
+        used_ids.add(heading_id)
+        toc_items.append({
+            'level': level,
+            'id': heading_id,
+            'title': heading_text,
+        })
+        return f'<h{level}{attrs}>{inner_html}</h{level}>'
+
+    processed_content = HEADING_PATTERN.sub(_replace, html_content)
+    return toc_items, processed_content
 
 
 def _append_suffix_if_needed(value, suffix):
@@ -104,53 +226,219 @@ def _get_seo_page_meta(page_name, language_code='ru'):
     }
 
 
+def _get_blog_language(language_code='ru'):
+    return (language_code or 'ru')[:2]
+
+
+def _get_blog_strings(language_code='ru'):
+    return BLOG_META_STRINGS.get(_get_blog_language(language_code), BLOG_META_STRINGS['ru'])
+
+
+def _get_blog_intro_strings(language_code='ru'):
+    return BLOG_INTRO_STRINGS.get(_get_blog_language(language_code), BLOG_INTRO_STRINGS['ru'])
+
+
+def _get_translated_attr(instance, field_name, language_code='ru', fallback=''):
+    if instance is None:
+        return fallback
+
+    language_code = _get_blog_language(language_code)
+    localized_field_name = field_name if language_code == 'ru' else f'{field_name}_{language_code}'
+    value = getattr(instance, localized_field_name, None) or getattr(instance, field_name, None) or fallback
+    if isinstance(value, str):
+        return value.strip()
+    return value
+
+
+def _build_blog_listing_url(url_name, *, slug=None, page=None):
+    kwargs = {'slug': slug} if slug else {}
+    url = reverse(url_name, kwargs=kwargs)
+    if page:
+        try:
+            page_number = int(page)
+        except (TypeError, ValueError):
+            page_number = 1
+        if page_number > 1:
+            return f'{url}?page={page_number}'
+    return url
+
+
+def _set_blog_indexation(request, *, canonical_url='', meta_robots=''):
+    request.canonical_url_override = canonical_url
+    request.seo_meta_robots = meta_robots
+
+
+def _build_blog_root_meta(language_code='ru', page_obj=None):
+    seo_meta = _get_seo_page_meta('blog', language_code)
+    defaults = BLOG_SEO_DEFAULTS.get(language_code, BLOG_SEO_DEFAULTS['ru'])
+    meta_title = seo_meta.get('title') or defaults['title']
+    meta_description = seo_meta.get('description') or defaults['description']
+    meta_keywords = seo_meta.get('keywords')
+    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    return meta_title, truncate_meta(meta_description), meta_keywords
+
+
+def _build_blog_category_meta(category, language_code='ru', page_obj=None):
+    strings = _get_blog_strings(language_code)
+    category_name = _get_translated_attr(category, 'name', language_code, category.name)
+    category_description = _get_translated_attr(category, 'description', language_code, '')
+    meta_title = _get_translated_attr(category, 'meta_title', language_code, '') or strings['category_title'].format(name=category_name)
+    meta_description = _get_translated_attr(category, 'meta_description', language_code, '') or category_description or strings['category_description'].format(name=category_name)
+    meta_keywords = _get_translated_attr(category, 'meta_keywords', language_code, '')
+    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    return meta_title, truncate_meta(meta_description), meta_keywords
+
+
+def _build_blog_tag_meta(tag, language_code='ru', page_obj=None):
+    strings = _get_blog_strings(language_code)
+    meta_title = strings['tag_title'].format(name=tag.name)
+    meta_description = strings['tag_description'].format(name=tag.name)
+    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    return meta_title, truncate_meta(meta_description), ''
+
+
+def _build_blog_search_meta(search_query, language_code='ru', page_obj=None):
+    strings = _get_blog_strings(language_code)
+    query = (search_query or '').strip()
+    meta_title = strings['search_title'].format(query=query)
+    meta_description = strings['search_description'].format(query=query)
+    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
+    return meta_title, truncate_meta(meta_description), ''
+
+
+def _build_blog_post_meta(post, language_code='ru'):
+    strings = _get_blog_strings(language_code)
+    translated_title = post._get_translated_value('title', language_code)
+    raw_meta_title = _get_translated_attr(post, 'meta_title', language_code, '')
+    meta_title = raw_meta_title or strings['post_title'].format(title=translated_title)
+    meta_description = truncate_meta(post.get_meta_description(language_code))
+    meta_keywords = post.get_meta_keywords(language_code)
+    return meta_title, meta_description, meta_keywords
+
+
+def _build_blog_list_heading(*, language_code='ru', current_category=None, current_tag=None, search_query=''):
+    strings = _get_blog_strings(language_code)
+    if current_category:
+        return _get_translated_attr(current_category, 'name', language_code, current_category.name)
+    if current_tag:
+        return f"{_('Статьи с тегом')} \"{current_tag.name}\""
+    if search_query:
+        return _('Результаты поиска')
+    return strings['site_h1']
+
+
+def _format_posts_count(count, language_code='ru'):
+    strings = _get_blog_intro_strings(language_code)
+    count = max(int(count or 0), 0)
+    if language_code == 'ru':
+        mod10 = count % 10
+        mod100 = count % 100
+        if mod10 == 1 and mod100 != 11:
+            return strings['posts_count_one'].format(count=count)
+        if 2 <= mod10 <= 4 and not 12 <= mod100 <= 14:
+            return strings['posts_count_few'].format(count=count)
+        return strings['posts_count_many'].format(count=count)
+    if language_code == 'en':
+        key = 'posts_count_one' if count == 1 else 'posts_count_many'
+        return strings[key].format(count=count)
+    return strings['posts_count_many'].format(count=count)
+
+
+def _build_blog_intro(*, language_code='ru', current_category=None, current_tag=None, posts_count=0, search_query=''):
+    if search_query:
+        return None
+
+    strings = _get_blog_intro_strings(language_code)
+    posts_label = _format_posts_count(posts_count, language_code)
+
+    if current_category:
+        category_name = _get_translated_attr(current_category, 'name', language_code, current_category.name)
+        category_description = _get_translated_attr(current_category, 'description', language_code, '')
+        return {
+            'eyebrow': strings['category_eyebrow'],
+            'lead': category_description or strings['category_body'].format(name=category_name),
+            'body': strings['category_body'].format(name=category_name),
+            'meta': posts_label,
+        }
+
+    if current_tag:
+        return {
+            'eyebrow': strings['tag_eyebrow'],
+            'lead': strings['tag_lead'].format(name=current_tag.name),
+            'body': strings['tag_body'],
+            'meta': posts_label,
+        }
+
+    return {
+        'eyebrow': strings['root_eyebrow'],
+        'lead': strings['root_lead'],
+        'body': strings['root_body'],
+        'meta': posts_label,
+    }
+
+
 def blog_list(request):
     """Список всех статей блога"""
     posts = BlogPost.get_published().prefetch_related('tags')
     language_code = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
-    
+
+    category_slug = (request.GET.get('category') or '').strip()
+    tag_slug = (request.GET.get('tag') or '').strip()
+    search_query = (request.GET.get('search') or '').strip()
+    page_number = request.GET.get('page')
+
+    if category_slug and not tag_slug and not search_query:
+        category_for_redirect = BlogCategory.objects.filter(slug=category_slug, is_active=True).first()
+        if category_for_redirect:
+            return HttpResponsePermanentRedirect(
+                _build_blog_listing_url('blog:category', slug=category_for_redirect.slug, page=page_number)
+            )
+
+    if tag_slug and not category_slug and not search_query:
+        tag_for_redirect = BlogTag.objects.filter(slug=tag_slug).first()
+        if tag_for_redirect:
+            return HttpResponsePermanentRedirect(
+                _build_blog_listing_url('blog:tag', slug=tag_for_redirect.slug, page=page_number)
+            )
+
     # Фильтрация по категории
-    category_slug = request.GET.get('category')
     if category_slug:
         category = get_object_or_404(BlogCategory, slug=category_slug, is_active=True)
         posts = posts.filter(category=category)
     else:
         category = None
-    
+
     # Фильтрация по тегу
-    tag_slug = request.GET.get('tag')
     if tag_slug:
         tag = get_object_or_404(BlogTag, slug=tag_slug)
         posts = posts.filter(tags=tag)
     else:
         tag = None
-    
-    
+
     # Поиск
-    search_query = request.GET.get('search')
     if search_query:
         posts = posts.filter(
             Q(title__icontains=search_query) |
             Q(excerpt__icontains=search_query) |
             Q(content__icontains=search_query)
         )
-    
+
     # Пагинация
     paginator = Paginator(posts, getattr(settings, 'PAGINATE_BY', 12))
-    page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     # Получаем категории и рекомендуемые статьи для сайдбара
     categories = BlogCategory.objects.filter(is_active=True)
     featured_posts = BlogPost.get_featured()
-    
-    seo_meta = _get_seo_page_meta('blog', language_code)
-    defaults = BLOG_SEO_DEFAULTS.get(language_code, BLOG_SEO_DEFAULTS['ru'])
 
-    meta_title = seo_meta.get('title') or defaults['title']
-    meta_description = seo_meta.get('description') or defaults['description']
-    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
-    meta_description = truncate_meta(meta_description)
+    if search_query:
+        meta_title, meta_description, meta_keywords = _build_blog_search_meta(search_query, language_code, page_obj)
+    elif category:
+        meta_title, meta_description, meta_keywords = _build_blog_category_meta(category, language_code, page_obj)
+    elif tag:
+        meta_title, meta_description, meta_keywords = _build_blog_tag_meta(tag, language_code, page_obj)
+    else:
+        meta_title, meta_description, meta_keywords = _build_blog_root_meta(language_code, page_obj)
 
     context = {
         'page_obj': page_obj,
@@ -162,30 +450,63 @@ def blog_list(request):
         'search_query': search_query,
         'meta_title': meta_title,
         'meta_description': meta_description,
-        'meta_keywords': seo_meta.get('keywords'),
-        'page_keywords': seo_meta.get('keywords'),
+        'meta_keywords': meta_keywords,
+        'page_keywords': meta_keywords,
+        'page_h1': _build_blog_list_heading(
+            language_code=language_code,
+            current_category=category,
+            current_tag=tag,
+            search_query=search_query,
+        ),
     }
-
-    page_url = request.build_absolute_uri()
-    item_list_schema = build_blog_item_list_schema(
-        page_obj.object_list,
-        request,
+    context['blog_intro'] = _build_blog_intro(
         language_code=language_code,
-        title=meta_title,
-        description=meta_description,
-        page_url=page_url,
+        current_category=category,
+        current_tag=tag,
+        posts_count=paginator.count,
+        search_query=search_query,
     )
-    if item_list_schema:
-        context['schema_blog_list_json'] = json.dumps(item_list_schema, ensure_ascii=False)
 
-    search_schema = build_blog_search_schema(request)
-    if search_schema:
-        context['schema_blog_search_json'] = json.dumps(search_schema, ensure_ascii=False)
+    if search_query or category or tag:
+        if category and not tag:
+            canonical_url = _build_blog_listing_url('blog:category', slug=category.slug)
+        elif tag and not category:
+            canonical_url = _build_blog_listing_url('blog:tag', slug=tag.slug)
+        else:
+            canonical_url = reverse('blog:list')
+        context['meta_robots'] = 'noindex, follow'
+        context['canonical_url'] = canonical_url
+        _set_blog_indexation(request, canonical_url=canonical_url, meta_robots='noindex, follow')
 
-    breadcrumb_schema = build_breadcrumb_schema([
+    if not search_query and not category and not tag:
+        page_url = request.build_absolute_uri()
+        item_list_schema = build_blog_item_list_schema(
+            page_obj.object_list,
+            request,
+            language_code=language_code,
+            title=meta_title,
+            description=meta_description,
+            page_url=page_url,
+        )
+        if item_list_schema:
+            context['schema_blog_list_json'] = json.dumps(item_list_schema, ensure_ascii=False)
+
+        search_schema = build_blog_search_schema(request)
+        if search_schema:
+            context['schema_blog_search_json'] = json.dumps(search_schema, ensure_ascii=False)
+
+    breadcrumb_items = [
         (_('Главная'), reverse('core:home')),
         (_('Блог'), reverse('blog:list')),
-    ], request)
+    ]
+    if category and not tag:
+        breadcrumb_items.append((_get_translated_attr(category, 'name', language_code, category.name), category.get_absolute_url()))
+    elif tag and not category:
+        breadcrumb_items.append((tag.name, tag.get_absolute_url()))
+    elif search_query:
+        breadcrumb_items.append((_('Поиск'), None))
+
+    breadcrumb_schema = build_breadcrumb_schema(breadcrumb_items, request)
     if breadcrumb_schema:
         context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
     
@@ -207,15 +528,21 @@ def blog_detail(request, slug):
     related_posts = BlogPost.get_published().filter(
         category=post.category
     ).exclude(id=post.id)[:3]
+
+    more_from_category = BlogPost.get_published().filter(
+        category=post.category
+    ).exclude(id=post.id)
+    if related_posts:
+        more_from_category = more_from_category.exclude(id__in=[item.id for item in related_posts])
+    more_from_category = more_from_category[:4]
     
     # Получаем категории и рекомендуемые статьи для сайдбара
     categories = BlogCategory.objects.filter(is_active=True)
     featured_posts = BlogPost.get_featured()
     
     language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
-    meta_title = post.get_meta_title(language_code)
-    meta_description = truncate_meta(post.get_meta_description(language_code))
-    meta_keywords = post.get_meta_keywords(language_code)
+    meta_title, meta_description, meta_keywords = _build_blog_post_meta(post, language_code)
+    article_toc, processed_content = _extract_blog_toc_and_content(post.content)
 
     amp_url = request.build_absolute_uri(
         reverse('blog:detail_amp', kwargs={'slug': slug})
@@ -224,8 +551,11 @@ def blog_detail(request, slug):
     context = {
         'post': post,
         'related_posts': related_posts,
+        'more_from_category': more_from_category,
         'categories': categories,
         'featured_posts': featured_posts,
+        'article_toc': article_toc,
+        'processed_content': processed_content,
         'meta_title': meta_title,
         'meta_description': meta_description,
         'meta_keywords': meta_keywords,
@@ -262,7 +592,7 @@ def blog_detail(request, slug):
     breadcrumb_schema = build_breadcrumb_schema([
         (_('Главная'), reverse('core:home')),
         (_('Блог'), reverse('blog:list')),
-        (post.category.name if post.category else None, post.category.get_absolute_url() if post.category else None),
+        (_get_translated_attr(post.category, 'name', language_code, post.category.name) if post.category else None, post.category.get_absolute_url() if post.category else None),
         (post.title, post.get_absolute_url()),
     ], request)
     if breadcrumb_schema:
@@ -329,7 +659,7 @@ def blog_detail_amp(request, slug):
     breadcrumb_schema = build_breadcrumb_schema([
         (_('Главная'), reverse('core:home')),
         (_('Блог'), reverse('blog:list')),
-        (post.category.name if post.category else None, post.category.get_absolute_url() if post.category else None),
+        (_get_translated_attr(post.category, 'name', language_code, post.category.name) if post.category else None, post.category.get_absolute_url() if post.category else None),
         (post.title, post.get_absolute_url()),
     ], request)
     if breadcrumb_schema:
@@ -353,30 +683,37 @@ def blog_category(request, slug):
     featured_posts = BlogPost.get_featured()
     
     language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
-    meta_title = category.meta_title or f'Статьи в категории {category.name}'
-    meta_description = category.meta_description or category.description
-    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
-    meta_description = truncate_meta(meta_description)
+    meta_title, meta_description, meta_keywords = _build_blog_category_meta(category, language_code, page_obj)
 
     context = {
         'page_obj': page_obj,
         'posts': page_obj.object_list,
         'category': category,
+        'current_category': category,
+        'current_tag': None,
         'categories': categories,
         'featured_posts': featured_posts,
         'meta_title': meta_title,
         'meta_description': meta_description,
-        'meta_keywords': category.meta_keywords,
+        'meta_keywords': meta_keywords,
+        'page_keywords': meta_keywords,
     }
+    context['blog_intro'] = _build_blog_intro(
+        language_code=language_code,
+        current_category=category,
+        posts_count=paginator.count,
+    )
 
     page_url = request.build_absolute_uri()
+    category_name = _get_translated_attr(category, 'name', language_code, category.name)
+    category_description = _get_translated_attr(category, 'description', language_code, category.description)
     about = {
         '@type': 'Thing',
-        'name': category.name,
+        'name': category_name,
         'url': page_url,
     }
-    if category.description:
-        about['description'] = category.description
+    if category_description:
+        about['description'] = category_description
     item_list_schema = build_blog_item_list_schema(
         page_obj.object_list,
         request,
@@ -392,7 +729,7 @@ def blog_category(request, slug):
     breadcrumb_schema = build_breadcrumb_schema([
         (_('Главная'), reverse('core:home')),
         (_('Блог'), reverse('blog:list')),
-        (category.name, category.get_absolute_url()),
+        (category_name, category.get_absolute_url()),
     ], request)
     if breadcrumb_schema:
         context['schema_blog_breadcrumb_json'] = json.dumps(breadcrumb_schema, ensure_ascii=False)
@@ -415,20 +752,26 @@ def blog_tag(request, slug):
     featured_posts = BlogPost.get_featured()
     
     language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
-    meta_title = f'Статьи с тегом {tag.name}'
-    meta_description = f'Все статьи с тегом {tag.name}'
-    meta_title, meta_description = _apply_pagination_suffix(meta_title, meta_description, language_code, page_obj)
-    meta_description = truncate_meta(meta_description)
+    meta_title, meta_description, meta_keywords = _build_blog_tag_meta(tag, language_code, page_obj)
 
     context = {
         'page_obj': page_obj,
         'posts': page_obj.object_list,
         'tag': tag,
+        'current_category': None,
+        'current_tag': tag,
         'categories': categories,
         'featured_posts': featured_posts,
         'meta_title': meta_title,
         'meta_description': meta_description,
+        'meta_keywords': meta_keywords,
+        'page_keywords': meta_keywords,
     }
+    context['blog_intro'] = _build_blog_intro(
+        language_code=language_code,
+        current_tag=tag,
+        posts_count=paginator.count,
+    )
 
     page_url = request.build_absolute_uri()
     about = {

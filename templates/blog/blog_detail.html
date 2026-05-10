@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{{ post.get_meta_title }} - {% trans "Недвижимость в Таиланде" %}{% endblock %}
+{% block title %}{{ meta_title }}{% endblock %}
 
-{% block description %}{{ page_description|default:post.get_meta_description }}{% endblock %}
+{% block description %}{{ page_description|default:meta_description }}{% endblock %}
 
 {% if page_keywords %}
 {% block keywords %}{{ page_keywords }}{% endblock %}
@@ -197,6 +197,15 @@
         border-top: 2px solid var(--secondary-color);
         margin: 2rem 0;
     }
+
+    .article-toc__link {
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .article-toc__link:hover {
+        color: var(--accent-color);
+        transform: translateX(2px);
+    }
 </style>
 {% endblock %}
 
@@ -231,8 +240,8 @@
             </nav>
             <article class="bg-white rounded-lg shadow-md overflow-hidden">
                 <!-- Главное изображение -->
-                {% if post.featured_image %}
-                    <img src="{{ post.featured_image.url }}" alt="{{ post.featured_image_alt|default:post.title }}" 
+                {% if post.get_localized_featured_image %}
+                    <img src="{{ post.get_localized_featured_image.url }}" alt="{{ post.get_featured_image_alt_text }}" 
                          class="w-full h-64 md:h-96 object-cover">
                 {% endif %}
 
@@ -261,9 +270,34 @@
                         {{ post.excerpt }}
                     </div>
 
+                    {% if article_toc|length > 1 %}
+                        <section class="mb-8 rounded-2xl border border-gray-200 bg-gray-50/80 p-5">
+                            <div class="mb-4 flex items-center gap-3">
+                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent/15 text-primary">
+                                    <i class="fas fa-list-ul text-sm"></i>
+                                </span>
+                                <div>
+                                    <h2 class="text-lg font-semibold text-gray-900">{% trans "Содержание" %}</h2>
+                                    <p class="text-sm text-gray-500">{% trans "Быстрый переход по основным разделам статьи" %}</p>
+                                </div>
+                            </div>
+                            <ol class="space-y-2">
+                                {% for toc_item in article_toc %}
+                                    <li class="{% if toc_item.level == 3 %}ml-5{% endif %}">
+                                        <a href="#{{ toc_item.id }}"
+                                           class="article-toc__link inline-flex items-start gap-2 text-sm font-medium text-gray-700">
+                                            <span class="mt-[0.45rem] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent"></span>
+                                            <span>{{ toc_item.title }}</span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ol>
+                        </section>
+                    {% endif %}
+
                     <!-- Содержание статьи -->
                     <div class="prose prose-lg max-w-none">
-                        {{ post.content|safe }}
+                        {{ processed_content|safe }}
                     </div>
 
                     <!-- Теги -->
@@ -343,8 +377,8 @@
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {% for related_post in related_posts %}
                             <article class="bg-white rounded-lg shadow-md overflow-hidden">
-                                {% if related_post.featured_image %}
-                                    <img src="{{ related_post.featured_image.url }}" alt="{{ related_post.title }}" 
+                                {% if related_post.get_localized_featured_image %}
+                                    <img src="{{ related_post.get_localized_featured_image.url }}" alt="{{ related_post.get_featured_image_alt_text }}" 
                                          class="w-full h-32 object-cover">
                                 {% endif %}
                                 <div class="p-4">
@@ -366,6 +400,50 @@
                         {% endfor %}
                     </div>
                 </div>
+            {% endif %}
+
+            {% if more_from_category %}
+                <section class="mt-12 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <div class="mb-2 inline-flex items-center rounded-full bg-accent/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                                {% trans "Ещё по теме" %}
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-900">
+                                {% blocktrans with category_name=post.category.name %}Больше материалов из категории “{{ category_name }}”{% endblocktrans %}
+                            </h2>
+                        </div>
+                        <a href="{% url 'blog:category' post.category.slug %}"
+                           class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity duration-200 hover:opacity-80">
+                            <span>{% trans "Все статьи категории" %}</span>
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                    </div>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        {% for category_post in more_from_category %}
+                            <article class="rounded-xl border border-gray-200 bg-gray-50 p-4 transition-shadow duration-200 hover:shadow-md">
+                                <div class="mb-3 flex items-center gap-3 text-xs text-gray-500">
+                                    <span>{{ category_post.published_at|date:'d.m.Y' }}</span>
+                                    <span>&middot;</span>
+                                    <span>{{ category_post.get_reading_time }} {% trans "мин" %}</span>
+                                </div>
+                                <h3 class="mb-2 text-lg font-semibold text-gray-900">
+                                    <a href="{{ category_post.get_absolute_url }}" class="transition-colors duration-200 hover:text-primary">
+                                        {{ category_post.title }}
+                                    </a>
+                                </h3>
+                                <p class="mb-3 text-sm leading-6 text-gray-600">
+                                    {{ category_post.excerpt|default:category_post.content|striptags|truncatewords:22 }}
+                                </p>
+                                <a href="{{ category_post.get_absolute_url }}"
+                                   class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-opacity duration-200 hover:opacity-80">
+                                    <span>{% trans "Открыть статью" %}</span>
+                                    <i class="fas fa-arrow-right text-xs"></i>
+                                </a>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
             {% endif %}
         </div>
 
@@ -472,8 +550,8 @@
                         {% for featured_post in featured_posts %}
                             {% if featured_post.id != post.id %}
                                 <article class="flex space-x-3">
-                                    {% if featured_post.featured_image %}
-                                        <img src="{{ featured_post.featured_image.url }}" alt="{{ featured_post.title }}"
+                                    {% if featured_post.get_localized_featured_image %}
+                                        <img src="{{ featured_post.get_localized_featured_image.url }}" alt="{{ featured_post.get_featured_image_alt_text }}"
                                              class="w-16 h-16 object-cover rounded">
                                     {% endif %}
                                     <div class="flex-1">

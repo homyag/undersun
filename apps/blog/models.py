@@ -271,6 +271,44 @@ class BlogPost(models.Model):
 
         return ''
 
+    def get_featured_image_field(self, language_code=None):
+        """Вернуть локализованный объект ImageFieldFile с fallback между языками."""
+        language_code = (language_code or translation.get_language() or settings.LANGUAGE_CODE or 'ru')[:2]
+        candidates = []
+        language_map = {
+            'ru': self.featured_image,
+            'en': self.featured_image_en,
+            'th': self.featured_image_th,
+        }
+
+        if language_code in language_map:
+            candidates.append(language_map[language_code])
+
+        for code in ('ru', 'en', 'th'):
+            if code != language_code:
+                candidates.append(language_map.get(code))
+
+        for field in candidates:
+            if field:
+                try:
+                    if field.name:
+                        return field
+                except Exception:
+                    continue
+
+        return None
+
+    def get_localized_featured_image(self):
+        """Шаблонный helper: вернуть текущую локализованную обложку статьи."""
+        return self.get_featured_image_field()
+
+    def get_featured_image_alt_text(self, language_code=None):
+        """Вернуть локализованный alt-текст обложки с fallback на заголовок статьи."""
+        alt_text = self._get_translated_value('featured_image_alt', language_code)
+        if alt_text:
+            return alt_text
+        return self._get_translated_value('title', language_code)
+
     def get_featured_image_absolute_url(self, request, language_code='ru'):
         """Вернуть абсолютный URL изображения обложки для OG метатегов."""
         relative_url = self.get_featured_image_for_language(language_code)

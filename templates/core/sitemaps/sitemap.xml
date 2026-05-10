@@ -5,7 +5,6 @@
     <url>
         <loc>{{ entry.loc }}</loc>
         {% if entry.lastmod %}<lastmod>{{ entry.lastmod }}</lastmod>{% endif %}
-        {% if entry.amp_url %}<xhtml:link rel="amphtml" href="{{ entry.amp_url }}" />{% endif %}
         {% for alt in entry.alternates %}
         <xhtml:link rel="alternate" hreflang="{{ alt.lang }}" href="{{ alt.url }}" />
         {% endfor %}

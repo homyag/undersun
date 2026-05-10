@@ -511,7 +511,6 @@ class SitemapView(View):
         ('properties:property_list', None),
         ('properties:property_sale', None),
         ('properties:property_rent', None),
-        ('properties:property_favorites', None),
         ('location_list', None),
     ]
     property_type_slugs = ['condo', 'villa', 'townhouse', 'land']
@@ -561,37 +560,27 @@ class SitemapView(View):
         # Properties
         for prop in Property.objects.filter(is_active=True, status='available'):
             alternates = build_alternates(prop.get_absolute_url)
-            amp_alternates = build_alternates(
-                lambda slug=prop.slug: reverse('properties:property_detail_amp', kwargs={'slug': slug})
-            )
             lastmod = prop.updated_at.isoformat() if prop.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod, amp_alternates))
+            entries.extend(self._expand_entries(alternates, lastmod))
 
         # Blog
         for post in BlogPost.get_published():
             alternates = build_alternates(post.get_absolute_url)
-            amp_alternates = build_alternates(
-                lambda slug=post.slug: reverse('blog:detail_amp', kwargs={'slug': slug})
-            )
             lastmod = post.updated_at.isoformat() if post.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod, amp_alternates))
+            entries.extend(self._expand_entries(alternates, lastmod))
 
         xml_content = render_to_string('core/sitemaps/sitemap.xml', {'entries': entries})
         return HttpResponse(xml_content, content_type='application/xml')
 
     @staticmethod
-    def _expand_entries(alternates, lastmod, amp_alternates=None):
-        amp_lookup = {}
-        if amp_alternates:
-            amp_lookup = {amp['lang']: amp['url'] for amp in amp_alternates}
-
+    def _expand_entries(alternates, lastmod):
         expanded = []
+        x_default = next((alt['url'] for alt in alternates if alt['lang'] == 'en'), alternates[0]['url'])
         for alt in alternates:
             expanded.append({
                 'loc': alt['url'],
                 'lastmod': lastmod,
-                'alternates': [a for a in alternates if a['url'] != alt['url']],
-                'amp_url': amp_lookup.get(alt['lang'])
+                'alternates': alternates + [{'lang': 'x-default', 'url': x_default}],
             })
         return expanded
 

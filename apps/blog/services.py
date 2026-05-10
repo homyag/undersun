@@ -300,34 +300,57 @@ def build_blog_item_list_schema(
     page_url=None,
     about=None,
 ):
-    """ItemList для списков блога (главная, категория, тег)."""
+    """CollectionPage + ItemList для индексируемых списков блога."""
     if not posts:
         return None
 
+    language = (language_code or getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
+    page_absolute_url = page_url or _absolute_url(getattr(request, 'get_full_path', lambda: '')(), request)
+    blog_root_url = _absolute_url(reverse('blog:list'), request) if request else None
+    blog_name = BLOG_WEBSITE_NAMES.get(language, BLOG_WEBSITE_NAMES['en'])
+    blog_description = BLOG_WEBSITE_DESCRIPTIONS.get(language, BLOG_WEBSITE_DESCRIPTIONS['en'])
+
     items = []
     for idx, post in enumerate(posts, start=1):
-        post_schema = build_blog_post_schema(
-            post,
-            request,
-            language_code=language_code,
-            meta_description=post.get_meta_description(language_code),
-        )
+        post_url = _absolute_url(post.get_absolute_url(), request)
+        image_url = post.get_featured_image_absolute_url(request, language)
         items.append({
             '@type': 'ListItem',
             'position': idx,
-            'url': post_schema.get('url'),
-            'item': post_schema,
+            'url': post_url,
+            'name': post.title,
+            'item': {
+                '@type': 'WebPage',
+                '@id': post_url,
+                'url': post_url,
+                'name': post.title,
+                'description': post.get_meta_description(language) or None,
+                'inLanguage': language,
+                'image': image_url or None,
+                'datePublished': post.published_at.isoformat() if post.published_at else None,
+                'dateModified': post.updated_at.isoformat() if post.updated_at else None,
+            },
         })
 
     schema = {
         '@context': 'https://schema.org',
-        '@type': 'ItemList',
+        '@type': 'CollectionPage',
         'name': title,
         'description': description,
-        'itemListElement': items,
-        'itemListOrder': 'https://schema.org/ItemListOrderDescending',
-        'numberOfItems': len(items),
-        'url': page_url or _absolute_url(getattr(request, 'get_full_path', lambda: '')(), request),
+        'url': page_absolute_url,
+        'inLanguage': language,
+        'isPartOf': {
+            '@type': 'Blog',
+            'name': blog_name,
+            'description': blog_description,
+            'url': blog_root_url,
+        },
+        'mainEntity': {
+            '@type': 'ItemList',
+            'itemListElement': items,
+            'itemListOrder': 'https://schema.org/ItemListOrderDescending',
+            'numberOfItems': len(items),
+        },
     }
 
     if about:

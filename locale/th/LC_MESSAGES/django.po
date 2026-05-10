@@ -2662,9 +2662,34 @@ msgstr "ผู้เขียนบทความ"
 msgid "Похожие статьи"
 msgstr "บทความที่เกี่ยวข้อง"
 
+#: templates/blog/blog_detail.html:280
+msgid "Содержание"
+msgstr "สารบัญ"
+
+#: templates/blog/blog_detail.html:281
+msgid "Быстрый переход по основным разделам статьи"
+msgstr "ไปยังหัวข้อหลักของบทความอย่างรวดเร็ว"
+
+#: templates/blog/blog_detail.html:410
+msgid "Ещё по теме"
+msgstr "เพิ่มเติมในหัวข้อนี้"
+
+#: templates/blog/blog_detail.html:413
+#, python-format
+msgid "Больше материалов из категории “%(category_name)s”"
+msgstr "บทความเพิ่มเติมจากหมวด “%(category_name)s”"
+
+#: templates/blog/blog_detail.html:418
+msgid "Все статьи категории"
+msgstr "บทความทั้งหมดในหมวดนี้"
+
+#: templates/blog/blog_detail.html:440
+msgid "Открыть статью"
+msgstr "เปิดบทความ"
+
 #: templates/blog/blog_detail.html:351 templates/blog/blog_list.html:273
 msgid "Категории"
-msgstr "ประเภทสินค้า"
+msgstr "หมวดหมู่"
 
 #: templates/blog/blog_detail.html:375
 msgid "Свяжитесь с нами"
@@ -2672,7 +2697,7 @@ msgstr "ติดต่อเรา"
 
 #: templates/blog/blog_detail.html:378
 msgid "Есть вопросы? Мы всегда рады помочь!"
-msgstr "มีคำถามไหม? เรามักจะมีความสุขที่จะช่วยให้!"
+msgstr "มีคำถามไหม? เรายินดีช่วยเหลือเสมอ"
 
 #: templates/blog/blog_detail.html:391
 #: templates/core/includes/home/home_visit_office_section.html:121
@@ -2691,7 +2716,7 @@ msgstr "คำถามหรือความคิดเห็นของค
 
 #: templates/blog/blog_detail.html:417 templates/blog/blog_detail.html:527
 msgid "Отправить"
-msgstr "ส่งคำขอ"
+msgstr "ส่ง"
 
 #: templates/blog/blog_detail.html:421
 #: templates/core/includes/home/home_phone_contact_form_section.html:36
@@ -2724,41 +2749,31 @@ msgstr "บทความแนะนำ"
 
 #: templates/blog/blog_detail.html:491
 msgid "Отправка..."
-msgstr "ส่งคำขอ"
+msgstr "กำลังส่ง..."
 
 #: templates/blog/blog_detail_amp.html:75
-#, fuzzy
-#| msgid "Похожие статьи"
 msgid "Назад к статье"
-msgstr "บทความที่เกี่ยวข้อง"
+msgstr "กลับไปยังบทความ"
 
 #: templates/blog/blog_detail_amp.html:97
-#, fuzzy
-#| msgid "Где вам удобнее общаться"
 msgid "Вам также может понравиться"
-msgstr "เลือกช่องทางการติดต่อที่คุณสะดวก"
+msgstr "คุณอาจชอบบทความนี้เช่นกัน"
 
 #: templates/blog/blog_detail_amp.html:110
-#, fuzzy
-#| msgid "Консультации по покупке недвижимости"
 msgid "Нужна консультация по недвижимости?"
-msgstr "ขั้นตอนการซื้ออสังหาริมทรัพย์"
+msgstr "ต้องการคำปรึกษาเรื่องอสังหาริมทรัพย์หรือไม่?"
 
 #: templates/blog/blog_detail_amp.html:111
-#, fuzzy
-#| msgid "Смотреть каталог"
 msgid "Перейти в каталог"
-msgstr "ดูแคตตาล็อก"
+msgstr "ไปยังแคตตาล็อก"
 
 #: templates/blog/blog_detail_amp.html:117
-#, fuzzy
-#| msgid "Недвижимость на Пхукете"
 msgid "Найдите вашу недвижимость на Пхукете"
-msgstr "ภูเก็ตอสังหาริมทรัพย์"
+msgstr "ค้นหาอสังหาริมทรัพย์ของคุณในภูเก็ต"
 
 #: templates/blog/blog_list.html:18 templates/blog/blog_tag.html:4
 msgid "Статьи с тегом"
-msgstr "บทความที่มีแท็ก"
+msgstr "บทความที่ติดแท็ก"
 
 #: templates/blog/blog_list.html:20 templates/core/search.html:19
 msgid "Результаты поиска"
@@ -2770,29 +2785,29 @@ msgstr "บล็อกเกี่ยวกับอสังหาริมท
 
 #: templates/blog/blog_list.html:29
 msgid "Новости, статьи, кейсы и события в мире недвижимости Пхукета"
-msgstr "ผู้เชี่ยวชาญด้านอสังหาริมทรัพย์ภูเก็ตที่หนุ่มสาวและกระตือรือร้น"
+msgstr "ข่าวสาร บทความ เคสศึกษา และเหตุการณ์ในโลกอสังหาริมทรัพย์ภูเก็ต"
 
 #: templates/blog/blog_list.html:43
 msgid "Поиск по статьям..."
-msgstr "ค้นหาบทความ.."
+msgstr "ค้นหาบทความ..."
 
 #: templates/blog/blog_list.html:51
 msgid "Все категории"
-msgstr "การเลือกทรัพย์สิน"
+msgstr "ทุกหมวดหมู่"
 
 #: templates/blog/blog_list.html:62 templates/core/search.html:79
 msgid "Найти"
-msgstr "เพื่อค้นหา"
+msgstr "ค้นหา"
 
 #: templates/blog/blog_list.html:69
 msgid "Сбросить"
-msgstr "โยนออก"
+msgstr "รีเซ็ต"
 
 #: templates/blog/blog_list.html:98 templates/blog/blog_list.html:120
 #: templates/locations/location_detail.html:253
 #: templates/locations/location_detail.html:265
 msgid "мин"
-msgstr "ประเภท:"
+msgstr "นาที"
 
 #: templates/blog/blog_list.html:156
 #: templates/core/includes/home/home_news_section.html:86
@@ -2812,13 +2827,17 @@ msgstr "ไม่พบอะไรสำหรับการค้นหาข
 msgid "В данной категории пока нет статей."
 msgstr "ยังไม่มีบทความในหมวดหมู่นี้"
 
+#: templates/blog/blog_list.html:31
+msgid "Статьи из данной категории"
+msgstr "บทความจากหมวดหมู่นี้"
+
 #: templates/blog/blog_list.html:226
 msgid "Все статьи"
-msgstr "ทุกประเภท"
+msgstr "บทความทั้งหมด"
 
 #: templates/blog/blog_list.html:239
 msgid "Рекомендуемые"
-msgstr "แนะนำโดยย่อ"
+msgstr "แนะนำ"
 
 #: templates/core/404.html:5
 msgid "Страница не найдена"
