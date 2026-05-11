@@ -2,10 +2,53 @@
     const MAP_DEFAULT_CENTER = [98.3923, 7.8804];
     const FILTER_SUBMIT_DELAY = 400;
     const PRICE_FILTER_SUBMIT_DELAY = 800;
+    const MAP_PAGE_SCROLL_RESTORE_KEY = 'mapPagePendingScrollRestore';
 
     let geolocateMarker = null;
     let mapReady = false;
     let propertiesLoaded = false;
+
+    function saveMapPageScrollState() {
+        try {
+            sessionStorage.setItem(MAP_PAGE_SCROLL_RESTORE_KEY, JSON.stringify({
+                scrollY: window.scrollY || window.pageYOffset || 0,
+                timestamp: Date.now()
+            }));
+        } catch (error) {
+            // Ignore storage issues silently.
+        }
+    }
+
+    function restoreMapPageScrollState() {
+        try {
+            const rawState = sessionStorage.getItem(MAP_PAGE_SCROLL_RESTORE_KEY);
+            if (!rawState) {
+                return;
+            }
+
+            sessionStorage.removeItem(MAP_PAGE_SCROLL_RESTORE_KEY);
+            const parsedState = JSON.parse(rawState);
+            if (typeof parsedState?.scrollY !== 'number') {
+                return;
+            }
+
+            const stateAge = Date.now() - (parsedState.timestamp || 0);
+            if (stateAge > 20000) {
+                return;
+            }
+
+            const targetScrollY = Math.max(0, parsedState.scrollY);
+            const restoreScroll = () => window.scrollTo(0, targetScrollY);
+            window.requestAnimationFrame(restoreScroll);
+            window.setTimeout(restoreScroll, 80);
+        } catch (error) {
+            try {
+                sessionStorage.removeItem(MAP_PAGE_SCROLL_RESTORE_KEY);
+            } catch (removeError) {
+                // Ignore storage issues silently.
+            }
+        }
+    }
 
     function getMapLoadingElement() {
         return document.getElementById('map-loading');
@@ -186,9 +229,14 @@
                     : FILTER_SUBMIT_DELAY;
 
                 input._mapFilterTimeout = setTimeout(() => {
+                    saveMapPageScrollState();
                     form.submit();
                 }, delay);
             });
+        });
+
+        form.addEventListener('submit', () => {
+            saveMapPageScrollState();
         });
 
         const districtSelect = document.getElementById('district-select');
@@ -205,6 +253,7 @@
             locationSelect.innerHTML = `<option value="">${defaultLabel}</option>`;
 
             if (!districtSlug) {
+                saveMapPageScrollState();
                 form.submit();
                 return;
             }
@@ -237,6 +286,7 @@
                     console.error('Failed to load locations for district:', error);
                 })
                 .finally(() => {
+                    saveMapPageScrollState();
                     form.submit();
                 });
         });
@@ -274,6 +324,7 @@
             return;
         }
 
+        restoreMapPageScrollState();
         showMapLoading(window.djangoTranslations?.mapLoadingText || '');
         window.propertiesMapBridge.initialize('property-map');
         bindFloatingButtons();
@@ -298,6 +349,10 @@
 
     window.addEventListener('currencyChanged', () => {
         loadMapProperties();
+    });
+
+    window.addEventListener('pageshow', () => {
+        restoreMapPageScrollState();
     });
 
     document.addEventListener('DOMContentLoaded', initializeMapPage);

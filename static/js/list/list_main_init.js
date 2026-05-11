@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('catalog-loading-overlay');
     const manualApplyInputs = new Set(['district', 'q', 'min_price', 'max_price']);
     const applyLabels = Array.from(document.querySelectorAll('[data-filters-apply-label]'));
+    const pendingCatalogRestoreKey = 'catalogPendingRestore';
     let applyCountRequestId = 0;
     let applyCountTimeout = null;
 
@@ -60,6 +61,67 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         propertiesContainer.classList.remove('loading');
+    };
+
+    const applyCatalogState = (state) => {
+        if (!state || typeof state !== 'object') {
+            return;
+        }
+
+        if (state.viewType === 'map') {
+            setView('map');
+        }
+
+        if (typeof state.scrollY !== 'number') {
+            return;
+        }
+
+        const targetScrollY = Math.max(0, state.scrollY);
+        const restoreScroll = () => window.scrollTo(0, targetScrollY);
+
+        window.requestAnimationFrame(restoreScroll);
+        window.setTimeout(restoreScroll, 80);
+    };
+
+    const savePendingCatalogRestore = () => {
+        try {
+            const payload = {
+                scrollY: window.scrollY || window.pageYOffset || 0,
+                viewType: getCurrentViewType(),
+                timestamp: Date.now()
+            };
+            sessionStorage.setItem(pendingCatalogRestoreKey, JSON.stringify(payload));
+        } catch (error) {
+            // Ignore storage issues silently.
+        }
+    };
+
+    const restorePendingCatalogState = () => {
+        try {
+            const rawState = sessionStorage.getItem(pendingCatalogRestoreKey);
+            if (!rawState) {
+                return;
+            }
+
+            sessionStorage.removeItem(pendingCatalogRestoreKey);
+            const parsedState = JSON.parse(rawState);
+            if (!parsedState || typeof parsedState !== 'object') {
+                return;
+            }
+
+            const stateAge = Date.now() - (parsedState.timestamp || 0);
+            if (stateAge > 20000) {
+                return;
+            }
+
+            applyCatalogState(parsedState);
+        } catch (error) {
+            try {
+                sessionStorage.removeItem(pendingCatalogRestoreKey);
+            } catch (removeError) {
+                // Ignore storage issues silently.
+            }
+        }
     };
 
     const ensureViewModeInput = () => {
@@ -118,15 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const parsedState = JSON.parse(rawState);
-            if (parsedState?.viewType === 'map') {
-                setView('map');
-            }
-
-            if (typeof parsedState?.scrollY === 'number') {
-                window.requestAnimationFrame(() => {
-                    window.scrollTo(0, parsedState.scrollY);
-                });
-            }
+            applyCatalogState(parsedState);
         } catch (error) {
             // Ignore malformed state silently.
         }
@@ -158,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.dataset.lastFilterOrigin = origin;
         syncViewModeInput();
         saveCatalogState();
+        savePendingCatalogRestore();
         showCatalogLoadingState();
 
         if (typeof form.requestSubmit === 'function') {
@@ -274,11 +329,13 @@ document.addEventListener('DOMContentLoaded', function() {
             form.dataset.lastFilterOrigin = '';
             syncViewModeInput();
             saveCatalogState();
+            savePendingCatalogRestore();
             showCatalogLoadingState();
         });
     }
 
     hideCatalogLoadingState();
+    restorePendingCatalogState();
 
     window.addEventListener('pagehide', function() {
         saveCatalogState();
@@ -519,6 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const queryString = params.toString();
                         const normalizedPrefix = typeUrlPrefix.endsWith('/') ? typeUrlPrefix : `${typeUrlPrefix}/`;
                         const targetUrl = `${normalizedPrefix}${input.value}/`;
+                        savePendingCatalogRestore();
                         window.location.href = queryString ? `${targetUrl}?${queryString}` : targetUrl;
                         return;
                     }
