@@ -3399,6 +3399,20 @@ msgstr "Condos"
 msgid "Дома"
 msgstr "Townhouses"
 
+#: templates/properties/includes/list/list_properties_map.html:13
+#: templates/includes/list/list_data_injection.html:47
+msgid "Обновить карту"
+msgstr "Refresh map"
+
+#: templates/properties/includes/list/list_properties_map.html:17
+#: templates/includes/list/list_data_injection.html:48
+msgid "Сбросить обзор"
+msgstr "Reset view"
+
+#: templates/includes/list/list_data_injection.html:46
+msgid "Объектов на карте"
+msgstr "Properties on map"
+
 #: templates/core/includes/home/home_featured_properties_section.html:67
 msgid "Смотреть каталог"
 msgstr "View catalog"

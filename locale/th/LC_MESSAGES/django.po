@@ -3339,6 +3339,20 @@ msgstr "คอนโดมิเนียม"
 msgid "Дома"
 msgstr "ทาวน์เฮาส์"
 
+#: templates/properties/includes/list/list_properties_map.html:13
+#: templates/includes/list/list_data_injection.html:47
+msgid "Обновить карту"
+msgstr "รีเฟรชแผนที่"
+
+#: templates/properties/includes/list/list_properties_map.html:17
+#: templates/includes/list/list_data_injection.html:48
+msgid "Сбросить обзор"
+msgstr "รีเซ็ตมุมมอง"
+
+#: templates/includes/list/list_data_injection.html:46
+msgid "Объектов на карте"
+msgstr "จำนวนอสังหาฯ บนแผนที่"
+
 #: templates/core/includes/home/home_featured_properties_section.html:67
 msgid "Смотреть каталог"
 msgstr "ดูแคตตาล็อก"

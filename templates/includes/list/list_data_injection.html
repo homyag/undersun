@@ -4,10 +4,24 @@
 // Inject Django URLs into JavaScript
 window.djangoUrls = {
     mapPropertiesJson: "{% url 'properties:map_properties_json' %}",
+    mapDistrictsJson: "{% url 'properties:map_districts_json' %}",
+    mapProtomapsBasemapProxy: "{% url 'properties:map_protomaps_basemap_proxy' %}",
     getLocationsForDistrict: "{% url 'properties:get_locations_for_district' %}",
     ajaxSearchCount: "{% url 'properties:ajax_search_count' %}",
     staticImages: "{% static 'images/' %}",
-    noImageSvg: "{% static 'images/no-image.svg' %}"
+    noImageSvg: "{% static 'images/no-image.svg' %}",
+    mapStyleUrl: "https://tiles.openfreemap.org/styles/liberty"
+};
+
+window.mapConfig = {
+    currentBasemap: "raster-osm",
+    targetBasemap: "protomaps-en",
+    labelLanguage: "en",
+    districtOverlayMode: "centroid-labels",
+    vectorStyleUrl: "",
+    protomapsEnabled: false,
+    protomapsUrl: "",
+    protomapsTheme: "light"
 };
 
 // Inject Django translations
@@ -23,6 +37,18 @@ window.djangoTranslations = {
     noLocationsAvailable: "{% trans 'Локации не найдены' %}",
     loadingCatalog: "{% trans 'Обновляем каталог...' %}",
     priceOnRequest: "{% trans 'Цена по запросу' %}",
+    mapLoadingTitle: "{% trans 'Загружаем карту' %}",
+    mapLoadingText: "{% trans 'Подбираем объекты и расставляем маркеры на карте.' %}",
+    mapEmptyTitle: "{% trans 'На карте пока нет объектов' %}",
+    mapEmptyText: "{% trans 'Попробуйте смягчить фильтры или перейти к списку объектов.' %}",
+    mapErrorTitle: "{% trans 'Не удалось обновить карту' %}",
+    mapErrorText: "{% trans 'Проверьте фильтры или попробуйте обновить страницу.' %}",
+    mapResultsSummary: "{% trans 'Объектов на карте' %}",
+    mapRefreshLabel: "{% trans 'Обновить карту' %}",
+    mapResetViewLabel: "{% trans 'Сбросить обзор' %}",
+    saleLabel: "{% trans 'Продажа' %}",
+    rentLabel: "{% trans 'Аренда' %}",
+    bothLabel: "{% trans 'Продажа и аренда' %}",
     bedroomsShort: "{% trans 'спал.' %}",
     bathroomsShort: "{% trans 'ванн.' %}",
     areaShort: "{% trans 'м²' %}",

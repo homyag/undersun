@@ -1,5 +1,9 @@
 import json
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 from urllib.parse import quote_plus, urlencode
 
 from django.conf import settings
@@ -10,7 +14,7 @@ from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpRespons
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.db.models import Q, Count, Case, When, Value, IntegerField, F
+from django.db.models import Q, Count, Case, When, Value, IntegerField, F, Avg
 from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -68,6 +72,17 @@ PROPERTY_TYPE_NAV_LABELS = {
         'en': 'Businesses',
         'th': 'ธุรกิจพร้อมดำเนินการ',
     },
+}
+
+PROTOMAPS_BASEMAP_URL = getattr(
+    settings,
+    'PROTOMAPS_BASEMAP_URL',
+    '',
+)
+PHUKET_DISTRICT_BOUNDARIES_PATH = Path(settings.BASE_DIR) / 'data' / 'geoBoundaries-THA-ADM2.geojson'
+PHUKET_DISTRICT_BOUNDARY_SLUG_ALIASES = {
+    'kathu-district': 'kathu',
+    'phuket': 'mueang-phuket',
 }
 
 CATALOG_SEO_TEXTS = {
@@ -183,6 +198,25 @@ def _normalize_whitespace(value):
     if not isinstance(value, str):
         return value
     return ' '.join(value.split())
+
+
+@lru_cache(maxsize=1)
+def _load_phuket_district_boundaries():
+    if not PHUKET_DISTRICT_BOUNDARIES_PATH.exists():
+        return {}
+
+    with PHUKET_DISTRICT_BOUNDARIES_PATH.open(encoding='utf-8') as geojson_file:
+        payload = json.load(geojson_file)
+
+    boundaries = {}
+    for feature in payload.get('features', []):
+        properties = feature.get('properties') or {}
+        slug = properties.get('slug')
+        if not slug:
+            continue
+        boundaries[slug] = feature
+
+    return boundaries
 
 
 def _get_translated_attr(instance, field_name, language_code='ru', fallback=''):
@@ -2738,6 +2772,7 @@ def get_locations_for_district(request):
 def map_properties_json(request):
     """Optimized AJAX endpoint для получения всех отфильтрованных объектов для карты"""
     try:
+        language_code = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
         # Создаем временный объект view для использования фильтров
         view = PropertyListView()
         view.request = request
@@ -2789,15 +2824,24 @@ def map_properties_json(request):
                 agent_phone = prop.agent.phone
             properties_data.append({
                 'id': prop.id,
-                'title': prop.title,
+                'title': _get_translated_attr(prop, 'title', language_code, prop.title),
                 'slug': prop.slug,
                 'lat': float(prop.latitude),
                 'lng': float(prop.longitude),
                 'property_type': prop.property_type.name if prop.property_type else '',
-                'property_type_label': prop.property_type.name_display if prop.property_type else '',
+                'property_type_label': (
+                    _get_translated_attr(prop.property_type, 'name_display', language_code, prop.property_type.name_display)
+                    if prop.property_type else ''
+                ),
                 'deal_type': prop.deal_type,
                 'price': price_display,
-                'location': prop.location.name if prop.location else (prop.district.name if prop.district else ''),
+                'location': (
+                    _get_translated_attr(prop.location, 'name', language_code, prop.location.name)
+                    if prop.location else (
+                        _get_translated_attr(prop.district, 'name', language_code, prop.district.name)
+                        if prop.district else ''
+                    )
+                ),
                 'url': property_url,
                 'image_url': image_url,
                 'bedrooms': prop.bedrooms or 0,
@@ -2817,6 +2861,280 @@ def map_properties_json(request):
             'success': False,
             'error': str(e)
         })
+
+
+def map_districts_json(request):
+    """District overlay payload for the catalog map."""
+
+    def _build_centroid(points):
+        lng = sum(point[0] for point in points) / len(points)
+        lat = sum(point[1] for point in points) / len(points)
+        return [lng, lat]
+
+    def _build_padded_bounds_polygon(points):
+        lng_values = [point[0] for point in points]
+        lat_values = [point[1] for point in points]
+        min_lng = min(lng_values)
+        max_lng = max(lng_values)
+        min_lat = min(lat_values)
+        max_lat = max(lat_values)
+
+        lng_span = max_lng - min_lng
+        lat_span = max_lat - min_lat
+        lng_padding = max(0.008, lng_span * 0.22)
+        lat_padding = max(0.006, lat_span * 0.22)
+
+        return [
+            [min_lng - lng_padding, min_lat - lat_padding],
+            [max_lng + lng_padding, min_lat - lat_padding],
+            [max_lng + lng_padding, max_lat + lat_padding],
+            [min_lng - lng_padding, max_lat + lat_padding],
+            [min_lng - lng_padding, min_lat - lat_padding],
+        ]
+
+    def _cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    def _build_convex_hull_polygon(points):
+        unique_points = sorted({(float(lng), float(lat)) for lng, lat in points})
+        if len(unique_points) < 3:
+            return _build_padded_bounds_polygon(unique_points)
+
+        lower = []
+        for point in unique_points:
+            while len(lower) >= 2 and _cross(lower[-2], lower[-1], point) <= 0:
+                lower.pop()
+            lower.append(point)
+
+        upper = []
+        for point in reversed(unique_points):
+            while len(upper) >= 2 and _cross(upper[-2], upper[-1], point) <= 0:
+                upper.pop()
+            upper.append(point)
+
+        hull = lower[:-1] + upper[:-1]
+        if len(hull) < 3:
+            return _build_padded_bounds_polygon(unique_points)
+
+        polygon = [[float(lng), float(lat)] for lng, lat in hull]
+        polygon.append(polygon[0])
+        return polygon
+
+    def _iter_geometry_points(geometry):
+        geometry_type = (geometry or {}).get('type')
+        coordinates = (geometry or {}).get('coordinates') or []
+
+        if geometry_type == 'Polygon':
+            for ring in coordinates:
+                for lng, lat in ring:
+                    yield float(lng), float(lat)
+            return
+
+        if geometry_type == 'MultiPolygon':
+            for polygon in coordinates:
+                for ring in polygon:
+                    for lng, lat in ring:
+                        yield float(lng), float(lat)
+
+    def _build_geometry_center(geometry):
+        points = list(_iter_geometry_points(geometry))
+        if not points:
+            return None
+
+        lng_values = [point[0] for point in points]
+        lat_values = [point[1] for point in points]
+        return [
+            (min(lng_values) + max(lng_values)) / 2,
+            (min(lat_values) + max(lat_values)) / 2,
+        ]
+
+    try:
+        district_boundaries = _load_phuket_district_boundaries()
+        property_points = (
+            Property.objects
+            .filter(
+                is_active=True,
+                status='available',
+                district__isnull=False,
+                latitude__isnull=False,
+                longitude__isnull=False,
+            )
+            .select_related('district')
+            .values(
+                'district_id',
+                'district__slug',
+                'district__name',
+                'district__name_en',
+                'latitude',
+                'longitude',
+            )
+            .order_by('district__name')
+        )
+
+        grouped = {}
+        for row in property_points:
+            source_slug = row['district__slug']
+            boundary_slug = PHUKET_DISTRICT_BOUNDARY_SLUG_ALIASES.get(source_slug, source_slug)
+            grouped.setdefault(boundary_slug, {
+                'boundary_slug': boundary_slug,
+                'source_slugs': set(),
+                'source_names': {},
+                'points': [],
+            })
+            grouped[boundary_slug]['source_slugs'].add(source_slug)
+            grouped[boundary_slug]['source_names'][source_slug] = row.get('district__name_en') or row['district__name']
+            grouped[boundary_slug]['points'].append([
+                float(row['longitude']),
+                float(row['latitude']),
+            ])
+
+        districts_payload = []
+        district_features = []
+
+        for district in grouped.values():
+            points = district['points']
+            if not points:
+                continue
+
+            properties_count = len(points)
+            boundary_feature = district_boundaries.get(district['boundary_slug'])
+            source_slugs = district['source_slugs']
+            preferred_slug = (
+                district['boundary_slug']
+                if district['boundary_slug'] in source_slugs
+                else sorted(source_slugs)[0]
+            )
+            district_name = (
+                district['source_names'].get(preferred_slug)
+                or (boundary_feature or {}).get('properties', {}).get('name')
+                or district['boundary_slug'].replace('-', ' ').title()
+            )
+
+            if boundary_feature:
+                geometry = boundary_feature.get('geometry') or {}
+                center = _build_geometry_center(geometry) or _build_centroid(points)
+            else:
+                center = _build_centroid(points)
+                geometry = {
+                    'type': 'Polygon',
+                    'coordinates': [_build_convex_hull_polygon(points)],
+                }
+
+            district_payload = {
+                'slug': preferred_slug,
+                'name': district_name,
+                'lat': center[1],
+                'lng': center[0],
+                'properties_count': properties_count,
+                'polygon': geometry.get('coordinates', []),
+            }
+            districts_payload.append(district_payload)
+            district_feature = {
+                'type': 'Feature',
+                'geometry': geometry,
+                'properties': {
+                    'slug': preferred_slug,
+                    'name': district_name,
+                    'properties_count': properties_count,
+                    'center_lat': center[1],
+                    'center_lng': center[0],
+                },
+            }
+            district_features.append(district_feature)
+
+        districts_payload.sort(key=lambda item: item['name'])
+
+        return JsonResponse({
+            'success': True,
+            'districts': districts_payload,
+            'geojson': {
+                'type': 'FeatureCollection',
+                'features': district_features,
+            },
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'districts': [],
+            'geojson': {
+                'type': 'FeatureCollection',
+                'features': [],
+            },
+        })
+
+
+@require_http_methods(["GET", "HEAD"])
+def map_protomaps_basemap_proxy(request):
+    """Same-origin proxy for PMTiles basemap to avoid browser CORS failures."""
+    if not PROTOMAPS_BASEMAP_URL:
+        return JsonResponse({
+            'success': False,
+            'error': 'PROTOMAPS_BASEMAP_URL is not configured',
+        }, status=404)
+
+    try:
+        upstream_headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/124.0.0.0 Safari/537.36'
+            ),
+            'Accept': '*/*',
+            'Accept-Encoding': 'identity',
+        }
+        range_header = request.headers.get('Range')
+        if range_header:
+            upstream_headers['Range'] = range_header
+
+        upstream_request = Request(
+            PROTOMAPS_BASEMAP_URL,
+            headers=upstream_headers,
+            method='GET',
+        )
+
+        with urlopen(upstream_request, timeout=20) as upstream_response:
+            status_code = getattr(upstream_response, 'status', 200)
+            content_type = upstream_response.headers.get('Content-Type', 'application/octet-stream')
+            response = HttpResponse(
+                b'' if request.method == 'HEAD' else upstream_response.read(),
+                status=status_code,
+                content_type=content_type,
+            )
+
+            passthrough_headers = (
+                'Accept-Ranges',
+                'Content-Range',
+                'Content-Length',
+                'ETag',
+                'Last-Modified',
+                'Cache-Control',
+            )
+            for header_name in passthrough_headers:
+                header_value = upstream_response.headers.get(header_name)
+                if header_value:
+                    response[header_name] = header_value
+
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
+
+    except HTTPError as error:
+        response = HttpResponse(
+            b'' if request.method == 'HEAD' else error.read(),
+            status=error.code,
+            content_type=error.headers.get('Content-Type', 'text/plain'),
+        )
+        for header_name in ('Accept-Ranges', 'Content-Range', 'Content-Length', 'ETag', 'Last-Modified', 'Cache-Control'):
+            header_value = error.headers.get(header_name)
+            if header_value:
+                response[header_name] = header_value
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+    except URLError as error:
+        return JsonResponse({
+            'success': False,
+            'error': str(error),
+        }, status=502)
 
 
 def ajax_search_count(request):

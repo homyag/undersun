@@ -9,16 +9,15 @@
 <script src="{{ js_catalog_url }}"></script>
 {% endif %}
 
-<!-- Leaflet JavaScript -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-
-<!-- Leaflet MarkerCluster -->
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<!-- MapLibre GL JavaScript -->
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@protomaps/basemaps@5/dist/basemaps.js" crossorigin="anonymous"></script>
 
 <!-- List JavaScript Files -->
 <script src="{% static 'js/list/list_utility_functions.js' %}"></script>
+<script src="{% static 'js/map/map_popups.js' %}"></script>
+<script src="{% static 'js/map/map_core.js' %}"></script>
 <script src="{% static 'js/list/list_map_functions.js' %}"></script>
 <script src="{% static 'js/list/list_map_data_loader.js' %}"></script>
 <script src="{% static 'js/list/list_view_toggle.js' %}"></script>

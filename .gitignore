@@ -150,6 +150,7 @@ joomla_base.json
 real_estate_images_analysis.json
 photo_mapping.json
 joomla_django_comparison.json
+data/geoBoundaries-THA-ADM2_full.geojson
 
 # Логи скриптов
 migration.log

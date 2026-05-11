@@ -34,6 +34,10 @@ function setView(viewType) {
         grid.classList.add('hidden');
         if (pagination) pagination.classList.add('hidden');
         map.classList.remove('hidden');
+
+        if (typeof window.setMapStatus === 'function') {
+            window.setMapStatus('loading');
+        }
         
         // Initialize map if not already done
         initializePropertiesMap();
@@ -64,3 +68,6 @@ function changeView(viewType) {
     }
     setView(viewType);
 }
+
+window.setView = setView;
+window.changeView = changeView;
