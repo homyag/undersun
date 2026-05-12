@@ -63,6 +63,34 @@ document.addEventListener('DOMContentLoaded', function() {
         propertiesContainer.classList.remove('loading');
     };
 
+    const scheduleCatalogScrollRestore = (targetScrollY) => {
+        const normalizedTarget = Math.max(0, targetScrollY);
+        let attempts = 0;
+        const maxAttempts = 14;
+        const threshold = 4;
+
+        const restoreScroll = () => {
+            window.scrollTo(0, normalizedTarget);
+        };
+
+        const tick = () => {
+            restoreScroll();
+            attempts += 1;
+
+            if (Math.abs((window.scrollY || window.pageYOffset || 0) - normalizedTarget) <= threshold) {
+                return;
+            }
+
+            if (attempts >= maxAttempts) {
+                return;
+            }
+
+            window.setTimeout(tick, attempts < 4 ? 80 : 140);
+        };
+
+        window.requestAnimationFrame(tick);
+    };
+
     const applyCatalogState = (state) => {
         if (!state || typeof state !== 'object') {
             return;
@@ -76,11 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const targetScrollY = Math.max(0, state.scrollY);
-        const restoreScroll = () => window.scrollTo(0, targetScrollY);
-
-        window.requestAnimationFrame(restoreScroll);
-        window.setTimeout(restoreScroll, 80);
+        scheduleCatalogScrollRestore(state.scrollY);
     };
 
     const savePendingCatalogRestore = () => {
@@ -100,27 +124,29 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const rawState = sessionStorage.getItem(pendingCatalogRestoreKey);
             if (!rawState) {
-                return;
+                return null;
             }
 
             sessionStorage.removeItem(pendingCatalogRestoreKey);
             const parsedState = JSON.parse(rawState);
             if (!parsedState || typeof parsedState !== 'object') {
-                return;
+                return null;
             }
 
             const stateAge = Date.now() - (parsedState.timestamp || 0);
             if (stateAge > 20000) {
-                return;
+                return null;
             }
 
             applyCatalogState(parsedState);
+            return parsedState;
         } catch (error) {
             try {
                 sessionStorage.removeItem(pendingCatalogRestoreKey);
             } catch (removeError) {
                 // Ignore storage issues silently.
             }
+            return null;
         }
     };
 
@@ -335,7 +361,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     hideCatalogLoadingState();
-    restorePendingCatalogState();
+    const pendingCatalogState = restorePendingCatalogState();
+
+    if (pendingCatalogState) {
+        window.addEventListener('load', function restoreCatalogScrollAfterLoad() {
+            applyCatalogState(pendingCatalogState);
+        }, { once: true });
+    }
 
     window.addEventListener('pagehide', function() {
         saveCatalogState();

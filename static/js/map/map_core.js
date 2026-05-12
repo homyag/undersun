@@ -872,6 +872,15 @@
         setSourceData(DISTRICT_SOURCE_ID, state.districtGeoJson);
     }
 
+    function getDistrictFeatureFromSource(feature) {
+        const districtSlug = feature?.properties?.slug;
+        if (!districtSlug || !Array.isArray(state.districtGeoJson?.features)) {
+            return feature || null;
+        }
+
+        return state.districtGeoJson.features.find((item) => item?.properties?.slug === districtSlug) || feature || null;
+    }
+
     function clearHoverState() {
         setSingleFeatureSource(HOVER_SOURCE_ID, null);
         setSingleFeatureSource(HOVER_CLUSTER_SOURCE_ID, null);
@@ -1133,7 +1142,7 @@
                 return;
             }
 
-            setSingleFeatureSource(DISTRICT_HOVER_SOURCE_ID, feature);
+            setSingleFeatureSource(DISTRICT_HOVER_SOURCE_ID, getDistrictFeatureFromSource(feature));
         };
 
         const handleDistrictMouseLeave = () => {
