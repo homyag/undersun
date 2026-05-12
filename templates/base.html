@@ -154,6 +154,7 @@
             transform: translateY(8px);
             transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
             pointer-events: none;
+            z-index: 60;
         }
 
         .nav-area-panel.is-open {
@@ -161,6 +162,15 @@
             visibility: visible;
             transform: translateY(0);
             pointer-events: auto;
+        }
+
+        .nav-area-trigger::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 100%;
+            width: 1rem;
+            height: 100%;
         }
     </style>
     {% block extra_css %}

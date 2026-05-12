@@ -405,9 +405,17 @@
                 triggers.forEach(trigger => {
                     const panel = trigger.querySelector('.nav-area-panel');
                     if (!panel) return;
+                    let closeTimeoutId = null;
+
+                    const clearCloseTimeout = () => {
+                        if (!closeTimeoutId) return;
+                        window.clearTimeout(closeTimeoutId);
+                        closeTimeoutId = null;
+                    };
 
                     const openPanel = () => {
                         if (!desktopQuery.matches) return;
+                        clearCloseTimeout();
                         panel.classList.add('is-open');
                     };
 
@@ -415,13 +423,18 @@
                         if (evt && (panel.contains(evt.relatedTarget) || trigger.contains(evt.relatedTarget))) {
                             return;
                         }
-                        panel.classList.remove('is-open');
+                        clearCloseTimeout();
+                        closeTimeoutId = window.setTimeout(() => {
+                            panel.classList.remove('is-open');
+                            closeTimeoutId = null;
+                        }, 120);
                     };
 
                     trigger.addEventListener('mouseenter', openPanel);
                     trigger.addEventListener('focusin', openPanel);
                     trigger.addEventListener('mouseleave', closePanel);
                     trigger.addEventListener('focusout', closePanel);
+                    panel.addEventListener('mouseenter', openPanel);
                 });
             }
 
