@@ -897,8 +897,8 @@
                             </div>
                             <div class="flex-grow">
                                 <p class="text-sm font-medium text-white leading-relaxed">
-                                    59/358 Moo.4, Kathu Sub-District, <br>
-                                    Kathu District, Phuket Province 83120
+                                    {{ business_profile.address_line_1 }} <br>
+                                    {{ business_profile.address_line_2 }}
                                 </p>
                             </div>
                         </div>
@@ -909,12 +909,12 @@
                                 <i class="fas fa-phone text-white"></i>
                             </div>
                             <div class="flex-grow">
-                                <a href="tel:+66827268615"
+                                <a href="tel:{{ business_profile.phone_e164 }}"
                                    class="text-sm font-medium text-white hover:text-accent transition-colors"
                                    data-ym-goal="property_call_click"
                                    data-ym-param-context="office_info"
                                    data-ym-param-property-id="{{ property.id }}">
-                                    +66 82 726 8615
+                                    {{ business_profile.phone_display }}
                                 </a>
                             </div>
                         </div>
@@ -925,8 +925,8 @@
                                 <i class="fas fa-envelope text-white"></i>
                             </div>
                             <div class="flex-grow">
-                                <a href="mailto:info@undersunestate.com" class="text-sm font-medium text-white hover:text-accent transition-colors">
-                                    info@undersunestate.com
+                                <a href="mailto:{{ business_profile.email }}" class="text-sm font-medium text-white hover:text-accent transition-colors">
+                                    {{ business_profile.email }}
                                 </a>
                             </div>
                         </div>
@@ -938,7 +938,7 @@
                             </div>
                             <div class="flex-grow">
                                 <p class="text-sm font-medium text-white">
-                                    {% trans "Пн-Пт: 9:00-18:00" %}
+                                    {{ business_profile.hours_label }}
                                 </p>
                             </div>
                         </div>

@@ -3124,10 +3124,8 @@ msgstr ""
 "repairs, rentals and much more."
 
 #: templates/core/includes/form_security_fields.html:5
-#, fuzzy
-#| msgid "Ваш телефон"
 msgid "Ваш сайт"
-msgstr "Your phone number"
+msgstr "Your website"
 
 #: templates/core/includes/home/home_districts_section.html:6
 msgid "Популярные районы"
@@ -5520,3 +5518,15 @@ msgstr "Register"
 #: templates/properties/list.html:81
 msgid "Обновляем каталог..."
 msgstr "Loading catalog..."
+
+msgid "Данные компании"
+msgstr "Company details"
+
+msgid "Официальная информация"
+msgstr "Official information"
+
+msgid "Официальное название"
+msgstr "Official name"
+
+msgid "Phuket real estate agency: sale, purchase, rentals, investments and legal support."
+msgstr "Phuket real estate agency: sale, purchase, rentals, investments and legal support."

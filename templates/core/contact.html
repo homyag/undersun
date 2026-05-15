@@ -6,10 +6,11 @@
 {% block title %}{% trans "Контакты" %} - Undersun Estate{% endblock %}
 
 {% block structured_data %}
+{{ block.super }}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebPage",
+  "@type": "ContactPage",
   "name": "{% trans "Контакты Undersun Estate" %}",
   "url": "{{ request.build_absolute_uri }}",
   "isPartOf": {
@@ -18,35 +19,28 @@
     "url": "{{ request.scheme }}://{{ request.get_host }}"
   },
   "about": {
-    "@type": "RealEstateAgent",
-    "name": "Undersun Estate",
-    "telephone": "+66 63 303 3133",
-    "email": "info@undersunestate.com",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120",
-      "addressLocality": "Kathu",
-      "addressRegion": "Phuket",
-      "postalCode": "83120",
-      "addressCountry": "TH"
-    },
-    "contactPoint": [
-      {
-        "@type": "ContactPoint",
-        "telephone": "+66 63 303 3133",
-        "contactType": "sales",
-        "areaServed": "TH",
-        "availableLanguage": ["ru", "en", "th"]
-      },
-      {
-        "@type": "ContactPoint",
-        "telephone": "+66 82 726 8615",
-        "contactType": "customer support",
-        "areaServed": "TH",
-        "availableLanguage": ["ru", "en", "th"]
-      }
-    ]
+    "@id": "{{ request.scheme }}://{{ request.get_host }}/#real-estate-agent"
   }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "{% trans "Главная" %}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'core:home' %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{% trans "Контакты" %}",
+      "item": "{{ request.build_absolute_uri }}"
+    }
+  ]
 }
 </script>
 {% endblock %}
@@ -138,7 +132,8 @@
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 mb-1">{% trans "Адрес" %}</h3>
-                            <p class="text-gray-600">59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120, Thailand</p>
+                            <p class="text-gray-600">{{ business_profile.address_full }}</p>
+                            <p class="mt-2"><a href="{{ business_profile.google_maps_url }}" target="_blank" rel="noopener" class="text-primary hover:text-accent">Google Maps</a></p>
                         </div>
                     </div>
                     
@@ -148,7 +143,7 @@
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 mb-1">{% trans "Телефон" %}</h3>
-                            <p class="text-gray-600">+66 63 303 3133</p>
+                            <p class="text-gray-600">{{ business_profile.phone_display }}</p>
                         </div>
                     </div>
                     
@@ -158,7 +153,7 @@
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 mb-1">{% trans "Email" %}</h3>
-                            <p class="text-gray-600">info@undersunestate.com</p>
+                            <p class="text-gray-600">{{ business_profile.email }}</p>
                         </div>
                     </div>
                     
@@ -168,7 +163,7 @@
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 mb-1">{% trans "Часы работы" %}</h3>
-                            <p class="text-gray-600">{% trans "Пн-Вс: 9:00 - 21:00" %}</p>
+                            <p class="text-gray-600">{{ business_profile.hours_label }}</p>
                         </div>
                     </div>
                 </div>
@@ -189,7 +184,7 @@
                         <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-colors">
                             <i class="fab fa-telegram"></i>
                         </a>
-                        <a href="https://wa.me/6663303313" target="_blank" class="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full transition-colors">
+                        <a href="{{ business_profile.whatsapp_url }}" target="_blank" rel="noopener" class="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full transition-colors">
                             <i class="fab fa-whatsapp"></i>
                         </a>
                     </div>
@@ -203,8 +198,8 @@
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4">
         <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наше расположение" %}</h2>
-            <p class="text-gray-600">{% trans "Мы находимся в самом сердце Карона, Пхукет" %}</p>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ business_profile.map_heading }}</h2>
+            <p class="text-gray-600">{{ business_profile.map_subtitle }}</p>
         </div>
         
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">

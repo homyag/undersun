@@ -294,12 +294,12 @@
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                <a href="https://wa.me/66633033133" target="_blank" rel="noopener"
+                <a href="{{ business_profile.whatsapp_url }}" target="_blank" rel="noopener"
                    class="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-2xl font-semibold bg-accent text-gray-900 shadow-lg transition-transform hover:-translate-y-0.5">
                     <i class="fab fa-whatsapp mr-2"></i>
                     {% trans "Написать в WhatsApp" %}
                 </a>
-                <a href="tel:+66633033133"
+                <a href="tel:{{ business_profile.phone_e164 }}"
                    class="flex-1 inline-flex items-center justify-center px-5 py-3 rounded-2xl font-semibold border border-white/40 text-white hover:border-white">
                     <i class="fas fa-phone mr-2"></i>
                     {% trans "Позвонить" %}

@@ -57,9 +57,7 @@
                         {% for service in menu_services %}
                             <a href="{{ service.get_absolute_url }}"
                                class="block px-3 py-1 text-tertiary hover:text-accent transition-colors">
-                                {% if LANGUAGE_CODE == 'en' %}
-                                    {{ service.title_en|default:service.title }}{% elif LANGUAGE_CODE == 'th' %}
-                                    {{ service.title_th|default:service.title }}{% else %}{{ service.title }}{% endif %}
+                                {{ service.navigation_title|default:service.title }}
                             </a>
                         {% endfor %}
                         {% if not menu_services %}
@@ -103,10 +101,10 @@
                 <!-- Mobile Contact Info -->
                 <div class="border-t border-gray-200 pt-2 mt-2">
                     <div class="px-3 py-2 space-y-2">
-                        <a href="https://wa.me/66633033133"
+                        <a href="{{ business_profile.whatsapp_url }}"
                            class="flex items-center text-primary hover:text-accent transition-colors" target="_blank">
                             <i class="fab fa-whatsapp mr-3 text-green-500"></i>
-                            <span class="text-sm">+66 63 303 3133</span>
+                            <span class="text-sm">{{ business_profile.phone_display }}</span>
                         </a>
                         <a href="mailto:info@undersunestate.com"
                            class="flex items-center text-primary hover:text-accent transition-colors">

@@ -5,6 +5,7 @@
 {#{% block title %}{% trans "Undersun Estate - Недвижимость на Пхукете, Таиланд" %}{% endblock %}#}
 {% block title %}{{ page_title }}{% endblock %}
 {% block structured_data %}
+    {{ block.super }}
     {% include 'includes/home/home_structured_data.html' %}
 {% endblock %}
 

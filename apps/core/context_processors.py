@@ -6,6 +6,8 @@ from urllib.parse import urlsplit, urlunsplit
 from apps.properties.models import PropertyType, Property
 from apps.locations.models import District, Location
 from apps.core.models import SEOPage, Service
+from apps.core.service_landing_content import get_service_page_copy
+from apps.core.business_profile import get_business_profile, build_business_schema_json
 from apps.core.utils import truncate_meta
 from apps.core.seo_utils import build_canonical_url
 import re
@@ -93,6 +95,7 @@ def site_context(request):
     search_schema = {
         "@context": "https://schema.org",
         "@type": "WebSite",
+        "name": getattr(settings, 'SITE_NAME', 'Undersun Estate'),
         "url": site_root_url,
         "inLanguage": language_code,
         "potentialAction": {
@@ -103,13 +106,21 @@ def site_context(request):
     }
 
     search_schema_json = json.dumps(search_schema, ensure_ascii=False)
+    business_profile = get_business_profile(language_code)
+    business_schema_json = build_business_schema_json(site_root_url, canonical_absolute_url, language_code)
+
+    menu_services = list(Service.get_menu_services())
+    for service in menu_services:
+        page_copy = get_service_page_copy(service.slug, language_code)
+        service.navigation_title = page_copy.get('title') or service.title
+        service.navigation_description = page_copy.get('description') or service.description
 
     return {
         'property_types': PropertyType.ordered_for_navigation(),
         'districts': District.objects.prefetch_related('locations').all(),
         'current_language': language_code,
         'site_name': getattr(settings, 'SITE_NAME', 'Undersun Estate'),
-        'menu_services': Service.get_menu_services(),
+        'menu_services': menu_services,
         'tailwind_use_cdn': getattr(settings, 'TAILWIND_USE_CDN', False),
         'default_og_image_url': default_og_image_url,
         'hero_og_images': hero_image_urls,
@@ -119,6 +130,8 @@ def site_context(request):
         'canonical_url': canonical_absolute_url,
         'meta_robots': getattr(request, 'seo_meta_robots', ''),
         'search_schema_json': search_schema_json,
+        'business_profile': business_profile,
+        'business_schema_json': business_schema_json,
         'recaptcha_site_key': getattr(settings, 'RECAPTCHA_SITE_KEY', ''),
         'twitter_username': getattr(settings, 'SOCIAL_TWITTER_USERNAME', ''),
     }

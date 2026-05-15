@@ -23,6 +23,7 @@ from apps.properties.views import PropertyListView
 from apps.locations.models import District
 from apps.blog.models import BlogPost
 from .models import PromotionalBanner, Service, Team
+from .service_landing_content import build_service_landing_content, get_service_page_copy
 import logging
 
 logger = logging.getLogger(__name__)
@@ -491,9 +492,7 @@ class PrivacyView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        candidate = get_language_from_path(self.request.path)
-        default_lang = getattr(self.request, 'LANGUAGE_CODE', None) or get_language() or settings.LANGUAGE_CODE
-        lang = (candidate or default_lang)[:2]
+        lang = (getattr(self.request, 'LANGUAGE_CODE', None) or get_language() or settings.LANGUAGE_CODE)[:2]
         self.request.LANGUAGE_CODE = lang
         context['privacy_language'] = lang
         return context
@@ -636,15 +635,32 @@ class ServiceDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+        service = self.get_object()
+        language_code = (getattr(self.request, 'LANGUAGE_CODE', translation.get_language() or 'ru') or 'ru')[:2]
+        service_landing = build_service_landing_content(service.slug, language_code)
+        page_copy = get_service_page_copy(service.slug, language_code)
+        localized_meta_title = getattr(service, f'meta_title_{language_code}', '') if language_code != 'ru' else service.meta_title
+        localized_meta_description = getattr(service, f'meta_description_{language_code}', '') if language_code != 'ru' else service.meta_description
+
         # Добавляем все услуги для меню
         context['all_services'] = Service.get_menu_services()
+        context['localized_menu_services'] = [
+            {
+                'slug': menu_service.slug,
+                'url': menu_service.get_absolute_url(),
+                'icon_class': menu_service.icon_class,
+                'title': get_service_page_copy(menu_service.slug, language_code).get('title') or menu_service.title,
+            }
+            for menu_service in context['all_services']
+        ]
         
         # SEO данные
-        service = self.get_object()
-        context['page_title'] = service.get_meta_title()
-        context['page_description'] = truncate_meta(service.get_meta_description())
+        context['page_title'] = localized_meta_title or page_copy.get('title') or service.title
+        context['page_description'] = truncate_meta(localized_meta_description or page_copy.get('description') or service.description)
         context['page_keywords'] = service.meta_keywords
+        context['service_landing'] = service_landing
+        context['service_display_title'] = page_copy.get('title') or service_landing.get('badge') or service.title
+        context['service_display_description'] = page_copy.get('description') or service.description
         
         # Добавляем рекомендуемые объекты в зависимости от типа услуги
         context['featured_properties'] = self._get_featured_properties_for_service(service)

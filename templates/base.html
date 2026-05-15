@@ -182,6 +182,9 @@
     <!-- Structured Data -->
     {% block structured_data %}
         {{ block.super }}
+        {% if business_schema_json %}
+            <script type="application/ld+json">{{ business_schema_json|safe }}</script>
+        {% endif %}
         {% if search_schema_json %}
             <script type="application/ld+json">{{ search_schema_json|safe }}</script>
         {% endif %}
@@ -382,7 +385,7 @@
 
 {% include 'includes/layout/footer.html' %}
 <!-- WhatsApp Button -->
-<a href="https://wa.me/66633033133" class="whatsapp-btn" target="_blank"
+<a href="{{ business_profile.whatsapp_url }}" class="whatsapp-btn" target="_blank"
    style="position: fixed; right: 15px; bottom: 85px; z-index: 1000; width: 50px; height: 50px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; text-decoration: none; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);">
     <i class="fab fa-whatsapp"></i>
 </a>

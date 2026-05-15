@@ -1,21 +1,20 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% with lang=privacy_language %}
 {% block title %}
-    {% if lang|lower == 'en' %}Privacy & Cookies Policy - Undersun Estate{% elif lang|lower == 'th' %}นโยบายความเป็นส่วนตัวและคุกกี้ - Undersun Estate{% else %}Политика конфиденциальности и cookie - Undersun Estate{% endif %}
+    {% if privacy_language|lower == 'en' %}Privacy & Cookies Policy - Undersun Estate{% elif privacy_language|lower == 'th' %}นโยบายความเป็นส่วนตัวและคุกกี้ - Undersun Estate{% else %}Политика конфиденциальности и cookie - Undersun Estate{% endif %}
 {% endblock %}
 
 {% block content %}
 <section class="bg-gradient-to-r from-primary to-blue-800 py-16 text-white">
     <div class="mx-auto max-w-5xl px-4 text-center">
         <h1 class="text-3xl font-bold sm:text-5xl">
-            {% if lang|lower == 'en' %}Privacy Notice{% elif lang|lower == 'th' %}นโยบายความเป็นส่วนตัว{% else %}Политика конфиденциальности{% endif %}
+            {% if privacy_language|lower == 'en' %}Privacy Notice{% elif privacy_language|lower == 'th' %}นโยบายความเป็นส่วนตัว{% else %}Политика конфиденциальности{% endif %}
         </h1>
         <p class="mt-4 text-base sm:text-lg opacity-90">
-            {% if lang|lower == 'en' %}
+            {% if privacy_language|lower == 'en' %}
                 Effective date: 20 October 2025. This notice explains how Undersun Estate complies with the EU General Data Protection Regulation (GDPR).
-            {% elif lang|lower == 'th' %}
+            {% elif privacy_language|lower == 'th' %}
                 มีผลบังคับใช้วันที่ 20 ตุลาคม 2025 นโยบายนี้อธิบายการปฏิบัติตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของประเทศไทย.
             {% else %}
                 Дата вступления в силу: 20 октября 2025 года. Документ составлен в соответствии с Федеральным законом № 152‑ФЗ «О персональных данных».
@@ -26,9 +25,9 @@
 
 <section class="py-12">
     <div class="mx-auto max-w-5xl space-y-10 px-4">
-        {% if lang|lower == 'en' %}
+        {% if privacy_language|lower == 'en' %}
             {% include 'core/includes/privacy/privacy_en.html' %}
-        {% elif lang|lower == 'th' %}
+        {% elif privacy_language|lower == 'th' %}
             {% include 'core/includes/privacy/privacy_th.html' %}
         {% else %}
             {% include 'core/includes/privacy/privacy_ru.html' %}
@@ -36,14 +35,13 @@
 
         <article class="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-5 text-sm text-slate-600">
             <h2 class="text-lg font-semibold text-slate-900">
-                {% if lang|lower == 'en' %}Contact the Data Protection Officer{% elif lang|lower == 'th' %}ติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคล{% else %}Контакты ответственного за защиту данных{% endif %}
+                {% if privacy_language|lower == 'en' %}Contact the Data Protection Officer{% elif privacy_language|lower == 'th' %}ติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคล{% else %}Контакты ответственного за защиту данных{% endif %}
             </h2>
             <p>Email: <a class="underline" href="mailto:privacy@undersunestate.com">privacy@undersunestate.com</a></p>
-            <p>{% if lang|lower == 'en' %}Postal address: 9/9 Moo 6, Cherngtalay, Thalang, Phuket 83110, Thailand{% elif lang|lower == 'th' %}ที่อยู่: 9/9 หมู่ 6 เชิงทะเล ถลาง ภูเก็ต 83110 ประเทศไทย{% else %}Почтовый адрес: 9/9 Moo 6, Cherngtalay, Thalang, Phuket 83110, Таиланд{% endif %}</p>
-            <p>{% if lang|lower == 'en' %}Phone: +66 63 303 3133{% elif lang|lower == 'th' %}โทร: +66 63 303 3133{% else %}Телефон: +66 63 303 3133{% endif %}</p>
-            <p>{% if lang|lower == 'en' %}Supervisory authorities: EU Data Protection Authorities and Thailand PDPC.{% elif lang|lower == 'th' %}หน่วยงานกำกับดูแล: สำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคล (PDPC) และ EU DPA ที่เกี่ยวข้อง{% else %}Надзорные органы: Роскомнадзор и PDPC (Таиланд).{% endif %}</p>
+            <p>{% if privacy_language|lower == 'en' %}Postal address: {{ business_profile.address_full }}{% elif privacy_language|lower == 'th' %}ที่อยู่: {{ business_profile.address_full }}{% else %}Почтовый адрес: {{ business_profile.address_full }}{% endif %}</p>
+            <p>{% if privacy_language|lower == 'en' %}Phone: {{ business_profile.phone_display }}{% elif privacy_language|lower == 'th' %}โทร: {{ business_profile.phone_display }}{% else %}Телефон: {{ business_profile.phone_display }}{% endif %}</p>
+            <p>{% if privacy_language|lower == 'en' %}Supervisory authorities: relevant EU Data Protection Authorities under the GDPR.{% elif privacy_language|lower == 'th' %}หน่วยงานกำกับดูแล: สำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคลของประเทศไทย (PDPC){% else %}Надзорный орган: Роскомнадзор.{% endif %}</p>
         </article>
     </div>
 </section>
 {% endblock %}
-{% endwith %}

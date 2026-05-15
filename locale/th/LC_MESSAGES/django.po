@@ -3077,10 +3077,8 @@ msgid ""
 msgstr "ใช่เรานำเสนอบริการการจัดการอสังหาริมทรัพย์อย่างเต็มรูปแบบ:ทำความสะอาด,ปรับปรุง,ให้เช่าและอื่นๆอีกมากมาย"
 
 #: templates/core/includes/form_security_fields.html:5
-#, fuzzy
-#| msgid "Ваш телефон"
 msgid "Ваш сайт"
-msgstr "เบอร์โทรศัพท์"
+msgstr "เว็บไซต์ของคุณ"
 
 #: templates/core/includes/home/home_districts_section.html:6
 msgid "Популярные районы"
@@ -5446,3 +5444,15 @@ msgstr "ลงทะเบียน"
 #: templates/properties/list.html:81
 msgid "Обновляем каталог..."
 msgstr "กำลังอัปเดตแคตตาล็อก..."
+
+msgid "Данные компании"
+msgstr "ข้อมูลบริษัท"
+
+msgid "Официальная информация"
+msgstr "ข้อมูลอย่างเป็นทางการ"
+
+msgid "Официальное название"
+msgstr "ชื่ออย่างเป็นทางการ"
+
+msgid "Phuket real estate agency: sale, purchase, rentals, investments and legal support."
+msgstr "เอเจนซี่อสังหาริมทรัพย์ในภูเก็ต: ซื้อ ขาย เช่า การลงทุน และบริการด้านกฎหมาย"

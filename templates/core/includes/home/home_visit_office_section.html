@@ -42,8 +42,8 @@
             <i class="fas fa-map-marker-alt text-accent text-lg flex-shrink-0"></i>
             <div>
               <p class="text-sm text-gray-700">
-                59/358 Moo.4, Kathu Sub-District, <br>
-                Kathu District, Phuket Province 83120
+                {{ business_profile.address_line_1 }} <br>
+                {{ business_profile.address_line_2 }}
               </p>
             </div>
           </div>
@@ -52,8 +52,8 @@
           <div class="flex items-center space-x-3">
             <i class="fas fa-phone text-accent text-lg flex-shrink-0"></i>
             <div>
-              <a href="tel:+66827268615" class="text-gray-700 hover:text-accent transition-colors">
-                +66 82 726 8615
+              <a href="tel:{{ business_profile.phone_e164 }}" class="text-gray-700 hover:text-accent transition-colors">
+                {{ business_profile.phone_display }}
               </a>
             </div>
           </div>
@@ -62,8 +62,8 @@
           <div class="flex items-center space-x-3">
             <i class="fas fa-envelope text-accent text-lg flex-shrink-0"></i>
             <div>
-              <a href="mailto:info@undersunestate.com" class="text-gray-700 hover:text-accent transition-colors">
-                info@undersunestate.com
+              <a href="mailto:{{ business_profile.email }}" class="text-gray-700 hover:text-accent transition-colors">
+                {{ business_profile.email }}
               </a>
             </div>
           </div>
@@ -73,7 +73,7 @@
             <i class="fas fa-clock text-accent text-lg flex-shrink-0"></i>
             <div>
               <p class="text-sm text-gray-700">
-                {% trans "Пн-Пт: 9:00-18:00" %}
+                {{ business_profile.hours_label }}
               </p>
             </div>
           </div>

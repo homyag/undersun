@@ -1,26 +1,25 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% with lang=LANGUAGE_CODE|default:'ru' %}
 {% block title %}
-    {% if lang == 'en' %}Terms of Use - Undersun Estate{% elif lang == 'th' %}เงื่อนไขการใช้งาน - Undersun Estate{% else %}Пользовательское соглашение - Undersun Estate{% endif %}
+    {% if LANGUAGE_CODE|default:'ru' == 'en' %}Terms of Use - Undersun Estate{% elif LANGUAGE_CODE|default:'ru' == 'th' %}เงื่อนไขการใช้งาน - Undersun Estate{% else %}Пользовательское соглашение - Undersun Estate{% endif %}
 {% endblock %}
 
 {% block content %}
 <section class="bg-gradient-to-r from-primary to-blue-800 py-16 text-white">
     <div class="mx-auto max-w-5xl px-4 text-center">
         <h1 class="text-3xl font-bold sm:text-5xl">
-            {% if lang == 'en' %}Terms of Use{% elif lang == 'th' %}เงื่อนไขการใช้งาน{% else %}Пользовательское соглашение{% endif %}
+            {% if LANGUAGE_CODE|default:'ru' == 'en' %}Terms of Use{% elif LANGUAGE_CODE|default:'ru' == 'th' %}เงื่อนไขการใช้งาน{% else %}Пользовательское соглашение{% endif %}
         </h1>
         <p class="mt-4 text-base sm:text-lg opacity-90">
-            {% if lang == 'en' %}Effective date: 20 October 2025. These terms govern your access to the Undersun Estate website, services, and digital tools.{% elif lang == 'th' %}มีผลใช้บังคับวันที่ 20 ตุลาคม 2025 ข้อกำหนดนี้ควบคุมการใช้งานเว็บไซต์ บริการ และเครื่องมือดิจิทัลของ Undersun Estate{% else %}Дата вступления в силу: 20 октября 2025 года. Настоящие условия регулируют доступ к сайту, сервисам и цифровым инструментам Undersun Estate.{% endif %}
+            {% if LANGUAGE_CODE|default:'ru' == 'en' %}Effective date: 20 October 2025. These terms govern your access to the Undersun Estate website, services, and digital tools.{% elif LANGUAGE_CODE|default:'ru' == 'th' %}มีผลใช้บังคับวันที่ 20 ตุลาคม 2025 ข้อกำหนดนี้ควบคุมการใช้งานเว็บไซต์ บริการ และเครื่องมือดิจิทัลของ Undersun Estate{% else %}Дата вступления в силу: 20 октября 2025 года. Настоящие условия регулируют доступ к сайту, сервисам и цифровым инструментам Undersun Estate.{% endif %}
         </p>
     </div>
 </section>
 
 <section class="py-12">
     <div class="mx-auto max-w-5xl space-y-10 px-4 text-slate-700">
-        {% if lang == 'en' %}
+        {% if LANGUAGE_CODE|default:'ru' == 'en' %}
             <article class="space-y-6">
                 <h2 class="text-2xl font-semibold text-slate-900">1. Acceptance of terms</h2>
                 <p>By browsing Undersun Estate, submitting enquiries, or booking consultations you agree to these Terms of Use and our Privacy & Cookies Policy. If you do not accept these terms, please refrain from using the website.</p>
@@ -53,7 +52,7 @@
                 <h2 class="text-2xl font-semibold text-slate-900">7. Contact</h2>
                 <p>Questions regarding these terms can be addressed to <a class="underline" href="mailto:info@undersunestate.com">info@undersunestate.com</a>.</p>
             </article>
-        {% elif lang == 'th' %}
+        {% elif LANGUAGE_CODE|default:'ru' == 'th' %}
             <article class="space-y-6">
                 <h2 class="text-2xl font-semibold text-slate-900">1. การยอมรับเงื่อนไข</h2>
                 <p>เมื่อคุณเข้าชมเว็บไซต์ Undersun Estate ส่งแบบฟอร์ม หรือจองการปรึกษา ถือว่าคุณยอมรับเงื่อนไขการใช้งานนี้ หากไม่เห็นด้วย โปรดหยุดใช้บริการเว็บไซต์</p>
@@ -128,7 +127,7 @@
                     <p>คุณมีสิทธิ์ขอเข้าถึง แก้ไข ลบ หรือถอนความยินยอมในการใช้ข้อมูล ติดต่อเราได้ตามช่องทางด้านล่าง</p>
 
                     <h4 class="font-semibold text-slate-900 mt-4">9. การติดต่อเรา</h4>
-                    <p>ฝ่ายนโยบายข้อมูลส่วนบุคคล UNDERSUN ESTATE CO., LTD โทร: +66 63 303 3133 อีเมล: info@undersunestate.com เว็บไซต์: www.undersunestate.com</p>
+                    <p>ฝ่ายนโยบายข้อมูลส่วนบุคคล UNDERSUN ESTATE CO., LTD โทร: {{ business_profile.phone_display }} อีเมล: {{ business_profile.email }} เว็บไซต์: www.undersunestate.com</p>
 
                     <h4 class="font-semibold text-slate-900 mt-4">10. กฎหมายที่ใช้บังคับ</h4>
                     <p>นโยบายนี้อยู่ภายใต้กฎหมายประเทศไทย หากมีข้อสงสัยเพิ่มเติม โปรดติดต่อเรา</p>
@@ -170,10 +169,9 @@
         {% endif %}
 
         <article class="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-5 text-sm text-slate-600">
-            <h2 class="text-lg font-semibold text-slate-900">{% if lang == 'en' %}Need assistance?{% elif lang == 'th' %}ต้องการความช่วยเหลือ?{% else %}Нужна помощь?{% endif %}</h2>
-            <p>{% if lang == 'en' %}Reach us at +66 63 303 3133 or via the contact form for personalised support.{% elif lang == 'th' %}ติดต่อเราได้ที่ +66 63 303 3133 หรือผ่านแบบฟอร์มติดต่อ เพื่อรับคำปรึกษาอย่างมืออาชีพ{% else %}Свяжитесь с нами по телефону +66 63 303 3133 или через форму обратной связи для персональной консультации.{% endif %}</p>
+            <h2 class="text-lg font-semibold text-slate-900">{% if LANGUAGE_CODE|default:'ru' == 'en' %}Need assistance?{% elif LANGUAGE_CODE|default:'ru' == 'th' %}ต้องการความช่วยเหลือ?{% else %}Нужна помощь?{% endif %}</h2>
+            <p>{% if LANGUAGE_CODE|default:'ru' == 'en' %}Reach us at {{ business_profile.phone_display }} or via the contact form for personalised support.{% elif LANGUAGE_CODE|default:'ru' == 'th' %}ติดต่อเราได้ที่ {{ business_profile.phone_display }} หรือผ่านแบบฟอร์มติดต่อ เพื่อรับคำปรึกษาอย่างมืออาชีพ{% else %}Свяжитесь с нами по телефону {{ business_profile.phone_display }} или через форму обратной связи для персональной консультации.{% endif %}</p>
         </article>
     </div>
 </section>
 {% endblock %}
-{% endwith %}

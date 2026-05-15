@@ -50,9 +50,7 @@
                     {% for service in menu_services %}
                         <li><a href="{{ service.get_absolute_url }}"
                                class="text-gray-300 hover:text-white transition-colors">
-                            {% if LANGUAGE_CODE == 'en' %}
-                                {{ service.title_en|default:service.title }}{% elif LANGUAGE_CODE == 'th' %}
-                                {{ service.title_th|default:service.title }}{% else %}{{ service.title }}{% endif %}
+                            {{ service.navigation_title|default:service.title }}
                         </a></li>
                     {% endfor %}
                 </ul>
@@ -62,12 +60,10 @@
                 <h6 class="text-lg font-semibold mb-4">{% if LANGUAGE_CODE == 'en' %}
                     Contacts{% elif LANGUAGE_CODE == 'th' %}ติดต่อเรา{% else %}Контакты{% endif %}</h6>
                 <div class="space-y-2 text-gray-300">
-                    <p><i class="fas fa-map-marker-alt mr-2"></i> 59/358 Moo.4, Kathu Sub-District, Kathu District, Phuket Province 83120</p>
-                    <p><i class="fas fa-phone mr-2"></i> +66 63 303 3133</p>
-                    <p><i class="fas fa-envelope mr-2"></i> info@undersunestate.com</p>
-                    <p><i class="fas fa-clock mr-2"></i> {% if LANGUAGE_CODE == 'en' %}Mon-Sun: 9:00 -
-                        21:00{% elif LANGUAGE_CODE == 'th' %}จันทร์-อาทิตย์: 9:00 - 21:00{% else %}Пн-Вс: 9:00 -
-                        21:00{% endif %}</p>
+                    <p><i class="fas fa-map-marker-alt mr-2"></i> {{ business_profile.address_full }}</p>
+                    <p><i class="fas fa-phone mr-2"></i> {{ business_profile.phone_display }}</p>
+                    <p><i class="fas fa-envelope mr-2"></i> {{ business_profile.email }}</p>
+                    <p><i class="fas fa-clock mr-2"></i> {{ business_profile.hours_label }}</p>
                 </div>
             </div>
         </div>

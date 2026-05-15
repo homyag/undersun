@@ -9,10 +9,10 @@
         <!-- Desktop layout -->
         <div class="hidden md:flex justify-between items-center text-sm">
             <div class="flex items-center space-x-6">
-                <a href="https://wa.me/66633033133" class="flex items-center hover:text-accent transition-colors"
+                <a href="{{ business_profile.whatsapp_url }}" class="flex items-center hover:text-accent transition-colors"
                    target="_blank">
                     <i class="fab fa-whatsapp mr-2"></i>
-                    +66 63 303 3133
+                    {{ business_profile.phone_display }}
                 </a>
                 <a href="mailto:info@undersunestate.com" class="flex items-center hover:text-accent transition-colors">
                     <i class="fas fa-envelope mr-2"></i>
@@ -71,7 +71,7 @@
                    target="_blank" rel="noopener noreferrer">
                     <i class="fab fa-telegram text-base"></i>
                 </a>
-                <a href="https://wa.me/66633033133" class="text-green-400 hover:text-green-300 transition-colors"
+                <a href="{{ business_profile.whatsapp_url }}" class="text-green-400 hover:text-green-300 transition-colors"
                    target="_blank" rel="noopener noreferrer">
                     <i class="fab fa-whatsapp text-base"></i>
                 </a>
@@ -91,9 +91,9 @@
 
             <!-- Phone Number - Right -->
             <div class="flex items-center">
-                <a href="tel:+66633033133" class="flex items-center hover:text-accent transition-colors font-medium">
+                <a href="tel:{{ business_profile.phone_e164 }}" class="flex items-center hover:text-accent transition-colors font-medium">
                     <i class="fas fa-phone mr-2 text-sm"></i>
-                    <span class="text-sm">+66 63 303 3133</span>
+                    <span class="text-sm">{{ business_profile.phone_display }}</span>
                 </a>
             </div>
         </div>
@@ -183,10 +183,7 @@
                                     {% for service in menu_services %}
                                         <a href="{{ service.get_absolute_url }}"
                                            class="block px-4 py-2 text-gray-800 hover:bg-gray-100 transition-colors duration-200">
-                                            {% if lang == 'en' %}
-                                                {{ service.title_en|default:service.title }}{% elif lang == 'th' %}
-                                                {{ service.title_th|default:service.title }}{% else %}
-                                                {{ service.title }}{% endif %}
+                                            {{ service.navigation_title|default:service.title }}
                                         </a>
                                     {% endfor %}
                                     {% if not menu_services %}

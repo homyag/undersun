@@ -27,6 +27,7 @@ from apps.core.utils import build_query_string, rate_limit, validate_form_securi
 from apps.core.amp_utils import convert_html_to_amp
 from apps.core.models import SEOContentBlock
 from apps.core.seo_utils import build_property_meta
+from apps.core.business_profile import BUSINESS_PROFILE
 from .seo_landings import resolve_landing_signature, build_candidate_slugs
 from .models import Property, PropertyType
 from apps.locations.models import District, Location
@@ -2426,8 +2427,8 @@ def property_detail_amp(request, slug):
         title=property_title_display,
         url=canonical_url,
     )
-    whatsapp_url = f"https://wa.me/66633033133?text={quote_plus(whatsapp_message)}"
-    contact_phone = '+66633033133'
+    whatsapp_url = f"https://wa.me/{BUSINESS_PROFILE['phone_e164'].lstrip('+')}?text={quote_plus(whatsapp_message)}"
+    contact_phone = BUSINESS_PROFILE['phone_e164']
 
     final_price = _build_final_price(property_obj)
 
@@ -2847,7 +2848,7 @@ def map_properties_json(request):
                 'bedrooms': prop.bedrooms or 0,
                 'bathrooms': prop.bathrooms or 0,
                 'area': float(prop.area_total) if prop.area_total else 0,
-                'agent_phone': agent_phone or '+66633033133'
+                'agent_phone': agent_phone or BUSINESS_PROFILE['phone_e164']
             })
         
         return JsonResponse({

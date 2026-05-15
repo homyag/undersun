@@ -3,20 +3,20 @@
 {% load static %}
 {% load currency_tags %}
 
-{% block title %}{{ service.get_meta_title }}{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 
-{% block description %}{{ service.get_meta_description }}{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
 
 {% block keywords %}{{ service.meta_keywords }}{% endblock %}
 
 {% block structured_data %}
-<!-- Structured Data for Service -->
+{{ block.super }}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Service",
-  "name": "{{ service.title }}",
-  "description": "{{ service.description }}",
+  "name": "{{ service_display_title|escapejs }}",
+  "description": "{{ service_display_description|striptags|escapejs }}",
   "provider": {
     "@type": "Organization",
     "name": "Undersun Estate",
@@ -29,191 +29,303 @@
   }
 }
 </script>
+{% if service_landing.faq %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in service_landing.faq %}
+    {
+      "@type": "Question",
+      "name": "{{ item.question|escapejs }}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ item.answer|escapejs }}"
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
 {% endblock %}
 
 {% block content %}
-<!-- Service Hero Section -->
-<section class="pt-16 pb-12 bg-gradient-to-br from-gray-50 to-white relative">
-    <div class="max-w-7xl mx-auto px-4">
-        <!-- Header block with yellow corners -->
-        <div class="text-center mb-8 lg:mb-10 relative">
-            <!-- Mobile layout: simple without corners -->
-            <div class="lg:hidden">
-                <div class="mb-4">
-                    {% if service.icon_class %}
-                    <div class="inline-flex items-center justify-center w-12 h-12 bg-accent rounded-full mb-3">
-                        <i class="{{ service.icon_class }} text-lg text-gray-900"></i>
-                    </div>
-                    {% endif %}
-                </div>
-                <h1 class="text-2xl font-bold text-primary mb-3">{{ service.title }}</h1>
-                <p class="text-base text-tertiary max-w-sm mx-auto leading-relaxed px-4">{{ service.description }}</p>
+<section class="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-accent/10 pt-16 pb-12">
+    <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,rgba(241,180,0,0.14),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(71,75,87,0.1),transparent_38%)]"></div>
+    <div class="relative max-w-7xl mx-auto px-4">
+        <div class="max-w-4xl">
+            {% if service_landing.badge %}
+            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-accent/25 bg-white/90 px-4 py-2 text-sm font-semibold text-primary shadow-sm">
+                {% if service.icon_class %}
+                <i class="{{ service.icon_class }} text-accent"></i>
+                {% endif %}
+                <span>{{ service_landing.badge }}</span>
             </div>
+            {% endif %}
 
-            <!-- Desktop layout: corners around both title and subtitle -->
-            <div class="hidden lg:block">
-                <!-- Yellow corner decorations for desktop -->
-                <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-full max-w-3xl h-24">
-                    <!-- Top left corner -->
-                    <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-accent"></div>
-                    <!-- Top right corner -->
-                    <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-accent"></div>
-                    <!-- Bottom left corner -->
-                    <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-accent"></div>
-                    <!-- Bottom right corner -->
-                    <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-accent"></div>
-                </div>
-                
-                <div class="pt-4 pb-4">
-                    {% if service.icon_class %}
-                    <div class="mb-4">
-                        <div class="inline-flex items-center justify-center w-16 h-16 bg-accent rounded-full mb-3">
-                            <i class="{{ service.icon_class }} text-2xl text-gray-900"></i>
-                        </div>
-                    </div>
-                    {% endif %}
-                    <h1 class="text-3xl font-bold text-primary mb-4">{{ service.title }}</h1>
-                    <p class="text-lg text-tertiary max-w-2xl mx-auto leading-relaxed">{{ service.description }}</p>
-                </div>
+            <h1 class="text-3xl font-bold leading-tight text-primary sm:text-4xl lg:text-5xl">{{ service_display_title }}</h1>
+            <p class="mt-4 max-w-3xl text-base leading-7 text-tertiary sm:text-lg">{{ service_display_description }}</p>
+
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                <a href="#serviceContactForm" class="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-[#616677]">
+                    {{ service_landing.cta_button|default:service_landing.labels.contact_form }}
+                </a>
+                <a href="tel:{{ business_profile.phone_e164 }}" class="inline-flex items-center justify-center rounded-lg border border-primary/20 bg-white px-6 py-3 font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/5">
+                    <i class="fas fa-phone mr-2 text-accent"></i>{{ service_landing.labels.call }}
+                </a>
             </div>
         </div>
     </div>
-    
-    <!-- Subtle gradient overlay -->
-    <div class="absolute inset-0 bg-gradient-to-r from-accent/10 to-primary/10 pointer-events-none"></div>
 </section>
 
-<!-- Service Content Section -->
-<section class="py-16 bg-white">
+<section class="bg-white py-14 sm:py-16">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <!-- Main Content -->
-            <div class="lg:col-span-2">
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
+            <div class="lg:col-span-8">
                 {% if service.image %}
-                <div class="mb-8">
-                    <img src="{{ service.image.url }}" alt="{{ service.title }}" 
-                         class="w-full h-64 lg:h-80 object-cover rounded-lg shadow-lg">
+                <div class="overflow-hidden rounded-[1.75rem] border border-gray-100 bg-white shadow-xl shadow-slate-200/60">
+                    <img src="{{ service.image.url }}" alt="{{ service.title }}" class="h-64 w-full object-cover sm:h-80 lg:h-[25rem]">
                 </div>
                 {% endif %}
-                
-                <div class="prose prose-lg max-w-none">
-                    <div class="service-content text-tertiary leading-relaxed">
+
+                <div class="mt-8 grid gap-6 sm:grid-cols-2">
+                    <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
+                        <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.problem_title }}</p>
+                        <p class="text-sm leading-7 text-tertiary sm:text-base">{{ service_landing.problem_text }}</p>
+                    </article>
+                    <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
+                        <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.audience_title }}</p>
+                        <ul class="space-y-3 text-sm leading-7 text-tertiary sm:text-base">
+                            {% for item in service_landing.audience_items %}
+                            <li class="flex gap-3">
+                                <span class="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-accent"></span>
+                                <span>{{ item }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+                </div>
+
+                {% if service.content %}
+                <section class="mt-10 rounded-[1.75rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70 sm:p-8">
+                    <div class="mb-6 flex items-center gap-3">
+                        <div class="h-11 w-11 rounded-2xl bg-accent/15 text-primary flex items-center justify-center">
+                            <i class="fas fa-compass text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
+                            <h2 class="text-2xl font-bold text-primary">{{ service_landing.overview_title|default:service_landing.labels.content_fallback_title }}</h2>
+                        </div>
+                    </div>
+                    <div class="service-content text-tertiary">
                         {{ service.content|safe }}
                     </div>
-                </div>
-            </div>
+                </section>
+                {% endif %}
 
-            <!-- Sidebar -->
-            <div class="lg:col-span-1">
-                <!-- Services Menu -->
-                <div class="bg-gray-50 rounded-lg p-6 mb-8 border border-gray-200">
-                    <h3 class="text-xl font-bold text-primary mb-6 flex items-center">
-                        <i class="fas fa-list mr-3 text-accent"></i>
-                        {% trans "Наши услуги" %}
-                    </h3>
-                    <nav class="space-y-2">
-                        {% for menu_service in all_services %}
-                        <a href="{{ menu_service.get_absolute_url }}" 
-                           class="group block px-4 py-3 rounded-lg transition-all duration-200 {% if menu_service.slug == service.slug %}bg-primary text-white shadow-md{% else %}text-tertiary hover:bg-white hover:shadow-sm hover:text-primary{% endif %}">
-                            <div class="flex items-center">
-                                {% if menu_service.icon_class %}
-                                <i class="{{ menu_service.icon_class }} mr-3 {% if menu_service.slug == service.slug %}text-accent{% else %}text-accent group-hover:text-accent{% endif %}"></i>
-                                {% endif %}
-                                <span class="font-medium">{{ menu_service.title }}</span>
+                {% if service_landing.stages %}
+                <section class="mt-10">
+                    <div class="mb-6">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
+                        <h2 class="mt-2 text-2xl font-bold text-primary sm:text-3xl">{{ service_landing.stages_title }}</h2>
+                    </div>
+                    <div class="grid gap-4">
+                        {% for stage in service_landing.stages %}
+                        <article class="grid gap-4 rounded-[1.5rem] border border-gray-100 bg-white p-5 shadow-sm shadow-slate-200/70 sm:grid-cols-[auto,1fr] sm:gap-5 sm:p-6">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-white">{{ forloop.counter }}</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-primary">{{ stage.title }}</h3>
+                                <p class="mt-2 text-sm leading-7 text-tertiary sm:text-base">{{ stage.text }}</p>
                             </div>
-                        </a>
+                        </article>
                         {% endfor %}
-                    </nav>
-                </div>
+                    </div>
+                </section>
+                {% endif %}
 
-                <!-- Contact Form -->
-                <div class="bg-primary text-white rounded-lg p-6 shadow-lg">
-                    <h3 class="text-xl font-bold mb-4 flex items-center">
-                        <i class="fas fa-comment-dots mr-3 text-accent"></i>
-                        {% trans "Получить консультацию" %}
-                    </h3>
-                    <p class="mb-6 opacity-90 text-sm">
-                        {% trans "Оставьте заявку и наш специалист свяжется с вами в течение часа" %}
-                    </p>
-                    <form id="serviceContactForm" class="space-y-4 js-recaptcha-form" method="post" action="{% url 'users:contact_form' %}" data-recaptcha-action="service_contact">
-                        {% csrf_token %}
-                        {% include 'core/includes/recaptcha_token_field.html' %}
-                        {% include 'core/includes/form_security_fields.html' with honeypot_id='service-contact-website' %}
-                        <input type="hidden" name="service" value="{{ service.title }}">
-                        
-                        <div>
-                            <input type="text" name="name" placeholder="{% trans 'Ваше имя' %}" required
-                                   class="w-full px-4 py-3 rounded-lg text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-200">
-                        </div>
-                        
-                        <div>
-                            <input type="tel" name="phone" placeholder="{% trans 'Телефон' %}" required
-                                   class="w-full px-4 py-3 rounded-lg text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-200">
-                        </div>
-                        
-                        <div>
-                            <input type="email" name="email" placeholder="{% trans 'Email' %}"
-                                   class="w-full px-4 py-3 rounded-lg text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent border border-gray-200">
-                        </div>
-                        
-                        <div>
-                            <textarea name="message" rows="4" placeholder="{% trans 'Ваш вопрос' %}"
-                                     class="w-full px-4 py-3 rounded-lg text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent resize-none border border-gray-200"></textarea>
-                        </div>
-                        
-                        <button type="submit" 
-                                class="w-full bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-6 rounded-lg transition-colors duration-200">
-                            {% trans "Отправить заявку" %}
-                        </button>
-                        
-                        <p class="text-xs opacity-75 text-center">
-                            {% trans "Нажимая кнопку, вы соглашаетесь с" %} 
-                            <a href="#" class="underline text-accent">{% trans "политикой конфиденциальности" %}</a>
-                        </p>
-                    </form>
-                </div>
+                <section class="mt-10 grid gap-6 xl:grid-cols-2">
+                    {% if service_landing.documents %}
+                    <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
+                        <h2 class="text-xl font-bold text-primary">{{ service_landing.documents_title }}</h2>
+                        <ul class="mt-5 space-y-3 text-sm leading-7 text-tertiary sm:text-base">
+                            {% for item in service_landing.documents %}
+                            <li class="flex gap-3">
+                                <i class="fas fa-file-lines mt-1 text-accent"></i>
+                                <span>{{ item }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+                    {% endif %}
+
+                    {% if service_landing.risks %}
+                    <article class="rounded-[1.5rem] border border-amber-200 bg-amber-50/70 p-6 shadow-sm shadow-amber-100/60">
+                        <h2 class="text-xl font-bold text-primary">{{ service_landing.risks_title }}</h2>
+                        <ul class="mt-5 space-y-3 text-sm leading-7 text-tertiary sm:text-base">
+                            {% for item in service_landing.risks %}
+                            <li class="flex gap-3">
+                                <i class="fas fa-shield-halved mt-1 text-accent"></i>
+                                <span>{{ item }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </article>
+                    {% endif %}
+                </section>
+
+                <section class="mt-10 grid gap-6 xl:grid-cols-2">
+                    <article class="rounded-[1.5rem] bg-primary p-6 text-white shadow-lg shadow-slate-300/50">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.timeline_title }}</p>
+                        <h2 class="mt-3 text-2xl font-bold">{% if LANGUAGE_CODE == 'en' %}Expected timing{% elif LANGUAGE_CODE == 'th' %}กรอบเวลาโดยทั่วไป{% else %}Как проходят сроки{% endif %}</h2>
+                        <p class="mt-4 text-sm leading-7 text-white/90 sm:text-base">{{ service_landing.timeline_text }}</p>
+                    </article>
+
+                    <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.pricing_title }}</p>
+                        <h2 class="mt-3 text-2xl font-bold text-primary">{% if LANGUAGE_CODE == 'en' %}Budget and commission{% elif LANGUAGE_CODE == 'th' %}งบประมาณและค่าคอมมิชชั่น{% else %}Как устроены расходы{% endif %}</h2>
+                        <p class="mt-4 text-sm leading-7 text-tertiary sm:text-base">{{ service_landing.pricing_text }}</p>
+                    </article>
+                </section>
+
+                {% if service_landing.cases %}
+                <section class="mt-10">
+                    <div class="mb-6">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
+                        <h2 class="mt-2 text-2xl font-bold text-primary sm:text-3xl">{{ service_landing.labels.cases_heading }}</h2>
+                    </div>
+                    <div class="grid gap-5 lg:grid-cols-2">
+                        {% for case in service_landing.cases %}
+                        <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
+                            <h3 class="text-lg font-semibold text-primary">{{ case.title }}</h3>
+                            <p class="mt-3 text-sm leading-7 text-tertiary sm:text-base">{{ case.text }}</p>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if service_landing.faq %}
+                <section class="mt-10">
+                    <div class="mb-6">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
+                        <h2 class="mt-2 text-2xl font-bold text-primary sm:text-3xl">{{ service_landing.labels.service_faq_heading }}</h2>
+                    </div>
+                    <div class="space-y-4">
+                        {% for item in service_landing.faq %}
+                        <details class="service-faq-item rounded-[1.5rem] border border-gray-100 bg-white p-5 shadow-sm shadow-slate-200/70">
+                            <summary class="cursor-pointer list-none pr-8 text-base font-semibold text-primary">
+                                {{ item.question }}
+                                <span class="service-faq-icon"><i class="fas fa-plus"></i></span>
+                            </summary>
+                            <p class="mt-4 text-sm leading-7 text-tertiary sm:text-base">{{ item.answer }}</p>
+                        </details>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                <section class="mt-10 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary to-[#5b6070] p-8 text-white shadow-xl shadow-slate-300/60 sm:p-10">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
+                    <h2 class="mt-3 text-3xl font-bold">{{ service_landing.cta_title }}</h2>
+                    <p class="mt-4 max-w-3xl text-base leading-7 text-white/90">{{ service_landing.cta_text }}</p>
+                    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                        <a href="#serviceContactForm" class="inline-flex items-center justify-center rounded-lg bg-accent px-6 py-3 font-semibold text-gray-900 transition-colors hover:bg-yellow-400">
+                            {{ service_landing.cta_button }}
+                        </a>
+                        <a href="{% url 'core:contact' %}" class="inline-flex items-center justify-center rounded-lg border border-white/30 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/10">
+                            {{ service_landing.labels.contact_us }}
+                        </a>
+                    </div>
+                </section>
             </div>
+
+            <aside class="lg:col-span-4">
+                <div class="space-y-6 lg:sticky lg:top-28">
+                    <section class="rounded-[1.75rem] border border-gray-100 bg-gray-50 p-6 shadow-sm shadow-slate-200/70">
+                        <h2 class="flex items-center text-xl font-bold text-primary">
+                            <i class="fas fa-list mr-3 text-accent"></i>
+                            {{ service_landing.labels.services_menu }}
+                        </h2>
+                        <nav class="mt-6 space-y-2">
+                            {% for menu_service in localized_menu_services %}
+                            <a href="{{ menu_service.url }}" class="group block rounded-xl px-4 py-3 transition-all duration-200 {% if menu_service.slug == service.slug %}bg-primary text-white shadow-md{% else %}bg-white text-tertiary hover:-translate-y-0.5 hover:shadow-sm hover:text-primary{% endif %}">
+                                <div class="flex items-center">
+                                    {% if menu_service.icon_class %}
+                                    <i class="{{ menu_service.icon_class }} mr-3 {% if menu_service.slug == service.slug %}text-accent{% else %}text-accent{% endif %}"></i>
+                                    {% endif %}
+                                    <span class="font-medium">{{ menu_service.title }}</span>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </nav>
+                    </section>
+
+                    <section class="rounded-[1.75rem] bg-primary p-6 text-white shadow-lg shadow-slate-300/60 sm:p-7">
+                        <h2 class="flex items-center text-xl font-bold">
+                            <i class="fas fa-comment-dots mr-3 text-accent"></i>
+                            {{ service_landing.labels.contact_form }}
+                        </h2>
+                        <p class="mt-3 text-sm leading-6 text-white/85">{{ service_landing.labels.contact_form_text }}</p>
+                        <form id="serviceContactForm" class="mt-6 space-y-4 js-recaptcha-form" method="post" action="{% url 'users:contact_form' %}" data-recaptcha-action="service_contact">
+                            {% csrf_token %}
+                            {% include 'core/includes/recaptcha_token_field.html' %}
+                            {% include 'core/includes/form_security_fields.html' with honeypot_id='service-contact-website' %}
+                            <input type="hidden" name="service" value="{{ service_display_title }}">
+
+                            <input type="text" name="name" placeholder="{{ service_landing.labels.name_placeholder }}" required class="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent">
+                            <input type="tel" name="phone" placeholder="{{ service_landing.labels.phone_placeholder }}" required class="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent">
+                            <input type="email" name="email" placeholder="{{ service_landing.labels.email_placeholder }}" class="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent">
+                            <textarea name="message" rows="4" placeholder="{{ service_landing.labels.message_placeholder }}" class="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
+
+                            <button type="submit" class="w-full rounded-xl bg-accent px-6 py-3 font-bold text-gray-900 transition-colors hover:bg-yellow-400">
+                                {{ service_landing.labels.submit }}
+                            </button>
+
+                            <p class="text-xs leading-5 text-white/75">
+                                {{ service_landing.labels.privacy_prefix }}
+                                <a href="{% url 'core:privacy' %}" class="underline underline-offset-2 text-accent">{{ service_landing.labels.privacy_label }}</a>
+                            </p>
+                        </form>
+                    </section>
+                </div>
+            </aside>
         </div>
     </div>
 </section>
 
-<!-- Related Properties Section -->
 {% if featured_properties %}
-<section class="py-16 bg-gray-50">
+<section class="bg-gray-50 py-16">
     <div class="max-w-7xl mx-auto px-4">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-primary mb-4">{% trans "Рекомендуемые объекты" %}</h2>
-            <p class="text-xl text-tertiary">{% trans "Недвижимость, которая может вас заинтересовать" %}</p>
+            <h2 class="text-3xl font-bold text-primary mb-4">{{ service_landing.labels.featured_title }}</h2>
+            <p class="text-xl text-tertiary">{{ service_landing.labels.featured_subtitle }}</p>
         </div>
 
-        <!-- Properties Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {% for property in featured_properties|slice:":3" %}
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+            <div class="group overflow-hidden rounded-[1.5rem] bg-white shadow-lg shadow-slate-200/70 transition-shadow duration-300 hover:shadow-xl">
                 <div class="relative">
                     {% if property.main_image %}
-                    <img src="{{ property.main_image.medium_url }}" alt="{{ property.get_card_image_alt }}" 
-                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <img src="{{ property.main_image.medium_url }}" alt="{{ property.get_card_image_alt }}" class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105">
                     {% elif property.images.first %}
-                    <img src="{{ property.images.first.medium_url }}" alt="{{ property.get_card_image_alt }}" 
-                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <img src="{{ property.images.first.medium_url }}" alt="{{ property.get_card_image_alt }}" class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105">
                     {% else %}
-                    <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                    <div class="flex h-48 w-full items-center justify-center bg-gray-200">
                         <i class="fas fa-home text-4xl text-gray-400"></i>
                     </div>
                     {% endif %}
-                    
-                    <!-- Price Badge -->
-                    <div class="absolute top-4 right-4 bg-accent text-gray-900 px-3 py-1 rounded-full font-bold text-sm">
+                    <div class="absolute top-4 right-4 rounded-full bg-accent px-3 py-1 text-sm font-bold text-gray-900">
                         {% price_in_currency property property.deal_type %}
                     </div>
                 </div>
-                
+
                 <div class="p-6">
-                    <h3 class="text-xl font-bold text-primary mb-2">{{ property.get_display_title }}</h3>
-                    <p class="text-tertiary mb-4 line-clamp-2">{{ property.description|truncatewords:15 }}</p>
-                    
-                    <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
+                    <h3 class="text-xl font-bold text-primary">{{ property.get_display_title }}</h3>
+                    <p class="mt-2 line-clamp-2 text-tertiary">{{ property.description|truncatewords:15 }}</p>
+
+                    <div class="mt-4 flex items-center gap-4 text-sm text-gray-500">
                         {% if property.bedrooms %}
                         <span class="flex items-center"><i class="fas fa-bed mr-1 text-accent"></i>{{ property.bedrooms }}</span>
                         {% endif %}
@@ -224,54 +336,24 @@
                         <span class="flex items-center"><i class="fas fa-ruler-combined mr-1 text-accent"></i>{{ property.area_total }} {% trans "м²" %}</span>
                         {% endif %}
                     </div>
-                    
-                    <a href="{{ property.get_absolute_url }}" 
-                       class="block w-full text-center border border-primary text-primary hover:bg-primary hover:text-white py-2 px-4 rounded-lg transition-colors duration-200 font-medium">
-                        {% trans "Подробнее" %}
+
+                    <a href="{{ property.get_absolute_url }}" class="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-primary px-4 py-2 font-medium text-primary transition-colors duration-200 hover:bg-primary hover:text-white">
+                        {{ service_landing.labels.details }}
                     </a>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        <!-- View All Properties Button -->
-        <div class="text-center mt-12">
-            <a href="{% url 'properties:property_list' %}" 
-               class="inline-flex items-center bg-primary hover:bg-yellow-500 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200">
-                {% trans "Смотреть все объекты" %}
+        <div class="mt-12 text-center">
+            <a href="{% url 'properties:property_list' %}" class="inline-flex items-center rounded-lg bg-primary px-8 py-3 font-bold text-white transition-colors duration-200 hover:bg-[#616677]">
+                {{ service_landing.labels.all_properties }}
                 <i class="fas fa-arrow-right ml-2"></i>
             </a>
         </div>
     </div>
 </section>
 {% endif %}
-
-<!-- CTA Section -->
-<section class="py-16 bg-gradient-to-r from-primary to-tertiary text-white relative overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 relative z-10">
-        <div class="text-center">
-            <h2 class="text-3xl lg:text-4xl font-bold mb-6">
-                {% trans "Готовы начать?" %}
-            </h2>
-            <p class="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                {% trans "Свяжитесь с нами прямо сейчас для получения персональной консультации по" %} {{ service.title|lower }}
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{% url 'core:contact' %}" 
-                   class="bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-8 rounded-lg transition-colors duration-200">
-                    {% trans "Связаться с нами" %}
-                </a>
-                <a href="tel:+66633033133" 
-                   class="border-2 border-accent text-accent hover:bg-accent hover:text-gray-900 font-bold py-3 px-8 rounded-lg transition-colors duration-200">
-                    <i class="fas fa-phone mr-2"></i>{% trans "Позвонить" %}
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Background decoration -->
-    <div class="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent"></div>
-</section>
 {% endblock %}
 
 {% block extra_css %}
@@ -279,7 +361,7 @@
 .service-content h2 {
     color: #474B57;
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 700;
     margin-top: 2rem;
     margin-bottom: 1rem;
 }
@@ -300,32 +382,41 @@
     margin-bottom: 0.5rem;
 }
 
-.service-content ul {
+.service-content ul,
+.service-content ol {
     margin: 1rem 0;
     padding-left: 1.5rem;
 }
 
 .service-content li {
     margin: 0.5rem 0;
-    position: relative;
-}
-
-.service-content li::before {
-    content: "•";
-    color: #F1B400;
-    font-weight: bold;
-    position: absolute;
-    left: -1rem;
 }
 
 .service-content p {
     margin: 1rem 0;
-    line-height: 1.6;
+    line-height: 1.8;
 }
 
 .service-content strong {
     color: #474B57;
     font-weight: 600;
+}
+
+.service-faq-item summary {
+    position: relative;
+    padding-right: 2rem;
+}
+
+.service-faq-icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: #F1B400;
+    transition: transform 0.2s ease;
+}
+
+.service-faq-item[open] .service-faq-icon {
+    transform: rotate(45deg);
 }
 
 .line-clamp-2 {
@@ -335,27 +426,4 @@
     overflow: hidden;
 }
 </style>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// Contact form submission
-document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Simple form validation
-    const name = this.querySelector('input[name="name"]').value.trim();
-    const phone = this.querySelector('input[name="phone"]').value.trim();
-    
-    if (!name || !phone) {
-        alert('{% trans "Пожалуйста, заполните имя и телефон" %}');
-        return;
-    }
-    
-    // Here you would normally submit the form via AJAX
-    // For now, we'll just show a success message
-    alert('{% trans "Спасибо! Мы свяжемся с вами в ближайшее время." %}');
-    this.reset();
-});
-</script>
 {% endblock %}

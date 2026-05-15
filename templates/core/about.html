@@ -4,6 +4,44 @@
 
 {% block title %}{% trans "О нас" %} - Undersun Estate{% endblock %}
 
+{% block structured_data %}
+{{ block.super }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "{% trans "О компании Undersun Estate" %}",
+  "url": "{{ request.build_absolute_uri }}",
+  "mainEntity": {
+    "@id": "{{ request.scheme }}://{{ request.get_host }}/#real-estate-agent"
+  },
+  "about": {
+    "@id": "{{ request.scheme }}://{{ request.get_host }}/#real-estate-agent"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "{% trans "Главная" %}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'core:home' %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{% trans "О нас" %}",
+      "item": "{{ request.build_absolute_uri }}"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <!-- About Hero Section -->
 <section class="relative overflow-hidden py-20 text-white">
@@ -106,6 +144,44 @@
     </div>
 </section>
 
+<section class="bg-white py-12">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="rounded-[1.75rem] border border-gray-100 bg-white p-8 shadow-sm shadow-slate-200/70">
+            <div class="mb-8">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{% trans "Данные компании" %}</p>
+                <h2 class="mt-2 text-3xl font-bold text-primary">{% trans "Официальная информация" %}</h2>
+            </div>
+            <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Официальное название" %}</h3>
+                    <p class="mt-2 text-gray-600">Undersun Estate</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Специализация" %}</h3>
+                    <p class="mt-2 text-gray-600">{% trans "Phuket real estate agency: sale, purchase, rentals, investments and legal support." %}</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Адрес" %}</h3>
+                    <p class="mt-2 text-gray-600">{{ business_profile.address_full }}</p>
+                    <p class="mt-2"><a href="{{ business_profile.google_maps_url }}" target="_blank" rel="noopener" class="text-primary hover:text-accent">Google Maps</a></p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Телефон" %}</h3>
+                    <p class="mt-2 text-gray-600"><a href="tel:{{ business_profile.phone_e164 }}" class="hover:text-primary">{{ business_profile.phone_display }}</a></p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Email" %}</h3>
+                    <p class="mt-2 text-gray-600"><a href="mailto:{{ business_profile.email }}" class="hover:text-primary">{{ business_profile.email }}</a></p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Часы работы" %}</h3>
+                    <p class="mt-2 text-gray-600">{{ business_profile.hours_label }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 {#<!-- Company Story -->#}
 {#<section class="py-16">#}
 {#    <div class="max-w-7xl mx-auto px-4">#}
@@ -196,22 +272,10 @@
                     {% endif %}
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 mb-3 group-hover:text-primary transition-colors duration-300">
-                    {% if lang == 'en' %}
-                        {{ service.title_en|default:service.title }}
-                    {% elif lang == 'th' %}
-                        {{ service.title_th|default:service.title_en|default:service.title }}
-                    {% else %}
-                        {{ service.title }}
-                    {% endif %}
+                    {{ service.navigation_title|default:service.title }}
                 </h3>
                 <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
-                    {% if lang == 'en' %}
-                        {{ service.description_en|default:service.description }}
-                    {% elif lang == 'th' %}
-                        {{ service.description_th|default:service.description_en|default:service.description }}
-                    {% else %}
-                        {{ service.description }}
-                    {% endif %}
+                    {{ service.navigation_description|default:service.description }}
                 </p>
                 <div class="mt-4 text-accent font-medium group-hover:underline transition-all duration-300">
                     {% trans "Подробнее" %} →
