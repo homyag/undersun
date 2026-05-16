@@ -44,24 +44,118 @@
 
 {% block content %}
 <!-- About Hero Section -->
-<section class="relative overflow-hidden py-20 text-white">
-    <div class="absolute inset-0 bg-gradient-to-br from-[#1a2950] via-primary to-[#071426]"></div>
-    <div class="absolute inset-y-0 right-[-10%] h-full w-2/5 bg-[radial-gradient(circle_at_center,_rgba(255,193,7,0.55)_0%,_rgba(12,23,43,0)_70%)]"></div>
-    <div class="absolute bottom-0 left-1/2 h-1 w-40 -translate-x-1/2 rounded-full bg-accent"></div>
+<section class="relative overflow-hidden bg-[#081326] py-16 text-white sm:py-20 lg:py-24">
+    <div class="absolute inset-0 bg-[linear-gradient(120deg,rgba(7,18,38,0.98)_0%,rgba(15,31,61,0.96)_52%,rgba(26,41,80,0.92)_100%)]"></div>
+    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+    <div class="absolute inset-y-0 right-[-12%] w-[34rem] rounded-full bg-[radial-gradient(circle,_rgba(241,180,0,0.9)_0%,rgba(241,180,0,0.28)_28%,rgba(241,180,0,0.08)_48%,rgba(8,19,38,0)_72%)] blur-2xl"></div>
+    <div class="absolute left-0 right-0 top-20 h-72 bg-[radial-gradient(circle_at_70%_40%,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0)_38%)]"></div>
+    <div class="absolute inset-0 opacity-[0.08]" style="background-image:linear-gradient(rgba(255,255,255,0.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.8)_1px,transparent_1px);background-size:120px 120px;"></div>
+
     <div class="relative z-10 mx-auto max-w-7xl px-4">
-        <div class="text-center">
-            {% with lang=LANGUAGE_CODE|default:'ru' %}
-                <p class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-accent shadow-[0_0_25px_rgba(255,193,7,0.35)]">
-                    {% if lang == 'en' %}About{% elif lang == 'th' %}เกี่ยวกับเรา{% else %}О компании{% endif %}
-                </p>
-                <h1 class="text-4xl font-bold leading-tight lg:text-6xl">
-                    {% if lang == 'en' %}Undersun Estate — your reliable partner in Phuket{% elif lang == 'th' %}Undersun Estate — พันธมิตรที่คุณเชื่อถือได้ในภูเก็ต{% else %}Undersun Estate — ваш надежный партнёр на Пхукете{% endif %}
+        {% with lang=LANGUAGE_CODE|default:'ru' %}
+        <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:gap-16">
+            <div>
+                <nav class="mb-6 flex items-center text-sm text-white/85" aria-label="{% trans 'Хлебные крошки' %}">
+                    <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
+                    <span class="mx-3 text-white/55">/</span>
+                    <span class="text-white">{% trans "О нас" %}</span>
+                </nav>
+
+                <div class="mb-5 inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm font-semibold uppercase tracking-[0.24em] text-accent shadow-[0_18px_40px_rgba(3,10,24,0.28)] backdrop-blur">
+                    <span class="inline-flex h-2.5 w-2.5 rounded-full bg-accent shadow-[0_0_16px_rgba(241,180,0,0.8)]"></span>
+                    {% if lang == 'en' %}Phuket Real Estate{% elif lang == 'th' %}อสังหาริมทรัพย์ภูเก็ต{% else %}Недвижимость Пхукета{% endif %}
+                </div>
+
+                <h1 class="max-w-4xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl xl:text-[4.4rem]">
+                    {% if lang == 'en' %}
+                        Modern real estate service with the energy of Phuket
+                    {% elif lang == 'th' %}
+                        บริการอสังหาริมทรัพย์สมัยใหม่ ที่สะท้อนพลังของภูเก็ต
+                    {% else %}
+                        Современный сервис в недвижимости с энергией Пхукета
+                    {% endif %}
                 </h1>
-                <p class="mt-6 text-lg opacity-90 lg:text-2xl">
-                    {% if lang == 'en' %}A multi-language team specialising in Thai real estate investments, lifestyle properties, and premium client service.{% elif lang == 'th' %}ทีมงานหลายภาษาเชี่ยวชาญอสังหาริมทรัพย์ไทย การลงทุน และบริการระดับพรีเมียมสำหรับลูกค้า{% else %}Эксперты рынка недвижимости Таиланда с акцентом на инвестиции, lifestyle и сервис премиум-класса.{% endif %}
+
+                <p class="mt-6 max-w-2xl text-base leading-8 text-white/86 sm:text-lg lg:text-xl">
+                    {% if lang == 'en' %}
+                        Undersun Estate combines market expertise, investment logic, and premium client care for buyers, sellers, landlords, and investors in Phuket.
+                    {% elif lang == 'th' %}
+                        Undersun Estate ผสานความเชี่ยวชาญด้านตลาด การลงทุน และบริการลูกค้าระดับพรีเมียม สำหรับผู้ซื้อ ผู้ขาย นักลงทุน และเจ้าของทรัพย์ในภูเก็ต
+                    {% else %}
+                        Undersun Estate объединяет знание рынка, инвестиционную экспертизу и премиальный клиентский сервис для покупателей, продавцов, собственников и инвесторов на Пхукете.
+                    {% endif %}
                 </p>
-            {% endwith %}
+
+                <div class="mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-white/16 bg-white/12 px-5 py-4 shadow-[0_18px_40px_rgba(3,10,24,0.22)] backdrop-blur">
+                        <p class="text-3xl font-bold text-accent">500+</p>
+                        <p class="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-gray-600">
+                            {% if lang == 'en' %}Listings{% elif lang == 'th' %}รายการ{% else %}Объектов{% endif %}
+                        </p>
+                    </div>
+                    <div class="rounded-2xl border border-white/16 bg-white/12 px-5 py-4 shadow-[0_18px_40px_rgba(3,10,24,0.22)] backdrop-blur">
+                        <p class="text-3xl font-bold text-accent">5+</p>
+                        <p class="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-gray-600">
+                            {% if lang == 'en' %}Years in Phuket{% elif lang == 'th' %}ปีในภูเก็ต{% else %}Лет на Пхукете{% endif %}
+                        </p>
+                    </div>
+                    <div class="rounded-2xl border border-white/16 bg-white/12 px-5 py-4 shadow-[0_18px_40px_rgba(3,10,24,0.22)] backdrop-blur">
+                        <p class="text-3xl font-bold text-accent">RU / EN / TH</p>
+                        <p class="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-gray-600">
+                            {% if lang == 'en' %}Client support{% elif lang == 'th' %}การดูแลลูกค้า{% else %}Поддержка клиентов{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative">
+                <div class="absolute right-10 top-2 h-32 w-32 rounded-full border border-white/18 bg-accent/90 shadow-[0_0_60px_rgba(241,180,0,0.45)]"></div>
+                <div class="relative overflow-hidden rounded-[2rem] border border-white/12 bg-[linear-gradient(160deg,rgba(255,255,255,0.14),rgba(255,255,255,0.04))] p-6 shadow-[0_32px_80px_rgba(2,10,24,0.45)] backdrop-blur">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
+                                {% if lang == 'en' %}Phuket Real Estate{% elif lang == 'th' %}อสังหาริมทรัพย์ภูเก็ต{% else %}Недвижимость Пхукета{% endif %}
+                            </p>
+                            <p class="mt-2 text-xl font-semibold text-gray-600">
+                                {% if lang == 'en' %}Property. Investment. Lifestyle.{% elif lang == 'th' %}ทรัพย์สิน การลงทุน ไลฟ์สไตล์{% else %}Недвижимость. Инвестиции. Lifestyle.{% endif %}
+                            </p>
+                        </div>
+                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-accent">
+                            <i class="fas fa-building text-lg"></i>
+                        </div>
+                    </div>
+
+                    <div class="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#0c1830] shadow-[0_24px_48px_rgba(2,10,24,0.32)]">
+                        <img
+                            src="{% static 'images/about_us/about_page_hero.webp' %}"
+                            alt="{% trans 'Вилла и кондоминиум на фоне заката в Пхукете' %}"
+                            class="h-60 w-full object-cover sm:h-72"
+                        >
+                        <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,18,38,0.04)_0%,rgba(7,18,38,0.18)_54%,rgba(7,18,38,0.36)_100%)]"></div>
+                    </div>
+
+                    <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                        <div class="rounded-2xl border border-white/14 bg-[#0b1730]/92 px-4 py-4 shadow-[0_18px_32px_rgba(1,8,20,0.35)]">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                                {% if lang == 'en' %}Focus{% elif lang == 'th' %}โฟกัส{% else %}Фокус{% endif %}
+                            </p>
+                            <p class="mt-2 font-semibold text-gray-600">
+                                {% if lang == 'en' %}Phuket residential and investment properties{% elif lang == 'th' %}อสังหาฯ เพื่ออยู่อาศัยและลงทุนในภูเก็ต{% else %}Жилая и инвестиционная недвижимость Пхукета{% endif %}
+                            </p>
+                        </div>
+                        <div class="rounded-2xl border border-white/14 bg-[#0b1730]/92 px-4 py-4 shadow-[0_18px_32px_rgba(1,8,20,0.35)]">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                                {% if lang == 'en' %}Approach{% elif lang == 'th' %}แนวทาง{% else %}Подход{% endif %}
+                            </p>
+                            <p class="mt-2 font-semibold text-gray-600">
+                                {% if lang == 'en' %}Clear recommendations, local expertise, full support{% elif lang == 'th' %}คำแนะนำชัดเจน ความรู้ท้องถิ่น และดูแลครบ{% else %}Чёткие рекомендации, локальная экспертиза и полное сопровождение{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        {% endwith %}
     </div>
 </section>
 
@@ -158,7 +252,15 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900">{% trans "Специализация" %}</h3>
-                    <p class="mt-2 text-gray-600">{% trans "Phuket real estate agency: sale, purchase, rentals, investments and legal support." %}</p>
+                    <p class="mt-2 text-gray-600">
+                        {% if LANGUAGE_CODE|default:'ru' == 'en' %}
+                            Phuket real estate agency: sale, purchase, rentals, investments and legal support.
+                        {% elif LANGUAGE_CODE|default:'ru' == 'th' %}
+                            เอเจนซี่อสังหาริมทรัพย์ในภูเก็ต: ซื้อ ขาย เช่า การลงทุน และบริการด้านกฎหมาย
+                        {% else %}
+                            Агентство недвижимости на Пхукете: продажа, покупка, аренда, инвестиции и юридическое сопровождение.
+                        {% endif %}
+                    </p>
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900">{% trans "Адрес" %}</h3>
