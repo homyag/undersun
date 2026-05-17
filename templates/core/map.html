@@ -62,8 +62,291 @@
     .bg-brand-soft { background: var(--brand-soft); }
 
     .map-hero {
-        background: linear-gradient(120deg, #1f2937 0%, #474B57 55%, #616677 100%);
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 78% 16%, rgba(241, 180, 0, 0.34), transparent 30%),
+            linear-gradient(135deg, #111827 0%, #333847 58%, #474B57 100%);
         color: white;
+    }
+
+    .map-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        opacity: 0.07;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.9) 1px, transparent 1px);
+        background-size: 96px 96px;
+        pointer-events: none;
+    }
+
+    .map-hero::after {
+        content: '';
+        position: absolute;
+        right: -12rem;
+        bottom: -16rem;
+        width: 38rem;
+        height: 38rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: inset 0 0 0 5rem rgba(255,255,255,0.025);
+        pointer-events: none;
+    }
+
+    .map-hero-shell {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+        gap: clamp(1.5rem, 3vw, 3rem);
+        align-items: center;
+    }
+
+    .map-hero-container {
+        padding-top: clamp(2rem, 4vw, 3.5rem);
+        padding-bottom: clamp(2.25rem, 4.5vw, 4rem);
+    }
+
+    .map-hero-copy {
+        position: relative;
+        min-width: 0;
+        border-radius: 2rem;
+        background:
+            linear-gradient(105deg, rgba(7,12,22,0.98) 0%, rgba(17,24,39,0.94) 62%, rgba(17,24,39,0.78) 100%);
+        border: 1px solid rgba(255,255,255,0.12);
+        padding: clamp(1rem, 2.4vw, 1.45rem);
+        box-shadow: 0 34px 100px rgba(0,0,0,0.40);
+        backdrop-filter: blur(8px);
+    }
+
+    .map-hero-copy::before {
+        content: '';
+        position: absolute;
+        inset: 0.55rem;
+        border-radius: 1.55rem;
+        border: 1px solid rgba(255,255,255,0.08);
+        pointer-events: none;
+    }
+
+    .map-hero-kicker {
+        display: inline-flex;
+        max-width: 100%;
+        align-items: center;
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.10);
+        padding: 0.55rem 1rem;
+        color: var(--brand-accent);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        backdrop-filter: blur(10px);
+    }
+
+    .map-hero-title {
+        max-width: 58rem;
+        margin-top: 1rem;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff;
+        font-size: clamp(2.1rem, 4.8vw, 3.9rem);
+        line-height: 1.03;
+        letter-spacing: -0.045em;
+        font-weight: 800;
+        text-shadow: 0 4px 26px rgba(0,0,0,0.78);
+    }
+
+    .map-hero-lead {
+        max-width: 43rem;
+        margin-top: 1rem;
+        color: rgba(255,255,255,0.80);
+        font-size: 1rem;
+        line-height: 1.65;
+    }
+
+    .map-hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem;
+        margin-top: 1.25rem;
+    }
+
+    .map-hero-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255,255,255,0.22);
+        padding: 0.72rem 1rem;
+        color: white;
+        font-weight: 800;
+        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .map-hero-action:hover {
+        transform: translateY(-2px);
+        border-color: rgba(241,180,0,0.75);
+    }
+
+    .map-hero-action.primary {
+        border-color: var(--brand-accent);
+        background: var(--brand-accent);
+        color: #111827;
+        box-shadow: 0 22px 48px rgba(241,180,0,0.24);
+    }
+
+    .map-room-card {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.16);
+        border-radius: 1.75rem;
+        background: rgba(255,255,255,0.10);
+        padding: 0.75rem;
+        box-shadow: 0 28px 80px rgba(0,0,0,0.28);
+        backdrop-filter: blur(14px);
+    }
+
+    .map-room-inner {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.25rem;
+        background:
+            radial-gradient(circle at 72% 24%, rgba(241,180,0,0.28), transparent 22%),
+            linear-gradient(145deg, rgba(17,24,39,0.94), rgba(71,75,87,0.88));
+        min-height: 22rem;
+        padding: 1rem;
+    }
+
+    .map-room-inner::before {
+        content: '';
+        position: absolute;
+        inset: 1rem;
+        border-radius: 1rem;
+        opacity: 0.17;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.95) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.95) 1px, transparent 1px);
+        background-size: 44px 44px;
+    }
+
+    .map-room-inner::after {
+        content: '';
+        position: absolute;
+        inset: 3.7rem 2rem 4.6rem;
+        border: 1px solid rgba(241,180,0,0.35);
+        border-radius: 47% 53% 45% 55% / 58% 42% 57% 43%;
+        transform: rotate(-12deg);
+    }
+
+    .map-room-header,
+    .map-room-stats,
+    .map-room-point {
+        position: relative;
+        z-index: 1;
+    }
+
+    .map-room-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .map-room-label {
+        color: rgba(255,255,255,0.58);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .map-room-title {
+        margin-top: 0.35rem;
+        color: white;
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.035em;
+    }
+
+    .map-room-badge {
+        flex-shrink: 0;
+        border-radius: 999px;
+        background: rgba(241,180,0,0.95);
+        color: #111827;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .map-room-point {
+        position: absolute;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.92);
+        color: #111827;
+        padding: 0.35rem 0.62rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        box-shadow: 0 18px 34px rgba(0,0,0,0.24);
+    }
+
+    .map-room-point::before {
+        content: '';
+        width: 0.46rem;
+        height: 0.46rem;
+        border-radius: 999px;
+        background: var(--brand-accent);
+        box-shadow: 0 0 0 0.28rem rgba(241,180,0,0.22);
+    }
+
+    .map-room-point.north { top: 34%; right: 21%; }
+    .map-room-point.west { top: 49%; left: 14%; }
+    .map-room-point.south { right: 29%; bottom: 31%; }
+
+    .map-room-stats {
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 0.7rem;
+    }
+
+    .map-room-stat-main,
+    .map-room-stat {
+        border: 1px solid rgba(255,255,255,0.13);
+        border-radius: 1rem;
+        background: rgba(17,24,39,0.76);
+        padding: 0.72rem;
+    }
+
+    .map-room-stat-main strong,
+    .map-room-stat strong {
+        display: block;
+        color: white;
+        font-size: 1.28rem;
+        line-height: 1;
+    }
+
+    .map-room-stat-main span,
+    .map-room-stat span {
+        margin-top: 0.35rem;
+        display: block;
+        color: rgba(255,255,255,0.62);
+        font-size: 0.78rem;
+        line-height: 1.35;
+    }
+
+    .map-room-stat-stack {
+        display: grid;
+        gap: 0.7rem;
     }
 
     .map-hero-grid {
@@ -86,23 +369,123 @@
         font-weight: 700;
     }
 
+    .map-experience-section {
+        background:
+            radial-gradient(circle at 18% 10%, rgba(241,180,0,0.14), transparent 24rem),
+            #f7f3ea;
+    }
+
+    .map-section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.36fr);
+        gap: 2rem;
+        align-items: end;
+        margin-bottom: 1.8rem;
+    }
+
+    .map-section-kicker {
+        color: var(--brand-accent);
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .map-section-title {
+        max-width: 46rem;
+        margin-top: 0.7rem;
+        color: var(--brand-primary);
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.02;
+        letter-spacing: -0.045em;
+    }
+
+    .map-section-copy {
+        max-width: 42rem;
+        margin-top: 1rem;
+        color: var(--brand-tertiary);
+        font-size: 1rem;
+        line-height: 1.75;
+    }
+
+    .map-section-note {
+        border-left: 2px solid rgba(241,180,0,0.65);
+        padding-left: 1rem;
+        color: var(--brand-primary);
+        font-weight: 700;
+        line-height: 1.6;
+    }
+
     .map-layout {
         display: grid;
-        grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
-        gap: 1.5rem;
-        padding: 2rem 0;
-        background: var(--brand-soft);
+        grid-template-columns: minmax(300px, 0.35fr) minmax(0, 1fr);
+        gap: 1.25rem;
+        padding: 0;
+        background: transparent;
         align-items: flex-start;
     }
 
     .map-filter-column {
         width: 100%;
-        max-width: 360px;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .map-filter-dropdown {
+        display: block;
+    }
+
+    .map-filter-summary {
+        display: none;
+    }
+
+    .map-filter-content {
+        display: block;
     }
 
     #map-filter-sidebar {
-        border-radius: 18px;
-        box-shadow: 0 20px 50px rgba(71, 75, 87, 0.15);
+        overflow: hidden;
+        border-radius: 1.8rem;
+        box-shadow: 0 28px 80px rgba(15, 23, 42, 0.10);
+    }
+
+    #map-filter-sidebar > div:first-child {
+        background: #111827;
+        border-color: rgba(255,255,255,0.08);
+        color: white;
+    }
+
+    #map-filter-sidebar > div:first-child h3 {
+        color: white;
+    }
+
+    .map-filter-intro {
+        margin-bottom: 0.85rem;
+        border-radius: 1.35rem;
+        background: #111827;
+        padding: 1.15rem;
+        color: white;
+        box-shadow: 0 22px 58px rgba(15,23,42,0.16);
+    }
+
+    .map-filter-intro p:first-child {
+        color: var(--brand-accent);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .map-filter-intro p:last-child {
+        margin-top: 0.55rem;
+        color: rgba(255,255,255,0.72);
+        font-size: 0.9rem;
+        line-height: 1.55;
+    }
+
+    .map-stage {
+        min-width: 0;
     }
 
 
@@ -400,11 +783,12 @@
         width: 100%;
         position: relative;
         background: white;
-        border-radius: 22px;
-        box-shadow: 0 25px 60px rgba(71, 75, 87, 0.15);
+        border: 1px solid rgba(71,75,87,0.10);
+        border-radius: 2rem;
+        box-shadow: 0 34px 90px rgba(15,23,42,0.14);
         overflow: visible;
-        min-height: 540px;
-        height: calc(100vh - 260px);
+        min-height: 600px;
+        height: calc(100vh - 220px);
         isolation: isolate; /* keep map overlays beneath global nav */
         z-index: 0;
     }
@@ -412,12 +796,12 @@
     #property-map {
         width: 100%;
         height: 100%;
-        min-height: 520px;
-        border-radius: 22px;
+        min-height: 580px;
+        border-radius: 2rem;
     }
 
     .map-wrapper .maplibregl-map {
-        border-radius: 22px;
+        border-radius: 2rem;
     }
 
     .map-toolbar {
@@ -439,7 +823,7 @@
 
     .map-toolbar-card {
         background: rgba(255, 255, 255, 0.92);
-        border-radius: 14px;
+        border-radius: 1rem;
         padding: 0.85rem 1rem;
         min-width: 160px;
         border: 1px solid rgba(71, 75, 87, 0.08);
@@ -459,7 +843,7 @@
     .map-floating-btn {
         width: 46px;
         height: 46px;
-        border-radius: 14px;
+        border-radius: 1rem;
         border: none;
         background: rgba(71, 75, 87, 0.9);
         color: white;
@@ -864,13 +1248,69 @@
     }
 
     @media (max-width: 1024px) {
+        .map-hero-shell,
+        .map-section-head {
+            grid-template-columns: 1fr;
+        }
+        .map-room-card {
+            display: none;
+        }
         .map-layout {
             grid-template-columns: 1fr;
-            padding: 1.5rem 0;
         }
         .map-filter-column {
             max-width: 100%;
-            order: 2;
+            order: 1;
+        }
+        .map-filter-dropdown {
+            overflow: hidden;
+            border: 1px solid rgba(71,75,87,0.10);
+            border-radius: 1.35rem;
+            background: #ffffff;
+            box-shadow: 0 22px 60px rgba(15,23,42,0.10);
+        }
+        .map-filter-summary {
+            display: flex;
+            cursor: pointer;
+            list-style: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.1rem;
+            background: #111827;
+            color: #ffffff;
+            font-weight: 800;
+        }
+        .map-filter-summary::-webkit-details-marker {
+            display: none;
+        }
+        .map-filter-summary span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+        .map-filter-summary i {
+            color: var(--brand-accent);
+            transition: transform 0.2s ease;
+        }
+        .map-filter-dropdown[open] .map-filter-summary i:last-child {
+            transform: rotate(180deg);
+        }
+        .map-filter-content {
+            display: none;
+            padding: 0.85rem;
+        }
+        .map-filter-dropdown[open] > .map-filter-content {
+            display: block;
+        }
+        .map-filter-intro {
+            margin-bottom: 0.75rem;
+            border-radius: 1rem;
+            box-shadow: none;
+        }
+        #map-filter-sidebar {
+            border-radius: 1rem;
+            box-shadow: none;
         }
         .map-wrapper {
             min-height: 70vh;
@@ -882,9 +1322,29 @@
             min-height: 420px;
             border-radius: 18px;
         }
+        .map-stage {
+            order: 2;
+        }
     }
 
     @media (max-width: 768px) {
+        .map-hero-title {
+            font-size: clamp(2rem, 10vw, 2.9rem);
+        }
+        .map-hero-copy {
+            border-radius: 1.5rem;
+            padding: 1rem;
+            background: rgba(17,24,39,0.90);
+        }
+        .map-hero-actions {
+            flex-direction: column;
+        }
+        .map-hero-action {
+            width: 100%;
+        }
+        .map-room-stats {
+            grid-template-columns: 1fr;
+        }
         .map-toolbar {
             position: absolute;
             top: 0.75rem;
@@ -915,6 +1375,25 @@
     }
 
     @media (max-width: 640px) {
+        .map-hero-kicker {
+            letter-spacing: 0.12em;
+        }
+        .map-room-card {
+            border-radius: 1.5rem;
+            padding: 0.7rem;
+        }
+        .map-room-point {
+            font-size: 0.68rem;
+        }
+        .map-room-point.west {
+            left: 8%;
+        }
+        .map-section-note {
+            border-left: 0;
+            border-top: 2px solid rgba(241,180,0,0.65);
+            padding-top: 0.9rem;
+            padding-left: 0;
+        }
         .map-hero-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
         .map-highlight-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     }
@@ -929,98 +1408,170 @@
 
 
 {% block content %}
-<!-- Hero -->
-<section class="map-hero py-10">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-                <p class="uppercase tracking-[0.4em] text-xs text-white/70 mb-2">{% trans "Карта Undersun Estate" %}</p>
-                <h1 class="text-3xl md:text-4xl font-bold leading-tight">
-                    {% trans "Исследуйте Пхукет на карте и находите лучшие районы" %}
-                </h1>
-                <p class="text-white/80 mt-3 max-w-2xl">
-                    {% trans "Кастомные маркеры, продвинутые фильтры и брендовая аналитика помогают сравнивать объекты по локациям, цене и типу сделки гораздо быстрее." %}
+{% with lang=LANGUAGE_CODE|default:'ru' %}
+<section class="map-hero">
+    <div class="map-hero-container relative mx-auto max-w-7xl px-4">
+        <nav class="mb-10 flex min-w-0 items-center text-sm text-white/75" aria-label="{% trans 'Хлебные крошки' %}">
+            <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
+            <span class="mx-3 text-white/40">/</span>
+            <span class="text-white">{% if lang == 'en' %}Map{% elif lang == 'th' %}แผนที่{% else %}Карта{% endif %}</span>
+        </nav>
+
+        <div class="map-hero-shell">
+            <div class="map-hero-copy">
+                <p class="map-hero-kicker">
+                    {% if lang == 'en' %}Phuket property map{% elif lang == 'th' %}แผนที่อสังหาฯ ภูเก็ต{% else %}Карта недвижимости Пхукета{% endif %}
                 </p>
+                <h1 class="map-hero-title" style="color:#fff !important;-webkit-text-fill-color:#fff;">
+                    {% if lang == 'en' %}
+                        Explore Phuket by location before opening the shortlist.
+                    {% elif lang == 'th' %}
+                        สำรวจภูเก็ตตามทำเลก่อนเปิดรายการทรัพย์ที่เหมาะสม
+                    {% else %}
+                        Сначала изучите Пхукет по локациям, затем выбирайте объекты.
+                    {% endif %}
+                </h1>
+                <p class="map-hero-lead">
+                    {% if lang == 'en' %}
+                        Use the map to compare villas, condos, houses, and land by district, price, deal type, and practical proximity. It is a calmer way to understand where a property fits before you request a viewing.
+                    {% elif lang == 'th' %}
+                        ใช้แผนที่เพื่อเปรียบเทียบวิลล่า คอนโด บ้าน และที่ดินตามเขต ราคา ประเภทดีล และความสะดวกของทำเล ก่อนตัดสินใจนัดชมทรัพย์
+                    {% else %}
+                        Сравнивайте виллы, кондо, дома и землю по районам, цене, типу сделки и реальному расположению. Карта помогает понять контекст объекта до просмотра.
+                    {% endif %}
+                </p>
+                <div class="map-hero-actions">
+                    <a href="#map-experience" class="map-hero-action primary" data-ym-goal="map_hero_open_map_click">
+                        <i class="fas fa-map-location-dot"></i>
+                        {% if lang == 'en' %}Open the map{% elif lang == 'th' %}เปิดแผนที่{% else %}Открыть карту{% endif %}
+                    </a>
+                    <a href="{% url 'properties:property_list' %}" class="map-hero-action" data-ym-goal="map_hero_catalog_click">
+                        <i class="fas fa-layer-group"></i>
+                        {% if lang == 'en' %}View catalog{% elif lang == 'th' %}ดูแคตตาล็อก{% else %}Смотреть каталог{% endif %}
+                    </a>
+                </div>
             </div>
-            <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto max-w-md md:max-w-none">
-                <a href="{% url 'properties:property_list' %}" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white text-brand-primary font-semibold shadow-lg hover:-translate-y-0.5 transition text-sm whitespace-nowrap">
-                    <i class="fas fa-layer-group mr-2"></i>
-                    {% trans "Каталог объектов" %}
-                </a>
-                <a href="tel:{{ business_profile.phone_e164 }}" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-white/40 text-white font-semibold hover:bg-white/10 transition text-sm whitespace-nowrap">
-                    <i class="fas fa-phone mr-2"></i>
-                    {{ business_profile.phone_display }}
-                </a>
-            </div>
-        </div>
-        <div class="map-hero-grid mt-8">
-            <div class="map-stat-card">
-                <div class="text-xs uppercase tracking-[0.3em] text-white/70 mb-1">{% trans "Всего" %}</div>
-                <div class="map-stat-value">{{ total_properties }}</div>
-                <div class="text-sm text-white/70">{% trans "активных объектов" %}</div>
-            </div>
-            <div class="map-stat-card">
-                <div class="text-xs uppercase tracking-[0.3em] text-white/70 mb-1">{% trans "Продажа" %}</div>
-                <div class="map-stat-value">{{ sale_properties }}</div>
-                <div class="text-sm text-white/70">{% trans "виллы, кондо, земля" %}</div>
-            </div>
-            <div class="map-stat-card">
-                <div class="text-xs uppercase tracking-[0.3em] text-white/70 mb-1">{% trans "Аренда" %}</div>
-                <div class="map-stat-value">{{ rent_properties }}</div>
-                <div class="text-sm text-white/70">{% trans "от 1 месяца" %}</div>
-            </div>
-            <div class="map-stat-card">
-                <div class="text-xs uppercase tracking-[0.3em] text-white/70 mb-1">{% trans "Районы" %}</div>
-                <div class="map-stat-value">{{ districts_count }}</div>
-                <div class="text-sm text-white/70">{% trans "подготовлены к исследованию" %}</div>
-            </div>
+
+            <aside class="map-room-card" aria-label="{% if lang == 'en' %}Map overview{% elif lang == 'th' %}ภาพรวมแผนที่{% else %}Обзор карты{% endif %}">
+                <div class="map-room-inner">
+                    <div class="map-room-header">
+                        <div>
+                            <p class="map-room-label">{% if lang == 'en' %}Live map room{% elif lang == 'th' %}ห้องแผนที่{% else %}Карта объектов{% endif %}</p>
+                            <p class="map-room-title">{% if lang == 'en' %}Phuket{% elif lang == 'th' %}ภูเก็ต{% else %}Пхукет{% endif %}</p>
+                        </div>
+                        <span class="map-room-badge">RU / EN / TH</span>
+                    </div>
+
+                    <span class="map-room-point north">{% if lang == 'en' %}North{% elif lang == 'th' %}เหนือ{% else %}Север{% endif %}</span>
+                    <span class="map-room-point west">{% if lang == 'en' %}West coast{% elif lang == 'th' %}ชายฝั่งตะวันตก{% else %}Западное побережье{% endif %}</span>
+                    <span class="map-room-point south">{% if lang == 'en' %}South{% elif lang == 'th' %}ใต้{% else %}Юг{% endif %}</span>
+
+                    <div class="map-room-stats">
+                        <div class="map-room-stat-main">
+                            <strong>{{ total_properties }}</strong>
+                            <span>{% if lang == 'en' %}active properties with coordinates{% elif lang == 'th' %}ทรัพย์ที่มีพิกัดบนแผนที่{% else %}активных объектов с координатами{% endif %}</span>
+                        </div>
+                        <div class="map-room-stat-stack">
+                            <div class="map-room-stat">
+                                <strong>{{ sale_properties }}</strong>
+                                <span>{% if lang == 'en' %}for sale{% elif lang == 'th' %}สำหรับขาย{% else %}в продаже{% endif %}</span>
+                            </div>
+                            <div class="map-room-stat">
+                                <strong>{{ districts_count }}</strong>
+                                <span>{% if lang == 'en' %}districts{% elif lang == 'th' %}เขต{% else %}районов{% endif %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
         </div>
     </div>
 </section>
 
-<!-- Map experience -->
-<section class="bg-brand-soft">
-    <div class="max-w-7xl mx-auto px-4 map-layout" id="mapLayout">
-        <div class="map-filter-column">
-            {% include 'properties/includes/list/list_filters_card.html' with filter_wrapper_id='map-filter-sidebar' filter_wrapper_classes='bg-white rounded-2xl shadow-2xl border border-gray-200 w-full' filter_reset_url=request.path %}
+<section class="map-experience-section scroll-mt-24" id="map-experience">
+    <div class="mx-auto max-w-7xl px-4 py-12 lg:py-16">
+        <div class="map-section-head">
+            <div class="min-w-0">
+                <p class="map-section-kicker">{% if lang == 'en' %}Interactive search{% elif lang == 'th' %}ค้นหาแบบโต้ตอบ{% else %}Интерактивный поиск{% endif %}</p>
+                <h2 class="map-section-title">
+                    {% if lang == 'en' %}Filter the brief, then read the island visually.{% elif lang == 'th' %}ตั้งเงื่อนไข แล้วอ่านภาพรวมเกาะจากแผนที่{% else %}Настройте бриф и смотрите остров визуально.{% endif %}
+                </h2>
+                <p class="map-section-copy">
+                    {% if lang == 'en' %}
+                        Filters narrow the brief; markers show how the options are distributed across Phuket. Open a marker to check price, media, location, and the next contact path.
+                    {% elif lang == 'th' %}
+                        ฟิลเตอร์ช่วยจำกัดโจทย์ ส่วนหมุดบนแผนที่แสดงการกระจายของตัวเลือกในภูเก็ต เปิดหมุดเพื่อดูราคา รูปภาพ ทำเล และช่องทางติดต่อถัดไป
+                    {% else %}
+                        Фильтры сужают задачу, а маркеры показывают, как варианты распределены по Пхукету. Откройте маркер, чтобы увидеть цену, фото, локацию и следующий шаг.
+                    {% endif %}
+                </p>
+            </div>
+            <p class="map-section-note">
+                {% if lang == 'en' %}The map updates when filters or currency change, while the popup keeps the contact and favorite actions available.{% elif lang == 'th' %}แผนที่จะอัปเดตเมื่อเปลี่ยนฟิลเตอร์หรือสกุลเงิน พร้อมเก็บปุ่มติดต่อและรายการโปรดไว้ในป๊อปอัป{% else %}Карта обновляется при изменении фильтров и валюты, а в попапе остаются контакт и добавление в избранное.{% endif %}
+            </p>
         </div>
 
-        <div class="map-wrapper">
-            <div class="map-toolbar">
-                <div class="map-toolbar-card">
-                    <p class="text-xs uppercase tracking-[0.3em] text-brand-tertiary mb-1">{% trans "Показано" %}</p>
-                    <div class="text-2xl font-bold text-brand-primary" id="map-toolbar-visible">{{ total_properties }}</div>
-                    <p class="text-xs text-brand-tertiary">{% trans "объектов на карте" %}</p>
-                </div>
-            </div>
+        <div class="map-layout" id="mapLayout">
+            <aside class="map-filter-column" aria-label="{% if lang == 'en' %}Map filters{% elif lang == 'th' %}ฟิลเตอร์แผนที่{% else %}Фильтры карты{% endif %}">
+                <details class="map-filter-dropdown" open>
+                    <summary class="map-filter-summary">
+                        <span>
+                            <i class="fas fa-sliders-h"></i>
+                            {% if lang == 'en' %}Map filters{% elif lang == 'th' %}ฟิลเตอร์แผนที่{% else %}Фильтры карты{% endif %}
+                        </span>
+                        <i class="fas fa-chevron-down"></i>
+                    </summary>
+                    <div class="map-filter-content">
+                        <div class="map-filter-intro">
+                            <p>{% if lang == 'en' %}Selection brief{% elif lang == 'th' %}โจทย์การเลือก{% else %}Бриф подбора{% endif %}</p>
+                            <p>
+                                {% if lang == 'en' %}Choose deal type, property format, budget, district, and amenities. The page keeps the same route, so filtered map links remain shareable.{% elif lang == 'th' %}เลือกประเภทดีล รูปแบบทรัพย์ งบประมาณ เขต และสิ่งอำนวยความสะดวก ลิงก์แผนที่พร้อมฟิลเตอร์ยังแชร์ได้{% else %}Выберите тип сделки, формат объекта, бюджет, район и удобства. Ссылка на карту сохранит выбранные параметры.{% endif %}
+                            </p>
+                        </div>
+                        {% include 'properties/includes/list/list_filters_card.html' with filter_wrapper_id='map-filter-sidebar' filter_wrapper_classes='bg-white border border-primary/10 w-full' filter_reset_url=request.path %}
+                    </div>
+                </details>
+            </aside>
 
-            <div id="property-map"></div>
+            <div class="map-stage">
+                <div class="map-wrapper">
+                    <div class="map-toolbar">
+                        <div class="map-toolbar-card">
+                            <p class="text-xs uppercase tracking-[0.24em] text-brand-tertiary mb-1">{% if lang == 'en' %}Visible{% elif lang == 'th' %}แสดงอยู่{% else %}Показано{% endif %}</p>
+                            <div class="text-2xl font-bold text-brand-primary" id="map-toolbar-visible">{{ total_properties }}</div>
+                            <p class="text-xs text-brand-tertiary">{% if lang == 'en' %}properties on map{% elif lang == 'th' %}รายการบนแผนที่{% else %}объектов на карте{% endif %}</p>
+                        </div>
+                    </div>
 
-            <div id="map-loading">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto mb-4"></div>
-                    <p class="text-brand-tertiary">{% trans "Загружаем лучшие предложения" %}</p>
-                </div>
-            </div>
+                    <div id="property-map"></div>
 
-            <div class="map-floating-actions">
-                <button class="map-floating-btn" id="geoLocateBtn" title="{% trans 'Определить местоположение' %}">
-                    <i class="fas fa-location-arrow"></i>
-                </button>
-                <button class="map-floating-btn secondary" id="resetViewBtn" title="{% trans 'Сбросить вид' %}">
-                    <i class="fas fa-undo"></i>
-                </button>
-            </div>
+                    <div id="map-loading">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto mb-4"></div>
+                            <p class="text-brand-tertiary">{% if lang == 'en' %}Loading map properties{% elif lang == 'th' %}กำลังโหลดทรัพย์บนแผนที่{% else %}Загружаем объекты на карте{% endif %}</p>
+                        </div>
+                    </div>
 
-            <div class="map-floating-stats">
-                <div class="stat-pill">
-                    {% trans "Показано" %}: <span id="map-visible-count">{{ total_properties }}</span>
-                </div>
-                <div class="stat-pill">
-                    {% trans "Продажа" %}: <span id="map-visible-sale">{{ sale_properties }}</span>
-                </div>
-                <div class="stat-pill">
-                    {% trans "Аренда" %}: <span id="map-visible-rent">{{ rent_properties }}</span>
+                    <div class="map-floating-actions">
+                        <button class="map-floating-btn" id="geoLocateBtn" title="{% if lang == 'en' %}Find my location{% elif lang == 'th' %}ค้นหาตำแหน่งของฉัน{% else %}Определить местоположение{% endif %}">
+                            <i class="fas fa-location-arrow"></i>
+                        </button>
+                        <button class="map-floating-btn secondary" id="resetViewBtn" title="{% if lang == 'en' %}Reset map view{% elif lang == 'th' %}รีเซ็ตมุมมองแผนที่{% else %}Сбросить вид{% endif %}">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+
+                    <div class="map-floating-stats">
+                        <div class="stat-pill">
+                            {% if lang == 'en' %}Visible{% elif lang == 'th' %}แสดงอยู่{% else %}Показано{% endif %}: <span id="map-visible-count">{{ total_properties }}</span>
+                        </div>
+                        <div class="stat-pill">
+                            {% if lang == 'en' %}Sale{% elif lang == 'th' %}ขาย{% else %}Продажа{% endif %}: <span id="map-visible-sale">{{ sale_properties }}</span>
+                        </div>
+                        <div class="stat-pill">
+                            {% if lang == 'en' %}Rent{% elif lang == 'th' %}เช่า{% else %}Аренда{% endif %}: <span id="map-visible-rent">{{ rent_properties }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1029,6 +1580,7 @@
 
 <!-- Featured properties section reused from home -->
 {% include 'core/includes/home/home_featured_properties_section.html' %}
+{% endwith %}
 {% endblock %}
 
 
@@ -1038,6 +1590,26 @@
 <script>
 window.i18nGeoUnsupported = "{% trans 'Геолокация не поддерживается'|escapejs %}";
 window.i18nGeoFailed = "{% trans 'Не удалось определить позицию'|escapejs %}";
+(function () {
+    const filterDropdown = document.querySelector('.map-filter-dropdown');
+    const desktopQuery = window.matchMedia('(min-width: 1025px)');
+
+    if (!filterDropdown) {
+        return;
+    }
+
+    function syncFilterDropdown(event) {
+        filterDropdown.open = event.matches;
+    }
+
+    syncFilterDropdown(desktopQuery);
+
+    if (typeof desktopQuery.addEventListener === 'function') {
+        desktopQuery.addEventListener('change', syncFilterDropdown);
+    } else if (typeof desktopQuery.addListener === 'function') {
+        desktopQuery.addListener(syncFilterDropdown);
+    }
+})();
 </script>
 <script src="{% static 'js/map/map_popups.js' %}"></script>
 <script src="{% static 'js/map/map_core.js' %}"></script>

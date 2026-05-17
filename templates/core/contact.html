@@ -46,241 +46,77 @@
 {% endblock %}
 
 {% block content %}
-<!-- Contact Hero -->
-<section class="relative overflow-hidden bg-[#081326] py-16 text-white sm:py-20 lg:py-24">
-    <div class="absolute inset-0 bg-[linear-gradient(120deg,rgba(7,18,38,0.98)_0%,rgba(15,31,61,0.96)_52%,rgba(26,41,80,0.92)_100%)]"></div>
-    <div class="absolute inset-y-0 right-[-12%] w-[34rem] rounded-full bg-[radial-gradient(circle,_rgba(241,180,0,0.92)_0%,rgba(241,180,0,0.28)_28%,rgba(241,180,0,0.08)_48%,rgba(8,19,38,0)_72%)] blur-2xl"></div>
-    <div class="absolute inset-0 opacity-[0.08]" style="background-image:linear-gradient(rgba(255,255,255,0.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.8)_1px,transparent_1px);background-size:120px 120px;"></div>
-    <div class="relative z-10 mx-auto max-w-7xl px-4">
-        {% with lang=LANGUAGE_CODE|default:'ru' %}
-        <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:gap-16">
-            <div>
-                <nav class="mb-6 flex items-center text-sm text-white/85" aria-label="{% trans 'Хлебные крошки' %}">
-                    <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
-                    <span class="mx-3 text-white/55">/</span>
-                    <span class="text-white">{% trans "Контакты" %}</span>
-                </nav>
+{% with lang=LANGUAGE_CODE|default:'ru' %}
+<section class="relative overflow-hidden bg-primaryDark text-white" style="background:#111827;">
+    <div class="absolute inset-0" style="background:radial-gradient(circle at 72% 18%,rgba(241,180,0,0.32),transparent 31%),linear-gradient(135deg,#111827 0%,#333847 58%,#474B57 100%);"></div>
+    <div class="absolute inset-0 opacity-[0.07]" style="background-image:linear-gradient(rgba(255,255,255,0.9)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.9)_1px,transparent_1px);background-size:96px 96px;"></div>
 
-                <div class="mb-5 inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm font-semibold uppercase tracking-[0.24em] text-accent shadow-[0_18px_40px_rgba(3,10,24,0.28)] backdrop-blur">
-                    <span class="inline-flex h-2.5 w-2.5 rounded-full bg-accent shadow-[0_0_16px_rgba(241,180,0,0.8)]"></span>
-                    {% if lang == 'en' %}Contact Undersun{% elif lang == 'th' %}ติดต่อ Undersun{% else %}Связаться с Undersun{% endif %}
-                </div>
+    <div class="relative mx-auto max-w-7xl px-4 py-16 sm:py-20 lg:py-24">
+        <nav class="mb-10 flex min-w-0 items-center text-sm text-white/75" aria-label="{% trans 'Хлебные крошки' %}">
+            <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
+            <span class="mx-3 text-white/40">/</span>
+            <span class="text-white">{% trans "Контакты" %}</span>
+        </nav>
 
-                <h1 class="max-w-4xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl xl:text-[4.3rem]">
+        <div class="grid min-w-0 items-end gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:gap-16">
+            <div class="min-w-0">
+                <p class="mb-5 inline-flex max-w-full items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent backdrop-blur sm:tracking-[0.22em]">
+                    {% if lang == 'en' %}Contact Undersun Estate{% elif lang == 'th' %}ติดต่อ Undersun Estate{% else %}Контакт с Undersun Estate{% endif %}
+                </p>
+                <h1 class="max-w-4xl break-words text-4xl font-bold leading-[1.03] tracking-[-0.04em] sm:text-5xl lg:text-6xl xl:text-[4.55rem]">
                     {% if lang == 'en' %}
-                        Let’s discuss your plans in Phuket real estate
+                        Start with a clear conversation about your Phuket property plans.
                     {% elif lang == 'th' %}
-                        มาคุยกันเกี่ยวกับแผนอสังหาฯ ของคุณในภูเก็ต
+                        เริ่มจากการพูดคุยที่ชัดเจนเกี่ยวกับแผนอสังหาฯ ของคุณในภูเก็ต
                     {% else %}
-                        Давайте обсудим ваши планы в недвижимости Пхукета
+                        Начните с понятного разговора о ваших планах на Пхукете.
                     {% endif %}
                 </h1>
-
-                <p class="mt-6 max-w-2xl text-base leading-8 text-white/84 sm:text-lg lg:text-xl">
+                <p class="mt-7 max-w-2xl break-words text-lg leading-8 text-white/82">
                     {% if lang == 'en' %}
-                        Request a consultation, ask about investment opportunities, or get support with buying, selling, rentals, and legal guidance in Phuket.
+                        Send a request, call the office, or open WhatsApp. We will help frame the brief before recommending properties, viewings, or next steps.
                     {% elif lang == 'th' %}
-                        ขอคำปรึกษา สอบถามเรื่องการลงทุน หรือรับการดูแลเรื่องซื้อ ขาย เช่า และกฎหมายเกี่ยวกับอสังหาริมทรัพย์ในภูเก็ต
+                        ส่งคำขอ โทรหาเรา หรือเปิด WhatsApp เราจะช่วยตั้งโจทย์ให้ชัดเจนก่อนแนะนำทรัพย์ การนัดชม หรือขั้นตอนถัดไป
                     {% else %}
-                        Запросите консультацию, задайте вопрос об инвестициях или получите поддержку по покупке, продаже, аренде и юридическому сопровождению на Пхукете.
+                        Оставьте заявку, позвоните или напишите в WhatsApp. Сначала уточним задачу, затем предложим объекты, просмотры или следующий шаг.
                     {% endif %}
                 </p>
-
-                <div class="mt-10 flex flex-col gap-3 sm:flex-row">
-                    <a href="#consultation" class="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 font-semibold text-gray-900 shadow-[0_18px_38px_rgba(241,180,0,0.28)] transition-transform hover:-translate-y-0.5">
+                <div class="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                    <a href="#contact-form" class="inline-flex w-full items-center justify-center rounded-2xl bg-accent px-6 py-3 font-bold text-gray-950 shadow-[0_20px_44px_rgba(241,180,0,0.26)] transition-transform hover:-translate-y-0.5 sm:w-auto" data-ym-goal="contact_hero_form_click">
                         {% trans "Отправить сообщение" %}
                     </a>
-                    <a href="tel:{{ business_profile.phone_e164 }}" class="inline-flex items-center justify-center rounded-xl border border-white/18 bg-white/10 px-6 py-3 font-semibold text-gray-600 backdrop-blur transition-colors hover:border-accent/60 hover:bg-white/14">
-                        <i class="fas fa-phone mr-2 text-accent"></i>{{ business_profile.phone_display }}
+                    <a href="{{ business_profile.whatsapp_url }}" target="_blank" rel="noopener" class="inline-flex w-full items-center justify-center rounded-2xl border border-white/20 px-6 py-3 font-bold text-white backdrop-blur transition-colors hover:border-accent/70 sm:w-auto" style="background:rgba(255,255,255,0.10);" data-ym-goal="contact_hero_whatsapp_click">
+                        <i class="fab fa-whatsapp mr-2 text-accent"></i>WhatsApp
                     </a>
                 </div>
             </div>
 
-            <div class="relative">
-                <div class="absolute right-10 top-2 h-32 w-32 rounded-full border border-white/18 bg-accent/90 shadow-[0_0_60px_rgba(241,180,0,0.45)]"></div>
-                <div class="relative overflow-hidden rounded-[2rem] border border-white/12 bg-[linear-gradient(160deg,rgba(255,255,255,0.14),rgba(255,255,255,0.04))] p-6 shadow-[0_32px_80px_rgba(2,10,24,0.45)] backdrop-blur">
-                    <div class="grid gap-4">
-                        <div class="rounded-[1.5rem] border border-white/12 bg-white/8 p-5">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                                {% if lang == 'en' %}Office{% elif lang == 'th' %}สำนักงาน{% else %}Офис{% endif %}
-                            </p>
-                            <p class="mt-3 text-lg font-semibold text-gray-600">{{ business_profile.address_line_1 }}</p>
-                            <p class="mt-1 text-sm text-gray-600">{{ business_profile.address_line_2 }}</p>
-                        </div>
-
-                        <div class="grid gap-4 sm:grid-cols-2">
-                        <div class="rounded-[1.4rem] border border-white/12 bg-white/8 p-5">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                                {% if lang == 'en' %}Phone{% elif lang == 'th' %}โทรศัพท์{% else %}Телефон{% endif %}
-                            </p>
-                            <p class="mt-3 text-lg font-semibold text-gray-600">{{ business_profile.phone_display }}</p>
-                        </div>
-                        <div class="rounded-[1.4rem] border border-white/12 bg-white/8 p-5">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                                {% if lang == 'en' %}Hours{% elif lang == 'th' %}เวลาทำการ{% else %}Часы работы{% endif %}
-                            </p>
-                            <p class="mt-3 text-lg font-semibold text-gray-600">{{ business_profile.hours_label }}</p>
-                        </div>
-                        </div>
-
-                        <div class="rounded-[1.5rem] border border-white/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] p-5">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                                        {% if lang == 'en' %}Best channel{% elif lang == 'th' %}ช่องทางที่สะดวก{% else %}Удобный канал{% endif %}
-                                    </p>
-                                    <p class="mt-3 text-base leading-7 text-gray-600">
-                                        {% if lang == 'en' %}
-                                            WhatsApp, phone, email, or the contact form — we’ll respond within one business day.
-                                        {% elif lang == 'th' %}
-                                            WhatsApp โทรศัพท์ อีเมล หรือฟอร์มติดต่อ — เราจะตอบกลับภายใน 1 วันทำการ
-                                        {% else %}
-                                            WhatsApp, телефон, email или форма обратной связи — ответим в течение одного рабочего дня.
-                                        {% endif %}
-                                    </p>
-                                </div>
-                                <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-accent">
-                                    <i class="fas fa-paper-plane text-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endwith %}
-    </div>
-</section>
-
-<!-- Contact Form & Info -->
-<section class="bg-white py-16" id="consultation">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <!-- Contact Form -->
-            <div class="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:p-10">
-                <div class="mb-8">
+            <div class="relative min-w-0 max-w-full overflow-hidden pt-3">
+                <div class="absolute right-0 top-0 h-28 w-28 rounded-full bg-accent/90 blur-2xl"></div>
+                <div class="relative max-w-full rounded-[2.25rem] border border-white/15 bg-white/10 p-4 shadow-[0_36px_90px_rgba(0,0,0,0.35)] backdrop-blur sm:p-6">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                        {% if LANGUAGE_CODE|default:'ru' == 'en' %}Contact form{% elif LANGUAGE_CODE|default:'ru' == 'th' %}แบบฟอร์มติดต่อ{% else %}Форма связи{% endif %}
+                        {% if lang == 'en' %}Contact hub{% elif lang == 'th' %}ช่องทางติดต่อ{% else %}Контактный центр{% endif %}
                     </p>
-                    <h2 class="mt-3 text-3xl font-bold text-gray-900">{% trans "Отправьте нам сообщение" %}</h2>
-                </div>
-                
-                <form id="contactForm" method="post" class="space-y-6 js-recaptcha-form" data-recaptcha-action="contact_form">
-                    {% csrf_token %}
-                    {% include 'core/includes/recaptcha_token_field.html' %}
-                    {% include 'core/includes/form_security_fields.html' with honeypot_id='contact-page-website' %}
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="name" class="mb-2 block text-sm font-medium text-gray-700">{% trans "Имя" %}</label>
-                            <input type="text" id="name" name="name" required class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10">
-                        </div>
-                        <div>
-                            <label for="email" class="mb-2 block text-sm font-medium text-gray-700">{% trans "Email" %}</label>
-                            <input type="email" id="email" name="email" required class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10">
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="phone" class="mb-2 block text-sm font-medium text-gray-700">{% trans "Телефон" %}</label>
-                            <input type="tel" id="phone" name="phone" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10">
-                        </div>
-                        <div>
-                            <label for="subject" class="mb-2 block text-sm font-medium text-gray-700">{% trans "Тема" %}</label>
-                            <select id="subject" name="subject" class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10">
-                                <option value="">{% trans "Выберите тему" %}</option>
-                                <option value="buy">{% trans "Покупка недвижимости" %}</option>
-                                <option value="rent">{% trans "Аренда недвижимости" %}</option>
-                                <option value="sell">{% trans "Продажа недвижимости" %}</option>
-                                <option value="invest">{% trans "Инвестиции" %}</option>
-                                <option value="other">{% trans "Другое" %}</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label for="message" class="mb-2 block text-sm font-medium text-gray-700">{% trans "Сообщение" %}</label>
-                        <textarea id="message" name="message" rows="6" required class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10"></textarea>
-                    </div>
-                    
-                    <button type="submit" class="w-full rounded-xl bg-primary px-6 py-3 font-bold text-white shadow-[0_18px_38px_rgba(37,99,235,0.16)] transition-colors hover:bg-[#616677]">
-                        {% trans "Отправить сообщение" %}
-                    </button>
-                </form>
-            </div>
-            
-            <!-- Contact Information -->
-            <div class="rounded-[2rem] border border-gray-100 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-8 shadow-[0_24px_60px_rgba(15,23,42,0.08)] sm:p-10">
-                <div class="mb-8">
-                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
-                        {% if LANGUAGE_CODE|default:'ru' == 'en' %}Contact details{% elif LANGUAGE_CODE|default:'ru' == 'th' %}ข้อมูลติดต่อ{% else %}Контактные данные{% endif %}
-                    </p>
-                    <h2 class="mt-3 text-3xl font-bold text-gray-900">{% trans "Наши контакты" %}</h2>
-                </div>
-                
-                <div class="space-y-6">
-                    <div class="flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-                        <div class="mt-1 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/12 text-xl text-primary">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900 mb-1">{% trans "Адрес" %}</h3>
-                            <p class="text-gray-600">{{ business_profile.address_full }}</p>
-                            <p class="mt-2"><a href="{{ business_profile.google_maps_url }}" target="_blank" rel="noopener" class="text-primary hover:text-accent">Google Maps</a></p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-                        <div class="mt-1 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/12 text-xl text-primary">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900 mb-1">{% trans "Телефон" %}</h3>
-                            <p class="text-gray-600">{{ business_profile.phone_display }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-                        <div class="mt-1 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/12 text-xl text-primary">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900 mb-1">{% trans "Email" %}</h3>
-                            <p class="text-gray-600">{{ business_profile.email }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-                        <div class="mt-1 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/12 text-xl text-primary">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-gray-900 mb-1">{% trans "Часы работы" %}</h3>
-                            <p class="text-gray-600">{{ business_profile.hours_label }}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Social Links -->
-                <div class="mt-8 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-                    <h3 class="font-semibold text-gray-900 mb-4">{% trans "Следите за нами" %}</h3>
-                    <div class="flex flex-wrap gap-3">
-                        <a href="https://www.facebook.com/mr.undersunestate/" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10 hover:text-primary">
-                            <i class="fab fa-facebook-f"></i>
+                    <div class="mt-6 space-y-4 sm:space-y-5">
+                        <a href="tel:{{ business_profile.phone_e164 }}" class="group flex min-w-0 items-start gap-3 rounded-[1.5rem] border border-white/12 p-4 transition-colors hover:border-accent/70 sm:gap-4 sm:p-5" style="background:rgba(17,24,39,0.84);" data-ym-goal="contact_hero_call_click">
+                            <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent text-gray-950"><i class="fas fa-phone"></i></span>
+                            <span class="min-w-0">
+                                <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-white/56">{% trans "Телефон" %}</span>
+                                <span class="mt-2 block break-words text-lg font-semibold text-white">{{ business_profile.phone_display }}</span>
+                            </span>
                         </a>
-                        <a href="https://www.instagram.com/undersun.estate/" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10 hover:text-primary">
-                            <i class="fab fa-instagram"></i>
+                        <a href="mailto:{{ business_profile.email }}" class="group flex min-w-0 items-start gap-3 rounded-[1.5rem] border border-white/12 p-4 transition-colors hover:border-accent/70 sm:gap-4 sm:p-5" style="background:rgba(17,24,39,0.84);" data-ym-goal="contact_hero_email_click">
+                            <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/12 text-accent"><i class="fas fa-envelope"></i></span>
+                            <span class="min-w-0">
+                                <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Email</span>
+                                <span class="mt-2 block break-all text-lg font-semibold text-white">{{ business_profile.email }}</span>
+                            </span>
                         </a>
-                        <a href="https://www.youtube.com/@undersun_estate" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10 hover:text-primary">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                        <a href="https://t.me/undersunestate" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10 hover:text-primary">
-                            <i class="fab fa-telegram"></i>
-                        </a>
-                        <a href="{{ business_profile.whatsapp_url }}" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-white text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10 hover:text-primary">
-                            <i class="fab fa-whatsapp"></i>
-                        </a>
+                        <div class="min-w-0 rounded-[1.5rem] border border-white/12 p-4 sm:p-5" style="background:rgba(17,24,39,0.84);">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">{% if lang == 'en' %}Office{% elif lang == 'th' %}สำนักงาน{% else %}Офис{% endif %}</p>
+                            <p class="mt-2 break-words text-lg font-semibold text-white">{{ business_profile.address_line_1 }}</p>
+                            <p class="mt-1 break-words text-sm leading-6 text-white/68">{{ business_profile.address_line_2 }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -288,59 +124,169 @@
     </div>
 </section>
 
-<!-- Map Section -->
-<section class="bg-gray-50 py-16">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ business_profile.map_heading }}</h2>
-            <p class="text-gray-600">{{ business_profile.map_subtitle }}</p>
+<section class="bg-[#f7f3ea] py-10">
+    <div class="mx-auto grid min-w-0 max-w-7xl gap-4 px-4 md:grid-cols-3">
+        <div class="min-w-0 border-b border-primary/10 py-5 md:border-b-0 md:border-r md:pr-8">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-tertiary">{% if lang == 'en' %}Office hours{% elif lang == 'th' %}เวลาทำการ{% else %}Часы работы{% endif %}</p>
+            <p class="mt-2 break-words text-2xl font-bold text-primary">{{ business_profile.hours_label }}</p>
         </div>
-        
-        <div class="overflow-hidden rounded-[2rem] border border-white/60 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-            <div id="contact-map" class="w-full h-96">
-                <!-- Map will be loaded here -->
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d927.4941666554396!2d98.3417095!3d7.9138837!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60e8893a2e97b515%3A0xd9b2a3109bb2c0e7!2sUndersun%20Estate!5e1!3m2!1sru!2snl!4v1761220030003!5m2!1sru!2snl"
-                    width="100%"
-                    height="384" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
-            </div>
+        <div class="min-w-0 border-b border-primary/10 py-5 md:border-b-0 md:border-r md:px-8">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-tertiary">{% if lang == 'en' %}Response{% elif lang == 'th' %}การตอบกลับ{% else %}Ответ{% endif %}</p>
+            <p class="mt-2 break-words text-2xl font-bold text-primary">{% if lang == 'en' %}Within one business day{% elif lang == 'th' %}ภายใน 1 วันทำการ{% else %}В течение рабочего дня{% endif %}</p>
+        </div>
+        <div class="min-w-0 py-5 md:pl-8">
+            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-tertiary">{% if lang == 'en' %}Languages{% elif lang == 'th' %}ภาษา{% else %}Языки{% endif %}</p>
+            <p class="mt-2 text-2xl font-bold text-primary">RU / EN / TH</p>
         </div>
     </div>
 </section>
 
-<!-- FAQ Section -->
-<section class="py-16">
-    <div class="max-w-4xl mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Часто задаваемые вопросы" %}</h2>
+<section class="bg-white py-16 lg:py-24" id="contact-form">
+    <div class="mx-auto grid min-w-0 max-w-7xl gap-12 px-4 lg:grid-cols-[1.04fr_0.96fr] lg:gap-16">
+        <div class="min-w-0 rounded-[2rem] border border-primary/10 bg-white p-5 shadow-[0_28px_80px_rgba(15,23,42,0.08)] sm:p-10">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+                {% if lang == 'en' %}Tell us the brief{% elif lang == 'th' %}บอกโจทย์ของคุณ{% else %}Опишите задачу{% endif %}
+            </p>
+            <h2 class="mt-4 break-words text-3xl font-bold tracking-[-0.03em] text-primary sm:text-4xl">
+                {% trans "Отправьте нам сообщение" %}
+            </h2>
+            <p class="mt-4 break-words leading-7 text-tertiary">
+                {% if lang == 'en' %}Share what you are looking for, your preferred area, budget, and timeline. The team will come back with the most practical next step.{% elif lang == 'th' %}ระบุสิ่งที่ต้องการ ทำเล งบประมาณ และระยะเวลา ทีมงานจะตอบกลับพร้อมขั้นตอนถัดไปที่เหมาะสม{% else %}Расскажите, что ищете: район, бюджет, сроки и цель покупки. Команда вернётся с самым практичным следующим шагом.{% endif %}
+            </p>
+
+            <form id="contactForm" method="post" class="mt-8 space-y-6 js-recaptcha-form" data-recaptcha-action="contact_form" data-ym-goal="contact_form_submit" data-ym-event="submit">
+                {% csrf_token %}
+                {% include 'core/includes/recaptcha_token_field.html' %}
+                {% include 'core/includes/form_security_fields.html' with honeypot_id='contact-page-website' %}
+
+                <div class="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-2">
+                    <div class="min-w-0">
+                        <label for="name" class="mb-2 block text-sm font-semibold text-gray-800">{% trans "Имя" %}</label>
+                        <input type="text" id="name" name="name" required class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-950 transition-colors focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10">
+                    </div>
+                    <div class="min-w-0">
+                        <label for="email" class="mb-2 block text-sm font-semibold text-gray-800">{% trans "Email" %}</label>
+                        <input type="email" id="email" name="email" required class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-950 transition-colors focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10">
+                    </div>
+                </div>
+
+                <div class="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-2">
+                    <div class="min-w-0">
+                        <label for="phone" class="mb-2 block text-sm font-semibold text-gray-800">{% trans "Телефон" %}</label>
+                        <input type="tel" id="phone" name="phone" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-950 transition-colors focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10">
+                    </div>
+                    <div class="min-w-0">
+                        <label for="subject" class="mb-2 block text-sm font-semibold text-gray-800">{% trans "Тема" %}</label>
+                        <select id="subject" name="subject" class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-950 transition-colors focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10">
+                            <option value="">{% trans "Выберите тему" %}</option>
+                            <option value="buy">{% trans "Покупка недвижимости" %}</option>
+                            <option value="rent">{% trans "Аренда недвижимости" %}</option>
+                            <option value="sell">{% trans "Продажа недвижимости" %}</option>
+                            <option value="invest">{% trans "Инвестиции" %}</option>
+                            <option value="other">{% trans "Другое" %}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="message" class="mb-2 block text-sm font-semibold text-gray-800">{% trans "Сообщение" %}</label>
+                    <textarea id="message" name="message" rows="6" required class="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-950 transition-colors focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10"></textarea>
+                </div>
+
+                <button type="submit" class="w-full rounded-2xl bg-primary px-6 py-4 font-bold text-white shadow-[0_18px_44px_rgba(71,75,87,0.2)] transition-colors hover:bg-primaryDark">
+                    {% trans "Отправить сообщение" %}
+                </button>
+            </form>
         </div>
-        
-        <div class="space-y-6">
-            <div class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Могу ли я как иностранец купить недвижимость в Таиланде?" %}</h3>
-                <p class="text-gray-600">{% trans "Да, иностранцы могут покупать кондоминиумы (до 49% от общей площади здания) и дома в лизинг. Мы поможем вам разобраться во всех юридических аспектах." %}</p>
+
+        <aside class="min-w-0 space-y-6">
+            <div class="min-w-0 rounded-[2rem] bg-primaryDark p-5 text-white shadow-[0_28px_80px_rgba(15,23,42,0.18)] sm:p-8" style="background:#111827;">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{% if lang == 'en' %}Direct channels{% elif lang == 'th' %}ช่องทางโดยตรง{% else %}Прямые каналы{% endif %}</p>
+                <div class="mt-6 space-y-5">
+                    <a href="tel:{{ business_profile.phone_e164 }}" class="flex min-w-0 items-center justify-between gap-4 border-b border-white/10 pb-5 text-white transition-colors hover:text-accent" data-ym-goal="contact_sidebar_call_click">
+                        <span class="min-w-0 break-words">{{ business_profile.phone_display }}</span>
+                        <i class="fas fa-phone shrink-0"></i>
+                    </a>
+                    <a href="mailto:{{ business_profile.email }}" class="flex min-w-0 items-center justify-between gap-4 border-b border-white/10 pb-5 text-white transition-colors hover:text-accent" data-ym-goal="contact_sidebar_email_click">
+                        <span class="min-w-0 break-all">{{ business_profile.email }}</span>
+                        <i class="fas fa-envelope shrink-0"></i>
+                    </a>
+                    <a href="{{ business_profile.whatsapp_url }}" target="_blank" rel="noopener" class="flex min-w-0 items-center justify-between gap-4 text-white transition-colors hover:text-accent" data-ym-goal="contact_sidebar_whatsapp_click">
+                        <span class="min-w-0">WhatsApp</span>
+                        <i class="fab fa-whatsapp shrink-0"></i>
+                    </a>
+                </div>
             </div>
-            
-            <div class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Какие дополнительные расходы при покупке?" %}</h3>
-                <p class="text-gray-600">{% trans "Обычно это 6-8% от стоимости недвижимости: трансферный налог (2%), гербовый сбор (0.5%), регистрационные сборы, услуги юриста и агентская комиссия." %}</p>
+
+            <div class="min-w-0 rounded-[2rem] border border-primary/10 bg-[#f8f9fa] p-5 sm:p-8">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{% trans "Адрес" %}</p>
+                <p class="mt-4 break-words text-xl font-semibold leading-7 text-primary">{{ business_profile.address_full }}</p>
+                <a href="{{ business_profile.google_maps_url }}" target="_blank" rel="noopener" class="mt-6 inline-flex items-center font-bold text-primary transition-colors hover:text-accent" data-ym-goal="contact_google_maps_click">
+                    Google Maps <span class="ml-2">→</span>
+                </a>
             </div>
-            
-            <div class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Сколько времени занимает сделка?" %}</h3>
-                <p class="text-gray-600">{% trans "От 2 до 6 недель в зависимости от сложности сделки. Мы ведем весь процесс от начала до конца." %}</p>
+
+            <div class="min-w-0 rounded-[2rem] border border-primary/10 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-8">
+                <h3 class="text-xl font-bold text-primary">{% trans "Следите за нами" %}</h3>
+                <div class="mt-5 flex flex-wrap gap-3">
+                    <a href="https://www.facebook.com/mr.undersunestate/" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 text-primary transition-colors hover:border-accent hover:bg-accent/10" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/undersun.estate/" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 text-primary transition-colors hover:border-accent hover:bg-accent/10" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@undersun_estate" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 text-primary transition-colors hover:border-accent hover:bg-accent/10" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="https://t.me/undersunestate" target="_blank" rel="noopener" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 text-primary transition-colors hover:border-accent hover:bg-accent/10" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+                </div>
             </div>
-            
-            <div class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">{% trans "Предоставляете ли вы услуги управления недвижимостью?" %}</h3>
-                <p class="text-gray-600">{% trans "Да, мы предлагаем полный спектр услуг по управлению недвижимостью: уборка, ремонт, сдача в аренду и многое другое." %}</p>
+        </aside>
+    </div>
+</section>
+
+<section class="bg-[#f8f9fa] py-16 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4">
+        <div class="mb-8 max-w-3xl">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{% if lang == 'en' %}Visit us{% elif lang == 'th' %}เยี่ยมชมสำนักงาน{% else %}Офис на карте{% endif %}</p>
+            <h2 class="mt-4 break-words text-3xl font-bold tracking-[-0.03em] text-primary sm:text-4xl">{{ business_profile.map_heading }}</h2>
+            <p class="mt-4 break-words text-lg leading-8 text-tertiary">{{ business_profile.map_subtitle }}</p>
+        </div>
+        <div class="overflow-hidden rounded-[2rem] border border-white bg-white shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
+            <iframe
+                class="block max-w-full"
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d927.4941666554396!2d98.3417095!3d7.9138837!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60e8893a2e97b515%3A0xd9b2a3109bb2c0e7!2sUndersun%20Estate!5e1!3m2!1sru!2snl!4v1761220030003!5m2!1sru!2snl"
+                width="100%"
+                height="420"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy"
+                title="{% trans 'Карта офиса Undersun Estate' %}"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<section class="bg-white py-16 lg:py-24">
+    <div class="mx-auto grid min-w-0 max-w-7xl gap-12 px-4 lg:grid-cols-[0.75fr_1.25fr]">
+        <div class="min-w-0">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">FAQ</p>
+            <h2 class="mt-4 break-words text-3xl font-bold tracking-[-0.03em] text-primary sm:text-4xl">{% trans "Часто задаваемые вопросы" %}</h2>
+        </div>
+        <div class="min-w-0 divide-y divide-primary/10 rounded-[2rem] border border-primary/10 bg-white px-5 shadow-[0_24px_70px_rgba(15,23,42,0.06)] sm:px-8">
+            <div class="py-6">
+                <h3 class="break-words text-xl font-semibold text-gray-950">{% trans "Могу ли я как иностранец купить недвижимость в Таиланде?" %}</h3>
+                <p class="mt-3 break-words leading-7 text-tertiary">{% trans "Да, иностранцы могут покупать кондоминиумы (до 49% от общей площади здания) и дома в лизинг. Мы поможем вам разобраться во всех юридических аспектах." %}</p>
+            </div>
+            <div class="py-6">
+                <h3 class="break-words text-xl font-semibold text-gray-950">{% trans "Какие дополнительные расходы при покупке?" %}</h3>
+                <p class="mt-3 break-words leading-7 text-tertiary">{% trans "Обычно это 6-8% от стоимости недвижимости: трансферный налог (2%), гербовый сбор (0.5%), регистрационные сборы, услуги юриста и агентская комиссия." %}</p>
+            </div>
+            <div class="py-6">
+                <h3 class="break-words text-xl font-semibold text-gray-950">{% trans "Сколько времени занимает сделка?" %}</h3>
+                <p class="mt-3 break-words leading-7 text-tertiary">{% trans "От 2 до 6 недель в зависимости от сложности сделки. Мы ведем весь процесс от начала до конца." %}</p>
+            </div>
+            <div class="py-6">
+                <h3 class="break-words text-xl font-semibold text-gray-950">{% trans "Предоставляете ли вы услуги управления недвижимостью?" %}</h3>
+                <p class="mt-3 break-words leading-7 text-tertiary">{% trans "Да, мы предлагаем полный спектр услуг по управлению недвижимостью: уборка, ремонт, сдача в аренду и многое другое." %}</p>
             </div>
         </div>
     </div>
 </section>
+{% endwith %}
 {% endblock %}

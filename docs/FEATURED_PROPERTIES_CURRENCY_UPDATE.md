@@ -17,4 +17,4 @@
 
 - Блок featured properties получает серверный bootstrap payload и рендерится клиентским модулем.
 - Обновление валюты завязано на `currencyChanged`.
-- Логика блока больше не должна документироваться через старые line-by-line notes; текущая структура отражена в `docs/AGENT.md` и `docs/FUNCTIONS*.md`.
+- Логика блока больше не должна документироваться через старые line-by-line notes; текущая структура отражена в `AGENTS.md` и `docs/FUNCTIONS*.md`.

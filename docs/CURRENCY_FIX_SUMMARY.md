@@ -22,4 +22,4 @@
 - Выбор валюты хранится в session.
 - Дефолтная валюта определяется через `CurrencyPreference` и `CurrencyService`.
 - Синхронизация фронтенда идёт через событие `currencyChanged`.
-- Источником истины по текущему устройству являются `docs/AGENT.md`, `docs/ARCHITECTURE.md` и `docs/FUNCTIONS*.md`.
+- Источником истины по текущему устройству являются `AGENTS.md`, `docs/ARCHITECTURE.md` и `docs/FUNCTIONS*.md`.

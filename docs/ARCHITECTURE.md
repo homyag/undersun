@@ -377,7 +377,7 @@ The current event model uses:
 
 For new contributors:
 
-1. `docs/AGENT.md`
+1. `AGENTS.md`
 2. `docs/FUNCTIONS_RU.md` or `docs/FUNCTIONS.md`
 3. `config/urls.py`
 4. `apps/core/views.py`

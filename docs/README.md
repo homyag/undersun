@@ -5,12 +5,12 @@
 ## Source of Truth
 
 - Источник истины по архитектуре: код в `apps/`, `config/`, `templates/`, `static/js/`.
-- Актуальные обзорные документы: [AGENT.md](./AGENT.md), [ARCHITECTURE.md](./ARCHITECTURE.md), [FUNCTIONS_RU.md](./FUNCTIONS_RU.md), [FUNCTIONS.md](./FUNCTIONS.md).
+- Актуальные обзорные документы: [AGENTS.md](../AGENTS.md), [ARCHITECTURE.md](./ARCHITECTURE.md), [FUNCTIONS_RU.md](./FUNCTIONS_RU.md), [FUNCTIONS.md](./FUNCTIONS.md).
 - Исторические change-log документы не должны использоваться как описание текущего устройства проекта без сверки с кодом.
 
 ## 1. Current Architecture
 
-- [AGENT.md](./AGENT.md) — короткий onboarding по текущей архитектуре, ключевым workflows и ограничениям проекта.
+- [AGENTS.md](../AGENTS.md) — короткий onboarding по текущей архитектуре, ключевым workflows и ограничениям проекта.
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — расширенный обзор платформы: стек, маршруты, данные, фронтенд, аналитика, защита от ботов, деплой.
 - [FUNCTIONS_RU.md](./FUNCTIONS_RU.md) / [FUNCTIONS.md](./FUNCTIONS.md) — актуальная карта ключевых Python entry points, middleware, сервисов и JS-модулей.
 - [js_refactoring_summary.md](./js_refactoring_summary.md) — текущее разделение bootstrap-данных и клиентской логики на странице объекта.
@@ -50,6 +50,6 @@
 
 ## Maintenance Rules
 
-- Если меняется архитектура, сначала обновляйте [AGENT.md](./AGENT.md) и [ARCHITECTURE.md](./ARCHITECTURE.md).
+- Если меняется архитектура, сначала обновляйте [AGENTS.md](../AGENTS.md) и [ARCHITECTURE.md](./ARCHITECTURE.md).
 - Если меняются entry points, маршруты, middleware или клиентские модули, обновляйте [FUNCTIONS_RU.md](./FUNCTIONS_RU.md) и [FUNCTIONS.md](./FUNCTIONS.md).
 - Если документ описывает конкретный релиз, явно помечайте его как historical/change log.

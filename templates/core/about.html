@@ -43,360 +43,213 @@
 {% endblock %}
 
 {% block content %}
-<!-- About Hero Section -->
-<section class="relative overflow-hidden bg-[#081326] py-16 text-white sm:py-20 lg:py-24">
-    <div class="absolute inset-0 bg-[linear-gradient(120deg,rgba(7,18,38,0.98)_0%,rgba(15,31,61,0.96)_52%,rgba(26,41,80,0.92)_100%)]"></div>
-    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-    <div class="absolute inset-y-0 right-[-12%] w-[34rem] rounded-full bg-[radial-gradient(circle,_rgba(241,180,0,0.9)_0%,rgba(241,180,0,0.28)_28%,rgba(241,180,0,0.08)_48%,rgba(8,19,38,0)_72%)] blur-2xl"></div>
-    <div class="absolute left-0 right-0 top-20 h-72 bg-[radial-gradient(circle_at_70%_40%,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0)_38%)]"></div>
-    <div class="absolute inset-0 opacity-[0.08]" style="background-image:linear-gradient(rgba(255,255,255,0.8)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.8)_1px,transparent_1px);background-size:120px 120px;"></div>
+{% with lang=LANGUAGE_CODE|default:'ru' %}
+<section class="relative overflow-hidden bg-primaryDark text-white" style="background:#111827;">
+    <div class="absolute inset-0" style="background:radial-gradient(circle at 80% 10%,rgba(241,180,0,0.28),transparent 34%),linear-gradient(135deg,#111827 0%,#333847 56%,#474B57 100%);"></div>
+    <div class="absolute inset-0 opacity-[0.07]" style="background-image:linear-gradient(rgba(255,255,255,0.9)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.9)_1px,transparent_1px);background-size:96px 96px;"></div>
 
-    <div class="relative z-10 mx-auto max-w-7xl px-4">
-        {% with lang=LANGUAGE_CODE|default:'ru' %}
-        <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:gap-16">
+    <div class="relative mx-auto max-w-7xl px-4 py-16 sm:py-20 lg:py-24">
+        <nav class="mb-10 flex items-center text-sm text-white/75" aria-label="{% trans 'Хлебные крошки' %}">
+            <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
+            <span class="mx-3 text-white/40">/</span>
+            <span class="text-white">{% trans "О нас" %}</span>
+        </nav>
+
+        <div class="grid items-end gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:gap-16">
             <div>
-                <nav class="mb-6 flex items-center text-sm text-white/85" aria-label="{% trans 'Хлебные крошки' %}">
-                    <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
-                    <span class="mx-3 text-white/55">/</span>
-                    <span class="text-white">{% trans "О нас" %}</span>
-                </nav>
-
-                <div class="mb-5 inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm font-semibold uppercase tracking-[0.24em] text-accent shadow-[0_18px_40px_rgba(3,10,24,0.28)] backdrop-blur">
-                    <span class="inline-flex h-2.5 w-2.5 rounded-full bg-accent shadow-[0_0_16px_rgba(241,180,0,0.8)]"></span>
-                    {% if lang == 'en' %}Phuket Real Estate{% elif lang == 'th' %}อสังหาริมทรัพย์ภูเก็ต{% else %}Недвижимость Пхукета{% endif %}
-                </div>
-
-                <h1 class="max-w-4xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl xl:text-[4.4rem]">
+                <p class="mb-5 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-accent backdrop-blur">
+                    {% if lang == 'en' %}Phuket property advisory{% elif lang == 'th' %}ที่ปรึกษาอสังหาฯ ภูเก็ต{% else %}Экспертиза недвижимости Пхукета{% endif %}
+                </p>
+                <h1 class="max-w-4xl text-4xl font-bold leading-[1.03] tracking-[-0.04em] sm:text-5xl lg:text-6xl xl:text-[4.7rem]">
                     {% if lang == 'en' %}
-                        Modern real estate service with the energy of Phuket
+                        We help clients read the Phuket market before they choose a property.
                     {% elif lang == 'th' %}
-                        บริการอสังหาริมทรัพย์สมัยใหม่ ที่สะท้อนพลังของภูเก็ต
+                        เราช่วยให้ลูกค้าเข้าใจตลาดภูเก็ตก่อนเลือกอสังหาริมทรัพย์
                     {% else %}
-                        Современный сервис в недвижимости с энергией Пхукета
+                        Помогаем разобраться в рынке Пхукета до выбора объекта.
                     {% endif %}
                 </h1>
-
-                <p class="mt-6 max-w-2xl text-base leading-8 text-white/86 sm:text-lg lg:text-xl">
+                <p class="mt-7 max-w-2xl text-lg leading-8 text-white/82">
                     {% if lang == 'en' %}
-                        Undersun Estate combines market expertise, investment logic, and premium client care for buyers, sellers, landlords, and investors in Phuket.
+                        Undersun Estate combines local market knowledge, investment logic, and full transaction support for buying, selling, renting, and managing property in Phuket.
                     {% elif lang == 'th' %}
-                        Undersun Estate ผสานความเชี่ยวชาญด้านตลาด การลงทุน และบริการลูกค้าระดับพรีเมียม สำหรับผู้ซื้อ ผู้ขาย นักลงทุน และเจ้าของทรัพย์ในภูเก็ต
+                        Undersun Estate ผสานความรู้ตลาดท้องถิ่น มุมมองการลงทุน และการดูแลครบวงจรสำหรับการซื้อ ขาย เช่า และบริหารอสังหาริมทรัพย์ในภูเก็ต
                     {% else %}
-                        Undersun Estate объединяет знание рынка, инвестиционную экспертизу и премиальный клиентский сервис для покупателей, продавцов, собственников и инвесторов на Пхукете.
+                        Undersun Estate соединяет знание локального рынка, инвестиционную логику и сопровождение сделки: покупка, продажа, аренда и управление недвижимостью на Пхукете.
                     {% endif %}
                 </p>
-
-                <div class="mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
-                    <div class="rounded-2xl border border-white/16 bg-white/12 px-5 py-4 shadow-[0_18px_40px_rgba(3,10,24,0.22)] backdrop-blur">
-                        <p class="text-3xl font-bold text-accent">500+</p>
-                        <p class="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-gray-600">
-                            {% if lang == 'en' %}Listings{% elif lang == 'th' %}รายการ{% else %}Объектов{% endif %}
-                        </p>
-                    </div>
-                    <div class="rounded-2xl border border-white/16 bg-white/12 px-5 py-4 shadow-[0_18px_40px_rgba(3,10,24,0.22)] backdrop-blur">
-                        <p class="text-3xl font-bold text-accent">5+</p>
-                        <p class="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-gray-600">
-                            {% if lang == 'en' %}Years in Phuket{% elif lang == 'th' %}ปีในภูเก็ต{% else %}Лет на Пхукете{% endif %}
-                        </p>
-                    </div>
-                    <div class="rounded-2xl border border-white/16 bg-white/12 px-5 py-4 shadow-[0_18px_40px_rgba(3,10,24,0.22)] backdrop-blur">
-                        <p class="text-3xl font-bold text-accent">RU / EN / TH</p>
-                        <p class="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-gray-600">
-                            {% if lang == 'en' %}Client support{% elif lang == 'th' %}การดูแลลูกค้า{% else %}Поддержка клиентов{% endif %}
-                        </p>
-                    </div>
+                <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+                    <a href="{% url 'properties:property_list' %}" class="inline-flex items-center justify-center rounded-2xl bg-accent px-6 py-3 font-bold text-gray-950 shadow-[0_20px_44px_rgba(241,180,0,0.26)] transition-transform hover:-translate-y-0.5" data-ym-goal="about_catalog_click">
+                        {% if lang == 'en' %}View properties{% elif lang == 'th' %}ดูรายการทรัพย์{% else %}Смотреть каталог{% endif %}
+                    </a>
+                    <a href="{% url 'core:contact' %}" class="inline-flex items-center justify-center rounded-2xl border border-white/20 px-6 py-3 font-bold text-white backdrop-blur transition-colors hover:border-accent/70" style="background:rgba(255,255,255,0.10);" data-ym-goal="about_contact_click">
+                        {% if lang == 'en' %}Discuss a plan{% elif lang == 'th' %}ปรึกษาแผนของคุณ{% else %}Обсудить задачу{% endif %}
+                    </a>
                 </div>
             </div>
 
             <div class="relative">
-                <div class="absolute right-10 top-2 h-32 w-32 rounded-full border border-white/18 bg-accent/90 shadow-[0_0_60px_rgba(241,180,0,0.45)]"></div>
-                <div class="relative overflow-hidden rounded-[2rem] border border-white/12 bg-[linear-gradient(160deg,rgba(255,255,255,0.14),rgba(255,255,255,0.04))] p-6 shadow-[0_32px_80px_rgba(2,10,24,0.45)] backdrop-blur">
-                    <div class="mb-6 flex items-center justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-                                {% if lang == 'en' %}Phuket Real Estate{% elif lang == 'th' %}อสังหาริมทรัพย์ภูเก็ต{% else %}Недвижимость Пхукета{% endif %}
-                            </p>
-                            <p class="mt-2 text-xl font-semibold text-gray-600">
-                                {% if lang == 'en' %}Property. Investment. Lifestyle.{% elif lang == 'th' %}ทรัพย์สิน การลงทุน ไลฟ์สไตล์{% else %}Недвижимость. Инвестиции. Lifestyle.{% endif %}
-                            </p>
-                        </div>
-                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-accent">
-                            <i class="fas fa-building text-lg"></i>
-                        </div>
-                    </div>
-
-                    <div class="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#0c1830] shadow-[0_24px_48px_rgba(2,10,24,0.32)]">
-                        <img
-                            src="{% static 'images/about_us/about_page_hero.webp' %}"
-                            alt="{% trans 'Вилла и кондоминиум на фоне заката в Пхукете' %}"
-                            class="h-60 w-full object-cover sm:h-72"
-                        >
-                        <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,18,38,0.04)_0%,rgba(7,18,38,0.18)_54%,rgba(7,18,38,0.36)_100%)]"></div>
-                    </div>
-
-                    <div class="mt-5 grid gap-3 sm:grid-cols-2">
-                        <div class="rounded-2xl border border-white/14 bg-[#0b1730]/92 px-4 py-4 shadow-[0_18px_32px_rgba(1,8,20,0.35)]">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-                                {% if lang == 'en' %}Focus{% elif lang == 'th' %}โฟกัส{% else %}Фокус{% endif %}
-                            </p>
-                            <p class="mt-2 font-semibold text-gray-600">
-                                {% if lang == 'en' %}Phuket residential and investment properties{% elif lang == 'th' %}อสังหาฯ เพื่ออยู่อาศัยและลงทุนในภูเก็ต{% else %}Жилая и инвестиционная недвижимость Пхукета{% endif %}
-                            </p>
-                        </div>
-                        <div class="rounded-2xl border border-white/14 bg-[#0b1730]/92 px-4 py-4 shadow-[0_18px_32px_rgba(1,8,20,0.35)]">
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-                                {% if lang == 'en' %}Approach{% elif lang == 'th' %}แนวทาง{% else %}Подход{% endif %}
-                            </p>
-                            <p class="mt-2 font-semibold text-gray-600">
-                                {% if lang == 'en' %}Clear recommendations, local expertise, full support{% elif lang == 'th' %}คำแนะนำชัดเจน ความรู้ท้องถิ่น และดูแลครบ{% else %}Чёткие рекомендации, локальная экспертиза и полное сопровождение{% endif %}
-                            </p>
-                        </div>
+                <div class="absolute -right-5 -top-5 h-28 w-28 rounded-full bg-accent/90 blur-2xl"></div>
+                <div class="relative overflow-hidden rounded-[2.25rem] border border-white/15 bg-white/10 p-4 shadow-[0_36px_90px_rgba(0,0,0,0.35)] backdrop-blur">
+                    <img src="{% static 'images/about_us/about_page_hero.webp' %}" alt="{% trans 'Вилла и кондоминиум на фоне заката в Пхукете' %}" class="h-[24rem] w-full rounded-[1.75rem] object-cover sm:h-[30rem]">
+                    <div class="absolute bottom-8 left-8 right-8 rounded-[1.5rem] border border-white/20 p-5 text-white shadow-2xl backdrop-blur" style="background:rgba(17,24,39,0.86);">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+                            {% if lang == 'en' %}Our focus{% elif lang == 'th' %}จุดโฟกัสของเรา{% else %}Наш фокус{% endif %}
+                        </p>
+                        <p class="mt-3 text-lg font-semibold leading-7">
+                            {% if lang == 'en' %}Residential, investment, and lifestyle property decisions in Phuket.{% elif lang == 'th' %}การตัดสินใจด้านที่อยู่อาศัย การลงทุน และไลฟ์สไตล์ในภูเก็ต{% else %}Жилая, инвестиционная и lifestyle-недвижимость Пхукета.{% endif %}
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-        {% endwith %}
     </div>
 </section>
 
-<!-- Key Highlights -->
-<section class="py-12 bg-white">
-    <div class="max-w-6xl mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {% with lang=LANGUAGE_CODE|default:'ru' %}
-            <div class="flex items-start gap-4">
-                <div class="text-3xl text-accent"><i class="fas fa-flag"></i></div>
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-900">
-                        {% if lang == 'en' %}5+ years in Phuket real estate{% elif lang == 'th' %}มากกว่า 5 ปีในตลาดอสังหาฯ ภูเก็ต{% else %}5+ лет на рынке Пхукета{% endif %}
-                    </h3>
-                    <p class="text-gray-600">
-                        {% if lang == 'en' %}Independent agency with experience in resale, off-plan, and investments.{% elif lang == 'th' %}เอเจนซี่อิสระที่มีประสบการณ์ด้านอสังหาฯ มือสอง โครงการใหม่ และการลงทุน{% else %}Независимое агентство со знанием вторички, первички и инвестиционных проектов.{% endif %}
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-start gap-4">
-                <div class="text-3xl text-accent"><i class="fas fa-building"></i></div>
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-900">
-                        {% if lang == 'en' %}500+ curated listings{% elif lang == 'th' %}500+ รายการที่คัดสรร{% else %}500+ актуальных объектов{% endif %}
-                    </h3>
-                    <p class="text-gray-600">
-                        {% if lang == 'en' %}Options for lifestyle, rental income, or relocation goals.{% elif lang == 'th' %}ตัวเลือกสำหรับการอยู่อาศัย รายได้ค่าเช่า หรือย้ายถิ่นฐาน{% else %}Подбор вариантов по вашим целям: lifestyle, доход, переезд.{% endif %}
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-start gap-4">
-                <div class="text-3xl text-accent"><i class="fas fa-users"></i></div>
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-900">
-                        {% if lang == 'en' %}Strong partner network{% elif lang == 'th' %}เครือข่ายพันธมิตรที่แข็งแกร่ง{% else %}Сильная партнёрская сеть{% endif %}
-                    </h3>
-                    <p class="text-gray-600">
-                        {% if lang == 'en' %}Direct relationships with developers and trusted legal experts.{% elif lang == 'th' %}สัมพันธ์โดยตรงกับผู้พัฒนาและทนายความมืออาชีพ{% else %}Прямые связи с застройщиками и проверенными юристами.{% endif %}
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-start gap-4">
-                <div class="text-3xl text-accent"><i class="fas fa-lightbulb"></i></div>
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-900">
-                        {% if lang == 'en' %}Transparent recommendations{% elif lang == 'th' %}คำแนะนำที่โปร่งใส{% else %}Прозрачные рекомендации{% endif %}
-                    </h3>
-                    <p class="text-gray-600">
-                        {% if lang == 'en' %}We explain the market but advise only what meets your goals.{% elif lang == 'th' %}อธิบายตลาดแต่แนะนำเฉพาะสิ่งที่ตรงกับเป้าหมายคุณ{% else %}Показываем рынок, но советуем только то, что совпадает с вашими задачами.{% endif %}
-                    </p>
-                </div>
-            </div>
-            <div class="flex items-start gap-4">
-                <div class="text-3xl text-accent"><i class="fas fa-heart"></i></div>
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-900">
-                        {% if lang == 'en' %}Full post-purchase care{% elif lang == 'th' %}บริการหลังการซื้อครบวงจร{% else %}Полный сервис после покупки{% endif %}
-                    </h3>
-                    <p class="text-gray-600">
-                        {% if lang == 'en' %}Support with management, renovation, leasing after the deal.{% elif lang == 'th' %}ดูแลการบริหาร การปรับปรุง และการปล่อยเช่าหลังซื้อ{% else %}Остаёмся на связи и помогаем с управлением, ремонтом, арендой.{% endif %}
-                    </p>
-                </div>
-            </div>
-            {% endwith %}
+<section class="bg-[#f7f3ea] py-10">
+    <div class="mx-auto grid max-w-7xl gap-4 px-4 md:grid-cols-3">
+        <div class="border-b border-primary/10 py-5 md:border-b-0 md:border-r md:pr-8">
+            <p class="text-4xl font-bold tracking-[-0.04em] text-primary">500+</p>
+            <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
+                {% if lang == 'en' %}Curated listings{% elif lang == 'th' %}รายการที่คัดสรร{% else %}Актуальных объектов{% endif %}
+            </p>
+        </div>
+        <div class="border-b border-primary/10 py-5 md:border-b-0 md:border-r md:px-8">
+            <p class="text-4xl font-bold tracking-[-0.04em] text-primary">RU / EN / TH</p>
+            <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
+                {% if lang == 'en' %}Client support{% elif lang == 'th' %}ดูแลลูกค้า{% else %}Языки сопровождения{% endif %}
+            </p>
+        </div>
+        <div class="py-5 md:pl-8">
+            <p class="text-4xl font-bold tracking-[-0.04em] text-primary">5+</p>
+            <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
+                {% if lang == 'en' %}Years in Phuket{% elif lang == 'th' %}ปีในภูเก็ต{% else %}Лет на рынке Пхукета{% endif %}
+            </p>
         </div>
     </div>
 </section>
 
-<!-- Phuket Association Highlight -->
-<section class="py-12 bg-gray-50">
-    <div class="max-w-5xl mx-auto px-4 text-center">
-        {% with lang=LANGUAGE_CODE|default:'ru' %}
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">
-            {% if lang == 'en' %}We are more than a Phuket real estate agency{% elif lang == 'th' %}เรามากกว่าบริษัทอสังหาฯ ในภูเก็ต{% else %}Мы — не просто агентство недвижимости на Пхукете{% endif %}
-        </h2>
-        <p class="text-lg text-gray-700">
-            {% if lang == 'en' %}Undersun Estate is a co-founder of the Phuket Property Association, bringing together leading brokers, developers, and experts. In the first year the association hosted 12+ industry events.{% elif lang == 'th' %}Undersun Estate เป็นผู้ร่วมก่อตั้ง Phuket Property Association ที่รวมโบรกเกอร์ ผู้พัฒนา และผู้เชี่ยวชาญชั้นนำไว้ด้วยกัน ปีแรกเราจัดกิจกรรมอุตสาหกรรมกว่า 12 ครั้ง{% else %}Undersun Estate входит в число ключевых игроков рынка и является соучредителем Phuket Property Association — крупнейшего профессионального сообщества, объединяющего риэлторов, застройщиков и экспертов. За первый год ассоциация провела более 12 мероприятий для профессионалов отрасли.{% endif %}
+<section class="bg-white py-16 lg:py-24">
+    <div class="mx-auto grid max-w-7xl gap-12 px-4 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+                {% if lang == 'en' %}How we work{% elif lang == 'th' %}วิธีทำงานของเรา{% else %}Как мы работаем{% endif %}
+            </p>
+            <h2 class="mt-4 text-3xl font-bold leading-tight tracking-[-0.03em] text-primary sm:text-4xl">
+                {% if lang == 'en' %}Less noise, more context for every property decision.{% elif lang == 'th' %}ข้อมูลชัดเจนขึ้น เสียงรบกวนน้อยลง ในทุกการตัดสินใจ{% else %}Меньше шума, больше контекста для каждого решения.{% endif %}
+            </h2>
+            <p class="mt-5 text-lg leading-8 text-tertiary">
+                {% if lang == 'en' %}
+                    We do not just send links. We explain location, ownership format, liquidity, rental logic, and practical risks before the viewing.
+                {% elif lang == 'th' %}
+                    เราไม่เพียงส่งลิงก์รายการทรัพย์ แต่ช่วยอธิบายทำเล รูปแบบกรรมสิทธิ์ สภาพคล่อง เหตุผลด้านค่าเช่า และความเสี่ยงก่อนเข้าชม
+                {% else %}
+                    Мы не просто отправляем ссылки. До просмотра объясняем локацию, форму владения, ликвидность, арендную логику и практические риски.
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="space-y-6">
+            <div class="grid gap-5 border-t border-primary/10 pt-6 sm:grid-cols-[5rem_1fr]">
+                <p class="text-4xl font-bold text-accent">01</p>
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-950">{% if lang == 'en' %}Brief and market framing{% elif lang == 'th' %}ตั้งโจทย์และอ่านตลาด{% else %}Бриф и карта рынка{% endif %}</h3>
+                    <p class="mt-3 leading-7 text-tertiary">{% if lang == 'en' %}We clarify goals, budget, timeline, and property use: residence, rental income, resale, or relocation.{% elif lang == 'th' %}เราชี้แจงเป้าหมาย งบประมาณ ระยะเวลา และการใช้งานทรัพย์: อยู่อาศัย รายได้ค่าเช่า ขายต่อ หรือย้ายถิ่นฐาน{% else %}Уточняем цель, бюджет, сроки и сценарий владения: жизнь, аренда, перепродажа или переезд.{% endif %}</p>
+                </div>
+            </div>
+            <div class="grid gap-5 border-t border-primary/10 pt-6 sm:grid-cols-[5rem_1fr]">
+                <p class="text-4xl font-bold text-accent">02</p>
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-950">{% if lang == 'en' %}Curated shortlist{% elif lang == 'th' %}คัดรายการที่เหมาะสม{% else %}Точный shortlist{% endif %}</h3>
+                    <p class="mt-3 leading-7 text-tertiary">{% if lang == 'en' %}We filter villas, condos, houses, land, and investment options by location quality, legal structure, and real demand.{% elif lang == 'th' %}คัดวิลล่า คอนโด บ้าน ที่ดิน และตัวเลือกลงทุนตามคุณภาพทำเล โครงสร้างกฎหมาย และความต้องการจริง{% else %}Отбираем виллы, кондо, дома, землю и инвестиционные варианты по качеству локации, юридической структуре и реальному спросу.{% endif %}</p>
+                </div>
+            </div>
+            <div class="grid gap-5 border-t border-primary/10 pt-6 sm:grid-cols-[5rem_1fr]">
+                <p class="text-4xl font-bold text-accent">03</p>
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-950">{% if lang == 'en' %}Deal support and aftercare{% elif lang == 'th' %}ดูแลดีลและหลังการซื้อ{% else %}Сделка и поддержка после{% endif %}</h3>
+                    <p class="mt-3 leading-7 text-tertiary">{% if lang == 'en' %}We coordinate viewings, negotiation, legal checks, handover, management, leasing, and renovation support when needed.{% elif lang == 'th' %}ประสานงานชมทรัพย์ ต่อรอง ตรวจสอบกฎหมาย ส่งมอบ บริหาร ปล่อยเช่า และปรับปรุงเมื่อจำเป็น{% else %}Координируем просмотры, переговоры, юридическую проверку, передачу, управление, аренду и ремонт при необходимости.{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-primaryDark py-16 text-white lg:py-20" style="background:#111827;">
+    <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 lg:grid-cols-[1.05fr_0.95fr]">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Phuket Property Association</p>
+            <h2 class="mt-4 text-3xl font-bold leading-tight tracking-[-0.03em] sm:text-4xl">
+                {% if lang == 'en' %}We take part in shaping Phuket’s professional property community.{% elif lang == 'th' %}เรามีส่วนร่วมในการพัฒนาชุมชนวิชาชีพอสังหาฯ ภูเก็ต{% else %}Мы участвуем в развитии профессионального рынка Пхукета.{% endif %}
+            </h2>
+        </div>
+        <p class="text-lg leading-8 text-white/76">
+            {% if lang == 'en' %}
+                Undersun Estate is a co-founder of Phuket Property Association, a professional community connecting brokers, developers, lawyers, and market experts. The association hosted 12+ industry events in its first year.
+            {% elif lang == 'th' %}
+                Undersun Estate เป็นผู้ร่วมก่อตั้ง Phuket Property Association ชุมชนวิชาชีพที่เชื่อมโยงโบรกเกอร์ ผู้พัฒนา ทนายความ และผู้เชี่ยวชาญตลาด ปีแรกมีการจัดกิจกรรมมากกว่า 12 ครั้ง
+            {% else %}
+                Undersun Estate является соучредителем Phuket Property Association — профессионального сообщества риэлторов, застройщиков, юристов и экспертов рынка. За первый год ассоциация провела более 12 отраслевых мероприятий.
+            {% endif %}
         </p>
-        {% endwith %}
     </div>
 </section>
 
-<section class="bg-white py-12">
-    <div class="max-w-6xl mx-auto px-4">
-        <div class="rounded-[1.75rem] border border-gray-100 bg-white p-8 shadow-sm shadow-slate-200/70">
-            <div class="mb-8">
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{% trans "Данные компании" %}</p>
-                <h2 class="mt-2 text-3xl font-bold text-primary">{% trans "Официальная информация" %}</h2>
-            </div>
-            <div class="grid gap-6 md:grid-cols-2">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Официальное название" %}</h3>
-                    <p class="mt-2 text-gray-600">Undersun Estate</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Специализация" %}</h3>
-                    <p class="mt-2 text-gray-600">
-                        {% if LANGUAGE_CODE|default:'ru' == 'en' %}
-                            Phuket real estate agency: sale, purchase, rentals, investments and legal support.
-                        {% elif LANGUAGE_CODE|default:'ru' == 'th' %}
-                            เอเจนซี่อสังหาริมทรัพย์ในภูเก็ต: ซื้อ ขาย เช่า การลงทุน และบริการด้านกฎหมาย
-                        {% else %}
-                            Агентство недвижимости на Пхукете: продажа, покупка, аренда, инвестиции и юридическое сопровождение.
-                        {% endif %}
-                    </p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Адрес" %}</h3>
-                    <p class="mt-2 text-gray-600">{{ business_profile.address_full }}</p>
-                    <p class="mt-2"><a href="{{ business_profile.google_maps_url }}" target="_blank" rel="noopener" class="text-primary hover:text-accent">Google Maps</a></p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Телефон" %}</h3>
-                    <p class="mt-2 text-gray-600"><a href="tel:{{ business_profile.phone_e164 }}" class="hover:text-primary">{{ business_profile.phone_display }}</a></p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Email" %}</h3>
-                    <p class="mt-2 text-gray-600"><a href="mailto:{{ business_profile.email }}" class="hover:text-primary">{{ business_profile.email }}</a></p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Часы работы" %}</h3>
-                    <p class="mt-2 text-gray-600">{{ business_profile.hours_label }}</p>
-                </div>
-            </div>
+<section class="bg-white py-16 lg:py-24">
+    <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 lg:grid-cols-[0.95fr_1.05fr]">
+        <div class="relative">
+            <div class="absolute -left-5 -top-5 h-24 w-24 rounded-full bg-accent/40 blur-2xl"></div>
+            <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="relative aspect-[4/3] w-full rounded-[2rem] object-cover shadow-[0_28px_70px_rgba(15,23,42,0.14)]">
+        </div>
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{% trans "Наша команда" %}</p>
+            <h2 class="mt-4 text-3xl font-bold leading-tight tracking-[-0.03em] text-primary sm:text-4xl">
+                {% if lang == 'en' %}Local expertise with human contact at every step.{% elif lang == 'th' %}ความเชี่ยวชาญท้องถิ่น พร้อมการดูแลแบบใกล้ชิดทุกขั้นตอน{% else %}Локальная экспертиза и живой контакт на каждом этапе.{% endif %}
+            </h2>
+            <p class="mt-5 text-lg leading-8 text-tertiary">
+                {% if lang == 'en' %}Our team works with buyers, sellers, investors, landlords, developers, and legal partners, keeping communication practical and transparent.{% elif lang == 'th' %}ทีมของเราทำงานกับผู้ซื้อ ผู้ขาย นักลงทุน เจ้าของทรัพย์ ผู้พัฒนา และพาร์ทเนอร์กฎหมาย โดยสื่อสารอย่างชัดเจนและตรงไปตรงมา{% else %}Команда работает с покупателями, продавцами, инвесторами, собственниками, застройщиками и юридическими партнёрами — с понятной коммуникацией и прозрачными рекомендациями.{% endif %}
+            </p>
         </div>
     </div>
 </section>
 
-{#<!-- Company Story -->#}
-{#<section class="py-16">#}
-{#    <div class="max-w-7xl mx-auto px-4">#}
-{#        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">#}
-{#            <div>#}
-{#                <h2 class="text-3xl font-bold text-gray-900 mb-6">{% trans "Наша история" %}</h2>#}
-{#                <div class="space-y-4 text-gray-600">#}
-{#                    <p>#}
-{#                        {% trans "Undersun Estate - это молодая и энергичная команда экспертов рынка недвижимости Таиланда с 3-летним опытом работы. Мы предлагаем разнообразные варианты недвижимости: от доступного жилья до роскошных вилл." %}#}
-{#                    </p>#}
-{#                    <p>#}
-{#                        {% trans "Наша команда предоставляет комплексную и бесплатную поддержку на всех этапах сделки. Мы тщательно отбираем объекты недвижимости, ориентируясь на потребности и пожелания клиентов." %}#}
-{#                    </p>#}
-{#                    <p>#}
-{#                        {% trans "Мы специализируемся на продаже и аренде вилл, таунхаусов, кондоминиумов и земельных участков в различных районах Пхукета: Муанг Пхукет, Катху и Таланг." %}#}
-{#                    </p>#}
-{#                </div>#}
-{#            </div>#}
-{#            <div>#}
-{#                <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="rounded-lg shadow-lg w-full">#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-{#</section>#}
-{##}
-{#<!-- Statistics -->#}
-{#<section class="py-16 bg-gray-50">#}
-{#    <div class="max-w-7xl mx-auto px-4">#}
-{#        <div class="text-center mb-12">#}
-{#            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши достижения" %}</h2>#}
-{#        </div>#}
-{#        #}
-{#        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">#}
-{#            <div class="text-center">#}
-{#                <div class="text-4xl font-bold text-primary mb-2">500</div>#}
-{#                <div class="text-gray-600">{% trans "Объектов в портфолио" %}</div>#}
-{#            </div>#}
-{#            <div class="text-center">#}
-{#                <div class="text-4xl font-bold text-primary mb-2">5</div>#}
-{#                <div class="text-gray-600">#}
-{#                    {% if LANGUAGE_CODE == 'en' %}Years of experience{% elif LANGUAGE_CODE == 'th' %}ปีแห่งประสบการณ์{% else %}{% trans "Лет опыта" %}{% endif %}#}
-{#                </div>#}
-{#            </div>#}
-{#            <div class="text-center">#}
-{#                <div class="text-4xl font-bold text-primary mb-2">3</div>#}
-{#                <div class="text-gray-600">{% trans "Языка обслуживания" %}</div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-{#</section>#}
-
-<!-- Team -->
-<section class="py-16">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наша команда" %}</h2>
-            <p class="text-xl text-gray-600">{% trans "Молодые и энергичные специалисты рынка недвижимости Пхукета" %}</p>
+<section class="bg-[#f8f9fa] py-16 lg:py-24" id="services">
+    <div class="mx-auto grid max-w-7xl gap-12 px-4 lg:grid-cols-[0.75fr_1.25fr]">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{% trans "Наши услуги" %}</p>
+            <h2 class="mt-4 text-3xl font-bold leading-tight tracking-[-0.03em] text-primary sm:text-4xl">
+                {% if lang == 'en' %}Support for the full property cycle.{% elif lang == 'th' %}ดูแลครบวงจรในทุกขั้นตอนของอสังหาฯ{% else %}Сопровождение полного цикла недвижимости.{% endif %}
+            </h2>
         </div>
-        
-        <div class="flex justify-center">
-            <div class="max-w-2xl">
-                <img src="{% static 'images/about_us/team_photo.jpeg' %}" alt="{% trans 'Команда Undersun Estate' %}" class="rounded-lg shadow-lg w-full">
-                <div class="text-center mt-6">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">{% trans "Команда Undersun Estate" %}</h3>
-                    <p class="text-gray-600">{% trans "Наша дружная команда всегда готова помочь вам найти идеальную недвижимость" %}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Services -->
-<section class="py-16 bg-gray-50" id="services">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">{% trans "Наши услуги" %}</h2>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {% with lang=LANGUAGE_CODE|default:'ru' %}
+        <div class="divide-y divide-primary/10 rounded-[2rem] border border-primary/10 bg-white px-6 shadow-[0_24px_70px_rgba(15,23,42,0.07)] sm:px-8">
             {% for service in menu_services %}
-            <a href="{{ service.get_absolute_url }}" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 group">
-                <div class="text-primary text-3xl mb-4 group-hover:text-accent transition-colors duration-300">
-                    {% if service.icon_class %}
-                    <i class="{{ service.icon_class }}"></i>
-                    {% else %}
-                    <i class="fas fa-home"></i>
-                    {% endif %}
+            <a href="{{ service.get_absolute_url }}" class="group grid gap-4 py-6 transition-colors hover:text-primary sm:grid-cols-[3.5rem_1fr_auto] sm:items-center" data-ym-goal="about_service_click" data-ym-param-slug="{{ service.slug }}">
+                <div class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/12 text-xl text-primary transition-colors group-hover:bg-accent group-hover:text-gray-950">
+                    {% if service.icon_class %}<i class="{{ service.icon_class }}"></i>{% else %}<i class="fas fa-home"></i>{% endif %}
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3 group-hover:text-primary transition-colors duration-300">
-                    {{ service.navigation_title|default:service.title }}
-                </h3>
-                <p class="text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
-                    {{ service.navigation_description|default:service.description }}
-                </p>
-                <div class="mt-4 text-accent font-medium group-hover:underline transition-all duration-300">
-                    {% trans "Подробнее" %} →
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-950">{{ service.navigation_title|default:service.title }}</h3>
+                    <p class="mt-2 leading-7 text-tertiary">{{ service.navigation_description|default:service.description }}</p>
                 </div>
+                <span class="text-sm font-bold uppercase tracking-[0.16em] text-accent transition-transform group-hover:translate-x-1">{% trans "Подробнее" %} →</span>
             </a>
             {% endfor %}
-            {% endwith %}
         </div>
     </div>
 </section>
 
-<!-- Contact CTA -->
-<section class="py-16 bg-primary text-white">
-    <div class="max-w-7xl mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-4">{% trans "Готовы найти дом мечты?" %}</h2>
-        <p class="text-xl mb-8 opacity-90">{% trans "Свяжитесь с нами сегодня для бесплатной консультации" %}</p>
-        <a href="{% url 'core:contact' %}" class="bg-accent hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+<section class="bg-primary py-16 text-white" style="background:#474B57;">
+    <div class="mx-auto flex max-w-7xl flex-col gap-8 px-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-2xl">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{% if lang == 'en' %}Next step{% elif lang == 'th' %}ขั้นตอนต่อไป{% else %}Следующий шаг{% endif %}</p>
+            <h2 class="mt-4 text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
+                {% if lang == 'en' %}Tell us what you want to achieve in Phuket.{% elif lang == 'th' %}บอกเราเกี่ยวกับเป้าหมายของคุณในภูเก็ต{% else %}Расскажите, какую задачу хотите решить на Пхукете.{% endif %}
+            </h2>
+        </div>
+        <a href="{% url 'core:contact' %}" class="inline-flex items-center justify-center rounded-2xl bg-accent px-7 py-4 font-bold text-gray-950 shadow-[0_20px_44px_rgba(0,0,0,0.16)] transition-transform hover:-translate-y-0.5" data-ym-goal="about_final_contact_click">
             {% trans "Связаться с нами" %}
         </a>
     </div>
 </section>
+{% endwith %}
 {% endblock %}
