@@ -15,10 +15,17 @@
 {
   "@context": "https://schema.org",
   "@type": "Service",
+  "@id": "{{ service_schema_url|escapejs }}#service",
   "name": "{{ service_display_title|escapejs }}",
   "description": "{{ service_display_description|striptags|escapejs }}",
+  "url": "{{ service_schema_url|escapejs }}",
+  {% if service_schema_image_url %}
+  "image": "{{ service_schema_image_url|escapejs }}",
+  {% endif %}
+  "inLanguage": "{{ LANGUAGE_CODE|default:'ru'|escapejs }}",
   "provider": {
     "@type": "Organization",
+    "@id": "{{ service_provider_schema_id|escapejs }}",
     "name": "Undersun Estate",
     "url": "{{ request.scheme }}://{{ request.get_host }}"
   },
@@ -29,6 +36,29 @@
   }
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "{% trans 'Главная' %}",
+      "item": "{{ service_home_schema_url|escapejs }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ service_display_title|escapejs }}",
+      "item": "{{ service_schema_url|escapejs }}"
+    }
+  ]
+}
+</script>
+{% if responsible_specialist.schema_json %}
+<script type="application/ld+json">{{ responsible_specialist.schema_json|safe }}</script>
+{% endif %}
 {% if service_landing.faq %}
 <script type="application/ld+json">
 {
@@ -52,92 +82,126 @@
 {% endblock %}
 
 {% block content %}
-<section class="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-accent/10 pt-16 pb-12">
-    <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,rgba(241,180,0,0.14),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(71,75,87,0.1),transparent_38%)]"></div>
-    <div class="relative max-w-7xl mx-auto px-4">
-        <div class="max-w-4xl">
-            {% if service_landing.badge %}
-            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-accent/25 bg-white/90 px-4 py-2 text-sm font-semibold text-primary shadow-sm">
-                {% if service.icon_class %}
-                <i class="{{ service.icon_class }} text-accent"></i>
+{% with lang=LANGUAGE_CODE|default:'ru' %}
+<section class="service-hero">
+    <div class="relative mx-auto max-w-7xl px-4 py-8 sm:py-10 lg:py-12">
+        <nav class="mb-5 flex min-w-0 items-center text-sm text-white/72" aria-label="{% trans 'Хлебные крошки' %}">
+            <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
+            <span class="mx-3 text-white/35">/</span>
+            <span class="text-white/90">{{ service_landing.badge|default:service_display_title }}</span>
+        </nav>
+
+        <div class="service-hero-shell">
+            <div class="service-hero-copy">
+                {% if service_landing.badge %}
+                <p class="service-kicker">
+                    {% if service.icon_class %}<i class="{{ service.icon_class }}"></i>{% endif %}
+                    {{ service_landing.badge }}
+                </p>
                 {% endif %}
-                <span>{{ service_landing.badge }}</span>
+                <h1 class="service-hero-title">{{ service_display_title }}</h1>
+                <p class="service-hero-lead">{{ service_display_description }}</p>
+                <div class="service-hero-actions">
+                    <a href="#serviceContactForm" class="service-button service-button-primary" data-ym-goal="service_hero_form_click" data-ym-param-service="{{ service.slug }}">
+                        {{ service_landing.cta_button|default:service_landing.labels.contact_form }}
+                    </a>
+                    <a href="tel:{{ business_profile.phone_e164 }}" class="service-button service-button-secondary" data-ym-goal="service_hero_call_click" data-ym-param-service="{{ service.slug }}">
+                        <i class="fas fa-phone"></i>
+                        {{ service_landing.labels.call }}
+                    </a>
+                </div>
             </div>
-            {% endif %}
 
-            <h1 class="text-3xl font-bold leading-tight text-primary sm:text-4xl lg:text-5xl">{{ service_display_title }}</h1>
-            <p class="mt-4 max-w-3xl text-base leading-7 text-tertiary sm:text-lg">{{ service_display_description }}</p>
-
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href="#serviceContactForm" class="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-[#616677]">
-                    {{ service_landing.cta_button|default:service_landing.labels.contact_form }}
-                </a>
-                <a href="tel:{{ business_profile.phone_e164 }}" class="inline-flex items-center justify-center rounded-lg border border-primary/20 bg-white px-6 py-3 font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/5">
-                    <i class="fas fa-phone mr-2 text-accent"></i>{{ service_landing.labels.call }}
-                </a>
-            </div>
+            <aside class="service-dossier" aria-label="{% if lang == 'en' %}Service route{% elif lang == 'th' %}เส้นทางบริการ{% else %}Маршрут услуги{% endif %}">
+                <div class="service-dossier-map">
+                    <div class="service-dossier-head">
+                        <div>
+                            <p>{% if lang == 'en' %}Advisory dossier{% elif lang == 'th' %}แฟ้มคำปรึกษา{% else %}Досье услуги{% endif %}</p>
+                            <strong>{% if lang == 'en' %}Phuket{% elif lang == 'th' %}ภูเก็ต{% else %}Пхукет{% endif %}</strong>
+                        </div>
+                        <span>{{ localized_menu_services|length }} {% if lang == 'en' %}services{% elif lang == 'th' %}บริการ{% else %}услуг{% endif %}</span>
+                    </div>
+                    <div class="service-route-lines" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="service-dossier-bottom">
+                        <div>
+                            <strong>{% if service_landing.stages %}{{ service_landing.stages|length }}{% else %}4{% endif %}</strong>
+                            <span>{{ service_landing.stages_title|default:service_landing.labels.content_fallback_title }}</span>
+                        </div>
+                        <div>
+                            <strong>RU / EN / TH</strong>
+                            <span>{% if lang == 'en' %}Client support{% elif lang == 'th' %}ดูแลลูกค้า{% else %}Сопровождение{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
         </div>
     </div>
 </section>
 
-<section class="bg-white py-14 sm:py-16">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
-            <div class="lg:col-span-8">
-                {% if service.image %}
-                <div class="overflow-hidden rounded-[1.75rem] border border-gray-100 bg-white shadow-xl shadow-slate-200/60">
-                    <img src="{{ service.image.url }}" alt="{{ service.title }}" class="h-64 w-full object-cover sm:h-80 lg:h-[25rem]">
-                </div>
-                {% endif %}
+<section class="service-body">
+    <div class="mx-auto max-w-7xl px-4 py-12 lg:py-16">
+        <div class="service-layout">
+            <main class="min-w-0">
+                <section class="service-opening">
+                    <div class="service-media-card">
+                        {% if service.image %}
+                        <img src="{{ service.image.url }}" alt="{{ service_display_title }}" loading="eager">
+                        {% elif service_static_image %}
+                        <img src="{% static service_static_image %}" alt="{{ service_display_title }}" width="1254" height="1254" loading="eager" decoding="async">
+                        {% else %}
+                        <div class="service-media-fallback">
+                            {% if service.icon_class %}<i class="{{ service.icon_class }}"></i>{% else %}<i class="fas fa-compass"></i>{% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
 
-                <div class="mt-8 grid gap-6 sm:grid-cols-2">
-                    <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
-                        <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.problem_title }}</p>
-                        <p class="text-sm leading-7 text-tertiary sm:text-base">{{ service_landing.problem_text }}</p>
-                    </article>
-                    <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
-                        <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.audience_title }}</p>
-                        <ul class="space-y-3 text-sm leading-7 text-tertiary sm:text-base">
-                            {% for item in service_landing.audience_items %}
-                            <li class="flex gap-3">
-                                <span class="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-accent"></span>
-                                <span>{{ item }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </article>
-                </div>
+                    <div class="service-brief-stack">
+                        <article class="service-brief-panel service-brief-panel-dark">
+                            <p>{{ service_landing.problem_title }}</p>
+                            <h2>{% if lang == 'en' %}What we clarify first{% elif lang == 'th' %}สิ่งที่เราชี้แจงก่อน{% else %}Что проясняем сначала{% endif %}</h2>
+                            <span>{{ service_landing.problem_text }}</span>
+                        </article>
+                        <article class="service-brief-panel">
+                            <p>{{ service_landing.audience_title }}</p>
+                            <ul>
+                                {% for item in service_landing.audience_items %}
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    <span>{{ item }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </article>
+                    </div>
+                </section>
 
                 {% if service.content %}
-                <section class="mt-10 rounded-[1.75rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70 sm:p-8">
-                    <div class="mb-6 flex items-center gap-3">
-                        <div class="h-11 w-11 rounded-2xl bg-accent/15 text-primary flex items-center justify-center">
-                            <i class="fas fa-compass text-sm"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
-                            <h2 class="text-2xl font-bold text-primary">{{ service_landing.overview_title|default:service_landing.labels.content_fallback_title }}</h2>
-                        </div>
-                    </div>
-                    <div class="service-content text-tertiary">
+                <section class="service-editorial-card">
+                    <p class="service-section-kicker">{{ service_landing.badge }}</p>
+                    <h2>{{ service_landing.overview_title|default:service_landing.labels.content_fallback_title }}</h2>
+                    <div class="service-content">
                         {{ service.content|safe }}
                     </div>
                 </section>
                 {% endif %}
 
                 {% if service_landing.stages %}
-                <section class="mt-10">
-                    <div class="mb-6">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
-                        <h2 class="mt-2 text-2xl font-bold text-primary sm:text-3xl">{{ service_landing.stages_title }}</h2>
+                <section class="service-section">
+                    <div class="service-section-head">
+                        <p class="service-section-kicker">{{ service_landing.badge }}</p>
+                        <h2>{{ service_landing.stages_title }}</h2>
                     </div>
-                    <div class="grid gap-4">
+                    <div class="service-timeline">
                         {% for stage in service_landing.stages %}
-                        <article class="grid gap-4 rounded-[1.5rem] border border-gray-100 bg-white p-5 shadow-sm shadow-slate-200/70 sm:grid-cols-[auto,1fr] sm:gap-5 sm:p-6">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-white">{{ forloop.counter }}</div>
+                        <article class="service-timeline-row">
+                            <div class="service-timeline-number">{{ forloop.counter|stringformat:"02d" }}</div>
                             <div>
-                                <h3 class="text-lg font-semibold text-primary">{{ stage.title }}</h3>
-                                <p class="mt-2 text-sm leading-7 text-tertiary sm:text-base">{{ stage.text }}</p>
+                                <h3>{{ stage.title }}</h3>
+                                <p>{{ stage.text }}</p>
                             </div>
                         </article>
                         {% endfor %}
@@ -145,61 +209,150 @@
                 </section>
                 {% endif %}
 
-                <section class="mt-10 grid gap-6 xl:grid-cols-2">
+                <section class="service-evidence-grid">
                     {% if service_landing.documents %}
-                    <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
-                        <h2 class="text-xl font-bold text-primary">{{ service_landing.documents_title }}</h2>
-                        <ul class="mt-5 space-y-3 text-sm leading-7 text-tertiary sm:text-base">
+                    <article class="service-list-panel">
+                        <p class="service-section-kicker">{{ service_landing.documents_title }}</p>
+                        <h2>{% if lang == 'en' %}Documents and inputs{% elif lang == 'th' %}เอกสารและข้อมูล{% else %}Документы и вводные{% endif %}</h2>
+                        <ul>
                             {% for item in service_landing.documents %}
-                            <li class="flex gap-3">
-                                <i class="fas fa-file-lines mt-1 text-accent"></i>
-                                <span>{{ item }}</span>
-                            </li>
+                            <li><i class="fas fa-file-lines"></i><span>{{ item }}</span></li>
                             {% endfor %}
                         </ul>
                     </article>
                     {% endif %}
 
                     {% if service_landing.risks %}
-                    <article class="rounded-[1.5rem] border border-amber-200 bg-amber-50/70 p-6 shadow-sm shadow-amber-100/60">
-                        <h2 class="text-xl font-bold text-primary">{{ service_landing.risks_title }}</h2>
-                        <ul class="mt-5 space-y-3 text-sm leading-7 text-tertiary sm:text-base">
+                    <article class="service-list-panel service-list-panel-warm">
+                        <p class="service-section-kicker">{{ service_landing.risks_title }}</p>
+                        <h2>{% if lang == 'en' %}Risks we reduce{% elif lang == 'th' %}ความเสี่ยงที่เราช่วยลด{% else %}Какие риски снижаем{% endif %}</h2>
+                        <ul>
                             {% for item in service_landing.risks %}
-                            <li class="flex gap-3">
-                                <i class="fas fa-shield-halved mt-1 text-accent"></i>
-                                <span>{{ item }}</span>
-                            </li>
+                            <li><i class="fas fa-shield-halved"></i><span>{{ item }}</span></li>
                             {% endfor %}
                         </ul>
                     </article>
                     {% endif %}
                 </section>
 
-                <section class="mt-10 grid gap-6 xl:grid-cols-2">
-                    <article class="rounded-[1.5rem] bg-primary p-6 text-white shadow-lg shadow-slate-300/50">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.timeline_title }}</p>
-                        <h2 class="mt-3 text-2xl font-bold">{% if LANGUAGE_CODE == 'en' %}Expected timing{% elif LANGUAGE_CODE == 'th' %}กรอบเวลาโดยทั่วไป{% else %}Как проходят сроки{% endif %}</h2>
-                        <p class="mt-4 text-sm leading-7 text-white/90 sm:text-base">{{ service_landing.timeline_text }}</p>
-                    </article>
+                {% if service_context_links %}
+                <section class="service-context-links" aria-labelledby="service-context-title">
+                    <div class="service-context-head">
+                        <p class="service-section-kicker">{{ service_landing.badge }}</p>
+                        <h2 id="service-context-title">{{ service_context_links.title }}</h2>
+                        <span>{{ service_context_links.description }}</span>
+                    </div>
 
-                    <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.pricing_title }}</p>
-                        <h2 class="mt-3 text-2xl font-bold text-primary">{% if LANGUAGE_CODE == 'en' %}Budget and commission{% elif LANGUAGE_CODE == 'th' %}งบประมาณและค่าคอมมิชชั่น{% else %}Как устроены расходы{% endif %}</h2>
-                        <p class="mt-4 text-sm leading-7 text-tertiary sm:text-base">{{ service_landing.pricing_text }}</p>
+                    {% if service_context_links.property_links %}
+                    <div class="service-context-grid">
+                        {% for context_link in service_context_links.property_links %}
+                        <a href="{{ context_link.url }}" class="service-context-link-card" data-ym-goal="service_context_property_click" data-ym-param-service="{{ service.slug }}">
+                            <strong>{{ context_link.title }}</strong>
+                            <span>{{ context_link.meta }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="service-context-actions">
+                        <a href="{{ service_context_links.primary_url }}" class="service-context-primary" data-ym-goal="service_context_primary_click" data-ym-param-service="{{ service.slug }}">
+                            {{ service_context_links.primary_label }}
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                        {% for secondary_link in service_context_links.secondary_links %}
+                        <a href="{{ secondary_link.url }}" data-ym-goal="service_context_secondary_click" data-ym-param-service="{{ service.slug }}">
+                            {{ secondary_link.label }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                <section class="service-terms-strip">
+                    <article>
+                        <p>{{ service_landing.timeline_title }}</p>
+                        <h2>{% if lang == 'en' %}Expected timing{% elif lang == 'th' %}กรอบเวลาโดยทั่วไป{% else %}Как проходят сроки{% endif %}</h2>
+                        <span>{{ service_landing.timeline_text }}</span>
+                    </article>
+                    <article>
+                        <p>{{ service_landing.pricing_title }}</p>
+                        <h2>{% if lang == 'en' %}Budget and commission{% elif lang == 'th' %}งบประมาณและค่าคอมมิชชั่น{% else %}Как устроены расходы{% endif %}</h2>
+                        <span>{{ service_landing.pricing_text }}</span>
                     </article>
                 </section>
 
-                {% if service_landing.cases %}
-                <section class="mt-10">
-                    <div class="mb-6">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
-                        <h2 class="mt-2 text-2xl font-bold text-primary sm:text-3xl">{{ service_landing.labels.cases_heading }}</h2>
+                {% if responsible_specialist %}
+                <section class="service-trust-card" aria-labelledby="service-trust-title">
+                    <div class="service-trust-profile">
+                        {% if responsible_specialist.photo_url %}
+                        <img src="{{ responsible_specialist.photo_url }}" alt="{{ responsible_specialist.name }}" width="{{ responsible_specialist.photo_width }}" height="{{ responsible_specialist.photo_height }}" loading="lazy" decoding="async">
+                        {% else %}
+                        <span class="service-trust-photo-fallback"><i class="fas fa-user-tie"></i></span>
+                        {% endif %}
+                        <div>
+                            <strong>{{ responsible_specialist.name }}</strong>
+                            <span>{{ responsible_specialist.position }}</span>
+                        </div>
                     </div>
-                    <div class="grid gap-5 lg:grid-cols-2">
+
+                    <div class="service-trust-copy">
+                        <p class="service-section-kicker">{% if lang == 'en' %}Responsible specialist{% elif lang == 'th' %}ผู้เชี่ยวชาญที่รับผิดชอบ{% else %}Ответственный специалист{% endif %}</p>
+                        <h2 id="service-trust-title">
+                            {% if lang == 'en' %}{{ responsible_specialist.name }} oversees this service route{% elif lang == 'th' %}{{ responsible_specialist.name }} ดูแลกระบวนการบริการนี้{% else %}{{ responsible_specialist.name }} курирует эту услугу{% endif %}
+                        </h2>
+                        <p>
+                            {% if lang == 'en' %}
+                            The CEO reviews the brief, aligns the transaction route, and connects the right specialists before the client moves to reservation, signing, or negotiations.
+                            {% elif lang == 'th' %}
+                            CEO จะตรวจโจทย์ วางเส้นทางธุรกรรม และประสานผู้เชี่ยวชาญที่เหมาะสมก่อนเข้าสู่การจอง การลงนาม หรือการเจรจา.
+                            {% else %}
+                            CEO Undersun Estate разбирает вводные, согласует маршрут сделки и подключает профильных специалистов до резерва, подписания или переговоров.
+                            {% endif %}
+                        </p>
+                        <ul>
+                            <li><i class="fas fa-check"></i><span>{% if lang == 'en' %}Checks the client brief against Phuket market context.{% elif lang == 'th' %}ตรวจโจทย์ลูกค้ากับบริบทตลาดภูเก็ต.{% else %}Проверяет запрос клиента с учетом реального контекста рынка Пхукета.{% endif %}</span></li>
+                            <li><i class="fas fa-check"></i><span>{% if lang == 'en' %}Coordinates negotiation, document review, and next-step priorities.{% elif lang == 'th' %}ประสานการเจรจา การตรวจเอกสาร และลำดับขั้นตอนถัดไป.{% else %}Координирует переговоры, проверку документов и приоритеты следующих шагов.{% endif %}</span></li>
+                            <li><i class="fas fa-check"></i><span>{% if lang == 'en' %}Keeps the process tied to a real contact, not an anonymous intake form.{% elif lang == 'th' %}ทำให้กระบวนการมีผู้รับผิดชอบจริง ไม่ใช่แค่แบบฟอร์มทั่วไป.{% else %}Закрепляет процесс за реальным контактом, а не за обезличенной заявкой.{% endif %}</span></li>
+                        </ul>
+                        <div class="service-trust-actions">
+                            {% if responsible_specialist.phone %}
+                            <a href="tel:{{ responsible_specialist.phone }}" data-ym-goal="service_expert_call_click" data-ym-param-service="{{ service.slug }}">
+                                <i class="fas fa-phone"></i>
+                                {{ responsible_specialist.phone_display|default:responsible_specialist.phone }}
+                            </a>
+                            {% endif %}
+                            {% if responsible_specialist.whatsapp_url %}
+                            <a href="{{ responsible_specialist.whatsapp_url }}" target="_blank" rel="noopener" data-ym-goal="service_expert_whatsapp_click" data-ym-param-service="{{ service.slug }}">
+                                <i class="fab fa-whatsapp"></i>
+                                WhatsApp
+                            </a>
+                            {% endif %}
+                            {% if responsible_specialist.email %}
+                            <a href="mailto:{{ responsible_specialist.email }}" data-ym-goal="service_expert_email_click" data-ym-param-service="{{ service.slug }}">
+                                <i class="fas fa-envelope"></i>
+                                {{ responsible_specialist.email }}
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'core:about' %}" data-ym-goal="service_expert_about_click" data-ym-param-service="{{ service.slug }}">
+                                <i class="fas fa-users"></i>
+                                {% if lang == 'en' %}Team{% elif lang == 'th' %}ทีมงาน{% else %}Команда{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if service_landing.cases %}
+                <section class="service-section">
+                    <div class="service-section-head">
+                        <p class="service-section-kicker">{{ service_landing.badge }}</p>
+                        <h2>{{ service_landing.labels.cases_heading }}</h2>
+                    </div>
+                    <div class="service-case-grid">
                         {% for case in service_landing.cases %}
-                        <article class="rounded-[1.5rem] border border-gray-100 bg-white p-6 shadow-sm shadow-slate-200/70">
-                            <h3 class="text-lg font-semibold text-primary">{{ case.title }}</h3>
-                            <p class="mt-3 text-sm leading-7 text-tertiary sm:text-base">{{ case.text }}</p>
+                        <article>
+                            <h3>{{ case.title }}</h3>
+                            <p>{{ case.text }}</p>
                         </article>
                         {% endfor %}
                     </div>
@@ -207,86 +360,76 @@
                 {% endif %}
 
                 {% if service_landing.faq %}
-                <section class="mt-10">
-                    <div class="mb-6">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
-                        <h2 class="mt-2 text-2xl font-bold text-primary sm:text-3xl">{{ service_landing.labels.service_faq_heading }}</h2>
+                <section class="service-section">
+                    <div class="service-section-head">
+                        <p class="service-section-kicker">{{ service_landing.badge }}</p>
+                        <h2>{{ service_landing.labels.service_faq_heading }}</h2>
                     </div>
-                    <div class="space-y-4">
+                    <div class="service-faq-list">
                         {% for item in service_landing.faq %}
-                        <details class="service-faq-item rounded-[1.5rem] border border-gray-100 bg-white p-5 shadow-sm shadow-slate-200/70">
-                            <summary class="cursor-pointer list-none pr-8 text-base font-semibold text-primary">
+                        <details class="service-faq-item">
+                            <summary>
                                 {{ item.question }}
                                 <span class="service-faq-icon"><i class="fas fa-plus"></i></span>
                             </summary>
-                            <p class="mt-4 text-sm leading-7 text-tertiary sm:text-base">{{ item.answer }}</p>
+                            <p>{{ item.answer }}</p>
                         </details>
                         {% endfor %}
                     </div>
                 </section>
                 {% endif %}
 
-                <section class="mt-10 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-primary to-[#5b6070] p-8 text-white shadow-xl shadow-slate-300/60 sm:p-10">
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{{ service_landing.badge }}</p>
-                    <h2 class="mt-3 text-3xl font-bold">{{ service_landing.cta_title }}</h2>
-                    <p class="mt-4 max-w-3xl text-base leading-7 text-white/90">{{ service_landing.cta_text }}</p>
-                    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-                        <a href="#serviceContactForm" class="inline-flex items-center justify-center rounded-lg bg-accent px-6 py-3 font-semibold text-gray-900 transition-colors hover:bg-yellow-400">
+                <section class="service-final-cta">
+                    <p>{{ service_landing.badge }}</p>
+                    <h2>{{ service_landing.cta_title }}</h2>
+                    <span>{{ service_landing.cta_text }}</span>
+                    <div>
+                        <a href="#serviceContactForm" class="service-button service-button-primary" data-ym-goal="service_final_form_click" data-ym-param-service="{{ service.slug }}">
                             {{ service_landing.cta_button }}
                         </a>
-                        <a href="{% url 'core:contact' %}" class="inline-flex items-center justify-center rounded-lg border border-white/30 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/10">
+                        <a href="{% url 'core:contact' %}" class="service-button service-button-outline" data-ym-goal="service_final_contact_click" data-ym-param-service="{{ service.slug }}">
                             {{ service_landing.labels.contact_us }}
                         </a>
                     </div>
                 </section>
-            </div>
+            </main>
 
-            <aside class="lg:col-span-4">
-                <div class="space-y-6 lg:sticky lg:top-28">
-                    <section class="rounded-[1.75rem] border border-gray-100 bg-gray-50 p-6 shadow-sm shadow-slate-200/70">
-                        <h2 class="flex items-center text-xl font-bold text-primary">
-                            <i class="fas fa-list mr-3 text-accent"></i>
-                            {{ service_landing.labels.services_menu }}
-                        </h2>
-                        <nav class="mt-6 space-y-2">
+            <aside class="service-sidebar">
+                <div class="service-sidebar-sticky">
+                    <section class="service-menu-card">
+                        <p class="service-section-kicker">{{ service_landing.labels.services_menu }}</p>
+                        <nav>
                             {% for menu_service in localized_menu_services %}
-                            <a href="{{ menu_service.url }}" class="group block rounded-xl px-4 py-3 transition-all duration-200 {% if menu_service.slug == service.slug %}bg-primary text-white shadow-md{% else %}bg-white text-tertiary hover:-translate-y-0.5 hover:shadow-sm hover:text-primary{% endif %}">
-                                <div class="flex items-center">
-                                    {% if menu_service.icon_class %}
-                                    <i class="{{ menu_service.icon_class }} mr-3 {% if menu_service.slug == service.slug %}text-accent{% else %}text-accent{% endif %}"></i>
-                                    {% endif %}
-                                    <span class="font-medium">{{ menu_service.title }}</span>
-                                </div>
+                            <a href="{{ menu_service.url }}" class="{% if menu_service.slug == service.slug %}is-active{% endif %}" data-ym-goal="service_menu_click" data-ym-param-service="{{ menu_service.slug }}">
+                                {% if menu_service.icon_class %}<i class="{{ menu_service.icon_class }}"></i>{% endif %}
+                                <span>{{ menu_service.title }}</span>
                             </a>
                             {% endfor %}
                         </nav>
                     </section>
 
-                    <section class="rounded-[1.75rem] bg-primary p-6 text-white shadow-lg shadow-slate-300/60 sm:p-7">
-                        <h2 class="flex items-center text-xl font-bold">
-                            <i class="fas fa-comment-dots mr-3 text-accent"></i>
-                            {{ service_landing.labels.contact_form }}
-                        </h2>
-                        <p class="mt-3 text-sm leading-6 text-white/85">{{ service_landing.labels.contact_form_text }}</p>
-                        <form id="serviceContactForm" class="mt-6 space-y-4 js-recaptcha-form" method="post" action="{% url 'users:contact_form' %}" data-recaptcha-action="service_contact">
+                    <section class="service-contact-card">
+                        <p class="service-section-kicker">{{ service_landing.labels.contact_form }}</p>
+                        <h2>{% if lang == 'en' %}Discuss the next step{% elif lang == 'th' %}คุยขั้นตอนถัดไป{% else %}Обсудить следующий шаг{% endif %}</h2>
+                        <p>{{ service_landing.labels.contact_form_text }}</p>
+                        <form id="serviceContactForm" class="js-recaptcha-form" method="post" action="{% url 'users:contact_form' %}" data-recaptcha-action="service_contact" data-ym-goal="service_contact_form_submit" data-ym-param-service="{{ service.slug }}">
                             {% csrf_token %}
                             {% include 'core/includes/recaptcha_token_field.html' %}
                             {% include 'core/includes/form_security_fields.html' with honeypot_id='service-contact-website' %}
                             <input type="hidden" name="service" value="{{ service_display_title }}">
+                            <input type="hidden" name="subject" value="other">
 
-                            <input type="text" name="name" placeholder="{{ service_landing.labels.name_placeholder }}" required class="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent">
-                            <input type="tel" name="phone" placeholder="{{ service_landing.labels.phone_placeholder }}" required class="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent">
-                            <input type="email" name="email" placeholder="{{ service_landing.labels.email_placeholder }}" class="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent">
-                            <textarea name="message" rows="4" placeholder="{{ service_landing.labels.message_placeholder }}" class="w-full rounded-xl border border-white/20 bg-white px-4 py-3 text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent"></textarea>
+                            <input type="text" name="name" placeholder="{{ service_landing.labels.name_placeholder }}" required>
+                            <input type="tel" name="phone" placeholder="{{ service_landing.labels.phone_placeholder }}" required>
+                            <input type="email" name="email" placeholder="{{ service_landing.labels.email_placeholder }}" required>
+                            <textarea name="message" rows="4" placeholder="{{ service_landing.labels.message_placeholder }}" required></textarea>
 
-                            <button type="submit" class="w-full rounded-xl bg-accent px-6 py-3 font-bold text-gray-900 transition-colors hover:bg-yellow-400">
-                                {{ service_landing.labels.submit }}
-                            </button>
+                            <button type="submit">{{ service_landing.labels.submit }}</button>
 
-                            <p class="text-xs leading-5 text-white/75">
+                            <small>
                                 {{ service_landing.labels.privacy_prefix }}
-                                <a href="{% url 'core:privacy' %}" class="underline underline-offset-2 text-accent">{{ service_landing.labels.privacy_label }}</a>
-                            </p>
+                                <a href="{% url 'core:privacy' %}">{{ service_landing.labels.privacy_label }}</a>
+                            </small>
                         </form>
                     </section>
                 </div>
@@ -296,121 +439,887 @@
 </section>
 
 {% if featured_properties %}
-<section class="bg-gray-50 py-16">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-primary mb-4">{{ service_landing.labels.featured_title }}</h2>
-            <p class="text-xl text-tertiary">{{ service_landing.labels.featured_subtitle }}</p>
+<section class="service-featured">
+    <div class="mx-auto max-w-7xl px-4 py-14 lg:py-18">
+        <div class="service-featured-head">
+            <p class="service-section-kicker">{{ service_landing.badge }}</p>
+            <h2>{{ service_landing.labels.featured_title }}</h2>
+            <span>{{ service_landing.labels.featured_subtitle }}</span>
         </div>
 
-        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div class="service-featured-grid">
             {% for property in featured_properties|slice:":3" %}
-            <div class="group overflow-hidden rounded-[1.5rem] bg-white shadow-lg shadow-slate-200/70 transition-shadow duration-300 hover:shadow-xl">
-                <div class="relative">
+            <article class="service-property-card">
+                <a href="{{ property.get_absolute_url }}" class="service-property-media" data-ym-goal="service_featured_property_click" data-ym-param-service="{{ service.slug }}" data-ym-param-property="{{ property.slug }}">
                     {% if property.main_image %}
-                    <img src="{{ property.main_image.medium_url }}" alt="{{ property.get_card_image_alt }}" class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <img src="{{ property.main_image.medium_url }}" alt="{{ property.get_card_image_alt }}" loading="lazy">
                     {% elif property.images.first %}
-                    <img src="{{ property.images.first.medium_url }}" alt="{{ property.get_card_image_alt }}" class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    <img src="{{ property.images.first.medium_url }}" alt="{{ property.get_card_image_alt }}" loading="lazy">
                     {% else %}
-                    <div class="flex h-48 w-full items-center justify-center bg-gray-200">
-                        <i class="fas fa-home text-4xl text-gray-400"></i>
-                    </div>
+                    <span class="service-property-fallback"><i class="fas fa-home"></i></span>
                     {% endif %}
-                    <div class="absolute top-4 right-4 rounded-full bg-accent px-3 py-1 text-sm font-bold text-gray-900">
-                        {% price_in_currency property property.deal_type %}
+                    <span class="service-property-price">{% price_in_currency property property.deal_type %}</span>
+                </a>
+                <div class="service-property-body">
+                    <h3>{{ property.get_display_title }}</h3>
+                    <p>{{ property.description|truncatewords:15 }}</p>
+                    <div>
+                        {% if property.bedrooms %}<span><i class="fas fa-bed"></i>{{ property.bedrooms }}</span>{% endif %}
+                        {% if property.bathrooms %}<span><i class="fas fa-bath"></i>{{ property.bathrooms }}</span>{% endif %}
+                        {% if property.area_total %}<span><i class="fas fa-ruler-combined"></i>{{ property.area_total }} {% trans "м²" %}</span>{% endif %}
                     </div>
-                </div>
-
-                <div class="p-6">
-                    <h3 class="text-xl font-bold text-primary">{{ property.get_display_title }}</h3>
-                    <p class="mt-2 line-clamp-2 text-tertiary">{{ property.description|truncatewords:15 }}</p>
-
-                    <div class="mt-4 flex items-center gap-4 text-sm text-gray-500">
-                        {% if property.bedrooms %}
-                        <span class="flex items-center"><i class="fas fa-bed mr-1 text-accent"></i>{{ property.bedrooms }}</span>
-                        {% endif %}
-                        {% if property.bathrooms %}
-                        <span class="flex items-center"><i class="fas fa-bath mr-1 text-accent"></i>{{ property.bathrooms }}</span>
-                        {% endif %}
-                        {% if property.area_total %}
-                        <span class="flex items-center"><i class="fas fa-ruler-combined mr-1 text-accent"></i>{{ property.area_total }} {% trans "м²" %}</span>
-                        {% endif %}
-                    </div>
-
-                    <a href="{{ property.get_absolute_url }}" class="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-primary px-4 py-2 font-medium text-primary transition-colors duration-200 hover:bg-primary hover:text-white">
+                    <a href="{{ property.get_absolute_url }}" data-ym-goal="service_featured_property_details_click" data-ym-param-service="{{ service.slug }}" data-ym-param-property="{{ property.slug }}">
                         {{ service_landing.labels.details }}
                     </a>
                 </div>
-            </div>
+            </article>
             {% endfor %}
         </div>
 
-        <div class="mt-12 text-center">
-            <a href="{% url 'properties:property_list' %}" class="inline-flex items-center rounded-lg bg-primary px-8 py-3 font-bold text-white transition-colors duration-200 hover:bg-[#616677]">
+        <div class="mt-10 text-center">
+            <a href="{% url 'properties:property_list' %}" class="service-catalog-link" data-ym-goal="service_featured_catalog_click" data-ym-param-service="{{ service.slug }}">
                 {{ service_landing.labels.all_properties }}
-                <i class="fas fa-arrow-right ml-2"></i>
+                <i class="fas fa-arrow-right"></i>
             </a>
         </div>
     </div>
 </section>
 {% endif %}
+{% endwith %}
 {% endblock %}
 
 {% block extra_css %}
 <style>
-.service-content h2 {
+.service-hero {
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 78% 18%, rgba(241, 180, 0, 0.32), transparent 30%),
+        linear-gradient(135deg, #111827 0%, #333847 58%, #474B57 100%);
+    color: #fff;
+}
+
+.service-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.07;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.9) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.9) 1px, transparent 1px);
+    background-size: 96px 96px;
+}
+
+.service-hero::after {
+    content: '';
+    position: absolute;
+    right: -8rem;
+    bottom: -14rem;
+    width: 28rem;
+    height: 28rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 5rem rgba(255, 255, 255, 0.025);
+}
+
+.service-hero-shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.72fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.service-hero-copy {
+    min-width: 0;
+}
+
+.service-kicker,
+.service-section-kicker {
+    color: #F1B400;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.service-kicker {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.45rem 0.85rem;
+    backdrop-filter: blur(10px);
+}
+
+.service-hero-title {
+    max-width: 58rem;
+    margin-top: 0.95rem;
+    color: #FFFFFF;
+    font-size: clamp(2.35rem, 4.8vw, 3.9rem);
+    line-height: 1.02;
+    font-weight: 800;
+    letter-spacing: -0.055em;
+    text-shadow: 0 4px 26px rgba(0, 0, 0, 0.45);
+}
+
+.service-hero-lead {
+    max-width: 42rem;
+    margin-top: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.service-hero-actions,
+.service-final-cta div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 1.25rem;
+}
+
+.service-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    border-radius: 1rem;
+    padding: 0.82rem 1.15rem;
+    font-weight: 800;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.service-button:hover,
+.service-button:focus-visible {
+    transform: translateY(-2px);
+}
+
+.service-button:focus-visible,
+.service-menu-card a:focus-visible,
+.service-context-link-card:focus-visible,
+.service-context-actions a:focus-visible,
+.service-trust-actions a:focus-visible,
+.service-contact-card input:focus,
+.service-contact-card textarea:focus,
+.service-contact-card button:focus-visible,
+.service-property-body > a:focus-visible,
+.service-catalog-link:focus-visible {
+    outline: 3px solid rgba(241, 180, 0, 0.42);
+    outline-offset: 3px;
+}
+
+.service-button-primary {
+    border: 1px solid #F1B400;
+    background: #F1B400;
+    color: #111827;
+    box-shadow: 0 20px 44px rgba(241, 180, 0, 0.22);
+}
+
+.service-button-secondary,
+.service-button-outline {
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.service-dossier {
+    min-width: 0;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 1.65rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.75rem;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(14px);
+}
+
+.service-dossier-map {
+    position: relative;
+    overflow: hidden;
+    min-height: 17rem;
+    border-radius: 1.15rem;
+    background:
+        radial-gradient(circle at 72% 24%, rgba(241, 180, 0, 0.28), transparent 22%),
+        linear-gradient(145deg, rgba(71, 75, 87, 0.94), rgba(71, 75, 87, 0.88));
+    padding: 1rem;
+}
+
+.service-dossier-map::before {
+    content: '';
+    position: absolute;
+    inset: 0.95rem;
+    border-radius: 1.2rem;
+    opacity: 0.16;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.95) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.95) 1px, transparent 1px);
+    background-size: 36px 36px;
+}
+
+.service-dossier-head,
+.service-dossier-bottom,
+.service-route-lines {
+    position: relative;
+    z-index: 1;
+}
+
+.service-dossier-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.service-dossier-head p {
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.service-dossier-head strong {
+    display: block;
+    margin-top: 0.25rem;
+    color: #fff;
+    font-size: 1.35rem;
+    letter-spacing: -0.035em;
+}
+
+.service-dossier-head span {
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: rgba(241, 180, 0, 0.95);
+    color: #111827;
+    padding: 0.42rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.service-route-lines {
+    position: absolute;
+    inset: 4.75rem 2.25rem 5rem;
+}
+
+.service-route-lines span {
+    position: absolute;
+    border: 1px solid rgba(241, 180, 0, 0.34);
+    border-radius: 999px;
+}
+
+.service-route-lines span:nth-child(1) {
+    inset: 0 22% 28% 0;
+    transform: rotate(-10deg);
+}
+
+.service-route-lines span:nth-child(2) {
+    inset: 20% 0 12% 18%;
+    transform: rotate(14deg);
+}
+
+.service-route-lines span:nth-child(3) {
+    inset: 42% 30% 0 8%;
+    transform: rotate(-18deg);
+}
+
+.service-dossier-bottom {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.service-dossier-bottom div {
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 0.9rem;
+    background: rgba(71, 75, 87, 0.76);
+    padding: 0.65rem;
+}
+
+.service-dossier-bottom strong {
+    display: block;
+    color: #fff;
+    font-size: 1.05rem;
+}
+
+.service-dossier-bottom span {
+    display: block;
+    margin-top: 0.3rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+.service-body {
+    background:
+        radial-gradient(circle at 16% 8%, rgba(241, 180, 0, 0.14), transparent 24rem),
+        #f7f3ea;
+}
+
+.service-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.38fr);
+    align-items: start;
+    gap: clamp(2rem, 4vw, 4rem);
+}
+
+.service-opening {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    align-items: stretch;
+    gap: 1.25rem;
+}
+
+.service-media-card {
+    overflow: hidden;
+    min-height: 26rem;
+    border-radius: 2rem;
+    background: rgb(71 75 87/var(--tw-text-opacity,1));
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.14);
+}
+
+.service-media-card img {
+    width: 100%;
+    height: 100%;
+    min-height: 26rem;
+    object-fit: cover;
+}
+
+.service-media-fallback {
+    display: grid;
+    min-height: 26rem;
+    place-items: center;
+    background:
+        radial-gradient(circle at 70% 20%, rgba(241, 180, 0, 0.26), transparent 28%),
+        linear-gradient(135deg, rgb(71 75 87/var(--tw-text-opacity,1)), #474B57);
+    color: #F1B400;
+    font-size: 4rem;
+}
+
+.service-brief-stack {
+    display: grid;
+    gap: 1rem;
+}
+
+.service-brief-panel,
+.service-editorial-card,
+.service-list-panel,
+.service-context-links,
+.service-trust-card,
+.service-case-grid article,
+.service-faq-item,
+.service-menu-card {
+    border: 1px solid rgba(71, 75, 87, 0.1);
+    border-radius: 1.7rem;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.07);
+}
+
+.service-brief-panel {
+    padding: 1.35rem;
+}
+
+.service-brief-panel-dark {
+    background: rgb(71 75 87/var(--tw-text-opacity,1));
+    color: #fff;
+}
+
+.service-brief-panel h2,
+.service-editorial-card h2,
+.service-section-head h2,
+.service-list-panel h2,
+.service-context-head h2,
+.service-terms-strip article h2,
+.service-trust-copy h2,
+.service-final-cta h2,
+.service-featured-head h2,
+.service-contact-card h2 {
     color: #474B57;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+}
+
+.service-brief-panel h2 {
+    margin-top: 0.75rem;
+    color: inherit;
+    font-size: 1.65rem;
+    line-height: 1.15;
+}
+
+.service-brief-panel > span {
+    display: block;
+    margin-top: 1rem;
+    color: rgba(255, 255, 255, 0.78);
+    line-height: 1.7;
+}
+
+.service-brief-panel:not(.service-brief-panel-dark) > span,
+.service-brief-panel li {
+    color: #616677;
+}
+
+.service-brief-panel li span {
+    display: inline;
+    margin-top: 0;
+    color: inherit;
+}
+
+.service-brief-panel ul {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.service-brief-panel li,
+.service-list-panel li {
+    display: flex;
+    gap: 0.75rem;
+    line-height: 1.65;
+}
+
+.service-brief-panel li i,
+.service-list-panel li i {
+    margin-top: 0.35rem;
+    color: #F1B400;
+}
+
+.service-editorial-card,
+.service-section,
+.service-evidence-grid,
+.service-context-links,
+.service-terms-strip,
+.service-trust-card,
+.service-final-cta {
+    margin-top: 2.25rem;
+}
+
+.service-editorial-card {
+    padding: clamp(1.35rem, 3vw, 2rem);
+}
+
+.service-editorial-card h2 {
+    margin-top: 0.65rem;
+    font-size: clamp(1.85rem, 3vw, 2.5rem);
+}
+
+.service-content {
+    margin-top: 1.25rem;
+    color: #616677;
+}
+
+.service-content h2,
+.service-content h3,
+.service-content h4 {
+    color: #474B57;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.service-content h2 {
     margin-top: 2rem;
-    margin-bottom: 1rem;
+    font-size: 1.65rem;
 }
 
 .service-content h3 {
-    color: #474B57;
-    font-size: 1.25rem;
-    font-weight: 600;
     margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.3rem;
 }
 
 .service-content h4 {
-    color: #616677;
-    font-size: 1.125rem;
-    font-weight: 600;
     margin-top: 1.25rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.service-content p {
+    margin: 1rem 0;
+    line-height: 1.85;
 }
 
 .service-content ul,
 .service-content ol {
     margin: 1rem 0;
-    padding-left: 1.5rem;
+    padding-left: 1.35rem;
 }
 
 .service-content li {
     margin: 0.5rem 0;
-}
-
-.service-content p {
-    margin: 1rem 0;
-    line-height: 1.8;
+    line-height: 1.75;
 }
 
 .service-content strong {
     color: #474B57;
-    font-weight: 600;
+    font-weight: 800;
+}
+
+.service-section-head {
+    margin-bottom: 1.2rem;
+}
+
+.service-section-head h2 {
+    max-width: 44rem;
+    margin-top: 0.6rem;
+    font-size: clamp(1.9rem, 3vw, 2.7rem);
+    line-height: 1.08;
+}
+
+.service-timeline {
+    border-top: 1px solid rgba(71, 75, 87, 0.14);
+}
+
+.service-timeline-row {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 1.25rem;
+    border-bottom: 1px solid rgba(71, 75, 87, 0.12);
+    padding: 1.35rem 0;
+}
+
+.service-timeline-number {
+    color: #F1B400;
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.service-timeline-row h3 {
+    color: #111827;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.service-timeline-row p {
+    margin-top: 0.5rem;
+    color: #616677;
+    line-height: 1.75;
+}
+
+.service-evidence-grid,
+.service-terms-strip,
+.service-case-grid,
+.service-featured-grid {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.service-evidence-grid,
+.service-terms-strip,
+.service-case-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.service-list-panel {
+    padding: 1.35rem;
+}
+
+.service-list-panel-warm {
+    border-color: rgba(241, 180, 0, 0.22);
+    background: #fff7df;
+}
+
+.service-list-panel h2 {
+    margin-top: 0.6rem;
+    font-size: 1.55rem;
+}
+
+.service-list-panel ul {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    color: #616677;
+}
+
+.service-context-links {
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.service-context-head {
+    max-width: 48rem;
+}
+
+.service-context-head h2 {
+    margin-top: 0.65rem;
+    font-size: clamp(1.75rem, 3vw, 2.45rem);
+    line-height: 1.08;
+}
+
+.service-context-head span {
+    display: block;
+    margin-top: 0.75rem;
+    color: #616677;
+    line-height: 1.75;
+}
+
+.service-context-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-top: 1.15rem;
+}
+
+.service-context-link-card {
+    display: grid;
+    gap: 0.5rem;
+    min-height: 7.5rem;
+    border: 1px solid rgba(71, 75, 87, 0.1);
+    border-radius: 1.15rem;
+    background: #f8fafc;
+    padding: 1rem;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.service-context-link-card:hover,
+.service-context-link-card:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(241, 180, 0, 0.45);
+    background: #fff;
+}
+
+.service-context-link-card strong {
+    color: #111827;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.service-context-link-card span {
+    color: #616677;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.service-context-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.1rem;
+}
+
+.service-context-actions a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(71, 75, 87, 0.14);
+    border-radius: 999px;
+    background: #fff;
+    color: #474B57;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.service-context-actions a.service-context-primary {
+    border-color: #474B57;
+    background: #474B57;
+    color: #fff;
+}
+
+.service-context-actions a.service-context-primary i {
+    color: #F1B400;
+}
+
+.service-terms-strip {
+    border-radius: 2rem;
+    background: rgb(71 75 87/var(--tw-text-opacity,1));
+    padding: 1rem;
+}
+
+.service-terms-strip article {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1.35rem;
+    padding: 1.15rem;
+}
+
+.service-terms-strip article h2 {
+    margin-top: 0.7rem;
+    color: #fff;
+    font-size: 1.45rem;
+}
+
+.service-terms-strip article span,
+.service-final-cta span {
+    display: block;
+    margin-top: 0.8rem;
+    color: rgba(255, 255, 255, 0.76);
+    line-height: 1.75;
+}
+
+.service-trust-card {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.38fr) minmax(0, 1fr);
+    gap: 1.35rem;
+    align-items: stretch;
+    padding: clamp(1.2rem, 3vw, 1.7rem);
+}
+
+.service-trust-profile {
+    display: grid;
+    align-content: end;
+    min-height: 19rem;
+    overflow: hidden;
+    border-radius: 1.35rem;
+    background:
+        radial-gradient(circle at 72% 22%, rgba(241, 180, 0, 0.22), transparent 30%),
+        linear-gradient(145deg, rgba(71, 75, 87, 0.94), rgba(71, 75, 87, 0.82));
+    color: #fff;
+    padding: 1rem;
+}
+
+.service-trust-profile img,
+.service-trust-photo-fallback {
+    width: 100%;
+    max-width: 15rem;
+    aspect-ratio: 1 / 1;
+    justify-self: center;
+    border-radius: 1.2rem;
+    object-fit: cover;
+    box-shadow: 0 22px 46px rgba(15, 23, 42, 0.28);
+}
+
+.service-trust-photo-fallback {
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.12);
+    color: #F1B400;
+    font-size: 4rem;
+}
+
+.service-trust-profile div {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.service-trust-profile strong,
+.service-trust-profile span {
+    display: block;
+}
+
+.service-trust-profile strong {
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+.service-trust-profile span {
+    margin-top: 0.3rem;
+    color: rgba(255, 255, 255, 0.72);
+    line-height: 1.45;
+}
+
+.service-trust-copy {
+    align-self: center;
+    min-width: 0;
+}
+
+.service-trust-copy h2 {
+    margin-top: 0.65rem;
+    font-size: clamp(1.75rem, 3vw, 2.45rem);
+    line-height: 1.08;
+}
+
+.service-trust-copy p:not(.service-section-kicker) {
+    margin-top: 0.85rem;
+    color: #616677;
+    line-height: 1.75;
+}
+
+.service-trust-copy ul {
+    display: grid;
+    gap: 0.7rem;
+    margin-top: 1rem;
+    color: #474B57;
+}
+
+.service-trust-copy li {
+    display: flex;
+    gap: 0.65rem;
+    line-height: 1.55;
+}
+
+.service-trust-copy li i {
+    margin-top: 0.3rem;
+    color: #F1B400;
+}
+
+.service-trust-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.15rem;
+}
+
+.service-trust-actions a {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(71, 75, 87, 0.14);
+    border-radius: 999px;
+    background: #fff;
+    color: #474B57;
+    padding: 0.58rem 0.78rem;
+    font-size: 0.88rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.service-trust-actions a i {
+    color: #F1B400;
+}
+
+.service-case-grid article {
+    padding: 1.25rem;
+}
+
+.service-case-grid h3 {
+    color: #111827;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.service-case-grid p {
+    margin-top: 0.75rem;
+    color: #616677;
+    line-height: 1.75;
+}
+
+.service-faq-list {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.service-faq-item {
+    padding: 1.1rem 1.2rem;
 }
 
 .service-faq-item summary {
     position: relative;
+    cursor: pointer;
+    list-style: none;
     padding-right: 2rem;
+    color: #111827;
+    font-weight: 800;
+}
+
+.service-faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.service-faq-item p {
+    margin-top: 0.9rem;
+    color: #616677;
+    line-height: 1.75;
 }
 
 .service-faq-icon {
     position: absolute;
-    right: 0;
     top: 0;
+    right: 0;
     color: #F1B400;
     transition: transform 0.2s ease;
 }
@@ -419,11 +1328,348 @@
     transform: rotate(45deg);
 }
 
-.line-clamp-2 {
+.service-final-cta {
+    overflow: hidden;
+    border-radius: 2rem;
+    background:
+        radial-gradient(circle at 85% 20%, rgba(241, 180, 0, 0.28), transparent 26%),
+        linear-gradient(135deg, rgb(71 75 87/var(--tw-text-opacity,1)), #474B57);
+    color: #fff;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.service-final-cta h2 {
+    margin-top: 0.75rem;
+    color: #fff;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.04;
+}
+
+.service-sidebar {
+    min-width: 0;
+}
+
+.service-sidebar-sticky {
+    position: sticky;
+    top: 7rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.service-menu-card,
+.service-contact-card {
+    padding: 1.25rem;
+}
+
+.service-menu-card nav {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: 1rem;
+}
+
+.service-menu-card a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid rgba(71, 75, 87, 0.08);
+    border-radius: 1rem;
+    background: #fff;
+    color: #616677;
+    padding: 0.85rem 0.95rem;
+    font-weight: 800;
+    transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.service-menu-card a:hover,
+.service-menu-card a:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(241, 180, 0, 0.45);
+    color: #474B57;
+}
+
+.service-menu-card a i {
+    color: #F1B400;
+}
+
+.service-menu-card a.is-active {
+    border-color: rgb(71 75 87/var(--tw-text-opacity,1));
+    background: rgb(71 75 87/var(--tw-text-opacity,1));
+    color: #fff;
+}
+
+.service-contact-card {
+    border-radius: 1.7rem;
+    background: rgb(71 75 87/var(--tw-text-opacity,1));
+    color: #fff;
+    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.18);
+}
+
+.service-contact-card h2 {
+    margin-top: 0.65rem;
+    color: #fff;
+    font-size: 1.55rem;
+}
+
+.service-contact-card > p:not(.service-section-kicker) {
+    margin-top: 0.75rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.65;
+}
+
+.service-contact-card form {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+.service-contact-card input,
+.service-contact-card textarea {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 1rem;
+    background: #fff;
+    color: #111827;
+    padding: 0.82rem 1rem;
+    outline: none;
+}
+
+.service-contact-card input:focus,
+.service-contact-card textarea:focus {
+    border-color: #F1B400;
+    box-shadow: 0 0 0 3px rgba(241, 180, 0, 0.28);
+}
+
+.service-contact-card button {
+    border-radius: 1rem;
+    background: #F1B400;
+    color: #111827;
+    padding: 0.9rem 1rem;
+    font-weight: 900;
+}
+
+.service-contact-card small {
+    color: rgba(255, 255, 255, 0.68);
+    line-height: 1.55;
+}
+
+.service-contact-card small a {
+    color: #F1B400;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.service-featured {
+    background: #fff;
+}
+
+.service-featured-head {
+    max-width: 48rem;
+    margin-bottom: 2rem;
+}
+
+.service-featured-head h2 {
+    margin-top: 0.65rem;
+    color: #474B57;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+}
+
+.service-featured-head span {
+    display: block;
+    margin-top: 0.85rem;
+    color: #616677;
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.service-featured-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.service-property-card {
+    overflow: hidden;
+    border: 1px solid rgba(71, 75, 87, 0.1);
+    border-radius: 1.7rem;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+}
+
+.service-property-media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+}
+
+.service-property-media img,
+.service-property-fallback {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.service-property-fallback {
+    display: grid;
+    place-items: center;
+    background: #f1f2f6;
+    color: #F1B400;
+    font-size: 2.5rem;
+}
+
+.service-property-price {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #111827;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 900;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+}
+
+.service-property-body {
+    padding: 1.15rem;
+}
+
+.service-property-body h3 {
+    color: #111827;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.service-property-body p {
     display: -webkit-box;
+    overflow: hidden;
+    margin-top: 0.55rem;
+    color: #616677;
+    line-height: 1.6;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow: hidden;
+}
+
+.service-property-body div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.9rem;
+    color: #616677;
+    font-size: 0.9rem;
+}
+
+.service-property-body div span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.service-property-body div i {
+    color: #F1B400;
+}
+
+.service-property-body > a {
+    display: inline-flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+    border: 1px solid rgba(71, 75, 87, 0.18);
+    border-radius: 1rem;
+    color: #474B57;
+    padding: 0.75rem 1rem;
+    font-weight: 800;
+}
+
+.service-catalog-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border-radius: 1rem;
+    background: #474B57;
+    color: #fff;
+    padding: 0.9rem 1.25rem;
+    font-weight: 900;
+}
+
+@media (max-width: 1024px) {
+    .service-hero-shell,
+    .service-layout,
+    .service-opening,
+    .service-trust-card,
+    .service-context-grid,
+    .service-evidence-grid,
+    .service-terms-strip,
+    .service-case-grid,
+    .service-featured-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .service-dossier {
+        display: none;
+    }
+
+    .service-sidebar-sticky {
+        position: static;
+    }
+
+    .service-trust-profile {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .service-hero-title {
+        font-size: clamp(2.2rem, 12vw, 3.1rem);
+    }
+
+    .service-hero-actions,
+    .service-final-cta div {
+        flex-direction: column;
+    }
+
+    .service-button {
+        width: 100%;
+    }
+
+    .service-context-actions {
+        display: grid;
+    }
+
+    .service-trust-actions {
+        display: grid;
+    }
+
+    .service-media-card,
+    .service-media-card img,
+    .service-media-fallback {
+        min-height: 20rem;
+    }
+
+    .service-timeline-row {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+    }
+
+    .service-timeline-number {
+        font-size: 1.8rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .service-button,
+    .service-menu-card a,
+    .service-faq-icon {
+        transition: none;
+    }
+
+    .service-button:hover,
+    .service-button:focus-visible,
+    .service-menu-card a:hover,
+    .service-menu-card a:focus-visible {
+        transform: none;
+    }
 }
 </style>
 {% endblock %}

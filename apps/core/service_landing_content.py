@@ -917,6 +917,112 @@ SERVICE_LANDING_CONTENT = {
 }
 
 
+SERVICE_FAQ_EXTENSIONS = {
+    'buying-property': {
+        'ru': [
+            {'question': 'Какие расходы нужно учитывать кроме цены объекта?', 'answer': 'Обычно отдельно проверяем налоги и сборы при оформлении, юридическое сопровождение, платежи управляющей компании, фонд обслуживания, мебель, ремонт и расходы на перевод средств. Итоговый список зависит от объекта и структуры сделки.'},
+            {'question': 'Как понять, что цена объекта рыночная?', 'answer': 'Мы сравниваем объект с похожими предложениями по району, типу недвижимости, стадии готовности, площади, состоянию и условиям оплаты. Важно смотреть не только цену за метр, но и ликвидность, вид, инфраструктуру и качество проекта.'},
+            {'question': 'Что лучше выбрать: новостройку или resale?', 'answer': 'Зависит от цели. Новостройка может подойти под поэтапную оплату и выбор планировки, resale чаще удобнее для быстрого въезда или оценки реального состояния. Мы сравниваем оба сценария по срокам, рискам, бюджету и ликвидности.'},
+        ],
+        'en': [
+            {'question': 'What costs should I consider besides the property price?', 'answer': 'We usually check transfer taxes and fees, legal support, management fees, sinking fund, furniture, renovation needs, and fund transfer costs. The final list depends on the property and transaction structure.'},
+            {'question': 'How do I know whether the price is realistic?', 'answer': 'We compare the property with similar listings by area, property type, completion stage, size, condition, and payment terms. Price per square metre matters, but liquidity, view, infrastructure, and project quality matter too.'},
+            {'question': 'Should I choose a new development or resale property?', 'answer': 'It depends on the goal. New developments may suit phased payments and layout choice, while resale is often better for faster move-in and checking real condition. We compare both routes by timing, risk, budget, and liquidity.'},
+        ],
+        'th': [
+            {'question': 'ควรเผื่องบอะไรนอกจากราคาทรัพย์?', 'answer': 'โดยปกติเราจะตรวจภาษีและค่าธรรมเนียมโอน ค่าใช้จ่ายด้านกฎหมาย ค่าส่วนกลาง เงินกองทุน เฟอร์นิเจอร์ งานปรับปรุง และต้นทุนการโอนเงิน รายการจริงขึ้นอยู่กับทรัพย์และโครงสร้างดีล.'},
+            {'question': 'จะรู้ได้อย่างไรว่าราคาสมเหตุสมผล?', 'answer': 'เราเปรียบเทียบกับทรัพย์ใกล้เคียงตามทำเล ประเภททรัพย์ สถานะก่อสร้าง พื้นที่ สภาพทรัพย์ และเงื่อนไขการชำระเงิน โดยไม่ได้ดูแค่ราคาต่อตารางเมตร แต่ดูสภาพคล่อง วิว โครงสร้างพื้นฐาน และคุณภาพโครงการด้วย.'},
+            {'question': 'ควรเลือกโครงการใหม่หรือ resale?', 'answer': 'ขึ้นอยู่กับเป้าหมาย โครงการใหม่อาจเหมาะกับการผ่อนชำระเป็นงวดและเลือกแบบห้อง ส่วน resale มักเหมาะกับการเข้าอยู่เร็วและเห็นสภาพจริง เราจะเปรียบเทียบทั้งสองทางเลือกตามเวลา ความเสี่ยง งบประมาณ และสภาพคล่อง.'},
+        ],
+    },
+    'selling-property': {
+        'ru': [
+            {'question': 'Какие материалы нужны перед запуском продажи?', 'answer': 'Нужны документы по объекту, актуальные фото или возможность организовать съёмку, планировки, данные о платежах, управляющей компании, обременениях и желаемом сценарии продажи.'},
+            {'question': 'Сколько времени занимает продажа недвижимости?', 'answer': 'Фиксированного срока нет: он зависит от цены, района, состояния объекта, конкуренции и качества спроса. Мы оцениваем реалистичный коридор экспозиции до запуска и корректируем стратегию по реакции рынка.'},
+            {'question': 'Что делать, если объект уже долго не продаётся?', 'answer': 'Сначала разбираем цену, позиционирование, фотографии, описание, каналы продвижения и качество лидов. Часто помогает новая упаковка, корректировка ценового коридора и более точная работа с целевой аудиторией.'},
+        ],
+        'en': [
+            {'question': 'What do you need before launching a property for sale?', 'answer': 'We need property documents, current photos or access for a shoot, layouts, fee information, management details, encumbrance data, and the owner’s preferred sale scenario.'},
+            {'question': 'How long does it take to sell a property?', 'answer': 'There is no fixed timeline. It depends on price, area, property condition, competition, and real demand. We estimate a realistic exposure range before launch and adjust the strategy based on market feedback.'},
+            {'question': 'What if my property has already been on the market for a long time?', 'answer': 'We first review pricing, positioning, photos, copy, channels, and lead quality. A stronger package, adjusted price corridor, and clearer buyer targeting often improve the process.'},
+        ],
+        'th': [
+            {'question': 'ต้องเตรียมอะไรบ้างก่อนเริ่มขาย?', 'answer': 'ควรมีเอกสารทรัพย์ รูปปัจจุบันหรือเข้าถึงทรัพย์เพื่อถ่ายภาพ แบบแปลน ข้อมูลค่าใช้จ่าย บริษัทบริหาร ภาระผูกพัน และเป้าหมายการขายของเจ้าของ.'},
+            {'question': 'ขายอสังหาริมทรัพย์ใช้เวลานานแค่ไหน?', 'answer': 'ไม่มีระยะเวลาตายตัว ขึ้นอยู่กับราคา ทำเล สภาพทรัพย์ การแข่งขัน และดีมานด์จริง เราจะประเมินกรอบเวลาที่สมเหตุสมผลก่อนเริ่มขายและปรับกลยุทธ์ตาม feedback ตลาด.'},
+            {'question': 'ถ้าทรัพย์ขายมานานแล้วยังไม่ปิดดีลควรทำอย่างไร?', 'answer': 'เราจะตรวจราคา positioning รูปภาพ คำอธิบาย ช่องทางการตลาด และคุณภาพลีดก่อน หลายกรณีต้องปรับแพ็กเกจ ราคา และกลุ่มเป้าหมายให้แม่นขึ้น.'},
+        ],
+    },
+    'renting-property': {
+        'ru': [
+            {'question': 'Почему в каталоге может быть мало объектов аренды?', 'answer': 'Арендный рынок на Пхукете быстро меняется: хорошие варианты часто уходят быстрее, чем успевают попасть в публичный каталог. Поэтому мы дополнительно проверяем партнёрскую базу и актуальность у собственников.'},
+            {'question': 'Какой депозит обычно запрашивают собственники?', 'answer': 'Условия депозита зависят от срока аренды, объекта, сезона и требований собственника. До бронирования мы отдельно разбираем сумму депозита, возврат, коммунальные платежи и возможные удержания.'},
+            {'question': 'Какие районы лучше подходят для семьи или remote work?', 'answer': 'Для семьи обычно смотрят школы, дорогу, безопасность и инфраструктуру. Для remote work важны интернет, тишина, транспорт и бытовые сервисы. Мы подбираем район под сценарий жизни, а не только под бюджет.'},
+        ],
+        'en': [
+            {'question': 'Why can the rental catalogue have few active listings?', 'answer': 'The Phuket rental market moves quickly, and strong options can disappear before they reach the public catalogue. We also check partner inventory and owner availability directly.'},
+            {'question': 'What deposit do owners usually ask for?', 'answer': 'Deposit terms depend on lease length, property, season, and owner requirements. Before reservation we review the deposit amount, return terms, utilities, and possible deductions.'},
+            {'question': 'Which areas are better for families or remote work?', 'answer': 'For families we usually check schools, road access, safety, and infrastructure. For remote work, internet, quietness, transport, and daily services matter. We match the area to the living scenario, not only the budget.'},
+        ],
+        'th': [
+            {'question': 'ทำไมในแค็ตตาล็อกเช่าอาจมีรายการน้อย?', 'answer': 'ตลาดเช่าภูเก็ตเปลี่ยนเร็ว ตัวเลือกที่ดีมักถูกจองก่อนขึ้นแค็ตตาล็อกสาธารณะ เราจึงตรวจทั้งฐานพาร์ตเนอร์และความพร้อมจริงกับเจ้าของ.'},
+            {'question': 'เจ้าของมักขอเงินประกันเท่าไร?', 'answer': 'เงื่อนไขเงินประกันขึ้นอยู่กับระยะเวลาเช่า ทรัพย์ ฤดูกาล และข้อกำหนดเจ้าของ ก่อนจองเราจะตรวจจำนวนเงินประกัน เงื่อนไขคืน ค่าสาธารณูปโภค และรายการหักที่อาจเกิดขึ้น.'},
+            {'question': 'ทำเลไหนเหมาะกับครอบครัวหรือ remote work?', 'answer': 'สำหรับครอบครัวมักดูโรงเรียน การเดินทาง ความปลอดภัย และสิ่งอำนวยความสะดวก ส่วน remote work ต้องดูอินเทอร์เน็ต ความเงียบ การเดินทาง และบริการประจำวัน เราเลือกทำเลตามรูปแบบชีวิต ไม่ใช่แค่งบประมาณ.'},
+        ],
+    },
+    'commercial-real-estate': {
+        'ru': [
+            {'question': 'Что важно проверить перед покупкой готового бизнеса?', 'answer': 'Смотрим договор аренды или собственность, финансовые вводные, лицензии, персонал, обязательства, сезонность, поток клиентов и причины продажи. Часть проверки требует профильных юридических и бухгалтерских специалистов.'},
+            {'question': 'Можно ли оценить окупаемость коммерческого объекта?', 'answer': 'Мы помогаем собрать вводные и построить осторожный сценарий, но не обещаем доходность. Для оценки нужны реальные расходы, аренда, налоги, персонал, сезонность, ремонт и управленческая модель.'},
+            {'question': 'Подойдёт ли объект под мой формат бизнеса?', 'answer': 'Это проверяется по локации, трафику, планировке, парковке, инженерии, правилам использования и ограничениям договора. Иногда объект визуально подходит, но не проходит по операционным условиям.'},
+        ],
+        'en': [
+            {'question': 'What should be checked before buying a going concern?', 'answer': 'We review lease or ownership structure, financial inputs, licences, staffing, obligations, seasonality, customer flow, and the seller’s reason for exit. Some checks require specialist legal and accounting support.'},
+            {'question': 'Can you estimate commercial payback?', 'answer': 'We help gather inputs and build a cautious scenario, but we do not guarantee returns. A useful review needs real costs, rent, taxes, staffing, seasonality, fit-out needs, and the operating model.'},
+            {'question': 'Will a property fit my business format?', 'answer': 'This is checked through location, footfall, layout, parking, utilities, permitted use, and contract restrictions. Sometimes a property looks suitable but fails on operating conditions.'},
+        ],
+        'th': [
+            {'question': 'ก่อนซื้อธุรกิจพร้อมดำเนินการควรตรวจอะไร?', 'answer': 'ควรตรวจโครงสร้างเช่าหรือกรรมสิทธิ์ ข้อมูลการเงิน ใบอนุญาต พนักงาน ภาระผูกพัน ฤดูกาล จำนวนลูกค้า และเหตุผลที่ขาย บางส่วนต้องใช้ผู้เชี่ยวชาญด้านกฎหมายและบัญชี.'},
+            {'question': 'ประเมินระยะคืนทุนของทรัพย์เชิงพาณิชย์ได้ไหม?', 'answer': 'เราช่วยรวบรวมข้อมูลและสร้าง scenario แบบระมัดระวัง แต่ไม่รับประกันผลตอบแทน การประเมินต้องดูต้นทุนจริง ค่าเช่า ภาษี พนักงาน ฤดูกาล ค่า fit-out และรูปแบบการบริหาร.'},
+            {'question': 'ทรัพย์นี้เหมาะกับรูปแบบธุรกิจของฉันหรือไม่?', 'answer': 'ต้องตรวจทำเล traffic ผังพื้นที่ ที่จอดรถ ระบบวิศวกรรม การใช้ประโยชน์ที่อนุญาต และข้อจำกัดในสัญญา บางทรัพย์ดูเหมาะแต่ไม่ผ่านเงื่อนไขการดำเนินงานจริง.'},
+        ],
+    },
+    'land-sale': {
+        'ru': [
+            {'question': 'Какие титулы земли стоит проверять в первую очередь?', 'answer': 'В первую очередь смотрят тип правоустанавливающего документа, границы, историю владения и возможность регистрации сделки. Конкретные выводы нужно делать только после проверки документов профильным специалистом.'},
+            {'question': 'Можно ли иностранцу купить землю в Таиланде?', 'answer': 'Сделки с землёй для иностранных клиентов требуют отдельной правовой проверки. Мы не советуем полагаться на универсальные схемы и всегда разбираем структуру владения, цель покупки и ограничения до внесения денег.'},
+            {'question': 'Что кроме документов влияет на ценность участка?', 'answer': 'Критичны доступ с дороги, рельеф, коммуникации, дренаж, соседняя застройка, назначение земли, вид, шум, расстояние до инфраструктуры и реалистичный сценарий использования.'},
+        ],
+        'en': [
+            {'question': 'Which land title issues should be checked first?', 'answer': 'The first checks usually cover title type, boundaries, ownership history, and whether the transaction can be registered. Final conclusions should only be made after document review by a specialist.'},
+            {'question': 'Can a foreigner buy land in Thailand?', 'answer': 'Land transactions for foreign clients require separate legal review. We do not recommend relying on generic structures; ownership route, purchase goal, and restrictions must be checked before any payment.'},
+            {'question': 'What affects land value besides documents?', 'answer': 'Road access, topography, utilities, drainage, surrounding development, permitted use, view, noise, distance to infrastructure, and a realistic use scenario all matter.'},
+        ],
+        'th': [
+            {'question': 'ควรตรวจเรื่องเอกสารสิทธิ์ที่ดินอะไรก่อน?', 'answer': 'ควรเริ่มจากประเภทเอกสารสิทธิ์ ขอบเขต ประวัติการถือครอง และความเป็นไปได้ในการจดทะเบียนดีล ข้อสรุปควรทำหลังผู้เชี่ยวชาญตรวจเอกสารแล้วเท่านั้น.'},
+            {'question': 'ชาวต่างชาติซื้อที่ดินในไทยได้ไหม?', 'answer': 'ดีลที่ดินสำหรับลูกค้าต่างชาติต้องตรวจด้านกฎหมายแยกต่างหาก เราไม่แนะนำให้ใช้โครงสร้างทั่วไปโดยไม่ตรวจ ต้องดูโครงสร้างการถือครอง เป้าหมาย และข้อจำกัดก่อนชำระเงิน.'},
+            {'question': 'นอกจากเอกสารแล้วอะไรมีผลต่อมูลค่าที่ดิน?', 'answer': 'ทางเข้าออก ลักษณะพื้นที่ สาธารณูปโภค การระบายน้ำ สิ่งปลูกสร้างรอบข้าง การใช้ประโยชน์ วิว เสียงรบกวน ระยะถึงโครงสร้างพื้นฐาน และ scenario การใช้งานที่เป็นจริงล้วนสำคัญ.'},
+        ],
+    },
+    'legal-services': {
+        'ru': [
+            {'question': 'На каком этапе лучше подключать юридическую проверку?', 'answer': 'Лучше до внесения существенных платежей и до подписания документов, которые фиксируют обязательства. Чем раньше видна структура сделки, тем проще скорректировать рисковые условия.'},
+            {'question': 'Что проверяется в reservation agreement или SPA?', 'answer': 'Смотрим стороны сделки, объект, цену, график платежей, штрафы, сроки, условия возврата, передачу объекта, приложения и обязательства сторон. При необходимости подключаем профильных юристов.'},
+            {'question': 'Можете ли вы проверить застройщика или продавца?', 'answer': 'Мы помогаем собрать и проверить доступные вводные по стороне сделки, документам и истории объекта. Это не заменяет юридическое заключение, но помогает понять, какие вопросы нужно закрыть до оплаты.'},
+        ],
+        'en': [
+            {'question': 'When should legal review be involved?', 'answer': 'Ideally before major payments and before signing documents that create binding obligations. The earlier the deal structure is visible, the easier it is to adjust risky terms.'},
+            {'question': 'What do you check in a reservation agreement or SPA?', 'answer': 'We review parties, property details, price, payment schedule, penalties, deadlines, refund terms, handover, annexes, and party obligations. Specialist lawyers are involved where needed.'},
+            {'question': 'Can you check the developer or seller?', 'answer': 'We help gather and review available information about the counterparty, documents, and property history. This does not replace a legal opinion, but it shows which questions must be closed before payment.'},
+        ],
+        'th': [
+            {'question': 'ควรเริ่มตรวจด้านกฎหมายเมื่อไร?', 'answer': 'ควรเริ่มก่อนชำระเงินจำนวนมากและก่อนลงนามเอกสารที่สร้างภาระผูกพัน ยิ่งเห็นโครงสร้างดีลเร็วเท่าไร ก็ยิ่งปรับเงื่อนไขเสี่ยงได้ง่ายขึ้น.'},
+            {'question': 'ตรวจอะไรใน reservation agreement หรือ SPA?', 'answer': 'เราตรวจคู่สัญญา รายละเอียดทรัพย์ ราคา ตารางชำระเงิน ค่าปรับ กำหนดเวลา เงื่อนไขคืนเงิน การส่งมอบ ภาคผนวก และภาระของแต่ละฝ่าย และประสานผู้เชี่ยวชาญด้านกฎหมายเมื่อจำเป็น.'},
+            {'question': 'ช่วยตรวจผู้พัฒนาหรือผู้ขายได้ไหม?', 'answer': 'เราช่วยรวบรวมและตรวจข้อมูลที่มีเกี่ยวกับคู่สัญญา เอกสาร และประวัติทรัพย์ งานนี้ไม่แทน legal opinion แต่ช่วยระบุคำถามที่ต้องปิดก่อนชำระเงิน.'},
+        ],
+    },
+}
+
+
 SECTION_LABELS = {
     'ru': {
         'services_menu': 'Наши услуги',
@@ -1086,6 +1192,10 @@ def build_service_landing_content(service_slug, language_code='ru'):
         return {}
 
     payload = deepcopy(localized)
+    faq_extensions = SERVICE_FAQ_EXTENSIONS.get(service_slug, {})
+    extra_faq = faq_extensions.get(language_code) or faq_extensions.get('ru') or []
+    if extra_faq:
+        payload['faq'] = payload.get('faq', []) + deepcopy(extra_faq)
     payload['labels'] = SECTION_LABELS.get(language_code, SECTION_LABELS['ru'])
     return payload
 

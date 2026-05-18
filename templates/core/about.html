@@ -48,19 +48,19 @@
     <div class="absolute inset-0" style="background:radial-gradient(circle at 80% 10%,rgba(241,180,0,0.28),transparent 34%),linear-gradient(135deg,#111827 0%,#333847 56%,#474B57 100%);"></div>
     <div class="absolute inset-0 opacity-[0.07]" style="background-image:linear-gradient(rgba(255,255,255,0.9)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.9)_1px,transparent_1px);background-size:96px 96px;"></div>
 
-    <div class="relative mx-auto max-w-7xl px-4 py-16 sm:py-20 lg:py-24">
-        <nav class="mb-10 flex items-center text-sm text-white/75" aria-label="{% trans 'Хлебные крошки' %}">
+    <div class="relative mx-auto max-w-7xl px-4 py-8 sm:py-10 lg:py-12">
+        <nav class="mb-5 flex items-center text-sm text-white/75" aria-label="{% trans 'Хлебные крошки' %}">
             <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
             <span class="mx-3 text-white/40">/</span>
             <span class="text-white">{% trans "О нас" %}</span>
         </nav>
 
-        <div class="grid items-end gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:gap-16">
+        <div class="grid items-center gap-6 lg:grid-cols-2 lg:gap-10">
             <div>
-                <p class="mb-5 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-accent backdrop-blur">
+                <p class="mb-3 inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-accent backdrop-blur">
                     {% if lang == 'en' %}Phuket property advisory{% elif lang == 'th' %}ที่ปรึกษาอสังหาฯ ภูเก็ต{% else %}Экспертиза недвижимости Пхукета{% endif %}
                 </p>
-                <h1 class="max-w-4xl text-4xl font-bold leading-[1.03] tracking-[-0.04em] sm:text-5xl lg:text-6xl xl:text-[4.7rem]">
+                <h1 class="max-w-4xl text-4xl font-bold leading-[1.03] tracking-[-0.04em] sm:text-5xl lg:text-5xl">
                     {% if lang == 'en' %}
                         We help clients read the Phuket market before they choose a property.
                     {% elif lang == 'th' %}
@@ -69,7 +69,7 @@
                         Помогаем разобраться в рынке Пхукета до выбора объекта.
                     {% endif %}
                 </h1>
-                <p class="mt-7 max-w-2xl text-lg leading-8 text-white/82">
+                <p class="mt-4 max-w-2xl text-base leading-7 text-white/82">
                     {% if lang == 'en' %}
                         Undersun Estate combines local market knowledge, investment logic, and full transaction support for buying, selling, renting, and managing property in Phuket.
                     {% elif lang == 'th' %}
@@ -78,7 +78,7 @@
                         Undersun Estate соединяет знание локального рынка, инвестиционную логику и сопровождение сделки: покупка, продажа, аренда и управление недвижимостью на Пхукете.
                     {% endif %}
                 </p>
-                <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+                <div class="mt-5 flex flex-col gap-3 sm:flex-row">
                     <a href="{% url 'properties:property_list' %}" class="inline-flex items-center justify-center rounded-2xl bg-accent px-6 py-3 font-bold text-gray-950 shadow-[0_20px_44px_rgba(241,180,0,0.26)] transition-transform hover:-translate-y-0.5" data-ym-goal="about_catalog_click">
                         {% if lang == 'en' %}View properties{% elif lang == 'th' %}ดูรายการทรัพย์{% else %}Смотреть каталог{% endif %}
                     </a>
@@ -88,15 +88,15 @@
                 </div>
             </div>
 
-            <div class="relative">
-                <div class="absolute -right-5 -top-5 h-28 w-28 rounded-full bg-accent/90 blur-2xl"></div>
-                <div class="relative overflow-hidden rounded-[2.25rem] border border-white/15 bg-white/10 p-4 shadow-[0_36px_90px_rgba(0,0,0,0.35)] backdrop-blur">
-                    <img src="{% static 'images/about_us/about_page_hero.webp' %}" alt="{% trans 'Вилла и кондоминиум на фоне заката в Пхукете' %}" class="h-[24rem] w-full rounded-[1.75rem] object-cover sm:h-[30rem]">
-                    <div class="absolute bottom-8 left-8 right-8 rounded-[1.5rem] border border-white/20 p-5 text-white shadow-2xl backdrop-blur" style="background:rgba(17,24,39,0.86);">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+            <div class="about-hero-visual">
+                <div class="about-hero-glow"></div>
+                <div class="about-hero-media">
+                    <img src="{% static 'images/about_us/about_page_hero.webp' %}" alt="{% trans 'Вилла и кондоминиум на фоне заката в Пхукете' %}" class="about-hero-image">
+                    <div class="about-hero-focus">
+                        <p class="about-hero-focus-kicker">
                             {% if lang == 'en' %}Our focus{% elif lang == 'th' %}จุดโฟกัสของเรา{% else %}Наш фокус{% endif %}
                         </p>
-                        <p class="mt-3 text-lg font-semibold leading-7">
+                        <p class="about-hero-focus-text">
                             {% if lang == 'en' %}Residential, investment, and lifestyle property decisions in Phuket.{% elif lang == 'th' %}การตัดสินใจด้านที่อยู่อาศัย การลงทุน และไลฟ์สไตล์ในภูเก็ต{% else %}Жилая, инвестиционная и lifestyle-недвижимость Пхукета.{% endif %}
                         </p>
                     </div>
@@ -252,4 +252,84 @@
     </div>
 </section>
 {% endwith %}
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+.about-hero-visual {
+    position: relative;
+    min-width: 0;
+}
+
+.about-hero-glow {
+    position: absolute;
+    top: -1.25rem;
+    right: -1.25rem;
+    width: 7rem;
+    height: 7rem;
+    border-radius: 999px;
+    background: rgba(241, 180, 0, 0.9);
+    filter: blur(28px);
+}
+
+.about-hero-media {
+    position: relative;
+    overflow: hidden;
+    min-height: 18rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.75rem;
+    box-shadow: 0 36px 90px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+}
+
+.about-hero-image {
+    position: absolute;
+    inset: 0.75rem;
+    width: calc(100% - 1.5rem);
+    height: calc(100% - 1.5rem);
+    border-radius: 1.35rem;
+    object-fit: cover;
+}
+
+.about-hero-focus {
+    position: absolute;
+    z-index: 2;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    max-height: calc(100% - 2rem);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1.15rem;
+    background: rgba(71, 75, 87, 0.88);
+    color: #fff;
+    padding: 0.9rem 1rem;
+    box-shadow: 0 24px 54px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px);
+}
+
+.about-hero-focus-kicker {
+    color: #F1B400;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.about-hero-focus-text {
+    margin-top: 0.45rem;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+@media (max-width: 1024px) {
+    .about-hero-media {
+        min-height: 20rem;
+    }
+}
+</style>
 {% endblock %}

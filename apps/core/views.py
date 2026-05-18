@@ -12,9 +12,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import translation
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.translation import gettext, ngettext, get_language, get_language_from_path
 from django.conf import settings
+from django.contrib.staticfiles import finders
 
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string, truncate_meta
@@ -655,17 +657,375 @@ class ServiceDetailView(DetailView):
         ]
         
         # SEO данные
-        context['page_title'] = localized_meta_title or page_copy.get('title') or service.title
+        context['page_title'] = self._build_service_page_title(
+            service=service,
+            page_copy=page_copy,
+            language_code=language_code,
+            localized_meta_title=localized_meta_title,
+        )
         context['page_description'] = truncate_meta(localized_meta_description or page_copy.get('description') or service.description)
         context['page_keywords'] = service.meta_keywords
         context['service_landing'] = service_landing
         context['service_display_title'] = page_copy.get('title') or service_landing.get('badge') or service.title
         context['service_display_description'] = page_copy.get('description') or service.description
+        context['service_static_image'] = self._get_static_image_for_service(service.slug)
+        context['service_schema_url'] = self.request.build_absolute_uri(self.request.path)
+        context['service_home_schema_url'] = self.request.build_absolute_uri(reverse('core:home'))
+        context['service_provider_schema_id'] = f"{self.request.build_absolute_uri('/')}#real-estate-agent"
+        context['responsible_specialist'] = self._get_responsible_specialist_context(language_code)
+        context['service_context_links'] = self._get_service_context_links(service.slug, language_code)
+        service_image_url = self._get_service_image_url(service, context['service_static_image'])
+        if service_image_url:
+            context['og_image_url'] = service_image_url
+            context['service_schema_image_url'] = service_image_url
         
         # Добавляем рекомендуемые объекты в зависимости от типа услуги
         context['featured_properties'] = self._get_featured_properties_for_service(service)
         
         return context
+
+    def _build_service_page_title(self, service, page_copy, language_code, localized_meta_title):
+        if localized_meta_title:
+            return localized_meta_title
+
+        title = page_copy.get('title') or service.title
+        normalized_title = title.lower()
+        if 'undersun' in normalized_title:
+            return title
+
+        location_markers = {
+            'ru': 'пхукет',
+            'en': 'phuket',
+            'th': 'ภูเก็ต',
+        }
+        has_location = location_markers.get(language_code, 'phuket') in normalized_title
+
+        if language_code == 'ru':
+            localized_title = title if has_location else f'{title} на Пхукете'
+            return f'{localized_title} - Undersun Estate'
+
+        if language_code == 'th':
+            localized_title = title if has_location else f'{title}ในภูเก็ต'
+            return f'{localized_title} | Undersun Estate'
+
+        localized_title = title if has_location else f'{title} in Phuket'
+        return f'{localized_title} | Undersun Estate'
+
+    def _get_static_image_for_service(self, slug):
+        static_path = f'images/services/{slug}.webp'
+        return static_path if finders.find(static_path) else ''
+
+    def _get_service_image_url(self, service, static_image_path):
+        if service.image:
+            return self.request.build_absolute_uri(service.image.url)
+
+        if static_image_path:
+            return self.request.build_absolute_uri(static(static_image_path))
+
+        return ''
+
+    def _get_responsible_specialist_context(self, language_code):
+        specialist = Team.objects.filter(
+            Q(first_name_ru__iexact='Богдан') | Q(first_name_en__iexact='Bogdan') | Q(first_name__iexact='Bogdan'),
+            is_active=True,
+        ).order_by('display_order', 'id').first()
+
+        if not specialist:
+            return None
+
+        def localized_value(field_name):
+            candidates = [
+                getattr(specialist, f'{field_name}_{language_code}', ''),
+                getattr(specialist, f'{field_name}_en', ''),
+                getattr(specialist, f'{field_name}_ru', ''),
+                getattr(specialist, field_name, ''),
+            ]
+            return next((value for value in candidates if value), '')
+
+        first_name = localized_value('first_name')
+        last_name = localized_value('last_name')
+        position = localized_value('position')
+        photo_url = ''
+        photo_width = 256
+        photo_height = 256
+
+        if specialist.photo:
+            photo_url = self.request.build_absolute_uri(specialist.photo.url)
+            try:
+                photo_width = specialist.photo.width or photo_width
+                photo_height = specialist.photo.height or photo_height
+            except Exception:
+                pass
+
+        schema_id = f"{self.request.build_absolute_uri('/')}#bogdan-dyachuk"
+        profile_url = self.request.build_absolute_uri(reverse('core:about'))
+        schema = {
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            '@id': schema_id,
+            'name': f'{first_name} {last_name}'.strip(),
+            'jobTitle': position,
+            'url': profile_url,
+            'worksFor': {
+                '@type': 'RealEstateAgent',
+                '@id': f"{self.request.build_absolute_uri('/')}#real-estate-agent",
+                'name': 'Undersun Estate',
+            },
+        }
+
+        if photo_url:
+            schema['image'] = photo_url
+        if specialist.email:
+            schema['email'] = specialist.email
+        if specialist.phone:
+            schema['telephone'] = specialist.phone
+
+        return {
+            'name': f'{first_name} {last_name}'.strip(),
+            'position': position,
+            'photo_url': photo_url,
+            'photo_width': photo_width,
+            'photo_height': photo_height,
+            'phone': specialist.phone,
+            'phone_display': specialist.phone_display,
+            'email': specialist.email,
+            'whatsapp_url': specialist.whatsapp_url,
+            'telegram_url': specialist.telegram_url,
+            'profile_url': profile_url,
+            'schema_json': json.dumps(schema, ensure_ascii=False),
+        }
+
+    def _get_service_context_links(self, service_slug, language_code):
+        labels = {
+            'ru': {
+                'property_sale': 'Все объекты на продажу',
+                'property_rent': 'Каталог аренды',
+                'property_land': 'Все земельные участки',
+                'contact': 'Оставить запрос',
+                'buying_service': 'Как мы сопровождаем покупку',
+                'land_service': 'Проверка земли и сделки с участками',
+                'commercial_service': 'Коммерческая недвижимость',
+                'legal_service': 'Юридическое сопровождение',
+                'villa_type': 'Виллы на Пхукете',
+                'condo_type': 'Квартиры на Пхукете',
+                'townhouse_type': 'Таунхаусы и дома',
+            },
+            'en': {
+                'property_sale': 'All properties for sale',
+                'property_rent': 'Rental catalogue',
+                'property_land': 'All land plots',
+                'contact': 'Send a request',
+                'buying_service': 'How we support purchase',
+                'land_service': 'Land checks and land deals',
+                'commercial_service': 'Commercial real estate',
+                'legal_service': 'Legal support',
+                'villa_type': 'Villas in Phuket',
+                'condo_type': 'Condos in Phuket',
+                'townhouse_type': 'Townhouses and houses',
+            },
+            'th': {
+                'property_sale': 'อสังหาริมทรัพย์สำหรับขายทั้งหมด',
+                'property_rent': 'แค็ตตาล็อกเช่า',
+                'property_land': 'ที่ดินทั้งหมด',
+                'contact': 'ส่งคำขอ',
+                'buying_service': 'การดูแลการซื้อ',
+                'land_service': 'ตรวจสอบที่ดินและดีลที่ดิน',
+                'commercial_service': 'อสังหาริมทรัพย์เชิงพาณิชย์',
+                'legal_service': 'บริการด้านกฎหมาย',
+                'villa_type': 'วิลล่าในภูเก็ต',
+                'condo_type': 'คอนโดในภูเก็ต',
+                'townhouse_type': 'ทาวน์เฮาส์และบ้าน',
+            },
+        }.get(language_code, {})
+
+        configs = {
+            'buying-property': {
+                'title': {
+                    'ru': 'Подборки для покупки',
+                    'en': 'Selections for buyers',
+                    'th': 'คัดสรรสำหรับผู้ซื้อ',
+                },
+                'description': {
+                    'ru': 'Начните с актуальных объектов на продажу и смежных подборок по типам недвижимости.',
+                    'en': 'Start with active sale listings and related property-type collections.',
+                    'th': 'เริ่มจากรายการขายที่พร้อมอยู่และคัดสรรตามประเภทอสังหาริมทรัพย์.',
+                },
+                'primary_url': reverse('properties:property_sale'),
+                'primary_label': labels['property_sale'],
+                'queryset': Property.objects.filter(deal_type__in=['sale', 'both']).exclude(property_type__name='land'),
+                'secondary': [
+                    ('villa', labels['villa_type']),
+                    ('condo', labels['condo_type']),
+                    ('townhouse', labels['townhouse_type']),
+                ],
+            },
+            'land-sale': {
+                'title': {
+                    'ru': 'Земельные участки в каталоге',
+                    'en': 'Land plots in the catalogue',
+                    'th': 'ที่ดินในแค็ตตาล็อก',
+                },
+                'description': {
+                    'ru': 'Посмотрите реальные участки, по которым особенно важны титул, доступ, назначение земли и инфраструктура.',
+                    'en': 'Browse real plots where title, access, permitted use, and infrastructure checks are especially important.',
+                    'th': 'ดูที่ดินจริงที่ควรตรวจสอบเอกสารสิทธิ์ ทางเข้าออก การใช้ประโยชน์ และโครงสร้างพื้นฐาน.',
+                },
+                'primary_url': reverse('properties:property_by_type', kwargs={'type_name': 'land'}),
+                'primary_label': labels['property_land'],
+                'queryset': Property.objects.filter(property_type__name='land'),
+                'secondary': [
+                    ('service:legal-services', labels['legal_service']),
+                    ('property_sale', labels['property_sale']),
+                ],
+            },
+            'renting-property': {
+                'title': {
+                    'ru': 'Аренда и быстрый запрос',
+                    'en': 'Rentals and quick request',
+                    'th': 'เช่าและส่งคำขออย่างรวดเร็ว',
+                },
+                'description': {
+                    'ru': 'Если активных объектов аренды в каталоге мало, оставьте запрос: команда подберёт варианты под срок, район и состав семьи.',
+                    'en': 'If active rental listings are limited, send a request and the team will source options by term, area, and household needs.',
+                    'th': 'หากรายการเช่าในแค็ตตาล็อกมีจำกัด ส่งคำขอเพื่อให้ทีมคัดตัวเลือกตามระยะเวลา พื้นที่ และความต้องการของผู้อยู่อาศัย.',
+                },
+                'primary_url': reverse('properties:property_rent'),
+                'primary_label': labels['property_rent'],
+                'queryset': Property.objects.filter(deal_type__in=['rent', 'both']),
+                'secondary': [
+                    ('contact', labels['contact']),
+                    ('property_sale', labels['property_sale']),
+                ],
+            },
+            'selling-property': {
+                'title': {
+                    'ru': 'Как покупатели видят рынок',
+                    'en': 'How buyers browse the market',
+                    'th': 'ผู้ซื้อดูตลาดอย่างไร',
+                },
+                'description': {
+                    'ru': 'Эти страницы помогают понять, как объект будет конкурировать в каталоге и какие форматы сейчас сравнивают покупатели.',
+                    'en': 'These pages help show how a listing competes in the catalogue and which formats buyers compare.',
+                    'th': 'หน้าเหล่านี้ช่วยให้เห็นว่าทรัพย์จะแข่งขันในแค็ตตาล็อกอย่างไรและผู้ซื้อเปรียบเทียบรูปแบบใด.',
+                },
+                'primary_url': reverse('properties:property_sale'),
+                'primary_label': labels['property_sale'],
+                'queryset': Property.objects.filter(deal_type__in=['sale', 'both']),
+                'secondary': [
+                    ('service:buying-property', labels['buying_service']),
+                    ('villa', labels['villa_type']),
+                    ('condo', labels['condo_type']),
+                ],
+            },
+            'commercial-real-estate': {
+                'title': {
+                    'ru': 'Связанные направления сделки',
+                    'en': 'Related deal directions',
+                    'th': 'หัวข้อที่เกี่ยวข้องกับดีล',
+                },
+                'description': {
+                    'ru': 'Для коммерческих объектов чаще всего нужны проверка условий сделки, сравнение с рынком продажи и юридическое сопровождение.',
+                    'en': 'Commercial deals usually require transaction review, market comparison, and legal support.',
+                    'th': 'ดีลเชิงพาณิชย์มักต้องตรวจเงื่อนไข เปรียบเทียบตลาด และมีการดูแลด้านกฎหมาย.',
+                },
+                'primary_url': reverse('properties:property_sale'),
+                'primary_label': labels['property_sale'],
+                'queryset': Property.objects.none(),
+                'secondary': [
+                    ('service:legal-services', labels['legal_service']),
+                    ('service:land-sale', labels['land_service']),
+                    ('contact', labels['contact']),
+                ],
+            },
+            'legal-services': {
+                'title': {
+                    'ru': 'Где проверка особенно важна',
+                    'en': 'Where checks matter most',
+                    'th': 'กรณีที่การตรวจสอบสำคัญมาก',
+                },
+                'description': {
+                    'ru': 'Юридическая проверка особенно нужна при покупке, сделках с землёй и коммерческих объектах.',
+                    'en': 'Legal review is especially relevant for purchases, land deals, and commercial property.',
+                    'th': 'การตรวจด้านกฎหมายสำคัญมากสำหรับการซื้อ ดีลที่ดิน และอสังหาริมทรัพย์เชิงพาณิชย์.',
+                },
+                'primary_url': reverse('core:service_detail', kwargs={'slug': 'buying-property'}),
+                'primary_label': labels['buying_service'],
+                'queryset': Property.objects.filter(property_type__name='land'),
+                'secondary': [
+                    ('service:land-sale', labels['land_service']),
+                    ('service:commercial-real-estate', labels['commercial_service']),
+                    ('property_sale', labels['property_sale']),
+                ],
+            },
+        }
+
+        config = configs.get(service_slug)
+        if not config:
+            return {}
+
+        queryset = config['queryset'].filter(is_active=True, status='available').select_related(
+            'district',
+            'location',
+            'property_type',
+        ).order_by('-is_featured', '-featured_priority', '-updated_at')
+
+        property_links = [self._build_context_property_link(prop, language_code) for prop in queryset[:4]]
+        secondary_links = [
+            link
+            for link in (self._build_context_secondary_link(target, label) for target, label in config['secondary'])
+            if link
+        ]
+
+        return {
+            'title': config['title'].get(language_code) or config['title']['en'],
+            'description': config['description'].get(language_code) or config['description']['en'],
+            'primary_url': config['primary_url'],
+            'primary_label': config['primary_label'],
+            'property_links': property_links,
+            'secondary_links': secondary_links,
+        }
+
+    def _build_context_property_link(self, prop, language_code):
+        meta_parts = []
+        if prop.property_type:
+            meta_parts.append(prop.property_type.name_display)
+        if prop.district:
+            meta_parts.append(str(prop.district))
+        elif prop.location:
+            meta_parts.append(str(prop.location))
+
+        fallback_meta = {
+            'ru': 'Объект в каталоге',
+            'en': 'Catalogue listing',
+            'th': 'รายการในแค็ตตาล็อก',
+        }
+
+        return {
+            'url': prop.get_absolute_url(),
+            'title': prop.get_display_title(),
+            'meta': ' · '.join(meta_parts) or fallback_meta.get(language_code, fallback_meta['en']),
+        }
+
+    def _build_context_secondary_link(self, target, label):
+        if target.startswith('service:'):
+            return {
+                'url': reverse('core:service_detail', kwargs={'slug': target.split(':', 1)[1]}),
+                'label': label,
+            }
+
+        if target == 'property_sale':
+            return {'url': reverse('properties:property_sale'), 'label': label}
+
+        if target == 'property_rent':
+            return {'url': reverse('properties:property_rent'), 'label': label}
+
+        if target == 'contact':
+            return {'url': reverse('core:contact'), 'label': label}
+
+        if PropertyType.objects.filter(name=target).exists():
+            return {'url': reverse('properties:property_by_type', kwargs={'type_name': target}), 'label': label}
+
+        return None
     
     def _get_featured_properties_for_service(self, service):
         """Получить рекомендуемые объекты для конкретного типа услуги"""

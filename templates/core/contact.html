@@ -51,19 +51,19 @@
     <div class="absolute inset-0" style="background:radial-gradient(circle at 72% 18%,rgba(241,180,0,0.32),transparent 31%),linear-gradient(135deg,#111827 0%,#333847 58%,#474B57 100%);"></div>
     <div class="absolute inset-0 opacity-[0.07]" style="background-image:linear-gradient(rgba(255,255,255,0.9)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.9)_1px,transparent_1px);background-size:96px 96px;"></div>
 
-    <div class="relative mx-auto max-w-7xl px-4 py-16 sm:py-20 lg:py-24">
-        <nav class="mb-10 flex min-w-0 items-center text-sm text-white/75" aria-label="{% trans 'Хлебные крошки' %}">
+    <div class="relative mx-auto max-w-7xl px-4 py-8 sm:py-10 lg:py-12">
+        <nav class="mb-5 flex min-w-0 items-center text-sm text-white/75" aria-label="{% trans 'Хлебные крошки' %}">
             <a href="{% url 'core:home' %}" class="transition-colors hover:text-accent">{% trans "Главная" %}</a>
             <span class="mx-3 text-white/40">/</span>
             <span class="text-white">{% trans "Контакты" %}</span>
         </nav>
 
-        <div class="grid min-w-0 items-end gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:gap-16">
+        <div class="grid min-w-0 items-center gap-6 lg:grid-cols-2 lg:gap-10">
             <div class="min-w-0">
-                <p class="mb-5 inline-flex max-w-full items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent backdrop-blur sm:tracking-[0.22em]">
+                <p class="mb-3 inline-flex max-w-full items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent backdrop-blur sm:tracking-[0.22em]">
                     {% if lang == 'en' %}Contact Undersun Estate{% elif lang == 'th' %}ติดต่อ Undersun Estate{% else %}Контакт с Undersun Estate{% endif %}
                 </p>
-                <h1 class="max-w-4xl break-words text-4xl font-bold leading-[1.03] tracking-[-0.04em] sm:text-5xl lg:text-6xl xl:text-[4.55rem]">
+                <h1 class="max-w-4xl break-words text-4xl font-bold leading-[1.03] tracking-[-0.04em] sm:text-5xl lg:text-5xl">
                     {% if lang == 'en' %}
                         Start with a clear conversation about your Phuket property plans.
                     {% elif lang == 'th' %}
@@ -72,7 +72,7 @@
                         Начните с понятного разговора о ваших планах на Пхукете.
                     {% endif %}
                 </h1>
-                <p class="mt-7 max-w-2xl break-words text-lg leading-8 text-white/82">
+                <p class="mt-4 max-w-2xl break-words text-base leading-7 text-white/82">
                     {% if lang == 'en' %}
                         Send a request, call the office, or open WhatsApp. We will help frame the brief before recommending properties, viewings, or next steps.
                     {% elif lang == 'th' %}
@@ -81,7 +81,7 @@
                         Оставьте заявку, позвоните или напишите в WhatsApp. Сначала уточним задачу, затем предложим объекты, просмотры или следующий шаг.
                     {% endif %}
                 </p>
-                <div class="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                <div class="mt-5 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                     <a href="#contact-form" class="inline-flex w-full items-center justify-center rounded-2xl bg-accent px-6 py-3 font-bold text-gray-950 shadow-[0_20px_44px_rgba(241,180,0,0.26)] transition-transform hover:-translate-y-0.5 sm:w-auto" data-ym-goal="contact_hero_form_click">
                         {% trans "Отправить сообщение" %}
                     </a>
@@ -91,31 +91,31 @@
                 </div>
             </div>
 
-            <div class="relative min-w-0 max-w-full overflow-hidden pt-3">
+            <div class="relative min-w-0 max-w-full overflow-hidden">
                 <div class="absolute right-0 top-0 h-28 w-28 rounded-full bg-accent/90 blur-2xl"></div>
-                <div class="relative max-w-full rounded-[2.25rem] border border-white/15 bg-white/10 p-4 shadow-[0_36px_90px_rgba(0,0,0,0.35)] backdrop-blur sm:p-6">
+                <div class="relative max-w-full rounded-[2rem] border border-white/15 bg-white/10 p-4 shadow-[0_36px_90px_rgba(0,0,0,0.35)] backdrop-blur">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
                         {% if lang == 'en' %}Contact hub{% elif lang == 'th' %}ช่องทางติดต่อ{% else %}Контактный центр{% endif %}
                     </p>
-                    <div class="mt-6 space-y-4 sm:space-y-5">
-                        <a href="tel:{{ business_profile.phone_e164 }}" class="group flex min-w-0 items-start gap-3 rounded-[1.5rem] border border-white/12 p-4 transition-colors hover:border-accent/70 sm:gap-4 sm:p-5" style="background:rgba(17,24,39,0.84);" data-ym-goal="contact_hero_call_click">
-                            <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent text-gray-950"><i class="fas fa-phone"></i></span>
+                    <div class="mt-4 space-y-3">
+                        <a href="tel:{{ business_profile.phone_e164 }}" class="group flex min-w-0 items-start gap-3 rounded-[1.25rem] border border-white/12 p-3 transition-colors hover:border-accent/70" style="background:rgba(17,24,39,0.84);" data-ym-goal="contact_hero_call_click">
+                            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-gray-950"><i class="fas fa-phone"></i></span>
                             <span class="min-w-0">
                                 <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-white/56">{% trans "Телефон" %}</span>
-                                <span class="mt-2 block break-words text-lg font-semibold text-white">{{ business_profile.phone_display }}</span>
+                                <span class="mt-1 block break-words text-base font-semibold text-white">{{ business_profile.phone_display }}</span>
                             </span>
                         </a>
-                        <a href="mailto:{{ business_profile.email }}" class="group flex min-w-0 items-start gap-3 rounded-[1.5rem] border border-white/12 p-4 transition-colors hover:border-accent/70 sm:gap-4 sm:p-5" style="background:rgba(17,24,39,0.84);" data-ym-goal="contact_hero_email_click">
-                            <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/12 text-accent"><i class="fas fa-envelope"></i></span>
+                        <a href="mailto:{{ business_profile.email }}" class="group flex min-w-0 items-start gap-3 rounded-[1.25rem] border border-white/12 p-3 transition-colors hover:border-accent/70" style="background:rgba(17,24,39,0.84);" data-ym-goal="contact_hero_email_click">
+                            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/12 text-accent"><i class="fas fa-envelope"></i></span>
                             <span class="min-w-0">
                                 <span class="block text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Email</span>
-                                <span class="mt-2 block break-all text-lg font-semibold text-white">{{ business_profile.email }}</span>
+                                <span class="mt-1 block break-all text-base font-semibold text-white">{{ business_profile.email }}</span>
                             </span>
                         </a>
-                        <div class="min-w-0 rounded-[1.5rem] border border-white/12 p-4 sm:p-5" style="background:rgba(17,24,39,0.84);">
+                        <div class="min-w-0 rounded-[1.25rem] border border-white/12 p-3" style="background:rgba(17,24,39,0.84);">
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">{% if lang == 'en' %}Office{% elif lang == 'th' %}สำนักงาน{% else %}Офис{% endif %}</p>
-                            <p class="mt-2 break-words text-lg font-semibold text-white">{{ business_profile.address_line_1 }}</p>
-                            <p class="mt-1 break-words text-sm leading-6 text-white/68">{{ business_profile.address_line_2 }}</p>
+                            <p class="mt-1 break-words text-base font-semibold text-white">{{ business_profile.address_line_1 }}</p>
+                            <p class="mt-1 break-words text-sm leading-5 text-white/68">{{ business_profile.address_line_2 }}</p>
                         </div>
                     </div>
                 </div>
