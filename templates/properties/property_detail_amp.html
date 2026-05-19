@@ -54,8 +54,18 @@
     .amp-description p { margin-bottom:1rem; }
   </style>
   {% include 'properties/includes/detail_structured_data_product.html' with final_price=final_price %}
+  {% include 'properties/includes/detail_structured_data_place.html' %}
   {% if property_faq.has_items %}
   {% include 'properties/includes/detail_structured_data_faq.html' %}
+  {% endif %}
+  {% if property_responsible_specialist.schema_json %}
+  <script type="application/ld+json">{{ property_responsible_specialist.schema_json|safe }}</script>
+  {% endif %}
+  {% if business_schema_json %}
+  <script type="application/ld+json">{{ business_schema_json|safe }}</script>
+  {% endif %}
+  {% if search_schema_json %}
+  <script type="application/ld+json">{{ search_schema_json|safe }}</script>
   {% endif %}
 </head>
 <body>
@@ -65,10 +75,13 @@
       <h1>{{ property_title_display|default:property.title }}</h1>
       <div class="price">{{ price_display }}</div>
       <div class="location">{{ location_label }}</div>
-      <div class="location" style="font-size:0.95rem; opacity:0.85;">
-        {{ deal_type_label }} · {{ status_label }}{% if developer_name %} · {{ developer_name }}{% endif %}
-      </div>
+    <div class="location" style="font-size:0.95rem; opacity:0.85;">
+      {{ deal_type_label }} · {{ status_label }}{% if developer_name %} · {{ developer_name }}{% endif %}
     </div>
+    <div class="location" style="font-size:0.9rem; opacity:0.85; margin-top:8px;">
+      {{ property_freshness.updated_label }}: {{ property.updated_at|date:"d.m.Y" }}
+    </div>
+  </div>
   </header>
 
   <main>
@@ -141,6 +154,19 @@
     </section>
     {% endif %}
 
+    {% if property_context_links.links %}
+    <section class="card">
+      <h2 class="section-title">{{ property_context_links.heading }}</h2>
+      <p class="description">{{ property_context_links.description }}</p>
+      {% for link in property_context_links.links %}
+        <p class="description" style="margin:12px 0 0;">
+          <a href="{{ link.url }}" style="color:var(--accent); text-decoration:none; font-weight:700;">{{ link.label }}</a><br>
+          <span>{{ link.description }}</span>
+        </p>
+      {% endfor %}
+    </section>
+    {% endif %}
+
     {% if amenities %}
     <section class="card">
       <h2 class="section-title">{% trans "Удобства" %}</h2>
@@ -149,6 +175,20 @@
           <span class="amenity">{{ amenity }}</span>
         {% endfor %}
       </div>
+    </section>
+    {% endif %}
+
+    {% if property_responsible_specialist %}
+    <section class="card">
+      <h2 class="section-title">{{ property_responsible_specialist.labels.eyebrow }}</h2>
+      <p class="description">
+        <strong>{{ property_responsible_specialist.name }}</strong>
+        {% if property_responsible_specialist.position %}<br>{{ property_responsible_specialist.position }}{% endif %}
+      </p>
+      <p class="description">{{ property_responsible_specialist.labels.note }}</p>
+      {% if property_responsible_specialist.languages %}
+        <p class="description">{{ property_responsible_specialist.labels.languages }}: {{ property_responsible_specialist.languages|join:", " }}</p>
+      {% endif %}
     </section>
     {% endif %}
 

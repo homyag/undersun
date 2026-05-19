@@ -381,6 +381,7 @@ def blog_list(request):
     """Список всех статей блога"""
     posts = BlogPost.get_published().prefetch_related('tags')
     language_code = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
+    unsupported_query_params = set(request.GET) - {'page', 'category', 'tag', 'search'}
 
     category_slug = (request.GET.get('category') or '').strip()
     tag_slug = (request.GET.get('tag') or '').strip()
@@ -467,7 +468,7 @@ def blog_list(request):
         search_query=search_query,
     )
 
-    if search_query or category or tag:
+    if search_query or category or tag or unsupported_query_params:
         if category and not tag:
             canonical_url = _build_blog_listing_url('blog:category', slug=category.slug)
         elif tag and not category:
@@ -475,7 +476,7 @@ def blog_list(request):
         else:
             canonical_url = reverse('blog:list')
         context['meta_robots'] = 'noindex, follow'
-        context['canonical_url'] = canonical_url
+        context['canonical_url'] = request.build_absolute_uri(canonical_url)
         _set_blog_indexation(request, canonical_url=canonical_url, meta_robots='noindex, follow')
 
     if not search_query and not category and not tag:

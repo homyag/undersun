@@ -25,7 +25,7 @@ from django.templatetags.static import static
 from apps.currency.services import CurrencyService
 from apps.core.utils import build_query_string, rate_limit, validate_form_security, truncate_meta
 from apps.core.amp_utils import convert_html_to_amp
-from apps.core.models import SEOContentBlock
+from apps.core.models import SEOContentBlock, Team
 from apps.core.seo_utils import build_property_meta
 from apps.core.business_profile import BUSINESS_PROFILE
 from .seo_landings import resolve_landing_signature, build_candidate_slugs
@@ -194,6 +194,78 @@ CATALOG_SEO_TEXTS = {
     },
 }
 
+PROPERTY_DETAIL_CONTEXT_TEXTS = {
+    'ru': {
+        'freshness_updated_label': 'Цена и статус обновлены',
+        'freshness_status_label': 'Статус',
+        'freshness_note': 'Перед просмотром или резервированием подтвердим актуальные условия у владельца или застройщика.',
+        'trust_eyebrow': 'Ответственный специалист',
+        'trust_note': 'Отвечает за актуальность цены, статуса и организацию просмотра этого объекта.',
+        'trust_languages_label': 'Языки',
+        'trust_profile_label': 'О специалисте',
+        'context_heading': 'Полезные ссылки по этому объекту',
+        'context_description': 'Сравните похожие предложения, изучите локацию и связанные услуги Undersun Estate.',
+        'catalog_link_label': '{property_type} в {location}',
+        'catalog_link_description': 'Похожие объекты этого типа в выбранной локации.',
+        'location_link_label': 'Недвижимость в {location}',
+        'location_link_description': 'Обзор локации и актуальные объекты рядом.',
+        'buying_service_label': 'Сопровождение покупки',
+        'buying_service_description': 'Проверка объекта, документов и условий сделки.',
+        'renting_service_label': 'Сопровождение аренды',
+        'renting_service_description': 'Подбор, согласование условий и организация заселения.',
+        'land_service_label': 'Сделки с землей',
+        'land_service_description': 'Проверка участка, титула, доступа и ограничений.',
+        'legal_service_label': 'Юридическая проверка',
+        'legal_service_description': 'Документы, структура сделки и риски до оплаты.',
+    },
+    'en': {
+        'freshness_updated_label': 'Price and status updated',
+        'freshness_status_label': 'Status',
+        'freshness_note': 'Before a viewing or reservation, we confirm the latest terms with the owner or developer.',
+        'trust_eyebrow': 'Responsible specialist',
+        'trust_note': 'Responsible for confirming price, status, and arranging the viewing for this property.',
+        'trust_languages_label': 'Languages',
+        'trust_profile_label': 'About specialist',
+        'context_heading': 'Useful links for this property',
+        'context_description': 'Compare similar listings, explore the area, and review related Undersun Estate services.',
+        'catalog_link_label': '{property_type} in {location}',
+        'catalog_link_description': 'Similar properties of this type in the selected area.',
+        'location_link_label': 'Property in {location}',
+        'location_link_description': 'Area overview and active listings nearby.',
+        'buying_service_label': 'Purchase support',
+        'buying_service_description': 'Property checks, documents, and transaction terms.',
+        'renting_service_label': 'Rental support',
+        'renting_service_description': 'Shortlisting, terms negotiation, and move-in coordination.',
+        'land_service_label': 'Land transactions',
+        'land_service_description': 'Land title, access, boundaries, and restrictions checks.',
+        'legal_service_label': 'Legal review',
+        'legal_service_description': 'Documents, transaction structure, and risk review before payment.',
+    },
+    'th': {
+        'freshness_updated_label': 'ราคาและสถานะอัปเดตแล้ว',
+        'freshness_status_label': 'สถานะ',
+        'freshness_note': 'ก่อนนัดชมทรัพย์หรือจอง เราจะยืนยันเงื่อนไขล่าสุดกับเจ้าของหรือผู้พัฒนาโครงการอีกครั้ง',
+        'trust_eyebrow': 'ผู้เชี่ยวชาญที่รับผิดชอบ',
+        'trust_note': 'รับผิดชอบการยืนยันราคา สถานะ และการนัดชมทรัพย์นี้',
+        'trust_languages_label': 'ภาษา',
+        'trust_profile_label': 'เกี่ยวกับผู้เชี่ยวชาญ',
+        'context_heading': 'ลิงก์ที่เป็นประโยชน์สำหรับทรัพย์นี้',
+        'context_description': 'เปรียบเทียบรายการใกล้เคียง ดูข้อมูลทำเล และบริการที่เกี่ยวข้องของ Undersun Estate',
+        'catalog_link_label': '{property_type} ใน {location}',
+        'catalog_link_description': 'ทรัพย์ประเภทเดียวกันในทำเลที่เลือก',
+        'location_link_label': 'อสังหาริมทรัพย์ใน {location}',
+        'location_link_description': 'ข้อมูลทำเลและรายการที่พร้อมอยู่ใกล้เคียง',
+        'buying_service_label': 'บริการช่วยซื้อ',
+        'buying_service_description': 'ตรวจทรัพย์ เอกสาร และเงื่อนไขการซื้อขาย',
+        'renting_service_label': 'บริการช่วยเช่า',
+        'renting_service_description': 'คัดเลือกทรัพย์ เจรจาเงื่อนไข และประสานการย้ายเข้า',
+        'land_service_label': 'ธุรกรรมที่ดิน',
+        'land_service_description': 'ตรวจเอกสารสิทธิ์ ทางเข้าออก แนวเขต และข้อจำกัด',
+        'legal_service_label': 'ตรวจเอกสารทางกฎหมาย',
+        'legal_service_description': 'เอกสาร โครงสร้างดีล และความเสี่ยงก่อนชำระเงิน',
+    },
+}
+
 
 def _normalize_whitespace(value):
     if not isinstance(value, str):
@@ -229,6 +301,54 @@ def _get_translated_attr(instance, field_name, language_code='ru', fallback=''):
     base_value = getattr(instance, field_name, None)
     value = localized_value or base_value or fallback
     return _normalize_whitespace(value)
+
+
+def _get_explicit_translated_attr(instance, field_name, language_code='ru'):
+    if instance is None:
+        return ''
+
+    localized_field_name = field_name if language_code == 'ru' else f'{field_name}_{language_code}'
+    return _normalize_whitespace(getattr(instance, localized_field_name, None) or '')
+
+
+def _strip_property_title_suffix(value):
+    value = _normalize_whitespace(value or '')
+    for separator in (' | ', ' — ', ' – '):
+        if separator in value:
+            return _normalize_whitespace(value.split(separator, 1)[0])
+    return value
+
+
+def _build_property_display_title(property_obj, language_code='ru'):
+    language_code = (language_code or 'ru')[:2]
+    explicit_title = _get_explicit_translated_attr(property_obj, 'title', language_code)
+    if explicit_title:
+        return explicit_title
+
+    if language_code != 'ru':
+        generated_title = property_obj.generate_auto_seo(language_code).get('title', '')
+        generated_heading = _strip_property_title_suffix(generated_title)
+        if generated_heading:
+            return generated_heading
+
+    return _normalize_whitespace(property_obj.title)
+
+
+def _build_property_schema_description(property_obj, language_code='ru'):
+    language_code = (language_code or 'ru')[:2]
+    for field_name in ('short_description', 'description'):
+        explicit_value = _get_explicit_translated_attr(property_obj, field_name, language_code)
+        plain_value = _normalize_whitespace(strip_tags(explicit_value or ''))
+        if plain_value:
+            return truncate_meta(plain_value)
+
+    if language_code != 'ru':
+        generated_description = property_obj.generate_auto_seo(language_code).get('description', '')
+        if generated_description:
+            return truncate_meta(generated_description)
+
+    fallback = _normalize_whitespace(strip_tags(property_obj.short_description or property_obj.description or ''))
+    return truncate_meta(fallback)
 
 
 def _get_property_catalog_type_url(property_obj):
@@ -350,6 +470,198 @@ def _build_property_location_context(property_obj, language_code='ru'):
         'property_district_label': district_label,
         'property_location_label': location_label,
         'property_full_location_label': full_location_label,
+    }
+
+
+def _get_property_detail_context_texts(language_code='ru'):
+    language_code = (language_code or 'ru')[:2]
+    return PROPERTY_DETAIL_CONTEXT_TEXTS.get(language_code, PROPERTY_DETAIL_CONTEXT_TEXTS['ru'])
+
+
+def _get_localized_team_value(specialist, field_name, language_code='ru'):
+    candidates = [
+        getattr(specialist, f'{field_name}_{language_code}', ''),
+        getattr(specialist, f'{field_name}_en', ''),
+        getattr(specialist, f'{field_name}_ru', ''),
+        getattr(specialist, field_name, ''),
+    ]
+    return _normalize_whitespace(next((value for value in candidates if value), ''))
+
+
+def _get_default_property_specialist():
+    return Team.objects.filter(
+        Q(first_name_ru__iexact='Богдан') | Q(first_name_en__iexact='Bogdan') | Q(first_name__iexact='Bogdan'),
+        is_active=True,
+    ).order_by('display_order', 'id').first()
+
+
+def _build_property_responsible_specialist_context(property_obj, request, language_code='ru'):
+    language_code = (language_code or 'ru')[:2]
+    texts = _get_property_detail_context_texts(language_code)
+    specialist = property_obj.contact_person if property_obj.contact_person and property_obj.contact_person.is_active else None
+    if not specialist:
+        specialist = _get_default_property_specialist()
+
+    if not specialist:
+        return None
+
+    first_name = _get_localized_team_value(specialist, 'first_name', language_code)
+    last_name = _get_localized_team_value(specialist, 'last_name', language_code)
+    position = _get_localized_team_value(specialist, 'position', language_code)
+    name = _normalize_whitespace(f'{first_name} {last_name}'.strip()) or specialist.full_name
+    languages = specialist.get_languages_list()
+    photo_url = ''
+    photo_width = 256
+    photo_height = 256
+
+    if specialist.photo:
+        photo_url = request.build_absolute_uri(specialist.photo.url)
+        try:
+            photo_width = specialist.photo.width or photo_width
+            photo_height = specialist.photo.height or photo_height
+        except Exception:
+            pass
+
+    site_root_url = request.build_absolute_uri('/')
+    profile_url = request.build_absolute_uri(reverse('core:about'))
+    schema = {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        '@id': f'{site_root_url}#team-member-{specialist.id}',
+        'name': name,
+        'url': profile_url,
+        'worksFor': {
+            '@type': 'RealEstateAgent',
+            '@id': f'{site_root_url}#real-estate-agent',
+            'name': 'Undersun Estate',
+        },
+    }
+
+    if position:
+        schema['jobTitle'] = position
+    if photo_url:
+        schema['image'] = photo_url
+    if specialist.email:
+        schema['email'] = specialist.email
+    if specialist.phone:
+        schema['telephone'] = specialist.phone
+    if languages:
+        schema['knowsLanguage'] = languages
+
+    return {
+        'name': name,
+        'position': position,
+        'initial': (first_name or name or 'U')[:1].upper(),
+        'photo_url': photo_url,
+        'photo_width': photo_width,
+        'photo_height': photo_height,
+        'phone': specialist.phone,
+        'phone_display': specialist.phone_display,
+        'email': specialist.email,
+        'whatsapp_url': specialist.whatsapp_url,
+        'telegram_url': specialist.telegram_url,
+        'profile_url': profile_url,
+        'languages': languages,
+        'labels': {
+            'eyebrow': texts['trust_eyebrow'],
+            'note': texts['trust_note'],
+            'languages': texts['trust_languages_label'],
+            'profile': texts['trust_profile_label'],
+        },
+        'schema_json': json.dumps(schema, ensure_ascii=False),
+    }
+
+
+def _build_property_freshness_context(property_obj, language_code='ru'):
+    language_code = (language_code or 'ru')[:2]
+    texts = _get_property_detail_context_texts(language_code)
+    return {
+        'updated_label': texts['freshness_updated_label'],
+        'status_label': texts['freshness_status_label'],
+        'status': property_obj.get_status_display(),
+        'note': texts['freshness_note'],
+    }
+
+
+def _build_property_context_links(property_obj, language_code='ru'):
+    language_code = (language_code or 'ru')[:2]
+    texts = _get_property_detail_context_texts(language_code)
+    location_context = _build_property_location_context(property_obj, language_code)
+    location_label = location_context.get('property_full_location_label') or 'Phuket'
+    property_type_label = _get_property_type_nav_label(property_obj, language_code)
+    property_type_slug = property_obj.property_type.name if property_obj.property_type else ''
+    deal_type = property_obj.deal_type
+    links = []
+    seen_urls = set()
+
+    def add_link(url, label, description, icon):
+        if not url or url in seen_urls:
+            return
+        seen_urls.add(url)
+        links.append({
+            'url': url,
+            'label': label,
+            'description': description,
+            'icon': icon,
+        })
+
+    catalog_base_url = (
+        reverse('properties:property_by_type', args=[property_type_slug])
+        if property_type_slug
+        else reverse('properties:property_list')
+    )
+    catalog_params = {}
+    if deal_type in {'sale', 'rent'}:
+        catalog_params['deal_type'] = deal_type
+    if property_obj.district:
+        catalog_params['district'] = property_obj.district.slug
+    if property_obj.location:
+        catalog_params['location'] = property_obj.location.slug
+
+    add_link(
+        _build_catalog_breadcrumb_url(catalog_base_url, catalog_params),
+        texts['catalog_link_label'].format(property_type=property_type_label, location=location_label),
+        texts['catalog_link_description'],
+        'fas fa-building',
+    )
+
+    if property_obj.location:
+        add_link(
+            property_obj.location.get_absolute_url(),
+            texts['location_link_label'].format(location=location_label),
+            texts['location_link_description'],
+            'fas fa-map-marker-alt',
+        )
+    elif property_obj.district:
+        add_link(
+            property_obj.district.get_absolute_url(),
+            texts['location_link_label'].format(location=location_label),
+            texts['location_link_description'],
+            'fas fa-map-marker-alt',
+        )
+
+    def add_service_link(slug, label_key, description_key, icon):
+        add_link(
+            reverse('core:service_detail', kwargs={'slug': slug}),
+            texts[label_key],
+            texts[description_key],
+            icon,
+        )
+
+    if property_type_slug == 'land':
+        add_service_link('land-sale', 'land_service_label', 'land_service_description', 'fas fa-drafting-compass')
+        add_service_link('legal-services', 'legal_service_label', 'legal_service_description', 'fas fa-file-signature')
+    else:
+        if deal_type in {'sale', 'both'}:
+            add_service_link('buying-property', 'buying_service_label', 'buying_service_description', 'fas fa-handshake')
+            add_service_link('legal-services', 'legal_service_label', 'legal_service_description', 'fas fa-file-signature')
+        if deal_type in {'rent', 'both'}:
+            add_service_link('renting-property', 'renting_service_label', 'renting_service_description', 'fas fa-key')
+
+    return {
+        'heading': texts['context_heading'],
+        'description': texts['context_description'],
+        'links': links[:5],
     }
 
 
@@ -2147,7 +2459,7 @@ class PropertyDetailView(DetailView):
     def get_queryset(self):
         # Возвращаем ВСЕ объекты, не фильтруем по is_active здесь
         return Property.objects.select_related(
-            'district', 'location', 'property_type', 'developer'
+            'district', 'location', 'property_type', 'developer', 'contact_person'
         ).prefetch_related('images', 'features__feature')
 
     def get_object(self):
@@ -2249,12 +2561,20 @@ class PropertyDetailView(DetailView):
             reverse('properties:property_detail_amp', kwargs={'slug': self.object.slug})
         )
         context['amp_url'] = amp_url
-        context['property_title_display'] = _normalize_whitespace(self.object.title)
+        context['property_title_display'] = _build_property_display_title(self.object, language_code)
+        context['property_schema_description'] = _build_property_schema_description(self.object, language_code)
         context['property_image_alt_base'] = self.object.get_seo_image_alt_base(language_code)
         context['property_seo_section'] = self.object.get_detail_seo_section(language_code)
         context['property_faq'] = self.object.get_detail_faq_items(language_code)
         context['property_type_nav_label'] = _get_property_type_nav_label(self.object, language_code)
         context['property_catalog_type_url'] = _get_property_catalog_type_url(self.object)
+        context['property_freshness'] = _build_property_freshness_context(self.object, language_code)
+        context['property_responsible_specialist'] = _build_property_responsible_specialist_context(
+            self.object,
+            self.request,
+            language_code,
+        )
+        context['property_context_links'] = _build_property_context_links(self.object, language_code)
         context.update(_build_property_location_context(self.object, language_code))
         context['detail_breadcrumbs'] = _build_catalog_breadcrumbs_common(
             language_code=language_code,
@@ -2378,7 +2698,7 @@ def _build_final_price(property_obj):
 
 def property_detail_amp(request, slug):
     queryset = Property.objects.select_related(
-        'district', 'location', 'property_type', 'developer'
+        'district', 'location', 'property_type', 'developer', 'contact_person'
     ).prefetch_related('images', 'features__feature')
 
     property_obj = get_object_or_404(queryset, slug=slug)
@@ -2396,7 +2716,14 @@ def property_detail_amp(request, slug):
         _annotate_property_labels(similar_property, language_code)
 
     canonical_url = request.build_absolute_uri(property_obj.get_absolute_url())
-    property_title_display = _normalize_whitespace(property_obj.title)
+    request.canonical_url_override = canonical_url
+    property_title_display = _build_property_display_title(property_obj, language_code)
+    property_schema_description = _build_property_schema_description(property_obj, language_code)
+    property_responsible_specialist = _build_property_responsible_specialist_context(
+        property_obj,
+        request,
+        language_code,
+    )
     seo_data = property_obj.get_seo_data(language_code)
     meta_title = seo_data.get('title') or f"{property_title_display} – Undersun Estate"
     raw_description = seo_data.get('description') or property_obj.short_description or strip_tags(property_obj.description)
@@ -2429,6 +2756,9 @@ def property_detail_amp(request, slug):
     )
     whatsapp_url = f"https://wa.me/{BUSINESS_PROFILE['phone_e164'].lstrip('+')}?text={quote_plus(whatsapp_message)}"
     contact_phone = BUSINESS_PROFILE['phone_e164']
+    if property_responsible_specialist:
+        contact_phone = property_responsible_specialist.get('phone') or contact_phone
+        whatsapp_url = property_responsible_specialist.get('whatsapp_url') or whatsapp_url
 
     final_price = _build_final_price(property_obj)
 
@@ -2453,9 +2783,13 @@ def property_detail_amp(request, slug):
         'gallery_images': gallery_images,
         'location_label': location_label,
         'property_title_display': property_title_display,
+        'property_schema_description': property_schema_description,
         'property_image_alt_base': property_obj.get_seo_image_alt_base(language_code),
         'property_seo_section': property_obj.get_detail_seo_section(language_code),
         'property_faq': property_obj.get_detail_faq_items(language_code),
+        'property_freshness': _build_property_freshness_context(property_obj, language_code),
+        'property_responsible_specialist': property_responsible_specialist,
+        'property_context_links': _build_property_context_links(property_obj, language_code),
         'stats': stats,
         'amenities': amenities,
         'price_display': property_obj.price_display,

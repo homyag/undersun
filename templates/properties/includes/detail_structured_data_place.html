@@ -3,14 +3,15 @@
 {% load l10n %}
 {% load url_utils %}
 {% static 'images/no-image.svg' as fallback_property_image_url %}
+{% firstof canonical_url request.build_absolute_uri as schema_page_url %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Place",
-  "@id": "{{ request.build_absolute_uri }}#place",
+  "@id": "{{ schema_page_url|escapejs }}#place",
   "name": "{{ property_title_display|default:property.title|escapejs }}",
-  "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
-  "url": "{{ request.build_absolute_uri }}",
+  "description": "{{ property_schema_description|default:property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
+  "url": "{{ schema_page_url|escapejs }}",
   "image": [{% if property.images.exists %}{% for image in property.images.all %}"{{ image.medium_url|default:image.thumbnail_url|absolute_url:request|escape }}"{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}"{{ fallback_property_image_url|absolute_url:request|escape }}"{% endif %}]
   {% if property.year_built %},
   "yearBuilt": "{{ property.year_built }}"
@@ -40,12 +41,12 @@
       "@type": "PropertyValue",
       "name": "{% trans "Количество спален" %}",
       "value": {{ property.bedrooms }}
-    }{% if property.bathrooms or property.area_total %}, {% endif %}{% endif %}
+    }{% if property.bathrooms or property.area_total or property.build_status %}, {% endif %}{% endif %}
     {% if property.bathrooms %}{
       "@type": "PropertyValue",
       "name": "{% trans "Количество ванных" %}",
       "value": {{ property.bathrooms }}
-    }{% if property.area_total %}, {% endif %}{% endif %}
+    }{% if property.area_total or property.build_status %}, {% endif %}{% endif %}
     {% if property.area_total %}{
       "@type": "PropertyValue",
       "name": "{% trans "Площадь" %}",

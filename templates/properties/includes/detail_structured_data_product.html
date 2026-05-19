@@ -3,14 +3,15 @@
 {% load l10n %}
 {% load url_utils %}
 {% static 'images/no-image.svg' as fallback_property_image_url %}
+{% firstof canonical_url request.build_absolute_uri as schema_page_url %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Product",
-  "@id": "{{ request.build_absolute_uri }}#product",
+  "@id": "{{ schema_page_url|escapejs }}#product",
   "name": "{{ property_title_display|default:property.title|escapejs }}",
-  "description": "{{ property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
-  "url": "{{ request.build_absolute_uri }}",
+  "description": "{{ property_schema_description|default:property.short_description|default:property.description|striptags|truncatechars:400|escapejs }}",
+  "url": "{{ schema_page_url|escapejs }}",
   {% if property.legacy_id %}
   "sku": "{{ property.legacy_id|escapejs }}",
   {% else %}
@@ -57,10 +58,12 @@
   {% endif %}
   "offers": {
     "@type": "Offer",
+    {% if final_price %}
     "priceCurrency": "THB",
-    "price": "{{ final_price|default:'0'|unlocalize }}",
+    "price": "{{ final_price|unlocalize }}",
+    {% endif %}
     "availability": "{% if property.status == 'available' %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
-    "url": "{{ request.build_absolute_uri }}",
+    "url": "{{ schema_page_url|escapejs }}",
     "seller": {
       "@type": "RealEstateAgent",
       "name": "Undersun Estate",

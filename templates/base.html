@@ -19,7 +19,7 @@
     <meta property="og:title" content="{% block og_title %}{{ page_title }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ page_description }}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
-    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:url" content="{{ canonical_url|default:request.build_absolute_uri }}">
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:site_name" content="{{ site_name|default:'Undersun Estate' }}">
     <meta property="og:locale"

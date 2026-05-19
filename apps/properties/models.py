@@ -29,7 +29,7 @@ PROPERTY_TYPE_SEO_LABELS = {
 
 PROPERTY_FALLBACK_LABELS = {
     'ru': {
-        'title_template': '{property_type}{bedroom_suffix} в {location} | {deal_type} | Undersun Estate',
+        'title_template': '{property_type}{bedroom_suffix}{title_suffix} в {location}{deal_title_suffix} | Undersun Estate',
         'description_template': '{deal_type}: {property_type}{bedroom_suffix} в {location}. {facts}',
         'keywords_real_estate': 'недвижимость пхукет',
         'price': 'Цена {price}.',
@@ -74,11 +74,21 @@ PROPERTY_FALLBACK_LABELS = {
         'faq_investment_answer': '{value}',
         'faq_distances_question': 'Что находится рядом с объектом?',
         'faq_distances_answer': 'Рядом с объектом: {distances}.',
+        'faq_freshness_question': 'Насколько актуальны цена и статус объекта?',
+        'faq_freshness_answer': 'Цена и статус сверяются командой Undersun Estate; страница обновлена {updated_date}. Перед просмотром или резервированием мы подтвердим актуальные условия у владельца или застройщика.',
+        'faq_viewing_question': 'Можно ли посмотреть объект перед решением?',
+        'faq_viewing_answer': 'Да, просмотр можно согласовать через ответственного специалиста. Для части объектов возможен видео-показ или предварительная удаленная консультация по планировке, окружению и условиям сделки.',
+        'faq_extra_costs_question': 'Какие расходы могут быть сверх цены?',
+        'faq_extra_costs_answer_sale': 'Помимо цены объекта могут возникать регистрационные сборы, налоги, юридическая проверка, обслуживание комплекса и другие расходы по конкретной сделке. Мы заранее уточняем структуру платежей и рекомендуем проверять документы до внесения существенных сумм.',
+        'faq_extra_costs_answer_rent': 'При аренде обычно нужно учитывать депозит, авансовую оплату, коммунальные платежи, интернет, уборку, обслуживание бассейна или сада и правила возврата депозита. Точные условия зависят от объекта и срока аренды.',
+        'faq_extra_costs_answer_land': 'Для земельных участков особенно важны расходы на проверку титула, границ, доступа, инфраструктуры, разрешенного использования и регистрацию сделки. Финальные условия нужно подтверждать после проверки документов.',
+        'faq_remote_question': 'Можно ли начать сделку удаленно?',
+        'faq_remote_answer': 'Да, часть этапов можно начать удаленно: уточнить условия, получить дополнительные материалы, провести видео-показ и подготовить вопросы для проверки. Подписание и платежи зависят от формата сделки и документов, поэтому финальный порядок согласуется отдельно.',
         'bedroom_suffix': ' с {count} спальнями',
         'bedroom_keyword': '{count} спальни',
     },
     'en': {
-        'title_template': '{property_type}{bedroom_suffix} in {location} | {deal_type} | Undersun Estate',
+        'title_template': '{property_type}{bedroom_suffix}{title_suffix} in {location}{deal_title_suffix} | Undersun Estate',
         'description_template': '{deal_type}: {property_type}{bedroom_suffix} in {location}. {facts}',
         'keywords_real_estate': 'phuket real estate',
         'price': 'Price {price}.',
@@ -123,11 +133,21 @@ PROPERTY_FALLBACK_LABELS = {
         'faq_investment_answer': '{value}',
         'faq_distances_question': 'What is nearby?',
         'faq_distances_answer': 'Nearby highlights include {distances}.',
+        'faq_freshness_question': 'How current are the price and status?',
+        'faq_freshness_answer': 'The Undersun Estate team checks the price and status; this page was updated on {updated_date}. Before a viewing or reservation, we confirm the latest terms with the owner or developer.',
+        'faq_viewing_question': 'Can I view the property before deciding?',
+        'faq_viewing_answer': 'Yes. A viewing can be arranged through the responsible specialist. For some properties, a video viewing or remote pre-consultation on layout, surroundings, and deal terms is possible.',
+        'faq_extra_costs_question': 'What costs may be added to the price?',
+        'faq_extra_costs_answer_sale': 'Beyond the asking price, a transaction may include registration fees, taxes, legal checks, common area fees, and other deal-specific costs. We clarify the payment structure in advance and recommend document review before major payments.',
+        'faq_extra_costs_answer_rent': 'For rentals, account for deposit, advance rent, utilities, internet, cleaning, pool or garden service, and deposit return terms. Exact terms depend on the property and rental period.',
+        'faq_extra_costs_answer_land': 'For land, key costs and checks may include title review, boundaries, access, infrastructure, permitted use, and registration. Final terms should be confirmed after document review.',
+        'faq_remote_question': 'Can I start the process remotely?',
+        'faq_remote_answer': 'Yes. Several steps can start remotely: clarifying terms, receiving additional materials, arranging a video viewing, and preparing due-diligence questions. Signing and payments depend on the transaction format and documents.',
         'bedroom_suffix': ' with {count} bedrooms',
         'bedroom_keyword': '{count} bedroom',
     },
     'th': {
-        'title_template': '{deal_type} {property_type}{bedroom_suffix} ใน {location} | Undersun Estate',
+        'title_template': '{deal_type} {property_type}{bedroom_suffix}{title_suffix} ใน {location} | Undersun Estate',
         'description_template': '{deal_type} {property_type}{bedroom_suffix} ใน {location} {facts}',
         'keywords_real_estate': 'อสังหาริมทรัพย์ภูเก็ต',
         'price': 'ราคา {price}',
@@ -172,6 +192,16 @@ PROPERTY_FALLBACK_LABELS = {
         'faq_investment_answer': '{value}',
         'faq_distances_question': 'มีสถานที่สำคัญอะไรอยู่ใกล้เคียง?',
         'faq_distances_answer': 'สถานที่สำคัญใกล้เคียง ได้แก่ {distances}',
+        'faq_freshness_question': 'ราคาและสถานะอัปเดตล่าสุดหรือไม่?',
+        'faq_freshness_answer': 'ทีม Undersun Estate ตรวจสอบราคาและสถานะ หน้านี้อัปเดตเมื่อ {updated_date} ก่อนนัดชมทรัพย์หรือจอง เราจะยืนยันเงื่อนไขล่าสุดกับเจ้าของหรือผู้พัฒนาโครงการอีกครั้ง',
+        'faq_viewing_question': 'สามารถนัดชมทรัพย์ก่อนตัดสินใจได้หรือไม่?',
+        'faq_viewing_answer': 'ได้ สามารถนัดชมผ่านผู้เชี่ยวชาญที่รับผิดชอบทรัพย์นี้ บางทรัพย์สามารถจัดวิดีโอทัวร์หรือให้คำปรึกษาเบื้องต้นเกี่ยวกับผัง ทำเล และเงื่อนไขดีลได้',
+        'faq_extra_costs_question': 'มีค่าใช้จ่ายอื่นนอกเหนือจากราคาหรือไม่?',
+        'faq_extra_costs_answer_sale': 'นอกจากราคาทรัพย์ อาจมีค่าธรรมเนียมจดทะเบียน ภาษี การตรวจเอกสาร ค่าส่วนกลาง และค่าใช้จ่ายเฉพาะดีล เราจะช่วยอธิบายโครงสร้างการชำระเงินล่วงหน้าและแนะนำให้ตรวจเอกสารก่อนชำระเงินก้อนใหญ่',
+        'faq_extra_costs_answer_rent': 'สำหรับการเช่า ควรตรวจเงินมัดจำ ค่าเช่าล่วงหน้า ค่าน้ำไฟ อินเทอร์เน็ต ทำความสะอาด บริการสระหรือสวน และเงื่อนไขคืนมัดจำ เงื่อนไขจริงขึ้นอยู่กับทรัพย์และระยะเวลาเช่า',
+        'faq_extra_costs_answer_land': 'สำหรับที่ดิน ควรตรวจเอกสารสิทธิ์ แนวเขต ทางเข้าออก โครงสร้างพื้นฐาน การใช้ประโยชน์ที่อนุญาต และค่าใช้จ่ายจดทะเบียน เงื่อนไขสุดท้ายควรยืนยันหลังตรวจเอกสาร',
+        'faq_remote_question': 'สามารถเริ่มขั้นตอนจากระยะไกลได้หรือไม่?',
+        'faq_remote_answer': 'ได้ หลายขั้นตอนเริ่มจากระยะไกลได้ เช่น ตรวจเงื่อนไข รับข้อมูลเพิ่มเติม วิดีโอทัวร์ และเตรียมคำถามสำหรับตรวจสอบเอกสาร ส่วนการลงนามและการชำระเงินขึ้นอยู่กับรูปแบบดีลและเอกสาร',
         'bedroom_suffix': ' {count} ห้องนอน',
         'bedroom_keyword': '{count} ห้องนอน',
     },
@@ -654,6 +684,62 @@ class Property(models.Model):
             return f' с {count} спальней'
         return f' с {count} спальнями'
 
+    @staticmethod
+    def _format_compact_thb(value):
+        if value in (None, ''):
+            return ''
+
+        amount = float(value)
+        if amount >= 1_000_000:
+            compact = f'{amount / 1_000_000:.1f}'.rstrip('0').rstrip('.')
+            return f'฿{compact}M'
+
+        return f'฿{amount:,.0f}'
+
+    def _get_title_suffix(self, language_code='ru'):
+        parts = []
+        property_type_name = self.property_type.name if self.property_type else ''
+        area_value = self.area_land if property_type_name == 'land' and self.area_land else self.area_total or self.area_land
+
+        if area_value:
+            area_units = {
+                'ru': 'м²',
+                'en': 'm²',
+                'th': 'ตร.ม.',
+            }
+            area_unit = area_units.get(language_code, area_units['ru'])
+            parts.append(f'{self._format_number(area_value)} {area_unit}')
+
+        if self.deal_type == 'rent':
+            price_value = self.price_rent_monthly_thb
+        else:
+            price_value = self.price_sale_thb or self.price_rent_monthly_thb
+
+        price_label = self._format_compact_thb(price_value)
+        if price_label:
+            parts.append(price_label)
+
+        if not parts and self.legacy_id:
+            parts.append(f'ID {self.legacy_id}')
+
+        if not parts:
+            return ''
+
+        if language_code == 'th':
+            return f" {' '.join(parts[:3])}"
+
+        return f", {', '.join(parts[:3])}"
+
+    def _get_deal_title_suffix(self, language_code='ru'):
+        if self.deal_type == 'sale':
+            return ''
+
+        deal_type_name = self._get_translated_deal_type(language_code)
+        if not deal_type_name or language_code == 'th':
+            return ''
+
+        return f' | {deal_type_name}'
+
     def _get_keyword_bedroom_label(self, language_code='ru'):
         if not self.bedrooms:
             return ''
@@ -928,8 +1014,10 @@ class Property(models.Model):
         title = texts['title_template'].format(
             property_type=type_name,
             bedroom_suffix=bedroom_suffix,
+            title_suffix=self._get_title_suffix(language_code),
             location=location_name,
             deal_type=deal_type_name,
+            deal_title_suffix=self._get_deal_title_suffix(language_code),
         )
 
         facts = ' '.join(self._build_seo_fact_sentences(language_code))
@@ -1071,6 +1159,12 @@ class Property(models.Model):
             'answer': self._to_plain_text(price_answer),
         })
 
+        updated_date = self.updated_at.strftime('%d.%m.%Y') if self.updated_at else ''
+        faq_items.append({
+            'question': texts['faq_freshness_question'],
+            'answer': self._to_plain_text(texts['faq_freshness_answer'].format(updated_date=updated_date)),
+        })
+
         location_answer = texts['faq_location_answer'].format(
             location_sentence=self._get_location_sentence(language_code)
         )
@@ -1085,6 +1179,24 @@ class Property(models.Model):
                 'question': texts['faq_specs_question'],
                 'answer': self._to_plain_text(specs_answer),
             })
+
+        faq_items.append({
+            'question': texts['faq_viewing_question'],
+            'answer': self._to_plain_text(texts['faq_viewing_answer']),
+        })
+
+        extra_costs_key = 'faq_extra_costs_answer_land' if self.property_type and self.property_type.name == 'land' else (
+            'faq_extra_costs_answer_rent' if self.deal_type == 'rent' else 'faq_extra_costs_answer_sale'
+        )
+        faq_items.append({
+            'question': texts['faq_extra_costs_question'],
+            'answer': self._to_plain_text(texts[extra_costs_key]),
+        })
+
+        faq_items.append({
+            'question': texts['faq_remote_question'],
+            'answer': self._to_plain_text(texts['faq_remote_answer']),
+        })
 
         amenities = self._get_translated_amenity_names(language_code)
         if amenities:
@@ -1121,7 +1233,7 @@ class Property(models.Model):
         return {
             'has_items': bool(faq_items),
             'heading': texts['faq_heading'],
-            'entries': faq_items[:6],
+            'entries': faq_items[:8],
         }
 
     def get_display_title(self):
