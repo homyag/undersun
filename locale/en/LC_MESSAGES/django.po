@@ -5530,3 +5530,24 @@ msgstr "Official name"
 
 msgid "Phuket real estate agency: sale, purchase, rentals, investments and legal support."
 msgstr "Phuket real estate agency: sale, purchase, rentals, investments and legal support."
+
+msgid "Планировки и схемы"
+msgstr "Floor plans and layouts"
+
+msgid "Схемы помогают оценить планировку, пропорции помещений и логику пространства до просмотра объекта."
+msgstr "Floor plans help evaluate the layout, room proportions, and flow of the property before a viewing."
+
+msgid "Посмотрите планировку"
+msgstr "View the floor plan"
+
+msgid "Так проще представить, как устроены комнаты, где находятся основные зоны и насколько пространство подходит под ваши задачи."
+msgstr "It makes it easier to understand how the rooms are arranged, where the main zones are, and whether the space fits your plans."
+
+msgid "Схема"
+msgstr "Layout"
+
+msgid "План"
+msgstr "Plan"
+
+msgid "Открыть"
+msgstr "Open"

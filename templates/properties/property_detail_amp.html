@@ -40,6 +40,9 @@
     .description { color:#1e293b; line-height:1.7; }
     .amenities { display:flex; flex-wrap:wrap; gap:8px; }
     .amenity { background:#eef2ff; color:#312e81; padding:8px 14px; border-radius:999px; font-size:0.95rem; }
+    .floorplan-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .floorplan-card { border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; background:#f8fafc; }
+    .floorplan-card p { margin:12px 16px 16px; color:var(--muted); font-size:0.9rem; font-weight:600; }
     .cta { text-align:center; background:linear-gradient(135deg,var(--accent),#ffe580); border-radius:24px; padding:24px; color:#1f2937; }
     .cta-buttons { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
     .cta a { display:flex; align-items:center; justify-content:center; border-radius:999px; font-weight:600; text-decoration:none; padding:12px 20px; }
@@ -114,65 +117,27 @@
       </div>
     </section>
 
-    {% if property_seo_section.has_content %}
-    <section class="card">
-      <h2 class="section-title">{{ property_seo_section.heading }}</h2>
-      {% if property_seo_section.intro %}
-        <p class="description">{{ property_seo_section.intro }}</p>
-      {% endif %}
-      {% if property_seo_section.highlights %}
-        <h3 class="section-title" style="font-size:1.05rem; margin-top:20px;">{{ property_seo_section.highlights_heading }}</h3>
-        <ul class="description" style="padding-left:18px; margin:0;">
-          {% for highlight in property_seo_section.highlights %}
-            <li style="margin-bottom:8px;">{{ highlight }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-      {% if property_seo_section.suitable_for %}
-        <h3 class="section-title" style="font-size:1.05rem; margin-top:20px;">{{ property_seo_section.suitable_for_heading }}</h3>
-        <p class="description">{{ property_seo_section.suitable_for }}</p>
-      {% endif %}
-      {% if property_seo_section.investment_potential %}
-        <h3 class="section-title" style="font-size:1.05rem; margin-top:20px;">{{ property_seo_section.investment_heading }}</h3>
-        <p class="description">{{ property_seo_section.investment_potential|linebreaksbr }}</p>
-      {% endif %}
-      {% if property_seo_section.supporting_text %}
-        <p class="description">{{ property_seo_section.supporting_text }}</p>
-      {% endif %}
-    </section>
-    {% endif %}
-
-    {% if property_faq.has_items %}
-    <section class="card">
-      <h2 class="section-title">{{ property_faq.heading }}</h2>
-      {% for faq in property_faq.entries %}
-        <div style="padding:16px 0;{% if not forloop.last %} border-bottom:1px solid #e2e8f0;{% endif %}">
-          <h3 class="section-title" style="font-size:1.05rem; margin:0 0 10px;">{{ faq.question }}</h3>
-          <p class="description" style="margin:0;">{{ faq.answer }}</p>
-        </div>
-      {% endfor %}
-    </section>
-    {% endif %}
-
-    {% if property_context_links.links %}
-    <section class="card">
-      <h2 class="section-title">{{ property_context_links.heading }}</h2>
-      <p class="description">{{ property_context_links.description }}</p>
-      {% for link in property_context_links.links %}
-        <p class="description" style="margin:12px 0 0;">
-          <a href="{{ link.url }}" style="color:var(--accent); text-decoration:none; font-weight:700;">{{ link.label }}</a><br>
-          <span>{{ link.description }}</span>
-        </p>
-      {% endfor %}
-    </section>
-    {% endif %}
-
     {% if amenities %}
     <section class="card">
       <h2 class="section-title">{% trans "Удобства" %}</h2>
       <div class="amenities">
         {% for amenity in amenities %}
           <span class="amenity">{{ amenity }}</span>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if floorplan_images %}
+    <section class="card">
+      <h2 class="section-title">{% trans "Посмотрите планировку" %}</h2>
+      <p class="description">{% trans "Так проще представить, как устроены комнаты, где находятся основные зоны и насколько пространство подходит под ваши задачи." %}</p>
+      <div class="floorplan-grid">
+        {% for floorplan in floorplan_images %}
+          <a class="floorplan-card" href="{{ floorplan.full_url }}" target="_blank" rel="noopener" style="text-decoration:none;">
+            <amp-img src="{{ floorplan.url }}" width="720" height="450" layout="responsive" alt="{{ floorplan.alt }}"></amp-img>
+            <p>{% trans "Схема" %} {{ forloop.counter }}</p>
+          </a>
         {% endfor %}
       </div>
     </section>
@@ -219,6 +184,31 @@
           </article>
         {% endfor %}
       </div>
+    </section>
+    {% endif %}
+
+    {% if property_faq.has_items %}
+    <section class="card">
+      <h2 class="section-title">{{ property_faq.heading }}</h2>
+      {% for faq in property_faq.entries %}
+        <div style="padding:16px 0;{% if not forloop.last %} border-bottom:1px solid #e2e8f0;{% endif %}">
+          <h3 class="section-title" style="font-size:1.05rem; margin:0 0 10px;">{{ faq.question }}</h3>
+          <p class="description" style="margin:0;">{{ faq.answer }}</p>
+        </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if property_context_links.links %}
+    <section class="card">
+      <h2 class="section-title">{{ property_context_links.heading }}</h2>
+      <p class="description">{{ property_context_links.description }}</p>
+      {% for link in property_context_links.links %}
+        <p class="description" style="margin:12px 0 0;">
+          <a href="{{ link.url }}" style="color:var(--accent); text-decoration:none; font-weight:700;">{{ link.label }}</a><br>
+          <span>{{ link.description }}</span>
+        </p>
+      {% endfor %}
     </section>
     {% endif %}
   </main>

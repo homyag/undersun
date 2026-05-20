@@ -72,8 +72,13 @@ class BaseAdminWithRequiredFields(admin.ModelAdmin):
 class PropertyImageInline(admin.TabularInline):
     model = PropertyImage
     extra = 1
-    fields = ('drag_handle', 'image_preview', 'image', 'title', 'is_main', 'order')
-    readonly_fields = ('drag_handle', 'image_preview')
+    fields = (
+        'drag_handle', 'image_preview', 'image', 'title', 'frame_type',
+        'alt_text', 'alt_text_ru', 'alt_text_en', 'alt_text_th',
+        'alt_generated_by', 'alt_confidence', 'alt_generated_at',
+        'is_main', 'order',
+    )
+    readonly_fields = ('drag_handle', 'image_preview', 'alt_generated_at')
     
     class Media:
         css = {
@@ -91,6 +96,11 @@ class PropertyImageInline(admin.TabularInline):
     def image_preview(self, obj):
         """Отображение превью изображения в админке"""
         if obj.image:
+            try:
+                image_url = obj.image.url
+            except Exception:
+                return format_html('<div style="color: #999; font-style: italic;">Файл недоступен</div>')
+
             # Определяем стили для главного изображения
             border_style = 'border: 3px solid #28a745;' if obj.is_main else 'border: 1px solid #ddd;'
             
@@ -112,8 +122,8 @@ class PropertyImageInline(admin.TabularInline):
                     </div>
                 </div>
                 ''',
-                obj.image.url,
-                obj.image.url,
+                image_url,
+                image_url,
                 obj.title or 'Изображение',
                 border_style,
                 star_html,

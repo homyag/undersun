@@ -1,5 +1,6 @@
 import builtins
 import os
+import re
 from io import BytesIO
 
 from django.db import models
@@ -204,6 +205,95 @@ PROPERTY_FALLBACK_LABELS = {
         'faq_remote_answer': 'ได้ หลายขั้นตอนเริ่มจากระยะไกลได้ เช่น ตรวจเงื่อนไข รับข้อมูลเพิ่มเติม วิดีโอทัวร์ และเตรียมคำถามสำหรับตรวจสอบเอกสาร ส่วนการลงนามและการชำระเงินขึ้นอยู่กับรูปแบบดีลและเอกสาร',
         'bedroom_suffix': ' {count} ห้องนอน',
         'bedroom_keyword': '{count} ห้องนอน',
+    },
+}
+
+PROPERTY_IMAGE_FRAME_TYPES = [
+    ('facade', _('Фасад / экстерьер')),
+    ('living_room', _('Гостиная')),
+    ('bedroom', _('Спальня')),
+    ('bathroom', _('Ванная')),
+    ('kitchen', _('Кухня')),
+    ('pool', _('Бассейн')),
+    ('terrace', _('Терраса / балкон')),
+    ('view', _('Вид')),
+    ('garden', _('Сад / участок')),
+    ('floorplan', _('Планировка')),
+    ('neighborhood', _('Локация / окружение')),
+    ('interior', _('Интерьер')),
+    ('exterior', _('Экстерьер')),
+    ('other', _('Другое')),
+]
+
+PROPERTY_IMAGE_GENERIC_ALT_PREFIXES = (
+    'image', 'images', 'photo', 'photos', 'picture', 'pictures',
+    'изображение', 'изображения', 'фото', 'фотография', 'картинка',
+)
+
+PROPERTY_IMAGE_FILENAME_HINTS = {
+    'facade': ('facade', 'façade', 'fac', 'cam ext', 'exterior', 'ext', 'front', 'outside', 'building'),
+    'living_room': ('living room', 'living', 'livingroom', 'lounge', 'salon', 'hall', 'sitting'),
+    'bedroom': ('bedroom', 'master bedroom', 'small bedroom', 'sleep', 'room'),
+    'bathroom': ('bathroom', 'bath', 'master bathroom', 'wc', 'toilet'),
+    'kitchen': ('kitchen', 'cook', 'pantry'),
+    'pool': ('pool', 'swim', 'jacuzzi'),
+    'terrace': ('terrace', 'balcony', 'patio', 'deck', 'veranda'),
+    'view': ('view', 'sea', 'ocean', 'sunset', 'sunrise', 'mountain', 'panorama'),
+    'garden': ('garden', 'yard', 'lawn', 'green', 'outdoor'),
+    'floorplan': ('floor plan', 'floorplan', 'plan', 'layout', 'masterplan', 'blueprint'),
+    'neighborhood': ('location', 'area', 'map', 'neighborhood', 'street', 'district'),
+    'interior': ('cam int', 'interior', 'inside', 'indoor', 'room', 'house'),
+    'exterior': ('exterior', 'outside', 'outdoor'),
+}
+
+PROPERTY_IMAGE_AUTO_ALT_TEMPLATES = {
+    'ru': {
+        'facade': 'Фасад {subject}{location_suffix}',
+        'living_room': 'Гостиная {subject}{location_suffix}',
+        'bedroom': 'Спальня {subject}{location_suffix}',
+        'bathroom': 'Ванная {subject}{location_suffix}',
+        'kitchen': 'Кухня {subject}{location_suffix}',
+        'pool': 'Бассейн {subject}{location_suffix}',
+        'terrace': 'Терраса {subject}{location_suffix}',
+        'view': 'Вид с {subject}{location_suffix}',
+        'garden': 'Сад {subject}{location_suffix}',
+        'floorplan': 'Планировка {subject}{location_suffix}',
+        'neighborhood': 'Локация {subject}{location_suffix}',
+        'interior': 'Интерьер {subject}{location_suffix}',
+        'exterior': 'Экстерьер {subject}{location_suffix}',
+        'other': '{subject}{location_suffix}',
+    },
+    'en': {
+        'facade': 'Exterior of {subject}{location_suffix}',
+        'living_room': 'Living room of {subject}{location_suffix}',
+        'bedroom': 'Bedroom of {subject}{location_suffix}',
+        'bathroom': 'Bathroom of {subject}{location_suffix}',
+        'kitchen': 'Kitchen of {subject}{location_suffix}',
+        'pool': 'Pool area of {subject}{location_suffix}',
+        'terrace': 'Terrace of {subject}{location_suffix}',
+        'view': 'View from {subject}{location_suffix}',
+        'garden': 'Garden of {subject}{location_suffix}',
+        'floorplan': 'Floor plan of {subject}{location_suffix}',
+        'neighborhood': 'Area around {subject}{location_suffix}',
+        'interior': 'Interior of {subject}{location_suffix}',
+        'exterior': 'Exterior of {subject}{location_suffix}',
+        'other': '{subject}{location_suffix}',
+    },
+    'th': {
+        'facade': 'ภายนอกของ{subject}{location_suffix}',
+        'living_room': 'ห้องนั่งเล่นของ{subject}{location_suffix}',
+        'bedroom': 'ห้องนอนของ{subject}{location_suffix}',
+        'bathroom': 'ห้องน้ำของ{subject}{location_suffix}',
+        'kitchen': 'ห้องครัวของ{subject}{location_suffix}',
+        'pool': 'สระว่ายน้ำของ{subject}{location_suffix}',
+        'terrace': 'ระเบียงของ{subject}{location_suffix}',
+        'view': 'วิวจาก{subject}{location_suffix}',
+        'garden': 'สวนของ{subject}{location_suffix}',
+        'floorplan': 'ผังของ{subject}{location_suffix}',
+        'neighborhood': 'บริเวณรอบ{subject}{location_suffix}',
+        'interior': 'ภายในของ{subject}{location_suffix}',
+        'exterior': 'ภายนอกของ{subject}{location_suffix}',
+        'other': '{subject}{location_suffix}',
     },
 }
 
@@ -1280,7 +1370,11 @@ class Property(models.Model):
         base_alt = self.get_seo_image_alt_base(language_code)
 
         if image:
-            candidate = getattr(image, 'alt_text', '') or getattr(image, 'title', '')
+            localized_getter = getattr(image, 'get_localized_alt_text', None)
+            if callable(localized_getter):
+                candidate = localized_getter(language_code)
+            else:
+                candidate = getattr(image, 'alt_text', '') or getattr(image, 'title', '')
             candidate = self._normalize_whitespace(candidate)
             generic_prefixes = (
                 'image', 'images', 'photo', 'photos', 'picture',
@@ -1379,8 +1473,34 @@ class PropertyImage(models.Model):
     # Дополнительные поля для разных типов изображений (из дампа Joomla)
     image_type = models.CharField(_('Тип изображения'), max_length=20, choices=IMAGE_TYPES, 
                                  default='main', help_text=_('Тип изображения для категоризации'))
+    frame_type = models.CharField(
+        _('Тип кадра'),
+        max_length=20,
+        choices=PROPERTY_IMAGE_FRAME_TYPES,
+        default='other',
+        help_text=_('Автоматически определяемый тип кадра для генерации alt-текста'),
+    )
     alt_text = models.CharField(_('Alt текст'), max_length=200, blank=True,
                                help_text=_('Альтернативный текст для SEO и доступности'))
+    alt_text_ru = models.CharField(_('Alt текст (RU)'), max_length=200, blank=True, default='')
+    alt_text_en = models.CharField(_('Alt текст (EN)'), max_length=200, blank=True, default='')
+    alt_text_th = models.CharField(_('Alt текст (TH)'), max_length=200, blank=True, default='')
+    alt_generated_by = models.CharField(
+        _('Источник alt'),
+        max_length=20,
+        blank=True,
+        default='',
+        help_text=_('heuristic, vision или manual'),
+    )
+    alt_confidence = models.DecimalField(
+        _('Уверенность'),
+        max_digits=4,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        help_text=_('Уверенность классификации от 0 до 1'),
+    )
+    alt_generated_at = models.DateTimeField(_('Сгенерировано'), blank=True, null=True)
 
     # Автоматическое создание thumbnails
     thumbnail = ImageSpecField(
@@ -1405,12 +1525,204 @@ class PropertyImage(models.Model):
     def __str__(self):
         return f"{self.property.title} - {self.title or 'Image'}"
 
+    @staticmethod
+    def _normalize_alt_source(value):
+        if not isinstance(value, str):
+            return ''
+        return ' '.join(value.split()).strip()
+
+    @classmethod
+    def _looks_generic_alt(cls, value):
+        normalized = cls._normalize_alt_source(value).lower()
+        if not normalized:
+            return True
+        return any(
+            normalized == prefix or normalized.startswith(f'{prefix} ')
+            for prefix in PROPERTY_IMAGE_GENERIC_ALT_PREFIXES
+        )
+
+    @classmethod
+    def _normalize_frame_source(cls, value):
+        if not isinstance(value, str):
+            return ''
+        normalized = value.replace('\\', '/').split('/')[-1]
+        normalized = normalized.rsplit('.', 1)[0]
+        normalized = normalized.replace('-', ' ').replace('_', ' ')
+        normalized = re.sub(r'[^0-9a-zA-Z\u0400-\u04FF\u0E00-\u0E7F]+', ' ', normalized)
+        return ' '.join(normalized.lower().split())
+
+    def _collect_frame_source_text(self):
+        parts = [
+            self.title,
+            self.image.name if self.image else '',
+            self.image_type,
+        ]
+        if not self.alt_generated_by:
+            parts.extend([
+                self.alt_text,
+                self.alt_text_ru,
+                self.alt_text_en,
+                self.alt_text_th,
+            ])
+        normalized_parts = [
+            self._normalize_frame_source(part)
+            for part in parts
+            if part
+        ]
+        return ' '.join(part for part in normalized_parts if part)
+
+    def infer_frame_type(self):
+        source_text = self._collect_frame_source_text()
+        if not source_text:
+            return 'other', 0.0
+
+        if self.image_type == 'floorplan':
+            return 'floorplan', 0.99
+
+        best_frame_type = 'other'
+        best_score = 0
+
+        for frame_type, hints in PROPERTY_IMAGE_FILENAME_HINTS.items():
+            score = sum(1 for hint in hints if hint in source_text)
+            if score > best_score:
+                best_frame_type = frame_type
+                best_score = score
+
+        if best_score == 0:
+            return 'other', 0.0
+
+        confidence = min(0.95, 0.55 + (best_score * 0.12))
+        return best_frame_type, round(confidence, 2)
+
+    def get_effective_frame_type(self):
+        if self.frame_type and self.frame_type != 'other':
+            return self.frame_type
+        inferred_frame_type, _ = self.infer_frame_type()
+        return inferred_frame_type
+
+    def _get_subject_phrase(self, language_code='ru'):
+        try:
+            property_obj = self.property
+        except Exception:
+            property_obj = None
+        if not property_obj:
+            defaults = {'ru': 'объекта', 'en': 'property', 'th': 'อสังหาริมทรัพย์'}
+            return defaults.get(language_code, defaults['ru'])
+
+        type_slug = property_obj.property_type.name if property_obj.property_type else ''
+        subject_map = {
+            'ru': {
+                'villa': 'виллы',
+                'condo': 'кондоминиума',
+                'townhouse': 'таунхауса',
+                'land': 'участка',
+                'investment': 'инвестиционного объекта',
+                'business': 'готового бизнеса',
+            },
+            'en': {
+                'villa': 'villa',
+                'condo': 'condo',
+                'townhouse': 'townhouse',
+                'land': 'land plot',
+                'investment': 'investment property',
+                'business': 'business property',
+            },
+            'th': {
+                'villa': 'วิลล่า',
+                'condo': 'คอนโดมิเนียม',
+                'townhouse': 'ทาวน์เฮาส์',
+                'land': 'ที่ดิน',
+                'investment': 'อสังหาริมทรัพย์เพื่อการลงทุน',
+                'business': 'ธุรกิจ',
+            },
+        }
+        return subject_map.get(language_code, subject_map['ru']).get(type_slug, {
+            'ru': 'объекта',
+            'en': 'property',
+            'th': 'อสังหาริมทรัพย์',
+        }.get(language_code, 'объекта'))
+
+    def get_auto_alt_text(self, language_code='ru', frame_type=None):
+        language_code = (language_code or 'ru')[:2]
+        frame_type = (frame_type or self.get_effective_frame_type() or 'other')[:20]
+        templates = PROPERTY_IMAGE_AUTO_ALT_TEMPLATES.get(language_code, PROPERTY_IMAGE_AUTO_ALT_TEMPLATES['ru'])
+        template = templates.get(frame_type, templates['other'])
+
+        subject = self._get_subject_phrase(language_code)
+        location_suffix = ''
+        try:
+            property_obj = self.property
+        except Exception:
+            property_obj = None
+        if property_obj:
+            location_label = property_obj._get_primary_location_label(language_code)
+            if location_label:
+                if language_code == 'en':
+                    location_suffix = f' in {location_label}'
+                elif language_code == 'th':
+                    location_suffix = f' ใน{location_label}'
+                else:
+                    location_suffix = f' в {location_label}'
+
+        alt_text = template.format(subject=subject, location_suffix=location_suffix)
+        return self._normalize_alt_source(alt_text)
+
+    def get_localized_alt_text(self, language_code='ru'):
+        language_code = (language_code or 'ru')[:2]
+        candidates = []
+        if language_code == 'ru':
+            candidates.extend([
+                getattr(self, 'alt_text_ru', ''),
+                self.alt_text,
+            ])
+        else:
+            candidates.append(getattr(self, f'alt_text_{language_code}', ''))
+            if self.alt_text and not self._contains_cyrillic(self.alt_text):
+                candidates.append(self.alt_text)
+
+        for candidate in candidates:
+            candidate = self._normalize_alt_source(candidate)
+            if candidate and not self._looks_generic_alt(candidate):
+                return candidate
+
+        return self.get_auto_alt_text(language_code)
+
+    @staticmethod
+    def _contains_cyrillic(value):
+        if not isinstance(value, str):
+            return False
+        return bool(re.search(r'[\u0400-\u04FF]', value))
+
+    def mark_alt_generated(self, generated_by='heuristic', confidence=None):
+        self.alt_generated_by = generated_by or ''
+        self.alt_confidence = confidence
+        try:
+            from django.utils import timezone
+            self.alt_generated_at = timezone.now()
+        except Exception:
+            self.alt_generated_at = None
+
+    def populate_localized_alt_texts(self, generated_by='heuristic', confidence=None, overwrite=False):
+        for language_code in ('ru', 'en', 'th'):
+            field_name = 'alt_text' if language_code == 'ru' else f'alt_text_{language_code}'
+            current_value = self._normalize_alt_source(getattr(self, field_name, ''))
+            if current_value and not overwrite and not self._looks_generic_alt(current_value):
+                continue
+            setattr(self, field_name, self.get_auto_alt_text(language_code))
+        self.mark_alt_generated(generated_by=generated_by, confidence=confidence)
+
     def save(self, *args, **kwargs):
         # Автоматически делать первое изображение главным
         if self.is_main:
             PropertyImage.objects.filter(property=self.property).exclude(id=self.id).update(is_main=False)
         elif not PropertyImage.objects.filter(property=self.property, is_main=True).exists():
             self.is_main = True
+
+        if not self.frame_type or self.frame_type == 'other':
+            inferred_frame_type, confidence = self.infer_frame_type()
+            self.frame_type = inferred_frame_type
+            if inferred_frame_type != 'other' and not self.alt_generated_by:
+                self.mark_alt_generated(generated_by='heuristic', confidence=confidence)
 
         self._convert_image_to_webp()
         super().save(*args, **kwargs)

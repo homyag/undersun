@@ -175,6 +175,66 @@ class PromotionalBanner(models.Model):
         base = self.name or f"#{self.pk}"
         return f"{base} [{lang_display}]"
 
+    def _image_is_available(self, image_field):
+        if not image_field or not getattr(image_field, 'name', ''):
+            return False
+
+        storage = getattr(image_field, 'storage', None)
+        try:
+            return storage.exists(image_field.name) if storage else False
+        except Exception:
+            return False
+
+    def _safe_image_url(self, image_field):
+        if not self._image_is_available(image_field):
+            return ''
+        try:
+            return image_field.url
+        except Exception:
+            return ''
+
+    def _safe_image_dimension(self, image_field, dimension, default_value):
+        if not self._image_is_available(image_field):
+            return default_value
+        try:
+            return getattr(image_field, dimension) or default_value
+        except Exception:
+            return default_value
+
+    def has_any_image(self):
+        return any((
+            self._image_is_available(self.desktop_image),
+            self._image_is_available(self.tablet_image),
+            self._image_is_available(self.mobile_image),
+        ))
+
+    def desktop_image_url(self):
+        return self._safe_image_url(self.desktop_image)
+
+    def tablet_image_url(self):
+        return self._safe_image_url(self.tablet_image)
+
+    def mobile_image_url(self):
+        return self._safe_image_url(self.mobile_image)
+
+    def desktop_image_width(self):
+        return self._safe_image_dimension(self.desktop_image, 'width', 1920)
+
+    def desktop_image_height(self):
+        return self._safe_image_dimension(self.desktop_image, 'height', 600)
+
+    def tablet_image_width(self):
+        return self._safe_image_dimension(self.tablet_image, 'width', 1536)
+
+    def tablet_image_height(self):
+        return self._safe_image_dimension(self.tablet_image, 'height', 600)
+
+    def mobile_image_width(self):
+        return self._safe_image_dimension(self.mobile_image, 'width', 828)
+
+    def mobile_image_height(self):
+        return self._safe_image_dimension(self.mobile_image, 'height', 600)
+
     @classmethod
     def get_active_banner(cls, language_code=None):
         """Совместимость: возвращает случайный баннер для языка."""

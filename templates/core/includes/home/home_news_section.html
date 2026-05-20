@@ -33,12 +33,12 @@
             <!-- News Image with Link -->
             <div class="relative overflow-hidden h-64">
               <a href="{{ news.get_absolute_url }}" class="block w-full h-full" itemprop="url">
-                {% if news.featured_image %}
-                  <img src="{{ news.featured_image.url }}" 
+                {% if news.get_localized_featured_image %}
+                  <img src="{{ news.get_localized_featured_image.url }}"
                        alt="{{ news.title }}"
                        itemprop="image"
-                       width="{{ news.featured_image.width|default_if_none:'1200' }}"
-                       height="{{ news.featured_image.height|default_if_none:'800' }}"
+                       width="{{ news.get_localized_featured_image.width|default_if_none:'1200' }}"
+                       height="{{ news.get_localized_featured_image.height|default_if_none:'800' }}"
                        loading="lazy"
                        decoding="async"
                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"

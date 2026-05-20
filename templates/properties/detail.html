@@ -117,14 +117,14 @@
         <div class="max-w-7xl mx-auto px-2 sm:px-4">
             <!-- Main Carousel Container -->
             <div class="relative overflow-hidden rounded-lg sm:rounded-xl shadow-lg sm:shadow-2xl group">
-                {% if property.images.exists %}
+                {% if gallery_images %}
                     <!-- Carousel with Single/Dual Image Display -->
                     <div class="property-carousel relative h-64 sm:h-80 lg:h-auto">
-                        {% for image in property.images.all %}
+                        {% for image in gallery_images %}
                             <div class="property-slide absolute inset-0 transition-opacity duration-1000 lg:hidden {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
                                  aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
                                  data-slide-index="{{ forloop.counter0 }}">
-                                <img src="{{ image.medium_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
+                                <img src="{{ image.url }}" alt="{{ image.alt }}"
                                      class="gallery-hero-image cursor-pointer hover:scale-105 transition-transform duration-300 rounded-lg sm:rounded-xl"
                                      onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
                             </div>
@@ -135,22 +135,22 @@
                                  class="property-slide desktop-frame-primary desktop-preview-frame group relative cursor-pointer overflow-hidden rounded-[1.75rem] border border-white/15 shadow-[0_20px_48px_rgba(15,23,42,0.2)]"
                                  data-image-index="0">
                                 <img id="desktop-primary-image"
-                                     src="{{ property.images.first.medium_url }}"
-                                     alt="{{ property_image_alt_base }} 1"
+                                     src="{{ gallery_images.0.url }}"
+                                     alt="{{ gallery_images.0.alt }}"
                                      class="gallery-hero-image transition-transform duration-300">
                             </div>
                             <div id="desktop-secondary-trigger"
                                  class="property-slide desktop-frame-secondary desktop-preview-frame group relative cursor-pointer overflow-hidden rounded-[1.75rem] border border-white/15 shadow-[0_18px_42px_rgba(15,23,42,0.16)]"
                                  data-image-index="1">
                                 <img id="desktop-secondary-image"
-                                     src="{% if property.images.count > 1 %}{{ property.images.all.1.medium_url }}{% else %}{{ property.images.first.medium_url }}{% endif %}"
-                                     alt="{{ property_image_alt_base }} 2"
+                                     src="{% if gallery_images|length > 1 %}{{ gallery_images.1.url }}{% else %}{{ gallery_images.0.url }}{% endif %}"
+                                     alt="{% if gallery_images|length > 1 %}{{ gallery_images.1.alt }}{% else %}{{ gallery_images.0.alt }}{% endif %}"
                                      class="gallery-hero-image transition-transform duration-300">
                             </div>
                         </div>
 
                         <!-- Carousel Navigation -->
-                        {% if property.images.count > 1 %}
+                        {% if gallery_images|length > 1 %}
                             <!-- Previous Button -->
                             <button onclick="previousSlide()"
                                     class="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/18 bg-white/12 text-sm text-white/88 shadow-[0_10px_28px_rgba(15,23,42,0.22)] backdrop-blur-md transition-all duration-300 hover:bg-white/18 hover:text-white sm:left-4 sm:h-11 sm:w-11 sm:opacity-0 sm:group-hover:opacity-100">
@@ -165,7 +165,7 @@
 
                             <!-- Slide Indicators -->
                             <div class="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm lg:hidden">
-                                {% for image in property.images.all %}
+                                {% for image in gallery_images %}
                                     <button onclick="goToSlideByImage({{ forloop.counter0 }})"
                                             class="property-slide-indicator h-2.5 w-2.5 rounded-full ring-1 ring-white/20 transition-all duration-300 {% if forloop.counter0 == 0 %}bg-accent shadow-[0_0_0_4px_rgba(255,255,255,0.12)]{% else %}bg-white/35 hover:bg-white/60{% endif %}"
                                             data-slide-index="{{ forloop.counter0 }}">
@@ -174,7 +174,7 @@
                             </div>
 
                             <div class="absolute bottom-5 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-2 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm lg:flex">
-                                {% for image in property.images.all %}
+                                {% for image in gallery_images %}
                                     {% if forloop.counter0|divisibleby:2 %}
                                         <button onclick="goToHeroPair({{ forloop.counter0 }})"
                                                 class="property-slide-pair-indicator h-2.5 rounded-full ring-1 ring-white/20 transition-all duration-300 {% if forloop.counter0 == 0 %}w-7 bg-accent shadow-[0_0_0_4px_rgba(255,255,255,0.12)]{% else %}w-2.5 bg-white/35 hover:w-5 hover:bg-white/60{% endif %}"
@@ -189,7 +189,7 @@
                         <!-- Photo Counter Badge -->
                         <div class="absolute right-2 top-2 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/14 bg-black/35 px-2.5 py-1 text-[11px] font-medium text-white/86 shadow-[0_10px_24px_rgba(15,23,42,0.16)] backdrop-blur-sm sm:right-4 sm:top-4 sm:px-3 sm:py-1.5 sm:text-xs">
                             <i class="fas fa-images text-[10px] sm:text-[11px]"></i>
-                            <span id="current-photo">1</span> / {{ property.images.count }} <span
+                            <span id="current-photo">1</span> / {{ gallery_images|length }} <span
                                 class="hidden sm:inline">{% trans "фото" %}</span>
                         </div>
 
@@ -221,13 +221,13 @@
             </div>
 
             <!-- Thumbnail Navigation -->
-            {% if property.images.count > 1 %}
+            {% if gallery_images|length > 1 %}
                 <div class="mt-4 overflow-x-auto">
                     <div class="inline-flex min-w-full items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-sm ring-1 ring-gray-200/80 backdrop-blur-sm pb-2">
-                        {% for image in property.images.all %}
+                        {% for image in gallery_images %}
                             <div class="flex-shrink-0 relative cursor-pointer group"
                                  onclick="goToSlideByImage({{ forloop.counter0 }})">
-                                <img src="{{ image.thumbnail_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
+                                <img src="{{ image.url }}" alt="{{ image.alt }}"
                                      class="h-16 w-16 object-cover rounded-xl transition-all duration-300 border-2 {% if forloop.counter0 == 0 %}border-accent shadow-md{% else %}border-transparent hover:border-accent/40{% endif %} sm:h-[4.25rem] sm:w-[4.25rem]"
                                      data-thumb="{{ forloop.counter0 }}">
                                 <!-- Hover Overlay -->
@@ -407,6 +407,12 @@
                         </div>
                     </div>
 
+                    {% if floorplan_images %}
+                        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 mb-6">
+                            {% include 'properties/includes/detail_floorplans_block.html' %}
+                        </div>
+                    {% endif %}
+
                     <!-- Key Features -->
                     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                         <h2 class="text-xl font-semibold text-gray-900 mb-4">{% trans "Основные характеристики" %}</h2>
@@ -514,80 +520,6 @@
                         </div>
                     {% endif %}
 
-                    {% if property_seo_section.has_content %}
-                        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                            <div class="prose max-w-none">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-3">{{ property_seo_section.heading }}</h2>
-
-                                {% if property_seo_section.intro %}
-                                    <p class="text-gray-700 leading-relaxed">{{ property_seo_section.intro }}</p>
-                                {% endif %}
-
-                                {% if property_seo_section.highlights %}
-                                    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ property_seo_section.highlights_heading }}</h3>
-                                    <ul class="list-disc pl-5 space-y-2 text-gray-700">
-                                        {% for highlight in property_seo_section.highlights %}
-                                            <li>{{ highlight }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
-
-                                {% if property_seo_section.suitable_for %}
-                                    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ property_seo_section.suitable_for_heading }}</h3>
-                                    <p class="text-gray-700 leading-relaxed">{{ property_seo_section.suitable_for }}</p>
-                                {% endif %}
-
-                                {% if property_seo_section.investment_potential %}
-                                    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ property_seo_section.investment_heading }}</h3>
-                                    <p class="text-gray-700 leading-relaxed">{{ property_seo_section.investment_potential|linebreaksbr }}</p>
-                                {% endif %}
-
-                                {% if property_seo_section.supporting_text %}
-                                    <p class="text-gray-700 leading-relaxed mt-4">{{ property_seo_section.supporting_text }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    {% if property_faq.has_items %}
-                        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                            <div class="prose max-w-none">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ property_faq.heading }}</h2>
-                                <div class="space-y-4">
-                                    {% for faq in property_faq.entries %}
-                                        <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
-                                            <h3 class="text-base font-semibold text-gray-900 mb-2">{{ faq.question }}</h3>
-                                            <p class="text-gray-700 leading-relaxed mb-0">{{ faq.answer }}</p>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    {% if property_context_links.links %}
-                        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                            <div class="mb-5">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ property_context_links.heading }}</h2>
-                                <p class="text-sm text-gray-600 leading-relaxed">{{ property_context_links.description }}</p>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {% for link in property_context_links.links %}
-                                    <a href="{{ link.url }}"
-                                       class="group flex min-h-[96px] items-start gap-3 rounded-lg border border-gray-200 px-4 py-4 transition-colors hover:border-primary hover:bg-gray-50">
-                                        <span class="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary bg-opacity-10 text-primary">
-                                            <i class="{{ link.icon }}"></i>
-                                        </span>
-                                        <span class="min-w-0">
-                                            <span class="block font-semibold text-gray-900 transition-colors group-hover:text-primary">{{ link.label }}</span>
-                                            <span class="mt-1 block text-sm leading-relaxed text-gray-600">{{ link.description }}</span>
-                                        </span>
-                                    </a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-
                     <!-- Features & Amenities -->
                     {% if property.features.exists %}
                         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -606,9 +538,9 @@
                                     </div>
                                 {% endfor %}
                             </div>
+
                         </div>
                     {% endif %}
-
 
                     <!-- Map -->
                     {% if property.latitude and property.longitude %}
@@ -1090,6 +1022,53 @@
         </section>
     {% endif %}
 
+    {% if property_faq.has_items or property_context_links.links %}
+        <section class="py-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {% if property_faq.has_items %}
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="prose max-w-none">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ property_faq.heading }}</h2>
+                                <div class="space-y-4">
+                                    {% for faq in property_faq.entries %}
+                                        <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-4">
+                                            <h3 class="text-base font-semibold text-gray-900 mb-2">{{ faq.question }}</h3>
+                                            <p class="text-gray-700 leading-relaxed mb-0">{{ faq.answer }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if property_context_links.links %}
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="mb-5">
+                                <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ property_context_links.heading }}</h2>
+                                <p class="text-sm text-gray-600 leading-relaxed">{{ property_context_links.description }}</p>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3">
+                                {% for link in property_context_links.links %}
+                                    <a href="{{ link.url }}"
+                                       class="group flex min-h-[96px] items-start gap-3 rounded-lg border border-gray-200 px-4 py-4 transition-colors hover:border-primary hover:bg-gray-50">
+                                        <span class="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary bg-opacity-10 text-primary">
+                                            <i class="{{ link.icon }}"></i>
+                                        </span>
+                                        <span class="min-w-0">
+                                            <span class="block font-semibold text-gray-900 transition-colors group-hover:text-primary">{{ link.label }}</span>
+                                            <span class="mt-1 block text-sm leading-relaxed text-gray-600">{{ link.description }}</span>
+                                        </span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
     <!-- Gallery Modal -->
     <div id="gallery-modal"
          class="fixed inset-0 z-50 hidden bg-slate-950/95 transition-opacity duration-300 backdrop-blur-md"
@@ -1105,7 +1084,7 @@
                 <!-- Main Image -->
                 <div class="relative flex-1 overflow-hidden rounded-[28px] border border-white/8 bg-white/[0.03] p-3 shadow-[0_28px_90px_rgba(0,0,0,0.45)] md:p-4">
                     <div class="pointer-events-none absolute inset-x-0 top-0 h-24 rounded-t-[28px] bg-gradient-to-b from-white/[0.06] to-transparent"></div>
-                    <img id="gallery-image" src="" alt="{{ property_image_alt_base }}"
+                    <img id="gallery-image" src="" alt="{{ gallery_images.0.alt }}"
                          class="mx-auto block h-auto max-w-full object-contain rounded-[22px] shadow-2xl">
 
                     <!-- Loading Indicator -->
@@ -1131,7 +1110,7 @@
                 </div>
 
                 <!-- Thumbnail Navigation -->
-                {% if property.images.count > 1 %}
+                {% if gallery_images|length > 1 %}
                     <div class="hidden md:block">
                         <div class="relative mx-auto w-[min(92vw,760px)] overflow-hidden rounded-2xl border border-white/10 bg-black/50 shadow-2xl backdrop-blur-md">
                             <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-black/70 to-transparent"></div>
@@ -1139,8 +1118,8 @@
                             <div id="gallery-thumbs-track"
                                  class="flex items-center gap-2 overflow-x-auto px-4 py-3 scroll-smooth"
                                  style="-ms-overflow-style:none; scrollbar-width:none;">
-                                {% for image in property.images.all %}
-                                    <img src="{{ image.thumbnail_url }}" alt="{{ property_image_alt_base }} {{ forloop.counter }}"
+                                {% for image in gallery_images %}
+                                    <img src="{{ image.url }}" alt="{{ image.alt }}"
                                          class="gallery-thumb h-14 w-14 shrink-0 cursor-pointer rounded-xl border-2 border-transparent object-cover transition-all duration-200 hover:-translate-y-0.5 hover:border-white/80 hover:shadow-lg"
                                          data-index="{{ forloop.counter0 }}"
                                          onclick="openGallery({{ forloop.counter0 }})">

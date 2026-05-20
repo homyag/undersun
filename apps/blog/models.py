@@ -291,7 +291,7 @@ class BlogPost(models.Model):
         for field in candidates:
             if field:
                 try:
-                    if field.name:
+                    if field.name and field.storage.exists(field.name):
                         return field
                 except Exception:
                     continue

@@ -10,22 +10,22 @@
 
 // Property images
 const PROPERTY_IMAGES = [
-    {% for image in property.images.all %}
-        "{{ image.medium_url }}"{% if not forloop.last %},{% endif %}
+    {% for image in gallery_images %}
+        "{{ image.url }}"{% if not forloop.last %},{% endif %}
     {% endfor %}
 ];
 
 const PROPERTY_IMAGE_ALTS = [
-    {% for image in property.images.all %}
-        "{{ property_image_alt_base|escapejs }} {{ forloop.counter }}"{% if not forloop.last %},{% endif %}
+    {% for image in gallery_images %}
+        "{{ image.alt|escapejs }}"{% if not forloop.last %},{% endif %}
     {% endfor %}
 ];
 
 const PROPERTY_IMAGE_DIMENSIONS = [
-    {% for image in property.images.all %}
+    {% for image in gallery_images %}
         {
-            width: {% if image.image and image.image.width %}{{ image.image.width }}{% else %}null{% endif %},
-            height: {% if image.image and image.image.height %}{{ image.image.height }}{% else %}null{% endif %}
+            width: {% if image.width %}{{ image.width }}{% else %}null{% endif %},
+            height: {% if image.height %}{{ image.height }}{% else %}null{% endif %}
         }{% if not forloop.last %},{% endif %}
     {% endfor %}
 ];

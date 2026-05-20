@@ -946,17 +946,44 @@ class PropertyListView(ListView):
                 except ValueError:
                     pass
         
-        # Поиск по тексту
-        query = self.request.GET.get('q')
+        # Поиск по тексту, внутреннему ID и legacy-коду объекта
+        query = (self.request.GET.get('q') or '').strip()
         if query:
-            queryset = queryset.filter(
+            legacy_query = query.lstrip('#№').strip()
+            compact_legacy_query = ''.join(char for char in legacy_query if char.isalnum())
+            legacy_tokens = {query, legacy_query, compact_legacy_query}
+            if compact_legacy_query.lower().startswith('id') and len(compact_legacy_query) > 2:
+                legacy_tokens.add(compact_legacy_query[2:])
+
+            search_filter = (
                 Q(title_ru__icontains=query) |
                 Q(title_en__icontains=query) |
+                Q(title_th__icontains=query) |
                 Q(description_ru__icontains=query) |
                 Q(description_en__icontains=query) |
+                Q(description_th__icontains=query) |
+                Q(short_description_ru__icontains=query) |
+                Q(short_description_en__icontains=query) |
+                Q(short_description_th__icontains=query) |
+                Q(complex_name__icontains=query) |
+                Q(address__icontains=query) |
                 Q(district__name_ru__icontains=query) |
-                Q(district__name_en__icontains=query)
+                Q(district__name_en__icontains=query) |
+                Q(district__name_th__icontains=query) |
+                Q(location__name_ru__icontains=query) |
+                Q(location__name_en__icontains=query) |
+                Q(location__name_th__icontains=query)
             )
+
+            for legacy_token in legacy_tokens:
+                if legacy_token:
+                    search_filter |= Q(legacy_id__icontains=legacy_token)
+
+            for legacy_token in legacy_tokens:
+                if legacy_token and legacy_token.isdigit():
+                    search_filter |= Q(pk=int(legacy_token))
+
+            queryset = queryset.filter(search_filter)
         
         return queryset.distinct()
 
@@ -2575,6 +2602,7 @@ class PropertyDetailView(DetailView):
             language_code,
         )
         context['property_context_links'] = _build_property_context_links(self.object, language_code)
+        context.update(_build_property_image_sets(self.object, language_code))
         context.update(_build_property_location_context(self.object, language_code))
         context['detail_breadcrumbs'] = _build_catalog_breadcrumbs_common(
             language_code=language_code,
@@ -2696,6 +2724,120 @@ def _build_final_price(property_obj):
     return property_obj.price_sale_thb or property_obj.price_rent_monthly_thb or 0
 
 
+def _file_field_exists(file_field):
+    try:
+        storage = getattr(file_field, 'storage', None)
+        name = getattr(file_field, 'name', '')
+        return bool(storage and name and storage.exists(name))
+    except Exception:
+        return False
+
+
+def _get_file_dimensions(file_field):
+    try:
+        return {
+            'width': file_field.width or None,
+            'height': file_field.height or None,
+        }
+    except Exception:
+        return {'width': None, 'height': None}
+
+
+def _build_floorplan_alt(property_obj, language_code='ru'):
+    base_alt = property_obj.get_seo_image_alt_base(language_code)
+    templates = {
+        'ru': 'Планировка: {base}',
+        'en': 'Floor plan: {base}',
+        'th': 'ผัง: {base}',
+    }
+    template = templates.get((language_code or 'ru')[:2], templates['ru'])
+    return template.format(base=base_alt)
+
+
+def _is_floorplan_image(image):
+    if getattr(image, 'image_type', '') == 'floorplan':
+        return True
+    if getattr(image, 'frame_type', '') == 'floorplan':
+        if getattr(image, 'alt_generated_by', '') == 'heuristic':
+            try:
+                inferred_frame_type, _ = image.infer_frame_type()
+                return inferred_frame_type == 'floorplan'
+            except Exception:
+                return False
+        return True
+
+    frame_getter = getattr(image, 'get_effective_frame_type', None)
+    if callable(frame_getter):
+        try:
+            return frame_getter() == 'floorplan'
+        except Exception:
+            return False
+    return False
+
+
+def _build_property_image_sets(property_obj, language_code='ru'):
+    gallery_images = []
+    floorplan_images = []
+    seen_floorplan_urls = set()
+
+    if _file_field_exists(getattr(property_obj, 'floorplan', None)):
+        floorplan_url = property_obj.floorplan.url
+        floorplan_images.append({
+            'url': floorplan_url,
+            'full_url': floorplan_url,
+            'alt': _build_floorplan_alt(property_obj, language_code),
+            'width': _get_file_dimensions(property_obj.floorplan)['width'],
+            'height': _get_file_dimensions(property_obj.floorplan)['height'],
+        })
+        seen_floorplan_urls.add(floorplan_url)
+
+    for image in property_obj.images.all():
+        image_url = image.medium_url or image.thumbnail_url or image.original_url
+        if not image_url:
+            continue
+
+        is_floorplan = _is_floorplan_image(image)
+        target_images = floorplan_images if is_floorplan else gallery_images
+        position = len(target_images) + 1
+        alt_text = property_obj.get_seo_image_alt(
+            image=image,
+            language_code=language_code,
+            position=position,
+        )
+
+        image_item = {
+            'url': image_url,
+            'full_url': image.original_url or image_url,
+            'alt': alt_text,
+            **_get_file_dimensions(image.image),
+        }
+
+        if is_floorplan:
+            if image_item['full_url'] in seen_floorplan_urls:
+                continue
+            seen_floorplan_urls.add(image_item['full_url'])
+            floorplan_images.append(image_item)
+        else:
+            gallery_images.append(image_item)
+
+    if not gallery_images:
+        if floorplan_images:
+            gallery_images.append(floorplan_images[0])
+        else:
+            gallery_images.append({
+                'url': static('images/no-image.svg'),
+                'full_url': static('images/no-image.svg'),
+                'alt': property_obj.get_seo_image_alt(language_code=language_code),
+                'width': None,
+                'height': None,
+            })
+
+    return {
+        'gallery_images': gallery_images,
+        'floorplan_images': floorplan_images,
+    }
+
+
 def property_detail_amp(request, slug):
     queryset = Property.objects.select_related(
         'district', 'location', 'property_type', 'developer', 'contact_person'
@@ -2729,21 +2871,7 @@ def property_detail_amp(request, slug):
     raw_description = seo_data.get('description') or property_obj.short_description or strip_tags(property_obj.description)
     meta_description = truncate_meta(raw_description)
 
-    gallery_images = []
-    for index, image in enumerate(property_obj.images.all(), start=1):
-        image_url = image.medium_url or image.thumbnail_url or image.original_url
-        if not image_url:
-            continue
-        gallery_images.append({
-            'url': image_url,
-            'alt': property_obj.get_seo_image_alt(image=image, language_code=language_code, position=index),
-        })
-
-    if not gallery_images:
-        gallery_images.append({
-            'url': static('images/no-image.svg'),
-            'alt': property_obj.get_seo_image_alt(language_code=language_code),
-        })
+    image_context = _build_property_image_sets(property_obj, language_code)
 
     amenities = [relation.feature.name for relation in property_obj.features.all() if relation.feature]
     stats = _build_property_stats(property_obj)
@@ -2780,7 +2908,8 @@ def property_detail_amp(request, slug):
         'meta_title': meta_title,
         'meta_description': meta_description,
         'canonical_url': canonical_url,
-        'gallery_images': gallery_images,
+        'gallery_images': image_context['gallery_images'],
+        'floorplan_images': image_context['floorplan_images'],
         'location_label': location_label,
         'property_title_display': property_title_display,
         'property_schema_description': property_schema_description,
