@@ -18,8 +18,9 @@ BUSINESS_PROFILE = {
     'opens': '10:00',
     'closes': '20:00',
     'opening_hours_compact': 'Mo-Fr 10:00-20:00',
+    'google_maps_cid_url': 'https://maps.google.com/maps?cid=15686779743811846375',
     'same_as': [
-        'https://www.google.com/maps/place/Undersun+Estate/@7.9138326,98.3420203,17z/data=!3m1!4b1!4m6!3m5!1s0x60e8893a2e97b515:0xd9b2a3109bb2c0e7!8m2!3d7.9138326!4d98.3420203!16s%2Fg%2F11tjdw25jm?entry=ttu&g_ep=EgoyMDI2MDUxMi4wIKXMDSoASAFQAw%3D%3D',
+        'https://maps.google.com/maps?cid=15686779743811846375',
         'https://www.facebook.com/mr.undersunestate/',
         'https://www.instagram.com/undersun.estate/',
         'https://www.youtube.com/@undersun_estate',
@@ -66,7 +67,7 @@ def get_business_profile(language_code='ru'):
     payload = dict(BUSINESS_PROFILE)
     payload.update(localized)
     payload['whatsapp_url'] = f"https://wa.me/{BUSINESS_PROFILE['phone_e164'].lstrip('+')}"
-    payload['google_maps_url'] = BUSINESS_PROFILE['same_as'][0]
+    payload['google_maps_url'] = BUSINESS_PROFILE['google_maps_cid_url']
     return payload
 
 
@@ -108,6 +109,7 @@ def build_business_schema_json(site_root_url, page_url, language_code='ru'):
                     'latitude': profile['latitude'],
                     'longitude': profile['longitude'],
                 },
+                'hasMap': profile['google_maps_url'],
                 'openingHoursSpecification': [{
                     '@type': 'OpeningHoursSpecification',
                     'dayOfWeek': working_days,
@@ -144,6 +146,7 @@ def build_business_schema_json(site_root_url, page_url, language_code='ru'):
                     'latitude': profile['latitude'],
                     'longitude': profile['longitude'],
                 },
+                'hasMap': profile['google_maps_url'],
                 'openingHoursSpecification': [{
                     '@type': 'OpeningHoursSpecification',
                     'dayOfWeek': working_days,
