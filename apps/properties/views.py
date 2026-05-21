@@ -3235,11 +3235,45 @@ def get_locations_for_district(request):
 
 def map_properties_json(request):
     """Optimized AJAX endpoint для получения всех отфильтрованных объектов для карты"""
+    def _get_bounds_param(name):
+        raw_value = request.GET.get(name)
+        if raw_value in (None, ''):
+            return None
+
+        try:
+            return float(raw_value)
+        except (TypeError, ValueError):
+            return None
+
+    def _get_requested_bounds():
+        north = _get_bounds_param('bounds_north')
+        south = _get_bounds_param('bounds_south')
+        east = _get_bounds_param('bounds_east')
+        west = _get_bounds_param('bounds_west')
+
+        if None in (north, south, east, west):
+            return None
+
+        if north < south:
+            north, south = south, north
+        if not (-90 <= south <= 90 and -90 <= north <= 90):
+            return None
+        if not (-180 <= west <= 180 and -180 <= east <= 180):
+            return None
+
+        return {
+            'north': north,
+            'south': south,
+            'east': east,
+            'west': west,
+        }
+
     try:
         language_code = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
         # Создаем временный объект view для использования фильтров
         view = PropertyListView()
         view.request = request
+        requested_bounds = _get_requested_bounds()
         
         # Получаем базовый queryset с минимальными данными для карты
         queryset = Property.objects.filter(
@@ -3249,6 +3283,23 @@ def map_properties_json(request):
         
         # Применяем все фильтры
         queryset = view.apply_filters(queryset)
+
+        if requested_bounds:
+            queryset = queryset.filter(
+                latitude__gte=requested_bounds['south'],
+                latitude__lte=requested_bounds['north'],
+            )
+
+            if requested_bounds['west'] <= requested_bounds['east']:
+                queryset = queryset.filter(
+                    longitude__gte=requested_bounds['west'],
+                    longitude__lte=requested_bounds['east'],
+                )
+            else:
+                queryset = queryset.filter(
+                    Q(longitude__gte=requested_bounds['west']) |
+                    Q(longitude__lte=requested_bounds['east'])
+                )
         
         # Ограничиваем количество для производительности (максимум 1000 объектов)
         queryset = queryset[:1000]
@@ -3317,7 +3368,9 @@ def map_properties_json(request):
         return JsonResponse({
             'success': True,
             'properties': properties_data,
-            'total_count': len(properties_data)
+            'total_count': len(properties_data),
+            'bounds_applied': bool(requested_bounds),
+            'bounds': requested_bounds,
         })
         
     except Exception as e:

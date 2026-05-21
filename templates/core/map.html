@@ -892,6 +892,47 @@
         border: 1px solid rgba(71, 75, 87, 0.1);
     }
 
+    .map-return-button {
+        position: fixed;
+        right: max(1rem, calc((100vw - 1280px) / 2 + 1rem));
+        bottom: 1.25rem;
+        z-index: 1400;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        min-height: 48px;
+        max-width: calc(100vw - 2rem);
+        padding: 0.78rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 999px;
+        background: rgba(71, 75, 87, 0.94);
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 700;
+        line-height: 1;
+        box-shadow: 0 20px 46px rgba(15, 23, 42, 0.28);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(12px);
+        transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .map-return-button.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    .map-return-button:hover {
+        background: rgba(31, 41, 55, 0.97);
+    }
+
+    .map-return-button i {
+        color: var(--brand-accent);
+        font-size: 1rem;
+    }
+
     .map-highlight-section {
         background: white;
         padding: 2.5rem 0 3rem;
@@ -1408,6 +1449,13 @@
             padding-top: 0.9rem;
             padding-left: 0;
         }
+        .map-return-button {
+            right: 1rem;
+            bottom: 1rem;
+            min-height: 44px;
+            padding: 0.72rem 0.9rem;
+            font-size: 0.84rem;
+        }
         .map-hero-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
         .map-highlight-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     }
@@ -1591,6 +1639,18 @@
         </div>
     </div>
 </section>
+
+<button
+    type="button"
+    class="map-return-button"
+    id="mapReturnButton"
+    aria-label="{% if lang == 'en' %}Return to the map{% elif lang == 'th' %}กลับไปที่แผนที่{% else %}Вернуться к карте{% endif %}"
+    title="{% if lang == 'en' %}Return to the map{% elif lang == 'th' %}กลับไปที่แผนที่{% else %}Вернуться к карте{% endif %}"
+    data-ym-goal="map_return_to_map_click"
+>
+    <i class="fas fa-map-location-dot" aria-hidden="true"></i>
+    <span>{% if lang == 'en' %}Map{% elif lang == 'th' %}แผนที่{% else %}К карте{% endif %}</span>
+</button>
 
 <!-- Featured properties section reused from home -->
 {% include 'core/includes/home/home_featured_properties_section.html' %}

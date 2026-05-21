@@ -332,9 +332,12 @@ input[type="radio"]:focus {
 }
 
 .maplibregl-control-container,
-.maplibregl-ctrl-top-right,
-.maplibregl-popup {
+.maplibregl-ctrl-top-right {
     z-index: 5 !important;
+}
+
+.maplibregl-popup {
+    z-index: 1300 !important;
 }
 
 .map-district-marker {

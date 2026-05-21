@@ -7,6 +7,7 @@
     let geolocateMarker = null;
     let mapReady = false;
     let propertiesLoaded = false;
+    let mapBoundsRefreshTimer = null;
 
     function saveMapPageScrollState() {
         try {
@@ -101,7 +102,35 @@
         }
     }
 
-    function getMapPropertiesUrl() {
+    function isBoundsBasedMapLoadingEnabled() {
+        return window.mapConfig?.enableBoundsBasedLoading === true;
+    }
+
+    function getMapBoundsRefreshDelay() {
+        const configuredDelay = Number(window.mapConfig?.boundsRefreshDebounceMs);
+        return Number.isFinite(configuredDelay) && configuredDelay >= 0 ? configuredDelay : 550;
+    }
+
+    function appendMapBoundsParams(params) {
+        if (!isBoundsBasedMapLoadingEnabled()) {
+            return params;
+        }
+
+        const bounds = window.propertiesMapBridge?.getBoundsParams?.();
+        if (!bounds) {
+            return params;
+        }
+
+        Object.entries(bounds).forEach(([key, value]) => {
+            if (Number.isFinite(Number(value))) {
+                params.set(key, value);
+            }
+        });
+
+        return params;
+    }
+
+    function getMapPropertiesUrl({ includeBounds = true } = {}) {
         const endpoint = window.djangoUrls?.mapPropertiesJson;
         if (!endpoint) {
             return null;
@@ -110,12 +139,15 @@
         const url = new URL(endpoint, window.location.origin);
         const currentParams = new URLSearchParams(window.location.search);
         currentParams.delete('page');
+        if (includeBounds) {
+            appendMapBoundsParams(currentParams);
+        }
         url.search = currentParams.toString();
         return url.toString();
     }
 
-    async function fetchMapProperties() {
-        const url = getMapPropertiesUrl();
+    async function fetchMapProperties(options = {}) {
+        const url = getMapPropertiesUrl(options);
         if (!url) {
             return [];
         }
@@ -138,12 +170,14 @@
         return payload.properties;
     }
 
-    function refreshMapFromPayload(properties) {
+    function refreshMapFromPayload(properties, options = {}) {
         if (!window.propertiesMapBridge) {
             return;
         }
 
-        window.propertiesMapBridge.setProperties(properties);
+        window.propertiesMapBridge.setProperties(properties, {
+            fit: options.fit !== false,
+        });
         updateStats(properties);
     }
 
@@ -153,18 +187,28 @@
         }
     }
 
-    async function loadMapProperties() {
-        propertiesLoaded = false;
-        showMapLoading(window.djangoTranslations?.mapLoadingText || '');
+    async function loadMapProperties(options = {}) {
+        const {
+            fit = true,
+            includeBounds = true,
+            showLoading = true,
+        } = options;
+
+        if (showLoading) {
+            propertiesLoaded = false;
+            showMapLoading(window.djangoTranslations?.mapLoadingText || '');
+        }
 
         try {
-            const properties = await fetchMapProperties();
-            refreshMapFromPayload(properties);
+            const properties = await fetchMapProperties({ includeBounds });
+            refreshMapFromPayload(properties, { fit });
             propertiesLoaded = true;
             syncMapReadyState();
         } catch (error) {
             console.error('Failed to load map properties:', error);
-            setMapLoadingMessage(window.djangoTranslations?.mapErrorText || 'Unable to load map');
+            if (showLoading) {
+                setMapLoadingMessage(window.djangoTranslations?.mapErrorText || 'Unable to load map');
+            }
         }
     }
 
@@ -204,6 +248,37 @@
         document.getElementById('resetViewBtn')?.addEventListener('click', () => {
             window.propertiesMapBridge?.resetView();
         });
+    }
+
+    function bindReturnToMapButton() {
+        const button = document.getElementById('mapReturnButton');
+        const mapSection = document.getElementById('map-experience');
+        const mapElement = document.getElementById('property-map');
+
+        if (!button || !mapSection || !mapElement) {
+            return;
+        }
+
+        function scrollToMap() {
+            mapSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+            });
+        }
+
+        function syncButtonVisibility() {
+            const mapRect = mapElement.getBoundingClientRect();
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+            const mapIsAboveViewport = mapRect.bottom < 96;
+            const mapIsMostlyBelowViewport = mapRect.top > viewportHeight * 0.72;
+
+            button.classList.toggle('is-visible', mapIsAboveViewport || mapIsMostlyBelowViewport);
+        }
+
+        button.addEventListener('click', scrollToMap);
+        window.addEventListener('scroll', syncButtonVisibility, { passive: true });
+        window.addEventListener('resize', syncButtonVisibility);
+        syncButtonVisibility();
     }
 
     function initMapFilterForm() {
@@ -328,6 +403,7 @@
         showMapLoading(window.djangoTranslations?.mapLoadingText || '');
         window.propertiesMapBridge.initialize('property-map');
         bindFloatingButtons();
+        bindReturnToMapButton();
         initMapFilterForm();
         syncFavoriteIcons();
         loadMapProperties();
@@ -341,6 +417,21 @@
     document.addEventListener('catalog-map:error', () => {
         setMapLoadingMessage(window.djangoTranslations?.mapErrorText || 'Unable to load map');
         showMapLoading();
+    });
+
+    document.addEventListener('catalog-map:bounds-changed', () => {
+        if (!isBoundsBasedMapLoadingEnabled()) {
+            return;
+        }
+
+        window.clearTimeout(mapBoundsRefreshTimer);
+        mapBoundsRefreshTimer = window.setTimeout(() => {
+            loadMapProperties({
+                fit: false,
+                includeBounds: true,
+                showLoading: false,
+            });
+        }, getMapBoundsRefreshDelay());
     });
 
     window.addEventListener('resize', () => {

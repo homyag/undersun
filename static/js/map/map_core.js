@@ -72,11 +72,20 @@
         lastGeoJson: createEmptyFeatureCollection(),
         districtGeoJson: createEmptyFeatureCollection(),
         hoveredClusterId: null,
+        hoveredPropertyId: null,
+        hoverCloseTimer: null,
+        isPointerOverPopup: false,
+        isPinnedPopup: false,
+        lastPopupPropertyId: null,
         spiderClusterId: null,
         selectedPropertyId: null,
     };
     const POPUP_VIEWPORT_PADDING = 18;
     const SPIDERFY_MAX_POINTS = 24;
+    const HOVER_POPUP_CLOSE_DELAY = 180;
+    const MARKER_SPREAD_GROUP_RADIUS_PX = 30;
+    const MARKER_SPREAD_BASE_RADIUS_PX = 28;
+    const MARKER_SPREAD_MAX_RADIUS_PX = 86;
 
     function getMapConfig() {
         const config = { ...(window.mapConfig || {}) };
@@ -90,6 +99,32 @@
         } catch (error) {}
 
         return config;
+    }
+
+    function getMapBehaviorConfig() {
+        const config = getMapConfig();
+        const hoverMediaQuery = window.matchMedia
+            ? window.matchMedia('(hover: hover) and (pointer: fine)')
+            : null;
+
+        return {
+            enableHoverPopup: config.enableHoverPopup !== false && (!hoverMediaQuery || hoverMediaQuery.matches),
+            enableMarkerSpread: config.enableMarkerSpread !== false,
+            enablePropertyClusters: config.enablePropertyClusters === true,
+            enableBoundsBasedLoading: config.enableBoundsBasedLoading === true,
+        };
+    }
+
+    function isPropertyClusteringEnabled() {
+        return getMapBehaviorConfig().enablePropertyClusters;
+    }
+
+    function isHoverPopupEnabled() {
+        return getMapBehaviorConfig().enableHoverPopup;
+    }
+
+    function isBoundsBasedLoadingEnabled() {
+        return getMapBehaviorConfig().enableBoundsBasedLoading;
     }
 
     function getRasterOsmStyle() {
@@ -426,11 +461,80 @@
             });
 
             state.popup.on('close', () => {
+                clearHoverPopupTimer();
+                state.hoveredPropertyId = null;
+                state.isPointerOverPopup = false;
+                state.isPinnedPopup = false;
+                state.lastPopupPropertyId = null;
                 setSelectedFeature(null);
             });
         }
 
         return state.popup;
+    }
+
+    function clearHoverPopupTimer() {
+        if (state.hoverCloseTimer) {
+            window.clearTimeout(state.hoverCloseTimer);
+            state.hoverCloseTimer = null;
+        }
+    }
+
+    function closePropertyPopup({ clearPinned = false } = {}) {
+        clearHoverPopupTimer();
+
+        if (clearPinned) {
+            state.isPinnedPopup = false;
+        }
+
+        state.hoveredPropertyId = null;
+        state.isPointerOverPopup = false;
+        state.lastPopupPropertyId = null;
+
+        if (state.popup && state.popup.isOpen() && (!state.isPinnedPopup || clearPinned)) {
+            state.popup.remove();
+        }
+
+        if (clearPinned) {
+            setSelectedFeature(null);
+        }
+    }
+
+    function scheduleHoverPopupClose() {
+        clearHoverPopupTimer();
+
+        if (state.isPinnedPopup) {
+            return;
+        }
+
+        state.hoverCloseTimer = window.setTimeout(() => {
+            if (!state.hoveredPropertyId && !state.isPointerOverPopup) {
+                closePropertyPopup();
+            }
+        }, HOVER_POPUP_CLOSE_DELAY);
+    }
+
+    function bindPopupHoverGuards(popup) {
+        if (!isHoverPopupEnabled()) {
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            const popupElement = popup.getElement();
+            if (!popupElement || popupElement.dataset.hoverGuardsBound === 'true') {
+                return;
+            }
+
+            popupElement.dataset.hoverGuardsBound = 'true';
+            popupElement.addEventListener('mouseenter', () => {
+                state.isPointerOverPopup = true;
+                clearHoverPopupTimer();
+            });
+            popupElement.addEventListener('mouseleave', () => {
+                state.isPointerOverPopup = false;
+                scheduleHoverPopupClose();
+            });
+        });
     }
 
     function getPopupMaxWidth() {
@@ -488,42 +592,157 @@
         document.dispatchEvent(new CustomEvent(name, { detail }));
     }
 
-    function normalizeCoordinates(properties) {
-        const coordGroups = new Map();
+    function getStablePropertySortKey(property) {
+        const id = String(property?.id || '');
+        const slug = String(property?.slug || '');
+        return `${id.padStart(12, '0')}:${slug}`;
+    }
 
-        properties.forEach((property) => {
-            const lat = parseFloat(property.lat);
-            const lng = parseFloat(property.lng);
+    function getSpreadRadius(pointCount) {
+        if (pointCount <= 2) {
+            return 26;
+        }
+        if (pointCount <= 4) {
+            return 34;
+        }
+        if (pointCount <= 8) {
+            return 44;
+        }
 
-            if (Number.isNaN(lat) || Number.isNaN(lng)) {
+        return Math.min(MARKER_SPREAD_MAX_RADIUS_PX, MARKER_SPREAD_BASE_RADIUS_PX + pointCount * 3);
+    }
+
+    function getSpreadOffset(index, pointCount) {
+        if (pointCount <= 10) {
+            const angle = (-Math.PI / 2) + (index / pointCount) * Math.PI * 2;
+            const radius = getSpreadRadius(pointCount);
+            return {
+                x: Math.cos(angle) * radius,
+                y: Math.sin(angle) * radius,
+            };
+        }
+
+        const angle = (-Math.PI / 2) + index * 0.92;
+        const radius = Math.min(
+            MARKER_SPREAD_MAX_RADIUS_PX,
+            MARKER_SPREAD_BASE_RADIUS_PX + Math.floor(index / 6) * 18
+        );
+
+        return {
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+        };
+    }
+
+    function groupProjectedProperties(entries) {
+        const groups = [];
+        const visited = new Set();
+        const cellSize = MARKER_SPREAD_GROUP_RADIUS_PX;
+        const grid = new Map();
+
+        entries.forEach((entry, index) => {
+            entry.index = index;
+            const cellX = Math.floor(entry.point.x / cellSize);
+            const cellY = Math.floor(entry.point.y / cellSize);
+            entry.cellX = cellX;
+            entry.cellY = cellY;
+            const key = `${cellX}:${cellY}`;
+            if (!grid.has(key)) {
+                grid.set(key, []);
+            }
+            grid.get(key).push(entry);
+        });
+
+        entries.forEach((entry) => {
+            if (visited.has(entry.index)) {
                 return;
             }
 
-            const key = `${lat.toFixed(6)}:${lng.toFixed(6)}`;
-            if (!coordGroups.has(key)) {
-                coordGroups.set(key, []);
+            const group = [entry];
+            visited.add(entry.index);
+
+            for (let dx = -1; dx <= 1; dx += 1) {
+                for (let dy = -1; dy <= 1; dy += 1) {
+                    const candidates = grid.get(`${entry.cellX + dx}:${entry.cellY + dy}`) || [];
+                    candidates.forEach((candidate) => {
+                        if (visited.has(candidate.index)) {
+                            return;
+                        }
+
+                        const distance = Math.hypot(candidate.point.x - entry.point.x, candidate.point.y - entry.point.y);
+                        if (distance <= MARKER_SPREAD_GROUP_RADIUS_PX) {
+                            visited.add(candidate.index);
+                            group.push(candidate);
+                        }
+                    });
+                }
             }
-            coordGroups.get(key).push(property);
+
+            groups.push(group);
         });
 
-        coordGroups.forEach((group) => {
+        return groups;
+    }
+
+    function prepareDisplayCoordinates(properties) {
+        const behavior = getMapBehaviorConfig();
+        const prepared = properties.map((property) => {
+            const lat = parseFloat(property.lat);
+            const lng = parseFloat(property.lng);
+
+            return {
+                ...property,
+                lat,
+                lng,
+                original_lat: property.original_lat ?? lat,
+                original_lng: property.original_lng ?? lng,
+                map_lat: lat,
+                map_lng: lng,
+            };
+        });
+
+        if (!behavior.enableMarkerSpread || !state.map) {
+            return prepared;
+        }
+
+        const entries = prepared.map((property) => ({
+            property,
+            point: state.map.project([property.lng, property.lat]),
+        })).sort((a, b) => getStablePropertySortKey(a.property).localeCompare(getStablePropertySortKey(b.property)));
+
+        groupProjectedProperties(entries).forEach((group) => {
             if (group.length < 2) {
                 return;
             }
 
-            group.forEach((property, index) => {
-                const angle = (index / group.length) * Math.PI * 2;
-                const radius = 0.00018;
-                property.lng = parseFloat(property.lng) + Math.cos(angle) * radius;
-                property.lat = parseFloat(property.lat) + Math.sin(angle) * radius;
+            const sortedGroup = group
+                .slice()
+                .sort((a, b) => getStablePropertySortKey(a.property).localeCompare(getStablePropertySortKey(b.property)));
+            const center = sortedGroup.reduce((acc, entry) => ({
+                x: acc.x + entry.point.x,
+                y: acc.y + entry.point.y,
+            }), { x: 0, y: 0 });
+
+            center.x /= sortedGroup.length;
+            center.y /= sortedGroup.length;
+
+            sortedGroup.forEach((entry, index) => {
+                const offset = getSpreadOffset(index, sortedGroup.length);
+                const spreadLngLat = state.map.unproject([
+                    center.x + offset.x,
+                    center.y + offset.y,
+                ]);
+
+                entry.property.map_lng = spreadLngLat.lng;
+                entry.property.map_lat = spreadLngLat.lat;
             });
         });
 
-        return properties;
+        return prepared;
     }
 
     function propertiesToGeoJson(properties) {
-        const normalized = normalizeCoordinates(
+        const normalized = prepareDisplayCoordinates(
             properties
                 .filter((property) => !Number.isNaN(parseFloat(property.lat)) && !Number.isNaN(parseFloat(property.lng)))
                 .map((property) => ({ ...property }))
@@ -536,7 +755,7 @@
                 id: property.id,
                 geometry: {
                     type: 'Point',
-                    coordinates: [parseFloat(property.lng), parseFloat(property.lat)],
+                    coordinates: [parseFloat(property.map_lng), parseFloat(property.map_lat)],
                 },
                 properties: {
                     ...property,
@@ -551,14 +770,20 @@
             return;
         }
 
-        state.map.addSource(SOURCE_ID, {
+        const behavior = getMapBehaviorConfig();
+        const sourceOptions = {
             type: 'geojson',
             data: createEmptyFeatureCollection(),
-            cluster: true,
-            clusterRadius: 55,
-            clusterMaxZoom: 14,
             generateId: true,
-        });
+        };
+
+        if (behavior.enablePropertyClusters) {
+            sourceOptions.cluster = true;
+            sourceOptions.clusterRadius = 55;
+            sourceOptions.clusterMaxZoom = 14;
+        }
+
+        state.map.addSource(SOURCE_ID, sourceOptions);
 
         state.map.addSource(HOVER_SOURCE_ID, {
             type: 'geojson',
@@ -637,74 +862,76 @@
             },
         });
 
-        state.map.addLayer({
-            id: CLUSTER_GLOW_LAYER_ID,
-            type: 'circle',
-            source: SOURCE_ID,
-            filter: ['has', 'point_count'],
-            paint: {
-                'circle-color': '#F1B400',
-                'circle-radius': [
-                    'step',
-                    ['get', 'point_count'],
-                    26,
-                    20, 33,
-                    50, 40
-                ],
-                'circle-opacity': 0.18,
-                'circle-blur': 0.8,
-            },
-        });
+        if (behavior.enablePropertyClusters) {
+            state.map.addLayer({
+                id: CLUSTER_GLOW_LAYER_ID,
+                type: 'circle',
+                source: SOURCE_ID,
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': '#F1B400',
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        26,
+                        20, 33,
+                        50, 40
+                    ],
+                    'circle-opacity': 0.18,
+                    'circle-blur': 0.8,
+                },
+            });
 
-        state.map.addLayer({
-            id: CLUSTER_RING_LAYER_ID,
-            type: 'circle',
-            source: SOURCE_ID,
-            filter: ['has', 'point_count'],
-            paint: {
-                'circle-color': '#ffffff',
-                'circle-radius': [
-                    'step',
-                    ['get', 'point_count'],
-                    20,
-                    20, 26,
-                    50, 32
-                ],
-                'circle-opacity': 0.95,
-            },
-        });
+            state.map.addLayer({
+                id: CLUSTER_RING_LAYER_ID,
+                type: 'circle',
+                source: SOURCE_ID,
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': '#ffffff',
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        20,
+                        20, 26,
+                        50, 32
+                    ],
+                    'circle-opacity': 0.95,
+                },
+            });
 
-        state.map.addLayer({
-            id: CLUSTER_LAYER_ID,
-            type: 'circle',
-            source: SOURCE_ID,
-            filter: ['has', 'point_count'],
-            paint: {
-                'circle-color': getClusterCoreColorExpression(),
-                'circle-radius': [
-                    'step',
-                    ['get', 'point_count'],
-                    16,
-                    20, 21,
-                    50, 26
-                ],
-                'circle-stroke-width': 2,
-                'circle-stroke-color': 'rgba(17,24,39,0.08)',
-                'circle-opacity': 0.98,
-            },
-        });
+            state.map.addLayer({
+                id: CLUSTER_LAYER_ID,
+                type: 'circle',
+                source: SOURCE_ID,
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': getClusterCoreColorExpression(),
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        16,
+                        20, 21,
+                        50, 26
+                    ],
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': 'rgba(17,24,39,0.08)',
+                    'circle-opacity': 0.98,
+                },
+            });
 
-        state.map.addLayer({
-            id: HOVER_CLUSTER_LAYER_ID,
-            type: 'circle',
-            source: HOVER_CLUSTER_SOURCE_ID,
-            paint: {
-                'circle-color': '#F1B400',
-                'circle-radius': 36,
-                'circle-opacity': 0.2,
-                'circle-blur': 0.75,
-            },
-        });
+            state.map.addLayer({
+                id: HOVER_CLUSTER_LAYER_ID,
+                type: 'circle',
+                source: HOVER_CLUSTER_SOURCE_ID,
+                paint: {
+                    'circle-color': '#F1B400',
+                    'circle-radius': 36,
+                    'circle-opacity': 0.2,
+                    'circle-blur': 0.75,
+                },
+            });
+        }
 
         state.map.addLayer({
             id: SPIDER_LEG_LAYER_ID,
@@ -867,6 +1094,14 @@
         setSourceData(sourceId, collection);
     }
 
+    function getExistingLayerIds(layerIds) {
+        if (!state.map) {
+            return [];
+        }
+
+        return layerIds.filter((layerId) => state.map.getLayer(layerId));
+    }
+
     function setDistrictsGeoJson(geoJson) {
         state.districtGeoJson = geoJson || createEmptyFeatureCollection();
         setSourceData(DISTRICT_SOURCE_ID, state.districtGeoJson);
@@ -886,6 +1121,7 @@
         setSingleFeatureSource(HOVER_CLUSTER_SOURCE_ID, null);
         setSingleFeatureSource(DISTRICT_HOVER_SOURCE_ID, null);
         state.hoveredClusterId = null;
+        state.hoveredPropertyId = null;
     }
 
     function clearSpiderfy() {
@@ -904,12 +1140,23 @@
         return pointCount > 1 && pointCount <= SPIDERFY_MAX_POINTS;
     }
 
-    function openPropertyPopup(feature) {
+    function showPropertyPopup(feature, { pinned = false, trackClick = false } = {}) {
         if (!feature) {
             return;
         }
 
-        setSelectedFeature(feature);
+        const propertyId = feature.properties?.id || null;
+        if (!pinned && state.lastPopupPropertyId === propertyId && state.popup?.isOpen()) {
+            return;
+        }
+
+        clearHoverPopupTimer();
+        state.isPinnedPopup = pinned;
+        state.lastPopupPropertyId = propertyId;
+
+        if (pinned) {
+            setSelectedFeature(feature);
+        }
 
         const popup = createPopup();
         const coordinates = feature.geometry.coordinates.slice();
@@ -932,13 +1179,27 @@
             keepPopupWithinFrame(popup);
         }, 120);
 
-        if (typeof window.dispatchMetrikaGoal === 'function') {
+        bindPopupHoverGuards(popup);
+
+        if (trackClick && typeof window.dispatchMetrikaGoal === 'function') {
             window.dispatchMetrikaGoal('catalog_map_marker_click', {
                 id: feature.properties.id,
                 slug: feature.properties.slug,
                 type: feature.properties.property_type,
             });
         }
+    }
+
+    function openPropertyPopup(feature) {
+        showPropertyPopup(feature, { pinned: true, trackClick: true });
+    }
+
+    function openHoverPropertyPopup(feature) {
+        if (!isHoverPopupEnabled() || state.isPinnedPopup) {
+            return;
+        }
+
+        showPropertyPopup(feature, { pinned: false, trackClick: false });
     }
 
     function spiderfyCluster(clusterFeature) {
@@ -1023,6 +1284,16 @@
             return;
         }
 
+        const propertyInteractiveLayerIds = getExistingLayerIds(POINT_INTERACTIVE_LAYER_IDS);
+        const clusterInteractiveLayerIds = isPropertyClusteringEnabled()
+            ? getExistingLayerIds(CLUSTER_INTERACTIVE_LAYER_IDS)
+            : [];
+        const cursorLayerIds = getExistingLayerIds([
+            ...clusterInteractiveLayerIds,
+            ...propertyInteractiveLayerIds,
+            ...DISTRICT_INTERACTIVE_LAYER_IDS,
+        ]);
+
         const navigateToDistrictFeature = (feature) => {
             if (!feature?.properties?.slug) {
                 return;
@@ -1031,9 +1302,10 @@
         };
 
         state.map.on('click', (event) => {
-            const interactiveFeatures = state.map.queryRenderedFeatures(event.point, {
-                layers: [...POINT_INTERACTIVE_LAYER_IDS, ...CLUSTER_INTERACTIVE_LAYER_IDS],
-            });
+            const propertyClickLayerIds = [...propertyInteractiveLayerIds, ...clusterInteractiveLayerIds];
+            const interactiveFeatures = propertyClickLayerIds.length
+                ? state.map.queryRenderedFeatures(event.point, { layers: propertyClickLayerIds })
+                : [];
             const targetFeature = interactiveFeatures[0];
 
             if (!targetFeature) {
@@ -1048,6 +1320,7 @@
 
                 clearSpiderfy();
                 clearHoverState();
+                closePropertyPopup({ clearPinned: true });
                 return;
             }
 
@@ -1077,7 +1350,7 @@
             openPropertyPopup(targetFeature);
         });
 
-        [CLUSTER_LAYER_ID, CLUSTER_RING_LAYER_ID, CLUSTER_GLOW_LAYER_ID, HOVER_CLUSTER_LAYER_ID, POINT_LAYER_ID, POINT_ICON_LAYER_ID, SPIDER_POINT_LAYER_ID, SPIDER_POINT_ICON_LAYER_ID, ...DISTRICT_INTERACTIVE_LAYER_IDS].forEach((layerId) => {
+        cursorLayerIds.forEach((layerId) => {
             state.map.on('mouseenter', layerId, () => {
                 state.map.getCanvas().style.cursor = 'pointer';
             });
@@ -1107,7 +1380,7 @@
             state.hoveredClusterId = null;
         };
 
-        CLUSTER_INTERACTIVE_LAYER_IDS.forEach((layerId) => {
+        clusterInteractiveLayerIds.forEach((layerId) => {
             state.map.on('mousemove', layerId, handleClusterMouseMove);
             state.map.on('mouseleave', layerId, handleClusterMouseLeave);
         });
@@ -1119,18 +1392,24 @@
                 return;
             }
 
+            state.hoveredPropertyId = feature.properties.id || null;
+            clearHoverPopupTimer();
+
             if (state.selectedPropertyId && state.selectedPropertyId === feature.properties.id) {
                 return;
             }
 
             setSingleFeatureSource(HOVER_SOURCE_ID, feature);
+            openHoverPropertyPopup(feature);
         };
 
         const handlePointMouseLeave = () => {
+            state.hoveredPropertyId = null;
             setSingleFeatureSource(HOVER_SOURCE_ID, null);
+            scheduleHoverPopupClose();
         };
 
-        [POINT_LAYER_ID, POINT_ICON_LAYER_ID, SPIDER_POINT_LAYER_ID, SPIDER_POINT_ICON_LAYER_ID].forEach((layerId) => {
+        propertyInteractiveLayerIds.forEach((layerId) => {
             state.map.on('mousemove', layerId, handlePointMouseMove);
             state.map.on('mouseleave', layerId, handlePointMouseLeave);
         });
@@ -1189,15 +1468,25 @@
         fitToProperties(state.lastGeoJson);
     }
 
-    function setProperties(properties) {
-        state.pendingProperties = Array.isArray(properties) ? properties : [];
-        clearSpiderfy();
-        clearHoverState();
-        setSelectedFeature(null);
-        if (state.popup && state.popup.isOpen()) {
-            state.popup.remove();
+    function getBoundsParams() {
+        if (!state.map || !isBoundsBasedLoadingEnabled()) {
+            return null;
         }
 
+        const bounds = state.map.getBounds();
+        if (!bounds) {
+            return null;
+        }
+
+        return {
+            bounds_north: Number(bounds.getNorth().toFixed(6)),
+            bounds_south: Number(bounds.getSouth().toFixed(6)),
+            bounds_east: Number(bounds.getEast().toFixed(6)),
+            bounds_west: Number(bounds.getWest().toFixed(6)),
+        };
+    }
+
+    function renderProperties({ fit = false } = {}) {
         if (!state.loaded || !state.map || !state.map.getSource(SOURCE_ID)) {
             return;
         }
@@ -1205,7 +1494,21 @@
         const geoJson = propertiesToGeoJson(state.pendingProperties);
         state.lastGeoJson = geoJson;
         state.map.getSource(SOURCE_ID).setData(geoJson);
-        fitToProperties(geoJson);
+
+        if (fit) {
+            fitToProperties(geoJson);
+        }
+    }
+
+    function setProperties(properties, options = {}) {
+        const shouldFit = options.fit !== false;
+        state.pendingProperties = Array.isArray(properties) ? properties : [];
+        clearSpiderfy();
+        clearHoverState();
+        closePropertyPopup({ clearPinned: true });
+        setSelectedFeature(null);
+
+        renderProperties({ fit: shouldFit });
     }
 
     function initialize(containerId = 'map-container') {
@@ -1247,6 +1550,20 @@
             syncDistrictMarkersVisibility();
         });
 
+        state.map.on('zoomend', () => {
+            renderProperties({ fit: false });
+        });
+
+        state.map.on('moveend', () => {
+            if (!state.loaded || !isBoundsBasedLoadingEnabled()) {
+                return;
+            }
+
+            emitMapEvent('catalog-map:bounds-changed', {
+                bounds: getBoundsParams(),
+            });
+        });
+
         state.map.on('error', (event) => {
             emitMapEvent('catalog-map:error', { error: event?.error || null });
         });
@@ -1269,6 +1586,7 @@
         setProperties,
         refreshSize,
         resetView,
+        getBoundsParams,
         getMap() {
             return state.map;
         },

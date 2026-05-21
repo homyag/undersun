@@ -12,6 +12,36 @@ function getMapUiElements() {
     };
 }
 
+let mapBoundsRefreshTimer = null;
+
+function isBoundsBasedMapLoadingEnabled() {
+    return window.mapConfig?.enableBoundsBasedLoading === true;
+}
+
+function getMapBoundsRefreshDelay() {
+    const configuredDelay = Number(window.mapConfig?.boundsRefreshDebounceMs);
+    return Number.isFinite(configuredDelay) && configuredDelay >= 0 ? configuredDelay : 550;
+}
+
+function appendMapBoundsParams(params) {
+    if (!isBoundsBasedMapLoadingEnabled()) {
+        return params;
+    }
+
+    const bounds = window.propertiesMapBridge?.getBoundsParams?.();
+    if (!bounds) {
+        return params;
+    }
+
+    Object.entries(bounds).forEach(([key, value]) => {
+        if (Number.isFinite(Number(value))) {
+            params.set(key, value);
+        }
+    });
+
+    return params;
+}
+
 function setMapStatus(mode, summaryCount = null) {
     const ui = getMapUiElements();
     if (!ui.overlay || !ui.title || !ui.text || !ui.summary || !ui.summaryText) {
@@ -121,23 +151,34 @@ function collectMapFilterParams() {
     return params;
 }
 
-function setMapProperties(properties) {
+function setMapProperties(properties, options = {}) {
     if (!window.propertiesMapBridge) {
         return;
     }
 
-    window.propertiesMapBridge.setProperties(properties);
+    window.propertiesMapBridge.setProperties(properties, options);
 }
 
-function updateMapMarkers() {
+function updateMapMarkers(options = {}) {
     const endpoint = window.djangoUrls?.mapPropertiesJson;
     if (!endpoint) {
         setMapStatus('error');
         return;
     }
 
+    const {
+        fit = true,
+        includeBounds = true,
+        showLoading = true,
+    } = options;
     const params = collectMapFilterParams();
-    setMapStatus('loading');
+    if (includeBounds) {
+        appendMapBoundsParams(params);
+    }
+
+    if (showLoading) {
+        setMapStatus('loading');
+    }
 
     fetch(`${endpoint}?${params.toString()}`, {
         headers: {
@@ -153,7 +194,7 @@ function updateMapMarkers() {
             }
 
             const properties = data.properties || [];
-            setMapProperties(properties);
+            setMapProperties(properties, { fit });
             setMapStatus(properties.length ? 'ready' : 'empty', properties.length);
         })
         .catch((error) => {
@@ -161,6 +202,21 @@ function updateMapMarkers() {
             loadCurrentPageProperties(true);
         });
 }
+
+document.addEventListener('catalog-map:bounds-changed', () => {
+    if (!isBoundsBasedMapLoadingEnabled()) {
+        return;
+    }
+
+    window.clearTimeout(mapBoundsRefreshTimer);
+    mapBoundsRefreshTimer = window.setTimeout(() => {
+        updateMapMarkers({
+            fit: false,
+            includeBounds: true,
+            showLoading: false,
+        });
+    }, getMapBoundsRefreshDelay());
+});
 
 function loadCurrentPageProperties(fromError = false) {
     const propertyCards = document.querySelectorAll('.property-card');
