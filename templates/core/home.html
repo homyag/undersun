@@ -61,6 +61,7 @@
     {% static 'js/home/consultation.js' as consultation_js %}
     {% static 'js/home/search-counter.js' as search_counter_js %}
     {% static 'js/home/our-team.js' as our_team_js %}
+    {% static 'js/home/google-reviews.js' as google_reviews_js %}
     <script>
         (function() {
             const scripts = [
@@ -69,7 +70,8 @@
                 {src: '{{ featured_js }}'},
                 {src: '{{ consultation_js }}'},
                 {src: '{{ search_counter_js }}'},
-                {src: '{{ our_team_js }}'}
+                {src: '{{ our_team_js }}'},
+                {src: '{{ google_reviews_js }}'}
             ];
 
             function loadScript(entry) {

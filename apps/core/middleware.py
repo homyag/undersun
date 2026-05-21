@@ -13,6 +13,9 @@ from apps.core.bot_detection import BotDetectionService, bot_detection_service
 from apps.core.models import ManualIPBan, RequestLog
 
 
+logger = logging.getLogger(__name__)
+
+
 class PermissionsPolicyMiddleware(MiddlewareMixin):
     """
     Middleware to set Permissions Policy headers to allow unload events in admin
@@ -237,6 +240,12 @@ class BotDetectionMiddleware(MiddlewareMixin):
         self.service: BotDetectionService = bot_detection_service
         self.logger = logging.getLogger('bad_requests')
         self.challenge_query_param = settings.BOT_PROTECTION.get('CHALLENGE_QUERY_PARAM')
+        self.issue_server_challenge_cookie = bool(
+            settings.BOT_PROTECTION.get('ISSUE_SERVER_CHALLENGE_COOKIE', False)
+        )
+        self.respect_manual_ip_bans = bool(
+            settings.BOT_PROTECTION.get('RESPECT_MANUAL_IP_BANS', False)
+        )
         self.challenge_cookie_max_age = int(
             settings.BOT_PROTECTION.get('CHALLENGE_COOKIE_MAX_AGE_DAYS', 7) * 86400
         )
@@ -255,7 +264,7 @@ class BotDetectionMiddleware(MiddlewareMixin):
         if not client_ip:
             return None
 
-        if self._is_manually_banned(client_ip):
+        if self.respect_manual_ip_bans and self._is_manually_banned(client_ip):
             return HttpResponse('Forbidden', status=403)
 
         if self.service.is_ip_whitelisted(client_ip) or self.service.is_user_agent_whitelisted(user_agent):
@@ -414,6 +423,8 @@ class BotDetectionMiddleware(MiddlewareMixin):
         return HttpResponsePermanentRedirect(new_url)
 
     def _schedule_challenge_cookie(self, request):
+        if not self.issue_server_challenge_cookie:
+            return
         if not self._should_issue_cookie(request):
             return
         if getattr(request, '_bot_challenge_cookie_value', None):

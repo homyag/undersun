@@ -213,11 +213,11 @@
         const COUNTER_ID = 90630603;
         const COOKIE_NAME = 'bot_challenge';
         const METRIKA_PING_URL = "{% url 'core:metrika_loaded' %}";
-        const ACTIVE_EVENTS = ['scroll', 'mousemove', 'keydown', 'touchstart'];
-        const FALLBACK_DELAY = 2000;
-        let userInteracted = false;
+        const METRIKA_LOAD_DELAY = 5000;
+        const COOKIE_CHECK_INTERVAL = 500;
         let metrikaInjected = false;
-        let fallbackTimeoutId = null;
+        let loadTimerId = null;
+        let cookieCheckInterval = null;
 
         window.METRIKA_COUNTER_ID = COUNTER_ID;
 
@@ -247,7 +247,7 @@
             }
             metrikaInjected = true;
             if (window.console && typeof window.console.info === 'function') {
-                console.info('[BotProtection] Yandex.Metrika initialized');
+                console.info('[Analytics] Yandex.Metrika initialized');
             }
 
             (function(m,e,t,r,i,k,a){
@@ -265,7 +265,7 @@
             notifyBackend();
         }
 
-        function readyToLoad(requireInteraction = true) {
+        function readyToLoad() {
             if (metrikaInjected) {
                 return false;
             }
@@ -275,69 +275,41 @@
             if (document.visibilityState === 'hidden') {
                 return false;
             }
-            if (requireInteraction && !userInteracted) {
-                return false;
-            }
             return true;
         }
 
-        function tryLoadMetrika(requireInteraction = true) {
-            if (readyToLoad(requireInteraction)) {
+        function tryLoadMetrika() {
+            if (readyToLoad()) {
                 injectMetrika();
-            }
-        }
-
-        function scheduleFallbackCheck() {
-            if (fallbackTimeoutId || metrikaInjected) {
-                return;
-            }
-            if (!hasChallengeCookie() || userInteracted) {
-                return;
-            }
-            fallbackTimeoutId = setTimeout(() => {
-                fallbackTimeoutId = null;
-                if (!userInteracted) {
-                    tryLoadMetrika(false);
+                if (cookieCheckInterval) {
+                    clearInterval(cookieCheckInterval);
+                    cookieCheckInterval = null;
                 }
-            }, FALLBACK_DELAY);
+            }
         }
 
-        function markInteraction() {
-            userInteracted = true;
-            if (fallbackTimeoutId) {
-                clearTimeout(fallbackTimeoutId);
-                fallbackTimeoutId = null;
+        function startCookiePolling() {
+            if (cookieCheckInterval || metrikaInjected) {
+                return;
             }
-            tryLoadMetrika();
+            cookieCheckInterval = setInterval(() => {
+                tryLoadMetrika();
+            }, COOKIE_CHECK_INTERVAL);
         }
 
-        ACTIVE_EVENTS.forEach((eventName) => {
-            const options = { once: true };
-            if (eventName === 'scroll' || eventName === 'touchstart') {
-                options.passive = true;
+        document.addEventListener('visibilitychange', () => {
+            if (!loadTimerId) {
+                tryLoadMetrika();
             }
-            document.addEventListener(eventName, markInteraction, options);
         });
 
-        document.addEventListener('visibilitychange', () => tryLoadMetrika());
-
-        const cookieCheckInterval = setInterval(() => {
-            if (metrikaInjected) {
-                clearInterval(cookieCheckInterval);
-                return;
+        loadTimerId = setTimeout(() => {
+            loadTimerId = null;
+            tryLoadMetrika();
+            if (!metrikaInjected) {
+                startCookiePolling();
             }
-            if (hasChallengeCookie()) {
-                tryLoadMetrika();
-                scheduleFallbackCheck();
-                if (metrikaInjected) {
-                    clearInterval(cookieCheckInterval);
-                }
-            }
-        }, 500);
-
-        if (hasChallengeCookie()) {
-            scheduleFallbackCheck();
-        }
+        }, METRIKA_LOAD_DELAY);
 
         window.trackMetrikaGoal = function(goalName, params) {
             if (!goalName || typeof window.ym !== 'function') {

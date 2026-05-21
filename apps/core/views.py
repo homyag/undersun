@@ -26,6 +26,7 @@ from apps.locations.models import District
 from apps.blog.models import BlogPost
 from .models import PromotionalBanner, Service, Team
 from .service_landing_content import build_service_landing_content, get_service_page_copy
+from .google_reviews import get_homepage_google_reviews
 import logging
 
 logger = logging.getLogger(__name__)
@@ -193,6 +194,7 @@ class HomeView(TemplateView):
         context['homepage_team'] = Team.get_homepage_team()
         context['all_team'] = Team.get_all_active()
         context['hidden_team'] = Team.objects.filter(is_active=True, show_on_homepage=False).order_by('display_order', 'last_name')
+        context['google_reviews'] = get_homepage_google_reviews(current_language)
 
         context['home_services_structured'] = [
             {

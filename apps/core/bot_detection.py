@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import ipaddress
 import logging
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -53,6 +55,8 @@ class BotDetectionService:
         rate_limit = config.get('RATE_LIMIT', {})
         self.rate_limit_window = rate_limit.get('WINDOW_SECONDS', 10)
         self.rate_limit_max = rate_limit.get('MAX_REQUESTS', 5)
+        self.js_challenge_grace_seconds = int(config.get('JS_CHALLENGE_GRACE_SECONDS', 10))
+        self.js_challenge_max_misses = int(config.get('JS_CHALLENGE_MAX_MISSES', 3))
         self.skip_path_prefixes = tuple(config.get('SKIP_PATH_PREFIXES', []))
         self.skip_methods = set(config.get('SKIP_METHODS', []))
         self.challenge_cookie = config.get('CHALLENGE_COOKIE', 'bot_challenge')
@@ -116,134 +120,37 @@ class BotDetectionService:
             return DetectionResult(score=0, action='allow')
 
         path = request.path or '/'
-        referer = (request.META.get('HTTP_REFERER') or '')[:2048]
 
         if path.startswith(self.skip_path_prefixes):
             return DetectionResult(score=0, action='allow')
 
-        # Rule: blacklist IP
-        asn_value = None
-        asn_org_value = None
-
-        if self.is_ip_blacklisted(client_ip):
-            score += self._add_match(matches, 'blacklist_ip')
-
-        # Rule: forbidden paths
-        if any(pattern.search(path) for pattern in self.forbidden_paths):
-            score += self._add_match(matches, 'forbidden_path', path)
-
-        # Rule: suspicious UA
-        if user_agent == '-' or any(pattern.search(user_agent) for pattern in self.suspicious_user_agents):
-            score += self._add_match(matches, 'suspicious_user_agent', user_agent or '-')
-        elif any(pattern.search(user_agent) for pattern in self.high_risk_user_agents):
-            score += self._add_match(matches, 'high_risk_user_agent', user_agent[:120])
-
-        # Rule: missing headers typical for browsers
         headers = self._collect_headers(request)
         missing_accept_lang = not headers.get('HTTP_ACCEPT_LANGUAGE')
         missing_accept_encoding = not headers.get('HTTP_ACCEPT_ENCODING')
-        missing_sec = not headers.get('HTTP_SEC_CH_UA') and not headers.get('HTTP_SEC_FETCH_SITE')
 
-        if missing_accept_lang and missing_accept_encoding:
-            rule_key = 'missing_headers_critical'
-            if self.is_ip_whitelisted(client_ip):
-                rule_key = 'missing_headers'
-            score += self._add_match(matches, rule_key, 'accept')
-        elif missing_accept_lang or missing_accept_encoding:
-            score += self._add_match(matches, 'missing_headers', 'accept')
-        elif missing_sec:
-            score += self._add_match(matches, 'missing_headers', 'sec')
+        # Minimal anti-bot policy: block only truly headerless browser-like
+        # traffic and clients that keep requesting HTML without running JS.
+        if not user_agent or user_agent == '-' or (missing_accept_lang and missing_accept_encoding):
+            score += self._add_match(matches, 'missing_headers_critical', 'noheader')
 
-        # Rule: JS challenge presence
         cookie_token = request.COOKIES.get(self.challenge_cookie)
-        field_token = request.POST.get('bot_challenge_token') or request.GET.get('bot_challenge_token')
-        if not cookie_token:
-            score += self._add_match(matches, 'js_challenge_missing', 'cookie')
-        elif request.method in {'POST', 'PUT', 'PATCH'} and not field_token:
-            if self._is_metrika_ping(path) and self._is_internal_referer(referer, request):
-                pass
-            else:
-                score += self._add_match(matches, 'js_challenge_missing', 'field')
-        elif field_token and field_token != cookie_token:
-            score += self._add_match(matches, 'js_challenge_failed', 'mismatch')
 
-        # Rule: no referer and requesting HTML (approx by missing file extension)
-        no_referer_hit = False
-        if not referer and not path.startswith(self.skip_path_prefixes) and '.' not in path.split('/')[-1]:
-            no_referer_hit = True
-            score += self._add_match(matches, 'no_referer')
+        if score == 0 and self._should_enforce_js_challenge(request):
+            if cookie_token:
+                self._clear_js_challenge_pending(client_ip, user_agent)
+            elif self._record_js_challenge_miss(client_ip, user_agent):
+                score += self._add_match(matches, 'js_challenge_missing', 'cookie')
 
-        # Rule: suspicious methods HEAD/OPTIONS on HTML
-        if request.method in {'HEAD', 'OPTIONS'} and not path.startswith(self.skip_path_prefixes):
-            score += self._add_match(matches, 'head_on_html', request.method)
+        if score == 0 and request.method in {'POST', 'PUT', 'PATCH'}:
+            if not cookie_token:
+                score += self._add_match(matches, 'js_challenge_missing', 'cookie')
 
-        # Rule: single HTML hit without static follow-up
-        if request.method == 'GET' and self._is_single_html_hit(client_ip, path):
-            score += self._add_match(matches, 'single_html_hit')
-
-        # Rule: ASN reputation
-        asn_record = self._lookup_asn(client_ip)
-        if asn_record:
-            asn_value = asn_record.asn
-            asn_org_value = asn_record.organization
-            asn_weight = self._asn_weight(asn_record)
-            if asn_weight:
-                detail = f"{asn_record.asn} {asn_record.organization}".strip()
-                score += self._add_match(
-                    matches,
-                    'asn_datacenter',
-                    detail=detail,
-                    weight_override=asn_weight,
-                )
-
-        # Rule: rate limiting
-        if self._is_rate_limited(client_ip):
-            score += self._add_match(matches, 'rate_limit')
-
-        if no_referer_hit and len(matches) > 1:
-            score += self._add_match(matches, 'no_referer_combo')
-
-        action = self._resolve_action(score)
-        matched_keys = {match.key for match in matches}
-        basic_rules = {'js_challenge_missing', 'single_html_hit', 'no_referer', 'no_referer_combo'}
-        soft_missing_headers_rules = basic_rules | {'missing_headers_critical'}
-        only_basic = matched_keys and matched_keys.issubset(basic_rules)
-        only_basic_plus_asn = matched_keys and matched_keys.issubset(basic_rules | {'asn_datacenter'})
-        if only_basic and action in {'block', 'challenge'}:
-            action = 'monitor'
-        elif (
-            only_basic_plus_asn
-            and 'asn_datacenter' in matched_keys
-            and self._is_search_referer(referer)
-            and action in {'block', 'challenge'}
-        ):
-            action = 'monitor'
-        elif (
-            matched_keys
-            and 'missing_headers_critical' in matched_keys
-            and matched_keys.issubset(soft_missing_headers_rules)
-            and action == 'block'
-        ):
-            # Keep the strong signal in score/logs, but force a softer first step
-            # when the request only looks like a header-poor first visit.
-            action = 'challenge'
-
-        notify_fail2ban = (
-            score >= self.thresholds.get('fail2ban', 100)
-            and not (
-                matched_keys
-                and 'missing_headers_critical' in matched_keys
-                and matched_keys.issubset(soft_missing_headers_rules)
-            )
-        )
         return DetectionResult(
             score=score,
-            action=action,
+            action='block' if score else 'allow',
             matched_rules=matches,
-            notify_fail2ban=notify_fail2ban,
+            notify_fail2ban=False,
             headers=headers,
-            asn=asn_value,
-            asn_organization=asn_org_value,
         )
 
     def _collect_headers(self, request) -> Dict[str, str]:
@@ -253,6 +160,74 @@ class BotDetectionService:
             if value:
                 collected[header] = value[:256]
         return collected
+
+    def _should_enforce_js_challenge(self, request) -> bool:
+        if request.method not in {'GET', 'HEAD'}:
+            return False
+
+        path = request.path or '/'
+        if self._is_metrika_ping(path):
+            return False
+
+        leaf = path.split('/')[-1]
+        return '.' not in leaf
+
+    def _record_js_challenge_miss(self, client_ip: str, user_agent: str) -> bool:
+        cache_key = self._js_challenge_cache_key(client_ip, user_agent)
+        if not cache_key:
+            return False
+
+        now = time.time()
+        timeout = max(self.js_challenge_grace_seconds * 3, 30)
+        try:
+            started_at, misses = self._parse_js_challenge_state(cache.get(cache_key))
+            if started_at is None:
+                cache.set(cache_key, f'{now}:1', timeout=timeout)
+                return False
+
+            misses += 1
+            cache.set(cache_key, f'{started_at}:{misses}', timeout=timeout)
+        except Exception:  # pragma: no cover
+            logger.exception('JS challenge cache update failure')
+            return False
+
+        return (
+            misses >= self.js_challenge_max_misses
+            and now - started_at >= self.js_challenge_grace_seconds
+        )
+
+    @staticmethod
+    def _parse_js_challenge_state(raw_value) -> Tuple[Optional[float], int]:
+        if raw_value is None:
+            return None, 0
+        try:
+            if isinstance(raw_value, bytes):
+                raw_value = raw_value.decode('utf-8')
+            raw_text = str(raw_value)
+            if ':' in raw_text:
+                started_at, misses = raw_text.split(':', 1)
+                return float(started_at), int(misses)
+            return float(raw_text), 1
+        except (TypeError, ValueError):
+            return None, 0
+
+    def _clear_js_challenge_pending(self, client_ip: str, user_agent: str) -> None:
+        cache_key = self._js_challenge_cache_key(client_ip, user_agent)
+        if not cache_key:
+            return
+
+        try:
+            cache.delete(cache_key)
+        except Exception:  # pragma: no cover
+            logger.exception('JS challenge cache delete failure')
+
+    @staticmethod
+    def _js_challenge_cache_key(client_ip: str, user_agent: str) -> Optional[str]:
+        if not client_ip or not user_agent:
+            return None
+        fingerprint = f'{client_ip}|{user_agent[:512]}'.encode('utf-8', errors='ignore')
+        digest = hashlib.sha256(fingerprint).hexdigest()[:24]
+        return f'botjs:{digest}'
 
     def _is_rate_limited(self, client_ip: str) -> bool:
         if not client_ip or not self.rate_limit_max:

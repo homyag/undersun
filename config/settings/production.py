@@ -41,7 +41,7 @@ CSP_EXTRA_DIRECTIVES = {
     'worker-src': "'self' blob:",
     'style-src': "'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com https://fonts.googleapis.com",
     'font-src': "'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com",
-    'img-src': "'self' data: blob: https://mc.yandex.ru https://www.googletagmanager.com https://www.google-analytics.com https://analytics.ahrefs.com https://www.google.com https://www.gstatic.com https://flagcdn.com https://*.tile.openstreetmap.org https://tile.openstreetmap.org https://maps.gstatic.com https://maps.googleapis.com https://cdn.ampproject.org https://ytimg.com https://i.ytimg.com https://www.youtube.com https://www.youtube-nocookie.com https://www.facebook.com https://www.instagram.com https://www.linkedin.com https://t.me https://wa.me https://unpkg.com",
+    'img-src': "'self' data: blob: https://mc.yandex.ru https://www.googletagmanager.com https://www.google-analytics.com https://analytics.ahrefs.com https://www.google.com https://www.gstatic.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://flagcdn.com https://*.tile.openstreetmap.org https://tile.openstreetmap.org https://maps.gstatic.com https://maps.googleapis.com https://cdn.ampproject.org https://ytimg.com https://i.ytimg.com https://www.youtube.com https://www.youtube-nocookie.com https://www.facebook.com https://www.instagram.com https://www.linkedin.com https://t.me https://wa.me https://unpkg.com",
     'frame-src': "'self' https://mc.yandex.ru https://www.google.com https://www.youtube.com https://www.youtube-nocookie.com https://maps.google.com",
 }
 
