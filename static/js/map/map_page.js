@@ -8,6 +8,7 @@
     let mapReady = false;
     let propertiesLoaded = false;
     let mapBoundsRefreshTimer = null;
+    let lastLoadedMapBounds = null;
 
     function saveMapPageScrollState() {
         try {
@@ -113,12 +114,12 @@
 
     function appendMapBoundsParams(params) {
         if (!isBoundsBasedMapLoadingEnabled()) {
-            return params;
+            return null;
         }
 
         const bounds = window.propertiesMapBridge?.getBoundsParams?.();
         if (!bounds) {
-            return params;
+            return null;
         }
 
         Object.entries(bounds).forEach(([key, value]) => {
@@ -127,7 +128,20 @@
             }
         });
 
-        return params;
+        return bounds;
+    }
+
+    function boundsContain(container, inner) {
+        if (!container || !inner) {
+            return false;
+        }
+
+        return (
+            Number(container.bounds_north) >= Number(inner.bounds_north) &&
+            Number(container.bounds_south) <= Number(inner.bounds_south) &&
+            Number(container.bounds_east) >= Number(inner.bounds_east) &&
+            Number(container.bounds_west) <= Number(inner.bounds_west)
+        );
     }
 
     function getMapPropertiesUrl({ includeBounds = true } = {}) {
@@ -139,20 +153,27 @@
         const url = new URL(endpoint, window.location.origin);
         const currentParams = new URLSearchParams(window.location.search);
         currentParams.delete('page');
+        let requestedBounds = null;
         if (includeBounds) {
-            appendMapBoundsParams(currentParams);
+            requestedBounds = appendMapBoundsParams(currentParams);
         }
         url.search = currentParams.toString();
-        return url.toString();
+        return {
+            href: url.toString(),
+            requestedBounds,
+        };
     }
 
     async function fetchMapProperties(options = {}) {
-        const url = getMapPropertiesUrl(options);
-        if (!url) {
-            return [];
+        const request = getMapPropertiesUrl(options);
+        if (!request?.href) {
+            return {
+                properties: [],
+                requestedBounds: null,
+            };
         }
 
-        const response = await fetch(url, {
+        const response = await fetch(request.href, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
             },
@@ -167,7 +188,10 @@
             throw new Error('Invalid map properties payload');
         }
 
-        return payload.properties;
+        return {
+            properties: payload.properties,
+            requestedBounds: request.requestedBounds,
+        };
     }
 
     function refreshMapFromPayload(properties, options = {}) {
@@ -200,8 +224,9 @@
         }
 
         try {
-            const properties = await fetchMapProperties({ includeBounds });
+            const { properties, requestedBounds } = await fetchMapProperties({ includeBounds });
             refreshMapFromPayload(properties, { fit });
+            lastLoadedMapBounds = requestedBounds || null;
             propertiesLoaded = true;
             syncMapReadyState();
         } catch (error) {
@@ -421,6 +446,11 @@
 
     document.addEventListener('catalog-map:bounds-changed', () => {
         if (!isBoundsBasedMapLoadingEnabled()) {
+            return;
+        }
+
+        const visibleBounds = window.propertiesMapBridge?.getBoundsParams?.({ padded: false });
+        if (boundsContain(lastLoadedMapBounds, visibleBounds)) {
             return;
         }
 

@@ -112,6 +112,7 @@
             enableMarkerSpread: config.enableMarkerSpread !== false,
             enablePropertyClusters: config.enablePropertyClusters === true,
             enableBoundsBasedLoading: config.enableBoundsBasedLoading === true,
+            boundsPaddingRatio: Number.isFinite(Number(config.boundsPaddingRatio)) ? Number(config.boundsPaddingRatio) : 0.35,
         };
     }
 
@@ -376,6 +377,16 @@
         return '#10b981';
     }
 
+    function getDealDarkHex(dealType) {
+        if (dealType === 'rent') {
+            return '#1d4ed8';
+        }
+        if (dealType === 'both') {
+            return '#6d28d9';
+        }
+        return '#047857';
+    }
+
     function getPropertyTypeKey(propertyType) {
         const normalized = String(propertyType || '').toLowerCase();
 
@@ -401,27 +412,68 @@
         return `property-icon-${typeKey}-${dealKey}`;
     }
 
-    function createSvgIconMarkup(type, color) {
-        const iconPaths = {
-            condo: `<path d="M12 42V13.5c0-.8.7-1.5 1.5-1.5h17c.8 0 1.5.7 1.5 1.5V42h-6v-6h-8v6h-6Zm4-24h4v4h-4v-4Zm0 7h4v4h-4v-4Zm0 7h4v4h-4v-4Zm8-14h4v4h-4v-4Zm0 7h4v4h-4v-4Zm0 7h4v4h-4v-4Z" fill="${color}"/>`,
-            townhouse: `<path d="M8.5 26.5 22 15l13.5 11.5V42h-7.5V31H16v11H8.5V26.5Zm7.5 0h12v-2.3L22 19l-6 5.2v2.3Z" fill="${color}"/>`,
-            villa: `<path d="M22 13 8.5 19.5V23h27v-3.5L22 13Zm-10 12h3v11h-3V25Zm6 0h3v11h-3V25Zm6 0h3v11h-3V25Zm6 0h3v11h-3V25ZM9 39h26v3H9v-3Z" fill="${color}"/>`,
-            land: `<path d="M9 38c4.5-6.5 11-10.5 19.5-12 1.4-.2 2.6.8 2.8 2.2.2 1.4-.8 2.6-2.2 2.8-7.1 1.2-12.4 4.4-16.1 9.8L9 38Zm23.5-13.5c1.9 0 3.5 1.6 3.5 3.5S34.4 31.5 32.5 31.5 29 29.9 29 28s1.6-3.5 3.5-3.5Z" fill="${color}"/>`,
-            default: `<path d="M22 13c7 0 12 4.8 12 11.4 0 8.1-10.2 18-10.7 18.4a1.9 1.9 0 0 1-2.6 0C20.2 42.4 10 32.5 10 24.4 10 17.8 15 13 22 13Zm0 6.2a5.3 5.3 0 1 0 0 10.6 5.3 5.3 0 0 0 0-10.6Z" fill="${color}"/>`,
+    function createSvgIconMarkup(type, color, darkColor) {
+        const iconMarkup = {
+            condo: `
+                <rect x="15" y="10.5" width="18" height="25" rx="3.2" fill="#fff"/>
+                <rect x="18.5" y="15" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
+                <rect x="26.1" y="15" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
+                <rect x="18.5" y="21.2" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
+                <rect x="26.1" y="21.2" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
+                <rect x="18.5" y="27.4" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
+                <rect x="26.1" y="27.4" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
+                <rect x="22.2" y="30.2" width="3.8" height="5.3" rx="1" fill="${color}" fill-opacity="0.9"/>
+            `,
+            townhouse: `
+                <path d="M11.2 22.7 24 11.7l12.8 11v12.8h-8.3v-8.9h-9v8.9h-8.3V22.7Z" fill="#fff"/>
+                <path d="M16.2 22.6 24 16l7.8 6.6v1.9H16.2v-1.9Z" fill="${color}" fill-opacity="0.78"/>
+                <rect x="20.2" y="28.1" width="7.6" height="7.4" rx="1.2" fill="${color}" fill-opacity="0.86"/>
+            `,
+            villa: `
+                <path d="M10.5 19.3 24 11.5l13.5 7.8v3.5h-27v-3.5Z" fill="#fff"/>
+                <rect x="12.2" y="24.6" width="23.6" height="3.1" rx="1.1" fill="#fff"/>
+                <rect x="13.2" y="33.2" width="21.6" height="3.4" rx="1.2" fill="#fff"/>
+                <rect x="15" y="27.2" width="3.2" height="7.1" rx="1" fill="#fff"/>
+                <rect x="22.4" y="27.2" width="3.2" height="7.1" rx="1" fill="#fff"/>
+                <rect x="29.8" y="27.2" width="3.2" height="7.1" rx="1" fill="#fff"/>
+                <path d="M16.4 19.2 24 15l7.6 4.2H16.4Z" fill="${color}" fill-opacity="0.78"/>
+            `,
+            land: `
+                <path d="M11.8 33.7c4.6-7.8 11.7-12.5 21.4-14.1" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>
+                <path d="M13.2 34.2c3.3-3.7 7.7-5.5 13.2-5.3 4 .1 7-1.1 9.1-3.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
+                <circle cx="33.8" cy="19.5" r="4.3" fill="#fff"/>
+                <path d="M14.1 35.5c3.5-2.8 8.1-4.1 13.7-3.8" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-opacity="0.74"/>
+            `,
+            default: `
+                <circle cx="24" cy="22.5" r="10.5" fill="#fff"/>
+                <circle cx="24" cy="22.5" r="4.2" fill="${color}" fill-opacity="0.88"/>
+                <path d="M24 10.6c6.4 0 11.6 4.9 11.6 11.2 0 7.7-9.7 15.9-10.7 16.7a1.4 1.4 0 0 1-1.8 0c-1-.8-10.7-9-10.7-16.7 0-6.3 5.2-11.2 11.6-11.2Z" fill="#fff" fill-opacity="0.2"/>
+            `,
         };
 
         return `
-            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
-                <circle cx="22" cy="22" r="20" fill="white" fill-opacity="0.96"/>
-                <circle cx="22" cy="22" r="19" fill="none" stroke="rgba(15,23,42,0.08)" stroke-width="1.5"/>
-                ${iconPaths[type] || iconPaths.default}
+            <svg xmlns="http://www.w3.org/2000/svg" width="96" height="112" viewBox="0 0 48 56">
+                <defs>
+                    <linearGradient id="markerGradient" x1="10" y1="4" x2="38" y2="50" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stop-color="${color}"/>
+                        <stop offset="1" stop-color="${darkColor}"/>
+                    </linearGradient>
+                    <filter id="markerShadow" x="-30%" y="-20%" width="160%" height="160%">
+                        <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#111827" flood-opacity="0.28"/>
+                    </filter>
+                </defs>
+                <path d="M24 2.6c-11.5 0-20 8.2-20 19.4 0 14.9 16.9 29.6 18.8 31.2a1.9 1.9 0 0 0 2.4 0C27.1 51.6 44 36.9 44 22 44 10.8 35.5 2.6 24 2.6Z" fill="url(#markerGradient)" filter="url(#markerShadow)"/>
+                <path d="M24 5.2c-10 0-17.2 7.1-17.2 16.8 0 13.2 14.4 26.3 17.2 28.7C26.8 48.3 41.2 35.2 41.2 22 41.2 12.3 34 5.2 24 5.2Z" fill="none" stroke="#fff" stroke-opacity="0.28" stroke-width="1.4"/>
+                <circle cx="24" cy="22.5" r="16" fill="#fff" fill-opacity="0.14"/>
+                ${iconMarkup[type] || iconMarkup.default}
+                <circle cx="24" cy="50.4" r="2.3" fill="#fff" fill-opacity="0.9"/>
             </svg>
         `.trim();
     }
 
     function loadMapImage(map, name, svgMarkup) {
         return new Promise((resolve, reject) => {
-            const image = new Image(44, 44);
+            const image = new Image(96, 112);
             image.onload = () => {
                 if (!map.hasImage(name)) {
                     map.addImage(name, image, { pixelRatio: 2 });
@@ -444,7 +496,7 @@
             }
 
             const [, , type, dealType] = name.split('-');
-            return loadMapImage(state.map, name, createSvgIconMarkup(type, getDealHex(dealType)));
+            return loadMapImage(state.map, name, createSvgIconMarkup(type, getDealHex(dealType), getDealDarkHex(dealType)));
         });
 
         await Promise.all(jobs);
@@ -954,10 +1006,11 @@
             source: SOURCE_ID,
             filter: ['!', ['has', 'point_count']],
             paint: {
-                'circle-radius': 18,
+                'circle-radius': 19,
                 'circle-color': getDealColorExpression(),
-                'circle-opacity': 0.18,
+                'circle-opacity': 0.14,
                 'circle-blur': 0.85,
+                'circle-translate': [0, -23],
             },
         });
 
@@ -967,9 +1020,10 @@
             source: SOURCE_ID,
             filter: ['!', ['has', 'point_count']],
             paint: {
-                'circle-radius': 10.5,
+                'circle-radius': 13,
                 'circle-color': '#ffffff',
-                'circle-opacity': 0.98,
+                'circle-opacity': 0.2,
+                'circle-translate': [0, -23],
             },
         });
 
@@ -979,11 +1033,12 @@
             source: SOURCE_ID,
             filter: ['!', ['has', 'point_count']],
             paint: {
-                'circle-radius': 6.5,
+                'circle-radius': 11,
                 'circle-color': getDealColorExpression(),
-                'circle-stroke-width': 1.5,
-                'circle-stroke-color': 'rgba(17,24,39,0.08)',
-                'circle-opacity': 0.95,
+                'circle-stroke-width': 0,
+                'circle-stroke-color': 'rgba(17,24,39,0)',
+                'circle-opacity': 0.01,
+                'circle-translate': [0, -23],
             },
         });
 
@@ -992,10 +1047,11 @@
             type: 'circle',
             source: SPIDER_POINT_SOURCE_ID,
             paint: {
-                'circle-radius': 20,
+                'circle-radius': 21,
                 'circle-color': getDealColorExpression(),
-                'circle-opacity': 0.16,
+                'circle-opacity': 0.14,
                 'circle-blur': 0.82,
+                'circle-translate': [0, -23],
             },
         });
 
@@ -1004,9 +1060,10 @@
             type: 'circle',
             source: SPIDER_POINT_SOURCE_ID,
             paint: {
-                'circle-radius': 11.5,
+                'circle-radius': 13,
                 'circle-color': '#ffffff',
-                'circle-opacity': 0.98,
+                'circle-opacity': 0.2,
+                'circle-translate': [0, -23],
             },
         });
 
@@ -1015,11 +1072,12 @@
             type: 'circle',
             source: SPIDER_POINT_SOURCE_ID,
             paint: {
-                'circle-radius': 7.25,
+                'circle-radius': 11,
                 'circle-color': getDealColorExpression(),
-                'circle-stroke-width': 1.5,
-                'circle-stroke-color': 'rgba(17,24,39,0.08)',
-                'circle-opacity': 0.96,
+                'circle-stroke-width': 0,
+                'circle-stroke-color': 'rgba(17,24,39,0)',
+                'circle-opacity': 0.01,
+                'circle-translate': [0, -23],
             },
         });
 
@@ -1028,10 +1086,11 @@
             type: 'circle',
             source: HOVER_SOURCE_ID,
             paint: {
-                'circle-radius': 21,
+                'circle-radius': 25,
                 'circle-color': getDealColorExpression(),
-                'circle-opacity': 0.18,
+                'circle-opacity': 0.2,
                 'circle-blur': 0.8,
+                'circle-translate': [0, -23],
             },
         });
 
@@ -1040,10 +1099,11 @@
             type: 'circle',
             source: SELECTED_SOURCE_ID,
             paint: {
-                'circle-radius': 24,
+                'circle-radius': 29,
                 'circle-color': getDealColorExpression(),
-                'circle-opacity': 0.2,
+                'circle-opacity': 0.22,
                 'circle-blur': 0.78,
+                'circle-translate': [0, -23],
             },
         });
 
@@ -1054,7 +1114,16 @@
             filter: ['!', ['has', 'point_count']],
             layout: {
                 'icon-image': ['get', 'icon_name'],
-                'icon-size': 0.82,
+                'icon-size': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    8, 0.56,
+                    11, 0.68,
+                    14, 0.82
+                ],
+                'icon-anchor': 'bottom',
+                'icon-offset': [0, 2],
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
             },
@@ -1066,7 +1135,9 @@
             source: SPIDER_POINT_SOURCE_ID,
             layout: {
                 'icon-image': ['get', 'icon_name'],
-                'icon-size': 0.82,
+                'icon-size': 0.78,
+                'icon-anchor': 'bottom',
+                'icon-offset': [0, 2],
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
             },
@@ -1468,7 +1539,23 @@
         fitToProperties(state.lastGeoJson);
     }
 
-    function getBoundsParams() {
+    function normalizeLng(lng) {
+        if (!Number.isFinite(lng)) {
+            return lng;
+        }
+
+        return ((((lng + 180) % 360) + 360) % 360) - 180;
+    }
+
+    function clampLat(lat) {
+        if (!Number.isFinite(lat)) {
+            return lat;
+        }
+
+        return Math.max(-90, Math.min(90, lat));
+    }
+
+    function getBoundsParams(options = {}) {
         if (!state.map || !isBoundsBasedLoadingEnabled()) {
             return null;
         }
@@ -1478,11 +1565,21 @@
             return null;
         }
 
+        const behavior = getMapBehaviorConfig();
+        const shouldPad = options.padded !== false;
+        const paddingRatio = shouldPad ? Math.max(0, behavior.boundsPaddingRatio) : 0;
+        const north = bounds.getNorth();
+        const south = bounds.getSouth();
+        const east = bounds.getEast();
+        const west = bounds.getWest();
+        const latPadding = Math.abs(north - south) * paddingRatio;
+        const lngPadding = Math.abs(east - west) * paddingRatio;
+
         return {
-            bounds_north: Number(bounds.getNorth().toFixed(6)),
-            bounds_south: Number(bounds.getSouth().toFixed(6)),
-            bounds_east: Number(bounds.getEast().toFixed(6)),
-            bounds_west: Number(bounds.getWest().toFixed(6)),
+            bounds_north: Number(clampLat(north + latPadding).toFixed(6)),
+            bounds_south: Number(clampLat(south - latPadding).toFixed(6)),
+            bounds_east: Number(normalizeLng(east + lngPadding).toFixed(6)),
+            bounds_west: Number(normalizeLng(west - lngPadding).toFixed(6)),
         };
     }
 
@@ -1560,7 +1657,8 @@
             }
 
             emitMapEvent('catalog-map:bounds-changed', {
-                bounds: getBoundsParams(),
+                bounds: getBoundsParams({ padded: true }),
+                visibleBounds: getBoundsParams({ padded: false }),
             });
         });
 

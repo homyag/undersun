@@ -13,6 +13,7 @@ function getMapUiElements() {
 }
 
 let mapBoundsRefreshTimer = null;
+let lastLoadedMapBounds = null;
 
 function isBoundsBasedMapLoadingEnabled() {
     return window.mapConfig?.enableBoundsBasedLoading === true;
@@ -25,12 +26,12 @@ function getMapBoundsRefreshDelay() {
 
 function appendMapBoundsParams(params) {
     if (!isBoundsBasedMapLoadingEnabled()) {
-        return params;
+        return null;
     }
 
     const bounds = window.propertiesMapBridge?.getBoundsParams?.();
     if (!bounds) {
-        return params;
+        return null;
     }
 
     Object.entries(bounds).forEach(([key, value]) => {
@@ -39,7 +40,20 @@ function appendMapBoundsParams(params) {
         }
     });
 
-    return params;
+    return bounds;
+}
+
+function boundsContain(container, inner) {
+    if (!container || !inner) {
+        return false;
+    }
+
+    return (
+        Number(container.bounds_north) >= Number(inner.bounds_north) &&
+        Number(container.bounds_south) <= Number(inner.bounds_south) &&
+        Number(container.bounds_east) >= Number(inner.bounds_east) &&
+        Number(container.bounds_west) <= Number(inner.bounds_west)
+    );
 }
 
 function setMapStatus(mode, summaryCount = null) {
@@ -172,9 +186,7 @@ function updateMapMarkers(options = {}) {
         showLoading = true,
     } = options;
     const params = collectMapFilterParams();
-    if (includeBounds) {
-        appendMapBoundsParams(params);
-    }
+    const requestedBounds = includeBounds ? appendMapBoundsParams(params) : null;
 
     if (showLoading) {
         setMapStatus('loading');
@@ -195,6 +207,7 @@ function updateMapMarkers(options = {}) {
 
             const properties = data.properties || [];
             setMapProperties(properties, { fit });
+            lastLoadedMapBounds = requestedBounds || null;
             setMapStatus(properties.length ? 'ready' : 'empty', properties.length);
         })
         .catch((error) => {
@@ -205,6 +218,11 @@ function updateMapMarkers(options = {}) {
 
 document.addEventListener('catalog-map:bounds-changed', () => {
     if (!isBoundsBasedMapLoadingEnabled()) {
+        return;
+    }
+
+    const visibleBounds = window.propertiesMapBridge?.getBoundsParams?.({ padded: false });
+    if (boundsContain(lastLoadedMapBounds, visibleBounds)) {
         return;
     }
 
