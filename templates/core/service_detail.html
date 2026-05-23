@@ -22,7 +22,6 @@
   {% if service_schema_image_url %}
   "image": "{{ service_schema_image_url|escapejs }}",
   {% endif %}
-  "inLanguage": "{{ LANGUAGE_CODE|default:'ru'|escapejs }}",
   "provider": {
     "@type": "Organization",
     "@id": "{{ service_provider_schema_id|escapejs }}",

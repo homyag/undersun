@@ -1,8 +1,33 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% load url_utils %}
 
-{% block title %}{% trans "Районы Пхукета" %} - Undersun Estate{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+
+{% block structured_data %}
+    {{ block.super }}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "{{ page_title|escapejs }}",
+      "url": "{{ canonical_url|escapejs }}",
+      "numberOfItems": {{ districts|length|default:0 }},
+      "itemListElement": [
+        {% for district in districts %}
+        {
+          "@type": "ListItem",
+          "position": {{ forloop.counter }},
+          "name": "{{ district.name|escapejs }}",
+          "url": "{{ district.get_absolute_url|absolute_url:request|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }
+    </script>
+{% endblock %}
 
 {% block content %}
 <!-- Compact Header Banner -->
@@ -12,15 +37,15 @@
             <div class="space-y-3">
                 <p class="text-xs uppercase tracking-[0.4em] text-accent">Undersun Estate</p>
                 <h1 class="text-3xl lg:text-4xl font-bold">{% trans "Районы Пхукета" %}</h1>
-                <p class="text-white/85">{% trans "Выберите идеальное место для жизни" %}</p>
+                <p class="max-w-2xl text-white/85">{{ location_page_copy.list_intro }}</p>
                 <div class="flex flex-wrap gap-6 text-sm text-white/80">
                     <div>
                         <p class="text-3xl font-bold">{{ districts|length }}</p>
                         <p class="uppercase tracking-[0.3em] text-white/60">{% trans "районов" %}</p>
                     </div>
                     <div>
-                        <p class="text-3xl font-bold">25+</p>
-                        <p class="uppercase tracking-[0.3em] text-white/60">{% trans "пляжей" %}</p>
+                        <p class="text-3xl font-bold">{{ total_property_count }}</p>
+                        <p class="uppercase tracking-[0.3em] text-white/60">{% trans "объектов" %}</p>
                     </div>
                 </div>
             </div>
@@ -68,9 +93,14 @@
                             <h3 class="text-xl font-bold text-primary">{{ district.name }}</h3>
                             <span class="text-xs uppercase tracking-[0.3em] text-tertiary">{% trans "Пхукет" %}</span>
                         </div>
+                        {% if district.market_info %}
+                            <p class="mb-3 text-sm font-semibold text-gray-900">{{ district.market_info.profile }}</p>
+                        {% endif %}
                         
-                        {% if district.description %}
-                            <p class="text-tertiary mb-4 flex-1">{{ district.description|truncatewords:15 }}</p>
+                        {% if district.localized_description %}
+                            <p class="text-tertiary mb-4 flex-1">{{ district.localized_description|truncatewords:15 }}</p>
+                        {% elif district.market_info %}
+                            <p class="text-tertiary mb-4 flex-1">{{ district.market_info.note|truncatewords:18 }}</p>
                         {% endif %}
                         
                         <div class="space-y-3">
@@ -90,6 +120,38 @@
                     </div>
                 </div>
             {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Decision Guide -->
+<section class="py-14 bg-white">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div class="lg:col-span-2">
+                <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-3">{{ location_page_copy.decision_kicker }}</p>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ location_page_copy.decision_heading }}</h2>
+                <p class="text-lg leading-8 text-gray-600">{{ location_page_copy.decision_text }}</p>
+            </div>
+            {% if location_advisor %}
+                <div class="rounded-3xl border border-gray-100 bg-gray-50 p-6">
+                    <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-4">{{ location_page_copy.advisor_kicker }}</p>
+                    <div class="flex items-center gap-4">
+                        {% if location_advisor.photo %}
+                            <img src="{{ location_advisor.photo.url }}" alt="{{ location_advisor.full_name }}" class="h-16 w-16 rounded-2xl object-cover">
+                        {% else %}
+                            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-white">
+                                {{ location_advisor.first_name|first }}{{ location_advisor.last_name|first }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <p class="font-bold text-gray-900">{{ location_advisor.full_name }}</p>
+                            <p class="text-sm text-gray-500">{{ location_advisor.position }}</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm leading-6 text-gray-600">{{ location_page_copy.advisor_text }}</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </section>

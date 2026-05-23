@@ -71,12 +71,6 @@
         {% if prop.image %}
         "image": "{{ prop.image|escapejs }}",
         {% endif %}
-        {% if prop.address %}
-        "address": {
-          "@type": "PostalAddress",
-          "name": "{{ prop.address|escapejs }}"
-        },
-        {% endif %}
         "url": "{{ prop.url|escapejs }}"
         {% if prop.price is not None %}
         ,"offers": {

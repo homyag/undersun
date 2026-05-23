@@ -3,10 +3,13 @@
 {% load i18n %}
 {% load url_utils %}
 
-{% block title %}{{ location.name }}{{ pagination_seo_suffix }} - {% trans "Локации" %} - Undersun Estate{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
 
 {% block structured_data %}
-    {% url 'properties:property_list' as property_catalog_url %}
+    {{ block.super }}
+    {% url 'core:home' as home_url %}
+    {% url 'location_list' as location_list_url %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -15,18 +18,24 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "{% trans "Недвижимость" %}",
-          "item": "{{ property_catalog_url|absolute_url:request|escapejs }}"
+          "name": "{% trans "Главная" %}",
+          "item": "{{ home_url|absolute_url:request|escapejs }}"
         },
         {
           "@type": "ListItem",
           "position": 2,
+          "name": "{% trans "Районы Пхукета" %}",
+          "item": "{{ location_list_url|absolute_url:request|escapejs }}"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
           "name": "{{ location.district.name|escapejs }}",
           "item": "{{ location.district.get_absolute_url|absolute_url:request|escapejs }}"
         },
         {
           "@type": "ListItem",
-          "position": 3,
+          "position": 4,
           "name": "{{ location.name|escapejs }}",
           "item": "{{ location.get_absolute_url|absolute_url:request|escapejs }}"
         }
@@ -51,6 +60,9 @@
       ]
     }
     </script>
+    {% if location_place_schema_json %}
+        <script type="application/ld+json">{{ location_place_schema_json|safe }}</script>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -83,15 +95,9 @@
             <div class="max-w-3xl">
                 <p class="text-sm uppercase tracking-[0.3em] text-accent mb-4">{% trans "локация" %}</p>
                 <h1 class="text-4xl lg:text-5xl font-bold mb-4 font-gilroy">{{ location.name }}</h1>
-                {% if location.description %}
-                    <p class="text-lg lg:text-xl text-gray-100 max-w-2xl">
-                        {{ location.description|truncatewords:28 }}
-                    </p>
-                {% else %}
-                    <p class="text-lg lg:text-xl text-gray-100 max-w-2xl">
-                        {% blocktrans with district=location.district.name %}Локация внутри района {{ district }} на Пхукете с развитой инфраструктурой и инвестиционным спросом.{% endblocktrans %}
-                    </p>
-                {% endif %}
+                <p class="text-lg lg:text-xl text-gray-100 max-w-2xl">
+                    {{ location_hero_summary_text }}
+                </p>
                 <div class="mt-6 flex flex-wrap gap-4">
                     <a href="{% url 'properties:property_list' %}?district={{ location.district.slug }}&location={{ location.slug }}"
                        class="inline-flex items-center justify-center px-6 py-3 rounded-full font-semibold text-gray-900 bg-gradient-to-r from-accent to-yellow-400 hover:from-yellow-400 hover:to-accent transition-transform duration-300 hover:scale-105 shadow-lg">
@@ -127,16 +133,17 @@
                 <div class="bg-white/15 backdrop-blur-lg rounded-3xl px-6 py-5 border border-white/30 shadow-xl flex flex-col gap-3">
                     <div class="flex items-center gap-3">
                         <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent text-gray-900 shadow-inner">
-                            <i class="fas fa-chart-line"></i>
+                            <i class="fas fa-compass"></i>
                         </span>
                         <div>
-                            <p class="text-xs uppercase tracking-[0.4em] text-gray-100">{% trans "инвестиционный профиль" %}</p>
-                            <p class="text-sm text-white/80">{{ district_roi.title|default:location.district.name }}</p>
+                            <p class="text-xs uppercase tracking-[0.4em] text-gray-100">{{ location_page_copy.market_kicker }}</p>
+                            <p class="text-sm text-white/80">{{ location.district.name }}</p>
                         </div>
                     </div>
-                    <p class="text-5xl font-bold">{{ district_roi.roi|default:"6–8%" }}</p>
+                    <p class="text-2xl font-bold leading-tight">{{ district_market.profile }}</p>
+                    <p class="text-sm font-semibold text-accent">{{ district_market.focus }}</p>
                     <p class="text-sm text-white/75 leading-relaxed">
-                        {{ district_roi.note|default:_('Стабильный спрос на аренду и качественная застройка.') }}
+                        {{ district_market.note }}
                     </p>
                 </div>
             </div>
@@ -148,88 +155,106 @@
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4">
         <div class="flex items-center text-sm text-gray-500 space-x-2 mb-8 overflow-x-auto">
-            <a href="{% url 'properties:property_list' %}" class="hover:text-primary transition-colors whitespace-nowrap">{% trans "Недвижимость" %}</a>
+            <a href="{% url 'core:home' %}" class="hover:text-primary transition-colors whitespace-nowrap">{% trans "Главная" %}</a>
+            <span>/</span>
+            <a href="{% url 'location_list' %}" class="hover:text-primary transition-colors whitespace-nowrap">{% trans "Районы Пхукета" %}</a>
             <span>/</span>
             <a href="{{ location.district.get_absolute_url }}" class="hover:text-primary transition-colors whitespace-nowrap">{{ location.district.name }}</a>
             <span>/</span>
             <span class="text-gray-900 font-medium whitespace-nowrap">{{ location.name|truncatechars:30 }}</span>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-                <div class="space-y-8">
-                    <div class="text-gray-700 leading-relaxed text-lg">
-                        {% if location.description %}
-                            {{ location.description|linebreaks }}
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.82fr)] gap-8 lg:gap-10 items-start">
+            <div class="space-y-7">
+                <div class="max-w-3xl">
+                    <p class="mb-3 text-xs font-semibold uppercase text-tertiary">{{ location_page_copy.overview_kicker }}</p>
+                    <h2 class="text-3xl font-bold leading-tight text-gray-900 lg:text-4xl">
+                        {{ location_page_copy.location_context_heading }} {{ location.name }}
+                    </h2>
+                    <div class="mt-5 text-base leading-8 text-gray-700 lg:text-lg">
+                        {{ location_description_text|linebreaks }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                        <div class="flex items-start justify-between gap-4">
+                            <p class="text-xs font-semibold uppercase text-tertiary">{% trans "объектов в каталоге" %}</p>
+                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                <i class="fas fa-home"></i>
+                            </span>
+                        </div>
+                        <p class="mt-4 text-4xl font-bold text-primary">{{ location_property_count|default:district_property_count }}</p>
+                        <p class="mt-2 text-sm leading-6 text-gray-500">{% trans "Виллы, апартаменты и клубные резиденции." %}</p>
+                    </div>
+                    <div class="rounded-2xl border border-accent/30 bg-white p-5 shadow-sm">
+                        <div class="flex items-start justify-between gap-4">
+                            <p class="text-xs font-semibold uppercase text-tertiary">{% trans "медианная цена сделки" %}</p>
+                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-gray-900">
+                                <i class="fas fa-chart-line"></i>
+                            </span>
+                        </div>
+                        {% if location_avg_price or district_avg_price %}
+                            {% with median_price=location_avg_price|default:district_avg_price %}
+                            <p class="mt-4 text-3xl font-bold text-primary sm:text-4xl">
+                                {{ location_avg_price_currency.symbol|default:"฿" }}{{ median_price|floatformat:0 }}
+                                <span class="text-base font-semibold text-tertiary">{{ location_avg_price_currency.code|default:"THB" }}</span>
+                            </p>
+                            {% endwith %}
                         {% else %}
-                        {% blocktrans with district=location.district.name name=location.name %}Локация {{ name }} — часть района {{ district }}, где сочетаются уютные резиденции и близость к ключевым точкам Пхукета.{% endblocktrans %}
+                            <p class="mt-4 text-2xl font-semibold text-primary">{% trans "Цена по запросу" %}</p>
                         {% endif %}
+                        <p class="mt-2 text-sm leading-6 text-gray-500">{% trans "Расчёт основан на активных объявлениях." %}</p>
                     </div>
+                </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-r from-white to-gray-50 flex flex-col gap-2">
-                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "объектов в каталоге" %}</p>
-                            <p class="text-4xl font-bold text-primary">{{ location_property_count|default:district_property_count }}</p>
-                            <p class="text-sm text-gray-500">{% trans "Виллы, апартаменты и клубные резиденции." %}</p>
-                        </div>
-                        <div class="p-5 rounded-2xl border border-gray-100 bg-gradient-to-r from-accent/10 to-white flex flex-col gap-2">
-                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "медианная цена сделки" %}</p>
-                            {% if location_avg_price or district_avg_price %}
-                                {% with median_price=location_avg_price|default:district_avg_price %}
-                                <p class="text-4xl font-bold text-primary">
-                                    {{ selected_currency.symbol|default:"$" }}{{ median_price|floatformat:0 }}
-                                    <span class="text-base font-semibold text-tertiary ml-1">{{ selected_currency.code|default:"USD" }}</span>
-                                </p>
-                                {% endwith %}
-                            {% else %}
-                                <p class="text-2xl font-semibold text-primary">{% trans "Цена по запросу" %}</p>
-                            {% endif %}
-                            <p class="text-sm text-gray-500">{% trans "Расчёт основан на активных объявлениях." %}</p>
-                        </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div class="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                        <span class="text-gray-500">{% trans "район" %}</span>
+                        <span class="font-semibold text-gray-900">{{ location.district.name }}</span>
                     </div>
+                    <div class="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                        <span class="text-gray-500">{% trans "курорт" %}</span>
+                        <span class="font-semibold text-gray-900">{% trans "Пхукет" %}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                        <span class="text-gray-500">{% trans "формат" %}</span>
+                        <span class="font-semibold text-gray-900">{% trans "Инвестиции + lifestyle" %}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                        <span class="text-gray-500">{% trans "статус" %}</span>
+                        <span class="font-semibold text-gray-900">{% trans "Доступно к покупке" %}</span>
+                    </div>
+                </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                            <span class="text-gray-500 uppercase tracking-[0.3em]">{% trans "район" %}</span>
-                            <span class="font-semibold text-gray-900">{{ location.district.name }}</span>
-                        </div>
-                        <div class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                            <span class="text-gray-500 uppercase tracking-[0.3em]">{% trans "курорт" %}</span>
-                            <span class="font-semibold text-gray-900">{% trans "Пхукет" %}</span>
-                        </div>
-                        <div class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                            <span class="text-gray-500 uppercase tracking-[0.3em]">{% trans "формат" %}</span>
-                            <span class="font-semibold text-gray-900">{% trans "Инвестиции + lifestyle" %}</span>
-                        </div>
-                        <div class="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                            <span class="text-gray-500 uppercase tracking-[0.3em]">{% trans "статус" %}</span>
-                            <span class="font-semibold text-gray-900">{% trans "Доступно к покупке" %}</span>
+                <div class="rounded-3xl border border-primary/10 bg-white p-6 shadow-sm">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+                        <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-white">
+                            <i class="fas fa-route"></i>
+                        </span>
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold uppercase text-tertiary">{{ location_page_copy.overview_kicker }}</p>
+                            <h2 class="mt-2 text-xl font-bold leading-7 text-gray-900">{{ location_selection_heading }}</h2>
+                            <p class="mt-3 text-sm leading-7 text-gray-600">{{ location_selection_text }}</p>
                         </div>
                     </div>
-
-                    {% if district_roi.note %}
-                        <div class="p-6 rounded-3xl bg-primary/5 border border-primary/10 text-gray-700 leading-relaxed">
-                            <p class="text-xs uppercase tracking-[0.4em] text-primary mb-2">{% trans "Комментарий аналитиков Undersun" %}</p>
-                            <p>{{ district_roi.note }}</p>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="relative rounded-[32px] overflow-hidden shadow-2xl">
+            <aside class="space-y-4 lg:sticky lg:top-24">
+                <figure class="relative aspect-[4/3] overflow-hidden rounded-3xl bg-primary shadow-xl">
                     {% if location.image %}
-                        <img src="{{ location.image.url }}" alt="{{ location.name }}" class="w-full h-96 object-cover">
+                        <img src="{{ location.image.url }}" alt="{{ location.name }}" class="h-full w-full object-cover">
                     {% elif location_static_image %}
-                        <img src="{{ location_static_image }}" alt="{{ location.name }}" class="w-full h-96 object-cover">
+                        <img src="{{ location_static_image }}" alt="{{ location.name }}" class="h-full w-full object-cover">
                     {% elif district_static_image %}
-                        <img src="{{ district_static_image }}" alt="{{ location.district.name }}" class="w-full h-96 object-cover">
+                        <img src="{{ district_static_image }}" alt="{{ location.district.name }}" class="h-full w-full object-cover">
                     {% else %}
-                        <div class="w-full h-96 bg-gradient-to-br from-primary to-tertiary"></div>
+                        <div class="h-full w-full bg-gradient-to-br from-primary to-tertiary"></div>
                     {% endif %}
                     <div class="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent"></div>
                     <div class="absolute bottom-6 left-6 text-white">
-                        <p class="uppercase text-xs tracking-[0.3em] text-white/80 mb-1">{% trans "локация" %}</p>
+                        <p class="mb-1 text-xs font-semibold uppercase text-white/80">{{ location_page_copy.media_caption_location }}</p>
                         <p class="text-2xl font-bold">{{ location.name }}</p>
                         <p class="text-sm text-white/80">{{ location.district.name }}, {% trans "Пхукет" %}</p>
                     </div>
@@ -238,14 +263,14 @@
                         <i class="fas fa-map mr-2"></i>
                         {% trans "О районе" %}
                     </a>
-                </div>
+                </figure>
 
                 {% if district_travel_time %}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="p-5 rounded-2xl bg-primary/5 border border-gray-100 flex flex-col gap-3">
-                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "До аэропорта" %}</p>
+                    <div class="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
+                        <p class="text-xs font-semibold uppercase text-tertiary">{% trans "До аэропорта" %}</p>
+                        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div class="flex items-center gap-3">
-                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-accent text-gray-900">
+                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-gray-900">
                                     <i class="fas fa-car"></i>
                                 </span>
                                 <div>
@@ -253,24 +278,79 @@
                                     <p class="text-xl font-semibold text-gray-900">{{ district_travel_time.car|default:"15" }} {% trans "мин" %}</p>
                                 </div>
                             </div>
-                        </div>
-                        <div class="p-5 rounded-2xl bg-primary/5 border border-gray-100 flex flex-col gap-3">
-                            <p class="text-xs uppercase tracking-[0.4em] text-tertiary">{% trans "Общественный транспорт" %}</p>
                             <div class="flex items-center gap-3">
-                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/20 text-primary">
+                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                     <i class="fas fa-bus"></i>
                                 </span>
                                 <div>
-                                    <p class="text-sm text-gray-500">{% trans "Автобус" %}</p>
+                                    <p class="text-sm text-gray-500">{% trans "Общественный транспорт" %}</p>
                                     <p class="text-xl font-semibold text-gray-900">{{ district_travel_time.bus|default:"30" }} {% trans "мин" %}</p>
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-500">{{ district_travel_time.note|default:_('Время зависит от маршрута и трафика.') }}</p>
                         </div>
+                        <p class="mt-4 text-sm leading-6 text-gray-500">{{ district_travel_time.note|default:_('Время зависит от маршрута и трафика.') }}</p>
                     </div>
                 {% endif %}
-            </div>
+            </aside>
         </div>
+
+        {% if catalog_links %}
+            <div class="mt-12">
+                <div class="mb-6 max-w-3xl">
+                    <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-2">{{ location_page_copy.catalog_kicker }}</p>
+                    <h2 class="text-3xl font-bold text-gray-900">{{ location_page_copy.catalog_heading_location }}</h2>
+                    <p class="mt-3 text-gray-600">{{ location_page_copy.catalog_text }}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {% for link in catalog_links %}
+                        <a href="{{ link.url }}" class="group flex h-full gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-accent hover:shadow-lg">
+                            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary transition group-hover:bg-accent group-hover:text-gray-900">
+                                <i class="{{ link.icon }}"></i>
+                            </span>
+                            <span class="min-w-0">
+                                <span class="block font-bold text-gray-900">{{ link.label }}</span>
+                                <span class="mt-1 block text-sm leading-6 text-gray-500">{{ link.description }}</span>
+                                <span class="mt-3 inline-flex items-center text-sm font-semibold text-primary">
+                                    {{ link.count }} {{ location_page_copy.active_count_label }}
+                                    <i class="fas fa-arrow-right ml-2 text-xs transition group-hover:translate-x-1"></i>
+                                </span>
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if location_advisor %}
+            <div class="mt-12 rounded-3xl border border-gray-100 bg-white p-6 shadow-lg">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-center">
+                    <div class="lg:col-span-2">
+                        <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-3">{{ location_page_copy.advisor_kicker }}</p>
+                        <h2 class="text-2xl font-bold text-gray-900">{{ location_page_copy.advisor_heading }}</h2>
+                        <p class="mt-3 text-gray-600 leading-7">{{ location_page_copy.advisor_text }}</p>
+                    </div>
+                    <div class="flex items-center gap-4 rounded-2xl bg-gray-50 p-4">
+                        {% if location_advisor.photo %}
+                            <img src="{{ location_advisor.photo.url }}" alt="{{ location_advisor.full_name }}" class="h-16 w-16 rounded-2xl object-cover">
+                        {% else %}
+                            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-white">
+                                {{ location_advisor.first_name|first }}{{ location_advisor.last_name|first }}
+                            </div>
+                        {% endif %}
+                        <div class="min-w-0">
+                            <p class="font-bold text-gray-900">{{ location_advisor.full_name }}</p>
+                            <p class="text-sm text-gray-500">{{ location_advisor.position }}</p>
+                            {% if location_advisor.whatsapp_url %}
+                                <a href="{{ location_advisor.whatsapp_url }}" target="_blank" rel="noopener" class="mt-2 inline-flex items-center text-sm font-semibold text-primary hover:text-accent">
+                                    <i class="fab fa-whatsapp mr-2"></i>
+                                    WhatsApp
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </section>
 
@@ -340,6 +420,49 @@
                     </a>
                 </div>
             {% endif %}
+        </div>
+    </section>
+{% endif %}
+
+{% if related_location_links %}
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="mb-8 max-w-3xl">
+                <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-2">{{ location_page_copy.related_kicker }}</p>
+                <h2 class="text-3xl font-bold text-gray-900">{{ location_page_copy.related_heading }}</h2>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for related_location in related_location_links %}
+                    <a href="{{ related_location.get_absolute_url }}" class="group flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-accent hover:shadow-lg">
+                        <span>
+                            <span class="block font-bold text-gray-900">{{ related_location.name }}</span>
+                            <span class="mt-1 block text-sm text-gray-500">{{ related_location.active_property_count }} {{ location_page_copy.active_count_label }}</span>
+                        </span>
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition group-hover:bg-accent group-hover:text-gray-900">
+                            <i class="fas fa-arrow-right text-sm"></i>
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}
+
+{% if location_faq_items %}
+    <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="max-w-3xl mb-8">
+                <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-2">{{ location_page_copy.faq_kicker }}</p>
+                <h2 class="text-3xl font-bold text-gray-900">{{ location_page_copy.faq_heading }}</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for item in location_faq_items %}
+                    <div class="rounded-2xl border border-gray-100 bg-gray-50 p-6">
+                        <h3 class="text-lg font-bold text-gray-900">{{ item.question }}</h3>
+                        <p class="mt-3 text-gray-600 leading-7">{{ item.answer }}</p>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </section>
 {% endif %}

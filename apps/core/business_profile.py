@@ -120,7 +120,6 @@ def build_business_schema_json(site_root_url, page_url, language_code='ru'):
                     '@type': 'Place',
                     'name': profile['area_served'],
                 },
-                'availableLanguage': ['ru', 'en', 'th'],
                 'sameAs': profile['same_as'],
             },
             {

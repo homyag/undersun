@@ -256,7 +256,9 @@ def build_blog_post_schema(
         'publisher': {k: v for k, v in publisher_schema.items() if v not in (None, '', [], {})} if publisher_schema else None,
         'interactionStatistic': {
             '@type': 'InteractionCounter',
-            'interactionType': 'https://schema.org/ReadAction',
+            'interactionType': {
+                '@type': 'ReadAction',
+            },
             'userInteractionCount': post.views_count,
         } if post.views_count else None,
     }
@@ -352,9 +354,6 @@ def build_blog_item_list_schema(
             'numberOfItems': len(items),
         },
     }
-
-    if about:
-        schema['about'] = about
 
     return {k: v for k, v in schema.items() if v not in (None, '', [], {})}
 

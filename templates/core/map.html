@@ -15,7 +15,17 @@
   "url": "{{ request.build_absolute_uri }}",
   "provider": {
     "@type": "RealEstateAgent",
-    "name": "Undersun Estate"
+    "@id": "{{ request.scheme }}://{{ request.get_host }}/#real-estate-agent",
+    "name": "Undersun Estate",
+    "telephone": "{{ business_profile.phone_display|escapejs }}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ business_profile.street_address|escapejs }}",
+      "addressLocality": "{{ business_profile.locality|escapejs }}",
+      "addressRegion": "{{ business_profile.region|escapejs }}",
+      "postalCode": "{{ business_profile.postal_code|escapejs }}",
+      "addressCountry": "{{ business_profile.address_country_code|escapejs }}"
+    }
   },
   "spatialCoverage": {
     "@type": "Place",
@@ -31,7 +41,7 @@
     {
       "@type": "Place",
       "name": "{{ property.title|escapejs }}",
-      "url": "{{ property.get_absolute_url }}",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{{ property.get_absolute_url }}",
       "geo": {
         "@type": "GeoCoordinates",
         "latitude": {{ property.latitude|default:'0'|unlocalize }},
