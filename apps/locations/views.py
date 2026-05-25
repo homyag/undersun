@@ -289,6 +289,7 @@ def _localized_text(obj, field_name, language_code):
 def _median_sale_price_for_currency(queryset, currency_code):
     values_thb = list(
         queryset
+        .filter(deal_type__in=['sale', 'both'])
         .filter(price_sale_thb__isnull=False)
         .values_list('price_sale_thb', flat=True)
     )
@@ -730,7 +731,17 @@ class DistrictDetailView(DetailView):
         )
 
         # Локации в районе
-        locations = self.object.locations.all()
+        locations = (
+            self.object.locations
+            .annotate(
+                active_property_count=Count(
+                    'property',
+                    filter=Q(property__is_active=True, property__status='available'),
+                )
+            )
+            .filter(active_property_count__gt=0)
+            .order_by('-active_property_count', 'name')
+        )
         context['locations'] = locations
 
         property_type_ids = (
