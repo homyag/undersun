@@ -1,6 +1,5 @@
 from decimal import Decimal, InvalidOperation
 import json
-from urllib.parse import parse_qsl, urlencode
 
 from django.views.generic import TemplateView, DetailView, View
 from django.db.models import Q, Count
@@ -19,6 +18,10 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 
 from apps.currency.services import CurrencyService
+from apps.core.legacy_redirects import (
+    append_legacy_real_estate_query,
+    build_legacy_real_estate_target,
+)
 from apps.core.utils import build_query_string, truncate_meta
 from apps.properties.models import Property, PropertyType
 from apps.properties.views import PropertyListView
@@ -595,20 +598,20 @@ def custom_404(request, exception):
 
 
 def legacy_real_estate_redirect(request, *args, **kwargs):
-    """Постоянный редирект со старых URL /real-estate/... на новый каталог /property/."""
-    target_url = reverse('properties:property_list')
-
-    raw_query = request.META.get('QUERY_STRING', '').strip()
-    allowed_params = {}
-
-    if raw_query:
-        # Сохраняем только безопасные параметры, чтобы не протягивать legacy-хвосты в индекс
-        for key, value in parse_qsl(raw_query, keep_blank_values=True):
-            if key == 'page' and value:
-                allowed_params[key] = value
-
-    if allowed_params:
-        target_url = f"{target_url}?{urlencode(allowed_params)}"
+    """Постоянный редирект со старых URL /real-estate/... на актуальные страницы каталога."""
+    default_language = (
+        get_language_from_path(request.path)
+        or get_language()
+        or settings.LANGUAGE_CODE
+    )
+    target_url = (
+        build_legacy_real_estate_target(request.path, default_language=default_language)
+        or reverse('properties:property_list')
+    )
+    target_url = append_legacy_real_estate_query(
+        target_url,
+        request.META.get('QUERY_STRING'),
+    )
 
     return HttpResponsePermanentRedirect(target_url)
 

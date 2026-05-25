@@ -10,6 +10,10 @@ from django.utils.deprecation import MiddlewareMixin
 from urllib.parse import urlsplit, urlencode, parse_qsl, urlunsplit
 
 from apps.core.bot_detection import BotDetectionService, bot_detection_service
+from apps.core.legacy_redirects import (
+    append_legacy_real_estate_query,
+    build_legacy_real_estate_target,
+)
 from apps.core.models import ManualIPBan, RequestLog
 
 
@@ -119,21 +123,17 @@ class LanguageRedirectMiddleware(MiddlewareMixin):
 
 
 class LegacyRealEstateRedirectMiddleware(MiddlewareMixin):
-    """301-редиректы со старых URL /{lang}/real-estate/... на актуальный каталог."""
-
-    legacy_pattern = re.compile(r'^/(ru|en|th)/real-estate(?:/.*)?$')
+    """301-редиректы со старых URL /{lang}/real-estate/... на актуальные страницы каталога."""
 
     def process_request(self, request):
-        match = self.legacy_pattern.match(request.path)
-        if not match:
+        target = build_legacy_real_estate_target(request.path)
+        if not target:
             return None
 
-        language = match.group(1)
-        target = f'/{language}/property/'
-
-        query_string = request.META.get('QUERY_STRING')
-        if query_string:
-            target = f'{target}?{query_string}'
+        target = append_legacy_real_estate_query(
+            target,
+            request.META.get('QUERY_STRING'),
+        )
 
         return HttpResponsePermanentRedirect(target)
 
