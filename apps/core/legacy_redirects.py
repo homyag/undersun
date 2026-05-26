@@ -15,6 +15,41 @@ REAL_ESTATE_CATEGORY_MAP = {
     'rent': 'rent/',
 }
 
+REAL_ESTATE_SPECIAL_MAP = {
+    'for-investment': 'property/sale/',
+    'ready-made-business': 'services/commercial-real-estate/',
+    'ready-made-business-for-rent': 'services/commercial-real-estate/',
+    'business': 'services/commercial-real-estate/',
+}
+
+REAL_ESTATE_LOCATION_MAP = {
+    'kathu': 'locations/kathu-district/',
+    'kathu/kamala': 'locations/kathu-district/kamala/',
+    'kathu/kathu': 'locations/kathu-district/kathu/',
+    'kathu/patong': 'locations/kathu-district/patong/',
+    'kathu-district': 'locations/kathu-district/',
+    'kathu-district/kamala': 'locations/kathu-district/kamala/',
+    'kathu-district/kathu': 'locations/kathu-district/kathu/',
+    'kathu-district/patong': 'locations/kathu-district/patong/',
+    'mueang-phuket': 'locations/mueang-phuket/',
+    'mueang-phuket/chalong': 'locations/mueang-phuket/chalong/',
+    'mueang-phuket/karon': 'locations/mueang-phuket/karon/',
+    'mueang-phuket/ko-kaeo': 'locations/mueang-phuket/ko-kaeo/',
+    'mueang-phuket/ratsada': 'locations/mueang-phuket/ratsada/',
+    'mueang-phuket/rawai': 'locations/mueang-phuket/rawai/',
+    'mueang-phuket/talad-nuea': 'locations/mueang-phuket/talad-nuea/',
+    'mueang-phuket/talad-yai': 'locations/mueang-phuket/talad-yai/',
+    'mueang-phuket/wichit': 'locations/mueang-phuket/wichit/',
+    'thalang': 'locations/thalang/',
+    'thalang/bangtao': 'locations/thalang/bangtao/',
+    'thalang/cherng-talay': 'locations/thalang/cherng-talay/',
+    'thalang/mai-khao': 'locations/thalang/mai-khao/',
+    'thalang/pa-khlok': 'locations/thalang/pa-khlok/',
+    'thalang/sakhu': 'locations/thalang/sakhu/',
+    'thalang/si-sunthon': 'locations/thalang/si-sunthon/',
+    'thalang/thep-krasasttri': 'locations/thalang/thep-krasasttri/',
+}
+
 LEGACY_REAL_ESTATE_QUERY_PARAMS = {'page'}
 
 
@@ -33,6 +68,12 @@ def build_legacy_real_estate_target(path, default_language=None):
 
     if rest in REAL_ESTATE_CATEGORY_MAP:
         return f'/{language}/property/{REAL_ESTATE_CATEGORY_MAP[rest]}'
+
+    if rest in REAL_ESTATE_SPECIAL_MAP:
+        return f'/{language}/{REAL_ESTATE_SPECIAL_MAP[rest]}'
+
+    if rest in REAL_ESTATE_LOCATION_MAP:
+        return f'/{language}/{REAL_ESTATE_LOCATION_MAP[rest]}'
 
     last_segment = rest.rstrip('/').split('/')[-1]
     detail_match = re.match(r'^\d+-(?P<slug>.+)$', last_segment)

@@ -303,12 +303,28 @@ function closeGallery() {
 function setupContactSidebarScroll() {
     const wrapper = document.getElementById('contact-sidebar-wrapper');
     const sidebar = document.getElementById('property-contact-form');
-    const similarSection = document.getElementById('similar-properties');
-    if (!wrapper || !sidebar || !similarSection) {
+    const scrollBoundary = document.getElementById('same-complex-properties') || document.getElementById('similar-properties');
+    if (!wrapper || !sidebar || !scrollBoundary) {
         return;
     }
 
     let lastY = 0;
+
+    const getStickyTopOffset = () => {
+        const mainNav = document.getElementById('main-nav');
+        const gap = 24;
+
+        if (!mainNav) {
+            return gap;
+        }
+
+        const navRect = mainNav.getBoundingClientRect();
+        if (!navRect.height) {
+            return gap;
+        }
+
+        return Math.max(gap, Math.ceil(navRect.bottom + gap));
+    };
 
     const onScroll = () => {
         if (window.innerWidth < 1024) {
@@ -318,10 +334,11 @@ function setupContactSidebarScroll() {
 
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         const wrapperTop = wrapper.getBoundingClientRect().top + scrollTop;
-        const similarTop = similarSection.getBoundingClientRect().top + scrollTop;
+        const boundaryTop = scrollBoundary.getBoundingClientRect().top + scrollTop;
         const sidebarHeight = sidebar.offsetHeight;
-        const topOffset = 24;
-        const maxOffset = Math.max(0, similarTop - sidebarHeight - topOffset - wrapperTop);
+        const topOffset = getStickyTopOffset();
+        const sectionGap = 24;
+        const maxOffset = Math.max(0, boundaryTop - sidebarHeight - sectionGap - wrapperTop);
         const currentOffset = Math.max(0, Math.min(scrollTop - wrapperTop + topOffset, maxOffset));
 
         if (Math.abs(currentOffset - lastY) > 1) {

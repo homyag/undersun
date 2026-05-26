@@ -778,6 +778,51 @@
         </div>
     </section>
 
+    {% if same_complex_context.has_items %}
+        <section id="same-complex-properties"
+                 class="same-complex-section"
+                 aria-labelledby="same-complex-heading">
+            <div class="same-complex-inner">
+                <div class="same-complex-header">
+                    <div class="same-complex-title-group">
+                        <p class="same-complex-kicker">
+                            <span class="same-complex-kicker-icon" aria-hidden="true">
+                                <i class="fas fa-building"></i>
+                            </span>
+                            <span>{{ same_complex_context.eyebrow }}</span>
+                        </p>
+                        <h2 id="same-complex-heading" class="same-complex-title">
+                            {{ same_complex_context.heading }}
+                        </h2>
+                        <p class="same-complex-description">
+                            {{ same_complex_context.description }}
+                        </p>
+                    </div>
+                </div>
+                {% if same_complex_stats %}
+                    <div class="same-complex-stats" aria-label="{{ same_complex_context.stats_label }}">
+                        {% for stat in same_complex_stats %}
+                            <div class="same-complex-stat">
+                                <span class="same-complex-stat-icon" aria-hidden="true">
+                                    <i class="{{ stat.icon }}"></i>
+                                </span>
+                                <span class="same-complex-stat-text">
+                                    <span class="same-complex-stat-value">{{ stat.value }}</span>
+                                    <span class="same-complex-stat-label">{{ stat.label }}</span>
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <div class="same-complex-grid">
+                    {% for complex_property in same_complex_properties %}
+                        {% include 'properties/card.html' with property=complex_property %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
     <!-- Similar Properties -->
     {% if similar_properties %}
         <div id="similar-sentinel" class="block h-1" aria-hidden="true"></div>

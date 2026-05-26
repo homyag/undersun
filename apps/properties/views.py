@@ -1,4 +1,5 @@
 import json
+import re
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
@@ -194,6 +195,813 @@ CATALOG_SEO_TEXTS = {
     },
 }
 
+CATALOG_LANDING_OVERRIDES = {
+    ('en', 'type_only', 'condo', '', '', ''): {
+        'heading': 'Phuket condos for sale',
+        'page_title': 'Phuket Condos for Sale | Buy Condo in Phuket | Undersun Estate',
+        'page_description': (
+            'Compare %(count)s Phuket condos for sale by area, budget, project status, ownership structure '
+            'and fees. Undersun Estate helps shortlist units.'
+        ),
+        'seo_heading': 'Buying a condo in Phuket',
+        'intro': (
+            'Compare condos and apartments for sale in Phuket with current listings from Undersun Estate. '
+            'Use this page to shortlist units by budget, area, project status and practical ownership terms '
+            'before arranging a viewing.'
+        ),
+        'highlights': [
+            'Start with the use case: own stay, holiday use, rental management or long-term capital preservation.',
+            (
+                'Check foreign freehold quota, leasehold/freehold structure, common area fees, sinking fund, '
+                'rental rules and handover terms before reserving.'
+            ),
+            (
+                'Compare beach areas such as Bang Tao, Kamala and Karon with everyday locations such as '
+                'Chalong, Rawai, Kathu and Phuket Town.'
+            ),
+            (
+                'For off-plan condos, review developer track record, construction stage, payment schedule '
+                'and what is included in the furniture package.'
+            ),
+        ],
+        'follow_up': (
+            'Our team can prepare a shortlist, confirm current availability with the developer or owner, '
+            'and explain the tradeoffs between similar condo projects before you visit.'
+        ),
+        'faq_heading': 'Questions to ask before buying a condo in Phuket',
+        'faq_entries': [
+            {
+                'question': 'Can foreigners buy a condo in Phuket?',
+                'answer': (
+                    'Foreign buyers can usually consider condominium units where foreign freehold quota is '
+                    'available, or leasehold structures where that is the project format. The exact structure '
+                    'must be checked for the specific unit before reservation.'
+                ),
+            },
+            {
+                'question': 'What should I check before buying a Phuket condo?',
+                'answer': (
+                    'Check the project status, title and ownership structure, foreign quota, payment schedule, '
+                    'common area fees, sinking fund, furniture package, rental rules and handover terms.'
+                ),
+            },
+            {
+                'question': 'Which Phuket areas are popular for condos?',
+                'answer': (
+                    'Beach-focused buyers often compare Bang Tao, Kamala, Karon, Kata and Mai Khao. For daily '
+                    'living and a lower-key environment, Chalong, Rawai, Kathu and Phuket Town can also be relevant.'
+                ),
+            },
+            {
+                'question': 'Is a Phuket condo suitable for investment?',
+                'answer': (
+                    'It can be, but only after checking the entry price, rental rules, management model, fees, '
+                    'seasonality and resale liquidity. We avoid treating projected yield as a guarantee.'
+                ),
+            },
+            {
+                'question': 'How many condo listings are available on this page?',
+                'answer': 'There are currently %(count)s active condo listings in this selection.',
+            },
+        ],
+    },
+    ('en', 'type_only', 'villa', '', '', ''): {
+        'heading': 'Phuket villas for sale',
+        'page_title': 'Phuket Villas for Sale | Buy Villa in Phuket | Undersun Estate',
+        'page_description': (
+            'Compare %(count)s Phuket villas for sale by area, bedrooms, land, pool, project status and '
+            'ownership terms. Undersun Estate helps shortlist suitable villas.'
+        ),
+        'seo_heading': 'Buying a villa in Phuket',
+        'intro': (
+            'Use this villa selection to compare private pool villas, family homes and resort-style residences '
+            'across Phuket. The right shortlist depends on more than the photo gallery: road access, land title, '
+            'maintenance, rental rules and the specific micro-location all need to be checked.'
+        ),
+        'highlights': [
+            'Separate lifestyle villas for own stay from rental-focused villas managed by a project or operator.',
+            (
+                'Review land title, ownership structure, access road, utilities, estate fees, pool and garden '
+                'maintenance before committing to a reservation.'
+            ),
+            (
+                'Compare Bang Tao, Layan and Laguna with Kamala, Rawai, Chalong, Kathu and Thalang depending '
+                'on privacy, beach access, schools and daily logistics.'
+            ),
+            (
+                'For off-plan villas, check developer delivery history, construction stage, payment schedule, '
+                'included furniture and warranty terms.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate can compare similar villas side by side, confirm current availability and prepare '
+            'questions for the owner or developer before a viewing.'
+        ),
+        'faq_heading': 'Questions to ask before buying a villa in Phuket',
+        'faq_entries': [
+            {
+                'question': 'What should I check before buying a villa in Phuket?',
+                'answer': (
+                    'Check the land title, ownership structure, road access, utilities, estate fees, pool and '
+                    'garden maintenance, project rules, construction status and all payment milestones.'
+                ),
+            },
+            {
+                'question': 'Which Phuket areas are popular for villas?',
+                'answer': (
+                    'Buyers often compare Bang Tao, Layan, Laguna and Kamala for resort-style villas, while '
+                    'Rawai, Chalong, Kathu and Thalang can work for daily living, family logistics or larger plots.'
+                ),
+            },
+            {
+                'question': 'Is a villa better than a condo in Phuket?',
+                'answer': (
+                    'A villa gives more privacy, land and outdoor space, but it also brings more checks around '
+                    'land structure, maintenance, access and management. The better format depends on the goal.'
+                ),
+            },
+            {
+                'question': 'Can a Phuket villa be used for rental income?',
+                'answer': (
+                    'Some villas can be rented, but the result depends on location, management, seasonality, '
+                    'pricing, operating costs and legal/project rules. Projected yield should not be treated as guaranteed.'
+                ),
+            },
+            {
+                'question': 'How many villa listings are available on this page?',
+                'answer': 'There are currently %(count)s active villa listings in this selection.',
+            },
+        ],
+    },
+    ('ru', 'type_only', 'villa', '', '', ''): {
+        'heading': 'Виллы на Пхукете на продажу',
+        'page_title': 'Виллы на Пхукете купить | Undersun Estate',
+        'page_description': (
+            'Сравните виллы на Пхукете по району, бюджету, спальням, участку, бассейну, стадии проекта '
+            'и условиям владения. Undersun Estate помогает собрать шорт-лист.'
+        ),
+        'seo_heading': 'Как выбирать виллу на Пхукете',
+        'intro': (
+            'В этом разделе собраны виллы на Пхукете для жизни, отдыха и инвестиционных сценариев. При выборе '
+            'важно смотреть не только планировку и бассейн, но и титул земли, подъезд, управление, расходы на '
+            'обслуживание, правила аренды и конкретную микролокацию.'
+        ),
+        'highlights': [
+            'Разделяйте виллы для личного проживания, семейной жизни, отдыха и аренды: критерии выбора будут разными.',
+            (
+                'Проверьте титул земли, структуру владения, подъездную дорогу, коммуникации, платежи в комплексе, '
+                'обслуживание бассейна и сада до внесения существенных платежей.'
+            ),
+            (
+                'Сравнивайте Bang Tao, Layan, Laguna и Kamala с Rawai, Chalong, Kathu и Thalang по приватности, '
+                'пляжам, школам, пробкам и повседневной логистике.'
+            ),
+            (
+                'Для строящихся вилл отдельно оценивайте репутацию застройщика, стадию строительства, график '
+                'платежей, комплектацию мебелью и гарантийные условия.'
+            ),
+        ],
+        'follow_up': (
+            'Мы можем сравнить похожие виллы, уточнить актуальную доступность и заранее подготовить вопросы '
+            'к собственнику или застройщику перед просмотром.'
+        ),
+        'faq_heading': 'Что проверить перед покупкой виллы на Пхукете',
+        'faq_entries': [
+            {
+                'question': 'Что важно проверить перед покупкой виллы на Пхукете?',
+                'answer': (
+                    'Титул земли, структуру владения, подъезд, коммуникации, платежи за обслуживание, состояние '
+                    'объекта, правила комплекса, график платежей и условия передачи.'
+                ),
+            },
+            {
+                'question': 'Какие районы Пхукета чаще смотрят для покупки виллы?',
+                'answer': (
+                    'Для курортного формата часто сравнивают Bang Tao, Layan, Laguna и Kamala. Для жизни и '
+                    'семейной логистики также смотрят Rawai, Chalong, Kathu и Thalang.'
+                ),
+            },
+            {
+                'question': 'Вилла на Пхукете подходит для инвестиций?',
+                'answer': (
+                    'Потенциально да, но нужно считать конкретный объект: цену входа, расходы, управление, '
+                    'сезонность, правила аренды и ликвидность. Доходность нельзя считать гарантированной.'
+                ),
+            },
+            {
+                'question': 'Чем вилла отличается от квартиры в кондоминиуме при покупке?',
+                'answer': (
+                    'Вилла обычно даёт больше приватности, земли и пространства, но требует более тщательной '
+                    'проверки земли, содержания, управления и юридической структуры.'
+                ),
+            },
+            {
+                'question': 'Сколько вилл сейчас есть в этой подборке?',
+                'answer': 'Сейчас в подборке %(count)s актуальных предложений вилл.',
+            },
+        ],
+    },
+    ('en', 'deal_only', '', 'rent', '', ''): {
+        'heading': 'Phuket property for rent',
+        'page_title': 'Phuket Property for Rent | Villas and Condos | Undersun Estate',
+        'page_description': (
+            'Explore Phuket rentals by area, property type, bedrooms, budget and lease terms. '
+            'Undersun Estate helps shortlist villas, condos and homes for rent.'
+        ),
+        'seo_heading': 'Renting property in Phuket',
+        'intro': (
+            'This rental selection helps compare Phuket villas, condos, townhouses and homes by location, '
+            'budget and practical living conditions. Before choosing a property, it is important to confirm '
+            'lease length, deposit, utilities, maintenance responsibilities and what is included in the rent.'
+        ),
+        'highlights': [
+            'Clarify the rental scenario first: holiday stay, seasonal rental, long-term living or relocation.',
+            (
+                'Check deposit, advance rent, utility rates, internet, cleaning, pool and garden service, pet rules '
+                'and early termination terms.'
+            ),
+            (
+                'Compare beach areas with daily-life locations: proximity to schools, supermarkets, gyms, hospitals '
+                'and main roads can matter more than distance to the beach.'
+            ),
+            'For remote selection, request current photos, video viewing and a written list of included items.',
+        ],
+        'follow_up': (
+            'Undersun Estate can clarify current availability, negotiate viewing times and confirm the lease terms '
+            'before you travel to the property.'
+        ),
+        'faq_heading': 'Questions to ask before renting property in Phuket',
+        'faq_entries': [
+            {
+                'question': 'What should I check before renting in Phuket?',
+                'answer': (
+                    'Check lease length, deposit, advance rent, utilities, internet, maintenance responsibilities, '
+                    'cleaning, pool or garden service, pet rules and deposit return terms.'
+                ),
+            },
+            {
+                'question': 'Are Phuket rentals usually short-term or long-term?',
+                'answer': (
+                    'Both exist. Some properties are better for holiday or seasonal stays, while others work for '
+                    'long-term living. The allowed rental period must be confirmed for each property.'
+                ),
+            },
+            {
+                'question': 'Which areas are convenient for renting in Phuket?',
+                'answer': (
+                    'It depends on the lifestyle: Bang Tao, Kamala, Karon and Kata are beach-oriented; Rawai, '
+                    'Chalong, Kathu and Phuket Town can be more practical for everyday routines.'
+                ),
+            },
+            {
+                'question': 'Can I arrange a rental remotely?',
+                'answer': (
+                    'Initial shortlisting and video viewing can be arranged remotely, but the exact condition, '
+                    'included items and contract terms should be confirmed before payment.'
+                ),
+            },
+            {
+                'question': 'How many rentals are available on this page?',
+                'answer': 'There are currently %(count)s active rental listings in this selection.',
+            },
+        ],
+    },
+    ('ru', 'type_only', 'condo', '', '', ''): {
+        'heading': 'Квартиры на Пхукете на продажу',
+        'page_title': 'Купить квартиру на Пхукете | Квартиры в кондоминиумах | Undersun Estate',
+        'page_description': (
+            'Сравните квартиры на Пхукете по району, бюджету, стадии проекта, форме владения '
+            'и расходам. Undersun Estate помогает выбрать подходящие варианты.'
+        ),
+        'seo_heading': 'Как выбирать квартиру в кондоминиуме на Пхукете',
+        'intro': (
+            'В этой подборке собраны квартиры в кондоминиумах на Пхукете для жизни, отдыха и инвестиционных задач. '
+            'Перед выбором важно сравнить не только цену и вид из окна, но и район, статус проекта, форму '
+            'владения, квоту foreign freehold, расходы на содержание и правила аренды.'
+        ),
+        'highlights': [
+            'Сначала определите сценарий: собственное проживание, отдых, сдача в аренду или сохранение капитала.',
+            (
+                'Проверьте freehold/leasehold, доступность иностранной квоты, common fee, sinking fund, правила '
+                'аренды, комплектацию мебелью и условия передачи.'
+            ),
+            (
+                'Сравнивайте пляжные районы Bang Tao, Kamala, Karon, Kata и Mai Khao с более повседневными '
+                'локациями Chalong, Rawai, Kathu и Phuket Town.'
+            ),
+            (
+                'Для строящихся кондоминиумов отдельно проверяйте репутацию застройщика, стадию строительства, график '
+                'платежей и состав мебельного пакета.'
+            ),
+        ],
+        'follow_up': (
+            'Команда Undersun Estate может подготовить шорт-лист, уточнить актуальную доступность и сравнить '
+            'похожие проекты перед просмотром или резервированием.'
+        ),
+        'faq_heading': 'Что проверить перед покупкой квартиры на Пхукете',
+        'faq_entries': [
+            {
+                'question': 'Может ли иностранец купить квартиру на Пхукете?',
+                'answer': (
+                    'Да, если в конкретном кондоминиуме доступна иностранная квота freehold, либо если проект '
+                    'продаётся в leasehold. Точную структуру нужно проверять по конкретному юниту.'
+                ),
+            },
+            {
+                'question': 'Что важно проверить перед покупкой квартиры?',
+                'answer': (
+                    'Статус проекта, форму владения, иностранную квоту, график платежей, common fee, sinking fund, '
+                    'мебельный пакет, правила аренды и условия передачи.'
+                ),
+            },
+            {
+                'question': 'Какие районы Пхукета популярны для покупки квартир?',
+                'answer': (
+                    'Для пляжного формата часто смотрят Bang Tao, Kamala, Karon, Kata и Mai Khao. Для жизни и '
+                    'повседневной логистики могут подойти Chalong, Rawai, Kathu и Phuket Town.'
+                ),
+            },
+            {
+                'question': 'Квартира на Пхукете подходит для инвестиций?',
+                'answer': (
+                    'Может подходить, если цена входа, управление, расходы, сезонность и правила аренды сходятся '
+                    'в понятную модель. Прогноз доходности не стоит воспринимать как гарантию.'
+                ),
+            },
+            {
+                'question': 'Сколько квартир сейчас есть в этой подборке?',
+                'answer': 'Сейчас в подборке %(count)s актуальных предложений квартир.',
+            },
+        ],
+    },
+    ('ru', 'deal_only', '', 'sale', '', ''): {
+        'heading': 'Недвижимость на Пхукете на продажу',
+        'page_title': 'Купить недвижимость на Пхукете | Undersun Estate',
+        'page_description': (
+            'Сравните недвижимость на Пхукете: виллы, квартиры, таунхаусы и участки. '
+            'Подбор по районам, бюджету, цели покупки и условиям сделки.'
+        ),
+        'seo_heading': 'Покупка недвижимости на Пхукете',
+        'intro': (
+            'Этот раздел помогает сравнить недвижимость на Пхукете для покупки: виллы, квартиры, таунхаусы, '
+            'земельные участки и инвестиционные объекты. Выбор зависит от цели: жизнь, отдых, аренда, перепродажа '
+            'или сохранение капитала.'
+        ),
+        'highlights': [
+            'Сначала определите цель покупки и горизонт владения, а уже затем сравнивайте тип объекта и район.',
+            (
+                'Для квартир в кондоминиумах проверяйте foreign freehold quota, common fee и правила аренды; для вилл - землю, '
+                'подъезд, коммуникации, управление и обслуживание.'
+            ),
+            (
+                'Сравнивайте районы не только по расстоянию до пляжа, но и по школам, магазинам, пробкам, '
+                'медицине, шуму и ликвидности.'
+            ),
+            (
+                'Перед резервированием важно уточнить актуальную цену, статус объекта, структуру платежей, '
+                'налоги/сборы и документы.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate помогает собрать первичный шорт-лист, сравнить похожие варианты и подготовить '
+            'вопросы для проверки объекта и условий сделки.'
+        ),
+        'faq_heading': 'Частые вопросы о покупке недвижимости на Пхукете',
+        'faq_entries': [
+            {
+                'question': 'С чего начать покупку недвижимости на Пхукете?',
+                'answer': (
+                    'Начните с цели покупки, бюджета, срока владения и формата объекта. После этого можно '
+                    'сравнивать районы, юридическую структуру, расходы и ликвидность.'
+                ),
+            },
+            {
+                'question': 'Что важнее: район или тип объекта?',
+                'answer': (
+                    'Оба фактора важны. Район определяет образ жизни, спрос и логистику, а тип объекта влияет '
+                    'на юридическую структуру, расходы, управление и сценарий аренды.'
+                ),
+            },
+            {
+                'question': 'Какие расходы могут быть помимо цены объекта?',
+                'answer': (
+                    'В зависимости от сделки могут быть регистрационные сборы, налоги, юридическая проверка, '
+                    'common fee, sinking fund, обслуживание, мебельный пакет и расходы на управление.'
+                ),
+            },
+            {
+                'question': 'Можно ли выбрать объект удаленно?',
+                'answer': (
+                    'Первичный подбор и видео-просмотр можно провести удаленно. Перед оплатой важно подтвердить '
+                    'актуальные условия, документы, комплектацию и состояние объекта.'
+                ),
+            },
+            {
+                'question': 'Сколько объектов на продажу сейчас есть в каталоге?',
+                'answer': 'Сейчас в подборке %(count)s актуальных объектов на продажу.',
+            },
+        ],
+    },
+    ('th', 'type_only', 'condo', '', '', ''): {
+        'heading': 'คอนโดในภูเก็ตสำหรับขาย',
+        'page_title': 'คอนโดภูเก็ตสำหรับขาย | ซื้อคอนโดในภูเก็ต | Undersun Estate',
+        'page_description': (
+            'เปรียบเทียบคอนโดในภูเก็ตตามทำเล งบประมาณ สถานะโครงการ รูปแบบการถือครอง '
+            'และค่าใช้จ่าย เพื่อคัดเลือกตัวเลือกที่เหมาะสม.'
+        ),
+        'seo_heading': 'การเลือกซื้อคอนโดในภูเก็ต',
+        'intro': (
+            'หน้านี้รวบรวมคอนโดและอพาร์ตเมนต์ในภูเก็ตสำหรับอยู่อาศัย พักผ่อน และวางแผนลงทุน '
+            'ก่อนเลือกยูนิตควรเปรียบเทียบทำเล สถานะโครงการ รูปแบบการถือครอง โควตาต่างชาติ '
+            'ค่าใช้จ่ายส่วนกลาง และเงื่อนไขการปล่อยเช่า.'
+        ),
+        'highlights': [
+            'เริ่มจากเป้าหมายการซื้อ: อยู่อาศัยเอง พักผ่อน ปล่อยเช่า หรือถือครองระยะยาว.',
+            (
+                'ตรวจสอบ freehold/leasehold โควตาต่างชาติ ค่าส่วนกลาง เงินกองทุนส่วนกลาง '
+                'กฎการปล่อยเช่า เฟอร์นิเจอร์ และเงื่อนไขส่งมอบ.'
+            ),
+            (
+                'เปรียบเทียบทำเลชายหาด เช่น Bang Tao, Kamala, Karon, Kata และ Mai Khao '
+                'กับทำเลใช้ชีวิตประจำวัน เช่น Chalong, Rawai, Kathu และ Phuket Town.'
+            ),
+            (
+                'สำหรับคอนโดที่ยังสร้างไม่เสร็จ ควรตรวจสอบประวัติผู้พัฒนาโครงการ สถานะก่อสร้าง '
+                'ตารางชำระเงิน และรายการที่รวมในแพ็กเกจเฟอร์นิเจอร์.'
+            ),
+        ],
+        'follow_up': (
+            'ทีม Undersun Estate ช่วยจัดทำ shortlist ตรวจสอบห้องว่างล่าสุด และเปรียบเทียบโครงการที่ใกล้เคียงกัน '
+            'ก่อนนัดชมจริงหรือจอง.'
+        ),
+        'faq_heading': 'คำถามก่อนซื้อคอนโดในภูเก็ต',
+        'faq_entries': [
+            {
+                'question': 'ชาวต่างชาติซื้อคอนโดในภูเก็ตได้หรือไม่?',
+                'answer': (
+                    'โดยทั่วไปสามารถพิจารณายูนิตในคอนโดมิเนียมที่มีโควตา foreign freehold หรือรูปแบบ leasehold '
+                    'ตามโครงสร้างของโครงการ แต่ต้องตรวจสอบยูนิตนั้นโดยเฉพาะก่อนจอง.'
+                ),
+            },
+            {
+                'question': 'ควรตรวจสอบอะไรบ้างก่อนซื้อคอนโด?',
+                'answer': (
+                    'ควรตรวจสอบสถานะโครงการ รูปแบบการถือครอง โควตาต่างชาติ ตารางชำระเงิน ค่าส่วนกลาง '
+                    'เงินกองทุน เฟอร์นิเจอร์ กฎการปล่อยเช่า และเงื่อนไขส่งมอบ.'
+                ),
+            },
+            {
+                'question': 'ทำเลไหนในภูเก็ตนิยมซื้อคอนโด?',
+                'answer': (
+                    'ผู้ซื้อที่เน้นชายหาดมักเปรียบเทียบ Bang Tao, Kamala, Karon, Kata และ Mai Khao ส่วน Chalong, '
+                    'Rawai, Kathu และ Phuket Town เหมาะกับการใช้ชีวิตประจำวันมากกว่า.'
+                ),
+            },
+            {
+                'question': 'คอนโดในภูเก็ตเหมาะสำหรับลงทุนหรือไม่?',
+                'answer': (
+                    'อาจเหมาะได้หากราคาเริ่มต้น การบริหาร ค่าใช้จ่าย ฤดูกาล และกฎการปล่อยเช่าสอดคล้องกัน '
+                    'ไม่ควรมองผลตอบแทนที่คาดการณ์ไว้เป็นการรับประกัน.'
+                ),
+            },
+            {
+                'question': 'หน้านี้มีคอนโดกี่รายการ?',
+                'answer': 'ขณะนี้มีคอนโด %(count)s รายการในคัดสรรนี้.',
+            },
+        ],
+    },
+    ('th', 'type_only', 'villa', '', '', ''): {
+        'heading': 'วิลล่าในภูเก็ตสำหรับขาย',
+        'page_title': 'วิลล่าภูเก็ตสำหรับขาย | ซื้อวิลล่าในภูเก็ต | Undersun Estate',
+        'page_description': (
+            'เปรียบเทียบวิลล่าในภูเก็ตตามทำเล ห้องนอน ที่ดิน สระว่ายน้ำ สถานะโครงการ '
+            'และเงื่อนไขการถือครอง.'
+        ),
+        'seo_heading': 'การเลือกซื้อวิลล่าในภูเก็ต',
+        'intro': (
+            'คัดสรรนี้ช่วยเปรียบเทียบวิลล่าสระว่ายน้ำ บ้านครอบครัว และเรสซิเดนซ์ในภูเก็ต '
+            'การเลือกวิลล่าไม่ควรดูแค่ภาพและผังบ้าน แต่ต้องตรวจสอบถนนเข้าออก เอกสารสิทธิ์ที่ดิน '
+            'การดูแลรักษา กฎการปล่อยเช่า และทำเลย่อยของโครงการ.'
+        ),
+        'highlights': [
+            'แยกเป้าหมายให้ชัดเจนระหว่างอยู่อาศัยเอง บ้านพักครอบครัว บ้านพักตากอากาศ และวิลล่าสำหรับปล่อยเช่า.',
+            (
+                'ตรวจสอบเอกสารสิทธิ์ที่ดิน โครงสร้างการถือครอง ถนนเข้าออก สาธารณูปโภค ค่าส่วนกลาง '
+                'และค่าใช้จ่ายดูแลสระกับสวนก่อนจอง.'
+            ),
+            (
+                'เปรียบเทียบ Bang Tao, Layan, Laguna และ Kamala กับ Rawai, Chalong, Kathu และ Thalang '
+                'ตามความเป็นส่วนตัว โรงเรียน ชายหาด และการเดินทางประจำวัน.'
+            ),
+            (
+                'สำหรับวิลล่าที่ยังสร้างไม่เสร็จ ควรตรวจสอบผลงานผู้พัฒนาโครงการ สถานะก่อสร้าง ตารางชำระเงิน '
+                'รายการเฟอร์นิเจอร์ และเงื่อนไขรับประกัน.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate ช่วยเปรียบเทียบวิลล่าที่คล้ายกัน ตรวจสอบสถานะว่างล่าสุด '
+            'และเตรียมคำถามสำหรับเจ้าของหรือผู้พัฒนาโครงการก่อนนัดชม.'
+        ),
+        'faq_heading': 'คำถามก่อนซื้อวิลล่าในภูเก็ต',
+        'faq_entries': [
+            {
+                'question': 'ควรตรวจสอบอะไรบ้างก่อนซื้อวิลล่าในภูเก็ต?',
+                'answer': (
+                    'ควรตรวจสอบเอกสารสิทธิ์ที่ดิน โครงสร้างการถือครอง ถนนเข้าออก สาธารณูปโภค ค่าส่วนกลาง '
+                    'การดูแลสระและสวน กฎโครงการ สถานะก่อสร้าง และตารางชำระเงิน.'
+                ),
+            },
+            {
+                'question': 'ทำเลไหนนิยมสำหรับวิลล่าในภูเก็ต?',
+                'answer': (
+                    'ผู้ซื้อมักเปรียบเทียบ Bang Tao, Layan, Laguna และ Kamala สำหรับวิลล่าสไตล์รีสอร์ต ส่วน Rawai, '
+                    'Chalong, Kathu และ Thalang อาจเหมาะกับชีวิตประจำวัน ครอบครัว หรือที่ดินขนาดใหญ่.'
+                ),
+            },
+            {
+                'question': 'วิลล่าดีกว่าคอนโดหรือไม่?',
+                'answer': (
+                    'วิลล่าให้ความเป็นส่วนตัว ที่ดิน และพื้นที่ภายนอกมากกว่า แต่ต้องตรวจสอบเรื่องที่ดิน '
+                    'การดูแลรักษา ทางเข้าออก และการบริหารมากขึ้น รูปแบบที่เหมาะขึ้นอยู่กับเป้าหมาย.'
+                ),
+            },
+            {
+                'question': 'วิลล่าในภูเก็ตปล่อยเช่าได้หรือไม่?',
+                'answer': (
+                    'บางวิลล่าสามารถปล่อยเช่าได้ แต่ผลลัพธ์ขึ้นอยู่กับทำเล การบริหาร ฤดูกาล ราคา ค่าใช้จ่าย '
+                    'และกฎของโครงการ ไม่ควรมองผลตอบแทนที่คาดการณ์ไว้เป็นการรับประกัน.'
+                ),
+            },
+            {
+                'question': 'หน้านี้มีวิลล่ากี่รายการ?',
+                'answer': 'ขณะนี้มีวิลล่า %(count)s รายการในคัดสรรนี้.',
+            },
+        ],
+    },
+    ('ru', 'deal_only', '', 'rent', '', ''): {
+        'heading': 'Недвижимость на Пхукете в аренду',
+        'page_title': 'Аренда недвижимости на Пхукете | Виллы и квартиры | Undersun Estate',
+        'page_description': (
+            'Подбор аренды на Пхукете по району, типу объекта, спальням, бюджету и условиям договора. '
+            'Виллы, квартиры и дома для жизни или отдыха.'
+        ),
+        'seo_heading': 'Как выбирать аренду на Пхукете',
+        'intro': (
+            'Этот раздел помогает сравнить виллы, квартиры, таунхаусы и дома в аренду на Пхукете по району, '
+            'бюджету и бытовым условиям. Перед выбором важно уточнить срок аренды, депозит, коммунальные платежи, '
+            'ответственность за обслуживание и что входит в стоимость.'
+        ),
+        'highlights': [
+            'Сначала определите сценарий: короткий отпуск, сезонная аренда, долгосрочная жизнь или релокация.',
+            (
+                'Проверьте депозит, предоплату, тарифы на воду и электричество, интернет, уборку, обслуживание '
+                'бассейна и сада, правила с животными и условия досрочного выезда.'
+            ),
+            (
+                'Сравнивайте пляжные районы с повседневными локациями: школы, магазины, спортзалы, медицина '
+                'и основные дороги могут быть важнее расстояния до моря.'
+            ),
+            'Для удалённого подбора запрашивайте актуальные фото, видео-просмотр и письменный список того, что включено.',
+        ],
+        'follow_up': (
+            'Undersun Estate помогает уточнить актуальную доступность, согласовать время просмотра и проверить '
+            'условия аренды до поездки на объект.'
+        ),
+        'faq_heading': 'Что проверить перед арендой недвижимости на Пхукете',
+        'faq_entries': [
+            {
+                'question': 'Что важно проверить перед арендой на Пхукете?',
+                'answer': (
+                    'Срок аренды, депозит, предоплату, коммунальные платежи, интернет, обслуживание, уборку, '
+                    'правила с животными, условия возврата депозита и досрочного выезда.'
+                ),
+            },
+            {
+                'question': 'На Пхукете чаще ищут краткосрочную или долгосрочную аренду?',
+                'answer': (
+                    'Есть оба сценария. Одни объекты лучше подходят для отпуска или сезона, другие - для '
+                    'долгосрочной жизни. Разрешённый срок аренды нужно подтверждать по конкретному объекту.'
+                ),
+            },
+            {
+                'question': 'Какие районы удобны для аренды на Пхукете?',
+                'answer': (
+                    'Для пляжного формата часто смотрят Bang Tao, Kamala, Karon и Kata. Для повседневной жизни '
+                    'могут быть удобны Rawai, Chalong, Kathu и Phuket Town.'
+                ),
+            },
+            {
+                'question': 'Можно ли подобрать аренду удалённо?',
+                'answer': (
+                    'Первичный подбор и видео-просмотр можно организовать удалённо, но состояние объекта, '
+                    'комплектацию и договорные условия нужно подтвердить до оплаты.'
+                ),
+            },
+            {
+                'question': 'Сколько объектов в аренду сейчас есть в подборке?',
+                'answer': 'Сейчас в подборке %(count)s актуальных объектов в аренду.',
+            },
+        ],
+    },
+    ('th', 'deal_only', '', 'rent', '', ''): {
+        'heading': 'อสังหาริมทรัพย์ในภูเก็ตให้เช่า',
+        'page_title': 'อสังหาริมทรัพย์ภูเก็ตให้เช่า | วิลล่าและคอนโด | Undersun Estate',
+        'page_description': (
+            'ค้นหาอสังหาริมทรัพย์ให้เช่าในภูเก็ตตามทำเล ประเภท จำนวนห้องนอน งบประมาณ '
+            'และเงื่อนไขสัญญาเช่า.'
+        ),
+        'seo_heading': 'การเลือกเช่าอสังหาริมทรัพย์ในภูเก็ต',
+        'intro': (
+            'คัดสรรนี้ช่วยเปรียบเทียบวิลล่า คอนโด ทาวน์เฮาส์ และบ้านให้เช่าในภูเก็ตตามทำเล งบประมาณ '
+            'และเงื่อนไขการอยู่อาศัย ก่อนเลือกทรัพย์ควรยืนยันระยะเวลาเช่า เงินมัดจำ ค่าสาธารณูปโภค '
+            'ความรับผิดชอบในการดูแลรักษา และสิ่งที่รวมอยู่ในค่าเช่า.'
+        ),
+        'highlights': [
+            'กำหนดรูปแบบการเช่าก่อน: พักผ่อนระยะสั้น เช่าตามฤดูกาล อยู่อาศัยระยะยาว หรือย้ายถิ่นฐาน.',
+            (
+                'ตรวจสอบเงินมัดจำ ค่าเช่าล่วงหน้า ค่าน้ำไฟ อินเทอร์เน็ต ทำความสะอาด บริการสระและสวน '
+                'กฎเกี่ยวกับสัตว์เลี้ยง และเงื่อนไขยกเลิกก่อนกำหนด.'
+            ),
+            (
+                'เปรียบเทียบทำเลชายหาดกับทำเลใช้ชีวิตประจำวัน เพราะโรงเรียน ซูเปอร์มาร์เก็ต ฟิตเนส '
+                'โรงพยาบาล และถนนหลักอาจสำคัญกว่าระยะทางถึงทะเล.'
+            ),
+            'หากเลือกจากระยะไกล ควรขอรูปปัจจุบัน วิดีโอชมทรัพย์ และรายการสิ่งที่รวมอยู่ในสัญญาเป็นลายลักษณ์อักษร.',
+        ],
+        'follow_up': (
+            'Undersun Estate ช่วยตรวจสอบสถานะว่างล่าสุด นัดหมายเข้าชม และยืนยันเงื่อนไขสัญญาเช่าก่อนเดินทางไปดูทรัพย์.'
+        ),
+        'faq_heading': 'คำถามก่อนเช่าอสังหาริมทรัพย์ในภูเก็ต',
+        'faq_entries': [
+            {
+                'question': 'ควรตรวจสอบอะไรบ้างก่อนเช่าในภูเก็ต?',
+                'answer': (
+                    'ควรตรวจสอบระยะเวลาเช่า เงินมัดจำ ค่าเช่าล่วงหน้า ค่าน้ำไฟ อินเทอร์เน็ต การดูแลรักษา '
+                    'ทำความสะอาด บริการสระหรือสวน กฎสัตว์เลี้ยง และเงื่อนไขคืนเงินมัดจำ.'
+                ),
+            },
+            {
+                'question': 'การเช่าในภูเก็ตเป็นระยะสั้นหรือระยะยาว?',
+                'answer': (
+                    'มีทั้งสองแบบ บางทรัพย์เหมาะกับวันหยุดหรือฤดูกาลท่องเที่ยว บางทรัพย์เหมาะกับการอยู่ระยะยาว '
+                    'ต้องยืนยันระยะเวลาที่อนุญาตสำหรับทรัพย์แต่ละรายการ.'
+                ),
+            },
+            {
+                'question': 'ทำเลไหนเหมาะกับการเช่าในภูเก็ต?',
+                'answer': (
+                    'ขึ้นอยู่กับไลฟ์สไตล์ Bang Tao, Kamala, Karon และ Kata เน้นชายหาด ส่วน Rawai, Chalong, Kathu '
+                    'และ Phuket Town อาจสะดวกกว่าสำหรับชีวิตประจำวัน.'
+                ),
+            },
+            {
+                'question': 'สามารถเลือกเช่าจากระยะไกลได้หรือไม่?',
+                'answer': (
+                    'สามารถเริ่มคัดเลือกและชมวิดีโอจากระยะไกลได้ แต่ควรยืนยันสภาพทรัพย์ สิ่งที่รวมอยู่ '
+                    'และเงื่อนไขสัญญาก่อนชำระเงิน.'
+                ),
+            },
+            {
+                'question': 'หน้านี้มีทรัพย์ให้เช่ากี่รายการ?',
+                'answer': 'ขณะนี้มีรายการให้เช่า %(count)s รายการในคัดสรรนี้.',
+            },
+        ],
+    },
+    ('en', 'deal_only', '', 'sale', '', ''): {
+        'heading': 'Phuket property for sale',
+        'page_title': 'Property for Sale in Phuket | Villas, Condos and Land | Undersun Estate',
+        'page_description': (
+            'Compare Phuket property for sale: villas, condos, townhouses and land. Shortlist by area, budget, '
+            'purchase goal and deal terms.'
+        ),
+        'seo_heading': 'Buying property in Phuket',
+        'intro': (
+            'This section helps compare Phuket property for sale, including villas, condos, townhouses, land plots '
+            'and selected investment properties. The right option depends on the goal: living, holiday use, rental, '
+            'resale potential or long-term capital preservation.'
+        ),
+        'highlights': [
+            'Start with the purchase goal and holding period before comparing property type and area.',
+            (
+                'For condos, check foreign freehold quota, common area fees and rental rules; for villas, check land, '
+                'road access, utilities, management and maintenance.'
+            ),
+            (
+                'Compare districts by more than beach distance: schools, shops, traffic, medical access, noise and '
+                'resale liquidity can change the decision.'
+            ),
+            (
+                'Before reservation, confirm current price, availability, payment structure, taxes, fees and documents.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate helps prepare a shortlist, compare similar options and organize the questions needed '
+            'for property and deal checks.'
+        ),
+        'faq_heading': 'Questions about buying property in Phuket',
+        'faq_entries': [
+            {
+                'question': 'Where should I start when buying property in Phuket?',
+                'answer': (
+                    'Start with the purchase goal, budget, holding period and preferred property format. Then compare '
+                    'areas, ownership structure, running costs and liquidity.'
+                ),
+            },
+            {
+                'question': 'Is area or property type more important?',
+                'answer': (
+                    'Both matter. Area affects lifestyle, demand and daily logistics, while property type affects '
+                    'ownership structure, running costs, management and rental scenario.'
+                ),
+            },
+            {
+                'question': 'What costs can be added to the property price?',
+                'answer': (
+                    'Depending on the deal, costs may include registration fees, taxes, legal checks, common area fees, '
+                    'sinking fund, maintenance, furniture package and management costs.'
+                ),
+            },
+            {
+                'question': 'Can I shortlist Phuket property remotely?',
+                'answer': (
+                    'Initial shortlisting and video viewing can be done remotely. Before payment, current terms, '
+                    'documents, included items and property condition should be confirmed.'
+                ),
+            },
+            {
+                'question': 'How many sale listings are available in the catalogue?',
+                'answer': 'There are currently %(count)s active sale listings in this selection.',
+            },
+        ],
+    },
+    ('th', 'deal_only', '', 'sale', '', ''): {
+        'heading': 'อสังหาริมทรัพย์ในภูเก็ตสำหรับขาย',
+        'page_title': 'อสังหาริมทรัพย์ภูเก็ตสำหรับขาย | วิลล่า คอนโด และที่ดิน | Undersun Estate',
+        'page_description': (
+            'เปรียบเทียบอสังหาริมทรัพย์ภูเก็ตสำหรับขาย ทั้งวิลล่า คอนโด ทาวน์เฮาส์ และที่ดิน '
+            'ตามทำเล งบประมาณ เป้าหมายการซื้อ และเงื่อนไขดีล.'
+        ),
+        'seo_heading': 'การซื้ออสังหาริมทรัพย์ในภูเก็ต',
+        'intro': (
+            'หน้านี้ช่วยเปรียบเทียบอสังหาริมทรัพย์ในภูเก็ตสำหรับซื้อ ทั้งวิลล่า คอนโด ทาวน์เฮาส์ '
+            'ที่ดิน และทรัพย์เพื่อการลงทุนบางรายการ ตัวเลือกที่เหมาะขึ้นอยู่กับเป้าหมาย เช่น อยู่อาศัย '
+            'พักผ่อน ปล่อยเช่า ขายต่อ หรือถือครองระยะยาว.'
+        ),
+        'highlights': [
+            'เริ่มจากเป้าหมายการซื้อและระยะเวลาถือครอง ก่อนเปรียบเทียบประเภททรัพย์และทำเล.',
+            (
+                'สำหรับคอนโดควรตรวจสอบโควตาต่างชาติ ค่าส่วนกลาง และกฎการปล่อยเช่า; สำหรับวิลล่าควรตรวจสอบที่ดิน '
+                'ทางเข้า สาธารณูปโภค การบริหาร และการดูแลรักษา.'
+            ),
+            (
+                'เปรียบเทียบพื้นที่ไม่ใช่แค่ระยะทางถึงชายหาด แต่รวมถึงโรงเรียน ร้านค้า การจราจร การแพทย์ '
+                'เสียงรบกวน และสภาพคล่องในการขายต่อ.'
+            ),
+            (
+                'ก่อนจองควรยืนยันราคาปัจจุบัน สถานะทรัพย์ โครงสร้างการชำระเงิน ภาษี ค่าธรรมเนียม และเอกสาร.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate ช่วยจัดทำ shortlist เปรียบเทียบตัวเลือกใกล้เคียง และเตรียมคำถามสำหรับตรวจสอบทรัพย์และเงื่อนไขดีล.'
+        ),
+        'faq_heading': 'คำถามเกี่ยวกับการซื้ออสังหาริมทรัพย์ในภูเก็ต',
+        'faq_entries': [
+            {
+                'question': 'ควรเริ่มจากอะไรเมื่อซื้ออสังหาริมทรัพย์ในภูเก็ต?',
+                'answer': (
+                    'เริ่มจากเป้าหมายการซื้อ งบประมาณ ระยะเวลาถือครอง และประเภททรัพย์ที่ต้องการ '
+                    'จากนั้นจึงเปรียบเทียบทำเล โครงสร้างการถือครอง ค่าใช้จ่าย และสภาพคล่อง.'
+                ),
+            },
+            {
+                'question': 'ทำเลหรือประเภททรัพย์สำคัญกว่ากัน?',
+                'answer': (
+                    'สำคัญทั้งสองด้าน ทำเลมีผลต่อไลฟ์สไตล์ ความต้องการ และการเดินทางประจำวัน '
+                    'ส่วนประเภททรัพย์มีผลต่อโครงสร้างการถือครอง ค่าใช้จ่าย การบริหาร และรูปแบบการปล่อยเช่า.'
+                ),
+            },
+            {
+                'question': 'มีค่าใช้จ่ายอะไรนอกเหนือจากราคาทรัพย์?',
+                'answer': (
+                    'ขึ้นอยู่กับดีล อาจมีค่าธรรมเนียมจดทะเบียน ภาษี ค่าตรวจเอกสาร ค่าส่วนกลาง เงินกองทุน '
+                    'ค่าบำรุงรักษา แพ็กเกจเฟอร์นิเจอร์ และค่าใช้จ่ายการบริหาร.'
+                ),
+            },
+            {
+                'question': 'สามารถคัดเลือกทรัพย์จากระยะไกลได้หรือไม่?',
+                'answer': (
+                    'สามารถเริ่มคัดเลือกและชมวิดีโอจากระยะไกลได้ แต่ก่อนชำระเงินควรยืนยันเงื่อนไขล่าสุด '
+                    'เอกสาร รายการที่รวมอยู่ และสภาพทรัพย์.'
+                ),
+            },
+            {
+                'question': 'หน้านี้มีทรัพย์สำหรับขายกี่รายการ?',
+                'answer': 'ขณะนี้มีรายการขาย %(count)s รายการในคัดสรรนี้.',
+            },
+        ],
+    },
+}
+
 PROPERTY_DETAIL_CONTEXT_TEXTS = {
     'ru': {
         'freshness_updated_label': 'Цена и статус обновлены',
@@ -217,6 +1025,19 @@ PROPERTY_DETAIL_CONTEXT_TEXTS = {
         'land_service_description': 'Проверка участка, титула, доступа и ограничений.',
         'legal_service_label': 'Юридическая проверка',
         'legal_service_description': 'Документы, структура сделки и риски до оплаты.',
+        'same_complex_eyebrow': 'В этом комплексе',
+        'same_complex_heading': 'Другие объекты в {complex}',
+        'same_complex_description': 'В этом комплексе есть несколько доступных вариантов. Сравните их по спальням, площади и бюджету, чтобы быстрее понять, какой объект подходит под вашу задачу.',
+        'same_complex_stats_label': 'Краткое сравнение объектов в комплексе',
+        'same_complex_count_one': 'объект в проекте',
+        'same_complex_count_few': 'объекта в проекте',
+        'same_complex_count_many': 'объектов в проекте',
+        'same_complex_bedroom_one': 'спальня',
+        'same_complex_bedroom_few': 'спальни',
+        'same_complex_bedroom_many': 'спален',
+        'same_complex_area_label': 'площадь',
+        'same_complex_price_label': 'бюджет',
+        'same_complex_from_price': 'от {price}',
     },
     'en': {
         'freshness_updated_label': 'Price and status updated',
@@ -240,6 +1061,19 @@ PROPERTY_DETAIL_CONTEXT_TEXTS = {
         'land_service_description': 'Land title, access, boundaries, and restrictions checks.',
         'legal_service_label': 'Legal review',
         'legal_service_description': 'Documents, transaction structure, and risk review before payment.',
+        'same_complex_eyebrow': 'Same project',
+        'same_complex_heading': 'Other listings in {complex}',
+        'same_complex_description': 'This project has several active options. Compare bedrooms, area and budget before choosing the unit that fits your brief.',
+        'same_complex_stats_label': 'Quick comparison for this project',
+        'same_complex_count_one': 'listing in project',
+        'same_complex_count_few': 'listings in project',
+        'same_complex_count_many': 'listings in project',
+        'same_complex_bedroom_one': 'bedroom',
+        'same_complex_bedroom_few': 'bedrooms',
+        'same_complex_bedroom_many': 'bedrooms',
+        'same_complex_area_label': 'area',
+        'same_complex_price_label': 'budget',
+        'same_complex_from_price': 'from {price}',
     },
     'th': {
         'freshness_updated_label': 'ราคาและสถานะอัปเดตแล้ว',
@@ -263,6 +1097,80 @@ PROPERTY_DETAIL_CONTEXT_TEXTS = {
         'land_service_description': 'ตรวจเอกสารสิทธิ์ ทางเข้าออก แนวเขต และข้อจำกัด',
         'legal_service_label': 'ตรวจเอกสารทางกฎหมาย',
         'legal_service_description': 'เอกสาร โครงสร้างดีล และความเสี่ยงก่อนชำระเงิน',
+        'same_complex_eyebrow': 'โครงการเดียวกัน',
+        'same_complex_heading': 'รายการอื่นใน {complex}',
+        'same_complex_description': 'โครงการนี้มีตัวเลือกที่ยังพร้อมอยู่หลายรายการ เปรียบเทียบจำนวนห้องนอน พื้นที่ และงบประมาณก่อนเลือกยูนิตที่เหมาะกับเป้าหมายของคุณ',
+        'same_complex_stats_label': 'สรุปเปรียบเทียบโครงการนี้',
+        'same_complex_count_one': 'รายการในโครงการ',
+        'same_complex_count_few': 'รายการในโครงการ',
+        'same_complex_count_many': 'รายการในโครงการ',
+        'same_complex_bedroom_one': 'ห้องนอน',
+        'same_complex_bedroom_few': 'ห้องนอน',
+        'same_complex_bedroom_many': 'ห้องนอน',
+        'same_complex_area_label': 'พื้นที่',
+        'same_complex_price_label': 'งบประมาณ',
+        'same_complex_from_price': 'เริ่มที่ {price}',
+    },
+}
+
+
+CATALOG_INTERNAL_TYPE_LABELS = {
+    'en': {
+        '': {
+            'condo': 'Phuket condos for sale',
+            'villa': 'Phuket villas for sale',
+            'townhouse': 'Phuket townhouses for sale',
+            'land': 'Land for sale in Phuket',
+        },
+        'sale': {
+            'condo': 'Phuket condos for sale',
+            'villa': 'Phuket villas for sale',
+            'townhouse': 'Phuket townhouses for sale',
+            'land': 'Land for sale in Phuket',
+        },
+        'rent': {
+            'condo': 'Phuket condos for rent',
+            'villa': 'Phuket villas for rent',
+            'townhouse': 'Phuket townhouses for rent',
+        },
+    },
+    'ru': {
+        '': {
+            'condo': 'Квартиры на Пхукете на продажу',
+            'villa': 'Виллы на Пхукете на продажу',
+            'townhouse': 'Таунхаусы на Пхукете на продажу',
+            'land': 'Земля на Пхукете на продажу',
+        },
+        'sale': {
+            'condo': 'Квартиры на Пхукете на продажу',
+            'villa': 'Виллы на Пхукете на продажу',
+            'townhouse': 'Таунхаусы на Пхукете на продажу',
+            'land': 'Земля на Пхукете на продажу',
+        },
+        'rent': {
+            'condo': 'Квартиры на Пхукете в аренду',
+            'villa': 'Виллы на Пхукете в аренду',
+            'townhouse': 'Таунхаусы на Пхукете в аренду',
+        },
+    },
+    'th': {
+        '': {
+            'condo': 'คอนโดภูเก็ตสำหรับขาย',
+            'villa': 'วิลล่าภูเก็ตสำหรับขาย',
+            'townhouse': 'ทาวน์เฮาส์ภูเก็ตสำหรับขาย',
+            'land': 'ที่ดินภูเก็ตสำหรับขาย',
+        },
+        'sale': {
+            'condo': 'คอนโดภูเก็ตสำหรับขาย',
+            'villa': 'วิลล่าภูเก็ตสำหรับขาย',
+            'townhouse': 'ทาวน์เฮาส์ภูเก็ตสำหรับขาย',
+            'land': 'ที่ดินภูเก็ตสำหรับขาย',
+        },
+        'rent': {
+            'condo': 'คอนโดภูเก็ตสำหรับเช่า',
+            'villa': 'วิลล่าภูเก็ตสำหรับเช่า',
+            'townhouse': 'ทาวน์เฮาส์ภูเก็ตสำหรับเช่า',
+        },
     },
 }
 
@@ -375,6 +1283,88 @@ def _get_property_type_nav_label(property_obj, language_code='ru'):
     )
 
 
+PROJECT_NAME_SUFFIX_PATTERN = re.compile(r'\s(?:в|in|at|ใน)\s+(.+)$', re.IGNORECASE)
+PROJECT_NAME_GENERIC_PATTERNS = (
+    re.compile(r'^(?:a\s+)?bargain price$', re.IGNORECASE),
+    re.compile(r'^(?:the\s+)?area$', re.IGNORECASE),
+    re.compile(r'^phuket$', re.IGNORECASE),
+)
+
+
+def _normalize_project_key(value):
+    value = _normalize_whitespace(strip_tags(value or ''))
+    if not value:
+        return ''
+    value = re.sub(r'[^\w\u0E00-\u0E7F]+', ' ', value, flags=re.UNICODE)
+    return _normalize_whitespace(value).lower()
+
+
+def _is_plausible_project_name(value):
+    value = _normalize_whitespace(strip_tags(value or '').strip(' .,;:|/\\-–—'))
+    if not value:
+        return False
+    if len(value) < 4 or len(value.split()) > 8:
+        return False
+    if any(pattern.search(value) for pattern in PROJECT_NAME_GENERIC_PATTERNS):
+        return False
+
+    contains_thai = bool(re.search(r'[\u0E00-\u0E7F]', value))
+    contains_uppercase = any(char.isupper() for char in value)
+    contains_digit = any(char.isdigit() for char in value)
+    return contains_thai or contains_uppercase or contains_digit
+
+
+def _extract_project_name_from_title(value):
+    value = _normalize_whitespace(strip_tags(value or ''))
+    if not value:
+        return ''
+
+    matches = list(PROJECT_NAME_SUFFIX_PATTERN.finditer(value))
+    for match in reversed(matches):
+        candidate = _normalize_whitespace(match.group(1).strip(' .,;:|/\\-–—'))
+        if _is_plausible_project_name(candidate):
+            return candidate
+    return ''
+
+
+def _get_property_project_name(property_obj, language_code='ru'):
+    if property_obj is None:
+        return ''
+
+    language_code = (language_code or 'ru')[:2]
+    field_candidates = []
+    for base_field in ('complex_name', 'title'):
+        localized_field = base_field if language_code == 'ru' else f'{base_field}_{language_code}'
+        field_candidates.append(localized_field)
+        field_candidates.append(base_field)
+        field_candidates.extend([f'{base_field}_ru', f'{base_field}_en', f'{base_field}_th'])
+
+    seen_fields = set()
+    for field_name in field_candidates:
+        if field_name in seen_fields:
+            continue
+        seen_fields.add(field_name)
+        value = _normalize_whitespace(getattr(property_obj, field_name, '') or '')
+        if not value:
+            continue
+        if field_name.startswith('complex_name'):
+            return value
+        extracted = _extract_project_name_from_title(value)
+        if extracted:
+            return extracted
+
+    return ''
+
+
+def _filter_out_project_matches(properties, project_key):
+    if not project_key:
+        return list(properties)
+    return [
+        property_obj for property_obj in properties
+        if _normalize_project_key(_get_property_project_name(property_obj)) != project_key
+    ]
+
+
 def _get_catalog_deal_breadcrumb_label(deal_type, language_code='ru'):
     labels = {
         'sale': {'ru': 'Продажа', 'en': 'Sale', 'th': 'ขาย'},
@@ -471,6 +1461,138 @@ def _build_property_location_context(property_obj, language_code='ru'):
         'property_location_label': location_label,
         'property_full_location_label': full_location_label,
     }
+
+
+def _format_plain_decimal(value):
+    if value is None:
+        return ''
+
+    try:
+        decimal_value = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return ''
+
+    if decimal_value == decimal_value.to_integral_value():
+        return f'{int(decimal_value):,}'.replace(',', ' ')
+
+    formatted = f'{decimal_value:,.1f}'.replace(',', ' ')
+    return formatted.rstrip('0').rstrip('.')
+
+
+def _format_same_complex_area_range(properties, language_code='ru'):
+    areas = [
+        Decimal(str(property_obj.area_total))
+        for property_obj in properties
+        if property_obj.area_total
+    ]
+    if not areas:
+        return ''
+
+    min_area = min(areas)
+    max_area = max(areas)
+    unit = 'ตร.ม.' if language_code == 'th' else ('м²' if language_code == 'ru' else 'm²')
+
+    if min_area == max_area:
+        return f'{_format_plain_decimal(min_area)} {unit}'
+
+    return f'{_format_plain_decimal(min_area)}-{_format_plain_decimal(max_area)} {unit}'
+
+
+def _format_same_complex_price(property_obj, currency_code='THB'):
+    price = None
+    deal_type = property_obj.deal_type if property_obj.deal_type in {'sale', 'rent'} else 'sale'
+
+    if deal_type == 'sale':
+        price = property_obj.get_price_in_currency(currency_code, 'sale')
+        if not price and property_obj.deal_type == 'both':
+            price = property_obj.get_price_in_currency(currency_code, 'rent')
+    else:
+        price = property_obj.get_price_in_currency(currency_code, 'rent')
+
+    return price
+
+
+def _get_same_complex_plural_label(count, language_code, one_key, few_key, many_key):
+    texts = _get_property_detail_context_texts(language_code)
+
+    if language_code == 'ru':
+        if count % 10 == 1 and count % 100 != 11:
+            key = one_key
+        elif count % 10 in (2, 3, 4) and count % 100 not in (12, 13, 14):
+            key = few_key
+        else:
+            key = many_key
+    elif language_code == 'en':
+        key = one_key if count == 1 else many_key
+    else:
+        key = many_key
+
+    return texts[key]
+
+
+def _build_same_complex_stats(property_obj, same_complex_properties, language_code='ru', currency_code='THB'):
+    all_project_properties = [property_obj, *same_complex_properties]
+    texts = _get_property_detail_context_texts(language_code)
+    count = len(all_project_properties)
+    stats = [{
+        'icon': 'fas fa-layer-group',
+        'value': count,
+        'label': _get_same_complex_plural_label(
+            count,
+            language_code,
+            'same_complex_count_one',
+            'same_complex_count_few',
+            'same_complex_count_many',
+        ),
+    }]
+
+    bedroom_values = sorted({
+        int(project_property.bedrooms)
+        for project_property in all_project_properties
+        if project_property.bedrooms
+    })
+    if bedroom_values:
+        min_bedrooms = min(bedroom_values)
+        max_bedrooms = max(bedroom_values)
+        bedroom_label_count = min_bedrooms if min_bedrooms == max_bedrooms else max_bedrooms
+        bedroom_value = str(min_bedrooms) if min_bedrooms == max_bedrooms else f'{min_bedrooms}-{max_bedrooms}'
+        stats.append({
+            'icon': 'fas fa-bed',
+            'value': bedroom_value,
+            'label': _get_same_complex_plural_label(
+                bedroom_label_count,
+                language_code,
+                'same_complex_bedroom_one',
+                'same_complex_bedroom_few',
+                'same_complex_bedroom_many',
+            ),
+        })
+
+    area_range = _format_same_complex_area_range(all_project_properties, language_code)
+    if area_range:
+        stats.append({
+            'icon': 'fas fa-ruler-combined',
+            'value': area_range,
+            'label': texts['same_complex_area_label'],
+        })
+
+    prices = [
+        Decimal(str(price))
+        for price in (
+            _format_same_complex_price(project_property, currency_code)
+            for project_property in all_project_properties
+        )
+        if price
+    ]
+    if prices:
+        formatted_price = CurrencyService.format_price(min(prices), currency_code).replace(',', ' ')
+        stats.append({
+            'icon': 'fas fa-tag',
+            'value': texts['same_complex_from_price'].format(price=formatted_price),
+            'label': texts['same_complex_price_label'],
+        })
+
+    return stats
 
 
 def _get_property_detail_context_texts(language_code='ru'):
@@ -675,6 +1797,23 @@ def _annotate_property_labels(property_obj, language_code='ru'):
 
 def _get_catalog_texts(language_code='ru'):
     return CATALOG_SEO_TEXTS.get((language_code or 'ru')[:2], CATALOG_SEO_TEXTS['ru'])
+
+
+def _get_catalog_internal_type_label(property_type_obj, deal_type='', language_code='ru'):
+    language_code = (language_code or 'ru')[:2]
+    type_slug = getattr(property_type_obj, 'name', '') or ''
+    deal_key = deal_type if deal_type in {'sale', 'rent'} else ''
+    label_map = CATALOG_INTERNAL_TYPE_LABELS.get(language_code, CATALOG_INTERNAL_TYPE_LABELS['en'])
+    return (
+        label_map.get(deal_key, {}).get(type_slug)
+        or label_map.get('', {}).get(type_slug)
+        or _get_translated_attr(
+            property_type_obj,
+            'name_display',
+            language_code,
+            getattr(property_type_obj, 'name_display', type_slug),
+        )
+    )
 
 
 class DealTypeRedirectMixin:
@@ -1046,12 +2185,22 @@ class PropertyListView(ListView):
 
         context['page_title'] = meta.title
         context['page_description'] = meta.description
+        landing_override = self.get_catalog_landing_override(context, language_code)
+        if landing_override:
+            context['page_title'] = self._format_catalog_override_text(
+                landing_override.get('page_title', context['page_title']),
+                context,
+            )
+            context['page_description'] = truncate_meta(self._format_catalog_override_text(
+                landing_override.get('page_description', context['page_description']),
+                context,
+            ))
 
         page_number = self._get_catalog_page_number()
         if context.get('catalog_is_indexable') and page_number and page_number > 1:
             meta = self._refine_paginated_catalog_meta(
-                meta.title,
-                meta.description,
+                context['page_title'],
+                context['page_description'],
                 context.get('seo_heading') or meta.title,
                 page_number,
                 language_code,
@@ -1066,6 +2215,54 @@ class PropertyListView(ListView):
         self.request.seo_page_description = context['page_description']
 
         return context
+
+    def get_catalog_landing_override(self, context, language_code='ru'):
+        signature = self.get_catalog_landing_signature(context)
+        if not signature:
+            return None
+
+        current_filters = context.get('current_filters', {})
+        if self.request.GET.get('map_view') == 'true':
+            return None
+        if self.request.GET.get('sort') and self.request.GET.get('sort') != '-created_at':
+            return None
+
+        for key in self.NON_INDEX_FILTER_KEYS:
+            value = current_filters.get(key)
+            if isinstance(value, list):
+                if any(item not in (None, '') for item in value):
+                    return None
+            elif value not in (None, ''):
+                return None
+
+        property_types = [value for value in current_filters.get('property_type', []) if value]
+        if len(property_types) > 1:
+            return None
+
+        page_number = self._get_catalog_page_number()
+        if page_number is None:
+            return None
+
+        key = (
+            (language_code or 'ru')[:2],
+            signature.pattern,
+            signature.property_type,
+            signature.deal_type,
+            signature.district,
+            signature.location,
+        )
+        return CATALOG_LANDING_OVERRIDES.get(key)
+
+    def _format_catalog_override_text(self, text, context):
+        if not isinstance(text, str):
+            return text
+        values = {
+            'count': context.get('catalog_results_count') or self._get_results_count(context) or 0,
+        }
+        try:
+            return text % values
+        except (KeyError, TypeError, ValueError):
+            return text
 
     def _refine_paginated_catalog_meta(self, base_title, base_description, base_heading, page_number, language_code='ru'):
         texts = _get_catalog_texts(language_code)
@@ -1182,6 +2379,10 @@ class PropertyListView(ListView):
     def build_seo_heading(self, context):
         """Builds an SEO-friendly H1 based on selected filters."""
         language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        override = self.get_catalog_landing_override(context, language_code)
+        if override and override.get('heading'):
+            return self._format_catalog_override_text(override['heading'], context)
+
         texts = _get_catalog_texts(language_code)
         deal_type = context.get('deal_type') or self.request.GET.get('deal_type', '')
         property_type_obj = self._get_primary_property_type(context)
@@ -1285,6 +2486,9 @@ class PropertyListView(ListView):
             return None
 
         language_code = getattr(self.request, 'LANGUAGE_CODE', 'ru')[:2]
+        if self.get_catalog_landing_override(context, language_code):
+            return None
+
         candidate_slugs = self.get_seo_block_candidates(context)
         if not candidate_slugs:
             return None
@@ -1833,6 +3037,23 @@ class PropertyListView(ListView):
                 'follow_up': '',
             }
 
+        override = self.get_catalog_landing_override(context, language_code)
+        if override:
+            return {
+                'has_content': results_count > 0,
+                'heading': self._format_catalog_override_text(
+                    override.get('seo_heading') or override.get('heading') or texts['intro_heading'],
+                    context,
+                ),
+                'intro': self._format_catalog_override_text(override.get('intro', ''), context),
+                'highlights': [
+                    self._format_catalog_override_text(item, context)
+                    for item in override.get('highlights', [])
+                    if item
+                ],
+                'follow_up': self._format_catalog_override_text(override.get('follow_up', ''), context),
+            }
+
         subject = self._get_catalog_subject_label(property_type_obj, language_code)
         deal_phrase = self._get_catalog_deal_phrase(current_filters.get('deal_type') or context.get('deal_type'), language_code)
         geo_phrase = self._get_catalog_geo_phrase(location_obj, district_obj, language_code)
@@ -1891,6 +3112,27 @@ class PropertyListView(ListView):
                 'has_items': False,
                 'heading': texts['faq_heading'],
                 'entries': [],
+            }
+
+        override = self.get_catalog_landing_override(context, language_code)
+        if override and override.get('faq_entries'):
+            entries = []
+            for item in override.get('faq_entries', []):
+                question = self._format_catalog_override_text(item.get('question', ''), context)
+                answer = self._format_catalog_override_text(item.get('answer', ''), context)
+                if question and answer:
+                    entries.append({
+                        'question': question,
+                        'answer': answer,
+                    })
+
+            return {
+                'has_items': bool(entries),
+                'heading': self._format_catalog_override_text(
+                    override.get('faq_heading') or texts['faq_heading'],
+                    context,
+                ),
+                'entries': entries[:5],
             }
 
         entries = [{
@@ -2141,14 +3383,19 @@ class PropertyListView(ListView):
         for item in property_types:
             if property_type_obj and item.id == property_type_obj.id:
                 continue
-            base_url, params = self._get_catalog_link_base(context, deal_type=selected_deal_type, property_type_obj=item)
+            link_deal_type = selected_deal_type
+            if selected_deal_type == 'sale' and item.name in {'condo', 'villa', 'townhouse', 'land'}:
+                # Primary commercial landings for sale intent are the clean type pages.
+                # Keeping ?deal_type=sale here creates extra type+deal URLs competing with them.
+                link_deal_type = ''
+            base_url, params = self._get_catalog_link_base(context, deal_type=link_deal_type, property_type_obj=item)
             if district_obj:
                 params['district'] = district_obj.slug
             if location_obj:
                 params['district'] = location_obj.district.slug
                 params['location'] = location_obj.slug
             type_links.append({
-                'label': self._get_catalog_subject_label(item, language_code),
+                'label': _get_catalog_internal_type_label(item, selected_deal_type, language_code),
                 'url': self._build_catalog_url(base_url, params),
                 'count': item.property_count,
             })
@@ -2602,6 +3849,26 @@ class PropertyDetailView(DetailView):
             language_code,
         )
         context['property_context_links'] = _build_property_context_links(self.object, language_code)
+        same_complex_properties = self.get_same_complex_properties(language_code)
+        for same_complex_property in same_complex_properties:
+            _annotate_property_labels(same_complex_property, language_code)
+        same_complex_name = _get_property_project_name(self.object, language_code)
+        detail_context_texts = _get_property_detail_context_texts(language_code)
+        selected_currency_code = CurrencyService.get_selected_currency_code(self.request)
+        context['same_complex_properties'] = same_complex_properties
+        context['same_complex_context'] = {
+            'has_items': bool(same_complex_properties),
+            'eyebrow': detail_context_texts['same_complex_eyebrow'],
+            'heading': detail_context_texts['same_complex_heading'].format(complex=same_complex_name),
+            'description': detail_context_texts['same_complex_description'],
+            'stats_label': detail_context_texts['same_complex_stats_label'],
+        }
+        context['same_complex_stats'] = _build_same_complex_stats(
+            self.object,
+            same_complex_properties,
+            language_code,
+            selected_currency_code,
+        ) if same_complex_properties else []
         context.update(_build_property_image_sets(self.object, language_code))
         context.update(_build_property_location_context(self.object, language_code))
         context['detail_breadcrumbs'] = _build_catalog_breadcrumbs_common(
@@ -2627,6 +3894,33 @@ class PropertyDetailView(DetailView):
 
         target_url = reverse('properties:property_detail', kwargs={'slug': target_slug})
         return HttpResponsePermanentRedirect(target_url)
+
+    def get_same_complex_properties(self, language_code='ru'):
+        project_name = _get_property_project_name(self.object, language_code)
+        project_key = _normalize_project_key(project_name)
+        if not project_key:
+            return []
+
+        queryset = Property.objects.filter(
+            is_active=True,
+            status='available',
+        ).exclude(id=self.object.id)
+
+        if self.object.property_type_id:
+            queryset = queryset.filter(property_type=self.object.property_type)
+        if self.object.district_id:
+            queryset = queryset.filter(district=self.object.district)
+
+        candidates = queryset.select_related(
+            'district', 'location', 'property_type'
+        ).prefetch_related('images').order_by(
+            'bedrooms', 'price_sale_thb', '-updated_at'
+        )
+        matches = [
+            property_obj for property_obj in candidates
+            if _normalize_project_key(_get_property_project_name(property_obj, language_code)) == project_key
+        ]
+        return matches[:4]
     
     def get_similar_properties(self):
         """
@@ -2641,6 +3935,7 @@ class PropertyDetailView(DetailView):
             'is_active': True,
             'status': 'available'
         }
+        same_project_key = _normalize_project_key(_get_property_project_name(self.object))
         
         similar_properties = []
         
@@ -2649,11 +3944,12 @@ class PropertyDetailView(DetailView):
             same_location = Property.objects.filter(
                 location=self.object.location,
                 **base_filter
-            ).exclude(id=self.object.id).select_related(
+            ).exclude(id=self.object.id)
+            same_location = same_location.select_related(
                 'district', 'location', 'property_type'
-            ).prefetch_related('images')[:2]
+            ).prefetch_related('images')[:8]
             
-            similar_properties.extend(same_location)
+            similar_properties.extend(_filter_out_project_matches(same_location, same_project_key)[:2])
         
         # 2. Тот же район (но другая локация или без локации)
         if len(similar_properties) < 4:
@@ -2670,9 +3966,11 @@ class PropertyDetailView(DetailView):
             
             same_district = same_district.select_related(
                 'district', 'location', 'property_type'
-            ).prefetch_related('images')[:(4 - len(similar_properties))]
+            ).prefetch_related('images')[:8]
             
-            similar_properties.extend(same_district)
+            similar_properties.extend(
+                _filter_out_project_matches(same_district, same_project_key)[:(4 - len(similar_properties))]
+            )
         
         # 3. Тот же тип недвижимости (любая локация)
         if len(similar_properties) < 4:
@@ -2688,9 +3986,11 @@ class PropertyDetailView(DetailView):
             
             same_type = same_type.select_related(
                 'district', 'location', 'property_type'
-            ).prefetch_related('images')[:(4 - len(similar_properties))]
+            ).prefetch_related('images')[:8]
             
-            similar_properties.extend(same_type)
+            similar_properties.extend(
+                _filter_out_project_matches(same_type, same_project_key)[:(4 - len(similar_properties))]
+            )
         
         return similar_properties[:4]
 
