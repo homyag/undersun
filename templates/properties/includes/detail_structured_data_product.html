@@ -65,19 +65,10 @@
     "availability": "{% if property.status == 'available' %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
     "url": "{{ schema_page_url|escapejs }}",
     "seller": {
-      "@type": "RealEstateAgent",
+      "@type": "Organization",
       "@id": "{{ request.scheme }}://{{ request.get_host }}/#real-estate-agent",
       "name": "Undersun Estate",
-      "url": "{{ request.scheme }}://{{ request.get_host }}/",
-      "telephone": "{{ business_profile.phone_display|escapejs }}",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "{{ business_profile.street_address|escapejs }}",
-        "addressLocality": "{{ business_profile.locality|escapejs }}",
-        "addressRegion": "{{ business_profile.region|escapejs }}",
-        "postalCode": "{{ business_profile.postal_code|escapejs }}",
-        "addressCountry": "{{ business_profile.address_country_code|escapejs }}"
-      }
+      "url": "{{ request.scheme }}://{{ request.get_host }}/"
     }
   }
 }

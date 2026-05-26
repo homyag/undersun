@@ -64,9 +64,6 @@
   {% if property_responsible_specialist.schema_json %}
   <script type="application/ld+json">{{ property_responsible_specialist.schema_json|safe }}</script>
   {% endif %}
-  {% if business_schema_json %}
-  <script type="application/ld+json">{{ business_schema_json|safe }}</script>
-  {% endif %}
   {% if search_schema_json %}
   <script type="application/ld+json">{{ search_schema_json|safe }}</script>
   {% endif %}
@@ -74,7 +71,9 @@
 <body>
   <header>
     <div class="header-content">
-      <span class="badge">{{ property.property_type.name_display }}</span>
+      {% if property.property_type %}
+        <span class="badge">{{ property.property_type.name_display }}</span>
+      {% endif %}
       <h1>{{ property_title_display|default:property.title }}</h1>
       <div class="price">{{ price_display }}</div>
       <div class="location">{{ location_label }}</div>
@@ -177,7 +176,7 @@
               <amp-img src="{{ similar.images.first.medium_url|default:similar.images.first.original_url }}" width="360" height="220" layout="responsive" alt="{{ similar.localized_location_label|default:similar.title }}"></amp-img>
             {% endif %}
             <h3>{{ similar.title }}</h3>
-            <p>{{ similar.localized_location_label|default:similar.location.name|default:similar.district.name }} · {{ similar.price_display }}</p>
+            <p>{{ similar.localized_location_label|default:"Phuket" }} · {{ similar.price_display }}</p>
             <p style="margin-top:-8px;">
               <a href="{{ similar.get_absolute_url }}" style="color:var(--accent); text-decoration:none; font-weight:600;" data-amp-analytics="similar-link">{% trans "Подробнее" %}</a>
             </p>

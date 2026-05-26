@@ -4,6 +4,7 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block structured_data %}
+    {{ block.super }}
     {% if catalog_breadcrumbs %}
     <script type="application/ld+json">
     {

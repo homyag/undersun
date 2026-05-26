@@ -1653,7 +1653,7 @@ def _build_property_responsible_specialist_context(property_obj, request, langua
         'name': name,
         'url': profile_url,
         'worksFor': {
-            '@type': 'RealEstateAgent',
+            '@type': 'Organization',
             '@id': f'{site_root_url}#real-estate-agent',
             'name': 'Undersun Estate',
         },

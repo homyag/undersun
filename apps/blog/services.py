@@ -182,6 +182,8 @@ def _build_author_schema(post, request=None, publisher=None):
             '@type': 'Organization',
             'name': publisher.get('name'),
         }
+        if publisher.get('@id'):
+            works_for['@id'] = publisher['@id']
         if publisher.get('url'):
             works_for['url'] = publisher['url']
         if publisher.get('logo'):
@@ -193,8 +195,16 @@ def _build_author_schema(post, request=None, publisher=None):
 
 
 def _build_publisher_schema(request=None):
+    site_root_url = ''
+    if request:
+        try:
+            site_root_url = request.build_absolute_uri('/')
+        except Exception:
+            site_root_url = ''
+
     return {
         '@type': 'Organization',
+        '@id': f'{site_root_url}#real-estate-agent' if site_root_url else None,
         'name': 'Undersun Estate',
         'url': _absolute_url(reverse('core:home'), request) if request else None,
         'logo': {

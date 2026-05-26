@@ -6,6 +6,7 @@
 {% block title %}{{ page_title|default:_("Карта недвижимости") }}{% endblock %}
 
 {% block structured_data %}
+{{ block.super }}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -14,18 +15,10 @@
   "description": "{% trans "Живые данные по объектам недвижимости Пхукета: виллы, квартиры, таунхаусы с фильтрами и актуальными ценами" %}",
   "url": "{{ request.build_absolute_uri }}",
   "provider": {
-    "@type": "RealEstateAgent",
+    "@type": "Organization",
     "@id": "{{ request.scheme }}://{{ request.get_host }}/#real-estate-agent",
     "name": "Undersun Estate",
-    "telephone": "{{ business_profile.phone_display|escapejs }}",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "{{ business_profile.street_address|escapejs }}",
-      "addressLocality": "{{ business_profile.locality|escapejs }}",
-      "addressRegion": "{{ business_profile.region|escapejs }}",
-      "postalCode": "{{ business_profile.postal_code|escapejs }}",
-      "addressCountry": "{{ business_profile.address_country_code|escapejs }}"
-    }
+    "url": "{{ request.scheme }}://{{ request.get_host }}/"
   },
   "spatialCoverage": {
     "@type": "Place",

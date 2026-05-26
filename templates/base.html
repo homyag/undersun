@@ -182,9 +182,6 @@
     <!-- Structured Data -->
     {% block structured_data %}
         {{ block.super }}
-        {% if business_schema_json %}
-            <script type="application/ld+json">{{ business_schema_json|safe }}</script>
-        {% endif %}
         {% if search_schema_json %}
             <script type="application/ld+json">{{ search_schema_json|safe }}</script>
         {% endif %}

@@ -7,6 +7,9 @@
 
 {% block structured_data %}
 {{ block.super }}
+{% if business_schema_json %}
+<script type="application/ld+json">{{ business_schema_json|safe }}</script>
+{% endif %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

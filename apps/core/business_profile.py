@@ -71,15 +71,16 @@ def get_business_profile(language_code='ru'):
     return payload
 
 
-def build_business_schema_json(site_root_url, page_url, language_code='ru'):
+def build_business_schema_json(site_root_url, page_url=None, language_code='ru'):
     profile = get_business_profile(language_code)
     working_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    site_root_url = site_root_url.rstrip('/') + '/'
     logo_url = f"{site_root_url.rstrip('/')}{static('images/logo_fullscreen.svg')}"
     schema = {
         '@context': 'https://schema.org',
         '@graph': [
             {
-                '@type': 'RealEstateAgent',
+                '@type': ['RealEstateAgent', 'LocalBusiness'],
                 '@id': f'{site_root_url}#real-estate-agent',
                 'name': profile['name'],
                 'url': site_root_url,
@@ -120,38 +121,6 @@ def build_business_schema_json(site_root_url, page_url, language_code='ru'):
                     '@type': 'Place',
                     'name': profile['area_served'],
                 },
-                'sameAs': profile['same_as'],
-            },
-            {
-                '@type': 'LocalBusiness',
-                '@id': f'{site_root_url}#local-business',
-                'name': profile['name'],
-                'url': page_url,
-                'logo': logo_url,
-                'image': logo_url,
-                'telephone': profile['phone_display'],
-                'email': profile['email'],
-                'priceRange': '$$',
-                'address': {
-                    '@type': 'PostalAddress',
-                    'streetAddress': profile['street_address'],
-                    'addressLocality': profile['locality'],
-                    'addressRegion': profile['region'],
-                    'postalCode': profile['postal_code'],
-                    'addressCountry': profile['address_country_code'],
-                },
-                'geo': {
-                    '@type': 'GeoCoordinates',
-                    'latitude': profile['latitude'],
-                    'longitude': profile['longitude'],
-                },
-                'hasMap': profile['google_maps_url'],
-                'openingHoursSpecification': [{
-                    '@type': 'OpeningHoursSpecification',
-                    'dayOfWeek': working_days,
-                    'opens': profile['opens'],
-                    'closes': profile['closes'],
-                }],
                 'sameAs': profile['same_as'],
             },
         ],

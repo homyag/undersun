@@ -772,7 +772,7 @@ class ServiceDetailView(DetailView):
             'jobTitle': position,
             'url': profile_url,
             'worksFor': {
-                '@type': 'RealEstateAgent',
+                '@type': 'Organization',
                 '@id': f"{self.request.build_absolute_uri('/')}#real-estate-agent",
                 'name': 'Undersun Estate',
             },
