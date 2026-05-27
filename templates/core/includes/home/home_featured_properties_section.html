@@ -5,7 +5,7 @@
         <div class="text-center mb-8 sm:mb-12">
             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-4 uppercase">{% trans "Избранные объекты недвижимости" %}</h2>
             <p class="text-gray-600 max-w-3xl mx-auto text-sm sm:text-base leading-relaxed">
-                {% blocktrans %}Лучшие виллы, апартаменты и таунхаусы Пхукета для инвестиций, переезда и отдыха. Мы отбираем проекты с высокой ликвидностью, понятным управлением и прозрачной юридической проверкой.{% endblocktrans %}
+                {% blocktrans %}Лучшие виллы, апартаменты и дома Пхукета для инвестиций, переезда и отдыха. Мы отбираем проекты с высокой ликвидностью, понятным управлением и прозрачной юридической проверкой.{% endblocktrans %}
             </p>
             <div class="flex flex-wrap justify-center gap-4 mt-5 text-xs sm:text-sm font-medium text-primary">
                 <a href="{% url 'properties:property_by_type' 'villa' %}"
@@ -91,14 +91,43 @@
                data-ym-goal="featured_catalog_click">
                 {% trans "Смотреть каталог" %}
             </a>
+            {% get_current_language as current_language %}
             <div class="flex flex-wrap justify-center gap-3 mt-4 text-xs sm:text-sm text-gray-600">
-                <span>{% trans "Или перейти к выбору:" %}</span>
+                <span>
+                    {% if current_language == 'en' %}
+                        Popular buying sections:
+                    {% elif current_language == 'th' %}
+                        หมวดซื้อยอดนิยม:
+                    {% else %}
+                        Популярные разделы для покупки:
+                    {% endif %}
+                </span>
+                <a href="{% url 'properties:property_sale' %}"
+                   class="font-medium text-primary hover:text-accent transition"
+                   data-ym-goal="featured_type_shortcut"
+                   data-ym-param-type="sale"
+                   data-ym-param-placement="bottom">
+                    {% if current_language == 'en' %}
+                        Phuket property for sale
+                    {% elif current_language == 'th' %}
+                        อสังหาริมทรัพย์ภูเก็ตสำหรับขาย
+                    {% else %}
+                        Недвижимость на продажу
+                    {% endif %}
+                </a>
+                <span class="text-gray-300">•</span>
                 <a href="{% url 'properties:property_by_type' 'villa' %}"
                    class="font-medium text-primary hover:text-accent transition"
                    data-ym-goal="featured_type_shortcut"
                    data-ym-param-type="villa"
                    data-ym-param-placement="bottom">
-                    {% trans "Виллы" %}
+                    {% if current_language == 'en' %}
+                        Phuket villas for sale
+                    {% elif current_language == 'th' %}
+                        วิลล่าภูเก็ตสำหรับขาย
+                    {% else %}
+                        Купить виллу на Пхукете
+                    {% endif %}
                 </a>
                 <span class="text-gray-300">•</span>
                 <a href="{% url 'properties:property_by_type' 'condo' %}"
@@ -106,7 +135,13 @@
                    data-ym-goal="featured_type_shortcut"
                    data-ym-param-type="condo"
                    data-ym-param-placement="bottom">
-                    {% trans "Квартиры" %}
+                    {% if current_language == 'en' %}
+                        Phuket condos for sale
+                    {% elif current_language == 'th' %}
+                        คอนโดภูเก็ตสำหรับขาย
+                    {% else %}
+                        Купить квартиру на Пхукете
+                    {% endif %}
                 </a>
                 <span class="text-gray-300">•</span>
                 <a href="{% url 'properties:property_by_type' 'townhouse' %}"
@@ -114,7 +149,13 @@
                    data-ym-goal="featured_type_shortcut"
                    data-ym-param-type="townhouse"
                    data-ym-param-placement="bottom">
-                    {% trans "Дома" %}
+                    {% if current_language == 'en' %}
+                        Phuket townhouses
+                    {% elif current_language == 'th' %}
+                        ทาวน์เฮาส์ภูเก็ต
+                    {% else %}
+                        Дома на Пхукете
+                    {% endif %}
                 </a>
             </div>
         </div>

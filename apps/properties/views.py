@@ -207,11 +207,11 @@ CATALOG_SEO_TEXTS = {
 
 CATALOG_LANDING_OVERRIDES = {
     ('en', 'type_only', 'condo', '', '', ''): {
-        'heading': 'Phuket condos for sale',
-        'page_title': 'Phuket Condos for Sale | Buy Condo in Phuket | Undersun Estate',
+        'heading': 'Condos in Phuket for buying and investment',
+        'page_title': 'Condos for Sale in Phuket | Ownership and Project Checks | Undersun Estate',
         'page_description': (
-            'Compare %(count)s Phuket condos for sale by area, budget, project status, ownership structure '
-            'and fees. Undersun Estate helps shortlist units.'
+            'Compare %(count)s condo listings by area, budget, project status, ownership structure and fees. '
+            'Undersun Estate helps shortlist Phuket units.'
         ),
         'seo_heading': 'Buying a condo in Phuket',
         'intro': (
@@ -276,11 +276,11 @@ CATALOG_LANDING_OVERRIDES = {
         ],
     },
     ('en', 'type_only', 'villa', '', '', ''): {
-        'heading': 'Phuket villas for sale',
-        'page_title': 'Phuket Villas for Sale | Buy Villa in Phuket | Undersun Estate',
+        'heading': 'Private villas and family homes in Phuket',
+        'page_title': 'Villas for Sale in Phuket | Pool Villas and Family Homes | Undersun Estate',
         'page_description': (
-            'Compare %(count)s Phuket villas for sale by area, bedrooms, land, pool, project status and '
-            'ownership terms. Undersun Estate helps shortlist suitable villas.'
+            'Compare %(count)s villa listings by area, bedrooms, land, pool, project status and ownership terms. '
+            'Undersun Estate helps shortlist Phuket homes.'
         ),
         'seo_heading': 'Buying a villa in Phuket',
         'intro': (
@@ -343,11 +343,139 @@ CATALOG_LANDING_OVERRIDES = {
             },
         ],
     },
-    ('ru', 'type_only', 'villa', '', '', ''): {
-        'heading': 'Виллы на Пхукете на продажу',
-        'page_title': 'Виллы на Пхукете купить | Undersun Estate',
+    ('en', 'type_only', 'townhouse', '', '', ''): {
+        'heading': 'Townhouses and family homes in Phuket',
+        'page_title': 'Townhouses for Sale in Phuket | Family Homes | Undersun Estate',
         'page_description': (
-            'Сравните виллы на Пхукете по району, бюджету, спальням, участку, бассейну, стадии проекта '
+            'Compare %(count)s listings by area, bedrooms, living space, project rules and budget. '
+            'Undersun Estate helps shortlist practical Phuket homes.'
+        ),
+        'seo_heading': 'Buying a townhouse in Phuket',
+        'intro': (
+            'This townhouse selection helps compare practical Phuket homes for family living, relocation and '
+            'long-term ownership. A townhouse can be a more manageable alternative to a private villa while '
+            'still offering more space and privacy than a condo.'
+        ),
+        'highlights': [
+            'Check whether the townhouse suits daily living: parking, road access, storage, bedrooms and outdoor space matter.',
+            (
+                'Review ownership structure, project rules, common fees, maintenance responsibilities, utilities '
+                'and what is included before reserving.'
+            ),
+            (
+                'Compare family-friendly areas such as Chalong, Rawai, Kathu, Phuket Town and parts of Thalang '
+                'by schools, supermarkets, hospitals and commute time.'
+            ),
+            (
+                'For resale or rental scenarios, look at project condition, competing homes nearby, management '
+                'quality and realistic long-term demand.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate can compare townhouses with villas and condos, check current availability and '
+            'prepare practical questions before a viewing.'
+        ),
+        'faq_heading': 'Questions to ask before buying a townhouse in Phuket',
+        'faq_entries': [
+            {
+                'question': 'Is a townhouse a good alternative to a villa in Phuket?',
+                'answer': (
+                    'It can be. A townhouse usually gives more space than a condo and can be easier to maintain '
+                    'than a private villa, but road access, project rules, fees and privacy need to be checked.'
+                ),
+            },
+            {
+                'question': 'What should I check before buying a Phuket townhouse?',
+                'answer': (
+                    'Check ownership structure, project rules, common fees, parking, road access, utilities, '
+                    'building condition, maintenance responsibilities and rental restrictions.'
+                ),
+            },
+            {
+                'question': 'Which areas are practical for townhouses in Phuket?',
+                'answer': (
+                    'Townhouse buyers often compare everyday areas such as Chalong, Rawai, Kathu, Phuket Town '
+                    'and parts of Thalang where schools, supermarkets and main roads are more important than beachfront access.'
+                ),
+            },
+            {
+                'question': 'Is a townhouse better than a condo?',
+                'answer': (
+                    'A townhouse can offer more living space, parking and privacy. A condo can be simpler to '
+                    'manage and may have stronger resort facilities. The better format depends on the goal.'
+                ),
+            },
+            {
+                'question': 'How many townhouse listings are available on this page?',
+                'answer': 'There are currently %(count)s active townhouse listings in this selection.',
+            },
+        ],
+    },
+    ('en', 'type_only', 'land', '', '', ''): {
+        'heading': 'Land plots and development sites in Phuket',
+        'page_title': 'Land for Sale in Phuket | Title and Site Checks | Undersun Estate',
+        'page_description': (
+            'Compare %(count)s plots by area, access, title, utilities, zoning constraints and development fit. '
+            'Undersun Estate helps review site basics.'
+        ),
+        'seo_heading': 'Checking land before purchase in Phuket',
+        'intro': (
+            'This land selection is for buyers who are considering construction, development or long-term '
+            'landholding in Phuket. A plot should be assessed through documents and site conditions, not only '
+            'through its size and price.'
+        ),
+        'highlights': [
+            'Check title type, boundaries, access road, utilities, slope, drainage and practical buildability before reserving.',
+            (
+                'Review planning limitations, surrounding development, road width, electricity, water, soil and '
+                'the actual route from main roads.'
+            ),
+            (
+                'For villa construction or development, compare the land with realistic design, permit, budget '
+                'and exit scenarios.'
+            ),
+            (
+                'For foreign buyers, the legal structure needs separate review before any payment is made.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate can prepare a shortlist of plots, request core documents and flag practical checks '
+            'before a site visit.'
+        ),
+        'faq_heading': 'Questions to ask before buying land in Phuket',
+        'faq_entries': [
+            {
+                'question': 'What should I check before buying land in Phuket?',
+                'answer': (
+                    'Check title, boundaries, access, utilities, slope, drainage, planning limitations, nearby '
+                    'development and the legal structure for the buyer.'
+                ),
+            },
+            {
+                'question': 'Is every land plot suitable for villa construction?',
+                'answer': (
+                    'No. Buildability depends on title, access, utilities, slope, planning rules, budget, permits '
+                    'and the actual site conditions.'
+                ),
+            },
+            {
+                'question': 'Can foreigners buy land in Thailand directly?',
+                'answer': (
+                    'Foreign land ownership is restricted, so the structure needs a separate legal review. Do not '
+                    'rely on informal nominee or trust-based arrangements.'
+                ),
+            },
+            {
+                'question': 'How many land listings are available on this page?',
+                'answer': 'There are currently %(count)s active land listings in this selection.',
+            },
+        ],
+    },
+    ('ru', 'type_only', 'villa', '', '', ''): {
+        'heading': 'Подбор виллы на Пхукете',
+        'page_title': 'Купить виллу на Пхукете | Подбор и проверка объекта | Undersun Estate',
+        'page_description': (
+            'Сравните варианты по району, бюджету, спальням, участку, бассейну, стадии проекта '
             'и условиям владения. Undersun Estate помогает собрать шорт-лист.'
         ),
         'seo_heading': 'Как выбирать виллу на Пхукете',
@@ -411,12 +539,138 @@ CATALOG_LANDING_OVERRIDES = {
             },
         ],
     },
-    ('en', 'deal_only', '', 'rent', '', ''): {
-        'heading': 'Phuket property for rent',
-        'page_title': 'Phuket Property for Rent | Villas and Condos | Undersun Estate',
+    ('ru', 'type_only', 'townhouse', '', '', ''): {
+        'heading': 'Дома для жизни на Пхукете',
+        'page_title': 'Купить дом на Пхукете | Дома для семьи | Undersun Estate',
         'page_description': (
-            'Explore Phuket rentals by area, property type, bedrooms, budget and lease terms. '
-            'Undersun Estate helps shortlist villas, condos and homes for rent.'
+            'Сравните варианты по району, спальням, площади, комплексу, бюджету '
+            'и условиям владения. Undersun Estate помогает выбрать практичный вариант.'
+        ),
+        'seo_heading': 'Как выбирать дом на Пхукете',
+        'intro': (
+            'В этой подборке собраны дома на Пхукете для семейной жизни, переезда и долгосрочного владения. '
+            'Такой формат часто практичнее квартиры и проще в обслуживании, чем отдельная вилла, но перед покупкой '
+            'важно проверить правила комплекса, подъезд, парковку, расходы и состояние объекта.'
+        ),
+        'highlights': [
+            'Оценивайте дом под ежедневную жизнь: парковка, подъезд, хранение, спальни и небольшое внешнее пространство важны не меньше площади.',
+            (
+                'Проверьте структуру владения, правила комплекса, платежи за обслуживание, коммунальные условия, '
+                'ответственность за ремонт и то, что входит в цену.'
+            ),
+            (
+                'Для семьи чаще сравнивают Chalong, Rawai, Kathu, Phuket Town и части Thalang по школам, '
+                'магазинам, медицине, пробкам и ежедневной логистике.'
+            ),
+            (
+                'Если дом рассматривается для аренды или перепродажи, отдельно оцените состояние комплекса, '
+                'конкурирующие предложения рядом, управление и реальный спрос.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate поможет сравнить дома с виллами и квартирами, уточнить актуальную доступность '
+            'и подготовить вопросы перед просмотром.'
+        ),
+        'faq_heading': 'Что проверить перед покупкой дома на Пхукете',
+        'faq_entries': [
+            {
+                'question': 'Дом на Пхукете — это альтернатива вилле?',
+                'answer': (
+                    'Да, если нужен более практичный формат для жизни: больше пространства, чем в квартире, '
+                    'но обычно меньше расходов и забот, чем у отдельной виллы. Нужно проверять комплекс, правила и платежи.'
+                ),
+            },
+            {
+                'question': 'Что важно проверить перед покупкой дома?',
+                'answer': (
+                    'Структуру владения, документы, правила комплекса, платежи за обслуживание, парковку, подъезд, '
+                    'коммуникации, состояние здания, ответственность за ремонт и ограничения по аренде.'
+                ),
+            },
+            {
+                'question': 'Какие районы Пхукета удобны для покупки дома?',
+                'answer': (
+                    'Для постоянной жизни часто смотрят Chalong, Rawai, Kathu, Phuket Town и части Thalang, '
+                    'где важны школы, магазины, медицина, дороги и повседневная инфраструктура.'
+                ),
+            },
+            {
+                'question': 'Дом лучше квартиры?',
+                'answer': (
+                    'Дом даёт больше пространства, приватности и парковку. Квартира может быть проще в управлении '
+                    'и понятнее по владению для иностранцев. Выбор зависит от цели покупки.'
+                ),
+            },
+            {
+                'question': 'Сколько домов сейчас есть в этой подборке?',
+                'answer': 'Сейчас в подборке %(count)s актуальных предложений домов.',
+            },
+        ],
+    },
+    ('ru', 'type_only', 'land', '', '', ''): {
+        'heading': 'Участки для покупки на Пхукете',
+        'page_title': 'Земля на Пхукете | Проверка участка и титула | Undersun Estate',
+        'page_description': (
+            'Сравните участки по району, площади, доступу, титулу, коммуникациям и ограничениям застройки. '
+            'Undersun Estate помогает проверить исходные условия.'
+        ),
+        'seo_heading': 'Что проверить перед покупкой земли на Пхукете',
+        'intro': (
+            'Эта подборка подходит покупателям, которые рассматривают строительство, девелопмент или долгосрочное '
+            'владение участком на Пхукете. Землю нельзя оценивать только по площади и цене: важны документы, '
+            'доступ, коммуникации и реальные условия строительства.'
+        ),
+        'highlights': [
+            'Проверьте титул, границы, подъезд, коммуникации, уклон, дренаж и практическую пригодность участка под строительство.',
+            (
+                'Оцените ограничения застройки, окружение, ширину дороги, электричество, воду, грунт и фактический '
+                'маршрут от основных дорог.'
+            ),
+            (
+                'Если участок нужен под виллу или проект, сравнивайте его с реальным бюджетом, разрешениями, '
+                'архитектурной концепцией и сценарием выхода.'
+            ),
+            'Для иностранного покупателя юридическую структуру сделки нужно проверять отдельно до внесения платежей.',
+        ],
+        'follow_up': (
+            'Undersun Estate поможет собрать короткий список участков, запросить базовые документы и заранее '
+            'отметить вопросы для выезда на место.'
+        ),
+        'faq_heading': 'Вопросы перед покупкой земли на Пхукете',
+        'faq_entries': [
+            {
+                'question': 'Что важно проверить перед покупкой земли на Пхукете?',
+                'answer': (
+                    'Титул, границы, подъезд, коммуникации, уклон, дренаж, ограничения застройки, окружение '
+                    'и юридическую структуру сделки.'
+                ),
+            },
+            {
+                'question': 'Любой участок подходит для строительства виллы?',
+                'answer': (
+                    'Нет. Пригодность зависит от титула, подъезда, коммуникаций, уклона, правил застройки, '
+                    'бюджета, разрешений и фактического состояния участка.'
+                ),
+            },
+            {
+                'question': 'Может ли иностранец купить землю в Таиланде напрямую?',
+                'answer': (
+                    'Прямое владение землей для иностранцев ограничено, поэтому структуру сделки нужно разбирать '
+                    'с юристом. Серые схемы через номиналов лучше исключать.'
+                ),
+            },
+            {
+                'question': 'Сколько участков сейчас есть в этой подборке?',
+                'answer': 'Сейчас в подборке %(count)s актуальных предложений земли.',
+            },
+        ],
+    },
+    ('en', 'deal_only', '', 'rent', '', ''): {
+        'heading': 'Renting property in Phuket',
+        'page_title': 'Phuket Rentals | Villas, Condos and Homes | Undersun Estate',
+        'page_description': (
+            'Explore rental listings by area, property type, bedrooms, budget and lease terms. '
+            'Undersun Estate helps shortlist Phuket villas, condos and homes.'
         ),
         'seo_heading': 'Renting property in Phuket',
         'intro': (
@@ -477,10 +731,10 @@ CATALOG_LANDING_OVERRIDES = {
         ],
     },
     ('ru', 'type_only', 'condo', '', '', ''): {
-        'heading': 'Квартиры на Пхукете на продажу',
-        'page_title': 'Купить квартиру на Пхукете | Квартиры в кондоминиумах | Undersun Estate',
+        'heading': 'Квартиры в кондоминиумах на Пхукете',
+        'page_title': 'Купить квартиру на Пхукете | Подбор и проверка объекта | Undersun Estate',
         'page_description': (
-            'Сравните квартиры на Пхукете по району, бюджету, стадии проекта, форме владения '
+            'Сравните варианты по району, бюджету, стадии проекта, форме владения '
             'и расходам. Undersun Estate помогает выбрать подходящие варианты.'
         ),
         'seo_heading': 'Как выбирать квартиру в кондоминиуме на Пхукете',
@@ -545,15 +799,15 @@ CATALOG_LANDING_OVERRIDES = {
         ],
     },
     ('ru', 'deal_only', '', 'sale', '', ''): {
-        'heading': 'Недвижимость на Пхукете на продажу',
+        'heading': 'Покупка недвижимости на Пхукете',
         'page_title': 'Купить недвижимость на Пхукете | Undersun Estate',
         'page_description': (
-            'Сравните недвижимость на Пхукете: виллы, квартиры, таунхаусы и участки. '
-            'Подбор по районам, бюджету, цели покупки и условиям сделки.'
+            'Сравните виллы, квартиры, дома и участки по районам, бюджету, цели покупки '
+            'и условиям сделки.'
         ),
         'seo_heading': 'Покупка недвижимости на Пхукете',
         'intro': (
-            'Этот раздел помогает сравнить недвижимость на Пхукете для покупки: виллы, квартиры, таунхаусы, '
+            'Этот раздел помогает сравнить недвижимость на Пхукете для покупки: виллы, квартиры, дома, '
             'земельные участки и инвестиционные объекты. Выбор зависит от цели: жизнь, отдых, аренда, перепродажа '
             'или сохранение капитала.'
         ),
@@ -613,10 +867,10 @@ CATALOG_LANDING_OVERRIDES = {
         ],
     },
     ('th', 'type_only', 'condo', '', '', ''): {
-        'heading': 'คอนโดในภูเก็ตสำหรับขาย',
-        'page_title': 'คอนโดภูเก็ตสำหรับขาย | ซื้อคอนโดในภูเก็ต | Undersun Estate',
+        'heading': 'คอนโดในภูเก็ต',
+        'page_title': 'คอนโดภูเก็ตสำหรับขาย | ตรวจโครงการและค่าใช้จ่าย | Undersun Estate',
         'page_description': (
-            'เปรียบเทียบคอนโดในภูเก็ตตามทำเล งบประมาณ สถานะโครงการ รูปแบบการถือครอง '
+            'เปรียบเทียบตัวเลือกตามทำเล งบประมาณ สถานะโครงการ รูปแบบการถือครอง '
             'และค่าใช้จ่าย เพื่อคัดเลือกตัวเลือกที่เหมาะสม.'
         ),
         'seo_heading': 'การเลือกซื้อคอนโดในภูเก็ต',
@@ -681,10 +935,10 @@ CATALOG_LANDING_OVERRIDES = {
         ],
     },
     ('th', 'type_only', 'villa', '', '', ''): {
-        'heading': 'วิลล่าในภูเก็ตสำหรับขาย',
-        'page_title': 'วิลล่าภูเก็ตสำหรับขาย | ซื้อวิลล่าในภูเก็ต | Undersun Estate',
+        'heading': 'วิลล่าในภูเก็ต',
+        'page_title': 'วิลล่าภูเก็ตสำหรับขาย | ทำเล ที่ดิน และสระว่ายน้ำ | Undersun Estate',
         'page_description': (
-            'เปรียบเทียบวิลล่าในภูเก็ตตามทำเล ห้องนอน ที่ดิน สระว่ายน้ำ สถานะโครงการ '
+            'เปรียบเทียบตัวเลือกตามทำเล ห้องนอน ที่ดิน สระว่ายน้ำ สถานะโครงการ '
             'และเงื่อนไขการถือครอง.'
         ),
         'seo_heading': 'การเลือกซื้อวิลล่าในภูเก็ต',
@@ -748,16 +1002,139 @@ CATALOG_LANDING_OVERRIDES = {
             },
         ],
     },
-    ('ru', 'deal_only', '', 'rent', '', ''): {
-        'heading': 'Недвижимость на Пхукете в аренду',
-        'page_title': 'Аренда недвижимости на Пхукете | Виллы и квартиры | Undersun Estate',
+    ('th', 'type_only', 'townhouse', '', '', ''): {
+        'heading': 'ทาวน์เฮาส์สำหรับครอบครัวในภูเก็ต',
+        'page_title': 'ทาวน์เฮาส์ภูเก็ตสำหรับขาย | บ้านสำหรับครอบครัว | Undersun Estate',
         'page_description': (
-            'Подбор аренды на Пхукете по району, типу объекта, спальням, бюджету и условиям договора. '
+            'เปรียบเทียบตัวเลือกตามทำเล จำนวนห้องนอน พื้นที่ใช้สอย กฎโครงการ '
+            'และงบประมาณ.'
+        ),
+        'seo_heading': 'การเลือกซื้อทาวน์เฮาส์ในภูเก็ต',
+        'intro': (
+            'คัดสรรนี้ช่วยเปรียบเทียบทาวน์เฮาส์ในภูเก็ตสำหรับครอบครัว การย้ายมาอยู่อาศัย '
+            'และการถือครองระยะยาว ทาวน์เฮาส์มักให้พื้นที่มากกว่าคอนโด และดูแลง่ายกว่าวิลล่าส่วนตัว.'
+        ),
+        'highlights': [
+            'ตรวจสอบความเหมาะสมกับชีวิตประจำวัน: ที่จอดรถ ทางเข้าออก พื้นที่เก็บของ จำนวนห้องนอน และพื้นที่ภายนอก.',
+            (
+                'ตรวจสอบโครงสร้างการถือครอง กฎโครงการ ค่าส่วนกลาง ความรับผิดชอบในการดูแลรักษา '
+                'สาธารณูปโภค และสิ่งที่รวมอยู่ในราคา.'
+            ),
+            (
+                'เปรียบเทียบ Chalong, Rawai, Kathu, Phuket Town และบางส่วนของ Thalang ตามโรงเรียน '
+                'ซูเปอร์มาร์เก็ต โรงพยาบาล และเวลาเดินทาง.'
+            ),
+            (
+                'หากซื้อเพื่อปล่อยเช่าหรือขายต่อ ควรดูสภาพโครงการ ทรัพย์คู่แข่งใกล้เคียง คุณภาพการบริหาร '
+                'และความต้องการระยะยาว.'
+            ),
+        ],
+        'follow_up': (
+            'Undersun Estate ช่วยเปรียบเทียบทาวน์เฮาส์กับวิลล่าและคอนโด ตรวจสอบสถานะว่างล่าสุด '
+            'และเตรียมคำถามก่อนนัดชม.'
+        ),
+        'faq_heading': 'คำถามก่อนซื้อทาวน์เฮาส์ในภูเก็ต',
+        'faq_entries': [
+            {
+                'question': 'ทาวน์เฮาส์เป็นทางเลือกแทนวิลล่าได้หรือไม่?',
+                'answer': (
+                    'ได้ในหลายกรณี ทาวน์เฮาส์มักมีพื้นที่มากกว่าคอนโดและดูแลง่ายกว่าวิลล่าส่วนตัว '
+                    'แต่ต้องตรวจสอบทางเข้า กฎโครงการ ค่าส่วนกลาง และความเป็นส่วนตัว.'
+                ),
+            },
+            {
+                'question': 'ควรตรวจสอบอะไรบ้างก่อนซื้อทาวน์เฮาส์?',
+                'answer': (
+                    'ควรตรวจสอบโครงสร้างการถือครอง กฎโครงการ ค่าส่วนกลาง ที่จอดรถ ทางเข้าออก '
+                    'สาธารณูปโภค สภาพอาคาร การดูแลรักษา และข้อจำกัดการปล่อยเช่า.'
+                ),
+            },
+            {
+                'question': 'ทำเลไหนเหมาะกับทาวน์เฮาส์ในภูเก็ต?',
+                'answer': (
+                    'ผู้ซื้อทาวน์เฮาส์มักเปรียบเทียบ Chalong, Rawai, Kathu, Phuket Town และบางส่วนของ Thalang '
+                    'ซึ่งสะดวกต่อโรงเรียน ซูเปอร์มาร์เก็ต และถนนหลัก.'
+                ),
+            },
+            {
+                'question': 'ทาวน์เฮาส์ดีกว่าคอนโดหรือไม่?',
+                'answer': (
+                    'ทาวน์เฮาส์ให้พื้นที่ใช้สอย ที่จอดรถ และความเป็นส่วนตัวมากกว่า ส่วนคอนโดอาจดูแลง่ายกว่า '
+                    'และมีสิ่งอำนวยความสะดวกแบบรีสอร์ตมากกว่า.'
+                ),
+            },
+            {
+                'question': 'หน้านี้มีทาวน์เฮาส์กี่รายการ?',
+                'answer': 'ขณะนี้มีทาวน์เฮาส์ %(count)s รายการในคัดสรรนี้.',
+            },
+        ],
+    },
+    ('th', 'type_only', 'land', '', '', ''): {
+        'heading': 'ที่ดินและแปลงพัฒนาในภูเก็ต',
+        'page_title': 'ที่ดินภูเก็ตสำหรับขาย | ตรวจเอกสารสิทธิ์และสภาพแปลง | Undersun Estate',
+        'page_description': (
+            'เปรียบเทียบตัวเลือกตามทำเล ขนาด ทางเข้า เอกสารสิทธิ์ สาธารณูปโภค ข้อจำกัดการก่อสร้าง '
+            'และความเหมาะสมของโครงการ.'
+        ),
+        'seo_heading': 'การตรวจสอบที่ดินก่อนซื้อในภูเก็ต',
+        'intro': (
+            'คัดสรรนี้เหมาะสำหรับผู้ซื้อที่พิจารณาก่อสร้าง พัฒนาโครงการ หรือถือครองที่ดินระยะยาวในภูเก็ต '
+            'การเลือกแปลงควรดูทั้งเอกสาร ทางเข้า สาธารณูปโภค และสภาพพื้นที่จริง ไม่ใช่เพียงขนาดและราคา.'
+        ),
+        'highlights': [
+            'ตรวจสอบเอกสารสิทธิ์ แนวเขต ทางเข้า สาธารณูปโภค ความลาดชัน การระบายน้ำ และความเหมาะสมในการก่อสร้าง.',
+            (
+                'พิจารณาข้อจำกัดการก่อสร้าง สภาพแวดล้อม ความกว้างถนน ไฟฟ้า น้ำ สภาพดิน '
+                'และเส้นทางจริงจากถนนหลัก.'
+            ),
+            (
+                'หากซื้อเพื่อสร้างวิลล่าหรือพัฒนาโครงการ ควรเทียบกับแบบ งบประมาณ ใบอนุญาต '
+                'และแผนการขายต่อหรือถือครอง.'
+            ),
+            'สำหรับผู้ซื้อต่างชาติ โครงสร้างทางกฎหมายต้องได้รับการตรวจสอบแยกต่างหากก่อนชำระเงิน.',
+        ],
+        'follow_up': (
+            'Undersun Estate ช่วยคัดเลือกแปลง ขอเอกสารหลัก และเตรียมรายการตรวจสอบก่อนลงพื้นที่จริง.'
+        ),
+        'faq_heading': 'คำถามก่อนซื้อที่ดินในภูเก็ต',
+        'faq_entries': [
+            {
+                'question': 'ควรตรวจสอบอะไรบ้างก่อนซื้อที่ดินในภูเก็ต?',
+                'answer': (
+                    'ควรตรวจสอบเอกสารสิทธิ์ แนวเขต ทางเข้า สาธารณูปโภค ความลาดชัน การระบายน้ำ '
+                    'ข้อจำกัดการก่อสร้าง พื้นที่รอบข้าง และโครงสร้างทางกฎหมายของผู้ซื้อ.'
+                ),
+            },
+            {
+                'question': 'ที่ดินทุกแปลงเหมาะกับการสร้างวิลล่าหรือไม่?',
+                'answer': (
+                    'ไม่เสมอไป ความเหมาะสมขึ้นอยู่กับเอกสารสิทธิ์ ทางเข้า สาธารณูปโภค ความลาดชัน '
+                    'กฎการก่อสร้าง งบประมาณ ใบอนุญาต และสภาพพื้นที่จริง.'
+                ),
+            },
+            {
+                'question': 'ชาวต่างชาติซื้อที่ดินในไทยโดยตรงได้หรือไม่?',
+                'answer': (
+                    'การถือครองที่ดินโดยชาวต่างชาติมีข้อจำกัด จึงต้องตรวจโครงสร้างทางกฎหมายก่อน '
+                    'และไม่ควรใช้โครงสร้างที่ไม่ชัดเจนหรือพึ่งพานอมินี.'
+                ),
+            },
+            {
+                'question': 'หน้านี้มีที่ดินกี่รายการ?',
+                'answer': 'ขณะนี้มีรายการที่ดิน %(count)s รายการในคัดสรรนี้.',
+            },
+        ],
+    },
+    ('ru', 'deal_only', '', 'rent', '', ''): {
+        'heading': 'Подбор аренды на Пхукете',
+        'page_title': 'Аренда на Пхукете | Виллы, квартиры и дома | Undersun Estate',
+        'page_description': (
+            'Сравните варианты по району, типу объекта, спальням, бюджету и условиям договора. '
             'Виллы, квартиры и дома для жизни или отдыха.'
         ),
         'seo_heading': 'Как выбирать аренду на Пхукете',
         'intro': (
-            'Этот раздел помогает сравнить виллы, квартиры, таунхаусы и дома в аренду на Пхукете по району, '
+            'Этот раздел помогает сравнить виллы, квартиры и дома в аренду на Пхукете по району, '
             'бюджету и бытовым условиям. Перед выбором важно уточнить срок аренды, депозит, коммунальные платежи, '
             'ответственность за обслуживание и что входит в стоимость.'
         ),
@@ -814,10 +1191,10 @@ CATALOG_LANDING_OVERRIDES = {
         ],
     },
     ('th', 'deal_only', '', 'rent', '', ''): {
-        'heading': 'อสังหาริมทรัพย์ในภูเก็ตให้เช่า',
-        'page_title': 'อสังหาริมทรัพย์ภูเก็ตให้เช่า | วิลล่าและคอนโด | Undersun Estate',
+        'heading': 'การเช่าอสังหาริมทรัพย์ในภูเก็ต',
+        'page_title': 'เช่าอสังหาริมทรัพย์ภูเก็ต | วิลล่า คอนโด และบ้าน | Undersun Estate',
         'page_description': (
-            'ค้นหาอสังหาริมทรัพย์ให้เช่าในภูเก็ตตามทำเล ประเภท จำนวนห้องนอน งบประมาณ '
+            'ค้นหาตัวเลือกตามทำเล ประเภท จำนวนห้องนอน งบประมาณ '
             'และเงื่อนไขสัญญาเช่า.'
         ),
         'seo_heading': 'การเลือกเช่าอสังหาริมทรัพย์ในภูเก็ต',
@@ -878,10 +1255,10 @@ CATALOG_LANDING_OVERRIDES = {
         ],
     },
     ('en', 'deal_only', '', 'sale', '', ''): {
-        'heading': 'Phuket property for sale',
+        'heading': 'Buying property in Phuket',
         'page_title': 'Property for Sale in Phuket | Villas, Condos and Land | Undersun Estate',
         'page_description': (
-            'Compare Phuket property for sale: villas, condos, townhouses and land. Shortlist by area, budget, '
+            'Compare Phuket listings across villas, condos, townhouses and land. Shortlist by area, budget, '
             'purchase goal and deal terms.'
         ),
         'seo_heading': 'Buying property in Phuket',
@@ -945,10 +1322,10 @@ CATALOG_LANDING_OVERRIDES = {
         ],
     },
     ('th', 'deal_only', '', 'sale', '', ''): {
-        'heading': 'อสังหาริมทรัพย์ในภูเก็ตสำหรับขาย',
+        'heading': 'การซื้ออสังหาริมทรัพย์ในภูเก็ต',
         'page_title': 'อสังหาริมทรัพย์ภูเก็ตสำหรับขาย | วิลล่า คอนโด และที่ดิน | Undersun Estate',
         'page_description': (
-            'เปรียบเทียบอสังหาริมทรัพย์ภูเก็ตสำหรับขาย ทั้งวิลล่า คอนโด ทาวน์เฮาส์ และที่ดิน '
+            'เปรียบเทียบตัวเลือกทั้งวิลล่า คอนโด ทาวน์เฮาส์ และที่ดิน '
             'ตามทำเล งบประมาณ เป้าหมายการซื้อ และเงื่อนไขดีล.'
         ),
         'seo_heading': 'การซื้ออสังหาริมทรัพย์ในภูเก็ต',
@@ -1148,19 +1525,19 @@ CATALOG_INTERNAL_TYPE_LABELS = {
         '': {
             'condo': 'Квартиры на Пхукете на продажу',
             'villa': 'Виллы на Пхукете на продажу',
-            'townhouse': 'Таунхаусы на Пхукете на продажу',
+            'townhouse': 'Дома на Пхукете на продажу',
             'land': 'Земля на Пхукете на продажу',
         },
         'sale': {
             'condo': 'Квартиры на Пхукете на продажу',
             'villa': 'Виллы на Пхукете на продажу',
-            'townhouse': 'Таунхаусы на Пхукете на продажу',
+            'townhouse': 'Дома на Пхукете на продажу',
             'land': 'Земля на Пхукете на продажу',
         },
         'rent': {
             'condo': 'Квартиры на Пхукете в аренду',
             'villa': 'Виллы на Пхукете в аренду',
-            'townhouse': 'Таунхаусы на Пхукете в аренду',
+            'townhouse': 'Дома на Пхукете в аренду',
         },
     },
     'th': {
@@ -2075,7 +2452,7 @@ class PropertyListView(ListView):
         query_params.pop('property_type', None)
 
         deal_type = getattr(self, 'forced_deal_type', '') or request.GET.get('deal_type', '')
-        if deal_type in {'sale', 'rent'}:
+        if deal_type == 'rent':
             query_params['deal_type'] = deal_type
 
         target_url = reverse('properties:property_by_type', args=[property_type_name])
@@ -3894,10 +4271,28 @@ class PropertyByTypeView(PropertyListView):
     template_name = 'properties/list.html'
 
     def dispatch(self, request, *args, **kwargs):
+        redirect_response = self._maybe_redirect_redundant_sale_deal_type(request)
+        if redirect_response:
+            return redirect_response
+
         redirect_response = self._maybe_redirect_by_property_type(request)
         if redirect_response:
             return redirect_response
         return super().dispatch(request, *args, **kwargs)
+
+    def _maybe_redirect_redundant_sale_deal_type(self, request):
+        if request.GET.get('deal_type') != 'sale':
+            return None
+
+        query_params = request.GET.copy()
+        query_params.pop('deal_type', None)
+
+        target_url = request.path
+        query_string = query_params.urlencode()
+        if query_string:
+            target_url = f"{target_url}?{query_string}"
+
+        return HttpResponsePermanentRedirect(target_url)
 
     def _maybe_redirect_by_property_type(self, request):
         selected_types = request.GET.getlist('property_type')

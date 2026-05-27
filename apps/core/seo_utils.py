@@ -65,6 +65,22 @@ PROPERTY_META_STRINGS: Mapping[str, Mapping[str, str]] = {
         'stage_label': 'Стадия: %(status)s',
         'listings_single': '%(count)s актуальное предложение доступно сейчас.',
         'listings_plural': '%(count)s актуальных предложений доступны сейчас.',
+        'root_description': (
+            '%(count)s актуальных предложений: виллы, квартиры, дома и участки. '
+            'Используйте фильтры по району, бюджету, спальням и цели покупки.'
+        ),
+        'root_description_no_count': (
+            'Каталог вилл, квартир, домов и участков на Пхукете. Используйте фильтры по району, '
+            'бюджету, спальням и цели покупки.'
+        ),
+        'geo_description': (
+            'Актуальных вариантов в %(area)s: %(count)s. Сравните бюджет, параметры объекта, '
+            'статус, условия сделки и ежедневную логистику.'
+        ),
+        'geo_description_no_count': (
+            'Сравните предложения в %(area)s по бюджету, параметрам объекта, статусу, условиям сделки '
+            'и ежедневной логистике.'
+        ),
         'cta': 'Актуальные предложения от агентства Undersun Estate. Свяжитесь с нами для консультации и подбора объектов.',
         'geo_prefix': '%(type)s в %(area)s',
         'location_label': 'Локация: %(location)s',
@@ -84,6 +100,20 @@ PROPERTY_META_STRINGS: Mapping[str, Mapping[str, str]] = {
         'stage_label': 'Stage: %(status)s',
         'listings_single': '%(count)s listing available now.',
         'listings_plural': '%(count)s listings available now.',
+        'root_description': (
+            '%(count)s current listings across villas, condos, homes and land. Filter by area, budget, '
+            'bedrooms and purchase goal.'
+        ),
+        'root_description_no_count': (
+            'Browse Phuket villas, condos, homes and land. Filter by area, budget, bedrooms and purchase goal.'
+        ),
+        'geo_description': (
+            'Compare %(count)s listings in %(area)s by budget, property facts, project status, '
+            'ownership terms and daily logistics.'
+        ),
+        'geo_description_no_count': (
+            'Compare listings in %(area)s by budget, property facts, project status, ownership terms and daily logistics.'
+        ),
         'cta': 'Fresh listings from Undersun Estate. Contact us for expert guidance.',
         'geo_prefix': '%(type)s in %(area)s',
         'location_label': 'Location: %(location)s',
@@ -103,6 +133,22 @@ PROPERTY_META_STRINGS: Mapping[str, Mapping[str, str]] = {
         'stage_label': 'สถานะ: %(status)s',
         'listings_single': 'ข้อเสนอ %(count)s รายการพร้อมแล้วตอนนี้.',
         'listings_plural': 'ข้อเสนอ %(count)s รายการพร้อมแล้วตอนนี้.',
+        'root_description': (
+            'รายการปัจจุบัน %(count)s รายการ ทั้งวิลล่า คอนโด บ้าน และที่ดิน '
+            'กรองตามทำเล งบประมาณ จำนวนห้องนอน และเป้าหมายการซื้อ.'
+        ),
+        'root_description_no_count': (
+            'เลือกดูวิลล่า คอนโด บ้าน และที่ดินในภูเก็ต พร้อมกรองตามทำเล งบประมาณ '
+            'จำนวนห้องนอน และเป้าหมายการซื้อ.'
+        ),
+        'geo_description': (
+            'รายการใน %(area)s: %(count)s รายการ เปรียบเทียบงบประมาณ รายละเอียดทรัพย์ สถานะโครงการ '
+            'เงื่อนไขการถือครอง และการเดินทางประจำวัน.'
+        ),
+        'geo_description_no_count': (
+            'เปรียบเทียบรายการใน %(area)s ตามงบประมาณ รายละเอียดทรัพย์ สถานะโครงการ '
+            'เงื่อนไขการถือครอง และการเดินทางประจำวัน.'
+        ),
         'cta': 'รายการใหม่จาก Undersun Estate ติดต่อเราเพื่อขอคำแนะนำ.',
         'geo_prefix': '%(type)s ใน %(area)s',
         'location_label': 'ทำเล: %(location)s',
@@ -223,18 +269,37 @@ def build_property_meta(
 
     description_parts: List[str] = []
 
-    if property_type_name and (district_name or location_name):
-        area = location_name or district_name
-        description_parts.append(
-            phrases['geo_prefix'] % {'type': property_type_name, 'area': area}
-        )
+    is_root_catalog = not any((
+        property_type_name,
+        district_name,
+        location_name,
+        price_text,
+        bedrooms_text,
+        build_status_label,
+    ))
+
+    if is_root_catalog:
+        if results_count is not None and results_count > 0:
+            description = phrases['root_description'] % {'count': results_count}
+        else:
+            description = phrases['root_description_no_count']
+        return MetaData(title=title, description=truncate_meta(description))
+
+    geo_area = location_name or district_name
+    results_count_included = False
+
+    if geo_area:
+        if results_count is not None and results_count > 0:
+            description_parts.append(
+                phrases['geo_description'] % {'count': results_count, 'area': geo_area}
+            )
+            results_count_included = True
+        else:
+            description_parts.append(
+                phrases['geo_description_no_count'] % {'area': geo_area}
+            )
     else:
         description_parts.append(base_heading)
-
-    if location_name:
-        description_parts.append(phrases['location_label'] % {'location': location_name})
-    elif district_name:
-        description_parts.append(phrases['district_label'] % {'district': district_name})
 
     if price_text:
         description_parts.append(phrases['budget_label'] % {'price': price_text})
@@ -245,7 +310,7 @@ def build_property_meta(
     if build_status_label:
         description_parts.append(phrases['stage_label'] % {'status': build_status_label})
 
-    if results_count is not None and results_count > 0:
+    if results_count is not None and results_count > 0 and not results_count_included:
         key = 'listings_single' if results_count == 1 else 'listings_plural'
         description_parts.append(phrases[key] % {'count': results_count})
 
