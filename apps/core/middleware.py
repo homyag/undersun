@@ -139,16 +139,23 @@ class LegacyRealEstateRedirectMiddleware(MiddlewareMixin):
 
 
 class BadInquiryRequestLoggerMiddleware(MiddlewareMixin):
-    """Log подозрительные GET-запросы к AJAX-эндпоинту заявок по объектам."""
+    """Log подозрительные GET-запросы к endpoint заявок по объектам."""
 
     inquiry_pattern = re.compile(r'^/(?:[a-z]{2})?/property/ajax/inquiry/\d+/?$')
+    user_inquiry_pattern = re.compile(r'^/(?:[a-z]{2})?/users/property/\d+/inquiry/?$')
 
     def __init__(self, get_response=None):
         super().__init__(get_response)
         self.logger = logging.getLogger('bad_requests')
 
+    def _is_inquiry_path(self, path):
+        return bool(
+            self.inquiry_pattern.match(path)
+            or self.user_inquiry_pattern.match(path)
+        )
+
     def process_request(self, request):
-        if not self.inquiry_pattern.match(request.path):
+        if not self._is_inquiry_path(request.path):
             return None
 
         if request.method == 'POST':
@@ -168,14 +175,21 @@ class BadInquiryRequestLoggerMiddleware(MiddlewareMixin):
             query_string,
         )
 
-        # AJAX-инквайры работают только по POST. Возвращаем 405, но не блокируем Googlebot.
+        # AJAX-инквайры работают только по POST, но GET/HEAD иногда попадают в GSC.
+        # Отдаем 200 + X-Robots-Tag, чтобы Google исключал URL по noindex, а не как 4xx.
         return JsonResponse(
             {
                 'success': False,
-                'error': 'method_not_allowed',
+                'error': 'endpoint_accepts_post_only',
             },
-            status=405,
+            status=200,
         )
+
+    def process_response(self, request, response):
+        if self._is_inquiry_path(request.path):
+            response['X-Robots-Tag'] = 'noindex, nofollow'
+
+        return response
 
 
 class ForbiddenPathLoggerMiddleware(MiddlewareMixin):

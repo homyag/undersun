@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models import Q, Count, Case, When, Value, IntegerField, F, Avg
 from django.db.models.functions import Coalesce
-from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.urls import reverse
 from django.utils.translation import gettext, ngettext, override
 from django.utils.html import strip_tags
@@ -39,6 +39,16 @@ from .yml_feed import YandexYmlFeedGenerator
 LEGACY_PROPERTY_SLUG_REDIRECTS = {
     # Укороченный slug из старого каталога → актуальный slug
     '1-bedroom-apart': '1-bedroom-apartment-in-a-deluxe-condominium-in-rawai',
+}
+
+MISSING_PROPERTY_SLUG_FALLBACKS = {
+    '2-bedroom-apartment-300-meters-from-surin-beach-phuket-at-the-petit-tycoon': {
+        'view_name': 'properties:property_sale',
+        'params': {
+            'property_type': 'condo',
+            'district': 'thalang',
+        },
+    },
 }
 
 CATALOG_LINK_UNSET = object()
@@ -1885,12 +1895,242 @@ class PropertyListView(ListView):
     )
 
     NON_INDEX_FILTER_KEYS = ('min_price', 'max_price', 'bedrooms', 'amenities', 'q', 'build_status')
+    SINGLE_VALUE_QUERY_PARAMS = {
+        'deal_type',
+        'district',
+        'location',
+        'min_price',
+        'max_price',
+        'q',
+        'sort',
+        'map_view',
+        'build_status',
+        'page',
+    }
+    MULTI_VALUE_QUERY_PARAMS = {'property_type', 'bedrooms', 'amenities'}
+    CATALOG_QUERY_PARAM_ORDER = (
+        'deal_type',
+        'property_type',
+        'district',
+        'location',
+        'min_price',
+        'max_price',
+        'bedrooms',
+        'amenities',
+        'q',
+        'sort',
+        'map_view',
+        'build_status',
+        'page',
+    )
+
+    def dispatch(self, request, *args, **kwargs):
+        redirect_response = self._maybe_redirect_legacy_start_param(request)
+        if redirect_response:
+            return redirect_response
+
+        redirect_response = self._maybe_redirect_normalized_catalog_query(request)
+        if redirect_response:
+            return redirect_response
+
+        redirect_response = self._maybe_redirect_single_property_type_filter(request)
+        if redirect_response:
+            return redirect_response
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def _maybe_redirect_legacy_start_param(self, request):
+        start_value = request.GET.get('start')
+        if start_value in (None, ''):
+            return None
+
+        query_params = request.GET.copy()
+        query_params.pop('start', None)
+
+        try:
+            offset = int(start_value)
+        except (TypeError, ValueError):
+            offset = 0
+
+        if offset > 0:
+            page_size = self.get_paginate_by(None) or self.paginate_by or 12
+            query_params['page'] = str((offset // page_size) + 1)
+
+        query_string = query_params.urlencode()
+        target_url = request.path
+        if query_string:
+            target_url = f'{target_url}?{query_string}'
+
+        return HttpResponsePermanentRedirect(target_url)
+
+    def _maybe_redirect_normalized_catalog_query(self, request):
+        if not request.GET:
+            return None
+
+        normalized = {}
+        changed = False
+
+        for key in request.GET:
+            values = [value for value in request.GET.getlist(key) if value not in (None, '')]
+            if not values:
+                changed = True
+                continue
+
+            if key in self.SINGLE_VALUE_QUERY_PARAMS:
+                if len(values) > 1:
+                    changed = True
+                normalized[key] = [values[-1]]
+            elif key in self.MULTI_VALUE_QUERY_PARAMS:
+                deduped_values = []
+                seen_values = set()
+                for value in values:
+                    if value in seen_values:
+                        changed = True
+                        continue
+                    seen_values.add(value)
+                    deduped_values.append(value)
+                normalized[key] = deduped_values
+            else:
+                normalized[key] = values
+
+        forced_deal_type = getattr(self, 'forced_deal_type', '')
+        deal_type_values = normalized.get('deal_type') or []
+        if forced_deal_type and deal_type_values == [forced_deal_type]:
+            normalized.pop('deal_type', None)
+            changed = True
+
+        if normalized.get('sort') == ['-created_at']:
+            normalized.pop('sort', None)
+            changed = True
+
+        page_values = normalized.get('page') or []
+        if page_values:
+            try:
+                page_number = int(page_values[-1])
+            except (TypeError, ValueError):
+                normalized.pop('page', None)
+                changed = True
+            else:
+                if page_number <= 1:
+                    normalized.pop('page', None)
+                    changed = True
+
+        location_values = normalized.get('location') or []
+        if location_values:
+            location_queryset = Location.objects.select_related('district').filter(slug=location_values[-1])
+            district_values = normalized.get('district') or []
+            location_obj = None
+            if district_values:
+                location_obj = location_queryset.filter(district__slug=district_values[-1]).first()
+            else:
+                location_matches = list(location_queryset[:2])
+                if len(location_matches) == 1:
+                    location_obj = location_matches[0]
+
+            if location_obj and location_obj.district_id:
+                district_slug = location_obj.district.slug
+                if normalized.get('district') != [district_slug]:
+                    normalized['district'] = [district_slug]
+                    changed = True
+
+        if not changed:
+            return None
+
+        ordered_items = []
+        handled_keys = set()
+        for key in self.CATALOG_QUERY_PARAM_ORDER:
+            values = normalized.get(key)
+            if not values:
+                continue
+            handled_keys.add(key)
+            for value in values:
+                ordered_items.append((key, value))
+
+        for key in request.GET:
+            if key in handled_keys or key in self.CATALOG_QUERY_PARAM_ORDER:
+                continue
+            for value in normalized.get(key, []):
+                ordered_items.append((key, value))
+
+        query_string = urlencode(ordered_items)
+        target_url = request.path
+        if query_string:
+            target_url = f'{target_url}?{query_string}'
+
+        return HttpResponsePermanentRedirect(target_url)
+
+    def _maybe_redirect_single_property_type_filter(self, request):
+        if self.kwargs.get('type_name'):
+            return None
+
+        selected_types = [type_name for type_name in request.GET.getlist('property_type') if type_name]
+        if len(selected_types) != 1:
+            return None
+
+        property_type_name = selected_types[0]
+        if not PropertyType.objects.filter(name=property_type_name).exists():
+            return None
+
+        query_params = request.GET.copy()
+        query_params.pop('property_type', None)
+
+        deal_type = getattr(self, 'forced_deal_type', '') or request.GET.get('deal_type', '')
+        if deal_type in {'sale', 'rent'}:
+            query_params['deal_type'] = deal_type
+
+        target_url = reverse('properties:property_by_type', args=[property_type_name])
+        query_string = query_params.urlencode()
+        if query_string:
+            target_url = f'{target_url}?{query_string}'
+
+        return HttpResponsePermanentRedirect(target_url)
 
     def get_paginate_by(self, queryset):
         """Отключить пагинацию для карты"""
         if self.request.GET.get('map_view') == 'true':
             return None  # Отключить пагинацию для карты
         return self.paginate_by
+
+    def paginate_queryset(self, queryset, page_size):
+        """Return the nearest valid catalog page instead of a crawl-facing 404."""
+        paginator = self.get_paginator(
+            queryset,
+            page_size,
+            allow_empty_first_page=self.get_allow_empty(),
+        )
+        page_kwarg = self.page_kwarg
+        raw_page = self.kwargs.get(page_kwarg) or self.request.GET.get(page_kwarg) or 1
+        fallback_used = False
+
+        try:
+            page_number = int(raw_page)
+        except (TypeError, ValueError):
+            if raw_page == 'last':
+                page_number = paginator.num_pages
+            else:
+                page_number = 1
+                fallback_used = True
+
+        requested_page_number = page_number
+        if page_number < 1:
+            page_number = 1
+            fallback_used = True
+
+        try:
+            page_obj = paginator.page(page_number)
+        except EmptyPage:
+            page_obj = paginator.page(max(paginator.num_pages, 1))
+            fallback_used = True
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+            fallback_used = True
+
+        if fallback_used:
+            self.request.catalog_pagination_fallback = True
+            self.request.catalog_requested_page_number = requested_page_number
+            self.request.catalog_effective_page_number = page_obj.number
+
+        return paginator, page_obj, page_obj.object_list, page_obj.has_other_pages()
 
     def has_active_filters(self):
         """Проверяет наличие пользовательских фильтров в GET параметрах."""
@@ -2887,6 +3127,10 @@ class PropertyListView(ListView):
         return self.get_catalog_landing_signature(context) is not None
 
     def _get_catalog_page_number(self):
+        effective_page_number = getattr(self.request, 'catalog_effective_page_number', None)
+        if effective_page_number:
+            return effective_page_number
+
         page_param = self.request.GET.get('page')
         if not page_param:
             return 1
@@ -2929,6 +3173,10 @@ class PropertyListView(ListView):
     def apply_catalog_indexation_strategy(self, context, language_code='ru'):
         base_indexable = self.is_base_indexable_filter_page(context)
         is_indexable = self.is_indexable_filter_page(context)
+        pagination_fallback = bool(getattr(self.request, 'catalog_pagination_fallback', False))
+        if pagination_fallback:
+            is_indexable = False
+
         canonical_url = self.build_catalog_canonical_url(
             context,
             include_pagination=base_indexable,
@@ -3889,11 +4137,19 @@ class PropertyDetailView(DetailView):
             return None
 
         target_slug = LEGACY_PROPERTY_SLUG_REDIRECTS.get(slug)
-        if not target_slug:
-            return None
+        if target_slug:
+            target_url = reverse('properties:property_detail', kwargs={'slug': target_slug})
+            return HttpResponsePermanentRedirect(target_url)
 
-        target_url = reverse('properties:property_detail', kwargs={'slug': target_slug})
-        return HttpResponsePermanentRedirect(target_url)
+        fallback = MISSING_PROPERTY_SLUG_FALLBACKS.get(slug)
+        if fallback:
+            target_url = reverse(fallback['view_name'])
+            params = fallback.get('params') or {}
+            if params:
+                target_url = f"{target_url}?{urlencode(params)}"
+            return HttpResponsePermanentRedirect(target_url)
+
+        return None
 
     def get_same_complex_properties(self, language_code='ru'):
         project_name = _get_property_project_name(self.object, language_code)
@@ -4885,10 +5141,10 @@ def map_districts_json(request):
 def map_protomaps_basemap_proxy(request):
     """Same-origin proxy for PMTiles basemap to avoid browser CORS failures."""
     if not PROTOMAPS_BASEMAP_URL:
-        return JsonResponse({
-            'success': False,
-            'error': 'PROTOMAPS_BASEMAP_URL is not configured',
-        }, status=404)
+        response = HttpResponse(status=204)
+        response['X-Robots-Tag'] = 'noindex, nofollow'
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
     try:
         upstream_headers = {
@@ -4945,13 +5201,16 @@ def map_protomaps_basemap_proxy(request):
             header_value = error.headers.get(header_name)
             if header_value:
                 response[header_name] = header_value
+        response['X-Robots-Tag'] = 'noindex, nofollow'
         response['Access-Control-Allow-Origin'] = '*'
         return response
     except URLError as error:
-        return JsonResponse({
+        response = JsonResponse({
             'success': False,
             'error': str(error),
         }, status=502)
+        response['X-Robots-Tag'] = 'noindex, nofollow'
+        return response
 
 
 def ajax_search_count(request):
