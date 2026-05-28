@@ -206,6 +206,316 @@
         color: var(--accent-color);
         transform: translateX(2px);
     }
+
+    .blog-linked-properties {
+        margin-top: 2.5rem;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 2rem;
+    }
+
+    .blog-linked-properties__header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .blog-linked-properties__badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        background: rgba(241, 180, 0, 0.14);
+        color: var(--primary-color);
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .blog-linked-properties__title {
+        margin: 0.55rem 0 0;
+        color: #111827;
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+
+    .blog-linked-properties__description {
+        max-width: 42rem;
+        margin: 0.5rem 0 0;
+        color: #4b5563;
+        font-size: 0.875rem;
+        line-height: 1.65;
+    }
+
+    .blog-linked-properties__catalog-link {
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+        gap: 0.5rem;
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .blog-linked-properties__catalog-link:hover {
+        opacity: 0.78;
+    }
+
+    .blog-linked-properties__viewport {
+        position: relative;
+        margin-right: -1.5rem;
+    }
+
+    .blog-linked-properties__viewport::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0.75rem;
+        width: 3.5rem;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(255,255,255,0), #fff 78%);
+    }
+
+    .blog-linked-properties__rail {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(19rem, 21.5rem);
+        gap: 1rem;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding: 0.25rem 1.5rem 1rem 0;
+        scroll-padding-left: 0;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+    }
+
+    .blog-linked-properties__rail::-webkit-scrollbar {
+        height: 0.55rem;
+    }
+
+    .blog-linked-properties__rail::-webkit-scrollbar-track {
+        background: #f3f4f6;
+        border-radius: 999px;
+    }
+
+    .blog-linked-properties__rail::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
+    }
+
+    .blog-linked-property-card {
+        display: flex;
+        min-height: 100%;
+        scroll-snap-align: start;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 1rem;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .blog-linked-property-card:hover {
+        border-color: rgba(15, 23, 42, 0.16);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.10);
+        transform: translateY(-2px);
+    }
+
+    .blog-linked-property-card__media {
+        position: relative;
+        display: block;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        background: #f3f4f6;
+    }
+
+    .blog-linked-property-card__media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .blog-linked-property-card:hover .blog-linked-property-card__media img {
+        transform: scale(1.04);
+    }
+
+    .blog-linked-property-card__badges {
+        position: absolute;
+        top: 0.75rem;
+        left: 0.75rem;
+        right: 0.75rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .blog-linked-property-card__badge {
+        border-radius: 999px;
+        background: rgba(255,255,255,0.94);
+        color: #1f2937;
+        padding: 0.25rem 0.65rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        line-height: 1;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+    }
+
+    .blog-linked-property-card__badge--sale {
+        background: var(--accent-color);
+        color: #111827;
+    }
+
+    .blog-linked-property-card__badge--rent {
+        background: var(--primary-color);
+        color: #fff;
+    }
+
+    .blog-linked-property-card__body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .blog-linked-property-card__title {
+        display: -webkit-box;
+        min-height: 2.76em;
+        overflow: hidden;
+        margin: 0;
+        color: #111827;
+        font-size: 1rem;
+        font-weight: 800;
+        line-height: 1.38;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .blog-linked-property-card__title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .blog-linked-property-card__title a:hover {
+        color: var(--primary-color);
+    }
+
+    .blog-linked-property-card__location,
+    .blog-linked-property-card__facts {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        color: #4b5563;
+        font-size: 0.84rem;
+        line-height: 1.45;
+    }
+
+    .blog-linked-property-card__location {
+        margin-top: 0.7rem;
+    }
+
+    .blog-linked-property-card__facts {
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .blog-linked-property-card__facts span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .blog-linked-property-card__location i,
+    .blog-linked-property-card__facts i {
+        color: var(--primary-color);
+    }
+
+    .blog-linked-property-card__note {
+        margin: 0.9rem 0 0;
+        border-radius: 0.75rem;
+        background: #f8fafc;
+        color: #4b5563;
+        padding: 0.65rem 0.75rem;
+        font-size: 0.82rem;
+        line-height: 1.55;
+    }
+
+    .blog-linked-property-card__footer {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 0.85rem;
+        margin-top: auto;
+        padding-top: 1rem;
+    }
+
+    .blog-linked-property-card__price-label {
+        margin: 0;
+        color: #9ca3af;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    .blog-linked-property-card__price {
+        margin: 0.2rem 0 0;
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        font-weight: 800;
+        line-height: 1.15;
+    }
+
+    .blog-linked-property-card__cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        border-radius: 0.6rem;
+        background: var(--primary-color);
+        color: #fff;
+        padding: 0.65rem 0.8rem;
+        font-size: 0.82rem;
+        font-weight: 800;
+        line-height: 1;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .blog-linked-property-card__cta:hover {
+        background: var(--tertiary-color);
+        color: #fff;
+    }
+
+    @media (max-width: 640px) {
+        .blog-linked-properties__header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .blog-linked-properties__viewport {
+            margin-right: -1rem;
+        }
+
+        .blog-linked-properties__rail {
+            grid-auto-columns: minmax(17rem, 86vw);
+            padding-right: 1rem;
+        }
+
+        .blog-linked-properties__viewport::after {
+            width: 2.25rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -299,6 +609,8 @@
                     <div class="prose prose-lg max-w-none">
                         {{ processed_content|safe }}
                     </div>
+
+                    {% include 'blog/includes/linked_properties.html' %}
 
                     <!-- Теги -->
                     {% if post.tags.all %}

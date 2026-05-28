@@ -33,6 +33,15 @@
     .amp-content h3 { font-size: 1.3rem; margin: 24px 0 12px; }
     .amp-content p { margin-bottom: 1.4rem; }
     .amp-content ul { padding-left: 20px; margin-bottom: 1.4rem; }
+    .linked-properties { margin-top: 40px; padding-top: 24px; border-top: 1px solid #e2e8f0; }
+    .linked-properties h3 { font-size: 1.35rem; margin: 0 0 10px; }
+    .linked-properties p { color: #475569; line-height: 1.6; }
+    .property-item { border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; margin-top: 16px; background: #fff; }
+    .property-item__body { padding: 16px; }
+    .property-item__title { display: block; color: #0f172a; font-weight: 700; text-decoration: none; line-height: 1.35; }
+    .property-item__meta { margin-top: 10px; color: #64748b; font-size: 0.92rem; }
+    .property-item__price { margin-top: 12px; color: #0f172a; font-size: 1.15rem; font-weight: 800; }
+    .property-item__cta { display: inline-block; margin-top: 12px; padding: 10px 16px; border-radius: 10px; background: #0f172a; color: #fff; text-decoration: none; font-weight: 700; }
     .related { margin-top: 48px; }
     .related h3 { font-size: 1.3rem; margin-bottom: 16px; }
     .related-item { border-top: 1px solid #e2e8f0; padding: 12px 0; }
@@ -73,6 +82,34 @@
       <div class="amp-content">
         {{ amp_content|safe }}
       </div>
+
+      {% if linked_property_links %}
+      <section class="linked-properties">
+        <h3>{% trans "Объекты из статьи" %}</h3>
+        <p>{% trans "Редакция добавляет сюда объекты, которые помогают применить выводы статьи к реальному выбору недвижимости." %}</p>
+        {% for link in linked_property_links %}
+          {% with property=link.property %}
+          <article class="property-item">
+            {% if property.main_image %}
+              <a href="{{ property.get_absolute_url }}" data-amp-analytics="linked-property">
+                <amp-img src="{{ property.main_image.medium_url }}" width="640" height="400" layout="responsive" alt="{{ property.get_card_image_alt }}"></amp-img>
+              </a>
+            {% endif %}
+            <div class="property-item__body">
+              <a href="{{ property.get_absolute_url }}" class="property-item__title" data-amp-analytics="linked-property">{{ property.get_display_title }}</a>
+              <div class="property-item__meta">{{ property.get_display_location_label }}</div>
+              <div class="property-item__meta">
+                {% if property.bedrooms %}{{ property.bedrooms }} {% trans "спальни" %}{% endif %}
+                {% if property.area_total %}{% if property.bedrooms %} · {% endif %}{{ property.area_total }} {% trans "м²" %}{% endif %}
+              </div>
+              <div class="property-item__price">{{ link.display_price }}</div>
+              <a href="{{ property.get_absolute_url }}" class="property-item__cta" data-amp-analytics="linked-property">{% trans "Смотреть объект" %}</a>
+            </div>
+          </article>
+          {% endwith %}
+        {% endfor %}
+      </section>
+      {% endif %}
 
       {% if related_posts %}
       <section class="related">
@@ -154,6 +191,15 @@
             "request": "reachGoal",
             "vars": {
               "goalId": "amp_blog_related_click",
+              "yaParams": "{\"postId\": {{ post.id }}, \"slug\": \"{{ post.slug|escapejs }}\"}"
+            }
+          },
+          "linkedPropertyClick": {
+            "on": "click",
+            "selector": ".linked-properties a[data-amp-analytics='linked-property']",
+            "request": "reachGoal",
+            "vars": {
+              "goalId": "amp_blog_linked_property_click",
               "yaParams": "{\"postId\": {{ post.id }}, \"slug\": \"{{ post.slug|escapejs }}\"}"
             }
           }

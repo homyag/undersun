@@ -21,6 +21,7 @@ from django.views.decorators.http import require_POST
 from apps.core.models import SEOPage
 from apps.core.utils import truncate_meta
 from apps.core.amp_utils import convert_html_to_amp
+from apps.currency.services import CurrencyService
 
 from .models import BlogPost, BlogCategory, BlogTag
 from .services import (
@@ -316,6 +317,37 @@ def _build_blog_post_meta(post, language_code='ru'):
     return meta_title, meta_description, meta_keywords
 
 
+def _get_blog_linked_property_links(post, request):
+    """Return active property links prepared for blog templates."""
+    language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
+    currency_code = CurrencyService.get_selected_currency_code(request)
+    links = list(
+        post.property_links
+        .filter(property__is_active=True)
+        .select_related(
+            'property',
+            'property__property_type',
+            'property__district',
+            'property__location',
+        )
+        .prefetch_related('property__images')
+        .order_by('order', 'id')
+    )
+
+    visible_links = []
+    for link in links:
+        property_obj = link.property
+        if language_code in {'en', 'th'} and not getattr(property_obj, f'title_{language_code}', ''):
+            continue
+        deal_type = 'sale' if property_obj.deal_type in {'sale', 'both'} else 'rent'
+        link.display_deal_type = deal_type
+        link.display_price = property_obj.get_formatted_price(currency_code, deal_type)
+        link.display_property_type = property_obj._get_translated_type_name(language_code)
+        visible_links.append(link)
+
+    return visible_links
+
+
 def _build_blog_list_heading(*, language_code='ru', current_category=None, current_tag=None, search_query=''):
     strings = _get_blog_strings(language_code)
     if current_category:
@@ -517,7 +549,7 @@ def blog_list(request):
 def blog_detail(request, slug):
     """Детальная страница статьи"""
     post = get_object_or_404(
-        BlogPost.objects.select_related('category', 'author').prefetch_related('tags'),
+        BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related('tags'),
         slug=slug,
         status='published'
     )
@@ -544,6 +576,7 @@ def blog_detail(request, slug):
     language_code = (getattr(request, 'LANGUAGE_CODE', 'ru') or 'ru')[:2]
     meta_title, meta_description, meta_keywords = _build_blog_post_meta(post, language_code)
     article_toc, processed_content = _extract_blog_toc_and_content(post.content)
+    linked_property_links = _get_blog_linked_property_links(post, request)
 
     amp_url = request.build_absolute_uri(
         reverse('blog:detail_amp', kwargs={'slug': slug})
@@ -557,6 +590,7 @@ def blog_detail(request, slug):
         'featured_posts': featured_posts,
         'article_toc': article_toc,
         'processed_content': processed_content,
+        'linked_property_links': linked_property_links,
         'meta_title': meta_title,
         'meta_description': meta_description,
         'meta_keywords': meta_keywords,
@@ -604,7 +638,7 @@ def blog_detail(request, slug):
 
 def blog_detail_amp(request, slug):
     post = get_object_or_404(
-        BlogPost.objects.select_related('category', 'author').prefetch_related('tags'),
+        BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related('tags'),
         slug=slug,
         status='published'
     )
@@ -617,6 +651,7 @@ def blog_detail_amp(request, slug):
     meta_title = post.get_meta_title(language_code)
     meta_description = truncate_meta(post.get_meta_description(language_code))
     meta_keywords = post.get_meta_keywords(language_code)
+    linked_property_links = _get_blog_linked_property_links(post, request)
 
     canonical_url = request.build_absolute_uri(
         reverse('blog:detail', kwargs={'slug': slug})
@@ -628,6 +663,7 @@ def blog_detail_amp(request, slug):
     context = {
         'post': post,
         'related_posts': related_posts,
+        'linked_property_links': linked_property_links,
         'meta_title': meta_title,
         'meta_description': meta_description,
         'meta_keywords': meta_keywords,

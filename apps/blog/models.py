@@ -435,6 +435,44 @@ class BlogPost(models.Model):
         return self.content_type in ['upcoming_event', 'past_event']
 
 
+class BlogPostPropertyLink(models.Model):
+    """Объекты недвижимости, вручную связанные со статьей блога."""
+
+    post = models.ForeignKey(
+        BlogPost,
+        on_delete=models.CASCADE,
+        related_name='property_links',
+        verbose_name=_('Статья'),
+    )
+    property = models.ForeignKey(
+        'properties.Property',
+        on_delete=models.CASCADE,
+        related_name='blog_links',
+        verbose_name=_('Объект недвижимости'),
+    )
+    order = models.PositiveIntegerField(
+        _('Порядок'),
+        default=100,
+        help_text=_('Чем меньше число, тем выше объект в блоке статьи'),
+    )
+    editor_note = models.CharField(
+        _('Комментарий редактора'),
+        max_length=180,
+        blank=True,
+        help_text=_('Короткое пояснение, почему объект связан со статьей. Показывается на странице статьи.'),
+    )
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Объект в статье блога')
+        verbose_name_plural = _('Объекты в статье блога')
+        ordering = ['order', 'id']
+        unique_together = ('post', 'property')
+
+    def __str__(self):
+        return f'{self.post} → {self.property}'
+
+
 class BlogTag(models.Model):
     """Теги для статей блога"""
     

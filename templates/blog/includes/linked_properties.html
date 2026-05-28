@@ -1,0 +1,135 @@
+{% load i18n static %}
+
+{% if linked_property_links %}
+    <section class="blog-linked-properties">
+        <div class="blog-linked-properties__header">
+            <div>
+                <div class="blog-linked-properties__badge">
+                    {% trans "Объекты из статьи" %}
+                </div>
+                <h2 class="blog-linked-properties__title">
+                    {% trans "Недвижимость, связанная с материалом" %}
+                </h2>
+                <p class="blog-linked-properties__description">
+                    {% trans "Редакция добавляет сюда объекты, которые помогают применить выводы статьи к реальному выбору недвижимости." %}
+                </p>
+            </div>
+            <a href="{% url 'properties:property_sale' %}"
+               class="blog-linked-properties__catalog-link">
+                <span>{% trans "Все объекты на продажу" %}</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+
+        <div class="blog-linked-properties__viewport">
+            <div class="blog-linked-properties__rail">
+                {% for link in linked_property_links %}
+                    {% with property=link.property %}
+                        <article class="blog-linked-property-card">
+                            <a href="{{ property.get_absolute_url }}"
+                               class="blog-linked-property-card__media"
+                               data-ym-goal="blog_linked_property_click"
+                               data-ym-param-property-id="{{ property.id }}"
+                               data-ym-param-property-slug="{{ property.slug }}"
+                               data-ym-param-post-id="{{ post.id }}"
+                               data-ym-param-link="image">
+                                {% if property.main_image %}
+                                    <img src="{{ property.main_image.medium_url }}"
+                                         alt="{{ property.get_card_image_alt }}"
+                                         loading="lazy">
+                                {% else %}
+                                    <img src="{% static 'images/no-image.svg' %}"
+                                         alt="{% trans 'Изображение недоступно' %}"
+                                         loading="lazy">
+                                {% endif %}
+                                <div class="blog-linked-property-card__badges">
+                                    {% if link.display_property_type %}
+                                        <span class="blog-linked-property-card__badge">
+                                            {{ link.display_property_type }}
+                                        </span>
+                                    {% endif %}
+                                    {% if property.deal_type == 'rent' %}
+                                        <span class="blog-linked-property-card__badge blog-linked-property-card__badge--rent">
+                                            {% trans "Аренда" %}
+                                        </span>
+                                    {% else %}
+                                        <span class="blog-linked-property-card__badge blog-linked-property-card__badge--sale">
+                                            {% trans "Продажа" %}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </a>
+
+                            <div class="blog-linked-property-card__body">
+                                <h3 class="blog-linked-property-card__title">
+                                    <a href="{{ property.get_absolute_url }}"
+                                       data-ym-goal="blog_linked_property_click"
+                                       data-ym-param-property-id="{{ property.id }}"
+                                       data-ym-param-property-slug="{{ property.slug }}"
+                                       data-ym-param-post-id="{{ post.id }}"
+                                       data-ym-param-link="title">
+                                        {{ property.get_display_title }}
+                                    </a>
+                                </h3>
+
+                                <div class="blog-linked-property-card__location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ property.get_display_location_label }}</span>
+                                </div>
+
+                                <div class="blog-linked-property-card__facts">
+                                    {% if property.bedrooms %}
+                                        <span>
+                                            <i class="fas fa-bed"></i>
+                                            {{ property.bedrooms }}
+                                        </span>
+                                    {% endif %}
+                                    {% if property.bathrooms %}
+                                        <span>
+                                            <i class="fas fa-bath"></i>
+                                            {{ property.bathrooms }}
+                                        </span>
+                                    {% endif %}
+                                    {% if property.area_total %}
+                                        <span>
+                                            <i class="fas fa-ruler-combined"></i>
+                                            {{ property.area_total }} {% trans "м²" %}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                {% if link.editor_note %}
+                                    <p class="blog-linked-property-card__note">
+                                        {{ link.editor_note }}
+                                    </p>
+                                {% endif %}
+
+                                <div class="blog-linked-property-card__footer">
+                                    <div>
+                                        <p class="blog-linked-property-card__price-label">
+                                            {% trans "Цена" %}
+                                        </p>
+                                        <p class="blog-linked-property-card__price">
+                                            {{ link.display_price }}
+                                        </p>
+                                    </div>
+                                    <a href="{{ property.get_absolute_url }}"
+                                       class="blog-linked-property-card__cta"
+                                       data-ym-goal="blog_linked_property_click"
+                                       data-ym-param-property-id="{{ property.id }}"
+                                       data-ym-param-property-slug="{{ property.slug }}"
+                                       data-ym-param-post-id="{{ post.id }}"
+                                       data-ym-param-link="cta"
+                                       aria-label="{% trans 'Смотреть объект' %}: {{ property.get_display_title }}">
+                                        <span>{% trans "Смотреть" %}</span>
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}

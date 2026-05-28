@@ -1,5 +1,5 @@
 from modeltranslation.translator import translator, TranslationOptions
-from .models import BlogCategory, BlogPost
+from .models import BlogCategory, BlogPost, BlogPostPropertyLink
 
 
 class BlogCategoryTranslationOptions(TranslationOptions):
@@ -10,5 +10,10 @@ class BlogPostTranslationOptions(TranslationOptions):
     fields = ('title', 'excerpt', 'content', 'meta_title', 'meta_description', 'meta_keywords', 'featured_image_alt')
 
 
+class BlogPostPropertyLinkTranslationOptions(TranslationOptions):
+    fields = ('editor_note',)
+
+
 translator.register(BlogCategory, BlogCategoryTranslationOptions)
 translator.register(BlogPost, BlogPostTranslationOptions)
+translator.register(BlogPostPropertyLink, BlogPostPropertyLinkTranslationOptions)
