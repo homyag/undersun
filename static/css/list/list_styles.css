@@ -527,6 +527,18 @@ input[type="radio"]:focus {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.property-map-popup {
+    translate: var(--property-map-popup-shift-x, 0) var(--property-map-popup-shift-y, 0);
+}
+
+.property-map-popup .maplibregl-popup-content {
+    overflow: hidden;
+}
+
+.property-map-popup .property-popup {
+    width: min(320px, calc(100vw - 24px));
+}
+
 .popup-media {
     position: relative;
     overflow: hidden;
@@ -793,6 +805,31 @@ input[type="radio"]:focus {
     color: white;
     transform: translateY(-2px) scale(1.1);
     box-shadow: 0 8px 25px rgba(241, 180, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+    .property-map-popup .property-popup {
+        width: min(320px, calc(100vw - 24px));
+    }
+
+    .property-map-popup .popup-body {
+        padding: 0.95rem 1rem 1.05rem;
+    }
+
+    .property-map-popup .popup-title {
+        font-size: 0.98rem;
+        line-height: 1.35;
+    }
+
+    .property-map-popup .popup-actions {
+        gap: 0.5rem;
+    }
+
+    .property-map-popup .popup-action {
+        min-height: 42px;
+        padding: 0.58rem 0.55rem;
+        font-size: 0.82rem;
+    }
 }
 
 /* Price Indicator Styles (like Booking.com) */

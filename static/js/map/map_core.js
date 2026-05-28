@@ -77,6 +77,7 @@
         isPointerOverPopup: false,
         isPinnedPopup: false,
         lastPopupPropertyId: null,
+        popupAnchor: null,
         spiderClusterId: null,
         selectedPropertyId: null,
     };
@@ -502,15 +503,23 @@
         await Promise.all(jobs);
     }
 
-    function createPopup() {
+    function createPopup({ anchor = 'bottom' } = {}) {
+        if (state.popup && state.popupAnchor !== anchor) {
+            state.popup.remove();
+            state.popup = null;
+            state.popupAnchor = null;
+        }
+
         if (!state.popup) {
             state.popup = new maplibregl.Popup({
+                anchor,
                 closeButton: true,
                 closeOnClick: false,
                 maxWidth: '320px',
                 offset: 18,
                 focusAfterOpen: false,
             });
+            state.popupAnchor = anchor;
 
             state.popup.on('close', () => {
                 clearHoverPopupTimer();
@@ -518,6 +527,7 @@
                 state.isPointerOverPopup = false;
                 state.isPinnedPopup = false;
                 state.lastPopupPropertyId = null;
+                state.popupAnchor = null;
                 setSelectedFeature(null);
             });
         }
@@ -567,39 +577,78 @@
     }
 
     function bindPopupHoverGuards(popup) {
-        if (!isHoverPopupEnabled()) {
-            return;
-        }
-
         requestAnimationFrame(() => {
             const popupElement = popup.getElement();
-            if (!popupElement || popupElement.dataset.hoverGuardsBound === 'true') {
+            if (!popupElement) {
                 return;
             }
 
-            popupElement.dataset.hoverGuardsBound = 'true';
-            popupElement.addEventListener('mouseenter', () => {
-                state.isPointerOverPopup = true;
-                clearHoverPopupTimer();
-            });
-            popupElement.addEventListener('mouseleave', () => {
-                state.isPointerOverPopup = false;
-                scheduleHoverPopupClose();
-            });
+            if (popupElement.dataset.popupInteractionGuardsBound !== 'true') {
+                popupElement.dataset.popupInteractionGuardsBound = 'true';
+
+                const handlePopupWheel = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                };
+
+                ['wheel', 'mousewheel', 'DOMMouseScroll'].forEach((eventName) => {
+                    popupElement.addEventListener(eventName, handlePopupWheel, { passive: false });
+                });
+
+                popupElement.addEventListener('touchmove', (event) => {
+                    event.stopPropagation();
+                }, { passive: true });
+
+                ['pointerdown', 'mousedown', 'touchstart'].forEach((eventName) => {
+                    popupElement.addEventListener(eventName, (event) => {
+                        event.stopPropagation();
+                    });
+                });
+            }
+
+            if (isHoverPopupEnabled() && popupElement.dataset.hoverGuardsBound !== 'true') {
+                popupElement.dataset.hoverGuardsBound = 'true';
+                popupElement.addEventListener('mouseenter', () => {
+                    state.isPointerOverPopup = true;
+                    clearHoverPopupTimer();
+                });
+                popupElement.addEventListener('mouseleave', () => {
+                    state.isPointerOverPopup = false;
+                    scheduleHoverPopupClose();
+                });
+            }
         });
     }
 
-    function getPopupMaxWidth() {
-        if (!state.map) {
-            return '320px';
+    function getPopupAnchor(coordinates) {
+        if (!state.map || !coordinates) {
+            return 'bottom';
         }
 
-        const containerWidth = state.map.getContainer().clientWidth || 0;
-        const safeWidth = Math.max(240, Math.min(320, containerWidth - POPUP_VIEWPORT_PADDING * 2));
-        return `${safeWidth}px`;
+        const container = state.map.getContainer();
+        if (!container) {
+            return 'bottom';
+        }
+
+        const point = state.map.project(coordinates);
+        const popupWidth = Math.min(320, Math.max(240, container.clientWidth - POPUP_VIEWPORT_PADDING * 2));
+        const estimatedHeight = Math.min(430, Math.max(280, container.clientHeight * 0.72));
+        const spaceAbove = point.y - POPUP_VIEWPORT_PADDING - 18;
+        const spaceBelow = container.clientHeight - point.y - POPUP_VIEWPORT_PADDING - 18;
+        const verticalAnchor = spaceAbove >= estimatedHeight || spaceAbove > spaceBelow ? 'bottom' : 'top';
+        const halfWidth = popupWidth / 2;
+
+        let horizontalAnchor = '';
+        if (point.x < halfWidth + POPUP_VIEWPORT_PADDING) {
+            horizontalAnchor = 'left';
+        } else if (point.x > container.clientWidth - halfWidth - POPUP_VIEWPORT_PADDING) {
+            horizontalAnchor = 'right';
+        }
+
+        return horizontalAnchor ? `${verticalAnchor}-${horizontalAnchor}` : verticalAnchor;
     }
 
-    function keepPopupWithinFrame(popup) {
+    function updatePopupLayoutState(popup, { pinned = false, coordinates = null, anchor = 'bottom' } = {}) {
         if (!state.map || !popup) {
             return;
         }
@@ -610,6 +659,27 @@
             return;
         }
 
+        popupElement.classList.add('property-map-popup');
+        popupElement.classList.toggle('property-map-popup--hover', !pinned);
+        popupElement.classList.toggle('property-map-popup--pinned', pinned);
+        popupElement.style.setProperty('--property-map-popup-shift-x', '0px');
+        popupElement.style.setProperty('--property-map-popup-shift-y', '0px');
+    }
+
+    function clampPopupToMapFrame(popup) {
+        if (!state.map || !popup) {
+            return;
+        }
+
+        const popupElement = popup.getElement();
+        const container = state.map.getContainer();
+        if (!popupElement || !container) {
+            return;
+        }
+
+        popupElement.style.setProperty('--property-map-popup-shift-x', '0px');
+        popupElement.style.setProperty('--property-map-popup-shift-y', '0px');
+
         const popupRect = popupElement.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
         const minLeft = containerRect.left + POPUP_VIEWPORT_PADDING;
@@ -617,27 +687,49 @@
         const minTop = containerRect.top + POPUP_VIEWPORT_PADDING;
         const maxBottom = containerRect.bottom - POPUP_VIEWPORT_PADDING;
 
-        let dx = 0;
-        let dy = 0;
+        let shiftX = 0;
+        let shiftY = 0;
 
         if (popupRect.left < minLeft) {
-            dx = minLeft - popupRect.left;
+            shiftX = minLeft - popupRect.left;
         } else if (popupRect.right > maxRight) {
-            dx = maxRight - popupRect.right;
+            shiftX = maxRight - popupRect.right;
+        }
+
+        const shiftedLeft = popupRect.left + shiftX;
+        const shiftedRight = popupRect.right + shiftX;
+        if (shiftedLeft < minLeft) {
+            shiftX += minLeft - shiftedLeft;
+        } else if (shiftedRight > maxRight) {
+            shiftX += maxRight - shiftedRight;
         }
 
         if (popupRect.top < minTop) {
-            dy = minTop - popupRect.top;
+            shiftY = minTop - popupRect.top;
         } else if (popupRect.bottom > maxBottom) {
-            dy = maxBottom - popupRect.bottom;
+            shiftY = maxBottom - popupRect.bottom;
         }
 
-        if (dx !== 0 || dy !== 0) {
-            state.map.panBy([-dx, -dy], {
-                duration: 220,
-                easing: (t) => t,
-            });
+        const shiftedTop = popupRect.top + shiftY;
+        const shiftedBottom = popupRect.bottom + shiftY;
+        if (shiftedTop < minTop) {
+            shiftY += minTop - shiftedTop;
+        } else if (shiftedBottom > maxBottom) {
+            shiftY += maxBottom - shiftedBottom;
         }
+
+        popupElement.style.setProperty('--property-map-popup-shift-x', `${Math.round(shiftX)}px`);
+        popupElement.style.setProperty('--property-map-popup-shift-y', `${Math.round(shiftY)}px`);
+    }
+
+    function getPopupMaxWidth() {
+        if (!state.map) {
+            return '320px';
+        }
+
+        const containerWidth = state.map.getContainer().clientWidth || 0;
+        const safeWidth = Math.max(240, Math.min(320, containerWidth - POPUP_VIEWPORT_PADDING * 2));
+        return `${safeWidth}px`;
     }
 
     function emitMapEvent(name, detail = {}) {
@@ -1221,6 +1313,11 @@
             return;
         }
 
+        const coordinates = feature.geometry.coordinates.slice();
+        const popupAnchor = getPopupAnchor(coordinates);
+        const popup = createPopup({ anchor: popupAnchor });
+        const popupHtml = window.mapPopupUtils?.buildPropertyPopupHtml(feature.properties) || '';
+
         clearHoverPopupTimer();
         state.isPinnedPopup = pinned;
         state.lastPopupPropertyId = propertyId;
@@ -1229,9 +1326,6 @@
             setSelectedFeature(feature);
         }
 
-        const popup = createPopup();
-        const coordinates = feature.geometry.coordinates.slice();
-        const popupHtml = window.mapPopupUtils?.buildPropertyPopupHtml(feature.properties) || '';
         popup.setMaxWidth(getPopupMaxWidth());
 
         popup
@@ -1239,15 +1333,17 @@
             .setHTML(popupHtml)
             .addTo(state.map);
 
+        updatePopupLayoutState(popup, { pinned, coordinates, anchor: popupAnchor });
+
         if (typeof window.syncFavoriteIcons === 'function') {
             window.syncFavoriteIcons();
         }
 
         requestAnimationFrame(() => {
-            keepPopupWithinFrame(popup);
+            clampPopupToMapFrame(popup);
         });
         setTimeout(() => {
-            keepPopupWithinFrame(popup);
+            clampPopupToMapFrame(popup);
         }, 120);
 
         bindPopupHoverGuards(popup);
