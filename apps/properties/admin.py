@@ -577,6 +577,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
         ('Основная информация', {
             'fields': (
                 'legacy_id',
+                'complex_name',
                 'title',
                 'slug',
                 'district',

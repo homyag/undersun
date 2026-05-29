@@ -1670,24 +1670,63 @@ def _get_property_type_nav_label(property_obj, language_code='ru'):
     )
 
 
-PROJECT_NAME_SUFFIX_PATTERN = re.compile(r'\s(?:в|in|at|ใน)\s+(.+)$', re.IGNORECASE)
+PROJECT_NAME_SUFFIX_PATTERN = re.compile(r'\s(?:в|in|at|ใน)\s+', re.IGNORECASE)
+PROJECT_NAME_LEADING_CONTEXT_PATTERNS = (
+    re.compile(
+        r'^(?:в\s+)?'
+        r'(?:(?:новом|новый|нового|новая|новой|новое|новые|новых|'
+        r'премиум|премиальном|премиальный|премиального)\s+)*'
+        r'(?:жил(?:ом|ой|ого)?\s+)?'
+        r'(?:комплекс(?:е|а|ом)?|проект(?:е|а|ом)?|кондоминиум(?:е|а|ом)?|резиденци(?:и|я)|жк)\s+',
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r'^(?:премиум-класса|премиум|премиальном|премиальный|премиального)\s+',
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r'^(?:the\s+)?(?:new\s+)?(?:project|complex|development|residence|condominium|condo)\s+',
+        re.IGNORECASE,
+    ),
+    re.compile(r'^(?:โครงการ|คอมเพล็กซ์|คอนโดมิเนียม)\s*', re.IGNORECASE),
+)
 PROJECT_NAME_GENERIC_PATTERNS = (
     re.compile(r'^(?:a\s+)?bargain price$', re.IGNORECASE),
     re.compile(r'^(?:the\s+)?area$', re.IGNORECASE),
     re.compile(r'^phuket$', re.IGNORECASE),
+    re.compile(r'\b(?:район(?:е|а|ом)?|district|area)\b', re.IGNORECASE),
 )
 
 
+def _clean_project_name_candidate(value):
+    value = _normalize_whitespace(strip_tags(value or '').strip(' .,;:|/\\-–—'))
+    if not value:
+        return ''
+
+    previous = None
+    while value and value != previous:
+        previous = value
+        for pattern in PROJECT_NAME_LEADING_CONTEXT_PATTERNS:
+            value = _normalize_whitespace(pattern.sub('', value).strip(' .,;:|/\\-–—'))
+
+    return value
+
+
 def _normalize_project_key(value):
-    value = _normalize_whitespace(strip_tags(value or ''))
+    value = _clean_project_name_candidate(value)
     if not value:
         return ''
     value = re.sub(r'[^\w\u0E00-\u0E7F]+', ' ', value, flags=re.UNICODE)
     return _normalize_whitespace(value).lower()
 
 
+def _normalize_legacy_project_key(value):
+    value = _normalize_whitespace(strip_tags(value or ''))
+    return value.lower()
+
+
 def _is_plausible_project_name(value):
-    value = _normalize_whitespace(strip_tags(value or '').strip(' .,;:|/\\-–—'))
+    value = _clean_project_name_candidate(value)
     if not value:
         return False
     if len(value) < 4 or len(value.split()) > 8:
@@ -1708,7 +1747,7 @@ def _extract_project_name_from_title(value):
 
     matches = list(PROJECT_NAME_SUFFIX_PATTERN.finditer(value))
     for match in reversed(matches):
-        candidate = _normalize_whitespace(match.group(1).strip(' .,;:|/\\-–—'))
+        candidate = _clean_project_name_candidate(value[match.end():])
         if _is_plausible_project_name(candidate):
             return candidate
     return ''
@@ -1735,7 +1774,7 @@ def _get_property_project_name(property_obj, language_code='ru'):
         if not value:
             continue
         if field_name.startswith('complex_name'):
-            return value
+            return _clean_project_name_candidate(value) or value
         extracted = _extract_project_name_from_title(value)
         if extracted:
             return extracted
@@ -1743,12 +1782,38 @@ def _get_property_project_name(property_obj, language_code='ru'):
     return ''
 
 
-def _filter_out_project_matches(properties, project_key):
-    if not project_key:
+def _get_property_project_keys(property_obj, language_code='ru'):
+    if property_obj is None:
+        return []
+
+    keys = []
+
+    legacy_key = _normalize_legacy_project_key(getattr(property_obj, 'legacy_id', ''))
+    if legacy_key:
+        keys.append(('legacy_id', legacy_key))
+
+    project_name = _get_property_project_name(property_obj, language_code)
+    project_key = _normalize_project_key(project_name)
+    if project_key:
+        keys.append(('project_name', project_key))
+
+    return keys
+
+
+def _property_matches_project_keys(property_obj, project_keys, language_code='ru'):
+    if not project_keys:
+        return False
+
+    candidate_keys = set(_get_property_project_keys(property_obj, language_code))
+    return any(project_key in candidate_keys for project_key in project_keys)
+
+
+def _filter_out_project_matches(properties, project_keys, language_code='ru'):
+    if not project_keys:
         return list(properties)
     return [
         property_obj for property_obj in properties
-        if _normalize_project_key(_get_property_project_name(property_obj)) != project_key
+        if not _property_matches_project_keys(property_obj, project_keys, language_code)
     ]
 
 
@@ -4547,9 +4612,8 @@ class PropertyDetailView(DetailView):
         return None
 
     def get_same_complex_properties(self, language_code='ru'):
-        project_name = _get_property_project_name(self.object, language_code)
-        project_key = _normalize_project_key(project_name)
-        if not project_key:
+        project_keys = _get_property_project_keys(self.object, language_code)
+        if not project_keys:
             return []
 
         queryset = Property.objects.filter(
@@ -4557,8 +4621,6 @@ class PropertyDetailView(DetailView):
             status='available',
         ).exclude(id=self.object.id)
 
-        if self.object.property_type_id:
-            queryset = queryset.filter(property_type=self.object.property_type)
         if self.object.district_id:
             queryset = queryset.filter(district=self.object.district)
 
@@ -4569,7 +4631,7 @@ class PropertyDetailView(DetailView):
         )
         matches = [
             property_obj for property_obj in candidates
-            if _normalize_project_key(_get_property_project_name(property_obj, language_code)) == project_key
+            if _property_matches_project_keys(property_obj, project_keys, language_code)
         ]
         return matches[:4]
     
@@ -4586,7 +4648,7 @@ class PropertyDetailView(DetailView):
             'is_active': True,
             'status': 'available'
         }
-        same_project_key = _normalize_project_key(_get_property_project_name(self.object))
+        same_project_keys = _get_property_project_keys(self.object)
         
         similar_properties = []
         
@@ -4600,7 +4662,9 @@ class PropertyDetailView(DetailView):
                 'district', 'location', 'property_type'
             ).prefetch_related('images')[:8]
             
-            similar_properties.extend(_filter_out_project_matches(same_location, same_project_key)[:2])
+            similar_properties.extend(
+                _filter_out_project_matches(same_location, same_project_keys)[:2]
+            )
         
         # 2. Тот же район (но другая локация или без локации)
         if len(similar_properties) < 4:
@@ -4620,7 +4684,7 @@ class PropertyDetailView(DetailView):
             ).prefetch_related('images')[:8]
             
             similar_properties.extend(
-                _filter_out_project_matches(same_district, same_project_key)[:(4 - len(similar_properties))]
+                _filter_out_project_matches(same_district, same_project_keys)[:(4 - len(similar_properties))]
             )
         
         # 3. Тот же тип недвижимости (любая локация)
@@ -4640,7 +4704,7 @@ class PropertyDetailView(DetailView):
             ).prefetch_related('images')[:8]
             
             similar_properties.extend(
-                _filter_out_project_matches(same_type, same_project_key)[:(4 - len(similar_properties))]
+                _filter_out_project_matches(same_type, same_project_keys)[:(4 - len(similar_properties))]
             )
         
         return similar_properties[:4]
