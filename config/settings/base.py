@@ -561,6 +561,7 @@ TINYMCE_DEFAULT_CONFIG = {
     'image_title': True,
     'automatic_uploads': True,
     'file_picker_types': 'image',
+    'images_file_types': 'jpeg,jpg,jpe,jfi,jif,jfif,png,gif,webp,svg',
     'images_upload_url': reverse_lazy('blog:tinymce_upload'),
 }
 

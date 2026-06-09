@@ -1,6 +1,8 @@
 import json
 import os
 import re
+import xml.etree.ElementTree as ET
+from html import unescape as html_unescape
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -132,6 +134,177 @@ BLOG_SEO_DEFAULTS = {
 
 HEADING_PATTERN = re.compile(r'<h([23])([^>]*)>(.*?)</h\1>', re.IGNORECASE | re.DOTALL)
 HEADING_ID_PATTERN = re.compile(r'\sid=(["\'])(.*?)\1', re.IGNORECASE)
+TINYMCE_ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
+TINYMCE_MAX_UPLOAD_SIZE = 5 * 1024 * 1024
+SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
+XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink'
+SVG_BLOCKED_DECLARATION_PATTERN = re.compile(r'<!\s*(DOCTYPE|ENTITY)\b', re.IGNORECASE)
+SVG_URL_PATTERN = re.compile(r'url\(\s*([^)]+?)\s*\)', re.IGNORECASE)
+SVG_UNSAFE_VALUE_TOKENS = (
+    'javascript:',
+    'vbscript:',
+    'data:text/html',
+    '<script',
+    '</script',
+    'expression(',
+    '@import',
+)
+SVG_ALLOWED_TAGS = {
+    'svg',
+    'g',
+    'defs',
+    'title',
+    'desc',
+    'path',
+    'rect',
+    'circle',
+    'ellipse',
+    'line',
+    'polyline',
+    'polygon',
+    'text',
+    'tspan',
+    'lineargradient',
+    'radialgradient',
+    'stop',
+    'clippath',
+    'mask',
+    'pattern',
+    'symbol',
+    'use',
+    'a',
+}
+SVG_ALLOWED_ATTRS = {
+    'id',
+    'class',
+    'role',
+    'aria-label',
+    'focusable',
+    'version',
+    'viewbox',
+    'preserveaspectratio',
+    'width',
+    'height',
+    'x',
+    'y',
+    'x1',
+    'y1',
+    'x2',
+    'y2',
+    'cx',
+    'cy',
+    'r',
+    'rx',
+    'ry',
+    'd',
+    'points',
+    'transform',
+    'fill',
+    'fill-rule',
+    'fill-opacity',
+    'font-family',
+    'font-size',
+    'font-style',
+    'font-weight',
+    'stroke',
+    'stroke-width',
+    'stroke-linecap',
+    'stroke-linejoin',
+    'stroke-miterlimit',
+    'stroke-dasharray',
+    'stroke-dashoffset',
+    'stroke-opacity',
+    'opacity',
+    'style',
+    'offset',
+    'stop-color',
+    'stop-opacity',
+    'gradientunits',
+    'gradienttransform',
+    'patternunits',
+    'patterncontentunits',
+    'clip-path',
+    'clip-rule',
+    'mask',
+    'text-anchor',
+    'text-decoration',
+    'href',
+    'target',
+    'rel',
+}
+
+ET.register_namespace('', SVG_NAMESPACE)
+ET.register_namespace('xlink', XLINK_NAMESPACE)
+
+
+def _svg_local_name(name):
+    if name.startswith('{'):
+        return name.rsplit('}', 1)[-1]
+    return name
+
+
+def _is_safe_svg_attr_value(tag_name, attr_name, value):
+    normalized = html_unescape(str(value or '')).strip().lower()
+    if any(token in normalized for token in SVG_UNSAFE_VALUE_TOKENS):
+        return False
+
+    if attr_name == 'href':
+        if tag_name == 'a':
+            return (
+                normalized.startswith('#')
+                or normalized.startswith('https://')
+                or normalized.startswith('http://')
+            )
+        return normalized.startswith('#')
+
+    for match in SVG_URL_PATTERN.finditer(normalized):
+        target = match.group(1).strip(' \'"')
+        if not target.startswith('#'):
+            return False
+
+    return True
+
+
+def _sanitize_svg_element(element):
+    tag_name = _svg_local_name(element.tag).lower()
+
+    for child in list(element):
+        child_name = _svg_local_name(child.tag).lower()
+        if child_name not in SVG_ALLOWED_TAGS:
+            element.remove(child)
+            continue
+        _sanitize_svg_element(child)
+
+    for attr_name in list(element.attrib):
+        local_attr_name = _svg_local_name(attr_name).lower()
+        if (
+            local_attr_name.startswith('on')
+            or local_attr_name not in SVG_ALLOWED_ATTRS
+            or not _is_safe_svg_attr_value(tag_name, local_attr_name, element.attrib[attr_name])
+        ):
+            del element.attrib[attr_name]
+
+
+def _sanitize_svg_upload(uploaded_file):
+    raw_content = uploaded_file.read()
+    try:
+        svg_text = raw_content.decode('utf-8-sig')
+    except UnicodeDecodeError as exc:
+        raise ValueError('Invalid SVG encoding. Use UTF-8 SVG files.') from exc
+
+    if SVG_BLOCKED_DECLARATION_PATTERN.search(svg_text):
+        raise ValueError('Invalid SVG content. DOCTYPE and ENTITY declarations are not allowed.')
+
+    try:
+        root = ET.fromstring(svg_text)
+    except ET.ParseError as exc:
+        raise ValueError('Invalid SVG file.') from exc
+
+    if _svg_local_name(root.tag).lower() != 'svg':
+        raise ValueError('Invalid SVG file. Root element must be <svg>.')
+
+    _sanitize_svg_element(root)
+    return ET.tostring(root, encoding='utf-8', method='xml')
 
 
 def _extract_blog_toc_and_content(html_content):
@@ -146,7 +319,7 @@ def _extract_blog_toc_and_content(html_content):
         level = int(match.group(1))
         attrs = match.group(2) or ''
         inner_html = match.group(3) or ''
-        heading_text = strip_tags(inner_html).strip()
+        heading_text = html_unescape(strip_tags(inner_html)).replace('\xa0', ' ').strip()
 
         if not heading_text:
             return match.group(0)
@@ -867,22 +1040,24 @@ def tinymce_upload(request):
     """
     Загрузка изображений для TinyMCE редактора
     """
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
     if 'file' not in request.FILES:
         return JsonResponse({'error': 'No file provided'}, status=400)
     
     file = request.FILES['file']
     
     # Проверяем тип файла
-    allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
     file_extension = os.path.splitext(file.name)[1].lower()
     
-    if file_extension not in allowed_extensions:
+    if file_extension not in TINYMCE_ALLOWED_IMAGE_EXTENSIONS:
         return JsonResponse({
-            'error': 'Invalid file type. Allowed: JPG, PNG, GIF, WebP'
+            'error': 'Invalid file type. Allowed: JPG, PNG, GIF, WebP, SVG'
         }, status=400)
     
     # Проверяем размер файла (максимум 5MB)
-    if file.size > 5 * 1024 * 1024:
+    if file.size > TINYMCE_MAX_UPLOAD_SIZE:
         return JsonResponse({
             'error': 'File too large. Maximum size: 5MB'
         }, status=400)
@@ -890,13 +1065,18 @@ def tinymce_upload(request):
     try:
         # Создаем безопасное имя файла
         name, ext = os.path.splitext(file.name)
-        safe_name = slugify(name) + ext
+        safe_name = f'{slugify(name) or "image"}{ext.lower()}'
         
         # Путь для сохранения
         upload_path = f'blog/editor/{safe_name}'
+
+        if file_extension == '.svg':
+            file_content = _sanitize_svg_upload(file)
+        else:
+            file_content = file.read()
         
         # Сохраняем файл
-        file_path = default_storage.save(upload_path, ContentFile(file.read()))
+        file_path = default_storage.save(upload_path, ContentFile(file_content))
         
         # Возвращаем URL для TinyMCE
         file_url = request.build_absolute_uri(settings.MEDIA_URL + file_path)
@@ -904,6 +1084,11 @@ def tinymce_upload(request):
         return JsonResponse({
             'location': file_url
         })
+
+    except ValueError as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=400)
         
     except Exception as e:
         return JsonResponse({

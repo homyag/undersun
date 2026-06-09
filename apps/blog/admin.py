@@ -15,6 +15,30 @@ from .models import BlogCategory, BlogPost, BlogPostPropertyLink, BlogTag
 from .services import translate_blog_post, translate_blog_category
 
 
+BLOG_TINYMCE_LINK_ATTRS = {
+    'link_target_list': [
+        {'title': _('В текущем окне'), 'value': ''},
+        {'title': _('В новой вкладке'), 'value': '_blank'},
+    ],
+    'link_rel_list': [
+        {'title': _('Без rel'), 'value': ''},
+        {'title': 'nofollow', 'value': 'nofollow'},
+        {'title': 'noreferrer', 'value': 'noreferrer'},
+        {'title': 'noopener noreferrer', 'value': 'noopener noreferrer'},
+        {'title': 'nofollow noopener noreferrer', 'value': 'nofollow noopener noreferrer'},
+        {'title': 'sponsored nofollow', 'value': 'sponsored nofollow'},
+        {'title': 'ugc nofollow', 'value': 'ugc nofollow'},
+    ],
+}
+
+
+def blog_content_tinymce_widget():
+    return TinyMCE(
+        attrs={'class': 'tinymce-content'},
+        mce_attrs=BLOG_TINYMCE_LINK_ATTRS.copy(),
+    )
+
+
 class BaseAdminWithRequiredFields(admin.ModelAdmin):
     """Базовый класс админ-панели с подключением стилей для обязательных полей"""
     
@@ -133,9 +157,9 @@ class BlogPostAdminForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             # Только поля content используют TinyMCE
-            'content': TinyMCE(attrs={'class': 'tinymce-content'}),
-            'content_en': TinyMCE(attrs={'class': 'tinymce-content'}),
-            'content_th': TinyMCE(attrs={'class': 'tinymce-content'}),
+            'content': blog_content_tinymce_widget(),
+            'content_en': blog_content_tinymce_widget(),
+            'content_th': blog_content_tinymce_widget(),
         }
 
 
