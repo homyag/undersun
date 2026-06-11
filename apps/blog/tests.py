@@ -8,7 +8,70 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
+from .services import get_blog_post_translation_plan
 from .views import _extract_blog_toc_and_content, _sanitize_svg_upload, tinymce_upload
+
+
+class BlogTranslationPlanTests(SimpleTestCase):
+    def test_plan_skips_existing_translations_without_force(self):
+        post = SimpleNamespace(
+            title='Русский заголовок',
+            title_en='Existing title',
+            title_th='',
+            excerpt='Русское описание',
+            excerpt_en='',
+            excerpt_th='',
+            content='<p>Русский текст</p>',
+            content_en='Existing content',
+            content_th='',
+            meta_title='SEO заголовок',
+            meta_title_en='',
+            meta_title_th='',
+            meta_description='SEO описание',
+            meta_description_en='',
+            meta_description_th='',
+            meta_keywords='ключи',
+            meta_keywords_en='',
+            meta_keywords_th='',
+            featured_image_alt='Alt',
+            featured_image_alt_en='Existing alt',
+            featured_image_alt_th='',
+        )
+
+        plan, skipped_count = get_blog_post_translation_plan(
+            post,
+            target_languages=['en', 'th'],
+            force_retranslate=False,
+        )
+
+        translated_fields = {item['translated_field_name'] for item in plan}
+        self.assertNotIn('title_en', translated_fields)
+        self.assertNotIn('content_en', translated_fields)
+        self.assertNotIn('featured_image_alt_en', translated_fields)
+        self.assertIn('meta_title_en', translated_fields)
+        self.assertIn('title_th', translated_fields)
+        self.assertEqual(skipped_count, 3)
+
+    def test_plan_includes_existing_translations_with_force(self):
+        post = SimpleNamespace(
+            title='Русский заголовок',
+            title_en='Existing title',
+            excerpt='',
+            content='',
+            meta_title='',
+            meta_description='',
+            meta_keywords='',
+            featured_image_alt='',
+        )
+
+        plan, skipped_count = get_blog_post_translation_plan(
+            post,
+            target_languages=['en'],
+            force_retranslate=True,
+        )
+
+        self.assertEqual([item['translated_field_name'] for item in plan], ['title_en'])
+        self.assertEqual(skipped_count, 6)
 
 
 class BlogTocTests(SimpleTestCase):

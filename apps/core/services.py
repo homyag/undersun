@@ -1,6 +1,6 @@
 import re
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 from django.conf import settings
 from django.utils.html import strip_tags
 import requests
@@ -12,12 +12,19 @@ logger = logging.getLogger(__name__)
 class TranslationService:
     """Сервис для автоматического перевода контента через API"""
 
+    DEFAULT_REQUEST_TIMEOUT = (5.0, 20.0)
+    DEFAULT_FAILURE_COOLDOWN_SECONDS = 60.0
+
     def __init__(self):
         self.translation_settings = getattr(settings, 'TRANSLATION_SETTINGS', {
             'source_language': 'ru',
             'target_languages': ['en', 'th'],
             'chunk_size': 5000,
+            'request_timeout': self.DEFAULT_REQUEST_TIMEOUT,
+            'failure_cooldown_seconds': self.DEFAULT_FAILURE_COOLDOWN_SECONDS,
         })
+        self._yandex_unavailable_until = 0.0
+        self._last_yandex_error = ''
         self.refresh_credentials()
 
     def refresh_credentials(self) -> None:
@@ -29,6 +36,66 @@ class TranslationService:
             'YANDEX_TRANSLATE_ENDPOINT',
             'https://translate.api.cloud.yandex.net/translate/v2/translate'
         )
+
+    def _get_request_timeout(self) -> Union[float, Tuple[float, float]]:
+        """Возвращает timeout requests для Yandex API."""
+        timeout = self.translation_settings.get(
+            'request_timeout',
+            self.DEFAULT_REQUEST_TIMEOUT,
+        )
+
+        try:
+            if isinstance(timeout, str):
+                values = [value.strip() for value in timeout.split(',') if value.strip()]
+                if len(values) == 2:
+                    return float(values[0]), float(values[1])
+                return float(timeout)
+
+            if isinstance(timeout, (list, tuple)):
+                if len(timeout) == 2:
+                    return float(timeout[0]), float(timeout[1])
+                if len(timeout) == 1:
+                    return float(timeout[0])
+
+            return float(timeout)
+        except (TypeError, ValueError):
+            logger.warning(
+                "Invalid translation request timeout %r, using default %s",
+                timeout,
+                self.DEFAULT_REQUEST_TIMEOUT,
+            )
+            return self.DEFAULT_REQUEST_TIMEOUT
+
+    def _get_failure_cooldown_seconds(self) -> float:
+        """Возвращает паузу fast-fail после сетевой ошибки Yandex API."""
+        value = self.translation_settings.get(
+            'failure_cooldown_seconds',
+            self.DEFAULT_FAILURE_COOLDOWN_SECONDS,
+        )
+        try:
+            return max(0.0, float(value))
+        except (TypeError, ValueError):
+            logger.warning(
+                "Invalid translation failure cooldown %r, using default %s",
+                value,
+                self.DEFAULT_FAILURE_COOLDOWN_SECONDS,
+            )
+            return self.DEFAULT_FAILURE_COOLDOWN_SECONDS
+
+    def _get_yandex_unavailable_seconds_remaining(self) -> float:
+        return max(0.0, self._yandex_unavailable_until - time.monotonic())
+
+    def _mark_yandex_temporarily_unavailable(self, exc: Exception) -> None:
+        cooldown_seconds = self._get_failure_cooldown_seconds()
+        if cooldown_seconds <= 0:
+            return
+
+        self._yandex_unavailable_until = time.monotonic() + cooldown_seconds
+        self._last_yandex_error = str(exc)
+
+    def _clear_yandex_unavailable(self) -> None:
+        self._yandex_unavailable_until = 0.0
+        self._last_yandex_error = ''
     
     def translate_text(self, text: str, target_language: str, preserve_html: bool = False) -> Optional[str]:
         """
@@ -114,6 +181,16 @@ class TranslationService:
             logger.error("Yandex Translate API is not configured")
             return None
 
+        unavailable_seconds = self._get_yandex_unavailable_seconds_remaining()
+        if unavailable_seconds > 0:
+            logger.warning(
+                "Skipping Yandex Translate request: service is temporarily "
+                "unavailable for %.1f more seconds after previous network error: %s",
+                unavailable_seconds,
+                self._last_yandex_error,
+            )
+            return None
+
         format_type = 'HTML' if preserve_html else 'PLAIN_TEXT'
 
         payload = {
@@ -132,21 +209,32 @@ class TranslationService:
             'Content-Type': 'application/json',
         }
 
+        request_timeout = self._get_request_timeout()
+
         try:
             response = requests.post(
                 self.yandex_endpoint,
                 json=payload,
                 headers=headers,
-                timeout=30
+                timeout=request_timeout
             )
             response.raise_for_status()
 
             data = response.json()
             translations = data.get('translations')
             if translations:
+                self._clear_yandex_unavailable()
                 return translations[0].get('text')
 
             logger.error(f"Unexpected Yandex Translate response: {data}")
+            return None
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as exc:
+            logger.error(
+                "Yandex Translate API network error (timeout=%s): %s",
+                request_timeout,
+                exc,
+            )
+            self._mark_yandex_temporarily_unavailable(exc)
             return None
         except requests.exceptions.HTTPError as exc:
             # Логируем тело ответа, чтобы проще было диагностировать авторизацию

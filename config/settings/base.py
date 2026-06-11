@@ -572,12 +572,29 @@ YANDEX_TRANSLATE_ENDPOINT = env(
     'YANDEX_TRANSLATE_ENDPOINT',
     default='https://translate.api.cloud.yandex.net/translate/v2/translate'
 )
+YANDEX_TRANSLATE_CONNECT_TIMEOUT = env.float(
+    'YANDEX_TRANSLATE_CONNECT_TIMEOUT',
+    default=5.0,
+)
+YANDEX_TRANSLATE_READ_TIMEOUT = env.float(
+    'YANDEX_TRANSLATE_READ_TIMEOUT',
+    default=20.0,
+)
+YANDEX_TRANSLATE_FAILURE_COOLDOWN_SECONDS = env.float(
+    'YANDEX_TRANSLATE_FAILURE_COOLDOWN_SECONDS',
+    default=60.0,
+)
 
 # Translation settings
 TRANSLATION_SETTINGS = {
     'source_language': 'ru',
     'target_languages': ['en', 'th'],
     'chunk_size': 5000,  # Max characters per translation request
+    'request_timeout': (
+        YANDEX_TRANSLATE_CONNECT_TIMEOUT,
+        YANDEX_TRANSLATE_READ_TIMEOUT,
+    ),
+    'failure_cooldown_seconds': YANDEX_TRANSLATE_FAILURE_COOLDOWN_SECONDS,
 }
 
 

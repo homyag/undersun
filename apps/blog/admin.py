@@ -1,6 +1,11 @@
+import subprocess
+import sys
+
 from django.contrib import admin
-from django.db.models import Q
+from django.conf import settings
+from django.db.models import Prefetch, Q
 from django.http import JsonResponse
+from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
@@ -11,8 +16,8 @@ from django.urls import path, reverse
 from django.utils.safestring import mark_safe
 from tinymce.widgets import TinyMCE
 # from modeltranslation.admin import TranslationAdmin, TranslationTabularInline
-from .models import BlogCategory, BlogPost, BlogPostPropertyLink, BlogTag
-from .services import translate_blog_post, translate_blog_category
+from .models import BlogCategory, BlogPost, BlogPostPropertyLink, BlogTag, BlogTranslationJob
+from .services import queue_blog_translation_job, translate_blog_category
 
 
 BLOG_TINYMCE_LINK_ATTRS = {
@@ -149,6 +154,127 @@ class BlogPostPropertyLinkInline(admin.TabularInline):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class BlogTranslationJobInline(admin.TabularInline):
+    model = BlogTranslationJob
+    extra = 0
+    can_delete = False
+    fields = (
+        'status_badge',
+        'progress_display',
+        'target_languages',
+        'force_retranslate',
+        'current_field_display',
+        'error_message_display',
+        'created_at',
+        'finished_at',
+    )
+    readonly_fields = fields
+    ordering = ('-created_at',)
+    verbose_name = _('Задание перевода')
+    verbose_name_plural = _('Задания перевода')
+    max_num = 0
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('requested_by')
+
+    def status_badge(self, obj):
+        return format_translation_job_status(obj)
+
+    status_badge.short_description = _('Статус')
+
+    def progress_display(self, obj):
+        return format_translation_job_progress(obj)
+
+    progress_display.short_description = _('Прогресс')
+
+    def current_field_display(self, obj):
+        return format_html(
+            '<span data-blog-translation-job-current-field="{}">{}</span>',
+            obj.pk,
+            obj.current_field or '—',
+        )
+
+    current_field_display.short_description = _('Текущее поле')
+
+    def error_message_display(self, obj):
+        return format_html(
+            '<span data-blog-translation-job-error="{}">{}</span>',
+            obj.pk,
+            obj.error_message or '',
+        )
+
+    error_message_display.short_description = _('Ошибка')
+
+
+def format_translation_job_status(job):
+    colors = {
+        BlogTranslationJob.STATUS_PENDING: '#6b7280',
+        BlogTranslationJob.STATUS_RUNNING: '#2563eb',
+        BlogTranslationJob.STATUS_SUCCEEDED: '#15803d',
+        BlogTranslationJob.STATUS_FAILED: '#b91c1c',
+        BlogTranslationJob.STATUS_CANCELLED: '#92400e',
+    }
+    return format_html(
+        '<span data-blog-translation-job-status="{}" '
+        'style="display:inline-flex;align-items:center;gap:6px;'
+        'padding:2px 8px;border-radius:999px;background:{};color:#fff;'
+        'font-weight:600;white-space:nowrap;">{}</span>',
+        job.pk,
+        colors.get(job.status, '#6b7280'),
+        job.get_status_display(),
+    )
+
+
+def format_translation_job_progress(job):
+    return format_html(
+        '<span data-blog-translation-job-progress="{}">{}% ({}/{}, ошибок: {})</span>',
+        job.pk,
+        job.progress_percent,
+        job.completed_fields,
+        job.total_fields,
+        job.failed_fields,
+    )
+
+
+def start_blog_translation_worker(limit=20):
+    try:
+        requested_limit = int(limit)
+    except (TypeError, ValueError):
+        requested_limit = 20
+
+    limit = min(max(requested_limit, 1), 100)
+    log_path = settings.BASE_DIR / 'logs' / 'blog_translation_worker.log'
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    log_file = open(log_path, 'a', encoding='utf-8')
+    try:
+        subprocess.Popen(
+            [
+                sys.executable,
+                str(settings.BASE_DIR / 'manage.py'),
+                'process_blog_translation_jobs',
+                '--limit',
+                str(limit),
+            ],
+            cwd=settings.BASE_DIR,
+            stdin=subprocess.DEVNULL,
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
+            close_fds=True,
+            start_new_session=True,
+        )
+    finally:
+        log_file.close()
+
+    return limit, log_path
+
+
 class BlogPostAdminForm(forms.ModelForm):
     """Форма для BlogPost с кастомными виджетами"""
     
@@ -166,13 +292,25 @@ class BlogPostAdminForm(forms.ModelForm):
 @admin.register(BlogPost)
 class BlogPostAdmin(BaseAdminWithRequiredFields):
     form = BlogPostAdminForm
-    list_display = ('title', 'slug', 'category', 'team_author', 'author', 'status', 'is_featured', 'published_at', 'views_count')
+    change_form_template = 'admin/blog/blogpost/change_form.html'
+    list_display = (
+        'title',
+        'translation_queue_status',
+        'slug',
+        'category',
+        'team_author',
+        'author',
+        'status',
+        'is_featured',
+        'published_at',
+        'views_count',
+    )
     list_filter = ('status', 'is_featured', 'category', 'created_at', 'published_at')
     search_fields = ('title', 'excerpt', 'content')
     prepopulated_fields = {'slug': ('title',)}
     date_hierarchy = 'published_at'
     ordering = ('-created_at',)
-    inlines = [BlogPostPropertyLinkInline]
+    inlines = [BlogPostPropertyLinkInline, BlogTranslationJobInline]
     
     fieldsets = (
         (_('Основная информация (Русский)'), {
@@ -223,6 +361,9 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
     )
     
     readonly_fields = ('views_count',)
+
+    class Media:
+        js = ('admin/js/blog_translation_jobs.js',)
     
     
     def save_model(self, request, obj, form, change):
@@ -240,7 +381,17 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.select_related('category', 'author', 'team_author').prefetch_related('property_links')
+        return (
+            qs.select_related('category', 'author', 'team_author')
+            .prefetch_related(
+                'property_links',
+                Prefetch(
+                    'translation_jobs',
+                    queryset=BlogTranslationJob.objects.order_by('-created_at'),
+                    to_attr='prefetched_translation_jobs',
+                ),
+            )
+        )
     
     actions = ['make_published', 'make_draft', 'make_featured', 'auto_translate', 'force_retranslate']
     
@@ -259,8 +410,31 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
         self.message_user(request, f'{updated} статей отмечено как рекомендуемые.')
     make_featured.short_description = _('Отметить как рекомендуемые')
     
-    def auto_translate(self, request, queryset):
-        """Автоматически переводит выбранные статьи на английский и тайский (только пустые поля)"""
+    def _get_latest_translation_job(self, obj):
+        prefetched = getattr(obj, 'prefetched_translation_jobs', None)
+        if prefetched is not None:
+            return prefetched[0] if prefetched else None
+        return obj.translation_jobs.order_by('-created_at').first()
+
+    def translation_queue_status(self, obj):
+        job = self._get_latest_translation_job(obj)
+        if not job:
+            return format_html(
+                '<span style="color:#6b7280;">{}</span>',
+                _('Нет заданий'),
+            )
+
+        url = reverse('admin:blog_blogtranslationjob_change', args=[job.pk])
+        return format_html(
+            '<a href="{}" style="text-decoration:none;">{} {}</a>',
+            url,
+            format_translation_job_status(job),
+            format_translation_job_progress(job),
+        )
+
+    translation_queue_status.short_description = _('Перевод')
+
+    def _queue_translation_jobs(self, request, queryset, force_retranslate=False):
         from apps.core.services import translation_service
         
         if not translation_service.is_configured():
@@ -268,55 +442,64 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
                 'API перевода не настроен. Пожалуйста, добавьте YANDEX_TRANSLATE_API_KEY и YANDEX_TRANSLATE_FOLDER_ID в настройки.', 
                 level=messages.ERROR)
             return
-        
-        translated_count = 0
-        skipped_count = 0
-        
+
+        created_count = 0
+        no_work_count = 0
+        skipped_active_count = 0
+
         for post in queryset:
-            try:
-                translate_blog_post(post, force_retranslate=False)
-                translated_count += 1
-            except Exception as e:
-                self.message_user(request, f'Ошибка перевода статьи "{post.title}": {e}', level=messages.ERROR)
-                skipped_count += 1
-        
-        if translated_count > 0:
+            active_job = post.translation_jobs.filter(
+                status__in=[
+                    BlogTranslationJob.STATUS_PENDING,
+                    BlogTranslationJob.STATUS_RUNNING,
+                ]
+            ).first()
+
+            if active_job:
+                skipped_active_count += 1
+                continue
+
+            job = queue_blog_translation_job(
+                post,
+                requested_by=request.user,
+                force_retranslate=force_retranslate,
+            )
+
+            if job.status == BlogTranslationJob.STATUS_PENDING:
+                created_count += 1
+            else:
+                no_work_count += 1
+
+        if created_count:
             service_name = translation_service.get_available_service()
-            self.message_user(request, 
-                f'Успешно переведено {translated_count} статей через {service_name.upper()}. '
-                f'Пропущено: {skipped_count} (уже переведены или ошибки).')
+            worker_limit, log_path = start_blog_translation_worker(limit=max(created_count, 20))
+            self.message_user(
+                request,
+                f'Создано заданий перевода: {created_count} через {service_name.upper()}. '
+                f'Обработка запущена автоматически в фоне: до {worker_limit} заданий. '
+                f'Лог: {log_path}. '
+                f'Пропущено активных: {skipped_active_count}. Без новых полей: {no_work_count}.',
+                level=messages.SUCCESS,
+            )
         else:
-            self.message_user(request, 'Не удалось перевести ни одной статьи.', level=messages.WARNING)
+            self.message_user(
+                request,
+                f'Новые задания не созданы. Активных уже было: {skipped_active_count}. '
+                f'Без новых полей: {no_work_count}.',
+                level=messages.WARNING,
+            )
+
+    def auto_translate(self, request, queryset):
+        """Ставит выбранные статьи в очередь перевода без перезаписи заполненных полей."""
+        self._queue_translation_jobs(request, queryset, force_retranslate=False)
     
-    auto_translate.short_description = _('🌐 Перевести на EN и TH (только пустые поля)')
+    auto_translate.short_description = _('🌐 Перевести отсутствующие поля EN/TH')
     
     def force_retranslate(self, request, queryset):
-        """Принудительно переводит выбранные статьи, перезаписывая существующие переводы"""
-        from apps.core.services import translation_service
-        
-        if not translation_service.is_configured():
-            self.message_user(request, 
-                'API перевода не настроен. Пожалуйста, добавьте YANDEX_TRANSLATE_API_KEY и YANDEX_TRANSLATE_FOLDER_ID в настройки.', 
-                level=messages.ERROR)
-            return
-        
-        translated_count = 0
-        
-        for post in queryset:
-            try:
-                translate_blog_post(post, force_retranslate=True)
-                translated_count += 1
-            except Exception as e:
-                self.message_user(request, f'Ошибка перевода статьи "{post.title}": {e}', level=messages.ERROR)
-        
-        if translated_count > 0:
-            service_name = translation_service.get_available_service()
-            self.message_user(request, 
-                f'Принудительно переведено {translated_count} статей через {service_name.upper()}.')
-        else:
-            self.message_user(request, 'Не удалось перевести ни одной статьи.', level=messages.WARNING)
+        """Ставит выбранные статьи в очередь перевода с перезаписью существующих полей."""
+        self._queue_translation_jobs(request, queryset, force_retranslate=True)
     
-    force_retranslate.short_description = _('🔄 Перевести заново (перезаписать все переводы)')
+    force_retranslate.short_description = _('🔄 Перевести заново EN/TH')
     
     def get_urls(self):
         """Добавляем кастомные URL для отдельных объектов"""
@@ -446,7 +629,7 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
         }
     
     def translate_single_post(self, request, object_id):
-        """Переводит отдельную статью"""
+        """Ставит отдельную статью в очередь перевода."""
         from apps.core.services import translation_service
         
         try:
@@ -459,13 +642,64 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
             
             # Проверяем параметр force из GET-запроса
             force_retranslate = request.GET.get('force', 'false').lower() == 'true'
-            
-            translate_blog_post(post, force_retranslate=force_retranslate)
-            
+
+            active_job = post.translation_jobs.filter(
+                status__in=[
+                    BlogTranslationJob.STATUS_PENDING,
+                    BlogTranslationJob.STATUS_RUNNING,
+                ]
+            ).first()
+
+            if active_job:
+                job_url = reverse('admin:blog_blogtranslationjob_change', args=[active_job.pk])
+                messages.warning(
+                    request,
+                    format_html(
+                        'Для статьи уже есть активное задание перевода: <a href="{}">#{}</a>.',
+                        job_url,
+                        active_job.pk,
+                    ),
+                )
+                return HttpResponseRedirect(f"/admin/blog/blogpost/{object_id}/change/")
+
+            job = queue_blog_translation_job(
+                post,
+                requested_by=request.user,
+                force_retranslate=force_retranslate,
+            )
+
             service_name = translation_service.get_available_service()
-            action_text = "принудительно переведена заново" if force_retranslate else "переведена"
-            messages.success(request, 
-                f'Статья "{post.title}" успешно {action_text} через {service_name.upper()}.')
+            job_url = reverse('admin:blog_blogtranslationjob_change', args=[job.pk])
+            action_text = "перевод заново" if force_retranslate else "перевод"
+
+            if job.status == BlogTranslationJob.STATUS_PENDING:
+                worker_limit, log_path = start_blog_translation_worker(limit=20)
+                messages.success(
+                    request,
+                    format_html(
+                        'Статья "{}": {} поставлен в очередь через {}. '
+                        'Обработка запущена автоматически в фоне: до {} заданий. '
+                        'Задание: <a href="{}">#{}</a>. Лог: {}.',
+                        post.title,
+                        action_text,
+                        service_name.upper(),
+                        worker_limit,
+                        job_url,
+                        job.pk,
+                        log_path,
+                    ),
+                )
+            else:
+                messages.info(
+                    request,
+                    format_html(
+                        'Статья "{}": новых полей для перевода нет. '
+                        'Задание: <a href="{}">#{}</a>.',
+                        post.title,
+                        job_url,
+                        job.pk,
+                    ),
+                )
                 
         except BlogPost.DoesNotExist:
             messages.error(request, 'Статья не найдена.')
@@ -480,7 +714,268 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
         if object_id:
             extra_context['show_translate_button'] = True
             extra_context['translate_url'] = f"/admin/blog/blogpost/{object_id}/translate/"
+            extra_context['force_translate_url'] = f"/admin/blog/blogpost/{object_id}/translate/?force=true"
         return super().change_view(request, object_id, form_url, extra_context)
+
+
+@admin.register(BlogTranslationJob)
+class BlogTranslationJobAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'post_link',
+        'status_badge',
+        'progress_display',
+        'force_retranslate',
+        'current_field_display',
+        'requested_by',
+        'created_at',
+        'started_at',
+        'finished_at',
+    )
+    list_filter = ('status', 'force_retranslate', 'created_at')
+    search_fields = ('post__title', 'post__slug', 'error_message', 'log')
+    date_hierarchy = 'created_at'
+    ordering = ('-created_at',)
+    actions = ('retry_jobs', 'reset_running_jobs', 'cancel_pending_jobs')
+    readonly_fields = (
+        'post',
+        'requested_by',
+        'status_badge',
+        'target_languages',
+        'force_retranslate',
+        'provider',
+        'progress_display',
+        'total_fields',
+        'completed_fields',
+        'skipped_fields',
+        'failed_fields',
+        'current_language',
+        'current_field_display',
+        'error_message_display',
+        'log',
+        'created_at',
+        'updated_at',
+        'started_at',
+        'finished_at',
+    )
+
+    class Media:
+        js = ('admin/js/blog_translation_jobs.js',)
+
+    fieldsets = (
+        (_('Задание'), {
+            'fields': (
+                'post',
+                'requested_by',
+                'status_badge',
+                'target_languages',
+                'force_retranslate',
+                'provider',
+            ),
+        }),
+        (_('Прогресс'), {
+            'fields': (
+                'progress_display',
+                'total_fields',
+                'completed_fields',
+                'skipped_fields',
+                'failed_fields',
+                'current_language',
+                'current_field_display',
+            ),
+        }),
+        (_('Диагностика'), {
+            'fields': ('error_message_display', 'log'),
+        }),
+        (_('Время'), {
+            'fields': ('created_at', 'updated_at', 'started_at', 'finished_at'),
+        }),
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'run-pending/',
+                self.admin_site.admin_view(self.run_pending_jobs),
+                name='blog_blogtranslationjob_run_pending',
+            ),
+            path(
+                'status-json/',
+                self.admin_site.admin_view(self.status_json),
+                name='blog_blogtranslationjob_status_json',
+            ),
+        ]
+        return custom_urls + urls
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('post', 'requested_by')
+
+    def run_pending_jobs(self, request):
+        pending_count = BlogTranslationJob.objects.filter(
+            status=BlogTranslationJob.STATUS_PENDING,
+        ).count()
+
+        if pending_count == 0:
+            self.message_user(
+                request,
+                'В очереди нет ожидающих заданий перевода.',
+                level=messages.INFO,
+            )
+            return HttpResponseRedirect(reverse('admin:blog_blogtranslationjob_changelist'))
+
+        limit, log_path = start_blog_translation_worker(limit=request.GET.get('limit', 20))
+
+        self.message_user(
+            request,
+            f'Запущена обработка очереди в фоне: до {limit} заданий. '
+            f'Ожидало заданий: {pending_count}. Лог: {log_path}',
+            level=messages.SUCCESS,
+        )
+        return HttpResponseRedirect(reverse('admin:blog_blogtranslationjob_changelist'))
+
+    def status_json(self, request):
+        if not self.has_view_permission(request):
+            return JsonResponse({'jobs': []}, status=403)
+
+        raw_ids = request.GET.get('ids', '')
+        job_ids = [
+            int(value)
+            for value in raw_ids.split(',')
+            if value.strip().isdigit()
+        ]
+
+        queryset = BlogTranslationJob.objects.select_related('post')
+        if job_ids:
+            queryset = queryset.filter(pk__in=job_ids)
+        else:
+            queryset = queryset.none()
+
+        jobs_by_id = {job.pk: job for job in queryset}
+        jobs = [
+            self._serialize_job_status(jobs_by_id[job_id])
+            for job_id in job_ids
+            if job_id in jobs_by_id
+        ]
+        return JsonResponse({'jobs': jobs})
+
+    def _serialize_job_status(self, job):
+        return {
+            'id': job.pk,
+            'status': job.status,
+            'status_label': job.get_status_display(),
+            'progress_percent': job.progress_percent,
+            'total_fields': job.total_fields,
+            'completed_fields': job.completed_fields,
+            'skipped_fields': job.skipped_fields,
+            'failed_fields': job.failed_fields,
+            'current_language': job.current_language,
+            'current_field': job.current_field,
+            'error_message': job.error_message,
+            'started_at': job.started_at.isoformat() if job.started_at else '',
+            'finished_at': job.finished_at.isoformat() if job.finished_at else '',
+            'is_active': job.is_active,
+        }
+
+    def post_link(self, obj):
+        url = reverse('admin:blog_blogpost_change', args=[obj.post_id])
+        return format_html('<a href="{}">{}</a>', url, obj.post.title)
+
+    post_link.short_description = _('Статья')
+    post_link.admin_order_field = 'post__title'
+
+    def status_badge(self, obj):
+        return format_translation_job_status(obj)
+
+    status_badge.short_description = _('Статус')
+    status_badge.admin_order_field = 'status'
+
+    def progress_display(self, obj):
+        return format_translation_job_progress(obj)
+
+    progress_display.short_description = _('Прогресс')
+
+    def current_field_display(self, obj):
+        return format_html(
+            '<span data-blog-translation-job-current-field="{}">{}</span>',
+            obj.pk,
+            obj.current_field or '—',
+        )
+
+    current_field_display.short_description = _('Текущее поле')
+    current_field_display.admin_order_field = 'current_field'
+
+    def error_message_display(self, obj):
+        return format_html(
+            '<span data-blog-translation-job-error="{}">{}</span>',
+            obj.pk,
+            obj.error_message or '',
+        )
+
+    error_message_display.short_description = _('Ошибка')
+
+    def retry_jobs(self, request, queryset):
+        now = timezone.now()
+        retryable = queryset.exclude(
+            status__in=[
+                BlogTranslationJob.STATUS_PENDING,
+                BlogTranslationJob.STATUS_RUNNING,
+            ]
+        )
+        updated = retryable.update(
+            status=BlogTranslationJob.STATUS_PENDING,
+            completed_fields=0,
+            failed_fields=0,
+            current_language='',
+            current_field='',
+            error_message='',
+            started_at=None,
+            finished_at=None,
+            updated_at=now,
+        )
+        self.message_user(
+            request,
+            f'Повторно поставлено в очередь заданий: {updated}.',
+            level=messages.SUCCESS if updated else messages.WARNING,
+        )
+
+    retry_jobs.short_description = _('Повторить выбранные завершенные/ошибочные задания')
+
+    def reset_running_jobs(self, request, queryset):
+        now = timezone.now()
+        updated = queryset.filter(status=BlogTranslationJob.STATUS_RUNNING).update(
+            status=BlogTranslationJob.STATUS_PENDING,
+            current_language='',
+            current_field='',
+            error_message='',
+            started_at=None,
+            finished_at=None,
+            updated_at=now,
+        )
+        self.message_user(
+            request,
+            f'Возвращено в очередь зависших заданий: {updated}.',
+            level=messages.SUCCESS if updated else messages.WARNING,
+        )
+
+    reset_running_jobs.short_description = _('Вернуть выбранные задания "В работе" в очередь')
+
+    def cancel_pending_jobs(self, request, queryset):
+        updated = queryset.filter(status=BlogTranslationJob.STATUS_PENDING).update(
+            status=BlogTranslationJob.STATUS_CANCELLED,
+            finished_at=timezone.now(),
+            updated_at=timezone.now(),
+        )
+        self.message_user(
+            request,
+            f'Отменено ожидающих заданий: {updated}.',
+            level=messages.SUCCESS if updated else messages.WARNING,
+        )
+
+    cancel_pending_jobs.short_description = _('Отменить ожидающие задания')
 
 
 @admin.register(BlogTag)

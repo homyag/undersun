@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+    {% if show_translate_button %}
+        <li>
+            <a href="{{ translate_url }}" class="viewsitelink">
+                {% trans "Перевести отсутствующие поля" %}
+            </a>
+        </li>
+        <li>
+            <a href="{{ force_translate_url }}" class="historylink">
+                {% trans "Перевести заново" %}
+            </a>
+        </li>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}

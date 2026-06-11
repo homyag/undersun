@@ -1,9 +1,11 @@
 import logging
 from django.templatetags.static import static
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import strip_tags
 
 from apps.core.services import translation_service
+from .models import BlogTranslationJob
 
 
 BLOG_WEBSITE_NAMES = {
@@ -21,6 +23,212 @@ BLOG_WEBSITE_DESCRIPTIONS = {
 logger = logging.getLogger(__name__)
 
 
+BLOG_POST_TRANSLATABLE_FIELDS = [
+    'title',
+    'excerpt',
+    'content',
+    'meta_title',
+    'meta_description',
+    'meta_keywords',
+    'featured_image_alt',
+]
+
+
+def _append_job_log(job, message):
+    timestamp = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+    line = f'[{timestamp}] {message}'
+    job.log = f'{job.log}\n{line}'.strip() if job.log else line
+
+
+def get_blog_post_translation_plan(blog_post, target_languages=None, force_retranslate=False):
+    """Возвращает поля статьи, которые реально нужно отправить на перевод."""
+    if target_languages is None:
+        target_languages = translation_service.translation_settings['target_languages']
+
+    plan = []
+    skipped_count = 0
+
+    for lang in target_languages:
+        for field_name in BLOG_POST_TRANSLATABLE_FIELDS:
+            russian_value = getattr(blog_post, field_name, '')
+            if not russian_value:
+                skipped_count += 1
+                continue
+
+            translated_field_name = f'{field_name}_{lang}'
+            existing_translation = getattr(blog_post, translated_field_name, '')
+
+            if existing_translation and not force_retranslate:
+                skipped_count += 1
+                continue
+
+            preserve_html = field_name == 'content' and '<' in russian_value
+            plan.append({
+                'language': lang,
+                'field_name': field_name,
+                'translated_field_name': translated_field_name,
+                'source_text': russian_value,
+                'preserve_html': preserve_html,
+            })
+
+    return plan, skipped_count
+
+
+def queue_blog_translation_job(
+    blog_post,
+    *,
+    requested_by=None,
+    target_languages=None,
+    force_retranslate=False,
+):
+    """Создаёт задание перевода статьи без выполнения внешних API-запросов."""
+    if target_languages is None:
+        target_languages = translation_service.translation_settings['target_languages']
+
+    target_languages = list(target_languages)
+    plan, skipped_count = get_blog_post_translation_plan(
+        blog_post,
+        target_languages=target_languages,
+        force_retranslate=force_retranslate,
+    )
+
+    provider = translation_service.get_available_service() or ''
+    now = timezone.now()
+    status = BlogTranslationJob.STATUS_PENDING if plan else BlogTranslationJob.STATUS_SUCCEEDED
+    finished_at = None if plan else now
+    log = (
+        f'Поставлено в очередь полей: {len(plan)}. Пропущено: {skipped_count}.'
+        if plan
+        else f'Нет полей для перевода. Пропущено: {skipped_count}.'
+    )
+
+    return BlogTranslationJob.objects.create(
+        post=blog_post,
+        requested_by=requested_by if getattr(requested_by, 'is_authenticated', False) else None,
+        status=status,
+        target_languages=target_languages,
+        force_retranslate=force_retranslate,
+        provider=provider,
+        total_fields=len(plan),
+        skipped_fields=skipped_count,
+        finished_at=finished_at,
+        log=log,
+    )
+
+
+def process_blog_translation_job(job):
+    """Выполняет одно задание перевода статьи и сохраняет прогресс."""
+    if job.status == BlogTranslationJob.STATUS_CANCELLED:
+        return job
+
+    if not translation_service.is_configured():
+        job.status = BlogTranslationJob.STATUS_FAILED
+        job.error_message = 'Translation service is not configured.'
+        job.finished_at = timezone.now()
+        _append_job_log(job, job.error_message)
+        job.save(update_fields=['status', 'error_message', 'finished_at', 'log', 'updated_at'])
+        return job
+
+    job.status = BlogTranslationJob.STATUS_RUNNING
+    job.started_at = job.started_at or timezone.now()
+    job.finished_at = None
+    job.error_message = ''
+    job.completed_fields = 0
+    job.failed_fields = 0
+    job.current_language = ''
+    job.current_field = ''
+    _append_job_log(job, 'Обработка начата.')
+    job.save(update_fields=[
+        'status',
+        'started_at',
+        'finished_at',
+        'error_message',
+        'completed_fields',
+        'failed_fields',
+        'current_language',
+        'current_field',
+        'log',
+        'updated_at',
+    ])
+
+    post = job.post
+    plan, skipped_count = get_blog_post_translation_plan(
+        post,
+        target_languages=job.target_languages,
+        force_retranslate=job.force_retranslate,
+    )
+    job.total_fields = len(plan)
+    job.skipped_fields = skipped_count
+
+    if not plan:
+        job.status = BlogTranslationJob.STATUS_SUCCEEDED
+        job.finished_at = timezone.now()
+        _append_job_log(job, f'Нет полей для перевода. Пропущено: {skipped_count}.')
+        job.save(update_fields=[
+            'status',
+            'total_fields',
+            'skipped_fields',
+            'finished_at',
+            'log',
+            'updated_at',
+        ])
+        return job
+
+    job.save(update_fields=['total_fields', 'skipped_fields', 'updated_at'])
+
+    for item in plan:
+        job.current_language = item['language']
+        job.current_field = item['translated_field_name']
+        job.save(update_fields=['current_language', 'current_field', 'updated_at'])
+
+        translated_text = translation_service.translate_text(
+            item['source_text'],
+            item['language'],
+            preserve_html=item['preserve_html'],
+        )
+
+        if translated_text is None:
+            job.failed_fields += 1
+            job.status = BlogTranslationJob.STATUS_FAILED
+            job.error_message = (
+                f"Не удалось перевести поле {item['translated_field_name']} "
+                f"для статьи #{post.pk}."
+            )
+            job.finished_at = timezone.now()
+            _append_job_log(job, job.error_message)
+            job.save(update_fields=[
+                'status',
+                'failed_fields',
+                'error_message',
+                'finished_at',
+                'log',
+                'updated_at',
+            ])
+            return job
+
+        setattr(post, item['translated_field_name'], translated_text)
+        post.save(update_fields=[item['translated_field_name']])
+
+        job.completed_fields += 1
+        _append_job_log(job, f"Переведено поле {item['translated_field_name']}.")
+        job.save(update_fields=['completed_fields', 'log', 'updated_at'])
+
+    job.status = BlogTranslationJob.STATUS_SUCCEEDED
+    job.current_language = ''
+    job.current_field = ''
+    job.finished_at = timezone.now()
+    _append_job_log(job, 'Обработка завершена.')
+    job.save(update_fields=[
+        'status',
+        'current_language',
+        'current_field',
+        'finished_at',
+        'log',
+        'updated_at',
+    ])
+    return job
+
+
 def translate_blog_post(blog_post, target_languages=None, force_retranslate=False):
     """
     Автоматически переводит статью блога на указанные языки
@@ -36,13 +244,10 @@ def translate_blog_post(blog_post, target_languages=None, force_retranslate=Fals
     if not translation_service.is_configured():
         raise Exception("Translation service is not configured. Please set API keys in settings.")
     
-    # Определяем поля для перевода
-    fields_to_translate = ['title', 'excerpt', 'content', 'meta_title', 'meta_description', 'meta_keywords', 'featured_image_alt']
-    
     for lang in target_languages:
         logger.info(f"Translating blog post '{blog_post.title}' to {lang}")
         
-        for field_name in fields_to_translate:
+        for field_name in BLOG_POST_TRANSLATABLE_FIELDS:
             # Проверяем, есть ли значение в русском поле
             russian_value = getattr(blog_post, field_name, '')
             if not russian_value:

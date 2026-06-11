@@ -473,6 +473,95 @@ class BlogPostPropertyLink(models.Model):
         return f'{self.post} → {self.property}'
 
 
+class BlogTranslationJob(models.Model):
+    """Очередь переводов статей блога для выполнения вне HTTP-запроса."""
+
+    STATUS_PENDING = 'pending'
+    STATUS_RUNNING = 'running'
+    STATUS_SUCCEEDED = 'succeeded'
+    STATUS_FAILED = 'failed'
+    STATUS_CANCELLED = 'cancelled'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, _('Ожидает')),
+        (STATUS_RUNNING, _('В работе')),
+        (STATUS_SUCCEEDED, _('Завершено')),
+        (STATUS_FAILED, _('Ошибка')),
+        (STATUS_CANCELLED, _('Отменено')),
+    ]
+
+    post = models.ForeignKey(
+        BlogPost,
+        on_delete=models.CASCADE,
+        related_name='translation_jobs',
+        verbose_name=_('Статья'),
+    )
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='blog_translation_jobs',
+        verbose_name=_('Поставил в очередь'),
+    )
+    status = models.CharField(
+        _('Статус'),
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        db_index=True,
+    )
+    target_languages = models.JSONField(
+        _('Языки перевода'),
+        default=list,
+        blank=True,
+    )
+    force_retranslate = models.BooleanField(
+        _('Перезаписать существующие переводы'),
+        default=False,
+    )
+    provider = models.CharField(
+        _('Провайдер'),
+        max_length=50,
+        blank=True,
+        default='yandex',
+    )
+    total_fields = models.PositiveIntegerField(_('Всего полей'), default=0)
+    completed_fields = models.PositiveIntegerField(_('Переведено полей'), default=0)
+    skipped_fields = models.PositiveIntegerField(_('Пропущено полей'), default=0)
+    failed_fields = models.PositiveIntegerField(_('Ошибок полей'), default=0)
+    current_language = models.CharField(_('Текущий язык'), max_length=10, blank=True)
+    current_field = models.CharField(_('Текущее поле'), max_length=80, blank=True)
+    error_message = models.TextField(_('Ошибка'), blank=True)
+    log = models.TextField(_('Журнал'), blank=True)
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Обновлено'), auto_now=True)
+    started_at = models.DateTimeField(_('Начато'), blank=True, null=True)
+    finished_at = models.DateTimeField(_('Завершено'), blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('Задание перевода статьи')
+        verbose_name_plural = _('Задания перевода статей')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=['post', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f'#{self.pk} {self.post} ({self.get_status_display()})'
+
+    @property
+    def progress_percent(self):
+        if self.total_fields <= 0:
+            return 100 if self.status == self.STATUS_SUCCEEDED else 0
+        return min(100, int((self.completed_fields / self.total_fields) * 100))
+
+    @property
+    def is_active(self):
+        return self.status in {self.STATUS_PENDING, self.STATUS_RUNNING}
+
+
 class BlogTag(models.Model):
     """Теги для статей блога"""
     
