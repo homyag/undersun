@@ -73,10 +73,10 @@ class PropertyImageInline(admin.TabularInline):
     model = PropertyImage
     extra = 1
     fields = (
-        'drag_handle', 'image_preview', 'image', 'title', 'frame_type',
+        'drag_handle', 'image_preview', 'image', 'title', 'frame_type', 'is_main',
         'alt_text', 'alt_text_ru', 'alt_text_en', 'alt_text_th',
         'alt_generated_by', 'alt_confidence', 'alt_generated_at',
-        'is_main', 'order',
+        'order',
     )
     readonly_fields = ('drag_handle', 'image_preview', 'alt_generated_at')
     

@@ -5,24 +5,24 @@ from pathlib import Path
 import environ
 from django.urls import reverse_lazy
 
-# Build paths inside the project
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 IP2ASN_DB_PATH = BASE_DIR / 'tmp' / 'ip2asn.tsv'
 
-# Добавляем apps в Python path
+
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
-# Environment variables
+
 env = environ.Env(
     DEBUG=(bool, False)
 )
 
-# Читаем .env файл если он существует
+
 env_file = BASE_DIR / '.env'
 if env_file.exists():
     env.read_env(env_file)
 
-# Basic site metadata (used by structured feeds, OpenGraph, etc.)
+
 SITE_NAME = env('SITE_NAME', default='Undersun Estate')
 SITE_COMPANY_NAME = env('SITE_COMPANY_NAME', default='Undersun Estate Co., Ltd.')
 SITE_URL = env('SITE_URL', default='https://undersunestate.com')
@@ -33,7 +33,7 @@ RECAPTCHA_SECRET_KEY = env('RECAPTCHA_SECRET_KEY', default='')
 RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
 RECAPTCHA_MIN_SCORE = env.float('RECAPTCHA_MIN_SCORE', default=0.5)
 
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-change-me-in-production')
 
 # Application definition
@@ -276,6 +276,9 @@ BOT_PROTECTION = {
         r'OpenAI-SearchBot',
         r'GPTBot',
         r'ClaudeBot',
+        r'Claude-User',
+        r'Claude-SearchBot',
+        r'claude-code',
         r'AnthropicAI',
         r'Bytespider',
         r'CensysInspect',
@@ -453,7 +456,6 @@ SESSION_COOKIE_AGE = 1209600  # 2 weeks
 FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB
 
-# Cache (для продакшена настроить Redis)
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -461,7 +463,6 @@ CACHES = {
     }
 }
 
-# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
