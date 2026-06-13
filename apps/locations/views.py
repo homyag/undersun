@@ -602,14 +602,25 @@ def _merge_district_faq_items(slug, generic_items, language_code):
 
 
 def _place_schema_json(request, *, name, url, contained_in=None, image_url=None):
+    absolute_url = request.build_absolute_uri(url)
+    site_root_url = request.build_absolute_uri('/').rstrip('/') + '/'
+    language_code = _language_code(request)
     schema = {
         '@context': 'https://schema.org',
         '@type': 'Place',
+        '@id': f'{absolute_url}#place',
         'name': name,
-        'url': request.build_absolute_uri(url),
+        'url': absolute_url,
+        'inLanguage': language_code,
         'containedInPlace': {
             '@type': 'Place',
             'name': 'Phuket',
+        },
+        'isPartOf': {
+            '@type': 'WebSite',
+            '@id': f'{site_root_url}#website',
+            'name': 'Undersun Estate',
+            'url': site_root_url,
         },
     }
     if contained_in:
@@ -640,6 +651,17 @@ def _set_page_seo(request, title, description):
     request.seo_page_title = f'{title}{suffix}'
     request.seo_page_description = truncate_meta(f'{description}{suffix}')
     request.seo_pagination_customized = True
+
+
+def _annotate_property_schema_titles(properties, language_code='ru'):
+    object_list = getattr(properties, 'object_list', properties)
+    for property_obj in object_list:
+        title_getter = getattr(property_obj, 'get_localized_display_title', None)
+        if callable(title_getter):
+            property_obj.localized_title = title_getter(language_code)
+        else:
+            property_obj.localized_title = property_obj.title
+    return properties
 
 
 class LocationListView(ListView):
@@ -710,6 +732,7 @@ class DistrictDetailView(DetailView):
         paginator = Paginator(base_queryset, 12)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
+        _annotate_property_schema_titles(page_obj, language_code)
 
         context['properties'] = page_obj
         context['district_property_count'] = paginator.count
@@ -862,6 +885,7 @@ class LocationDetailView(DetailView):
         paginator = Paginator(base_queryset, 12)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
+        _annotate_property_schema_titles(page_obj, language_code)
 
         context['properties'] = page_obj
         context['district_property_count'] = paginator.count

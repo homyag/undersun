@@ -1615,6 +1615,10 @@ def _strip_property_title_suffix(value):
 
 
 def _build_property_display_title(property_obj, language_code='ru'):
+    localized_getter = getattr(property_obj, 'get_localized_display_title', None)
+    if callable(localized_getter):
+        return localized_getter(language_code)
+
     language_code = (language_code or 'ru')[:2]
     explicit_title = _get_explicit_translated_attr(property_obj, 'title', language_code)
     if explicit_title:
@@ -2241,6 +2245,7 @@ def _build_property_context_links(property_obj, language_code='ru'):
 
 def _annotate_property_labels(property_obj, language_code='ru'):
     labels = _build_property_location_context(property_obj, language_code)
+    property_obj.localized_title = _build_property_display_title(property_obj, language_code)
     property_obj.localized_district_label = labels['property_district_label']
     property_obj.localized_location_name = labels['property_location_label']
     property_obj.localized_location_label = labels['property_full_location_label']
@@ -4717,6 +4722,7 @@ def toggle_favorite(request):
 
 def favorites_view(request):
     """Страница избранного"""
+    request.seo_meta_robots = 'noindex, follow'
     return render(request, 'properties/favorites.html')
 def _build_property_stats(property_obj):
     stats = []
@@ -4793,6 +4799,7 @@ def _is_floorplan_image(image):
 def _build_property_image_sets(property_obj, language_code='ru'):
     gallery_images = []
     floorplan_images = []
+    property_schema_image_urls = []
     seen_floorplan_urls = set()
 
     if _file_field_exists(getattr(property_obj, 'floorplan', None)):
@@ -4834,6 +4841,7 @@ def _build_property_image_sets(property_obj, language_code='ru'):
             floorplan_images.append(image_item)
         else:
             gallery_images.append(image_item)
+            property_schema_image_urls.append(image_url)
 
     if not gallery_images:
         if floorplan_images:
@@ -4850,6 +4858,7 @@ def _build_property_image_sets(property_obj, language_code='ru'):
     return {
         'gallery_images': gallery_images,
         'floorplan_images': floorplan_images,
+        'property_schema_image_urls': property_schema_image_urls,
     }
 
 

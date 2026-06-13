@@ -23,9 +23,9 @@ from apps.core.legacy_redirects import (
     build_legacy_real_estate_target,
 )
 from apps.core.utils import build_query_string, truncate_meta
-from apps.properties.models import Property, PropertyType
+from apps.properties.models import Property, PropertyType, PROPERTY_FALLBACK_LABELS
 from apps.properties.views import PropertyListView
-from apps.locations.models import District
+from apps.locations.models import District, Location
 from apps.blog.models import BlogPost
 from .models import PromotionalBanner, Service, Team
 from .service_landing_content import build_service_landing_content, get_service_page_copy
@@ -44,51 +44,68 @@ def metrika_loaded_ping(request):
 def serialize_properties_for_js(properties):
     """Сериализация объектов недвижимости для JavaScript"""
     result = []
+    language_code = (get_language() or 'ru')[:2]
+
+    def get_price_deal_type(prop):
+        if prop.deal_type == 'rent':
+            return 'rent'
+        if prop.deal_type == 'both' and not prop.price_sale_thb and prop.price_rent_monthly_thb:
+            return 'rent'
+        return 'sale'
+
+    def format_home_price(prop, currency_code, deal_type):
+        labels = PROPERTY_FALLBACK_LABELS.get(language_code, PROPERTY_FALLBACK_LABELS['ru'])
+        price = prop.get_price_in_currency(currency_code, deal_type)
+        if not price:
+            return labels['price_on_request']
+
+        symbols = {'USD': '$', 'THB': '฿', 'RUB': '₽'}
+        price_display = f"{symbols.get(currency_code, currency_code)}{float(price):,.0f}"
+        if deal_type == 'rent':
+            price_display += labels['per_month']
+        return price_display
+
+    def get_price_amount(prop, currency_code, deal_type):
+        price = prop.get_price_in_currency(currency_code, deal_type)
+        return float(price) if price else 0
+
     for prop in properties:
         main_image_url = ''
         if prop.main_image:
             main_image_url = prop.main_image.medium_url
-        
-        # Форматирование цены с правильным преобразованием Decimal
-        price_formatted = 'Цена по запросу'
-        if prop.deal_type == 'rent' and prop.price_rent_monthly:
-            price_formatted = f'${float(prop.price_rent_monthly):,.0f}/мес'
-        elif prop.deal_type == 'both':
-            # Для объектов "продажа/аренда" показываем цену продажи
-            if prop.price_sale_usd:
-                price_formatted = f'${float(prop.price_sale_usd):,.0f}'
-        elif prop.price_sale_usd:
-            price_formatted = f'${float(prop.price_sale_usd):,.0f}'
+
+        price_deal_type = get_price_deal_type(prop)
+        price_formatted = format_home_price(prop, 'USD', price_deal_type)
         
         result.append({
             'id': prop.id,
             'slug': prop.slug,
-            'title': prop.title,
+            'title': prop._get_translated_property_field('title', language_code, fallback=prop.title),
             'url': prop.get_absolute_url(),
             'main_image_url': main_image_url,
             'price_formatted': price_formatted,
-            'district_name': prop.district.name if prop.district else 'Пхукет',
-            'location_name': prop.location.name if prop.location else '',
-            'property_type': prop.property_type.name_display if prop.property_type else '',
-            'property_type_name': prop.property_type.name_display if prop.property_type else '',
+            'district_name': prop._get_translated_district_name(language_code),
+            'location_name': prop._get_translated_location_name(language_code),
+            'property_type': prop._get_translated_type_name(language_code),
+            'property_type_name': prop._get_translated_type_name(language_code),
             'property_type_key': prop.property_type.name if prop.property_type else '',
             'deal_type': prop.deal_type,
             'bedrooms': prop.bedrooms or 0,
             'bathrooms': prop.bathrooms or 0,
             'area': float(prop.area_total) if prop.area_total else 0,
             # Цены в разных валютах для переключения
-            'price_sale_usd': float(prop.price_sale_usd) if prop.price_sale_usd else 0,
-            'price_sale_thb': float(prop.price_sale_thb) if prop.price_sale_thb else 0,
-            'price_sale_rub': float(prop.price_sale_rub) if prop.price_sale_rub else 0,
-            'price_rent_usd': float(prop.price_rent_monthly) if prop.price_rent_monthly else 0,
-            'price_rent_thb': float(prop.price_rent_monthly_thb) if prop.price_rent_monthly_thb else 0,
-            'price_rent_rub': float(prop.price_rent_monthly_rub) if prop.price_rent_monthly_rub else 0,
+            'price_sale_usd': get_price_amount(prop, 'USD', 'sale'),
+            'price_sale_thb': get_price_amount(prop, 'THB', 'sale'),
+            'price_sale_rub': get_price_amount(prop, 'RUB', 'sale'),
+            'price_rent_usd': get_price_amount(prop, 'USD', 'rent'),
+            'price_rent_thb': get_price_amount(prop, 'THB', 'rent'),
+            'price_rent_rub': get_price_amount(prop, 'RUB', 'rent'),
             # Цены за квадратный метр
             'price_per_sqm_thb': prop.get_formatted_price_per_sqm('THB', prop.deal_type),
             'price_per_sqm_usd': prop.get_formatted_price_per_sqm('USD', prop.deal_type), 
             'price_per_sqm_rub': prop.get_formatted_price_per_sqm('RUB', prop.deal_type),
             # Специальное предложение
-            'special_offer': prop.special_offer or '',
+            'special_offer': prop._get_translated_property_field('special_offer', language_code),
         })
     return json.dumps(result)
 
@@ -555,6 +572,15 @@ class SitemapView(View):
             alternates = build_alternates(
                 lambda type_slug=slug: reverse('properties:property_by_type', kwargs={'type_name': type_slug})
             )
+            entries.extend(self._expand_entries(alternates, None))
+
+        # District and location detail pages
+        for district in District.objects.order_by('slug'):
+            alternates = build_alternates(district.get_absolute_url)
+            entries.extend(self._expand_entries(alternates, None))
+
+        for location in Location.objects.select_related('district').order_by('district__slug', 'slug'):
+            alternates = build_alternates(location.get_absolute_url)
             entries.extend(self._expand_entries(alternates, None))
 
         # Services

@@ -217,7 +217,6 @@ class ForbiddenPathLoggerMiddleware(MiddlewareMixin):
         re.compile(r'^/cgi-bin'),
         re.compile(r'^/storage'),
         re.compile(r'^/backup'),
-        re.compile(r'^/\.well-known/security\.txt'),
     ]
 
     def __init__(self, get_response=None):

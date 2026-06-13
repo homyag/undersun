@@ -1,5 +1,6 @@
 from django import template
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 from ..services import CurrencyService
 
 register = template.Library()
@@ -46,7 +47,7 @@ def price_number_only(context, property_obj, deal_type='sale', currency_code=Non
     
     price = property_obj.get_price_in_currency(currency_code, deal_type)
     if not price:
-        return "По запросу"
+        return _("Цена по запросу")
     
     # Форматируем число с пробелами вместо запятых
     return f"{price:,.0f}".replace(',', ' ')

@@ -7,6 +7,7 @@
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",
+      "inLanguage": "{{ LANGUAGE_CODE|default:'ru'|escapejs }}",
       "mainEntity": [
         {
           "@type": "Question",
@@ -250,7 +251,7 @@
                  required
                  class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent mt-1" />
           <label for="question_privacy_consent" class="text-sm text-gray-600 leading-relaxed">
-            {% trans "Я согласен(на) с" %} <a href="#" class="text-accent underline hover:text-yellow-500 transition-colors">{% trans "политикой конфиденциальности" %}</a>
+            {% trans "Я согласен(на) с" %} <a href="{% url 'core:privacy' %}" class="text-accent underline hover:text-yellow-500 transition-colors">{% trans "политикой конфиденциальности" %}</a>
           </label>
         </div>
 

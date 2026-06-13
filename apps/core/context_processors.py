@@ -52,18 +52,19 @@ def site_context(request):
         except Exception:
             canonical_absolute_url = canonical_override
     language_code = getattr(request, 'LANGUAGE_CODE', 'ru')
+    hreflang_source_url = canonical_absolute_url
     language_urls = {}
     hreflang_items = []
     for code, _ in settings.LANGUAGES:
         try:
-            translated_url = translate_url(current_absolute_url, code)
+            translated_url = translate_url(hreflang_source_url, code)
         except Exception:
-            translated_url = current_absolute_url
+            translated_url = hreflang_source_url
         split_result = urlsplit(translated_url)
-        clean_absolute_url = urlunsplit((split_result.scheme, split_result.netloc, split_result.path, '', ''))
+        clean_absolute_url = urlunsplit((split_result.scheme, split_result.netloc, split_result.path, split_result.query, ''))
         hreflang_items.append((code, clean_absolute_url))
 
-        relative_url = urlunsplit(('', '', split_result.path, '', ''))
+        relative_url = urlunsplit(('', '', split_result.path, split_result.query, ''))
         if not relative_url.startswith('/'):
             relative_url = f'/{relative_url}'
         if not relative_url.strip('/'):
@@ -86,6 +87,7 @@ def site_context(request):
         site_root_url = request.build_absolute_uri('/')
     except Exception:
         site_root_url = '/'
+    site_root_url = site_root_url.rstrip('/') + '/'
 
     try:
         search_url = request.build_absolute_uri(search_path)
@@ -95,9 +97,15 @@ def site_context(request):
     search_schema = {
         "@context": "https://schema.org",
         "@type": "WebSite",
+        "@id": f"{site_root_url}#website",
         "name": getattr(settings, 'SITE_NAME', 'Undersun Estate'),
         "url": site_root_url,
         "inLanguage": language_code,
+        "publisher": {
+            "@type": "RealEstateAgent",
+            "@id": f"{site_root_url}#real-estate-agent",
+            "name": getattr(settings, 'SITE_NAME', 'Undersun Estate'),
+        },
         "potentialAction": {
             "@type": "SearchAction",
             "target": f"{search_url}?q={{search_term_string}}",

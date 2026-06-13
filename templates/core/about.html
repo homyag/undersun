@@ -2,7 +2,9 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}{% trans "О нас" %} - Undersun Estate{% endblock %}
+{% block title %}{% if LANGUAGE_CODE == 'en' %}About Undersun Estate - Phuket Property Association Co-Founder{% elif LANGUAGE_CODE == 'th' %}เกี่ยวกับ Undersun Estate - ผู้ร่วมก่อตั้ง Phuket Property Association{% else %}О нас - Undersun Estate{% endif %}{% endblock %}
+{% block description %}{% if LANGUAGE_CODE == 'en' %}Meet Undersun Estate, a Phuket real estate agency and Phuket Property Association co-founder helping buyers compare villas, condos, land and investment options.{% elif LANGUAGE_CODE == 'th' %}รู้จัก Undersun Estate เอเจนซี่อสังหาริมทรัพย์ภูเก็ตและผู้ร่วมก่อตั้ง Phuket Property Association ที่ช่วยเปรียบเทียบวิลล่า คอนโด ที่ดิน และตัวเลือกการลงทุน{% else %}Undersun Estate - агентство недвижимости на Пхукете и сооснователь Phuket Property Association. Помогаем сравнивать виллы, квартиры, землю и инвестиционные варианты.{% endif %}{% endblock %}
+{% block og_title %}{% if LANGUAGE_CODE == 'en' %}About Undersun Estate - Phuket Property Association Co-Founder{% elif LANGUAGE_CODE == 'th' %}เกี่ยวกับ Undersun Estate - ผู้ร่วมก่อตั้ง Phuket Property Association{% else %}О нас - Undersun Estate{% endif %}{% endblock %}
 
 {% block structured_data %}
 {{ block.super }}
@@ -94,7 +96,7 @@
             <div class="about-hero-visual">
                 <div class="about-hero-glow"></div>
                 <div class="about-hero-media">
-                    <img src="{% static 'images/about_us/about_page_hero.webp' %}" alt="{% trans 'Вилла и кондоминиум на фоне заката в Пхукете' %}" class="about-hero-image">
+                    <img src="{% static 'images/about_us/about_page_hero.webp' %}" alt="{% if lang == 'en' %}Villa and condominium at sunset in Phuket{% elif lang == 'th' %}วิลล่าและคอนโดมิเนียมยามพระอาทิตย์ตกในภูเก็ต{% else %}Вилла и кондоминиум на фоне заката в Пхукете{% endif %}" class="about-hero-image">
                     <div class="about-hero-focus">
                         <p class="about-hero-focus-kicker">
                             {% if lang == 'en' %}Our focus{% elif lang == 'th' %}จุดโฟกัสของเรา{% else %}Наш фокус{% endif %}

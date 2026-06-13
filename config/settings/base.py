@@ -74,8 +74,8 @@ if (BASE_DIR / 'theme').exists():
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 
-def _load_googlebot_ip_ranges():
-    base_path = BASE_DIR / 'seo' / 'googlebot-ip-ranges'
+def _load_bot_ip_ranges(*relative_path):
+    base_path = BASE_DIR.joinpath(*relative_path)
     if not base_path.exists():
         return []
 
@@ -95,7 +95,8 @@ def _load_googlebot_ip_ranges():
     return sorted(ranges)
 
 
-GOOGLEBOT_IP_RANGES = _load_googlebot_ip_ranges()
+GOOGLEBOT_IP_RANGES = _load_bot_ip_ranges('seo', 'googlebot-ip-ranges')
+BINGBOT_IP_RANGES = _load_bot_ip_ranges('config', 'bot_ip_ranges', 'bingbot')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -243,16 +244,14 @@ BOT_PROTECTION = {
         '185.32.187.0/24',
         '213.180.192.0/19',
         '2a02:6b8::/29',
-    ] + GOOGLEBOT_IP_RANGES,
+    ] + GOOGLEBOT_IP_RANGES + BINGBOT_IP_RANGES,
     'WHITELIST_USER_AGENTS': [
-        r'Googlebot',
         r'Chrome-Lighthouse',
         r'Google-InspectionTool',
         r'Google-Structured-Data-Testing-Tool',
         r'Structured-Data-Testing-Tool',
         r'Schema-Markup-Validator',
         r'Google-Read-Aloud',
-        r'Bingbot',
         r'BingPreview',
         r'Slurp',
         r'DuckDuckBot',
@@ -273,21 +272,18 @@ BOT_PROTECTION = {
         r'SemrushBot',
         r'Amazonbot',
         r'Instagram',
-        r'OpenAI-SearchBot',
+        r'OAI-SearchBot',
         r'GPTBot',
         r'ClaudeBot',
         r'Claude-User',
         r'Claude-SearchBot',
         r'claude-code',
         r'AnthropicAI',
-        r'Bytespider',
-        r'CensysInspect',
         r'Palo Alto Networks',
         r'ChatGPT-User',
         r'Slackbot',
         r'TelegramBot',
         r'newsai/1\.0',
-        r'MJ12bot',
         r'SERankingBacklinksBot',
         r'PerplexityBot',
         r'TikTokSpider',
@@ -339,7 +335,6 @@ BOT_PROTECTION = {
         r'^/cgi-bin',
         r'^/storage',
         r'^/backup',
-        r'^/\.well-known/security\.txt',
         r'/wp-content/plugins/hellopress',
         r'/wp-content/plugins',
     ],

@@ -19,6 +19,11 @@
   "name": "{{ service_display_title|escapejs }}",
   "description": "{{ service_display_description|striptags|escapejs }}",
   "url": "{{ service_schema_url|escapejs }}",
+  "inLanguage": "{{ LANGUAGE_CODE|default:'ru'|escapejs }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ service_schema_url|escapejs }}"
+  },
   {% if service_schema_image_url %}
   "image": "{{ service_schema_image_url|escapejs }}",
   {% endif %}
@@ -63,6 +68,7 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "{{ LANGUAGE_CODE|default:'ru'|escapejs }}",
   "mainEntity": [
     {% for item in service_landing.faq %}
     {

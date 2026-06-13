@@ -2,6 +2,7 @@
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
+  "inLanguage": "{{ LANGUAGE_CODE|default:'ru'|escapejs }}",
   "mainEntity": [
     {% for faq in property_faq.entries %}
     {

@@ -7,9 +7,11 @@
         return typeof value === 'string' && value.length ? value : fallback;
     };
     const PRICE_ON_REQUEST = translate('priceOnRequest', 'Цена по запросу');
+    const PER_MONTH = translate('perMonth', '/мес');
     const LEARN_MORE = translate('learnMore', 'Узнать подробнее');
     const CHANGE_CURRENCY = translate('changeCurrency', 'Изменить валюту');
     const UNIT_SQM = translate('unitSqm', 'м²');
+    const LOCATION_FALLBACK = translate('locationFallback', 'Пхукет');
     const CONSULTATION_TITLE = translate('consultationTitle', "Получить консультацию эксперта <span class='text-accent'>Undersun</span>");
     const CONSULTATION_SUBTITLE = translate('consultationSubtitle', 'Где вам удобнее общаться');
     const TAB_PHONE = translate('tabPhone', 'Звонок');
@@ -18,6 +20,7 @@
     const PHONE_PLACEHOLDER = translate('phonePlaceholder', '+66 XXX XXX XXX');
     const PHONE_SUBMIT = translate('phoneSubmit', 'Заказать звонок');
     const WHATSAPP_DESCRIPTION = translate('whatsappDescription', 'Напишите нам в WhatsApp для быстрой консультации');
+    const WHATSAPP_MESSAGE = translate('whatsappMessage', 'Здравствуйте! Меня интересует консультация по недвижимости');
     const WHATSAPP_BUTTON = translate('whatsappButton', 'Написать в WhatsApp');
     const TELEGRAM_DESCRIPTION = translate('telegramDescription', 'Напишите нам в Telegram для получения консультации');
     const TELEGRAM_BUTTON = translate('telegramButton', 'Написать в Telegram');
@@ -467,7 +470,7 @@
             if (headerCurrencyElement) {
                 // Extract currency info from button text (format: "₽ RUB" or "$ USD")
                 const buttonText = headerCurrencyElement.textContent?.trim() || '';
-                
+
                 // Remove any extra whitespace and split
                 const cleanText = buttonText.replace(/\s+/g, ' ').trim();
                 const parts = cleanText.split(' ');
@@ -476,10 +479,10 @@
                 if (parts.length >= 2) {
                     const symbol = parts[0];
                     let code = parts[1];
-                    
+
                     // Clean up code (remove any non-letter characters)
                     code = code.replace(/[^A-Z]/g, '');
-                    
+
                     if (code.length === 3) {
                         return {code, symbol};
                     }
@@ -572,7 +575,7 @@
 
             if (fromCurrency === toCurrency) {
                 const displayPrice = dealType === 'rent' ?
-                    `${formatPrice(basePrice)}/мес` :
+                    `${formatPrice(basePrice)}${PER_MONTH}` :
                     `${formatPrice(basePrice)}`;
                 priceElement.innerHTML = displayPrice;
 
@@ -587,7 +590,7 @@
             // Use cached rates or request them once
             const applyConvertedPrice = (rateValue) => {
                 const displayPrice = dealType === 'rent' ?
-                    `${formatPrice(rateValue)}/мес` :
+                    `${formatPrice(rateValue)}${PER_MONTH}` :
                     `${formatPrice(rateValue)}`;
                 priceElement.innerHTML = displayPrice;
                 updatePricePerSqmFromData(propertyData, toCurrency, pricePerSqmElement);
@@ -644,13 +647,13 @@
             // Get current currency from header first
             const headerCurrency = getHeaderCurrency();
             const currentCode = headerCurrency.code;
-            
+
             if (property.deal_type === 'rent') {
                 // Try to get price in current header currency first
                 if (currentCode === 'RUB' && property.price_rent_rub) return property.price_rent_rub;
                 if (currentCode === 'USD' && property.price_rent_usd) return property.price_rent_usd;
                 if (currentCode === 'THB' && property.price_rent_thb) return property.price_rent_thb;
-                
+
                 // Fallback to any available price
                 return property.price_rent_thb || property.price_rent_rub || property.price_rent_usd || 0;
             } else {
@@ -658,7 +661,7 @@
                 if (currentCode === 'RUB' && property.price_sale_rub) return property.price_sale_rub;
                 if (currentCode === 'USD' && property.price_sale_usd) return property.price_sale_usd;
                 if (currentCode === 'THB' && property.price_sale_thb) return property.price_sale_thb;
-                
+
                 // Fallback to any available price
                 return property.price_sale_thb || property.price_sale_rub || property.price_sale_usd || 0;
             }
@@ -668,7 +671,7 @@
         function getInitialCurrency(property) {
             // Get current currency from header first
             const headerCurrency = getHeaderCurrency();
-            
+
             // Check if property has price in current currency from header
             const currentCode = headerCurrency.code;
             if (property.deal_type === 'rent') {
@@ -680,7 +683,7 @@
                 if (currentCode === 'USD' && property.price_sale_usd) return {code: 'USD', symbol: '$'};
                 if (currentCode === 'THB' && property.price_sale_thb) return {code: 'THB', symbol: '฿'};
             }
-            
+
             // If property doesn't have price in header currency, use header currency anyway
             // The price conversion will happen in updatePropertyPrice function
             return headerCurrency;
@@ -711,11 +714,11 @@
 
             // Find all currency toggle buttons
             const toggleButtons = carouselContainer.querySelectorAll('.currency-toggle-btn');
-            
+
             toggleButtons.forEach((toggleBtn, index) => {
                 const propertyId = toggleBtn.dataset.propertyId;
                 const dealType = toggleBtn.dataset.dealType;
-                
+
                 // Create dropdown HTML
                 const dropdownHTML = `
                     <div class="currency-dropdown absolute w-32 bg-white rounded-lg shadow-xl border border-gray-200 transition-all duration-200"
@@ -749,10 +752,10 @@
                         </div>
                     </div>
                 `;
-                
+
                 dropdownContainer.insertAdjacentHTML('beforeend', dropdownHTML);
                 const dropdown = document.getElementById(`currency-dropdown-${propertyId}`);
-                
+
                 if (!dropdown) {
                     return;
                 }
@@ -760,16 +763,16 @@
                 // Function to position dropdown relative to button
                 const positionDropdown = function() {
                     const buttonRect = toggleBtn.getBoundingClientRect();
-                    
+
                     // Position dropdown below button, centered
                     // Since container is position: fixed, use viewport coordinates directly
                     const left = buttonRect.left + (buttonRect.width / 2) - 64; // 64 is half of dropdown width (128px / 2)
                     const top = buttonRect.bottom + 4; // 4px gap below button
-                    
+
                     // Ensure dropdown doesn't go off screen
                     const maxLeft = window.innerWidth - 128; // 128px dropdown width
                     const finalLeft = Math.max(0, Math.min(left, maxLeft));
-                    
+
                     dropdown.style.left = finalLeft + 'px';
                     dropdown.style.top = top + 'px';
                     dropdown.style.position = 'fixed';
@@ -777,7 +780,7 @@
 
                 // Create specific handlers for each button to avoid closure issues
                 const handleToggle = function(e) {
-                    
+
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -793,7 +796,7 @@
 
                     // Toggle current dropdown
                     const isVisible = dropdown.style.display === 'block';
-                    
+
                     if (isVisible) {
                         // Hide dropdown
                         dropdown.style.opacity = '0';
@@ -805,16 +808,16 @@
                     } else {
                         // Position dropdown relative to button
                         positionDropdown();
-                        
+
                         // Show dropdown
                         dropdown.style.display = 'block';
                         dropdown.style.opacity = '0';
                         dropdown.style.visibility = 'hidden';
                         dropdown.style.transform = 'scale(0.95)';
-                        
+
                         // Force repaint
                         dropdown.offsetHeight;
-                        
+
                         // Animate in
                         requestAnimationFrame(() => {
                             dropdown.style.opacity = '1';
@@ -939,9 +942,9 @@
 
             if (fromCurrency === toCurrency) {
                 const displayPrice = dealType === 'rent' ?
-                    `${formatPrice(basePrice)}/мес` :
+                    `${formatPrice(basePrice)}${PER_MONTH}` :
                     `${formatPrice(basePrice)}`;
-                
+
                 // Update ALL price elements for this property
                 allPriceElements.forEach(priceElement => {
                     priceElement.innerHTML = displayPrice;
@@ -957,9 +960,9 @@
                 const rate = window.exchangeRates[rateKey];
                 const convertedPrice = basePrice * rate;
                 const displayPrice = dealType === 'rent' ?
-                    `${formatPrice(convertedPrice)}/мес` :
+                    `${formatPrice(convertedPrice)}${PER_MONTH}` :
                     `${formatPrice(convertedPrice)}`;
-                
+
                 // Update ALL price elements for this property
                 allPriceElements.forEach(priceElement => {
                     priceElement.innerHTML = displayPrice;
@@ -974,9 +977,9 @@
                             const rate = data.rates[rateKey] || 1;
                             const convertedPrice = basePrice * rate;
                             const displayPrice = dealType === 'rent' ?
-                                `${formatPrice(convertedPrice)}/мес` :
+                                `${formatPrice(convertedPrice)}${PER_MONTH}` :
                                 `${formatPrice(convertedPrice)}`;
-                            
+
                             // Update ALL price elements for this property
                             allPriceElements.forEach(priceElement => {
                                 priceElement.innerHTML = displayPrice;
@@ -984,9 +987,9 @@
                             updatePricePerSqmFromData(propertyData, toCurrency);
                         } else {
                             const displayPrice = dealType === 'rent' ?
-                                `${formatPrice(basePrice)}/мес` :
+                                `${formatPrice(basePrice)}${PER_MONTH}` :
                                 `${formatPrice(basePrice)}`;
-                            
+
                             // Update ALL price elements for this property
                             allPriceElements.forEach(priceElement => {
                                 priceElement.innerHTML = displayPrice;
@@ -997,9 +1000,9 @@
                     .catch(error => {
                         console.error('Error fetching exchange rates:', error);
                         const displayPrice = dealType === 'rent' ?
-                            `${formatPrice(basePrice)}/мес` :
+                            `${formatPrice(basePrice)}${PER_MONTH}` :
                             `${formatPrice(basePrice)}`;
-                        
+
                         // Update ALL price elements for this property
                         allPriceElements.forEach(priceElement => {
                             priceElement.innerHTML = displayPrice;
@@ -1023,26 +1026,26 @@
                     <h3 class="text-lg font-bold mb-2 leading-tight text-white">${CONSULTATION_TITLE}</h3>
                     <p class="text-white/90 mb-4 text-sm">${CONSULTATION_SUBTITLE}</p>
                 </div>
-                
+
                 <!-- Tabs -->
                 <div class="flex mb-3 bg-white/10 rounded-md p-1">
-                    <button onclick="switchConsultationTab('${consultationId}', 'phone')" 
-                            class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200 active" 
+                    <button onclick="switchConsultationTab('${consultationId}', 'phone')"
+                            class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200 active"
                             data-tab="phone" data-consultation-id="${consultationId}">
                         <i class="fas fa-phone text-xs mr-1"></i>${TAB_PHONE}
                     </button>
-                    <button onclick="switchConsultationTab('${consultationId}', 'whatsapp')" 
-                            class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200" 
+                    <button onclick="switchConsultationTab('${consultationId}', 'whatsapp')"
+                            class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200"
                             data-tab="whatsapp" data-consultation-id="${consultationId}">
                         <i class="fab fa-whatsapp text-xs mr-1"></i>${TAB_WHATSAPP}
                     </button>
-                    <button onclick="switchConsultationTab('${consultationId}', 'telegram')" 
-                            class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200" 
+                    <button onclick="switchConsultationTab('${consultationId}', 'telegram')"
+                            class="consultation-tab flex-1 py-2 px-2 rounded text-xs font-medium transition-all duration-200"
                             data-tab="telegram" data-consultation-id="${consultationId}">
                         <i class="fab fa-telegram text-xs mr-1"></i>${TAB_TELEGRAM}
                     </button>
                 </div>
-                
+
                 <!-- Tab Content -->
                 <div class="flex-1">
                     <!-- Phone Tab -->
@@ -1054,40 +1057,40 @@
                             </div>
                             <input type="hidden" name="form_rendered_at" value="${renderTimestamp}">
                             <div>
-                                <input type="tel" 
+                                <input type="tel"
                                        name="phone"
-                                       placeholder="${PHONE_PLACEHOLDER}" 
+                                       placeholder="${PHONE_PLACEHOLDER}"
                                        inputmode="tel"
                                        pattern="^\\+?[\\d\\s\\-\\(\\)]{10,15}$"
                                        title="${PHONE_PLACEHOLDER}"
                                        class="consultation-form-input w-full px-3 py-2 rounded-md bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                                        required>
                             </div>
-                            <button type="submit" 
+                            <button type="submit"
                                     class="w-full bg-accent hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
                                 ${PHONE_SUBMIT}
                             </button>
                         </form>
                     </div>
-                    
+
                     <!-- WhatsApp Tab -->
                     <div class="consultation-content hidden" data-tab="whatsapp" data-consultation-id="${consultationId}">
                         <div class="text-center py-4">
                             <p class="text-white/90 mb-4 text-sm">${WHATSAPP_DESCRIPTION}</p>
-                            <a href="https://wa.me/66633033133?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9C%D0%B5%D0%BD%D1%8F%20%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%B5%D1%81%D1%83%D0%B5%D1%82%20%D0%BA%D0%BE%D0%BD%D1%81%D1%83%D0%BB%D1%8C%D1%82%D0%B0%D1%86%D0%B8%D1%8F%20%D0%BF%D0%BE%20%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D0%B8" 
-                               target="_blank" 
+                            <a href="https://wa.me/66633033133?text=${encodeURIComponent(WHATSAPP_MESSAGE)}"
+                               target="_blank"
                                class="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
                                 <i class="fab fa-whatsapp mr-2"></i>${WHATSAPP_BUTTON}
                             </a>
                         </div>
                     </div>
-                    
+
                     <!-- Telegram Tab -->
                     <div class="consultation-content hidden" data-tab="telegram" data-consultation-id="${consultationId}">
                         <div class="text-center py-4">
                             <p class="text-white/90 mb-4 text-sm">${TELEGRAM_DESCRIPTION}</p>
-                            <a href="https://t.me/undersunestate" 
-                               target="_blank" 
+                            <a href="https://t.me/undersunestate"
+                               target="_blank"
                                class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">
                                 <i class="fab fa-telegram mr-2"></i>${TELEGRAM_BUTTON}
                             </a>
@@ -1140,7 +1143,7 @@
                         ''
                     }
                     </a>
-                    
+
                     <div class="absolute top-3 right-3">
                         <button class="bg-white/90 hover:bg-white w-10 h-10 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center"
                                 data-property-id="${property.id}">
@@ -1148,7 +1151,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="p-4 flex flex-col justify-between flex-1">
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 mb-3 leading-tight line-clamp-2">
@@ -1156,12 +1159,12 @@
                                 ${property.title.length > 60 ? property.title.substring(0, 60) + '...' : property.title}
                             </a>
                         </h3>
-                        
+
                         <div class="flex items-center text-gray-600 mb-3">
                             <i class="fas fa-map-marker-alt mr-2 text-primary text-sm"></i>
-                            <span class="text-sm font-medium">${property.district_name || 'Пхукет'}${property.location_name ? ', ' + property.location_name : ''}</span>
+                            <span class="text-sm font-medium">${property.district_name || LOCATION_FALLBACK}${property.location_name ? ', ' + property.location_name : ''}</span>
                         </div>
-                        
+
                         <!-- Property Details -->
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center space-x-4">
@@ -1185,7 +1188,7 @@
                                 ` : ''}
                             </div>
                         </div>
-                        
+
                         <!-- Price + CTA -->
                         <div class="mt-auto">
                             <div class="mb-3 sm:mb-4">
@@ -1202,7 +1205,7 @@
                                             return formattedPrice || priceOnRequestLabel;
                                         })()}
                                     </span>
-                                    
+
                                     <!-- Currency Dropdown -->
                                     <div class="relative">
                                         <button class="currency-toggle-btn bg-gray-100 hover:bg-primary hover:text-white text-gray-500 transition-all duration-200 px-3 py-1.5 rounded-md text-sm border border-gray-200 hover:border-primary flex items-center"
@@ -1213,10 +1216,10 @@
                                             <span class="current-currency-code-${property.id} font-medium mr-1">${getInitialCurrency(property).code}</span>
                                             <i class="fas fa-chevron-down text-xs"></i>
                                         </button>
-    
+
                                     </div>
                                 </div>
-                                
+
                                 ${property.area > 0 && property.deal_type === 'sale' ? `
                                     <div class="text-center">
                                         <div class="text-sm text-gray-600 font-medium card-price-per-sqm-${property.id}">
@@ -1225,7 +1228,7 @@
                                     </div>
                                 ` : ''}
                             </div>
-                            
+
                             <a href="${property.url}" class="mb-0 block w-full bg-accent hover:bg-yellow-500 text-gray-900 py-2.5 sm:py-3 px-4 rounded-md font-semibold transition-all duration-300 text-center text-sm" ${buildYmAttributes('cta')}>
                                 ${learnMoreLabel}
                             </a>
@@ -1247,11 +1250,11 @@
             if (currency) {
                 updateHeroSearchPlaceholders(symbol, currency);
             }
-            
+
             // Update all property currency buttons and prices
             setTimeout(() => {
                 updateAllPricesToHeaderCurrency();
-                
+
                 // Also update all currency dropdown buttons to show new currency
                 const carouselContainer = document.getElementById('properties-carousel');
                 if (carouselContainer) {
@@ -1282,5 +1285,5 @@
     } else {
         initFeaturedProperties();
     }
-    
+
 })();

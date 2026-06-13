@@ -36,6 +36,8 @@ PROPERTY_FALLBACK_LABELS = {
         'price': 'Цена {price}.',
         'price_on_request': 'Цена по запросу',
         'per_month': '/мес',
+        'unit_sqm': 'м²',
+        'discount_label': 'скидка',
         'area': 'Площадь {area} м².',
         'land_area': 'Участок {area} м².',
         'bathrooms': '{count} ванных.',
@@ -95,6 +97,8 @@ PROPERTY_FALLBACK_LABELS = {
         'price': 'Price {price}.',
         'price_on_request': 'Price on request',
         'per_month': '/month',
+        'unit_sqm': 'm²',
+        'discount_label': 'discount',
         'area': 'Total area {area} m².',
         'land_area': 'Land plot {area} m².',
         'bathrooms': '{count} bathrooms.',
@@ -154,6 +158,8 @@ PROPERTY_FALLBACK_LABELS = {
         'price': 'ราคา {price}',
         'price_on_request': 'สอบถามราคา',
         'per_month': '/เดือน',
+        'unit_sqm': 'ตร.ม.',
+        'discount_label': 'ส่วนลด',
         'area': 'พื้นที่ใช้สอย {area} ตร.ม.',
         'land_area': 'ที่ดิน {area} ตร.ม.',
         'bathrooms': '{count} ห้องน้ำ',
@@ -563,17 +569,19 @@ class Property(models.Model):
     @property
     def price_display(self):
         """Отформатированная цена для отображения"""
+        language_code = (get_language() or 'ru')[:2]
+        labels = PROPERTY_FALLBACK_LABELS.get(language_code, PROPERTY_FALLBACK_LABELS['ru'])
         if self.deal_type == 'sale' and self.price_sale_thb:
             price_str = f"฿{self.price_sale_thb:,.0f}"
             if self.is_urgent_sale and self.original_price_thb and self.price_sale_thb:
                 # Показываем скидку если это срочная продажа
                 discount_percent = ((self.original_price_thb - self.price_sale_thb) / self.original_price_thb) * 100
                 if discount_percent > 0:
-                    price_str += f" (скидка {discount_percent:.0f}%)"
+                    price_str += f" ({labels['discount_label']} {discount_percent:.0f}%)"
             return price_str
         elif self.deal_type == 'rent' and self.price_rent_monthly_thb:
-            return f"฿{self.price_rent_monthly_thb:,.0f}/мес"
-        return "Цена по запросу"
+            return f"฿{self.price_rent_monthly_thb:,.0f}{labels['per_month']}"
+        return labels['price_on_request']
     
     def get_price_per_sqm_in_currency(self, currency_code, deal_type='sale'):
         """Получить цену за квадратный метр в указанной валюте"""
@@ -603,7 +611,9 @@ class Property(models.Model):
         
         # Форматируем с пробелами
         formatted_price = f"{int(price_per_sqm):,}".replace(',', ' ')
-        return f"{symbol}{formatted_price}/м²"
+        language_code = (get_language() or 'ru')[:2]
+        labels = PROPERTY_FALLBACK_LABELS.get(language_code, PROPERTY_FALLBACK_LABELS['ru'])
+        return f"{symbol}{formatted_price}/{labels['unit_sqm']}"
 
     def get_price_in_currency(self, currency_code, deal_type='sale'):
         """Получить цену в указанной валюте"""
@@ -650,7 +660,9 @@ class Property(models.Model):
         
         price = self.get_price_in_currency(currency_code, deal_type)
         if not price:
-            return "Цена по запросу"
+            language_code = (get_language() or 'ru')[:2]
+            labels = PROPERTY_FALLBACK_LABELS.get(language_code, PROPERTY_FALLBACK_LABELS['ru'])
+            return labels['price_on_request']
             
         try:
             currency = Currency.objects.get(code=currency_code)
@@ -663,7 +675,9 @@ class Property(models.Model):
                 price_str = f"{symbol}{price:,.{decimal_places}f}"
                 
             if deal_type == 'rent':
-                price_str += "/мес"
+                language_code = (get_language() or 'ru')[:2]
+                labels = PROPERTY_FALLBACK_LABELS.get(language_code, PROPERTY_FALLBACK_LABELS['ru'])
+                price_str += labels['per_month']
                 
             return price_str
         except Currency.DoesNotExist:
@@ -1202,6 +1216,29 @@ class Property(models.Model):
         language_code = (get_language() or 'ru').split('-')[0]
         return language_code if language_code in {'ru', 'en', 'th'} else 'ru'
 
+    @staticmethod
+    def _strip_display_title_suffix(value):
+        value = Property._normalize_whitespace(value or '')
+        for separator in (' | ', ' — ', ' – '):
+            if separator in value:
+                return Property._normalize_whitespace(value.split(separator, 1)[0])
+        return value
+
+    def get_localized_display_title(self, language_code='ru'):
+        language_code = (language_code or 'ru')[:2]
+        translated_field = 'title' if language_code == 'ru' else f'title_{language_code}'
+        explicit_title = self._normalize_whitespace(getattr(self, translated_field, '') or '')
+        if explicit_title:
+            return explicit_title
+
+        if language_code != 'ru':
+            generated_title = self.generate_auto_seo(language_code).get('title', '')
+            generated_heading = self._strip_display_title_suffix(generated_title)
+            if generated_heading:
+                return generated_heading
+
+        return self._normalize_whitespace(self.title)
+
     def get_detail_seo_section(self, language_code='ru'):
         texts = self._get_seo_texts(language_code)
         property_type_name = self._get_seo_property_type_name(language_code)
@@ -1327,7 +1364,7 @@ class Property(models.Model):
         }
 
     def get_display_title(self):
-        return self._get_translated_property_field('title', self._get_active_language_code(), self.title)
+        return self.get_localized_display_title(self._get_active_language_code())
 
     def get_display_location_label(self):
         language_code = self._get_active_language_code()

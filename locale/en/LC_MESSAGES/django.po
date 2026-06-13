@@ -3125,7 +3125,7 @@ msgstr ""
 
 #: templates/core/includes/form_security_fields.html:5
 msgid "Ваш сайт"
-msgstr "Your website"
+msgstr "Leave this field empty"
 
 #: templates/core/includes/home/home_districts_section.html:6
 msgid "Популярные районы"
@@ -3779,8 +3779,6 @@ msgid "Номер телефона"
 msgstr "Phone number"
 
 #: templates/core/includes/home/home_reviews_section.html:35
-#, fuzzy
-#| msgid "Расскажите, что вы ищете..."
 msgid "Расскажите, что вы ищете"
 msgstr "Tell us what you are looking for..."
 
@@ -4708,16 +4706,12 @@ msgid "О районе"
 msgstr "About the district"
 
 #: templates/locations/location_detail.html:246
-#, fuzzy
-#| msgid "До аэропорта, мин"
 msgid "До аэропорта"
-msgstr "To the airport, min"
+msgstr "To the airport"
 
 #: templates/locations/location_detail.html:264
-#, fuzzy
-#| msgid "Автор"
 msgid "Автобус"
-msgstr "Author"
+msgstr "Bus"
 
 #: templates/locations/location_detail.html:283
 msgid "Подбор недвижимости в локации"
@@ -5551,3 +5545,24 @@ msgstr "Plan"
 
 msgid "Открыть"
 msgstr "Open"
+
+#: templates/includes/list/list_data_injection.html:57
+#: templates/properties/includes/list/list_properties_map.html:49
+msgid "Продажа и аренда"
+msgstr "Sale and rent"
+
+#: templates/properties/includes/list/list_filters_card.html:231
+msgid "Подходящие удобства не найдены"
+msgstr "No matching amenities found"
+
+msgid "Здравствуйте! Меня интересует консультация по недвижимости"
+msgstr "Hello! I am interested in a real estate consultation"
+
+msgid "/мес"
+msgstr "/month"
+
+msgid "Предыдущий отзыв"
+msgstr "Previous review"
+
+msgid "Следующий отзыв"
+msgstr "Next review"

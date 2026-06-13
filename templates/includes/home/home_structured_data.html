@@ -20,6 +20,7 @@
 {% elif LANGUAGE_CODE == 'th' %}
   "name": "บริการจาก Undersun Estate",
 {% endif %}
+  "inLanguage": "{{ LANGUAGE_CODE|default:'ru'|escapejs }}",
   "itemListElement": [
   {% for service in home_services_structured %}
     {
@@ -49,6 +50,7 @@
 {% elif LANGUAGE_CODE == 'th' %}
   "name": "อสังหาริมทรัพย์แนะนำ",
 {% endif %}
+  "inLanguage": "{{ LANGUAGE_CODE|default:'ru'|escapejs }}",
   "itemListElement": [
   {% for prop in featured_properties_structured %}
     {

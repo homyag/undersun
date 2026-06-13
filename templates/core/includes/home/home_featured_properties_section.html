@@ -5,7 +5,13 @@
         <div class="text-center mb-8 sm:mb-12">
             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary mb-4 uppercase">{% trans "Избранные объекты недвижимости" %}</h2>
             <p class="text-gray-600 max-w-3xl mx-auto text-sm sm:text-base leading-relaxed">
-                {% blocktrans %}Лучшие виллы, апартаменты и дома Пхукета для инвестиций, переезда и отдыха. Мы отбираем проекты с высокой ликвидностью, понятным управлением и прозрачной юридической проверкой.{% endblocktrans %}
+                {% if LANGUAGE_CODE == 'en' %}
+                    Curated villas, condos and homes in Phuket for investment, relocation and holidays. We select projects with strong liquidity, clear management and transparent legal checks.
+                {% elif LANGUAGE_CODE == 'th' %}
+                    วิลล่า คอนโด และบ้านในภูเก็ตที่คัดสรรสำหรับการลงทุน การย้ายถิ่นฐาน และการพักผ่อน เราเลือกโครงการที่มีสภาพคล่องดี การบริหารชัดเจน และการตรวจสอบทางกฎหมายโปร่งใส
+                {% else %}
+                    Лучшие виллы, апартаменты и дома Пхукета для инвестиций, переезда и отдыха. Мы отбираем проекты с высокой ликвидностью, понятным управлением и прозрачной юридической проверкой.
+                {% endif %}
             </p>
             <div class="flex flex-wrap justify-center gap-4 mt-5 text-xs sm:text-sm font-medium text-primary">
                 <a href="{% url 'properties:property_by_type' 'villa' %}"
