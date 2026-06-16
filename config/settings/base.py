@@ -354,6 +354,7 @@ BOT_PROTECTION = {
     'RESPECT_MANUAL_IP_BANS': False,
     'JS_CHALLENGE_GRACE_SECONDS': 10,
     'JS_CHALLENGE_MAX_MISSES': 3,
+    'JS_CHALLENGE_EXEMPT_PATH_PREFIXES': ['/admin/'],
     'ACTION_THRESHOLDS': {
         'monitor': 30,
         'challenge': 60,

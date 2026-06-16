@@ -57,6 +57,9 @@ class BotDetectionService:
         self.rate_limit_max = rate_limit.get('MAX_REQUESTS', 5)
         self.js_challenge_grace_seconds = int(config.get('JS_CHALLENGE_GRACE_SECONDS', 10))
         self.js_challenge_max_misses = int(config.get('JS_CHALLENGE_MAX_MISSES', 3))
+        self.js_challenge_exempt_path_prefixes = tuple(
+            config.get('JS_CHALLENGE_EXEMPT_PATH_PREFIXES', [])
+        )
         self.skip_path_prefixes = tuple(config.get('SKIP_PATH_PREFIXES', []))
         self.skip_methods = set(config.get('SKIP_METHODS', []))
         self.challenge_cookie = config.get('CHALLENGE_COOKIE', 'bot_challenge')
@@ -134,14 +137,15 @@ class BotDetectionService:
             score += self._add_match(matches, 'missing_headers_critical', 'noheader')
 
         cookie_token = request.COOKIES.get(self.challenge_cookie)
+        js_challenge_exempt = self._is_js_challenge_exempt_path(path)
 
-        if score == 0 and self._should_enforce_js_challenge(request):
+        if score == 0 and not js_challenge_exempt and self._should_enforce_js_challenge(request):
             if cookie_token:
                 self._clear_js_challenge_pending(client_ip, user_agent)
             elif self._record_js_challenge_miss(client_ip, user_agent):
                 score += self._add_match(matches, 'js_challenge_missing', 'cookie')
 
-        if score == 0 and request.method in {'POST', 'PUT', 'PATCH'}:
+        if score == 0 and not js_challenge_exempt and request.method in {'POST', 'PUT', 'PATCH'}:
             if not cookie_token:
                 score += self._add_match(matches, 'js_challenge_missing', 'cookie')
 
@@ -171,6 +175,14 @@ class BotDetectionService:
 
         leaf = path.split('/')[-1]
         return '.' not in leaf
+
+    def _is_js_challenge_exempt_path(self, path: str) -> bool:
+        normalized_path = path or '/'
+        for prefix in self.js_challenge_exempt_path_prefixes:
+            normalized_prefix = (prefix or '').rstrip('/') or '/'
+            if normalized_path == normalized_prefix or normalized_path.startswith(f'{normalized_prefix}/'):
+                return True
+        return False
 
     def _record_js_challenge_miss(self, client_ip: str, user_agent: str) -> bool:
         cache_key = self._js_challenge_cache_key(client_ip, user_agent)
