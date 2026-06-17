@@ -17,7 +17,7 @@
 
 ## Статус реализации
 
-Обновлено: 2026-06-13.
+Обновлено: 2026-06-17.
 
 Реализовано в первой партии правок:
 
@@ -27,6 +27,8 @@
 - EN geography translations: добавлена диагностика `find_missing_translations`, заполнены `name_en/description_en` для `District` и `Location`, исправлен мусорный `Krabi` description. Production 2026-06-13: `locations.0003`, `0004` и `0005` применены; missing translations `ru -> en` больше не найдены; кириллица в `Location.name_en/description_en` не обнаружена.
 - EN price fallback: `price_number_only`, `Property.price_display` и `Property.get_formatted_price` больше не возвращают жестко прошитые `По запросу`, `/мес` и `скидка` на EN-страницах. Production HTML-check 2026-06-13: `/en/`, `/en/property/sale/`, `/en/locations/thalang/`, `/en/locations/thalang/cherng-talay/` вернули `200`; `Ко Каео`, `По запросу`, `Локация ` в видимом HTML не найдены.
 - GSC live rendered HTML `/en/` 2026-06-13: Google видит реальную страницу, а не challenge; canonical, hreflang, основной контент и JSON-LD присутствуют. Внешние robots blocks у Ahrefs/gstatic не являются ошибками сайта; `/en/bot/metrika-loaded/` — analytics beacon, не SEO-контент.
+- GSC URL Inspection 2026-06-17: `/en/`, `/ru/`, `/th/`, `/en/property/sale/`, одна карточка объекта и одна location detail page проверены; live rendered HTML/screenshot OK, status `200`, canonical, hreflang, основной HTML-контент и JSON-LD подтверждены.
+- Bing Webmaster Tools 2026-06-17: ключевые URL проверены, все OK.
 - GSC rendered HTML cleanup: локально исправлены новые подтвержденные утечки homepage featured data/JS: `/м²` в price-per-sqm заменен на `/m²` для EN, `price_formatted: "Цена по запросу"` больше не генерируется в JSON при наличии THB-цены, raw USD/RUB price fields для JS заполняются через серверную конвертацию, `/мес` локализован, WhatsApp prefill и Google Reviews `aria-label` переведены.
 - EN amenities translations: заполнены пустые `PropertyFeature.name_en`.
 - EN property translation tooling: добавлена batch-команда `translate_missing_properties` для управляемого перевода объектов порциями. Production fact-check: проблема с `Property.title_en`, найденная локально, на production не подтверждается.
@@ -35,7 +37,7 @@
 - Favorites pages: добавлен `noindex, follow`.
 - Sitemap: `District` и `Location` detail pages добавлены в sitemap с localized alternates.
 - Hreflang для индексируемых filter landing pages: language URLs строятся от canonical URL и сохраняют approved canonical query string.
-- Metadata/H1: переписан EN H1 главной, добавлены более сильные EN/TH/RU metadata для About.
+- Metadata/H1: переписан EN H1 главной, добавлены более сильные EN/TH/RU metadata для About, общий `truncate_meta` больше не добавляет буквальное `...` по умолчанию и очищает terminal ellipsis.
 - Footer: год копирайта заменен на динамический.
 - Production slug migration для property URLs: выполнена безопасная миграция `28` активных объектов со старых русскоязычных транслитерированных slug на EN slug; перед работой создан backup БД, старые URL закрыты `301` redirects на уровне Nginx.
 - Schema/JSON-LD: property/detail, service, home FAQ и location/district ItemList schema доработаны; убран `no-image.svg` из `Product.image`/`Place.image`, добавлены `inLanguage`/`mainEntityOfPage`, EN location ItemList больше не использует raw Russian `property.title`.
@@ -44,7 +46,6 @@
 
 - Выполнить `python manage.py compilemessages -l en -l th`, потому что `.mo` файлы не хранятся в git.
 - Перезапустить application workers, чтобы Python-код и новые `.mo` были загружены.
-- Проверить Googlebot/Bingbot через GSC/Bing Webmaster Tools: это нельзя считать выполненным только по локальным тестам.
 
 ## Этап 1. Критические технические риски
 
@@ -52,7 +53,7 @@
 
 ### 1. Исправить bot protection — частично реализовано 2026-06-12
 
-Статус: реализованы правки whitelist, official crawler names, Bingbot IP ranges и разблокировка `security.txt`. Остались production-проверка Googlebot/Bingbot через webmaster tools и отдельное решение по Redis для rate-limit state.
+Статус: реализованы правки whitelist, official crawler names, Bingbot IP ranges и разблокировка `security.txt`. Production-проверка Googlebot/Bingbot через webmaster tools выполнена 2026-06-17. Осталось отдельное решение по Redis для rate-limit state.
 
 Проблема:
 
@@ -85,9 +86,9 @@
 - `/.well-known/security.txt` не блокируется middleware, если файл решено публиковать.
 - Rate-limit/challenge state общий для всех workers.
 
-### 2. Проверить доступность сайта для поисковых роботов — не реализовано, внешняя проверка
+### 2. Проверить доступность сайта для поисковых роботов — реализовано 2026-06-17
 
-Статус: частично подтверждено через Google Search Console live test для `/en/` 2026-06-13: Google получил полноценный rendered HTML главной, не challenge. Остались проверки `/ru/`, `/th/`, catalog, property detail, location detail и Bing Webmaster Tools.
+Статус: подтверждено внешними webmaster tools. Google Search Console live test для `/en/` 2026-06-13: Google получил полноценный rendered HTML главной, не challenge. Google Search Console URL Inspection 2026-06-17: `/en/`, `/ru/`, `/th/`, `/en/property/sale/`, одна карточка объекта и одна location detail page проверены; live rendered HTML/screenshot OK, status `200`, canonical, hreflang, основной HTML-контент и JSON-LD подтверждены. Bing Webmaster Tools 2026-06-17: ключевые URL проверены, все OK.
 
 Проблема:
 
@@ -103,18 +104,23 @@
    - `/en/property/sale/`;
    - одну карточку объекта;
    - одну location detail page.
+   Статус: выполнено 2026-06-17, все OK.
 2. Посмотреть rendered HTML и screenshot от Google.
+   Статус: выполнено 2026-06-17 в рамках URL Inspection, live rendered HTML/screenshot OK.
 3. Проверить, видит ли Google:
    - status `200`;
    - canonical;
    - hreflang;
    - основной HTML-контент;
    - JSON-LD schema.
+   Статус: выполнено 2026-06-17: status `200`, canonical, hreflang, основной HTML-контент и JSON-LD подтверждены.
 4. Аналогично проверить ключевые URL в Bing Webmaster Tools.
+   Статус: выполнено 2026-06-17, все OK.
 
 Критерии приемки:
 
 - Google URL Inspection показывает, что страницы доступны.
+- Bing Webmaster Tools показывает, что ключевые URL доступны.
 - Rendered HTML содержит основной контент.
 - Нет ошибок доступа, blocked by robots, server error или WAF/challenge.
 
@@ -334,9 +340,16 @@
 - Hreflang не теряет approved indexable params.
 - Transient filters не создают uncontrolled duplicate indexable pages.
 
-### 8. Переписать слабые metadata — частично реализовано 2026-06-12
+### 8. Переписать слабые metadata — реализовано 2026-06-17
 
-Статус: EN H1 главной переписан, About title/description/OG усилены trust signals. Проверка и чистка всех meta descriptions с буквальным `...` остается отдельной задачей.
+Статус: EN H1 главной переписан, About title/description/OG усилены trust signals. 2026-06-17 закрыта чистка meta descriptions с буквальным `...`: общий `truncate_meta` больше не добавляет `...` по умолчанию и очищает terminal ellipsis из исходного текста. EN title главной оставлен без изменения, потому что текущий `Undersun Estate - Phuket Real Estate` не конфликтует с buyer-intent задачей и не содержит подтвержденной ошибки.
+
+Проверки 2026-06-17:
+
+- `python manage.py test apps.core.tests.SeoUtilsTests` — OK.
+- `python manage.py check` — OK.
+- Django Client smoke-check: `/en/`, `/ru/`, `/th/`, `/en/about/`, `/en/locations/thalang/`, `/en/locations/thalang/cherng-talay/`, `/en/property/sale/` и одна EN property detail page вернули `200`; у каждой страницы один H1, description не заканчивается на `...`, canonical/hreflang/JSON-LD присутствуют.
+- Sitemap sample audit: проверено `250` rendered sitemap URL, `ellipsis_hits 0`.
 
 Подтвержденные проблемы:
 
@@ -352,13 +365,18 @@
 Задачи:
 
 1. Переписать EN H1 главной в один связный buyer-intent heading.
+   Статус: выполнено ранее.
 2. Обновить EN title главной, если нужно усилить buyer intent и Thailand/Phuket context.
+   Статус: изменение не требуется по текущему HTML; title валиден и не содержит подтвержденной ошибки.
 3. Убрать буквальные `...` из meta descriptions.
+   Статус: выполнено 2026-06-17 через `truncate_meta` и проверку rendered URL.
 4. Переписать `/en/about/` title/description/OG title.
+   Статус: выполнено ранее.
 5. Отразить в About metadata реальные trust signals:
    - Phuket Property Association;
    - co-founder positioning;
    - Phuket real estate expertise.
+   Статус: выполнено ранее.
 
 Критерии приемки:
 
@@ -371,9 +389,9 @@
 
 Срок: 1-3 недели
 
-### 9. Почистить конфликты `property_type` — частично реализовано 2026-06-12
+### 9. Почистить конфликты `property_type` — реализовано 2026-06-17
 
-Статус: production fact-check выполнен на VPS `51.79.173.21`. Добавлена команда `python manage.py audit_property_type_conflicts` для read-only аудита, CSV-выгрузки и точечного применения после ручной проверки ID.
+Статус: production fact-check выполнен на VPS `51.79.173.21`. Добавлена команда `python manage.py audit_property_type_conflicts` для read-only аудита, CSV-выгрузки и точечного применения после ручной проверки ID. Production re-check 2026-06-17 после ручной правки данных: массовый конфликт `villa_title_vs_condo` больше не найден; audit-only выводит `Conflicts found: 1`, только `villa_title_vs_townhouse` для объекта `#608`. Ручная проверка 2026-06-17 подтвердила, что `#608` корректно остается `property_type=townhouse`, поэтому оставшийся audit hit считается false-positive из-за названия проекта `Anocha Luxury Villas`.
 
 Проблема:
 
@@ -381,6 +399,10 @@
   - `63` активных объекта: `villa` есть в title, но `property_type = condo`;
   - `1` активный объект: title указывает на house, но содержит имя проекта `Anocha Luxury Villas` и `property_type = townhouse`; требует ручной проверки, не auto-fix;
   - прежние `land/plot` с `townhouse` классифицированы как участок у дома, а не как автоматический конфликт типа.
+- Production re-check 2026-06-17:
+  - `0` активных объектов `villa_title_vs_condo`;
+  - остался `#608`, `type=townhouse`, `status=available`, slug `three-storey-4-bedroom-house-in-ratsada-area-phuket-at-anocha-luxury-villas`, title `Three-storey 4 bedroom house in Ratsada area, Phuket at Anocha Luxury Villas`;
+  - ручная проверка подтвердила корректность типа `townhouse`; audit hit считается false-positive, потому что `Villas` входит в название проекта, а `house` не имеет отдельного типа в текущей taxonomy.
 - Это влияет на metadata, schema, filters, category pages и trust.
 
 Задачи:
@@ -388,10 +410,13 @@
 1. Выгрузить список конфликтующих объектов.
    Статус: команда добавлена; пример: `python manage.py audit_property_type_conflicts --csv property_type_conflicts.csv`.
 2. Проверить каждый конфликт по фактическому типу объекта.
+   Статус: выполнено; массовые `villa -> condo` конфликты исправлены вручную на production, `#608` проверен вручную и подтвержден как корректный `townhouse`.
 3. Исправить `Property.property_type`.
-   Статус: применять только после ручной проверки CSV. Для выбранных ID: `python manage.py audit_property_type_conflicts --expected villa --ids 1 9 10 --apply`.
+   Статус: выполнено; production re-check 2026-06-17 подтверждает, что массовые исправления применены, `#608` менять не нужно.
 4. Перегенерировать metadata/schema, если они зависят от типа.
+   Статус: не требуется для `#608`, так как тип подтвержден корректным; массовые исправления отражаются через существующую генерацию metadata/schema.
 5. Проверить карточки объектов, category pages и фильтры.
+   Статус: production audit подтверждает отсутствие оставшихся реальных конфликтов `property_type`.
 
 Инструкция для production:
 
@@ -556,9 +581,9 @@
 
 Срок: 1-2 недели
 
-### 11. Довести текущую schema, а не добавлять ее "с нуля" — реализовано в коде 2026-06-12
+### 11. Довести текущую schema, а не добавлять ее "с нуля" — реализовано 2026-06-17
 
-Статус: локальная ветка содержит `Product/Offer` на property detail и дополнительные исправления schema. Django Client audit по реальному HTML завершен без ошибок (`issue_count 0`). Остался внешний Rich Results Test после деплоя.
+Статус: локальная ветка содержит `Product/Offer` на property detail и дополнительные исправления schema. Django Client audit по реальному HTML завершен без ошибок (`issue_count 0`). Внешний Google Rich Results Test выполнен 2026-06-17 для homepage, property detail, service detail, blog detail и location page: критических ошибок нет. Minor issues есть у части Product snippets, Merchant listings, Articles и LocalBusiness, их можно разобрать отдельным follow-up, но они не блокируют закрытие schema-блока.
 
 Факт:
 
@@ -582,6 +607,12 @@
    - service detail;
    - blog detail;
    - location page.
+   Статус: выполнено 2026-06-17, критических ошибок нет.
+   - Homepage `https://undersunestate.com/ru/`: просканировано 2026-06-17 15:51:38, обнаружено `23` элемента без ошибок: `9` Product snippets, `9` Merchant listings, `3` Articles, `1` LocalBusiness, `1` Organization. Minor issues у Product snippets, Merchant listings и Articles.
+   - Property detail `https://undersunestate.com/ru/property/3-bedroom-villa-with-pool-in-rawai-area-phuket-in-quinta-lane-by-intira-villas/`: просканировано 2026-06-17 15:54:57, обнаружено `5` элементов без ошибок: `1` Product snippet, `1` Merchant listing, `1` BreadcrumbList, `1` LocalBusiness, `1` Organization. Minor issues у Product snippet, Merchant listing и LocalBusiness.
+   - Service detail `https://undersunestate.com/ru/services/buying-property/`: просканировано 2026-06-17 15:55:33, обнаружено `3` элемента без ошибок: `1` BreadcrumbList, `1` LocalBusiness, `1` Organization. Minor issue у LocalBusiness.
+   - Blog detail `https://undersunestate.com/ru/blog/mozhet-li-inostranec-kupit-nedvizhimost-na-phukete-v-2026-godu/`: просканировано 2026-06-17 16:00:46, обнаружено `4` элемента без ошибок: `1` Article, `1` BreadcrumbList, `1` LocalBusiness, `1` Organization. Minor issues у Article и LocalBusiness.
+   - Location page `https://undersunestate.com/ru/locations/thalang/`: просканировано 2026-06-17 16:05:50, обнаружено `4` элемента без ошибок: `1` BreadcrumbList, `1` Carousel, `1` LocalBusiness, `1` Organization. Minor issue у LocalBusiness.
 2. Добавить или починить primary property detail schema.
    Статус: выполнено, primary `Product/Offer` подтвержден и усилен.
    - `Product/Offer` или другая truthful structure;
@@ -591,7 +622,7 @@
    - images;
    - availability/status.
 3. Проверить, что schema не противоречит `property_type`.
-   Статус: локальный audit не нашел противоречий в проверенной выборке; спорные `property_type` остаются отдельной ручной задачей из пункта 9.
+   Статус: выполнено; локальный audit не нашел противоречий в проверенной выборке, production cleanup `property_type` закрыт в пункте 9.
 4. Не добавлять `aggregateRating`, если нет надежной синхронизации visible reviews.
    Статус: выполнено, `aggregateRating` не добавлялся.
 5. Не обещать rich results как гарантированный результат.
@@ -626,93 +657,166 @@
 
 Срок: 2-4 недели
 
-### 12. Исправить mobile first-screen rendering — не начато
+### 12. Исправить mobile first-screen rendering — выполнено 2026-06-17
 
-Статус: не входило в первую партию правок; требует Playwright/mobile screenshots.
+Статус: исправлено и проверено локальным Playwright/Chrome audit 2026-06-17.
 
 Подтвержденные проблемы:
 
-- Mobile homepage H1 обрезан справа.
-- Mobile header controls частично обрезаны.
-- Cookie banner перекрывает важный контент первого экрана.
-- На catalog mobile screenshot обрезаются headline/breadcrumb.
-- На property mobile screenshot cookie banner перекрывает property facts.
+- Mobile homepage H1 обрезался справа — исправлено через safe wrapping.
+- Mobile header controls могли обрезаться на узких экранах — добавлена mobile-защита contact bar.
+- Cookie banner перекрывал важный контент первого экрана — mobile banner стал компактнее; на property detail переносится под top nav.
+- На catalog mobile screenshot обрезались headline/breadcrumb — breadcrumbs переведены на wrapping.
+- На property mobile screenshot cookie banner перекрывал property facts — исправлено; facts/price/CTA не перекрываются.
 
 Задачи:
 
-1. Проверить mobile screenshots для:
+1. Проверить mobile screenshots для — выполнено 2026-06-17:
    - homepage;
    - catalog;
    - property detail;
    - location page.
-2. Исправить H1 wrapping и ширины контейнеров.
-3. Исправить mobile header controls.
-4. Пересмотреть позиционирование cookie banner на mobile.
-5. Проверить, что важные CTA и property facts не перекрываются.
-6. Прогнать Playwright screenshots после правок.
+2. Исправить H1 wrapping и ширины контейнеров — выполнено.
+3. Исправить mobile header controls — выполнено.
+4. Пересмотреть позиционирование cookie banner на mobile — выполнено.
+5. Проверить, что важные CTA и property facts не перекрываются — выполнено.
+6. Прогнать Playwright screenshots после правок — выполнено.
+
+Проверенные URL и viewports 2026-06-17:
+
+- `/ru/`
+- `/ru/property/sale/`
+- `/ru/property/3-bedroom-villa-with-pool-in-rawai-area-phuket-in-quinta-lane-by-intira-villas/`
+- `/ru/locations/thalang/`
+- Mobile: `320x740`, `360x740`, `390x844`.
+- Desktop smoke: `1366x900`.
 
 Критерии приемки:
 
-- Нет горизонтального clipping.
-- Cookie banner не перекрывает критические property facts/CTA.
-- H1 и breadcrumbs читаемы на mobile.
-- Desktop layout не деградировал.
+- Нет горизонтального clipping: `documentElement.scrollWidth` и `body.scrollWidth` равны viewport на проверенных mobile URL.
+- Cookie banner не перекрывает критические property facts/CTA: подтверждено на property detail.
+- H1 и breadcrumbs читаемы на mobile: подтверждено screenshots/DOM rects.
+- Desktop layout не деградировал: desktop smoke `1366x900`, все проверенные URL `200`, horizontal scroll не появился.
 
-### 13. Улучшить изображения и CLS — не начато
+### 13. Улучшить изображения и CLS — выполнено 2026-06-17
 
-Статус: не входило в первую партию правок.
+Статус: безопасные шаблонные правки выполнены 2026-06-17; массовая переконвертация существующего media-cache в WebP/AVIF не выполнялась и должна идти отдельной performance/media задачей после PageSpeed/CrUX из пункта 14.
 
 Подтвержденные проблемы:
 
-- На `/en/` найдено `28` изображений без явных width/height.
-- На `/en/property/sale/` найдено `25` изображений без явных width/height.
-- На проверенной property detail page найдено `19` изображений без явных width/height.
-- Property photos часто JPG.
-- WebP есть на главной, но image modernization неполная.
+- На `/en/` были изображения без явных width/height — исправлено для owned visible images на проверенном viewport-наборе.
+- На `/en/property/sale/` property card images были без width/height и без responsive candidates — исправлено.
+- На проверенной property detail page gallery/thumbnails были без stable dimensions — исправлено.
+- Property photos часто JPG — существующая модель уже конвертирует оригиналы в WebP при сохранении, но ImageKit `thumbnail/medium` cache пока остается отдельной media-format задачей.
+- WebP есть на главной, но image modernization неполная — оставить для performance backlog после фактического PageSpeed.
 
 Задачи:
 
-1. Добавить `width`/`height` или CSS `aspect-ratio` для:
+1. Добавить `width`/`height` или CSS `aspect-ratio` для — выполнено:
    - property cards;
    - galleries;
    - hero/media blocks;
    - team/service/blog images.
-2. Внедрить responsive `srcset` для property media.
-3. Конвертировать property images в WebP/AVIF там, где это безопасно.
-4. Не ставить `loading="lazy"` на первые above-the-fold images.
-5. Добавить preload/fetch priority для LCP image, если PageSpeed подтвердит проблему.
-6. Проверить CLS после правок.
+2. Внедрить responsive `srcset` для property media — выполнено для catalog cards, home featured property cards, property detail carousel/thumbnails.
+3. Конвертировать property images в WebP/AVIF там, где это безопасно — не выполнялось массово; вынести в media-format backlog после PageSpeed/CrUX, чтобы не ломать cache/feed/интеграции.
+4. Не ставить `loading="lazy"` на первые above-the-fold images — выполнено; first row catalog cards и property gallery/thumbnails больше не lazy above-the-fold.
+5. Добавить preload/fetch priority для LCP image, если PageSpeed подтвердит проблему — добавлен `fetchpriority="high"` для homepage hero, location/district hero и первого property/catalog image; подтверждение через PageSpeed остается в пункте 14.
+6. Проверить CLS после правок — выполнен local rendered audit по dimensions/lazy; field/lab CLS через PageSpeed остается в пункте 14.
+
+Проверенные URL и viewports 2026-06-17:
+
+- `/en/`
+- `/en/property/sale/`
+- `/en/property/3-bedroom-villa-with-pool-in-rawai-area-phuket-in-quinta-lane-by-intira-villas/`
+- `/en/locations/thalang/`
+- Mobile: `390x844`.
+- Desktop: `1366x900`.
+
+Финальный local Playwright/Chrome audit:
+
+- Owned visible images without `width`/`height`: `0` на всех проверенных URL/viewports.
+- Owned above-the-fold images without `width`/`height`: `0`.
+- Owned lazy above-the-fold images: `0`.
+- Property media without `srcset`: `0`.
+- Остаточные missing dimensions на property detail относятся к внешним Leaflet/OSM tiles/markers внутри карты; это не SEO-media сайта и не исправлялось.
 
 Критерии приемки:
 
-- Property cards/detail images имеют стабильные размеры.
-- PageSpeed не показывает массовые предупреждения по image dimensions.
-- CLS не ухудшается из-за media/cookie/banner blocks.
-- Above-the-fold images не задерживаются lazy-loading.
+- Property cards/detail images имеют стабильные размеры: подтверждено local rendered audit.
+- PageSpeed не показывает массовые предупреждения по image dimensions: требует внешней проверки в пункте 14.
+- CLS не ухудшается из-за media/cookie/banner blocks: local audit не нашел owned image dimension/lazy рисков; field/lab CLS проверить в пункте 14.
+- Above-the-fold images не задерживаются lazy-loading: подтверждено local rendered audit.
 
-### 14. Провести PageSpeed/CrUX проверку перед жесткими заявлениями о CWV — не начато
+### 14. Провести PageSpeed/CrUX проверку перед жесткими заявлениями о CWV — выполнено 2026-06-17
 
-Статус: не входило в первую партию правок; требует проверки внешними инструментами PageSpeed/CrUX.
+Статус: PageSpeed UI проверен 2026-06-17 на продовых URL. В PageSpeed для всех проверенных URL field data / CrUX: `Нет данных`, поэтому жесткие заявления по real-user CWV, INP и field TTFB не делаем. Ниже зафиксированы lab Lighthouse 13.4.0 данные и отдельный measured backlog.
 
 Проблема:
 
 - Внешний аудит делал прогнозы по CWV, но точные field data не были подтверждены.
 
+Проверенные URL:
+
+- `https://undersunestate.com/en/`
+- `https://undersunestate.com/en/property/sale/`
+- `https://undersunestate.com/en/property/3-bedroom-villa-with-pool-in-rawai-area-phuket-in-quinta-lane-by-intira-villas/`
+- `https://undersunestate.com/en/locations/thalang/`
+
+PageSpeed / Lighthouse lab:
+
+| Страница | Device | Score | FCP | LCP | TBT | CLS | SI | Field / CrUX | Report |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| Home | Mobile | 67 | 3.3s | 5.0s | 220ms | 0.006 | 5.8s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en/aiqx04115m?form_factor=mobile) |
+| Home | Desktop | 75 | 0.8s | 3.2s | 130ms | 0.016 | 2.4s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en/aiqx04115m?form_factor=desktop) |
+| Catalog sale | Mobile | 65 | 3.3s | 6.5s | 210ms | 0.011 | 4.6s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en-property-sale/65253i3vv0?form_factor=mobile) |
+| Catalog sale | Desktop | 91 | 0.7s | 1.6s | 10ms | 0.003 | 1.9s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en-property-sale/65253i3vv0?form_factor=desktop) |
+| Property detail | Mobile | 56 | 3.5s | 6.2s | 430ms | 0.001 | 5.3s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en-property-3-bedroom-villa-with-pool-in-rawai-area-phuket-in-quinta-lane-by-intira-villas/3ty9syz7nm?form_factor=mobile) |
+| Property detail | Desktop | 74 | 0.9s | 3.2s | 140ms | 0.088 | 1.8s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en-property-3-bedroom-villa-with-pool-in-rawai-area-phuket-in-quinta-lane-by-intira-villas/3ty9syz7nm?form_factor=desktop) |
+| Thalang | Mobile | 84 | 3.2s | 3.5s | 70ms | 0.002 | 4.0s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en-locations-thalang/qgp0dnb05z?form_factor=mobile) |
+| Thalang | Desktop | 98 | 0.7s | 0.8s | 0ms | 0.012 | 1.4s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en-locations-thalang/qgp0dnb05z?form_factor=desktop) |
+
+Synthetic browser navigation timing, Chrome / Playwright, not CrUX:
+
+| Страница | Status | Synthetic TTFB |
+| --- | ---: | ---: |
+| Home | 200 | 1937ms |
+| Catalog sale | 200 | 1020ms |
+| Property detail | 200 | 897ms |
+| Thalang | 200 | 1454ms |
+
+Measured findings:
+
+- Field data / CrUX отсутствуют для всех проверенных URL; INP недоступен, TBT используем только как lab proxy.
+- CLS в lab низкий на всех страницах: mobile `0.001-0.011`, desktop `0.003-0.088`; массовый CLS-риск не подтвердился.
+- Mobile LCP остается главным performance bottleneck: home `5.0s`, catalog `6.5s`, property detail `6.2s`.
+- PageSpeed на проде все еще показывает `Для изображений не заданы явным образом атрибуты width и height`; это ожидаемо до деплоя локальных правок из пункта 13.
+- `Улучшите загрузку изображений` повторяется на всех типах страниц: от `51-52 KiB` на location до `1.1-1.7 MiB` на home и `1.05 MiB` на desktop property detail.
+- Property detail mobile имеет самый высокий lab TBT: `430ms`; вероятные зоны проверки — gallery, map, third-party scripts, unused JS.
+- Synthetic TTFB через браузер высокий для anonymous page loads: примерно `0.9-1.9s`; curl без браузерного контекста получает `403` из-за bot protection, поэтому curl TTFB не учитывался.
+
+Performance backlog по измерениям:
+
+1. Деплоить image/CLS правки из пункта 13 и повторить PSI; после деплоя warning по missing `width` / `height` должен уйти для owned images.
+2. Оптимизировать LCP/media pipeline: безопасный WebP/AVIF для property/home изображений, контроль размеров generated variants, CDN/cache headers для media, отдельная проверка YML/feed compatibility.
+3. Разобрать property detail JS cost: отложить не критичные gallery/map/third-party сценарии до interaction/viewport, проверить TBT после изменения.
+4. Сократить unused CSS/JS: проверить active Tailwind build, purge/content coverage, page-specific JS loading и legacy scripts.
+5. Проверить anonymous-page server/cache path: TTFB по browser navigation высокий, но требует отдельного server-side профилирования и проверки bot protection/cache behavior.
+
 Задачи:
 
-1. Запустить PageSpeed Insights для:
+1. Запустить PageSpeed Insights для — выполнено 2026-06-17:
    - `/en/`;
    - `/en/property/sale/`;
    - одной property detail page;
    - одной location detail page.
-2. Сохранить результаты Lighthouse и CrUX, если доступны.
-3. Разделить field data и lab data.
-4. Сформировать отдельный performance backlog.
+2. Сохранить результаты Lighthouse и CrUX, если доступны — выполнено; Lighthouse сохранен ссылками на PSI, CrUX/field data недоступны (`Нет данных`).
+3. Разделить field data и lab data — выполнено.
+4. Сформировать отдельный performance backlog — выполнено.
 
 Критерии приемки:
 
-- Есть фактические данные по LCP, CLS, INP, TTFB.
-- Performance-задачи основаны на измерениях, а не прогнозах.
+- Есть фактические данные по LCP, CLS, INP, TTFB: lab LCP/CLS/TBT собраны; INP и field TTFB недоступны из-за отсутствия CrUX field data; synthetic browser TTFB собран отдельно и не трактуется как CWV.
+- Performance-задачи основаны на измерениях, а не прогнозах: выполнено.
 
 ## Этап 7. Контент и E-E-A-T
 

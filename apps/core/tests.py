@@ -5,6 +5,7 @@ from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from apps.core.bot_detection import BotDetectionService
 from apps.core.services import TranslationService
+from apps.core.utils import truncate_meta
 
 
 BOT_PROTECTION_TEST_CONFIG = {
@@ -34,6 +35,28 @@ BOT_PROTECTION_TEST_CONFIG = {
         'js_challenge_missing': 40,
     },
 }
+
+
+class SeoUtilsTests(SimpleTestCase):
+    def test_truncate_meta_does_not_append_literal_ellipsis(self):
+        text = ' '.join(['Phuket property buyers compare villas condos land title checks and location context'] * 4)
+
+        result = truncate_meta(text, limit=90)
+
+        self.assertLessEqual(len(result), 90)
+        self.assertFalse(result.endswith('...'))
+
+    def test_truncate_meta_strips_existing_terminal_ellipsis(self):
+        self.assertEqual(
+            truncate_meta('Compare villas, condos and land in Phuket...'),
+            'Compare villas, condos and land in Phuket',
+        )
+
+    def test_truncate_meta_preserves_short_description(self):
+        self.assertEqual(
+            truncate_meta('Compare Phuket villas and condos with local context.'),
+            'Compare Phuket villas and condos with local context.',
+        )
 
 
 class BotDetectionServiceTests(SimpleTestCase):

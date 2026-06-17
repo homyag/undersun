@@ -1,46 +1,46 @@
 {% load i18n %}
 {% with lang=LANGUAGE_CODE|default:'ru' %}
 <div id="cookie-consent-overlay" class="pointer-events-none fixed inset-x-0 bottom-0 z-[9998] hidden px-3 pb-3" data-cookie-lang="{{ lang }}" role="dialog" aria-modal="true" aria-labelledby="cookie-consent-title">
-    <div class="pointer-events-auto mx-auto flex w-full max-w-4xl flex-col gap-3 rounded-2xl border border-amber-200 bg-white/95 px-4 py-3 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.35)] backdrop-blur-md text-slate-900 max-h-[80vh] lg:max-h-[45vh] overflow-hidden">
-        <div class="flex flex-1 min-h-0 items-start gap-3 overflow-hidden">
+    <div class="cookie-consent-panel pointer-events-auto mx-auto flex w-full max-w-4xl flex-col gap-3 rounded-2xl border border-amber-200 bg-white/95 px-4 py-3 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.35)] backdrop-blur-md text-slate-900 max-h-[80vh] lg:max-h-[45vh] overflow-hidden">
+        <div class="cookie-consent-body flex flex-1 min-h-0 items-start gap-3 overflow-hidden">
             <div class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-500 sm:flex">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9.357a8.25 8.25 0 11-11.831-6.794 3.375 3.375 0 004.74 4.74 3.375 3.375 0 006.794 4.74 8.214 8.214 0 010 5.33" />
                 </svg>
             </div>
-            <div class="flex-1 space-y-1 text-xs leading-snug sm:text-sm overflow-y-auto pr-1">
+            <div class="cookie-consent-copy flex-1 space-y-1 text-xs leading-snug sm:text-sm overflow-y-auto pr-1">
                 {% if lang == 'en' %}
                     <h2 id="cookie-consent-title" class="text-sm font-semibold text-slate-900 sm:text-base">Cookie consent &amp; GDPR notice</h2>
                     <p>We rely on essential cookies for security and offer analytics cookies only with your consent.</p>
-                    <ul class="list-disc pl-4 text-slate-600">
+                    <ul class="cookie-consent-details list-disc pl-4 text-slate-600">
                         <li>Essential: language, session, fraud prevention.</li>
                         <li>Analytics: demand insights for Phuket property services.</li>
                     </ul>
-                    <p class="text-slate-500">Full details in the <a href="/{{ lang }}/privacy/" class="underline decoration-dotted">privacy notice</a>. Withdraw consent anytime via the <a href="/{{ lang }}/contact/" class="underline decoration-dotted">contact form</a>.</p>
+                    <p class="cookie-consent-details text-slate-500">Full details in the <a href="/{{ lang }}/privacy/" class="underline decoration-dotted">privacy notice</a>. Withdraw consent anytime via the <a href="/{{ lang }}/contact/" class="underline decoration-dotted">contact form</a>.</p>
                 {% elif lang == 'th' %}
                     <h2 id="cookie-consent-title" class="text-sm font-semibold text-slate-900 sm:text-base">การใช้คุกกี้และ PDPA</h2>
                     <p>เราใช้คุกกี้ที่จำเป็น และคุกกี้วิเคราะห์ตามความยินยอมของคุณภายใต้ PDPA.</p>
-                    <ul class="list-disc pl-4 text-slate-600">
+                    <ul class="cookie-consent-details list-disc pl-4 text-slate-600">
                         <li>คุกกี้จำเป็น: ภาษา ความปลอดภัย การทำงาน</li>
                         <li>คุกกี้วิเคราะห์: ปรับบริการอสังหาฯ ภูเก็ต</li>
                     </ul>
-                    <p class="text-slate-500">อ่าน <a href="/{{ lang }}/privacy/" class="underline decoration-dotted">นโยบายส่วนตัว</a> หรือเพิกถอนผ่าน <a href="/{{ lang }}/contact/" class="underline decoration-dotted">ฟอร์มติดต่อ</a>.</p>
+                    <p class="cookie-consent-details text-slate-500">อ่าน <a href="/{{ lang }}/privacy/" class="underline decoration-dotted">นโยบายส่วนตัว</a> หรือเพิกถอนผ่าน <a href="/{{ lang }}/contact/" class="underline decoration-dotted">ฟอร์มติดต่อ</a>.</p>
                 {% else %}
                     <h2 id="cookie-consent-title" class="text-sm font-semibold text-slate-900 sm:text-base">Использование файлов cookie</h2>
                     <p>Мы используем обязательные cookie и предлагаем аналитические cookie только с вашего согласия.</p>
-                    <ul class="list-disc pl-4 text-slate-600">
+                    <ul class="cookie-consent-details list-disc pl-4 text-slate-600">
                         <li>Обязательные: язык, безопасность, авторизация.</li>
                         <li>Аналитические: оценка спроса на недвижимость.</li>
                     </ul>
-                    <p class="text-slate-500">Политика — <a href="/{{ lang }}/privacy/" class="underline decoration-dotted">по ссылке</a>. Отказаться можно через <a href="/{{ lang }}/contact/" class="underline decoration-dotted">форму связи</a>.</p>
+                    <p class="cookie-consent-details text-slate-500">Политика — <a href="/{{ lang }}/privacy/" class="underline decoration-dotted">по ссылке</a>. Отказаться можно через <a href="/{{ lang }}/contact/" class="underline decoration-dotted">форму связи</a>.</p>
                 {% endif %}
             </div>
         </div>
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end flex-shrink-0">
-            <button type="button" id="cookie-consent-decline" class="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-400 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
+        <div class="cookie-consent-actions flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end flex-shrink-0">
+            <button type="button" id="cookie-consent-decline" class="cookie-consent-button inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-400 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
                 {% if lang == 'en' %}Reject non-essential{% elif lang == 'th' %}ปฏิเสธคุกกี้ที่ไม่จำเป็น{% else %}Отклонить необязательные{% endif %}
             </button>
-            <button type="button" id="cookie-consent-accept" class="inline-flex items-center justify-center rounded-full bg-amber-500 px-5 py-1.5 text-xs font-semibold text-white shadow-lg transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">
+            <button type="button" id="cookie-consent-accept" class="cookie-consent-button inline-flex items-center justify-center rounded-full bg-amber-500 px-5 py-1.5 text-xs font-semibold text-white shadow-lg transition hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300">
                 {% if lang == 'en' %}Accept all{% elif lang == 'th' %}ยอมรับทั้งหมด{% else %}Принять все{% endif %}
             </button>
         </div>

@@ -39,26 +39,34 @@ def build_query_string(querydict, allowed_keys):
     return urlencode(params, doseq=True)
 
 
-def truncate_meta(value, limit=155, ellipsis='...'):
-    """Очистить HTML, нормализовать пробелы и обрезать описание до лимита."""
+def _strip_terminal_ellipsis(value):
+    return re.sub(r'(?:\s*(?:\.{3,}|\u2026))+$', '', value).strip()
+
+
+def truncate_meta(value, limit=155, ellipsis=''):
+    """Очистить HTML, нормализовать пробелы и обрезать SEO-текст до лимита."""
     if not value:
         return ''
 
     text = strip_tags(str(value))
     text = re.sub(r'\s+', ' ', text).strip()
+    text = _strip_terminal_ellipsis(text)
     if not text or len(text) <= limit:
         return text
 
-    truncated = text[:limit]
+    suffix = ellipsis or ''
+    content_limit = max(limit - len(suffix), 0) if suffix else limit
+    truncated = text[:content_limit]
     last_space = truncated.rfind(' ')
     if last_space > 0:
         truncated = truncated[:last_space]
 
     truncated = truncated.rstrip(' .,;:-')
+    truncated = _strip_terminal_ellipsis(truncated)
     if not truncated:
-        truncated = text[:limit].rstrip()
+        truncated = _strip_terminal_ellipsis(text[:content_limit].rstrip())
 
-    return f"{truncated}{ellipsis}" if ellipsis else truncated
+    return f"{truncated}{suffix}" if suffix else truncated
 
 
 def rate_limit(key_prefix, limit=5, timeout=60):

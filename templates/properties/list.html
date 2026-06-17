@@ -53,18 +53,18 @@
 <section class="py-8 bg-gray-50 min-h-screen">
     <div class="max-w-7xl mx-auto px-4">
         {% if catalog_breadcrumbs %}
-        <nav class="mb-6 overflow-x-auto pb-2 text-sm text-gray-600" aria-label="{% trans 'Хлебные крошки' %}">
-            <div class="flex min-w-max items-center gap-2">
+        <nav class="mobile-safe-breadcrumbs mb-6 pb-2 text-sm text-gray-600" aria-label="{% trans 'Хлебные крошки' %}">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 {% for crumb in catalog_breadcrumbs %}
                     {% if not forloop.first %}
                         <i class="fas fa-chevron-right text-[10px] text-gray-400"></i>
                     {% endif %}
                     {% if crumb.url and not forloop.last %}
-                        <a href="{{ crumb.url }}" class="whitespace-nowrap transition-colors duration-200 hover:text-accent">
+                        <a href="{{ crumb.url }}" class="transition-colors duration-200 hover:text-accent">
                             {{ crumb.label }}
                         </a>
                     {% else %}
-                        <span class="whitespace-nowrap {% if forloop.last %}font-medium text-gray-900{% endif %}">
+                        <span class="{% if forloop.last %}font-medium text-gray-900{% endif %}">
                             {{ crumb.label }}
                         </span>
                     {% endif %}

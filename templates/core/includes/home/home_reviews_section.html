@@ -99,8 +99,11 @@
                 <img id="main-review-photo"
                      src="{{ reviews.0.profile_photo_url }}"
                      alt="{{ reviews.0.name }}"
+                     width="120"
+                     height="120"
                      class="{% if not reviews.0.profile_photo_url %}hidden{% endif %} w-12 h-12 rounded-full object-cover bg-gray-100"
                      loading="lazy"
+                     decoding="async"
                      referrerpolicy="no-referrer">
                 <div id="main-review-avatar" class="{% if reviews.0.profile_photo_url %}hidden{% endif %} w-12 h-12 bg-gradient-to-br {{ reviews.0.avatar_color }} rounded-full flex items-center justify-center text-white font-bold text-base">
                   {{ reviews.0.avatar }}
@@ -127,8 +130,11 @@
                   <img id="next-review-photo"
                        src="{{ reviews.1.profile_photo_url }}"
                        alt="{{ reviews.1.name }}"
+                       width="120"
+                       height="120"
                        class="{% if not reviews.1.profile_photo_url %}hidden{% endif %} w-10 h-10 rounded-full object-cover bg-white"
                        loading="lazy"
+                       decoding="async"
                        referrerpolicy="no-referrer">
                   <div id="next-review-avatar" class="{% if reviews.1.profile_photo_url %}hidden{% endif %} w-10 h-10 bg-gradient-to-br {{ reviews.1.avatar_color }} rounded-full flex items-center justify-center text-white font-bold text-sm">
                     {{ reviews.1.avatar }}

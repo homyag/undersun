@@ -4829,6 +4829,7 @@ def _build_property_image_sets(property_obj, language_code='ru'):
 
         image_item = {
             'url': image_url,
+            'thumbnail_url': image.thumbnail_url or image_url,
             'full_url': image.original_url or image_url,
             'alt': alt_text,
             **_get_file_dimensions(image.image),

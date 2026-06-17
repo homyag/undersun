@@ -113,20 +113,27 @@
 
 {% block content %}
     <!-- Property Gallery Carousel -->
-    <section class="py-4 sm:py-8 mt-6 sm:mt-10">
+    <section class="py-2 sm:py-8 mt-3 sm:mt-10">
         <div class="max-w-7xl mx-auto px-2 sm:px-4">
             <!-- Main Carousel Container -->
             <div class="relative overflow-hidden rounded-lg sm:rounded-xl shadow-lg sm:shadow-2xl group">
                 {% if gallery_images %}
                     <!-- Carousel with Single/Dual Image Display -->
-                    <div class="property-carousel relative h-64 sm:h-80 lg:h-auto">
+                    <div class="property-carousel relative h-52 sm:h-80 lg:h-auto">
                         {% for image in gallery_images %}
                             <div class="property-slide absolute inset-0 transition-opacity duration-1000 lg:hidden {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
                                  aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
                                  data-slide-index="{{ forloop.counter0 }}">
                                 <img src="{{ image.url }}" alt="{{ image.alt }}"
+                                     {% if image.thumbnail_url %}srcset="{{ image.thumbnail_url }} 300w, {{ image.url }} 800w{% if image.full_url and image.width %}, {{ image.full_url }} {{ image.width }}w{% endif %}"{% endif %}
+                                     sizes="100vw"
+                                     width="{{ image.width|default:800 }}"
+                                     height="{{ image.height|default:600 }}"
                                      class="gallery-hero-image cursor-pointer hover:scale-105 transition-transform duration-300 rounded-lg sm:rounded-xl"
-                                     onclick="openGallery({{ forloop.counter0 }})" loading="lazy">
+                                     onclick="openGallery({{ forloop.counter0 }})"
+                                     loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                                     decoding="async"
+                                     {% if forloop.first %}fetchpriority="high"{% endif %}>
                             </div>
                         {% endfor %}
 
@@ -137,6 +144,13 @@
                                 <img id="desktop-primary-image"
                                      src="{{ gallery_images.0.url }}"
                                      alt="{{ gallery_images.0.alt }}"
+                                     {% if gallery_images.0.thumbnail_url %}srcset="{{ gallery_images.0.thumbnail_url }} 300w, {{ gallery_images.0.url }} 800w{% if gallery_images.0.full_url and gallery_images.0.width %}, {{ gallery_images.0.full_url }} {{ gallery_images.0.width }}w{% endif %}"{% endif %}
+                                     sizes="(min-width: 1280px) 58vw, 100vw"
+                                     width="{{ gallery_images.0.width|default:800 }}"
+                                     height="{{ gallery_images.0.height|default:600 }}"
+                                     loading="eager"
+                                     decoding="async"
+                                     fetchpriority="high"
                                      class="gallery-hero-image transition-transform duration-300">
                             </div>
                             <div id="desktop-secondary-trigger"
@@ -145,6 +159,12 @@
                                 <img id="desktop-secondary-image"
                                      src="{% if gallery_images|length > 1 %}{{ gallery_images.1.url }}{% else %}{{ gallery_images.0.url }}{% endif %}"
                                      alt="{% if gallery_images|length > 1 %}{{ gallery_images.1.alt }}{% else %}{{ gallery_images.0.alt }}{% endif %}"
+                                     {% if gallery_images|length > 1 and gallery_images.1.thumbnail_url %}srcset="{{ gallery_images.1.thumbnail_url }} 300w, {{ gallery_images.1.url }} 800w{% if gallery_images.1.full_url and gallery_images.1.width %}, {{ gallery_images.1.full_url }} {{ gallery_images.1.width }}w{% endif %}"{% elif gallery_images.0.thumbnail_url %}srcset="{{ gallery_images.0.thumbnail_url }} 300w, {{ gallery_images.0.url }} 800w{% if gallery_images.0.full_url and gallery_images.0.width %}, {{ gallery_images.0.full_url }} {{ gallery_images.0.width }}w{% endif %}"{% endif %}
+                                     sizes="(min-width: 1280px) 38vw, 100vw"
+                                     width="{% if gallery_images|length > 1 %}{{ gallery_images.1.width|default:800 }}{% else %}{{ gallery_images.0.width|default:800 }}{% endif %}"
+                                     height="{% if gallery_images|length > 1 %}{{ gallery_images.1.height|default:600 }}{% else %}{{ gallery_images.0.height|default:600 }}{% endif %}"
+                                     loading="eager"
+                                     decoding="async"
                                      class="gallery-hero-image transition-transform duration-300">
                             </div>
                         </div>
@@ -222,13 +242,19 @@
 
             <!-- Thumbnail Navigation -->
             {% if gallery_images|length > 1 %}
-                <div class="mt-4 overflow-x-auto">
-                    <div class="inline-flex min-w-full items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-sm ring-1 ring-gray-200/80 backdrop-blur-sm pb-2">
+                <div class="mt-3 overflow-x-auto">
+                    <div class="inline-flex min-w-full items-center gap-2 rounded-2xl bg-white/90 p-1.5 shadow-sm ring-1 ring-gray-200/80 backdrop-blur-sm sm:p-2 sm:pb-2">
                         {% for image in gallery_images %}
                             <div class="flex-shrink-0 relative cursor-pointer group"
                                  onclick="goToSlideByImage({{ forloop.counter0 }})">
-                                <img src="{{ image.url }}" alt="{{ image.alt }}"
-                                     class="h-16 w-16 object-cover rounded-xl transition-all duration-300 border-2 {% if forloop.counter0 == 0 %}border-accent shadow-md{% else %}border-transparent hover:border-accent/40{% endif %} sm:h-[4.25rem] sm:w-[4.25rem]"
+                                <img src="{{ image.thumbnail_url|default:image.url }}" alt="{{ image.alt }}"
+                                     {% if image.thumbnail_url %}srcset="{{ image.thumbnail_url }} 300w, {{ image.url }} 800w"{% endif %}
+                                     sizes="68px"
+                                     class="h-14 w-14 object-cover rounded-xl transition-all duration-300 border-2 {% if forloop.counter0 == 0 %}border-accent shadow-md{% else %}border-transparent hover:border-accent/40{% endif %} sm:h-[4.25rem] sm:w-[4.25rem]"
+                                     width="300"
+                                     height="200"
+                                     loading="eager"
+                                     decoding="async"
                                      data-thumb="{{ forloop.counter0 }}">
                                 <!-- Hover Overlay -->
                                 <div class="absolute inset-0 rounded-xl bg-black bg-opacity-0 transition-all duration-300 group-hover:bg-opacity-20 flex items-center justify-center">
@@ -243,7 +269,7 @@
     </section>
 
     <!-- Back Navigation -->
-    <section class="pb-4">
+    <section class="pb-3 sm:pb-4">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                 <button onclick="goBackToCatalog()"
@@ -261,7 +287,7 @@
             <!-- Breadcrumbs -->
             <div class="mt-4">
                 {% if detail_breadcrumbs %}
-                <nav class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-600 overflow-x-auto pb-2" aria-label="{% trans 'Хлебные крошки' %}">
+                <nav class="mobile-safe-breadcrumbs flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2 text-xs sm:text-sm text-gray-600 pb-2" aria-label="{% trans 'Хлебные крошки' %}">
                     <script type="application/ld+json">
                     {
                       "@context": "https://schema.org",
@@ -286,11 +312,11 @@
                         {% endif %}
                         {% if crumb.url and not forloop.last %}
                             <a href="{{ crumb.url }}"
-                               class="hover:text-accent transition-colors duration-200 whitespace-nowrap">
+                               class="hover:text-accent transition-colors duration-200">
                                 {{ crumb.label }}
                             </a>
                         {% else %}
-                            <span class="text-gray-900 {% if forloop.last %}font-medium{% endif %} whitespace-nowrap">
+                            <span class="text-gray-900 {% if forloop.last %}font-medium{% endif %}">
                                 {{ crumb.label|truncatechars:30 }}
                             </span>
                         {% endif %}
@@ -308,10 +334,10 @@
                 <!-- Main Info -->
                 <div class="lg:col-span-2">
                     <!-- Header -->
-                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start space-y-4 sm:space-y-0">
                             <div class="flex-1">
-                                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">{{ property_title_display|default:property.title }}</h1>
+                                <h1 class="mobile-safe-heading text-xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">{{ property_title_display|default:property.title }}</h1>
 
                                 <div class="flex flex-col sm:flex-row sm:items-center text-gray-600 mb-4 space-y-2 sm:space-y-0 sm:space-x-4">
                                     {% if property.legacy_id %}
@@ -927,6 +953,8 @@
                         <div class="inline-flex items-center justify-center bg-white rounded-xl px-5 py-3 shadow-md mb-3">
                             <img src="{% static 'images/home_page/homepage_visit_section/undersun_yellow_black.svg' %}"
                                  alt="Undersun Estate"
+                                 width="192"
+                                 height="29"
                                  class="h-7">
                         </div>
                         <h3 class="text-lg font-semibold text-white">
@@ -1030,6 +1058,10 @@
                         <div class="flex-shrink-0 hidden lg:block">
                             <img src="{% static 'images/detail_property/Tooltip container.png' %}"
                                  alt="{% trans 'Подписка на новости' %}"
+                                 width="150"
+                                 height="150"
+                                 loading="lazy"
+                                 decoding="async"
                                  class="w-32 h-auto">
                         </div>
                     </div>
@@ -1130,6 +1162,9 @@
                 <div class="relative flex-1 overflow-hidden rounded-[28px] border border-white/8 bg-white/[0.03] p-3 shadow-[0_28px_90px_rgba(0,0,0,0.45)] md:p-4">
                     <div class="pointer-events-none absolute inset-x-0 top-0 h-24 rounded-t-[28px] bg-gradient-to-b from-white/[0.06] to-transparent"></div>
                     <img id="gallery-image" src="" alt="{{ gallery_images.0.alt }}"
+                         width="{{ gallery_images.0.width|default:1200 }}"
+                         height="{{ gallery_images.0.height|default:800 }}"
+                         decoding="async"
                          class="mx-auto block h-auto max-w-full object-contain rounded-[22px] shadow-2xl">
 
                     <!-- Loading Indicator -->
@@ -1164,8 +1199,14 @@
                                  class="flex items-center gap-2 overflow-x-auto px-4 py-3 scroll-smooth"
                                  style="-ms-overflow-style:none; scrollbar-width:none;">
                                 {% for image in gallery_images %}
-                                    <img src="{{ image.url }}" alt="{{ image.alt }}"
+                                    <img src="{{ image.thumbnail_url|default:image.url }}" alt="{{ image.alt }}"
+                                         {% if image.thumbnail_url %}srcset="{{ image.thumbnail_url }} 300w, {{ image.url }} 800w"{% endif %}
+                                         sizes="56px"
                                          class="gallery-thumb h-14 w-14 shrink-0 cursor-pointer rounded-xl border-2 border-transparent object-cover transition-all duration-200 hover:-translate-y-0.5 hover:border-white/80 hover:shadow-lg"
+                                         width="300"
+                                         height="200"
+                                         loading="lazy"
+                                         decoding="async"
                                          data-index="{{ forloop.counter0 }}"
                                          onclick="openGallery({{ forloop.counter0 }})">
                                 {% endfor %}

@@ -23,7 +23,10 @@
                 <div class="aspect-[16/10] bg-gray-50 p-2">
                     <img src="{{ floorplan.url }}"
                          alt="{{ floorplan.alt }}"
+                         width="{{ floorplan.width|default:1200 }}"
+                         height="{{ floorplan.height|default:750 }}"
                          loading="lazy"
+                         decoding="async"
                          class="h-full w-full object-contain transition-transform duration-200 group-hover:scale-[1.01]">
                 </div>
                 <div class="flex items-center justify-between gap-3 border-t border-gray-100 px-3 py-2 text-sm">

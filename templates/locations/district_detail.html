@@ -66,6 +66,11 @@
     {% if district.image %}
         <div class="absolute inset-0">
             <img src="{{ district.image.url }}" alt="{{ district.name }}"
+                 width="{{ district.image.width|default:4896 }}"
+                 height="{{ district.image.height|default:3264 }}"
+                 loading="eager"
+                 decoding="async"
+                 fetchpriority="high"
                  class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/60 to-black/40"></div>
             <div class="absolute inset-0 bg-[url('{% static 'images/patterns/noise.png' %}')] opacity-20 mix-blend-overlay"></div>
@@ -73,6 +78,11 @@
     {% elif district_static_image %}
         <div class="absolute inset-0">
             <img src="{{ district_static_image }}" alt="{{ district.name }}"
+                 width="4896"
+                 height="3264"
+                 loading="eager"
+                 decoding="async"
+                 fetchpriority="high"
                  class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/60 to-black/40"></div>
             <div class="absolute inset-0 bg-[url('{% static 'images/patterns/noise.png' %}')] opacity-20 mix-blend-overlay"></div>
@@ -85,7 +95,7 @@
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div class="max-w-3xl">
                 <p class="text-sm uppercase tracking-[0.3em] text-accent mb-4">{% trans "район" %}</p>
-                <h1 class="text-4xl lg:text-5xl font-bold mb-4 font-gilroy">{{ district.name }}</h1>
+                <h1 class="mobile-safe-heading text-4xl lg:text-5xl font-bold mb-4 font-gilroy">{{ district.name }}</h1>
                 <p class="text-lg lg:text-xl text-gray-100 max-w-2xl">
                     {{ district_hero_summary_text }}
                 </p>
@@ -140,12 +150,12 @@
 <!-- District Info -->
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-center text-sm text-gray-500 space-x-2 mb-8 overflow-x-auto">
-            <a href="{% url 'core:home' %}" class="hover:text-primary transition-colors whitespace-nowrap">{% trans "Главная" %}</a>
+        <div class="mobile-safe-breadcrumbs flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500 mb-8">
+            <a href="{% url 'core:home' %}" class="hover:text-primary transition-colors">{% trans "Главная" %}</a>
             <span>/</span>
-            <a href="{% url 'location_list' %}" class="hover:text-primary transition-colors whitespace-nowrap">{% trans "Районы Пхукета" %}</a>
+            <a href="{% url 'location_list' %}" class="hover:text-primary transition-colors">{% trans "Районы Пхукета" %}</a>
             <span>/</span>
-            <span class="text-gray-900 font-medium whitespace-nowrap">{{ district.name|truncatechars:30 }}</span>
+            <span class="text-gray-900 font-medium">{{ district.name|truncatechars:30 }}</span>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.82fr)] gap-8 lg:gap-10 items-start">
@@ -207,9 +217,17 @@
             <aside class="space-y-4 lg:sticky lg:top-24">
                 <figure class="relative aspect-[4/3] overflow-hidden rounded-3xl bg-primary shadow-xl">
                     {% if district.image %}
-                        <img src="{{ district.image.url }}" alt="{{ district.name }}" class="h-full w-full object-cover">
+                        <img src="{{ district.image.url }}" alt="{{ district.name }}"
+                             width="{{ district.image.width|default:4896 }}"
+                             height="{{ district.image.height|default:3264 }}"
+                             decoding="async"
+                             class="h-full w-full object-cover">
                     {% elif district_static_image %}
-                        <img src="{{ district_static_image }}" alt="{{ district.name }}" class="h-full w-full object-cover">
+                        <img src="{{ district_static_image }}" alt="{{ district.name }}"
+                             width="4896"
+                             height="3264"
+                             decoding="async"
+                             class="h-full w-full object-cover">
                     {% else %}
                         <div class="h-full w-full bg-gradient-to-br from-primary to-tertiary"></div>
                     {% endif %}
@@ -284,7 +302,12 @@
                     </div>
                     <div class="flex items-center gap-4 rounded-2xl bg-gray-50 p-4">
                         {% if location_advisor.photo %}
-                            <img src="{{ location_advisor.photo.url }}" alt="{{ location_advisor.full_name }}" class="h-16 w-16 rounded-2xl object-cover">
+                            <img src="{{ location_advisor.photo.url }}" alt="{{ location_advisor.full_name }}"
+                                 width="{{ location_advisor.photo.width|default_if_none:'256' }}"
+                                 height="{{ location_advisor.photo.height|default_if_none:'256' }}"
+                                 loading="lazy"
+                                 decoding="async"
+                                 class="h-16 w-16 rounded-2xl object-cover">
                         {% else %}
                             <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-white">
                                 {{ location_advisor.first_name|first }}{{ location_advisor.last_name|first }}
