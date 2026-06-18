@@ -825,7 +825,7 @@ Performance backlog по измерениям:
    - оптимизировать LCP/media pipeline: безопасный WebP/AVIF для property/home изображений, контроль размеров generated variants, CDN/cache headers для media, отдельная проверка YML/feed compatibility;
    - preload/fetchpriority оставлять только для настоящего LCP image конкретной страницы;
    - ниже-fold изображения, reviews/contact/team/news media не должны конкурировать с первым экраном.
-5. TBT P1 — property detail:
+5. TBT P1 — property detail — начато 2026-06-18:
    - отложить не критичные gallery modal, map, Leaflet/OSM и third-party сценарии до interaction/viewport;
    - в первом экране оставить только минимальную логику текущего слайда, favorite/share/contact CTA;
    - после изменения отдельно проверить property detail mobile TBT.
@@ -860,6 +860,12 @@ Implementation log:
   - Добавлены безопасные stubs для inline handlers `switchPropertyType`, `toggleStep`, `switchConsultationTab`, `handlePhoneCallback`, чтобы первый пользовательский клик загрузил нужный модуль и повторил действие.
   - Server-rendered homepage content сохраняется: lazy JS работает только как enhancement и не заменяет первичный HTML-контент.
   - Verification: `python manage.py check`, `node --check` для home JS modules, Node parse inline homepage loader, rendered HTML `/en/` через Django Client: status `200`, section markers present, early `/static/js/home/` script src = `0`, loader содержит featured/interaction stubs.
+- 2026-06-18, iteration 3:
+  - Property detail Leaflet lazy-load: `leaflet.css` и `leaflet.js` больше не подключаются как прямые ранние resources страницы объекта.
+  - Map initialization перенесена из `templates/properties/includes/detail_bootstrap.js.html` в `static/js/properties/detail.js`.
+  - `window.propertyDetailMapAssets` хранит URL/SRI для Leaflet, а `detail.js` подгружает CSS/JS только при приближении `#property-map` к viewport, при открытии URL с hash `#property-map` или при клике по ссылке на карту.
+  - Первый экран property detail сохраняет текущую gallery/price/favorite/form логику; карта остается DOM-блоком и загружается как below-fold enhancement.
+  - Verification: `node --check static/js/properties/detail.js`, `python manage.py check`, rendered HTML property detail через Django Client: status `200`, `#property-map=True`, direct Leaflet scripts/styles = `0`, `detail.js` подключен, `window.propertyDetailMapAssets=True`, `L.map` отсутствует в bootstrap HTML.
 
 Задачи:
 

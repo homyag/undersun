@@ -11,6 +11,9 @@ const LABEL_PRICE_ON_REQUEST = PROPERTY_I18N.priceOnRequest || 'По запро�
 const LABEL_PER_MONTH = PROPERTY_I18N.perMonth || 'мес';
 const LABEL_PER_SQM = PROPERTY_I18N.perSqm || 'м²';
 
+let propertyMapAssetPromise = null;
+let propertyMapInstance = null;
+
 function firePropertyGoal(goalName, params = {}) {
     if (typeof window.dispatchMetrikaGoal !== 'function' || !goalName) {
         return;
@@ -121,6 +124,175 @@ function normalizeImageIndex(index) {
     }
 
     return ((index % PROPERTY_IMAGES.length) + PROPERTY_IMAGES.length) % PROPERTY_IMAGES.length;
+}
+
+function getPropertyMapAssets() {
+    const configuredAssets = window.propertyDetailMapAssets || {};
+    return {
+        styles: Array.isArray(configuredAssets.styles) ? configuredAssets.styles : [],
+        scripts: Array.isArray(configuredAssets.scripts) ? configuredAssets.scripts : [],
+    };
+}
+
+function normalizeAssetConfig(asset, urlKey) {
+    if (!asset) {
+        return null;
+    }
+    if (typeof asset === 'string') {
+        return { [urlKey]: asset };
+    }
+    return asset;
+}
+
+function loadStylesheetAsset(asset) {
+    const config = normalizeAssetConfig(asset, 'href');
+    if (!config || !config.href) {
+        return Promise.resolve();
+    }
+
+    if (document.querySelector(`link[href="${config.href}"]`)) {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = config.href;
+        if (config.integrity) {
+            link.integrity = config.integrity;
+        }
+        if (config.crossorigin !== undefined) {
+            link.crossOrigin = config.crossorigin;
+        }
+        link.onload = resolve;
+        link.onerror = () => reject(new Error(`Failed to load stylesheet: ${config.href}`));
+        document.head.appendChild(link);
+    });
+}
+
+function loadScriptAsset(asset) {
+    const config = normalizeAssetConfig(asset, 'src');
+    if (!config || !config.src) {
+        return Promise.resolve();
+    }
+
+    if (document.querySelector(`script[src="${config.src}"]`)) {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = config.src;
+        script.async = true;
+        if (config.integrity) {
+            script.integrity = config.integrity;
+        }
+        if (config.crossorigin !== undefined) {
+            script.crossOrigin = config.crossorigin;
+        }
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`Failed to load script: ${config.src}`));
+        document.body.appendChild(script);
+    });
+}
+
+function ensurePropertyMapAssets() {
+    if (propertyMapAssetPromise) {
+        return propertyMapAssetPromise;
+    }
+
+    const assets = getPropertyMapAssets();
+    propertyMapAssetPromise = Promise.all(assets.styles.map(loadStylesheetAsset))
+        .then(() => assets.scripts.reduce((chain, asset) => chain.then(() => loadScriptAsset(asset)), Promise.resolve()));
+
+    return propertyMapAssetPromise;
+}
+
+function initializePropertyMap() {
+    if (propertyMapInstance) {
+        if (typeof propertyMapInstance.invalidateSize === 'function') {
+            window.setTimeout(() => propertyMapInstance.invalidateSize(), 80);
+        }
+        return;
+    }
+
+    if (!MAP_DATA || !MAP_DATA.lat || !MAP_DATA.lng) {
+        return;
+    }
+
+    const container = document.getElementById('property-map');
+    const leaflet = window.L;
+    const lat = Number(MAP_DATA.lat);
+    const lng = Number(MAP_DATA.lng);
+
+    if (!container || !leaflet || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return;
+    }
+
+    const map = leaflet.map(container);
+    const phuketBounds = leaflet.latLngBounds(
+        [7.55, 98.15],
+        [8.20, 98.60]
+    );
+
+    leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    map.fitBounds(phuketBounds, { padding: [20, 20] });
+
+    leaflet.marker([lat, lng])
+        .addTo(map)
+        .bindPopup(MAP_DATA.title);
+
+    container.dataset.mapLoaded = 'true';
+    propertyMapInstance = map;
+    window.setTimeout(() => map.invalidateSize(), 80);
+}
+
+function loadPropertyMap() {
+    if (!MAP_DATA || !MAP_DATA.lat || !MAP_DATA.lng) {
+        return Promise.resolve();
+    }
+
+    return ensurePropertyMapAssets()
+        .then(initializePropertyMap)
+        .catch(error => {
+            console.error('Property map failed to load:', error);
+        });
+}
+
+function setupPropertyMapLazyLoad() {
+    const mapContainer = document.getElementById('property-map');
+    if (!mapContainer || !MAP_DATA || !MAP_DATA.lat || !MAP_DATA.lng) {
+        return;
+    }
+
+    document.querySelectorAll('a[href="#property-map"]').forEach(link => {
+        link.addEventListener('click', () => {
+            loadPropertyMap();
+        }, { passive: true });
+    });
+
+    if (window.location.hash === '#property-map') {
+        loadPropertyMap();
+        return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+        window.addEventListener('load', loadPropertyMap, { once: true });
+        return;
+    }
+
+    const observer = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) {
+            return;
+        }
+        observer.disconnect();
+        loadPropertyMap();
+    }, { rootMargin: '350px 0px' });
+
+    observer.observe(mapContainer);
 }
 
 function preloadImageAtIndex(index) {
@@ -835,6 +1007,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize prices
     updatePrices();
+
+    setupPropertyMapLazyLoad();
 
     // Listen for currency changes
     window.addEventListener('currencyChanged', updatePrices);
