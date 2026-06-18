@@ -30,6 +30,20 @@
     {% if amp_url %}
         <link rel="amphtml" href="{{ amp_url }}">
     {% endif %}
+    {% if gallery_images and gallery_images.0.url %}
+        <link rel="preload" as="image"
+              href="{{ gallery_images.0.url }}"
+              {% if gallery_images.0.thumbnail_url %}imagesrcset="{{ gallery_images.0.thumbnail_url }} 300w, {{ gallery_images.0.url }} 800w{% if gallery_images.0.full_url and gallery_images.0.width %}, {{ gallery_images.0.full_url }} {{ gallery_images.0.width }}w{% endif %}"{% endif %}
+              imagesizes="100vw"
+              fetchpriority="high"
+              media="(max-width: 1023px)">
+        <link rel="preload" as="image"
+              href="{{ gallery_images.0.url }}"
+              {% if gallery_images.0.thumbnail_url %}imagesrcset="{{ gallery_images.0.thumbnail_url }} 300w, {{ gallery_images.0.url }} 800w{% if gallery_images.0.full_url and gallery_images.0.width %}, {{ gallery_images.0.full_url }} {{ gallery_images.0.width }}w{% endif %}"{% endif %}
+              imagesizes="(min-width: 1280px) 58vw, 100vw"
+              fetchpriority="high"
+              media="(min-width: 1024px)">
+    {% endif %}
     <style>
         #gallery-thumbs-track::-webkit-scrollbar {
             display: none;
@@ -163,7 +177,7 @@
                                      sizes="(min-width: 1280px) 38vw, 100vw"
                                      width="{% if gallery_images|length > 1 %}{{ gallery_images.1.width|default:800 }}{% else %}{{ gallery_images.0.width|default:800 }}{% endif %}"
                                      height="{% if gallery_images|length > 1 %}{{ gallery_images.1.height|default:600 }}{% else %}{{ gallery_images.0.height|default:600 }}{% endif %}"
-                                     loading="eager"
+                                     loading="lazy"
                                      decoding="async"
                                      class="gallery-hero-image transition-transform duration-300">
                             </div>
@@ -266,7 +280,8 @@
                                      class="h-14 w-14 object-cover rounded-xl transition-all duration-300 border-2 {% if forloop.counter0 == 0 %}border-accent shadow-md{% else %}border-transparent hover:border-accent/40{% endif %} sm:h-[4.25rem] sm:w-[4.25rem]"
                                      width="300"
                                      height="200"
-                                     loading="eager"
+                                     loading="lazy"
+                                     fetchpriority="low"
                                      decoding="async"
                                      data-thumb="{{ forloop.counter0 }}">
                                 <!-- Hover Overlay -->
@@ -643,6 +658,7 @@
                                                  width="{{ property_responsible_specialist.photo_width }}"
                                                  height="{{ property_responsible_specialist.photo_height }}"
                                                  loading="lazy"
+                                                 decoding="async"
                                                  class="w-full h-full object-cover">
                                         {% else %}
                                             <div class="w-full h-full bg-primary bg-opacity-10 flex items-center justify-center text-primary text-2xl font-bold">
@@ -1574,7 +1590,26 @@
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/properties/detail.css' %}">
+<style>
+    #property-map {
+        position: relative;
+        z-index: 1;
+    }
+
+    #contact-sidebar-wrapper {
+        position: relative;
+    }
+
+    #property-contact-form {
+        will-change: transform;
+    }
+</style>
+<link rel="preload" as="style"
+      href="{% static 'css/properties/detail.css' %}"
+      onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+    <link rel="stylesheet" href="{% static 'css/properties/detail.css' %}">
+</noscript>
 {% endblock %}
 
 {% block extra_js %}
@@ -1605,5 +1640,5 @@ window.propertyDetailTranslations = {
 </script>
 
 <!-- Property Detail Page Script -->
-<script src="{% static 'js/properties/detail.js' %}"></script>
+<script src="{% static 'js/properties/detail.js' %}" defer></script>
 {% endblock %}

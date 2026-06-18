@@ -39,33 +39,55 @@
 }
 
 .spinner {
-    @apply w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 auto;
+    border: 2px solid var(--primary-color, #474B57);
+    border-top-color: transparent;
+    border-radius: 999px;
+    animation: catalog-spin 1s linear infinite;
+}
+
+@keyframes catalog-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Mobile Filters */
 #filters-sidebar.mobile-open {
-    @apply block;
+    display: block;
 }
 
 /* Smooth Transitions */
 .properties-grid .property-card {
-    @apply transition-all duration-300 hover:transform hover:scale-105;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .properties-grid .property-card:hover {
+        transform: scale(1.01);
+    }
 }
 
 .view-toggle-btn--active {
-    @apply bg-white text-primary shadow-sm;
+    background: #fff;
+    color: var(--primary-color, #474B57);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
 
 /* Custom Checkbox and Radio Styles */
 input[type="checkbox"]:checked,
 input[type="radio"]:checked {
-    @apply bg-primary border-primary;
+    background-color: var(--primary-color, #474B57);
+    border-color: var(--primary-color, #474B57);
 }
 
 input[type="checkbox"]:focus,
 input[type="radio"]:focus {
-    @apply ring-2 ring-primary ring-opacity-50;
+    outline: 2px solid rgba(71, 75, 87, 0.45);
+    outline-offset: 2px;
 }
 
 /* Responsive Filters */
@@ -78,28 +100,50 @@ input[type="radio"]:focus {
 
 /* Pagination Styles */
 .pagination-container {
-    @apply flex justify-center mt-12;
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
 }
 
 .pagination-container nav {
-    @apply flex items-center space-x-2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .pagination-container a {
-    @apply px-3 py-2 text-sm font-medium text-gray-500 hover:text-primary border border-gray-300 rounded-md hover:border-primary transition-colors cursor-pointer;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .pagination-container a:hover {
-    @apply bg-primary/10;
+    border-color: var(--primary-color, #474B57);
+    background: rgba(71, 75, 87, 0.1);
+    color: var(--primary-color, #474B57);
 }
 
 .pagination-container span {
-    @apply px-3 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-md;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--primary-color, #474B57);
+    border-radius: 0.375rem;
+    background: var(--primary-color, #474B57);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
 }
 
 /* Ensure pagination is visible */
 .pagination-container .disabled {
-    @apply text-gray-400 cursor-not-allowed;
+    color: #9ca3af;
+    cursor: not-allowed;
 }
 
 /* Map Container Z-Index Fix */

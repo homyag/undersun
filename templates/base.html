@@ -283,7 +283,7 @@
       (function() {
         const GTAG_SRC = 'https://www.googletagmanager.com/gtag/js?id=G-8VHW4STYH3';
         const AHREFS_SRC = 'https://analytics.ahrefs.com/analytics.js';
-        const THIRD_PARTY_DELAY = 6500;
+        const THIRD_PARTY_DELAY = 15000;
         let analyticsRequested = false;
 
         function appendScript(src, attrs) {
@@ -325,7 +325,7 @@
         const COUNTER_ID = 90630603;
         const COOKIE_NAME = 'bot_challenge';
         const METRIKA_PING_URL = "{% url 'core:metrika_loaded' %}";
-        const METRIKA_LOAD_DELAY = 5000;
+        const METRIKA_LOAD_DELAY = 15000;
         const COOKIE_CHECK_INTERVAL = 500;
         let metrikaInjected = false;
         let loadTimerId = null;
@@ -503,7 +503,7 @@
 {% include 'includes/layout/global_scripts.html' %}
 {% include "includes/cookie_consent.html" %}
 
-<script src="{% static 'js/cookie-consent.js' %}"></script>
+<script src="{% static 'js/cookie-consent.js' %}" defer></script>
 
 {% if recaptcha_site_key %}
 <script>

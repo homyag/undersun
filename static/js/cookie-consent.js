@@ -44,7 +44,18 @@
         );
     }
 
+    function shouldUseTopPlacement() {
+        return window.matchMedia('(max-width: 768px)').matches && Boolean(document.getElementById('main-price'));
+    }
+
     function adjustMobilePlacement() {
+        const forceTopPlacement = shouldUseTopPlacement();
+        overlay.classList.toggle('cookie-consent-mobile-top', forceTopPlacement);
+
+        if (forceTopPlacement) {
+            return;
+        }
+
         overlay.classList.remove('cookie-consent-mobile-top');
 
         if (!window.matchMedia('(max-width: 768px)').matches) {
@@ -52,11 +63,6 @@
         }
 
         const overlayRect = overlay.getBoundingClientRect();
-        if (document.getElementById('main-price')) {
-            overlay.classList.add('cookie-consent-mobile-top');
-            return;
-        }
-
         const criticalElements = Array.from(document.querySelectorAll('main h1, h1, #main-price, [onclick="openCallbackModal()"]'))
             .filter(element => {
                 const rect = element.getBoundingClientRect();
@@ -69,9 +75,12 @@
     }
 
     function showOverlay() {
+        adjustMobilePlacement();
         overlay.classList.remove('hidden');
         overlay.classList.remove('pointer-events-none');
-        window.requestAnimationFrame(adjustMobilePlacement);
+        if (!shouldUseTopPlacement()) {
+            window.requestAnimationFrame(adjustMobilePlacement);
+        }
     }
 
     function dispatchUpdate(status) {

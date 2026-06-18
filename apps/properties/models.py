@@ -1543,15 +1543,15 @@ class PropertyImage(models.Model):
     thumbnail = ImageSpecField(
         source='image',
         processors=[ResizeToFill(300, 200)],
-        format='JPEG',
-        options={'quality': 80}
+        format='WEBP',
+        options={'quality': 75, 'method': 6}
     )
 
     medium = ImageSpecField(
         source='image',
         processors=[ResizeToFit(800, 600)],
-        format='JPEG',
-        options={'quality': 85}
+        format='WEBP',
+        options={'quality': 78, 'method': 6}
     )
 
     class Meta:

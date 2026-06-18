@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 import re
 import random
 
@@ -539,6 +541,12 @@ class Team(models.Model):
     # Фото сотрудника
     photo = models.ImageField(_('Фото'), upload_to='team/', blank=True,
                             help_text=_('Рекомендуемое разрешение: 300x300 пикселей'))
+    photo_avatar = ImageSpecField(
+        source='photo',
+        processors=[ResizeToFill(160, 160)],
+        format='WEBP',
+        options={'quality': 75, 'method': 6},
+    )
     
     # Описание и навыки
     bio = models.TextField(_('Биография'), blank=True,
@@ -575,6 +583,29 @@ class Team(models.Model):
     def full_name(self):
         """Полное имя сотрудника"""
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def photo_avatar_url(self):
+        """URL компактного WebP-аватара для публичных карточек."""
+        if not self.photo:
+            return ''
+
+        try:
+            avatar_file = self.photo_avatar
+            generate = getattr(avatar_file, 'generate', None)
+            if callable(generate):
+                generate()
+            storage = getattr(avatar_file, 'storage', None)
+            name = getattr(avatar_file, 'name', None)
+            if storage and name and storage.exists(name):
+                return storage.url(name)
+        except Exception:
+            pass
+
+        try:
+            return self.photo.url
+        except Exception:
+            return ''
     
     @property 
     def whatsapp_url(self):

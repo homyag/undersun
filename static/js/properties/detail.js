@@ -13,6 +13,8 @@ const LABEL_PER_SQM = PROPERTY_I18N.perSqm || 'м²';
 
 let propertyMapAssetPromise = null;
 let propertyMapInstance = null;
+let galleryWarmupScheduled = false;
+let galleryWarmedUp = false;
 
 function firePropertyGoal(goalName, params = {}) {
     if (typeof window.dispatchMetrikaGoal !== 'function' || !goalName) {
@@ -319,6 +321,41 @@ function preloadAdjacentImages(index) {
     preloadImageAtIndex(index);
     preloadImageAtIndex(index + 1);
     preloadImageAtIndex(index - 1);
+}
+
+function scheduleGalleryWarmup() {
+    if (galleryWarmupScheduled || PROPERTY_IMAGES.length <= 1) {
+        return;
+    }
+    galleryWarmupScheduled = true;
+
+    const warmup = () => {
+        if (galleryWarmedUp) {
+            return;
+        }
+        galleryWarmedUp = true;
+        preloadAdjacentImages(currentImageIndex);
+        startAutoCarousel();
+    };
+
+    const scheduleAfterLoad = () => {
+        window.setTimeout(() => {
+            if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(warmup, { timeout: 3000 });
+                return;
+            }
+            warmup();
+        }, 8000);
+    };
+
+    if (document.readyState === 'complete') {
+        scheduleAfterLoad();
+    } else {
+        window.addEventListener('load', scheduleAfterLoad, { once: true });
+    }
+
+    window.addEventListener('pointerdown', warmup, { once: true, passive: true });
+    window.addEventListener('keydown', warmup, { once: true });
 }
 
 function setSlideVisibility(slide, isActive) {
@@ -709,11 +746,12 @@ function previousImage() {
 let autoCarouselInterval;
 
 function startAutoCarousel() {
-    if (PROPERTY_IMAGES.length > 1) {
-        autoCarouselInterval = setInterval(() => {
-            nextSlide();
-        }, 5000); // Change slide every 5 seconds
+    if (PROPERTY_IMAGES.length <= 1 || autoCarouselInterval) {
+        return;
     }
+    autoCarouselInterval = setInterval(() => {
+        nextSlide();
+    }, 5000); // Change slide every 5 seconds
 }
 
 function stopAutoCarousel() {
@@ -999,11 +1037,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Save catalog referrer if coming from catalog
     saveCatalogReferrer();
 
-    // Initialize carousel auto-play
-    startAutoCarousel();
     syncDesktopDualFrame();
-    preloadAdjacentImages(currentImageIndex);
     updateCarouselUI();
+    scheduleGalleryWarmup();
 
     // Initialize prices
     updatePrices();

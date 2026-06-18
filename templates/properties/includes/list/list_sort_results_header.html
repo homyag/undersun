@@ -50,14 +50,14 @@
                         <button id="grid-view"
                                 type="button"
                                 onclick="changeView('grid')"
-                                class="view-toggle-btn rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors"
+                                class="view-toggle-btn rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors {% if request.GET.map_view != 'true' %}view-toggle-btn--active{% endif %}"
                                 aria-pressed="{% if request.GET.map_view != 'true' %}true{% else %}false{% endif %}">
                             {% trans "Список" %}
                         </button>
                         <button id="map-view"
                                 type="button"
                                 onclick="changeView('map')"
-                                class="view-toggle-btn rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors"
+                                class="view-toggle-btn rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors {% if request.GET.map_view == 'true' %}view-toggle-btn--active{% endif %}"
                                 aria-pressed="{% if request.GET.map_view == 'true' %}true{% else %}false{% endif %}">
                             {% trans "Карта" %}
                         </button>

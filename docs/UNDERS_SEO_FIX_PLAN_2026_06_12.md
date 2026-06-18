@@ -784,6 +784,30 @@ Post-deploy mobile PSI re-check, 2026-06-18 11:44 GMT+3, Lighthouse 13.4.0:
 | Property detail | 59 | 86 | 100 | 0/2 | 3.5s | 6.0s | 20ms | 0.197 | 4.7s | image savings `231 KiB`, render-blocking CSS, form labels/touch targets, Agent View failed by CLS/accessibility tree |
 | Thalang | 76 | 95 | 100 | 2/2 | 3.2s | 4.2s | 120ms | 0 | 4.8s | render-blocking CSS, image savings `35 KiB`, cache headers `72 KiB`, unused JS |
 
+Post-deploy homepage mobile PSI re-check, 2026-06-18 15:16 GMT+3, Lighthouse 13.4.0:
+
+| Страница | Score | A11y | SEO | Agent View | FCP | LCP | TBT | CLS | SI | Основные PSI замечания |
+| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Home | 76 | 92 | 92 | 2/2 | 3.3s | 4.4s | 0ms | 0.002 | 4.2s | render-blocking only `dist/styles.css`, critical path includes sync `cookie-consent.js`, image savings `998 KiB`, unused JS only `jquery`, `main.css/fonts.css/gtag/Ahrefs` no longer in early warnings |
+
+Post-deploy catalog sale mobile PSI re-check, 2026-06-18 15:21 GMT+3, Lighthouse 13.4.0:
+
+| Страница | Score | A11y | SEO | Agent View | FCP | LCP | TBT | CLS | SI | Основные PSI замечания |
+| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Catalog sale | 67 | 95 | 100 | 1/2 | 3.3s | 5.0s | 0ms | 0.15 | 4.4s | image savings `253 KiB`, CLS from main catalog grid, critical path includes `/jsi18n/`, `dist/styles.css`, `list_styles.css`, CSP errors from `mc.yandex.com`, unused JS mainly `gtag`/Metrika |
+
+Post-deploy property detail mobile PSI re-check, 2026-06-18 17:37 GMT+3, Lighthouse 13.4.0:
+
+| Страница | Score | A11y | SEO | Agent View | FCP | LCP | TBT | CLS | SI | Основные PSI замечания |
+| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Property detail | 59 | 91 | 100 | 1/2 | 3.5s | 5.0s | 20ms | 0.236 | 5.6s | CLS mostly cookie banner `0.197`, property info section `0.040`, critical path includes `detail.js` and `detail.css`, image savings `66 KiB` mostly specialist photo `1080x1080 -> 112x112`, thumbs eager |
+
+Post-deploy property detail mobile PSI re-check, 2026-06-18 17:52 GMT+3, Lighthouse 13.4.0:
+
+| Страница | Score | A11y | SEO | Agent View | FCP | LCP | TBT | CLS | SI | Основные PSI замечания |
+| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Property detail | 76 | 91 | 100 | 2/2 | 3.5s | 4.1s | 0ms | 0 | 5.5s | CLS/Agent View fixed, `detail.css`/`detail.js` removed from critical path, image savings down to `10 KiB`; remaining blockers are render-blocking `dist/styles.css`, LCP gallery image load delay/duration, Font Awesome webfonts/unused CSS |
+
 Synthetic browser navigation timing, Chrome / Playwright, not CrUX:
 
 | Страница | Status | Synthetic TTFB |
@@ -796,34 +820,42 @@ Synthetic browser navigation timing, Chrome / Playwright, not CrUX:
 Measured findings:
 
 - Field data / CrUX отсутствуют для всех проверенных URL; INP недоступен, TBT используем только как lab proxy.
-- Initial 2026-06-17 CLS в lab был низкий на всех страницах: mobile `0.001-0.011`, desktop `0.003-0.088`; post-deploy PSI 2026-06-18 выявил CLS-регрессию на catalog mobile (`0.143`) и property detail mobile (`0.197`), из-за чего Agent View упал до `0/2` на этих страницах.
-- TBT после первых mobile performance итераций улучшился на ключевых страницах: home `220ms -> 90ms`, catalog `210ms -> 120ms`, property detail `430ms -> 20ms`. Следующий приоритет после этого замера — CLS/Agent View regression, затем LCP/images/render-blocking CSS.
-- Mobile LCP остается главным performance bottleneck: home `5.0s`, catalog `6.5s`, property detail `6.2s`.
+- Initial 2026-06-17 CLS в lab был низкий на всех страницах: mobile `0.001-0.011`, desktop `0.003-0.088`; post-deploy PSI 2026-06-18 выявил CLS-регрессию на catalog mobile (`0.143`) и property detail mobile (`0.197`), из-за чего Agent View падал на этих страницах. Property detail regression закрыт в PSI 17:52 (`CLS 0`, Agent View `2/2`); catalog CLS `0.15` остается открытым.
+- TBT после mobile performance итераций улучшился на ключевых страницах: latest post-deploy home/catalog/property detail показывают `0ms`. Следующий приоритет — catalog CLS/Agent View, затем LCP/images/render-blocking CSS.
+- Homepage post-deploy 15:16 подтвердил эффект iteration 6: home score `64 -> 76`, LCP `6.1s -> 4.4s`, TBT `90ms -> 0ms`, SI `7.0s -> 4.2s`. `main.css`, `fonts.css`, `gtag.js` и Ahrefs ушли из ранних PSI warnings; render-blocking остался только `dist/styles.css`.
+- Homepage contact image optimization из iteration 6 не проявилась в production PSI 15:16: Lighthouse все еще видит старый `home_page_contact_form_house_undersun.webp` с `width="3001"` вместо `_720.jpg`/`srcset`. Требуется проверить deploy/collectstatic/cache для `templates/core/includes/home/home_phone_contact_form_section.html` и новых static JPG variants.
+- Catalog sale post-deploy 15:21 подтвердил прогресс по TBT/LCP относительно 11:44: score `62 -> 67`, LCP `7.7s -> 5.0s`, TBT `120ms -> 0ms`, A11y `90 -> 95`, SEO `100`. Главный оставшийся blocker для Agent View — CLS `0.15`; ранняя цепочка также включала blocking `/jsi18n/` и `list_styles.css`.
+- Property detail post-deploy 17:37 показал главный CLS источник: cookie banner сначала появляется снизу, затем переносится наверх из-за `#main-price`, давая `0.197` из `0.236`. Второй источник — first-screen property info section (`0.040`). TBT уже низкий (`20ms`), поэтому приоритет для detail — CLS, critical path `detail.css/detail.js`, thumbnail/specialist image loading.
+- Property detail post-deploy 17:52 подтвердил эффект iteration 9: score `59 -> 76`, LCP `5.0s -> 4.1s`, TBT `20ms -> 0ms`, CLS `0.236 -> 0`, Agent View `1/2 -> 2/2`. Detail-specific CLS/Agent View blocker закрыт; следующие detail bottlenecks — LCP image resource load (`1.27s` delay + `1.03s` duration), global render-blocking `dist/styles.css`, Font Awesome webfonts и unused CSS.
+- Mobile LCP остается главным performance bottleneck: latest post-deploy home `4.4s`, catalog `5.0s`, property detail `4.1s`; location держится на `4.2s`.
 - Mobile FCP высокий и почти одинаковый на всех проверенных типах страниц: `3.2-3.5s`. Главные вероятные зоны влияния — render-blocking CSS, шрифты, TTFB и ранние blocking scripts.
-- Mobile Speed Index остается слабым на home/catalog/property detail: home `5.8s`, catalog `4.6s`, property detail `5.3s`; location page лучше (`4.0s`), поэтому приоритет — главная, каталог и карточка объекта.
-- Mobile TBT особенно проблемный на property detail (`430ms`), умеренно проблемный на home/catalog (`210-220ms`) и низкий на location (`70ms`). Приоритет TBT — property detail, затем home/catalog.
+- Mobile Speed Index остается слабым на home/catalog/property detail: latest post-deploy home `4.2s`, catalog `4.4s`, property detail `5.5s`; location page `4.8s`, поэтому следующий приоритет по SI — карточка объекта и каталог.
+- Mobile TBT после итераций закрыт на home/catalog/property detail (`0ms` в последних PSI), но нужно не ухудшить его при следующих CSS/media изменениях.
 - PageSpeed на проде показывал `Для изображений не заданы явным образом атрибуты width и height`; post-deploy rendered audit после второго деплоя подтвердил, что owned visible images без `width`/`height` и property media без `srcset` больше не найдены на `/en/`, `/en/property/sale/`, property detail и `/en/locations/thalang/`.
-- Post-deploy rendered audit 2026-06-17: homepage client-side featured carousel cleanup подтвержден на production. Дополнительно найден mobile-only нюанс на property detail: inactive gallery slides были скрыты только `opacity: 0`, поэтому DOM-аудит считал lazy gallery images above-the-fold. Добавлен local follow-up: inactive slides получают `visibility: hidden` через шаблон и `static/js/properties/detail.js`. Нужен повторный деплой `templates/properties/detail.html` и `static/js/properties/detail.js` перед финальным PSI re-check.
+- Post-deploy rendered audit 2026-06-17: homepage client-side featured carousel cleanup подтвержден на production. Mobile-only нюанс на property detail с inactive gallery slides, скрытыми только через `opacity: 0`, был закрыт: inactive slides получают `visibility: hidden`, а PSI 17:52 подтвердил `CLS 0` и Agent View `2/2`.
 - Agent View accessibility follow-up 2026-06-18: PageSpeed показал `Buttons must have discernible text`, `Links must have discernible text`, `Select element must have an accessible name`. Локально добавлены accessible names для icon-only header/footer/social/WhatsApp/carousel/favorite controls и `for/id` labels для hero search controls. Local rendered audit `/en/`, `/en/property/sale/` и property detail, mobile `390x844` и desktop `1366x900`: visible unnamed `button`, `a[href]`, `select` = `0`.
 - `Улучшите загрузку изображений` повторяется на всех типах страниц: от `51-52 KiB` на location до `1.1-1.7 MiB` на home и `1.05 MiB` на desktop property detail.
-- Property detail mobile имеет самый высокий lab TBT: `430ms`; вероятные зоны проверки — gallery, map, third-party scripts, unused JS.
+- Property detail mobile исторически имел самый высокий lab TBT (`430ms`), но после lazy map/gallery/third-party follow-up последний PSI показывает `0ms`; дальнейшие правки должны не ухудшить этот показатель.
 - Synthetic TTFB через браузер высокий для anonymous page loads: примерно `0.9-1.9s`; curl без браузерного контекста получает `403` из-за bot protection, поэтому curl TTFB не учитывался.
 
 Mobile performance targets для следующего PSI/Lighthouse re-check:
 
 - FCP: снизить mobile FCP с `3.2-3.5s` до диапазона около `2.5s` или ниже на home/catalog/property detail/location.
 - Speed Index: снизить mobile SI на home/property detail до `4.0s` или ниже, catalog — ближе к `4.0s`, location — удержать около текущего уровня.
-- TBT: снизить property detail mobile TBT с `430ms` до `200ms` или ниже; home/catalog — до `150ms` или ниже; location — не ухудшить.
-- CLS: удержать lab CLS ниже `0.1`; текущие правки image dimensions не должны ухудшиться.
+- TBT: latest PSI уже показывает `0ms` на home/catalog/property detail; цель дальше — не ухудшить этот уровень при CSS/media follow-up.
+- CLS: удержать lab CLS ниже `0.1`; property detail уже `0`, catalog остается открытым с `0.15`.
 - Эти цели являются lab Lighthouse targets, не field CWV SLA, пока CrUX data отсутствуют.
 
 Performance backlog по измерениям:
 
-1. Деплоить property mobile gallery visibility follow-up и повторить PSI/rendered audit; после повторного деплоя warning по missing `width` / `height` должен уйти для owned images, а mobile property detail не должен иметь lazy visible images above-the-fold.
+1. Property detail CLS/Agent View follow-up — выполнено 2026-06-18:
+   - post-deploy PSI 17:52: CLS `0`, Agent View `2/2`, TBT `0ms`;
+   - owned image warnings на detail снижены до `10 KiB` thumbnail compression savings;
+   - следующий шаг по detail — LCP image resource load и общий `dist/styles.css`, а не cookie/gallery CLS.
 2. FCP/SI P1 — шрифты — начато 2026-06-18:
    - конвертировать используемые Gilroy `.ttf` в `.woff2`;
    - оставить только реально используемые веса для первого экрана;
-   - применить `font-display: swap`;
+   - применить `font-display: optional` для снижения риска позднего font swap CLS на мобильных;
    - preload делать только для primary above-the-fold font files;
    - не грузить italic/extra-bold варианты до первого рендера, если они не нужны в первом viewport.
 3. FCP/SI P1 — critical CSS и active Tailwind build:
@@ -835,14 +867,18 @@ Performance backlog по измерениям:
    - оптимизировать LCP/media pipeline: безопасный WebP/AVIF для property/home изображений, контроль размеров generated variants, CDN/cache headers для media, отдельная проверка YML/feed compatibility;
    - preload/fetchpriority оставлять только для настоящего LCP image конкретной страницы;
    - ниже-fold изображения, reviews/contact/team/news media не должны конкурировать с первым экраном.
-5. TBT P1 — property detail — начато 2026-06-18:
+   - property detail follow-up 2026-06-18: первый gallery image добавлен в head как responsive image preload с `imagesrcset`/`imagesizes` и mobile/desktop `media`, чтобы уменьшить LCP resource load delay без preload всей галереи.
+5. TBT P1 — property detail — выполнено 2026-06-18, следующий follow-up относится к LCP/SI:
    - отложить не критичные gallery modal, map, Leaflet/OSM и third-party сценарии до interaction/viewport;
    - в первом экране оставить только минимальную логику текущего слайда, favorite/share/contact CTA;
-   - после изменения отдельно проверить property detail mobile TBT.
+   - после изменения отдельно проверить property detail mobile TBT;
+   - после PSI 17:37 дополнительно: убрать `detail.js` и `detail.css` из critical path, не запускать gallery preloading/autoplay до first paint/idle;
+   - PSI 17:52 подтвердил TBT `0ms`; remaining detail work: LCP image load delay/duration and Speed Index.
 6. TBT P1 — catalog — начато 2026-06-18:
    - грузить map JS/data только после выбора map view или появления map container в viewport;
    - grid/list каталог должен рендериться без ранней инициализации карты;
    - проверить, что page-specific list modules не создают long tasks при первом mobile load.
+   - после PSI 15:21 дополнительно убрать blocking `/jsi18n/` и `list_styles.css` из критической цепочки.
 7. TBT P1 — homepage — начато 2026-06-18:
    - не выполнять тяжелую инициализацию featured carousel, reviews, process steps, team/news enhancements до idle или viewport;
    - сохранить server-rendered карточки как первичный контент, а JS использовать как enhancement;
@@ -850,11 +886,11 @@ Performance backlog по измерениям:
 8. TBT/FCP P2 — third-party и forms — начато 2026-06-18:
    - отложить Metrika/goals, reviews widgets и cookie/banner non-critical logic после first paint/idle;
    - не блокировать первый рендер синхронными analytics/form сценариями.
-9. CLS / Agent View regression — начато 2026-06-18:
+9. CLS / Agent View regression — частично выполнено 2026-06-18:
    - добавить явные accessible names для mobile header search, catalog sort/filter selects и property detail form controls;
    - зарезервировать стабильные слоты под Font Awesome icons до загрузки CDN CSS;
    - зарезервировать высоту под `#price-per-sqm`, который заполняется JS после первого render;
-   - после деплоя повторить mobile PSI для catalog sale и property detail: целевой CLS ниже `0.1`, Agent View должен вернуться к `2/2`.
+   - после деплоя повторить mobile PSI для catalog sale и property detail: property detail выполнен (`CLS 0`, Agent View `2/2`), catalog sale остается открытым (`CLS 0.15`, Agent View `1/2`).
 10. FCP P2 — anonymous-page server/cache path:
    - TTFB по browser navigation высокий, но требует отдельного server-side профилирования;
    - проверить anonymous cache, template fragment cache, bot protection/cache behavior, currency/session middleware и DB-запросы в header/home/catalog/detail.
@@ -899,6 +935,36 @@ Implementation log:
   - `templates/core/includes/home/home_phone_contact_form_section.html`: большая contact image `3001x1833 / 704 KiB` заменена responsive `srcset` из generated JPEG variants `720w`, `960w`, `1400w` (`87 KiB`, `152 KiB`, `300 KiB`).
   - Manual content task: promotional banner `Pruksa` из `/media/promotional_banners/` остается тяжелым PNG (`4800x300 / 283 KiB` в PSI); код уже использует responsive `picture`, но нужен новый загруженный в админке mobile asset около `828x150` в WebP/сжатом PNG.
   - Verification: `node --check static/js/home/hero.js`, `python manage.py check`, `git diff --check`, rendered HTML `/en/`: status `200`, `fonts.css/main.css` только preload, direct `gtag.js`/Ahrefs script в head = `0`, contact image `srcset` содержит `720/960/1400`, `hero-slide-2` без inline background style.
+- 2026-06-18, iteration 7:
+  - Homepage mobile PSI 15:16 зафиксирован: score `76`, FCP `3.3s`, LCP `4.4s`, TBT `0ms`, CLS `0.002`, SI `4.2s`.
+  - `templates/base.html`: `static/js/cookie-consent.js` переведен на `defer`, потому что PSI dependency tree показывал его в критической цепочке `/en/ -> cookie-consent.js -> dist/styles.css`.
+  - Production follow-up: повторный деплой должен включить generated contact image variants и `home_phone_contact_form_section.html`; текущий PSI 15:16 все еще видел старую contact image разметку.
+- 2026-06-18, iteration 8:
+  - Catalog sale mobile PSI 15:21 зафиксирован: score `67`, FCP `3.3s`, LCP `5.0s`, TBT `0ms`, CLS `0.15`, SI `4.4s`, Agent View `1/2`.
+  - `templates/includes/list/list_scripts.html`: `/jsi18n/` переведен на `defer`; `config/urls.py`: `JavaScriptCatalog` завернут в `cache_page(86400)`, чтобы убрать no-cache warning для `6 KiB` catalog JS.
+  - `templates/includes/list/list_styles.html`: critical CSS для catalog overlay/view toggle оставлен inline, а `static/css/list/list_styles.css` переведен в `preload as=style` с `noscript` fallback, чтобы убрать отдельный render-blocking `list_styles.css`.
+  - `static/css/list/list_styles.css`: Tailwind `@apply` в raw CSS заменен обычными CSS rules для spinner, mobile filters, active view toggle, checkbox focus и pagination.
+  - `templates/properties/includes/list/list_sort_results_header.html`: active state для grid/map toggle теперь рендерится сервером, а не только после `DOMContentLoaded`.
+  - `templates/properties/card.html`: только первая карточка каталога остается `loading="eager"` + `fetchpriority="high"`; остальные изображения уходят в `lazy`, чтобы не конкурировать с LCP.
+  - `apps/properties/models.py`: ImageKit `thumbnail` и `medium` для `PropertyImage` переведены с JPEG на WebP (`quality 75/78`), чтобы карточки каталога отдавали modern format из `/media/CACHE/`.
+  - `static/css/fonts.css`: Gilroy faces переведены на `font-display: optional`, чтобы поздняя загрузка шрифта не двигала grid layout.
+  - `templates/base.html`: delayed Google/Ahrefs и Metrika увеличены до `15000ms`, чтобы third-party JS не попадал в ранний Lighthouse trace без взаимодействия.
+  - `config/settings/production.py`: в CSP добавлен `https://mc.yandex.com` для `connect-src`, `script-src`, `img-src`, `frame-src`, чтобы Metrika не создавала Best Practices console errors после загрузки.
+  - Verification: `python manage.py check`, `python manage.py makemigrations --check --dry-run` (`No changes detected`), `node --check static/js/list/list_main_init.js`, `node --check static/js/list/list_view_toggle.js`, `git diff --check`, `/jsi18n/` status `200`, `Cache-Control: max-age=86400`, `Vary: Accept-Language`, rendered HTML `/en/property/sale/`: status `200`, JSON-LD `4`, `/jsi18n/` defer, `list_styles.css` preload, first 5 catalog images `.webp`, first image eager/high, next images lazy.
+- 2026-06-18, iteration 9:
+  - Property detail mobile PSI 17:37 зафиксирован: score `59`, FCP `3.5s`, LCP `5.0s`, TBT `20ms`, CLS `0.236`, SI `5.6s`, Agent View `1/2`.
+  - Property detail mobile PSI 17:52 подтвердил результат деплоя: score `76`, FCP `3.5s`, LCP `4.1s`, TBT `0ms`, CLS `0`, SI `5.5s`, Agent View `2/2`; detail-specific CLS/Agent View blocker закрыт.
+  - `static/js/cookie-consent.js`: для property detail mobile top placement теперь выставляется до показа overlay, а не после первого render; это убирает сдвиг cookie banner снизу наверх (`0.197` CLS в PSI).
+  - `templates/properties/detail.html`: `static/css/properties/detail.css` переведен из blocking stylesheet в `preload as=style` с inline critical CSS для `#property-map`, `#contact-sidebar-wrapper`, `#property-contact-form`.
+  - `templates/properties/detail.html`: `static/js/properties/detail.js` переведен на `defer`, чтобы убрать его из parser-blocking critical path.
+  - `static/js/properties/detail.js`: adjacent gallery preload и autoplay больше не стартуют на `DOMContentLoaded`; warmup запускается после `load + 8000ms`/idle или первого user interaction.
+  - `templates/properties/detail.html`: desktop secondary hero image и thumbnail strip переведены на `lazy`; thumbnail strip получил `fetchpriority="low"`.
+  - `apps/core/models.py`: добавлен ImageKit `Team.photo_avatar` WebP `160x160` без DB migration; `apps/properties/views.py` использует этот avatar URL для property detail specialist card, сохраняя original image в Person schema.
+  - Verification: `python manage.py check`, `python manage.py makemigrations --check --dry-run` (`No changes detected`), `node --check static/js/properties/detail.js`, `node --check static/js/cookie-consent.js`, `git diff --check`, rendered HTML target property detail: status `200`, H1 count `1`, JSON-LD `6`, `detail.css` preload, `detail.js` defer, LCP hero eager/high, thumbs lazy/low, specialist image `/media/CACHE/...webp` `160x160`.
+- 2026-06-18, iteration 10:
+  - Property detail LCP follow-up: `templates/properties/detail.html` добавляет responsive preload для первого gallery image в `extra_meta` с тем же `imagesrcset`, что у видимого LCP `<img>`, отдельными `media` для mobile/desktop и `fetchpriority="high"`.
+  - Цель: снизить LCP resource load delay, который PSI 17:52 показывал как `1.27s`, не возвращая раннюю загрузку всех gallery images.
+  - Verification: `python manage.py check`, `git diff --check`, rendered HTML target property detail: status `200`, `2` image preload в head, mobile preload `imagesizes="100vw"`, desktop preload `imagesizes="(min-width: 1280px) 58vw, 100vw"`, hero image `eager/high` с тем же WebP cache URL.
 
 Задачи:
 
@@ -910,7 +976,7 @@ Implementation log:
 2. Сохранить результаты Lighthouse и CrUX, если доступны — выполнено; Lighthouse сохранен ссылками на PSI, CrUX/field data недоступны (`Нет данных`).
 3. Разделить field data и lab data — выполнено.
 4. Сформировать отдельный performance backlog — выполнено; 2026-06-18 расширено mobile performance plan по FCP, Speed Index и TBT.
-5. После деплоя accessibility/gallery follow-up повторить PSI на тех же URL и сравнить с baseline 2026-06-17 — выполнен post-deploy mobile re-check 2026-06-18; открыт CLS/Agent View regression follow-up для catalog/property detail.
+5. После деплоя accessibility/gallery follow-up повторить PSI на тех же URL и сравнить с baseline 2026-06-17 — выполнен post-deploy mobile re-check 2026-06-18; property detail CLS/Agent View закрыт, catalog CLS/Agent View остается открытым.
 6. Выполнять performance follow-up итерациями: сначала шрифты/CSS и lazy JS, затем media/WebP/AVIF и server/cache profiling.
 
 Критерии приемки:

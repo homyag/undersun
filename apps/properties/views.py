@@ -2091,12 +2091,22 @@ def _build_property_responsible_specialist_context(property_obj, request, langua
     photo_url = ''
     photo_width = 256
     photo_height = 256
+    schema_photo_url = ''
 
     if specialist.photo:
-        photo_url = request.build_absolute_uri(specialist.photo.url)
         try:
-            photo_width = specialist.photo.width or photo_width
-            photo_height = specialist.photo.height or photo_height
+            schema_photo_url = request.build_absolute_uri(specialist.photo.url)
+        except Exception:
+            schema_photo_url = ''
+        avatar_url = getattr(specialist, 'photo_avatar_url', '') or ''
+        photo_url = request.build_absolute_uri(avatar_url) if avatar_url else schema_photo_url
+        if avatar_url:
+            photo_width = 160
+            photo_height = 160
+        try:
+            if not avatar_url:
+                photo_width = specialist.photo.width or photo_width
+                photo_height = specialist.photo.height or photo_height
         except Exception:
             pass
 
@@ -2117,8 +2127,8 @@ def _build_property_responsible_specialist_context(property_obj, request, langua
 
     if position:
         schema['jobTitle'] = position
-    if photo_url:
-        schema['image'] = photo_url
+    if schema_photo_url or photo_url:
+        schema['image'] = schema_photo_url or photo_url
     if specialist.email:
         schema['email'] = specialist.email
     if specialist.phone:

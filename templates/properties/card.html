@@ -46,7 +46,7 @@
                              alt="{{ property.get_card_image_alt }}"
                              width="800"
                              height="600"
-                             loading="{% if forloop.counter <= 3 %}eager{% else %}lazy{% endif %}"
+                             loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                              decoding="async"
                              {% if forloop.first %}fetchpriority="high"{% endif %}>
                     {% else %}
@@ -55,7 +55,7 @@
                              alt="{% trans 'Изображение недоступно' %}"
                              width="800"
                              height="600"
-                             loading="{% if forloop.counter <= 3 %}eager{% else %}lazy{% endif %}"
+                             loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                              decoding="async"
                              {% if forloop.first %}fetchpriority="high"{% endif %}>
                     {% endif %}
