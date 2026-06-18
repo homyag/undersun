@@ -67,35 +67,159 @@
     {% static 'js/home/google-reviews.js' as google_reviews_js %}
     <script>
         (function() {
-            const scripts = [
-                {src: '{{ hero_js }}', priority: 'high'},
-                {src: '{{ process_steps_js }}'},
-                {src: '{{ featured_js }}'},
-                {src: '{{ consultation_js }}'},
-                {src: '{{ search_counter_js }}'},
-                {src: '{{ our_team_js }}'},
-                {src: '{{ google_reviews_js }}'}
-            ];
+            const homeScripts = {
+                hero: {src: '{{ hero_js }}', key: 'hero'},
+                searchCounter: {src: '{{ search_counter_js }}', key: 'searchCounter'},
+                featured: {src: '{{ featured_js }}', key: 'featured'},
+                consultation: {src: '{{ consultation_js }}', key: 'consultation'},
+                processSteps: {src: '{{ process_steps_js }}', key: 'processSteps'},
+                team: {src: '{{ our_team_js }}', key: 'team'},
+                reviews: {src: '{{ google_reviews_js }}', key: 'reviews'}
+            };
 
             function loadScript(entry) {
-                if (!entry || document.querySelector(`script[src="${entry.src}"]`)) {
+                if (!entry || !entry.src) {
+                    return Promise.resolve();
+                }
+                if (entry.promise) {
+                    return entry.promise;
+                }
+                if (document.querySelector(`script[src="${entry.src}"]`)) {
+                    entry.loaded = true;
+                    entry.promise = Promise.resolve();
+                    return entry.promise;
+                }
+
+                entry.promise = new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = entry.src;
+                    script.async = true;
+                    script.onload = () => {
+                        entry.loaded = true;
+                        resolve();
+                    };
+                    script.onerror = () => reject(new Error(`Failed to load home script: ${entry.src}`));
+                    document.body.appendChild(script);
+                });
+                return entry.promise;
+            }
+
+            function loadOnVisible(entry, selector, rootMargin) {
+                const target = document.querySelector(selector);
+                if (!target) {
                     return;
                 }
-                const script = document.createElement('script');
-                script.src = entry.src;
-                script.defer = true;
-                document.body.appendChild(script);
+
+                if (!('IntersectionObserver' in window)) {
+                    window.addEventListener('load', () => loadScript(entry), { once: true });
+                    return;
+                }
+
+                const observer = new IntersectionObserver((entries) => {
+                    if (!entries.some(item => item.isIntersecting)) {
+                        return;
+                    }
+                    observer.disconnect();
+                    loadScript(entry);
+                }, { rootMargin: rootMargin || '400px 0px' });
+
+                observer.observe(target);
             }
 
-            const criticalScripts = scripts.filter(item => item.priority === 'high');
-            criticalScripts.forEach(loadScript);
+            function loadOnInteraction(entry, selector, events) {
+                const eventNames = events || ['click', 'focusin'];
 
-            const restScripts = scripts.filter(item => item.priority !== 'high');
-            if ('requestIdleCallback' in window) {
-                requestIdleCallback(() => restScripts.forEach(loadScript), { timeout: 2000 });
-            } else {
-                setTimeout(() => restScripts.forEach(loadScript), 500);
+                eventNames.forEach(eventName => {
+                    document.addEventListener(eventName, function handleInteraction(event) {
+                        const target = event.target.closest(selector);
+                        if (!target || entry.loaded) {
+                            return;
+                        }
+
+                        document.removeEventListener(eventName, handleInteraction, true);
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (typeof event.stopImmediatePropagation === 'function') {
+                            event.stopImmediatePropagation();
+                        }
+                        loadScript(entry)
+                            .then(() => {
+                                window.requestAnimationFrame(() => {
+                                    if (eventName === 'focusin' && typeof target.focus === 'function') {
+                                        target.focus();
+                                        return;
+                                    }
+                                    target.dispatchEvent(new MouseEvent('click', {
+                                        bubbles: true,
+                                        cancelable: true,
+                                        view: window
+                                    }));
+                                });
+                            })
+                            .catch(error => console.error(error));
+                    }, true);
+                });
             }
+
+            const featuredStub = function(type) {
+                loadScript(homeScripts.featured)
+                    .then(() => {
+                        if (window.switchPropertyType && window.switchPropertyType !== featuredStub) {
+                            window.switchPropertyType(type);
+                        }
+                    })
+                    .catch(error => console.error(error));
+            };
+            window.switchPropertyType = window.switchPropertyType || featuredStub;
+
+            const processStub = function(stepNumber) {
+                loadScript(homeScripts.processSteps)
+                    .then(() => {
+                        if (window.toggleStep && window.toggleStep !== processStub) {
+                            window.toggleStep(stepNumber);
+                        }
+                    })
+                    .catch(error => console.error(error));
+            };
+            window.toggleStep = window.toggleStep || processStub;
+
+            const consultationTabStub = function(consultationId, tabName) {
+                loadScript(homeScripts.consultation)
+                    .then(() => {
+                        if (window.switchConsultationTab && window.switchConsultationTab !== consultationTabStub) {
+                            window.switchConsultationTab(consultationId, tabName);
+                        }
+                    })
+                    .catch(error => console.error(error));
+            };
+            window.switchConsultationTab = window.switchConsultationTab || consultationTabStub;
+
+            const consultationSubmitStub = function(event, consultationId) {
+                event.preventDefault();
+                loadScript(homeScripts.consultation)
+                    .then(() => {
+                        if (window.handlePhoneCallback && window.handlePhoneCallback !== consultationSubmitStub) {
+                            window.handlePhoneCallback(event, consultationId);
+                        }
+                    })
+                    .catch(error => console.error(error));
+            };
+            window.handlePhoneCallback = window.handlePhoneCallback || consultationSubmitStub;
+
+            loadScript(homeScripts.hero);
+            loadScript(homeScripts.searchCounter);
+
+            loadOnVisible(homeScripts.featured, '[data-home-featured-section]', '300px 0px');
+            loadOnVisible(homeScripts.consultation, '[data-home-consultation-section]', '300px 0px');
+            loadOnVisible(homeScripts.processSteps, '[data-home-process-section]', '300px 0px');
+            loadOnVisible(homeScripts.team, '[data-home-team-section]', '300px 0px');
+            loadOnVisible(homeScripts.reviews, '[data-home-reviews-section]', '300px 0px');
+
+            loadOnInteraction(homeScripts.featured, '#featured-prev, #featured-next, .property-tab', ['click']);
+            loadOnInteraction(homeScripts.consultation, '#quickConsultationForm input, #quickConsultationForm button, .consultation-tab', ['click', 'focusin']);
+            loadOnInteraction(homeScripts.processSteps, '.process-step-cloud', ['click']);
+            loadOnInteraction(homeScripts.team, '#show-more-team', ['click']);
+            loadOnInteraction(homeScripts.reviews, '#google-reviews-prev, #google-reviews-next, #next-review', ['click']);
         })();
     </script>
 {% endblock %}

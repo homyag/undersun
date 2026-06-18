@@ -833,7 +833,7 @@ Performance backlog по измерениям:
    - грузить map JS/data только после выбора map view или появления map container в viewport;
    - grid/list каталог должен рендериться без ранней инициализации карты;
    - проверить, что page-specific list modules не создают long tasks при первом mobile load.
-7. TBT P1 — homepage:
+7. TBT P1 — homepage — начато 2026-06-18:
    - не выполнять тяжелую инициализацию featured carousel, reviews, process steps, team/news enhancements до idle или viewport;
    - сохранить server-rendered карточки как первичный контент, а JS использовать как enhancement;
    - проверить, что home mobile TBT после изменений ниже `150ms`.
@@ -853,6 +853,13 @@ Implementation log:
   - `fonts.css` сокращен с `16` Gilroy `.ttf` faces до `5` normal faces (`400`, `500`, `600`, `700`, `800`); редкие italic/light/black начертания больше не провоцируют отдельные font downloads и могут синтезироваться браузером.
   - `.woff2` конвертация не выполнена в этой итерации: локально отсутствуют `fontTools`, `woff2_compress`, `ttx`; оставить как отдельную asset-tooling задачу.
   - Verification: `node --check` для измененных list JS, `python manage.py check`, rendered HTML `/en/property/sale/` через Django Client: status `200`, `window.catalogMapAssets=True`, direct `maplibre`, `pmtiles`, `map_core.js`, `maplibre-gl.css` в ранних scripts/styles = `0`.
+- 2026-06-18, iteration 2:
+  - Homepage JS lazy-load: `hero.js` и `search-counter.js` остаются early scripts, потому что отвечают за первый экран и hero search.
+  - `featured-properties.js`, `consultation.js`, `process-steps.js`, `our-team.js` и `google-reviews.js` больше не грузятся пачкой через `requestIdleCallback(..., timeout: 2000)`.
+  - Для featured, consultation, process, team и reviews добавлены stable section markers и viewport/interaction loader: модуль грузится при приближении секции к viewport или при первом клике/фокусе.
+  - Добавлены безопасные stubs для inline handlers `switchPropertyType`, `toggleStep`, `switchConsultationTab`, `handlePhoneCallback`, чтобы первый пользовательский клик загрузил нужный модуль и повторил действие.
+  - Server-rendered homepage content сохраняется: lazy JS работает только как enhancement и не заменяет первичный HTML-контент.
+  - Verification: `python manage.py check`, `node --check` для home JS modules, Node parse inline homepage loader, rendered HTML `/en/` через Django Client: status `200`, section markers present, early `/static/js/home/` script src = `0`, loader содержит featured/interaction stubs.
 
 Задачи:
 
