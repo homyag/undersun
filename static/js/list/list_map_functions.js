@@ -10,3 +10,5 @@ function initializePropertiesMap() {
         window.propertiesMapBridge.refreshSize();
     }, 120);
 }
+
+window.initializePropertiesMap = initializePropertiesMap;

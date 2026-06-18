@@ -23,9 +23,11 @@
                 <!-- Search Form in contact bar -->
                 <form class="flex" method="get" action="{% url 'core:search' %}">
                     <input type="search" name="q"
+                           aria-label="{% trans 'Поиск по сайту' %}"
                            placeholder="{% if LANGUAGE_CODE == 'en' %}Search...{% elif LANGUAGE_CODE == 'th' %}ค้นหา...{% else %}Поиск...{% endif %}"
                            class="px-3 py-1.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors w-40">
                     <button type="submit"
+                            aria-label="{% trans 'Найти' %}"
                             class="px-2 py-1.5 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
                         <i class="fas fa-search text-xs"></i>
                     </button>
@@ -33,26 +35,31 @@
                 <div class="flex items-center space-x-3">
                     <a href="https://www.facebook.com/mr.undersunestate/"
                        class="text-white hover:text-accent transition-colors text-sm" target="_blank"
-                       rel="noopener noreferrer">
+                       rel="noopener noreferrer"
+                       aria-label="Facebook Undersun Estate">
                         <i class="fab fa-facebook-f"></i>
                     </a>
                     <a href="https://www.instagram.com/undersun.estate/"
                        class="text-white hover:text-accent transition-colors text-sm" target="_blank"
-                       rel="noopener noreferrer">
+                       rel="noopener noreferrer"
+                       aria-label="Instagram Undersun Estate">
                         <i class="fab fa-instagram"></i>
                     </a>
                     <a href="https://www.youtube.com/@undersun_estate"
                        class="text-white hover:text-accent transition-colors text-sm" target="_blank"
-                       rel="noopener noreferrer">
+                       rel="noopener noreferrer"
+                       aria-label="YouTube Undersun Estate">
                         <i class="fab fa-youtube"></i>
                     </a>
                     <a href="https://t.me/undersunestate" class="text-white hover:text-accent transition-colors text-sm"
-                       target="_blank" rel="noopener noreferrer">
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="Telegram Undersun Estate">
                         <i class="fab fa-telegram"></i>
                     </a>
                     <a href="https://www.linkedin.com/company/undersun-estate/"
                        class="text-white hover:text-accent transition-colors text-sm" target="_blank"
-                       rel="noopener noreferrer">
+                       rel="noopener noreferrer"
+                       aria-label="LinkedIn Undersun Estate">
                         <i class="fab fa-linkedin-in"></i>
                     </a>
                 </div>
@@ -64,27 +71,33 @@
             <!-- Social Icons - Left -->
             <div class="mobile-social-links flex items-center">
                 <a href="https://www.youtube.com/@undersun_estate"
-                   class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                   class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer"
+                   aria-label="YouTube Undersun Estate">
                     <i class="fab fa-youtube text-base"></i>
                 </a>
                 <a href="https://t.me/undersunestate" class="text-white hover:text-accent transition-colors"
-                   target="_blank" rel="noopener noreferrer">
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="Telegram Undersun Estate">
                     <i class="fab fa-telegram text-base"></i>
                 </a>
                 <a href="{{ business_profile.whatsapp_url }}" class="text-green-400 hover:text-green-300 transition-colors"
-                   target="_blank" rel="noopener noreferrer">
+                   target="_blank" rel="noopener noreferrer"
+                   aria-label="WhatsApp Undersun Estate">
                     <i class="fab fa-whatsapp text-base"></i>
                 </a>
                 <a href="https://www.instagram.com/undersun.estate/"
-                   class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                   class="text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer"
+                   aria-label="Instagram Undersun Estate">
                     <i class="fab fa-instagram text-base"></i>
                 </a>
                 <a href="https://www.linkedin.com/company/undersun-estate/"
-                   class="mobile-social-optional text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                   class="mobile-social-optional text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer"
+                   aria-label="LinkedIn Undersun Estate">
                     <i class="fab fa-linkedin-in text-base"></i>
                 </a>
                 <a href="https://www.facebook.com/mr.undersunestate/"
-                   class="mobile-social-optional text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer">
+                   class="mobile-social-optional text-white hover:text-accent transition-colors" target="_blank" rel="noopener noreferrer"
+                   aria-label="Facebook Undersun Estate">
                     <i class="fab fa-facebook-f text-base"></i>
                 </a>
             </div>
@@ -108,7 +121,7 @@
             <div class="flex justify-between items-center h-14 md:h-14">
                 <!-- Logo -->
                 <div class="flex items-center flex-shrink-0">
-                    <a href="{% url 'core:home' %}" class="flex items-center">
+                    <a href="{% url 'core:home' %}" class="flex items-center" aria-label="Undersun Estate">
                         <!-- Desktop Logo -->
                         <img src="{% static 'images/logo_fullscreen.svg' %}" alt="Undersun Estate"
                              width="560" height="75"
@@ -358,7 +371,10 @@
                     </div>
 
                     <!-- Mobile Search Button -->
-                    <button onclick="toggleMobileSearch()" class="text-primary hover:text-accent transition-colors">
+                    <button type="button"
+                            onclick="toggleMobileSearch()"
+                            class="text-primary hover:text-accent transition-colors"
+                            aria-label="{% trans 'Открыть поиск' %}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -366,7 +382,10 @@
                     </button>
 
                     <!-- Menu Button -->
-                    <button id="mobile-menu-button" class="text-primary hover:text-accent transition-colors">
+                    <button id="mobile-menu-button"
+                            type="button"
+                            class="text-primary hover:text-accent transition-colors"
+                            aria-label="{% trans 'Открыть меню' %}">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 6h16M4 12h16M4 18h16"></path>

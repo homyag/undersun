@@ -81,9 +81,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1.2fr_1.2fr_1fr_1fr_0.8fr] items-end gap-3 xl:gap-5 2xl:gap-8">
                                 <!-- Поле "Тип" -->
                                 <div class="flex flex-col min-w-[150px] 2xl:min-w-[200px]">
-                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Тип" %}</label>
+                                    <label for="hero-type-desktop" class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Тип" %}</label>
                                     <div class="relative mt-2">
-                                        <select name="type" class="w-full h-11 2xl:h-14 px-3 2xl:px-4 pr-10 2xl:pr-12 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                        <select id="hero-type-desktop" name="type" class="w-full h-11 2xl:h-14 px-3 2xl:px-4 pr-10 2xl:pr-12 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
                                             <option value="">{% trans "Все типы" %}</option>
                                             {% for type in property_types %}
                                                 <option value="{{ type.name }}">{{ type.name_display }}</option>
@@ -99,9 +99,9 @@
 
                                 <!-- Поле "Район" -->
                                 <div class="flex flex-col min-w-[170px] 2xl:min-w-[220px]">
-                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Район" %}</label>
+                                    <label for="hero-location-desktop" class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Район" %}</label>
                                     <div class="relative mt-2">
-                                        <select name="location" class="w-full h-10 sm:h-12 px-3 sm:px-4 pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                        <select id="hero-location-desktop" name="location" class="w-full h-10 sm:h-12 px-3 sm:px-4 pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
                                             <option value="">{% trans "Все районы" %}</option>
                                             {% for district in districts %}
                                                 {% if district.locations.all %}
@@ -123,14 +123,14 @@
 
                                 <!-- Поле "Мин. цена" -->
                                 <div class="flex flex-col min-w-[140px] 2xl:min-w-[180px]">
-                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Мин. цена" %}</label>
-                                    <input type="number" name="min_price" min="0" inputmode="numeric" class="mt-2 h-11 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                    <label for="hero-min-price-desktop" class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Мин. цена" %}</label>
+                                    <input id="hero-min-price-desktop" type="number" name="min_price" min="0" inputmode="numeric" class="mt-2 h-11 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
                                 </div>
 
                                 <!-- Поле "Макс. цена" -->
                                 <div class="flex flex-col min-w-[140px] 2xl:min-w-[180px]">
-                                    <label class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Макс. цена" %}</label>
-                                    <input type="number" name="max_price" min="0" inputmode="numeric" class="mt-2 h-11 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                    <label for="hero-max-price-desktop" class="text-xs 2xl:text-sm font-semibold text-gray-600 uppercase tracking-wide">{% trans "Макс. цена" %}</label>
+                                    <input id="hero-max-price-desktop" type="number" name="max_price" min="0" inputmode="numeric" class="mt-2 h-11 2xl:h-14 px-3 2xl:px-4 bg-white border border-gray-200 rounded-md text-gray-900 text-xs sm:text-sm 2xl:text-base placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
                                 </div>
 
                                 <!-- Кнопка поиска -->
@@ -158,9 +158,9 @@
                               data-ym-param-device="mobile">
                             <!-- Поле "Тип" -->
                             <div>
-                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Тип" %}</label>
+                                <label for="hero-type-mobile" class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Тип" %}</label>
                                 <div class="relative mt-1 sm:mt-2">
-                                    <select name="type" class="w-full h-11 sm:h-12 px-3 sm:px-4 pr-9 sm:pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-sm sm:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                    <select id="hero-type-mobile" name="type" class="w-full h-11 sm:h-12 px-3 sm:px-4 pr-9 sm:pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-sm sm:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
                                         <option value="">{% trans "Все типы" %}</option>
                                         {% for type in property_types %}
                                             <option value="{{ type.name }}">{{ type.name_display }}</option>
@@ -176,9 +176,9 @@
 
                             <!-- Поле "Район" -->
                             <div>
-                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Район" %}</label>
+                                <label for="hero-location-mobile" class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Район" %}</label>
                                 <div class="relative mt-1 sm:mt-2">
-                                    <select name="location" class="w-full h-11 sm:h-12 px-3 sm:px-4 pr-9 sm:pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-sm sm:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
+                                    <select id="hero-location-mobile" name="location" class="w-full h-11 sm:h-12 px-3 sm:px-4 pr-9 sm:pr-10 bg-white border border-gray-200 rounded-md text-gray-900 text-sm sm:text-base cursor-pointer shadow-sm appearance-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition">
                                         <option value="">{% trans "Все районы" %}</option>
                                         {% for district in districts %}
                                             {% if district.locations.all %}
@@ -201,12 +201,12 @@
                             <!-- Поля цены -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Мин. цена" %}</label>
-                                    <input type="number" name="min_price" min="0" inputmode="numeric" class="mt-1 sm:mt-2 h-11 sm:h-12 w-full px-3 bg-white border border-gray-200 rounded-md text-gray-900 text-sm placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                    <label for="hero-min-price-mobile" class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Мин. цена" %}</label>
+                                    <input id="hero-min-price-mobile" type="number" name="min_price" min="0" inputmode="numeric" class="mt-1 sm:mt-2 h-11 sm:h-12 w-full px-3 bg-white border border-gray-200 rounded-md text-gray-900 text-sm placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
                                 </div>
                                 <div>
-                                    <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Макс. цена" %}</label>
-                                    <input type="number" name="max_price" min="0" inputmode="numeric" class="mt-1 sm:mt-2 h-11 sm:h-12 w-full px-3 bg-white border border-gray-200 rounded-md text-gray-900 text-sm placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
+                                    <label for="hero-max-price-mobile" class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{% trans "Макс. цена" %}</label>
+                                    <input id="hero-max-price-mobile" type="number" name="max_price" min="0" inputmode="numeric" class="mt-1 sm:mt-2 h-11 sm:h-12 w-full px-3 bg-white border border-gray-200 rounded-md text-gray-900 text-sm placeholder-gray-400 shadow-sm focus:ring-2 focus:ring-accent/40 focus:border-accent transition" placeholder="{{ selected_currency.code|default:'THB' }}" data-currency-placeholder data-placeholder-code="{{ selected_currency.code|default:'THB' }}" data-placeholder-symbol="{{ selected_currency.symbol|default:'' }}">
                                 </div>
                             </div>
 

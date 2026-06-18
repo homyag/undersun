@@ -71,8 +71,10 @@ def serialize_properties_for_js(properties):
 
     for prop in properties:
         main_image_url = ''
+        main_image_thumbnail_url = ''
         if prop.main_image:
             main_image_url = prop.main_image.medium_url
+            main_image_thumbnail_url = prop.main_image.thumbnail_url
 
         price_deal_type = get_price_deal_type(prop)
         price_formatted = format_home_price(prop, 'USD', price_deal_type)
@@ -83,6 +85,7 @@ def serialize_properties_for_js(properties):
             'title': prop._get_translated_property_field('title', language_code, fallback=prop.title),
             'url': prop.get_absolute_url(),
             'main_image_url': main_image_url,
+            'main_image_thumbnail_url': main_image_thumbnail_url,
             'price_formatted': price_formatted,
             'district_name': prop._get_translated_district_name(language_code),
             'location_name': prop._get_translated_location_name(language_code),

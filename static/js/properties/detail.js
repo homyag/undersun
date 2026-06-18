@@ -155,6 +155,8 @@ function setSlideVisibility(slide, isActive) {
     }
 
     slide.style.opacity = isActive ? '1' : '0';
+    slide.classList.toggle('visible', isActive);
+    slide.classList.toggle('invisible', !isActive);
     slide.classList.toggle('pointer-events-none', !isActive);
     slide.classList.toggle('pointer-events-auto', isActive);
     slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
@@ -442,6 +444,15 @@ function setDetailFavoriteState(propertyId, isFavorite) {
 
     const carouselIcon = document.querySelector('.carousel-favorite-btn i');
     if (carouselIcon) {
+        const carouselButton = carouselIcon.closest('button');
+        const messages = typeof window.FAVORITES_MESSAGES === 'object' ? window.FAVORITES_MESSAGES : {};
+        const label = isFavorite
+            ? (messages.removeLabel || 'Remove from favorites')
+            : (messages.addLabel || 'Add to favorites');
+        if (carouselButton) {
+            carouselButton.setAttribute('aria-label', label);
+            carouselButton.setAttribute('title', label);
+        }
         carouselIcon.classList.toggle('fas', isFavorite);
         carouselIcon.classList.toggle('far', !isFavorite);
         carouselIcon.classList.toggle('text-red-500', isFavorite);

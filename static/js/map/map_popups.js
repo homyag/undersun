@@ -58,7 +58,7 @@
                     <div class="popup-media-chips">
                         ${propertyTypeLabel ? `<span class="popup-media-chip">${escapeHtml(propertyTypeLabel)}</span>` : ''}
                     </div>
-                    <button class="favorite-toggle" type="button" onclick="toggleFavorite(${propertyId})" title="${window.djangoTranslations?.addToFavorites || 'Add to favorites'}">
+                    <button class="favorite-toggle" type="button" onclick="toggleFavorite(${propertyId})" title="${window.djangoTranslations?.addToFavorites || 'Add to favorites'}" aria-label="${window.djangoTranslations?.addToFavorites || 'Add to favorites'}">
                         <i class="far fa-heart" id="favorite-${propertyId}"></i>
                     </button>
                 </div>

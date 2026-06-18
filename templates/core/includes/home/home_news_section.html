@@ -32,7 +32,8 @@
             </div>
             <!-- News Image with Link -->
             <div class="relative overflow-hidden h-64">
-              <a href="{{ news.get_absolute_url }}" class="block w-full h-full" itemprop="url">
+              <a href="{{ news.get_absolute_url }}" class="block w-full h-full" itemprop="url"
+                 aria-label="{{ news.title }}">
                 {% if news.get_localized_featured_image %}
                   <img src="{{ news.get_localized_featured_image.url }}"
                        alt="{{ news.title }}"

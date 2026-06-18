@@ -17,7 +17,7 @@
 
 ## Статус реализации
 
-Обновлено: 2026-06-17.
+Обновлено: 2026-06-18.
 
 Реализовано в первой партии правок:
 
@@ -747,9 +747,9 @@
 - CLS не ухудшается из-за media/cookie/banner blocks: local audit не нашел owned image dimension/lazy рисков; field/lab CLS проверить в пункте 14.
 - Above-the-fold images не задерживаются lazy-loading: подтверждено local rendered audit.
 
-### 14. Провести PageSpeed/CrUX проверку перед жесткими заявлениями о CWV — выполнено 2026-06-17
+### 14. Провести PageSpeed/CrUX проверку перед жесткими заявлениями о CWV — выполнено 2026-06-17; mobile performance follow-up открыт 2026-06-18
 
-Статус: PageSpeed UI проверен 2026-06-17 на продовых URL. В PageSpeed для всех проверенных URL field data / CrUX: `Нет данных`, поэтому жесткие заявления по real-user CWV, INP и field TTFB не делаем. Ниже зафиксированы lab Lighthouse 13.4.0 данные и отдельный measured backlog.
+Статус: PageSpeed UI проверен 2026-06-17 на продовых URL. В PageSpeed для всех проверенных URL field data / CrUX: `Нет данных`, поэтому жесткие заявления по real-user CWV, INP и field TTFB не делаем. Ниже зафиксированы lab Lighthouse 13.4.0 данные, measured backlog и отдельный mobile performance plan по `FCP`, `Speed Index` и `TBT`.
 
 Проблема:
 
@@ -789,18 +789,70 @@ Measured findings:
 - Field data / CrUX отсутствуют для всех проверенных URL; INP недоступен, TBT используем только как lab proxy.
 - CLS в lab низкий на всех страницах: mobile `0.001-0.011`, desktop `0.003-0.088`; массовый CLS-риск не подтвердился.
 - Mobile LCP остается главным performance bottleneck: home `5.0s`, catalog `6.5s`, property detail `6.2s`.
-- PageSpeed на проде все еще показывает `Для изображений не заданы явным образом атрибуты width и height`; это ожидаемо до деплоя локальных правок из пункта 13.
+- Mobile FCP высокий и почти одинаковый на всех проверенных типах страниц: `3.2-3.5s`. Главные вероятные зоны влияния — render-blocking CSS, шрифты, TTFB и ранние blocking scripts.
+- Mobile Speed Index остается слабым на home/catalog/property detail: home `5.8s`, catalog `4.6s`, property detail `5.3s`; location page лучше (`4.0s`), поэтому приоритет — главная, каталог и карточка объекта.
+- Mobile TBT особенно проблемный на property detail (`430ms`), умеренно проблемный на home/catalog (`210-220ms`) и низкий на location (`70ms`). Приоритет TBT — property detail, затем home/catalog.
+- PageSpeed на проде показывал `Для изображений не заданы явным образом атрибуты width и height`; post-deploy rendered audit после второго деплоя подтвердил, что owned visible images без `width`/`height` и property media без `srcset` больше не найдены на `/en/`, `/en/property/sale/`, property detail и `/en/locations/thalang/`.
+- Post-deploy rendered audit 2026-06-17: homepage client-side featured carousel cleanup подтвержден на production. Дополнительно найден mobile-only нюанс на property detail: inactive gallery slides были скрыты только `opacity: 0`, поэтому DOM-аудит считал lazy gallery images above-the-fold. Добавлен local follow-up: inactive slides получают `visibility: hidden` через шаблон и `static/js/properties/detail.js`. Нужен повторный деплой `templates/properties/detail.html` и `static/js/properties/detail.js` перед финальным PSI re-check.
+- Agent View accessibility follow-up 2026-06-18: PageSpeed показал `Buttons must have discernible text`, `Links must have discernible text`, `Select element must have an accessible name`. Локально добавлены accessible names для icon-only header/footer/social/WhatsApp/carousel/favorite controls и `for/id` labels для hero search controls. Local rendered audit `/en/`, `/en/property/sale/` и property detail, mobile `390x844` и desktop `1366x900`: visible unnamed `button`, `a[href]`, `select` = `0`.
 - `Улучшите загрузку изображений` повторяется на всех типах страниц: от `51-52 KiB` на location до `1.1-1.7 MiB` на home и `1.05 MiB` на desktop property detail.
 - Property detail mobile имеет самый высокий lab TBT: `430ms`; вероятные зоны проверки — gallery, map, third-party scripts, unused JS.
 - Synthetic TTFB через браузер высокий для anonymous page loads: примерно `0.9-1.9s`; curl без браузерного контекста получает `403` из-за bot protection, поэтому curl TTFB не учитывался.
 
+Mobile performance targets для следующего PSI/Lighthouse re-check:
+
+- FCP: снизить mobile FCP с `3.2-3.5s` до диапазона около `2.5s` или ниже на home/catalog/property detail/location.
+- Speed Index: снизить mobile SI на home/property detail до `4.0s` или ниже, catalog — ближе к `4.0s`, location — удержать около текущего уровня.
+- TBT: снизить property detail mobile TBT с `430ms` до `200ms` или ниже; home/catalog — до `150ms` или ниже; location — не ухудшить.
+- CLS: удержать lab CLS ниже `0.1`; текущие правки image dimensions не должны ухудшиться.
+- Эти цели являются lab Lighthouse targets, не field CWV SLA, пока CrUX data отсутствуют.
+
 Performance backlog по измерениям:
 
-1. Деплоить image/CLS правки из пункта 13 и повторить PSI; после деплоя warning по missing `width` / `height` должен уйти для owned images.
-2. Оптимизировать LCP/media pipeline: безопасный WebP/AVIF для property/home изображений, контроль размеров generated variants, CDN/cache headers для media, отдельная проверка YML/feed compatibility.
-3. Разобрать property detail JS cost: отложить не критичные gallery/map/third-party сценарии до interaction/viewport, проверить TBT после изменения.
-4. Сократить unused CSS/JS: проверить active Tailwind build, purge/content coverage, page-specific JS loading и legacy scripts.
-5. Проверить anonymous-page server/cache path: TTFB по browser navigation высокий, но требует отдельного server-side профилирования и проверки bot protection/cache behavior.
+1. Деплоить property mobile gallery visibility follow-up и повторить PSI/rendered audit; после повторного деплоя warning по missing `width` / `height` должен уйти для owned images, а mobile property detail не должен иметь lazy visible images above-the-fold.
+2. FCP/SI P1 — шрифты — начато 2026-06-18:
+   - конвертировать используемые Gilroy `.ttf` в `.woff2`;
+   - оставить только реально используемые веса для первого экрана;
+   - применить `font-display: swap`;
+   - preload делать только для primary above-the-fold font files;
+   - не грузить italic/extra-bold варианты до первого рендера, если они не нужны в первом viewport.
+3. FCP/SI P1 — critical CSS и active Tailwind build:
+   - основной runtime CSS идет через `theme/static/css/dist/styles.css`, подключенный в `templates/base.html`;
+   - проверить Tailwind purge/content coverage и убрать неиспользуемые классы из production build;
+   - вынести или отложить CSS, который не нужен первому экрану: phone input, формы, отзывы, map/gallery-specific styling;
+   - убедиться, что root Tailwind pipeline `static/css/tailwind.min.css` не подключается параллельно без необходимости.
+4. FCP/SI P1 — above-the-fold media:
+   - оптимизировать LCP/media pipeline: безопасный WebP/AVIF для property/home изображений, контроль размеров generated variants, CDN/cache headers для media, отдельная проверка YML/feed compatibility;
+   - preload/fetchpriority оставлять только для настоящего LCP image конкретной страницы;
+   - ниже-fold изображения, reviews/contact/team/news media не должны конкурировать с первым экраном.
+5. TBT P1 — property detail:
+   - отложить не критичные gallery modal, map, Leaflet/OSM и third-party сценарии до interaction/viewport;
+   - в первом экране оставить только минимальную логику текущего слайда, favorite/share/contact CTA;
+   - после изменения отдельно проверить property detail mobile TBT.
+6. TBT P1 — catalog — начато 2026-06-18:
+   - грузить map JS/data только после выбора map view или появления map container в viewport;
+   - grid/list каталог должен рендериться без ранней инициализации карты;
+   - проверить, что page-specific list modules не создают long tasks при первом mobile load.
+7. TBT P1 — homepage:
+   - не выполнять тяжелую инициализацию featured carousel, reviews, process steps, team/news enhancements до idle или viewport;
+   - сохранить server-rendered карточки как первичный контент, а JS использовать как enhancement;
+   - проверить, что home mobile TBT после изменений ниже `150ms`.
+8. TBT/FCP P2 — third-party и analytics:
+   - отложить Metrika/goals, reviews widgets и cookie/banner non-critical logic после first paint/idle;
+   - не блокировать первый рендер синхронными analytics/form сценариями.
+9. FCP P2 — anonymous-page server/cache path:
+   - TTFB по browser navigation высокий, но требует отдельного server-side профилирования;
+   - проверить anonymous cache, template fragment cache, bot protection/cache behavior, currency/session middleware и DB-запросы в header/home/catalog/detail.
+
+Implementation log:
+
+- 2026-06-18, iteration 1:
+  - Catalog map assets lazy-load: `maplibre-gl.css`, `maplibre-gl.js`, `pmtiles`, `basemaps`, `static/js/map/map_popups.js`, `static/js/map/map_core.js`, `list_map_functions.js` и `list_map_data_loader.js` больше не подключаются напрямую в HTML grid/list view. Они подгружаются через `window.catalogMapAssets` при выборе map view.
+  - Grid/list catalog early scripts сокращены до `list_utility_functions.js`, `list_view_toggle.js`, `list_favorites.js`, `list_main_init.js` с `defer`.
+  - `list_map_data_loader.js` адаптирован под dynamic loading: binding кнопок карты выполняется idempotently даже если `DOMContentLoaded` уже прошел.
+  - `fonts.css` сокращен с `16` Gilroy `.ttf` faces до `5` normal faces (`400`, `500`, `600`, `700`, `800`); редкие italic/light/black начертания больше не провоцируют отдельные font downloads и могут синтезироваться браузером.
+  - `.woff2` конвертация не выполнена в этой итерации: локально отсутствуют `fontTools`, `woff2_compress`, `ttx`; оставить как отдельную asset-tooling задачу.
+  - Verification: `node --check` для измененных list JS, `python manage.py check`, rendered HTML `/en/property/sale/` через Django Client: status `200`, `window.catalogMapAssets=True`, direct `maplibre`, `pmtiles`, `map_core.js`, `maplibre-gl.css` в ранних scripts/styles = `0`.
 
 Задачи:
 
@@ -811,12 +863,16 @@ Performance backlog по измерениям:
    - одной location detail page.
 2. Сохранить результаты Lighthouse и CrUX, если доступны — выполнено; Lighthouse сохранен ссылками на PSI, CrUX/field data недоступны (`Нет данных`).
 3. Разделить field data и lab data — выполнено.
-4. Сформировать отдельный performance backlog — выполнено.
+4. Сформировать отдельный performance backlog — выполнено; 2026-06-18 расширено mobile performance plan по FCP, Speed Index и TBT.
+5. После деплоя accessibility/gallery follow-up повторить PSI на тех же URL и сравнить с baseline 2026-06-17.
+6. Выполнять performance follow-up итерациями: сначала шрифты/CSS и lazy JS, затем media/WebP/AVIF и server/cache profiling.
 
 Критерии приемки:
 
 - Есть фактические данные по LCP, CLS, INP, TTFB: lab LCP/CLS/TBT собраны; INP и field TTFB недоступны из-за отсутствия CrUX field data; synthetic browser TTFB собран отдельно и не трактуется как CWV.
 - Performance-задачи основаны на измерениях, а не прогнозах: выполнено.
+- Для следующего mobile PSI re-check есть отдельные targets по FCP, Speed Index и TBT.
+- Performance follow-up не ухудшает indexability, canonical, hreflang, server-rendered primary content, JSON-LD и accessibility tree.
 
 ## Этап 7. Контент и E-E-A-T
 

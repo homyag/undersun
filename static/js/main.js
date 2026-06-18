@@ -282,7 +282,9 @@ function showNotification(message, type = 'info') {
 function getFavoritesMessages() {
     const defaults = {
         added: 'Добавлено в избранное',
-        removed: 'Удалено из избранного'
+        removed: 'Удалено из избранного',
+        addLabel: 'В избранное',
+        removeLabel: 'Удалить из избранного'
     };
 
     if (window.FAVORITES_MESSAGES) {
@@ -332,10 +334,15 @@ function isFavorite(propertyId) {
 }
 
 function updateFavoriteButtons(propertyId, isFavoriteNow) {
+    const messages = getFavoritesMessages();
+    const label = isFavoriteNow ? messages.removeLabel : messages.addLabel;
+
     document.querySelectorAll(`.favorite-btn[data-property-id="${propertyId}"]`).forEach(btn => {
         const iconEl = btn.querySelector('i');
         if (!iconEl) return;
 
+        btn.setAttribute('aria-label', label);
+        btn.setAttribute('title', label);
         iconEl.classList.toggle('fas', isFavoriteNow);
         iconEl.classList.toggle('far', !isFavoriteNow);
         iconEl.classList.toggle('text-red-500', isFavoriteNow);
@@ -598,8 +605,10 @@ function createPropertyCard(property) {
                     
                     <!-- Favorite Button -->
                     <div class="absolute top-3 right-3">
-                        <button class="bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110"
-                                data-property-id="${property.id}">
+                        <button type="button" class="bg-white/90 hover:bg-white p-2 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110"
+                                data-property-id="${property.id}"
+                                aria-label="${getFavoritesMessages().addLabel}"
+                                title="${getFavoritesMessages().addLabel}">
                             <i class="${heartClass} group-hover:text-red-500 fa-heart transition-all duration-200"></i>
                         </button>
                     </div>

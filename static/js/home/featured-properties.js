@@ -1104,6 +1104,13 @@
         // Create property card
         function createPropertyCard(property, position) {
             const imageUrl = property.main_image_url || '/static/images/no-image.svg';
+            const thumbnailUrl = property.main_image_thumbnail_url || '';
+            const imageSrcset = thumbnailUrl && imageUrl && imageUrl !== '/static/images/no-image.svg'
+                ? ` srcset="${thumbnailUrl} 300w, ${imageUrl} 800w"`
+                : '';
+            const imageSizes = imageSrcset
+                ? ' sizes="(min-width: 1024px) 350px, (min-width: 640px) 50vw, calc(100vw - 2rem)"'
+                : '';
             const priceDisplay = property.price_formatted || PRICE_ON_REQUEST;
             const unitSqm = UNIT_SQM;
             const changeCurrencyLabel = CHANGE_CURRENCY;
@@ -1113,6 +1120,7 @@
             const propertySlug = property.slug || '';
             const cardPosition = position || '';
             const buildYmAttributes = (linkType) => `data-ym-goal="featured_card_click" data-ym-param-id="${property.id}" data-ym-param-slug="${propertySlug}" data-ym-param-type="${propertyTypeKey}" data-ym-param-position="${cardPosition}" data-ym-param-render="client" data-ym-param-link="${linkType}"`;
+            const favoriteButtonLabel = (window.FAVORITES_MESSAGES && window.FAVORITES_MESSAGES.addLabel) || 'Add to favorites';
 
             // Safely check favorites - use window.isFavorite if available
             let isFav = false;
@@ -1131,7 +1139,7 @@
             <div class="property-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden w-full h-full">
                 <div class="relative h-48">
                     <a href="${property.url}" class="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent" aria-label="${property.title}" ${buildYmAttributes('image')}>
-                        <img src="${imageUrl}" class="w-full h-full object-cover" alt="${property.title}" loading="lazy">
+                        <img src="${imageUrl}"${imageSrcset}${imageSizes} class="w-full h-full object-cover" alt="${property.title}" width="800" height="600" loading="lazy" decoding="async">
 
                         <!-- Special Offer Ribbon -->
                         ${property.special_offer ?
@@ -1145,8 +1153,10 @@
                     </a>
 
                     <div class="absolute top-3 right-3">
-                        <button class="bg-white/90 hover:bg-white w-10 h-10 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center"
-                                data-property-id="${property.id}">
+                        <button type="button" class="bg-white/90 hover:bg-white w-10 h-10 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center"
+                                data-property-id="${property.id}"
+                                aria-label="${favoriteButtonLabel}"
+                                title="${favoriteButtonLabel}">
                             <i class="${heartClass} group-hover:text-red-500 fa-heart transition-all duration-200"></i>
                         </button>
                     </div>

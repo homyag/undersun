@@ -121,7 +121,7 @@
                     <!-- Carousel with Single/Dual Image Display -->
                     <div class="property-carousel relative h-52 sm:h-80 lg:h-auto">
                         {% for image in gallery_images %}
-                            <div class="property-slide absolute inset-0 transition-opacity duration-1000 lg:hidden {% if forloop.counter0 == 0 %}opacity-100 pointer-events-auto{% else %}opacity-0 pointer-events-none{% endif %}"
+                            <div class="property-slide absolute inset-0 transition-opacity duration-1000 lg:hidden {% if forloop.counter0 == 0 %}visible opacity-100 pointer-events-auto{% else %}invisible opacity-0 pointer-events-none{% endif %}"
                                  aria-hidden="{% if forloop.counter0 == 0 %}false{% else %}true{% endif %}"
                                  data-slide-index="{{ forloop.counter0 }}">
                                 <img src="{{ image.url }}" alt="{{ image.alt }}"
@@ -173,12 +173,16 @@
                         {% if gallery_images|length > 1 %}
                             <!-- Previous Button -->
                             <button onclick="previousSlide()"
+                                    type="button"
+                                    aria-label="{% trans 'Предыдущее фото' %}"
                                     class="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/18 bg-white/12 text-sm text-white/88 shadow-[0_10px_28px_rgba(15,23,42,0.22)] backdrop-blur-md transition-all duration-300 hover:bg-white/18 hover:text-white sm:left-4 sm:h-11 sm:w-11 sm:opacity-0 sm:group-hover:opacity-100">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
 
                             <!-- Next Button -->
                             <button onclick="nextSlide()"
+                                    type="button"
+                                    aria-label="{% trans 'Следующее фото' %}"
                                     class="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/18 bg-white/12 text-sm text-white/88 shadow-[0_10px_28px_rgba(15,23,42,0.22)] backdrop-blur-md transition-all duration-300 hover:bg-white/18 hover:text-white sm:right-4 sm:h-11 sm:w-11 sm:opacity-0 sm:group-hover:opacity-100">
                                 <i class="fas fa-chevron-right"></i>
                             </button>
@@ -187,6 +191,8 @@
                             <div class="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/20 px-3 py-2 backdrop-blur-sm lg:hidden">
                                 {% for image in gallery_images %}
                                     <button onclick="goToSlideByImage({{ forloop.counter0 }})"
+                                            type="button"
+                                            aria-label="{% blocktrans with number=forloop.counter %}Открыть фото {{ number }}{% endblocktrans %}"
                                             class="property-slide-indicator h-2.5 w-2.5 rounded-full ring-1 ring-white/20 transition-all duration-300 {% if forloop.counter0 == 0 %}bg-accent shadow-[0_0_0_4px_rgba(255,255,255,0.12)]{% else %}bg-white/35 hover:bg-white/60{% endif %}"
                                             data-slide-index="{{ forloop.counter0 }}">
                                     </button>
@@ -197,6 +203,8 @@
                                 {% for image in gallery_images %}
                                     {% if forloop.counter0|divisibleby:2 %}
                                         <button onclick="goToHeroPair({{ forloop.counter0 }})"
+                                                type="button"
+                                                aria-label="{% blocktrans with number=forloop.counter %}Открыть группу фото {{ number }}{% endblocktrans %}"
                                                 class="property-slide-pair-indicator h-2.5 rounded-full ring-1 ring-white/20 transition-all duration-300 {% if forloop.counter0 == 0 %}w-7 bg-accent shadow-[0_0_0_4px_rgba(255,255,255,0.12)]{% else %}w-2.5 bg-white/35 hover:w-5 hover:bg-white/60{% endif %}"
                                                 data-slide-index="{{ forloop.counter0 }}">
                                         </button>
@@ -217,13 +225,18 @@
                         <div class="absolute bottom-2 left-2 z-10 flex items-center gap-1.5 rounded-full border border-white/12 bg-black/28 p-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.16)] backdrop-blur-sm sm:bottom-4 sm:left-4 sm:gap-2 sm:p-2">
                             <!-- Share Button -->
                             <button onclick="shareProperty()"
+                                    type="button"
+                                    aria-label="{% trans 'Поделиться объектом' %}"
                                     class="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-xs text-white/84 transition-all duration-300 hover:bg-white/16 hover:text-white sm:h-10 sm:w-10 sm:text-sm">
                                 <i class="fas fa-share-alt"></i>
                             </button>
 
                             <!-- Favorite Button -->
                             <button onclick="toggleFavoriteDetail({{ property.id }})"
-                                    class="carousel-favorite-btn flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-xs text-white/84 transition-all duration-300 hover:bg-white/16 hover:text-white sm:h-10 sm:w-10 sm:text-sm">
+                                    type="button"
+                                    class="carousel-favorite-btn flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-xs text-white/84 transition-all duration-300 hover:bg-white/16 hover:text-white sm:h-10 sm:w-10 sm:text-sm"
+                                    aria-label="{% trans 'В избранное' %}"
+                                    title="{% trans 'В избранное' %}">
                                 <i class="far fa-heart"></i>
                             </button>
                         </div>
@@ -381,8 +394,11 @@
                             <div class="flex flex-col items-end sm:text-right">
                                 <div class="flex items-center gap-3 mb-2">
                                     <div id="main-price" class="text-2xl sm:text-3xl font-bold text-primary">{% price_in_currency property property.deal_type %}</div>
-                                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 w-10 h-10 rounded-full transition-colors favorite-btn flex-shrink-0 flex items-center justify-center"
-                                            data-property-id="{{ property.id }}">
+                                    <button type="button"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-600 w-10 h-10 rounded-full transition-colors favorite-btn flex-shrink-0 flex items-center justify-center"
+                                            data-property-id="{{ property.id }}"
+                                            aria-label="{% trans 'В избранное' %}"
+                                            title="{% trans 'В избранное' %}">
                                         <i class="far text-gray-600 fa-heart text-lg"></i>
                                     </button>
                                 </div>
@@ -404,6 +420,8 @@
                                     </button>
                                     {% if property_responsible_specialist.whatsapp_url %}
                                         <a href="{{ property_responsible_specialist.whatsapp_url }}" target="_blank"
+                                           rel="noopener noreferrer"
+                                           aria-label="{% trans 'Написать в WhatsApp' %}"
                                            class="bg-green-500 hover:bg-green-600 text-white w-10 h-10 rounded-full transition-all duration-300 hover:scale-105 shadow-sm flex items-center justify-center"
                                            data-ym-goal="property_whatsapp_click"
                                            data-ym-param-context="cta_bar"
@@ -412,6 +430,8 @@
                                         </a>
                                     {% else %}
                                         <a href="{{ business_profile.whatsapp_url }}" target="_blank"
+                                           rel="noopener noreferrer"
+                                           aria-label="{% trans 'Написать в WhatsApp' %}"
                                            class="bg-green-500 hover:bg-green-600 text-white w-10 h-10 rounded-full transition-all duration-300 hover:scale-105 shadow-sm flex items-center justify-center"
                                            data-ym-goal="property_whatsapp_click"
                                            data-ym-param-context="cta_bar"
@@ -1177,6 +1197,8 @@
                 <!-- Navigation Buttons -->
                 <div class="absolute inset-y-0 left-4 hidden md:flex items-center z-20">
                     <button onclick="previousImage()"
+                            type="button"
+                            aria-label="{% trans 'Предыдущее фото' %}"
                             class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-xl text-white/90 shadow-xl backdrop-blur-xl transition-all duration-200 hover:scale-105 hover:bg-white/16 hover:text-white">
                         <i class="fas fa-chevron-left"></i>
                     </button>
@@ -1184,6 +1206,8 @@
 
                 <div class="absolute inset-y-0 right-4 hidden md:flex items-center z-20">
                     <button onclick="nextImage()"
+                            type="button"
+                            aria-label="{% trans 'Следующее фото' %}"
                             class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-xl text-white/90 shadow-xl backdrop-blur-xl transition-all duration-200 hover:scale-105 hover:bg-white/16 hover:text-white">
                         <i class="fas fa-chevron-right"></i>
                     </button>
@@ -1228,12 +1252,16 @@
         <!-- Mobile Navigation -->
         <div class="absolute top-1/2 left-3 transform -translate-y-1/2 md:hidden">
             <button onclick="event.stopPropagation(); previousImage();"
+                    type="button"
+                    aria-label="{% trans 'Предыдущее фото' %}"
                     class="flex h-9 w-9 items-center justify-center rounded-full border border-white/16 bg-white/12 text-xs text-white/88 shadow-[0_10px_24px_rgba(15,23,42,0.18)] backdrop-blur-md transition-all duration-200 hover:bg-white/18 hover:text-white">
                 <i class="fas fa-chevron-left"></i>
             </button>
         </div>
         <div class="absolute top-1/2 right-3 transform -translate-y-1/2 md:hidden">
             <button onclick="event.stopPropagation(); nextImage();"
+                    type="button"
+                    aria-label="{% trans 'Следующее фото' %}"
                     class="flex h-9 w-9 items-center justify-center rounded-full border border-white/16 bg-white/12 text-xs text-white/88 shadow-[0_10px_24px_rgba(15,23,42,0.18)] backdrop-blur-md transition-all duration-200 hover:bg-white/18 hover:text-white">
                 <i class="fas fa-chevron-right"></i>
             </button>

@@ -14,6 +14,7 @@ function getMapUiElements() {
 
 let mapBoundsRefreshTimer = null;
 let lastLoadedMapBounds = null;
+let mapUiControlsBound = false;
 
 function isBoundsBasedMapLoadingEnabled() {
     return window.mapConfig?.enableBoundsBasedLoading === true;
@@ -113,7 +114,12 @@ function setMapStatus(mode, summaryCount = null) {
 
 window.setMapStatus = setMapStatus;
 
-document.addEventListener('DOMContentLoaded', () => {
+function bindMapUiControls() {
+    if (mapUiControlsBound) {
+        return;
+    }
+    mapUiControlsBound = true;
+
     const ui = getMapUiElements();
 
     if (ui.refreshButton) {
@@ -129,7 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindMapUiControls);
+} else {
+    bindMapUiControls();
+}
 
 document.addEventListener('catalog-map:ready', () => {
     const ui = getMapUiElements();

@@ -145,7 +145,9 @@ function displayGridView(properties) {
 
                     <!-- Remove Button -->
                     <button class="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 remove-favorite shadow-lg"
-                            data-property-id="${property.id}" title="${TRANSLATIONS.removeFromFavorites}">
+                            data-property-id="${property.id}"
+                            title="${TRANSLATIONS.removeFromFavorites}"
+                            aria-label="${TRANSLATIONS.removeFromFavorites}">
                         <i class="fas fa-times text-sm"></i>
                     </button>
 
@@ -218,7 +220,9 @@ function displayTableView(properties) {
             <th class="px-6 py-4 min-w-[250px] relative">
                 <div class="flex flex-col items-center">
                     <button class="absolute top-2 right-2 text-red-400 hover:text-red-600 remove-favorite"
-                            data-property-id="${property.id}" title="${TRANSLATIONS.removeFromFavorites}">
+                            data-property-id="${property.id}"
+                            title="${TRANSLATIONS.removeFromFavorites}"
+                            aria-label="${TRANSLATIONS.removeFromFavorites}">
                         <i class="fas fa-times-circle text-xl"></i>
                     </button>
                     <img src="${property.main_image_url || '/static/images/no-image.jpg'}"

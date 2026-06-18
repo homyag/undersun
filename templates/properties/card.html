@@ -84,8 +84,11 @@
 
                 <!-- Favorite Button -->
                 <div class="absolute top-3 right-3">
-                    <button class="bg-white/90 hover:bg-white w-10 h-10 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center"
-                            data-property-id="{{ property.id }}">
+                    <button type="button"
+                            class="bg-white/90 hover:bg-white w-10 h-10 rounded-full transition-all duration-200 group favorite-btn shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center"
+                            data-property-id="{{ property.id }}"
+                            aria-label="{% trans 'В избранное' %}"
+                            title="{% trans 'В избранное' %}">
                         <i class="far text-gray-600 group-hover:text-red-500 fa-heart transition-all duration-200"></i>
                     </button>
                 </div>

@@ -355,6 +355,8 @@
 {% include 'includes/layout/footer.html' %}
 <!-- WhatsApp Button -->
 <a href="{{ business_profile.whatsapp_url }}" class="whatsapp-btn" target="_blank"
+   rel="noopener noreferrer"
+   aria-label="WhatsApp Undersun Estate"
    style="position: fixed; right: 15px; bottom: 85px; z-index: 1000; width: 50px; height: 50px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; text-decoration: none; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);">
     <i class="fab fa-whatsapp"></i>
 </a>
@@ -614,7 +616,9 @@
 <script>
     window.FAVORITES_MESSAGES = {
         added: '{% trans "Добавлено в избранное" %}',
-        removed: '{% trans "Удалено из избранного" %}'
+        removed: '{% trans "Удалено из избранного" %}',
+        addLabel: '{% trans "В избранное" %}',
+        removeLabel: '{% trans "Удалить из избранного" %}'
     };
 </script>
 

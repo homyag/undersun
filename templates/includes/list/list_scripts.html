@@ -3,23 +3,35 @@
 <!-- Inject Django data for JavaScript -->
 {% include 'includes/list/list_data_injection.html' %}
 
+{% static 'js/map/map_popups.js' as map_popups_js %}
+{% static 'js/map/map_core.js' as map_core_js %}
+{% static 'js/list/list_map_functions.js' as list_map_functions_js %}
+{% static 'js/list/list_map_data_loader.js' as list_map_data_loader_js %}
+<script>
+window.catalogMapAssets = {
+    styles: [
+        'https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css'
+    ],
+    scripts: [
+        'https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js',
+        'https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js',
+        'https://unpkg.com/@protomaps/basemaps@5/dist/basemaps.js',
+        '{{ map_popups_js }}',
+        '{{ map_core_js }}',
+        '{{ list_map_functions_js }}',
+        '{{ list_map_data_loader_js }}'
+    ]
+};
+</script>
+
 <!-- Django i18n catalog for JavaScript (fails gracefully if route is missing) -->
 {% url 'javascript-catalog' as js_catalog_url %}
 {% if js_catalog_url %}
 <script src="{{ js_catalog_url }}"></script>
 {% endif %}
 
-<!-- MapLibre GL JavaScript -->
-<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
-<script src="https://unpkg.com/pmtiles@4.3.0/dist/pmtiles.js" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@protomaps/basemaps@5/dist/basemaps.js" crossorigin="anonymous"></script>
-
 <!-- List JavaScript Files -->
-<script src="{% static 'js/list/list_utility_functions.js' %}"></script>
-<script src="{% static 'js/map/map_popups.js' %}"></script>
-<script src="{% static 'js/map/map_core.js' %}"></script>
-<script src="{% static 'js/list/list_map_functions.js' %}"></script>
-<script src="{% static 'js/list/list_map_data_loader.js' %}"></script>
-<script src="{% static 'js/list/list_view_toggle.js' %}"></script>
-<script src="{% static 'js/list/list_favorites.js' %}"></script>
-<script src="{% static 'js/list/list_main_init.js' %}"></script>
+<script src="{% static 'js/list/list_utility_functions.js' %}" defer></script>
+<script src="{% static 'js/list/list_view_toggle.js' %}" defer></script>
+<script src="{% static 'js/list/list_favorites.js' %}" defer></script>
+<script src="{% static 'js/list/list_main_init.js' %}" defer></script>
