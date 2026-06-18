@@ -404,7 +404,7 @@
                                 </div>
                                 {% if property.deal_type == 'sale' or property.deal_type == 'both' %}
                                     {% if property.area_total %}
-                                        <div id="price-per-sqm" class="text-sm text-gray-500 mb-3 self-end text-right w-full"></div>
+                                        <div id="price-per-sqm" class="text-sm text-gray-500 mb-3 self-end text-right w-full" style="min-height: 1.25rem;"></div>
                                     {% endif %}
                                 {% endif %}
 
@@ -915,15 +915,15 @@
                         <input type="hidden" name="inquiry_type" value="custom_selection">
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                            <label for="custom-selection-name" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Имя" %} <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" name="name" required
+                            <input type="text" name="name" id="custom-selection-name" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                            <label for="custom-selection-phone" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Телефон" %} <span class="text-red-500">*</span>
                             </label>
                             <input type="tel" name="phone" id="custom-selection-phone" required
@@ -931,27 +931,27 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                            <label for="custom-selection-email" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Email" %} <span class="text-red-500">*</span>
                             </label>
-                            <input type="email" name="email" required
+                            <input type="email" name="email" id="custom-selection-email" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                            <label for="custom-selection-time" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Удобное время для общения / Часовой пояс" %}
                             </label>
-                            <input type="text" name="preferred_time"
+                            <input type="text" name="preferred_time" id="custom-selection-time"
                                    placeholder="{% trans 'Например: 10:00-18:00 UTC+7' %}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                            <label for="custom-selection-message-field" class="block text-sm font-medium text-gray-700 mb-1">
                                 {% trans "Дополнительная информация" %}
                             </label>
-                            <textarea name="message" rows="3"
+                            <textarea name="message" id="custom-selection-message-field" rows="3"
                                       placeholder="{% trans 'Расскажите о ваших пожеланиях к недвижимости...' %}"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200"></textarea>
                         </div>
@@ -1062,6 +1062,7 @@
                                 {% include 'core/includes/form_security_fields.html' with honeypot_id='property-newsletter-website' %}
                                 <input type="email"
                                        name="email"
+                                       aria-label="{% trans 'Email для подписки' %}"
                                        placeholder="{% trans 'Введите ваш email' %}"
                                        required
                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm">
@@ -1174,6 +1175,8 @@
             <div class="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-6xl flex-col gap-4" data-gallery-content onclick="event.stopPropagation()">
                 <!-- Header -->
                 <button onclick="closeGallery()"
+                        type="button"
+                        aria-label="{% trans 'Закрыть галерею' %}"
                         class="absolute top-4 right-4 z-30 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-lg text-white/90 shadow-xl backdrop-blur-xl transition-all duration-200 hover:scale-105 hover:bg-white/16 hover:text-white md:h-12 md:w-12">
                     <i class="fas fa-times"></i>
                 </button>
@@ -1244,6 +1247,8 @@
         <!-- Mobile Close Button -->
         <div class="absolute bottom-6 inset-x-0 flex justify-center md:hidden">
             <button onclick="closeGallery()"
+                    type="button"
+                    aria-label="{% trans 'Закрыть галерею' %}"
                     class="flex h-10 w-10 items-center justify-center rounded-full border border-white/18 bg-white/14 text-sm text-white/90 shadow-[0_10px_24px_rgba(15,23,42,0.18)] backdrop-blur-md transition-all duration-200 hover:bg-white/18 hover:text-white">
                 <i class="fas fa-times"></i>
             </button>
@@ -1277,6 +1282,8 @@
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
                     <h3 class="text-xl font-bold text-gray-900">{% trans "Записаться на просмотр" %}</h3>
                     <button onclick="closeViewingModal()"
+                            type="button"
+                            aria-label="{% trans 'Закрыть' %}"
                             class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
                         <i class="fas fa-times text-xl"></i>
                     </button>
@@ -1303,26 +1310,26 @@
                         <input type="hidden" name="inquiry_type" value="viewing">
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
-                            <input type="text" name="name" required
+                            <label for="viewing-name" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
+                            <input type="text" name="name" id="viewing-name" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %} *</label>
-                            <input type="tel" name="phone" required
+                            <label for="viewing-phone" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %} *</label>
+                            <input type="tel" name="phone" id="viewing-phone" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %}</label>
-                            <input type="email" name="email"
+                            <label for="viewing-email" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %}</label>
+                            <input type="email" name="email" id="viewing-email"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Желаемая дата и время" %}</label>
-                            <input type="datetime-local" name="preferred_date"
+                            <label for="viewing-preferred-date" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Желаемая дата и время" %}</label>
+                            <input type="datetime-local" name="preferred_date" id="viewing-preferred-date"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
@@ -1374,6 +1381,8 @@
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
                     <h3 class="text-xl font-bold text-gray-900">{% trans "Получить консультацию" %}</h3>
                     <button onclick="closeConsultationModal()"
+                            type="button"
+                            aria-label="{% trans 'Закрыть' %}"
                             class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
                         <i class="fas fa-times text-xl"></i>
                     </button>
@@ -1400,26 +1409,26 @@
                         <input type="hidden" name="inquiry_type" value="consultation">
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
-                            <input type="text" name="name" required
+                            <label for="consultation-name" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
+                            <input type="text" name="name" id="consultation-name" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %} *</label>
-                            <input type="tel" name="phone" required
+                            <label for="consultation-phone" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %} *</label>
+                            <input type="tel" name="phone" id="consultation-phone" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %}</label>
-                            <input type="email" name="email"
+                            <label for="consultation-email" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %}</label>
+                            <input type="email" name="email" id="consultation-email"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Что вас интересует?" %}</label>
-                            <select name="consultation_topic"
+                            <label for="consultation-topic" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Что вас интересует?" %}</label>
+                            <select name="consultation_topic" id="consultation-topic"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">{% trans "Выберите тему консультации" %}</option>
                                 <option value="price">{% trans "Цена и условия покупки" %}</option>
@@ -1433,8 +1442,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваши вопросы" %}</label>
-                            <textarea name="message" rows="4"
+                            <label for="consultation-message-field" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваши вопросы" %}</label>
+                            <textarea name="message" id="consultation-message-field" rows="4"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
                                       placeholder="{% trans 'Опишите, что вас интересует об этом объекте...' %}"></textarea>
                         </div>
@@ -1508,6 +1517,8 @@
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
                     <h3 class="text-xl font-bold text-gray-900">{% trans "Заказать звонок" %}</h3>
                     <button onclick="closeCallbackModal()"
+                            type="button"
+                            aria-label="{% trans 'Закрыть' %}"
                             class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
                         <i class="fas fa-times text-xl"></i>
                     </button>
@@ -1531,14 +1542,14 @@
                         <input type="hidden" name="inquiry_type" value="callback">
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
-                            <input type="text" name="name" required
+                            <label for="callback-name" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Ваше имя" %} *</label>
+                            <input type="text" name="name" id="callback-name" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %} *</label>
-                            <input type="tel" name="phone" required
+                            <label for="callback-phone" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Телефон" %} *</label>
+                            <input type="tel" name="phone" id="callback-phone" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
 

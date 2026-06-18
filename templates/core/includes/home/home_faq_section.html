@@ -210,7 +210,10 @@
         <h3 class="text-2xl font-bold text-primary">
           {% trans "Задать вопрос" %}
         </h3>
-        <button id="close-question-modal" class="text-gray-400 hover:text-accent hover:bg-accent/10 rounded-full p-2 transition-all duration-200">
+        <button id="close-question-modal"
+                type="button"
+                aria-label="{% trans 'Закрыть' %}"
+                class="text-gray-400 hover:text-accent hover:bg-accent/10 rounded-full p-2 transition-all duration-200">
           <i class="fas fa-times text-lg"></i>
         </button>
       </div>

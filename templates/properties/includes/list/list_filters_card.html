@@ -117,6 +117,7 @@
                         <span class="filter-currency-symbol shrink-0 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-md" data-default-symbol="{{ selected_currency.symbol|default:'฿' }}">{{ selected_currency.symbol|default:'฿' }}</span>
                         <div class="relative flex-1">
                             <input type="number" name="min_price" value="{{ current_filters.min_price }}" min="0"
+                                   aria-label="{% trans 'Минимальная цена' %}"
                                    class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary" placeholder="0">
                             <div class="price-loading-indicator hidden absolute right-3 top-1/2 -translate-y-1/2 transform">
                                 <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -130,6 +131,7 @@
                         <span class="filter-currency-symbol shrink-0 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-md" data-default-symbol="{{ selected_currency.symbol|default:'฿' }}">{{ selected_currency.symbol|default:'฿' }}</span>
                         <div class="relative flex-1">
                             <input type="number" name="max_price" value="{{ current_filters.max_price }}" min="0"
+                                   aria-label="{% trans 'Максимальная цена' %}"
                                    class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary" placeholder="50,000,000">
                             <div class="price-loading-indicator hidden absolute right-3 top-1/2 -translate-y-1/2 transform">
                                 <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -146,7 +148,9 @@
             </h4>
             <div class="relative">
                 <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                <input type="text" name="q" value="{{ current_filters.q }}" placeholder="{% if lang_code == 'en' %}ID, district, project{% elif lang_code == 'th' %}ID, เขต, โครงการ{% else %}ID, район, проект{% endif %}"
+                <input type="text" name="q" value="{{ current_filters.q }}"
+                       aria-label="{% trans 'Поиск по объектам' %}"
+                       placeholder="{% if lang_code == 'en' %}ID, district, project{% elif lang_code == 'th' %}ID, เขต, โครงการ{% else %}ID, район, проект{% endif %}"
                        class="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
             </div>
         </div>
@@ -155,7 +159,9 @@
             <h4 class="font-semibold text-gray-900 mb-3">
                 {% trans "Район" %}
             </h4>
-            <select name="district" id="district-select" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+            <select name="district" id="district-select"
+                    aria-label="{% trans 'Район' %}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
                 <option value="">{% trans "Все районы" %}</option>
                 {% for district in districts %}
                 <option value="{{ district.slug }}" {% if request.GET.district == district.slug %}selected{% endif %}>
@@ -169,7 +175,9 @@
             <h4 class="font-semibold text-gray-900 mb-3">
                 {% trans "Локация" %}
             </h4>
-            <select name="location" id="location-select" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+            <select name="location" id="location-select"
+                    aria-label="{% trans 'Локация' %}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary focus:border-primary">
                 <option value="">{% trans "Все локации" %}</option>
                 {% for location in locations %}
                 <option value="{{ location.slug }}" {% if request.GET.location == location.slug %}selected{% endif %}>
@@ -206,6 +214,7 @@
                     <i class="fas fa-search text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
                     <input type="text"
                            class="w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
+                           aria-label="{% trans 'Поиск по удобствам' %}"
                            placeholder="{% if lang_code == 'en' %}Find an amenity{% elif lang_code == 'th' %}ค้นหาสิ่งอำนวยความสะดวก{% else %}Найти удобство{% endif %}"
                            data-amenities-search>
                 </div>

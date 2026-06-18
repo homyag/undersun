@@ -21,7 +21,9 @@
                 <div class="min-w-0">
                     <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">{% trans "Сортировка" %}</div>
                     <div class="relative mt-1">
-                        <select onchange="updateSort(this.value)" class="min-w-[9rem] appearance-none rounded-full border border-gray-200 bg-gray-50 py-1.5 pl-3 pr-9 text-sm font-medium text-gray-700 transition-colors focus:border-primary/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10">
+                        <select onchange="updateSort(this.value)"
+                                aria-label="{% trans 'Сортировка' %}"
+                                class="min-w-[9rem] appearance-none rounded-full border border-gray-200 bg-gray-50 py-1.5 pl-3 pr-9 text-sm font-medium text-gray-700 transition-colors focus:border-primary/30 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10">
                             <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>{% trans "По дате" %}</option>
                             <option value="price_asc" {% if request.GET.sort == 'price_asc' or request.GET.sort == 'price_sale_usd' or request.GET.sort == 'price_sale_thb' or request.GET.sort == 'price_rent_monthly' %}selected{% endif %}>{% trans "Цена ↑" %}</option>
                             <option value="price_desc" {% if request.GET.sort == 'price_desc' or request.GET.sort == '-price_sale_usd' or request.GET.sort == '-price_sale_thb' or request.GET.sort == '-price_rent_monthly' %}selected{% endif %}>{% trans "Цена ↓" %}</option>

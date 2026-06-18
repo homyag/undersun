@@ -32,9 +32,7 @@ function initializeHeroSection() {
     }
 
     const staticBackground = document.querySelector('.hero-static-bg');
-    let currentSlide = 0;
-    const initialSlide = slides[currentSlide];
-    const lazySlides = Array.from(slides).filter(slide => slide.dataset.lazyBg);
+    let currentSlide = -1;
     const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
     let slideInterval = null;
 
@@ -85,13 +83,9 @@ function initializeHeroSection() {
         img.src = lazySrc;
     }
 
-    function hydrateHeroSlidesImmediately() {
-        lazySlides.forEach(slide => ensureSlideBackground(slide));
-    }
-
     function setSlideVisibility() {
         slides.forEach((slide, index) => {
-            slide.style.opacity = index === currentSlide ? '1' : '0';
+            slide.style.opacity = currentSlide >= 0 && index === currentSlide ? '1' : '0';
         });
     }
 
@@ -107,10 +101,19 @@ function initializeHeroSection() {
             return;
         }
 
-        slides[currentSlide].style.opacity = '0';
+        const previousSlide = currentSlide >= 0 ? slides[currentSlide] : null;
+        if (previousSlide) {
+            previousSlide.style.opacity = '0';
+        }
+
         currentSlide = (currentSlide + 1) % slides.length;
-        ensureSlideBackground(slides[currentSlide], { highPriority: true });
-        slides[currentSlide].style.opacity = '1';
+        const targetSlide = slides[currentSlide];
+        ensureSlideBackground(targetSlide, {
+            onLoad: () => {
+                hideStaticBackground();
+                targetSlide.style.opacity = '1';
+            }
+        });
     }
 
     function startSlider() {
@@ -119,7 +122,7 @@ function initializeHeroSection() {
         }
 
         if (!slideInterval) {
-            slideInterval = setInterval(nextSlide, 10000);
+            slideInterval = setInterval(nextSlide, 12000);
         }
     }
 
@@ -133,8 +136,9 @@ function initializeHeroSection() {
     const motionChangeHandler = (event) => {
         if (event.matches) {
             stopSlider();
-            slides.forEach((slide, index) => {
-                slide.style.opacity = index === 0 ? '1' : '0';
+            currentSlide = -1;
+            slides.forEach(slide => {
+                slide.style.opacity = '0';
             });
         } else {
             startSlider();
@@ -148,19 +152,7 @@ function initializeHeroSection() {
     }
 
     ensureSlideBackground(staticBackground, { highPriority: true });
-    let staticHidden = false;
-    const hideStaticWhenReady = () => {
-        if (staticHidden) {
-            return;
-        }
-        staticHidden = true;
-        setTimeout(() => hideStaticBackground(), 500);
-    };
-
-    ensureSlideBackground(initialSlide, { highPriority: true, onLoad: hideStaticWhenReady });
-    hydrateHeroSlidesImmediately();
     setSlideVisibility();
-    setTimeout(hideStaticWhenReady, 2000);
     startSlider();
 }
 

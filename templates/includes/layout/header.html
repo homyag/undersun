@@ -399,9 +399,11 @@
                  class="lg:hidden hidden absolute top-14 left-0 right-0 bg-white border-b border-gray-200 p-4 z-40">
                 <form class="flex" method="get" action="{% url 'core:search' %}">
                     <input type="search" name="q"
+                           aria-label="{% trans 'Поиск по сайту' %}"
                            placeholder="{% if LANGUAGE_CODE == 'en' %}Search...{% elif LANGUAGE_CODE == 'th' %}ค้นหา...{% else %}Поиск...{% endif %}"
                            class="flex-1 px-3 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-accent focus:border-accent focus:bg-white transition-colors">
                     <button type="submit"
+                            aria-label="{% trans 'Найти' %}"
                             class="px-4 py-2 bg-accent text-gray-900 rounded-r-md hover:bg-yellow-500 transition-colors border border-accent border-l-0">
                         <i class="fas fa-search"></i>
                     </button>

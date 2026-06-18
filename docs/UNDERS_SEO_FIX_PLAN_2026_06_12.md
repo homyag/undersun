@@ -775,6 +775,15 @@ PageSpeed / Lighthouse lab:
 | Thalang | Mobile | 84 | 3.2s | 3.5s | 70ms | 0.002 | 4.0s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en-locations-thalang/qgp0dnb05z?form_factor=mobile) |
 | Thalang | Desktop | 98 | 0.7s | 0.8s | 0ms | 0.012 | 1.4s | Нет данных | [PSI](https://pagespeed.web.dev/analysis/https-undersunestate-com-en-locations-thalang/qgp0dnb05z?form_factor=desktop) |
 
+Post-deploy mobile PSI re-check, 2026-06-18 11:44 GMT+3, Lighthouse 13.4.0:
+
+| Страница | Score | A11y | SEO | Agent View | FCP | LCP | TBT | CLS | SI | Основные PSI замечания |
+| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Home | 64 | 92 | 92 | 2/2 | 3.4s | 6.1s | 90ms | 0.003 | 7.0s | render-blocking CSS `dist/styles.css` / `fonts.css` / `main.css`, image savings `1065 KiB`, unused JS/CSS |
+| Catalog sale | 62 | 90 | 100 | 0/2 | 3.2s | 7.7s | 120ms | 0.143 | 4.0s | image savings `253 KiB`, render-blocking CSS, missing select labels, Agent View failed by CLS/accessibility tree |
+| Property detail | 59 | 86 | 100 | 0/2 | 3.5s | 6.0s | 20ms | 0.197 | 4.7s | image savings `231 KiB`, render-blocking CSS, form labels/touch targets, Agent View failed by CLS/accessibility tree |
+| Thalang | 76 | 95 | 100 | 2/2 | 3.2s | 4.2s | 120ms | 0 | 4.8s | render-blocking CSS, image savings `35 KiB`, cache headers `72 KiB`, unused JS |
+
 Synthetic browser navigation timing, Chrome / Playwright, not CrUX:
 
 | Страница | Status | Synthetic TTFB |
@@ -787,7 +796,8 @@ Synthetic browser navigation timing, Chrome / Playwright, not CrUX:
 Measured findings:
 
 - Field data / CrUX отсутствуют для всех проверенных URL; INP недоступен, TBT используем только как lab proxy.
-- CLS в lab низкий на всех страницах: mobile `0.001-0.011`, desktop `0.003-0.088`; массовый CLS-риск не подтвердился.
+- Initial 2026-06-17 CLS в lab был низкий на всех страницах: mobile `0.001-0.011`, desktop `0.003-0.088`; post-deploy PSI 2026-06-18 выявил CLS-регрессию на catalog mobile (`0.143`) и property detail mobile (`0.197`), из-за чего Agent View упал до `0/2` на этих страницах.
+- TBT после первых mobile performance итераций улучшился на ключевых страницах: home `220ms -> 90ms`, catalog `210ms -> 120ms`, property detail `430ms -> 20ms`. Следующий приоритет после этого замера — CLS/Agent View regression, затем LCP/images/render-blocking CSS.
 - Mobile LCP остается главным performance bottleneck: home `5.0s`, catalog `6.5s`, property detail `6.2s`.
 - Mobile FCP высокий и почти одинаковый на всех проверенных типах страниц: `3.2-3.5s`. Главные вероятные зоны влияния — render-blocking CSS, шрифты, TTFB и ранние blocking scripts.
 - Mobile Speed Index остается слабым на home/catalog/property detail: home `5.8s`, catalog `4.6s`, property detail `5.3s`; location page лучше (`4.0s`), поэтому приоритет — главная, каталог и карточка объекта.
@@ -837,10 +847,15 @@ Performance backlog по измерениям:
    - не выполнять тяжелую инициализацию featured carousel, reviews, process steps, team/news enhancements до idle или viewport;
    - сохранить server-rendered карточки как первичный контент, а JS использовать как enhancement;
    - проверить, что home mobile TBT после изменений ниже `150ms`.
-8. TBT/FCP P2 — third-party и analytics:
+8. TBT/FCP P2 — third-party и forms — начато 2026-06-18:
    - отложить Metrika/goals, reviews widgets и cookie/banner non-critical logic после first paint/idle;
    - не блокировать первый рендер синхронными analytics/form сценариями.
-9. FCP P2 — anonymous-page server/cache path:
+9. CLS / Agent View regression — начато 2026-06-18:
+   - добавить явные accessible names для mobile header search, catalog sort/filter selects и property detail form controls;
+   - зарезервировать стабильные слоты под Font Awesome icons до загрузки CDN CSS;
+   - зарезервировать высоту под `#price-per-sqm`, который заполняется JS после первого render;
+   - после деплоя повторить mobile PSI для catalog sale и property detail: целевой CLS ниже `0.1`, Agent View должен вернуться к `2/2`.
+10. FCP P2 — anonymous-page server/cache path:
    - TTFB по browser navigation высокий, но требует отдельного server-side профилирования;
    - проверить anonymous cache, template fragment cache, bot protection/cache behavior, currency/session middleware и DB-запросы в header/home/catalog/detail.
 
@@ -866,6 +881,24 @@ Implementation log:
   - `window.propertyDetailMapAssets` хранит URL/SRI для Leaflet, а `detail.js` подгружает CSS/JS только при приближении `#property-map` к viewport, при открытии URL с hash `#property-map` или при клике по ссылке на карту.
   - Первый экран property detail сохраняет текущую gallery/price/favorite/form логику; карта остается DOM-блоком и загружается как below-fold enhancement.
   - Verification: `node --check static/js/properties/detail.js`, `python manage.py check`, rendered HTML property detail через Django Client: status `200`, `#property-map=True`, direct Leaflet scripts/styles = `0`, `detail.js` подключен, `window.propertyDetailMapAssets=True`, `L.map` отсутствует в bootstrap HTML.
+- 2026-06-18, iteration 4:
+  - Global form resources: `static/css/phone-input.css` больше не подключается как blocking stylesheet в `templates/base.html`; теперь используется `preload as=style` с `onload rel=stylesheet` и `noscript` fallback.
+  - reCAPTCHA API больше не загружается eagerly на `DOMContentLoaded` для всех страниц с формами. API подогревается при первом `focusin`/`pointerdown` внутри формы и все еще загружается на submit перед повторной отправкой формы с токеном.
+  - Форма сохраняет текущий contract: hidden `g-recaptcha-response` и `recaptcha_action` создаются при binding, submit перехватывается до `forms.js`, после получения токена повторно диспатчит submit.
+  - Verification: `python manage.py check`, `git diff --check`, rendered HTML `/en/`, `/en/property/sale/`, property detail через Django Client: status `200`, `phone-input.css` в head только как `preload`, stylesheet fallback только внутри `noscript`, direct `google.com/recaptcha/api.js` script = `0`, `warmupRecaptchaApi=True`.
+- 2026-06-18, iteration 5:
+  - Post-deploy PSI 2026-06-18 11:44 зафиксирован в плане: TBT улучшен, но catalog/property detail получили CLS/Agent View regression.
+  - Accessibility tree follow-up: добавлены accessible names для mobile header search, catalog sort/district/location selects, filter search/price inputs, home modal close buttons, property detail modal/gallery close buttons и property detail form controls (`for/id` или `aria-label`).
+  - CLS reserve follow-up: добавлен ранний inline fallback для Font Awesome icon slots в `templates/base.html`, чтобы поздняя загрузка icon CSS не двигала inline text; для `#price-per-sqm` на property detail зарезервирована минимальная высота перед JS update.
+  - Verification: `python manage.py check`, `git diff --check`, rendered HTML `/en/`, `/en/property/sale/`, property detail через Django Client: status `200`, visible unnamed `button`, `a[href]`, `select`, `input`, `textarea` = `0`.
+- 2026-06-18, iteration 6:
+  - Homepage mobile PSI follow-up: после деплоя PSI для `/en/` показал render-blocking own CSS `dist/styles.css` / `main.css` / `fonts.css`, image savings `1134 KiB`, early unused `gtag` и `jquery`.
+  - `templates/base.html`: `fonts.css` и `main.css` переведены из blocking stylesheet в `preload as=style` + `onload rel=stylesheet` с `noscript` fallback; минимальные critical rules для CSS variables, body, hero, hero-search и reCAPTCHA badge оставлены inline.
+  - `templates/base.html`: прямые ранние `gtag.js` и Ahrefs script убраны из head. `gtag` queue создается сразу, внешние analytics scripts загружаются после `load + 6500ms` или при первом `pointerdown/keydown`.
+  - `static/js/home/hero.js`: не-LCP hero slides больше не гидратятся сразу при старте; первый статический фон остается видимым, а фоновые слайды подтягиваются только при первой смене через `12000ms`.
+  - `templates/core/includes/home/home_phone_contact_form_section.html`: большая contact image `3001x1833 / 704 KiB` заменена responsive `srcset` из generated JPEG variants `720w`, `960w`, `1400w` (`87 KiB`, `152 KiB`, `300 KiB`).
+  - Manual content task: promotional banner `Pruksa` из `/media/promotional_banners/` остается тяжелым PNG (`4800x300 / 283 KiB` в PSI); код уже использует responsive `picture`, но нужен новый загруженный в админке mobile asset около `828x150` в WebP/сжатом PNG.
+  - Verification: `node --check static/js/home/hero.js`, `python manage.py check`, `git diff --check`, rendered HTML `/en/`: status `200`, `fonts.css/main.css` только preload, direct `gtag.js`/Ahrefs script в head = `0`, contact image `srcset` содержит `720/960/1400`, `hero-slide-2` без inline background style.
 
 Задачи:
 
@@ -877,7 +910,7 @@ Implementation log:
 2. Сохранить результаты Lighthouse и CrUX, если доступны — выполнено; Lighthouse сохранен ссылками на PSI, CrUX/field data недоступны (`Нет данных`).
 3. Разделить field data и lab data — выполнено.
 4. Сформировать отдельный performance backlog — выполнено; 2026-06-18 расширено mobile performance plan по FCP, Speed Index и TBT.
-5. После деплоя accessibility/gallery follow-up повторить PSI на тех же URL и сравнить с baseline 2026-06-17.
+5. После деплоя accessibility/gallery follow-up повторить PSI на тех же URL и сравнить с baseline 2026-06-17 — выполнен post-deploy mobile re-check 2026-06-18; открыт CLS/Agent View regression follow-up для catalog/property detail.
 6. Выполнять performance follow-up итерациями: сначала шрифты/CSS и lazy JS, затем media/WebP/AVIF и server/cache profiling.
 
 Критерии приемки:
