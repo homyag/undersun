@@ -19,6 +19,36 @@ HERO_OG_IMAGE_PATHS = [
     'images/home_page/homepage_hero_section/thailand_hero_section_3.webp',
 ]
 
+
+def _get_active_nav_section(request):
+    """Return the top-level navigation section for the current resolved view."""
+    resolver_match = getattr(request, 'resolver_match', None)
+    namespace = getattr(resolver_match, 'namespace', '') or getattr(resolver_match, 'app_name', '') or ''
+    view_name = getattr(resolver_match, 'view_name', '') or ''
+    url_name = getattr(resolver_match, 'url_name', '') or ''
+
+    if namespace == 'properties' or view_name.startswith('properties:'):
+        return 'properties'
+
+    # Location pages are reached from the Property dropdown via Areas.
+    if url_name in {'location_list', 'district_detail', 'location_detail'}:
+        return 'properties'
+
+    if namespace == 'blog' or view_name.startswith('blog:'):
+        return 'blog'
+
+    if view_name == 'core:map' or (namespace == 'core' and url_name == 'map'):
+        return 'map'
+
+    if namespace == 'core' and url_name == 'service_detail':
+        return 'services'
+
+    if namespace == 'core' and url_name in {'about', 'contact', 'contacts_redirect'}:
+        return 'about'
+
+    return ''
+
+
 def site_context(request):
     """Глобальный контекст для всех шаблонов"""
     hero_image_urls = []
@@ -129,6 +159,7 @@ def site_context(request):
         'current_language': language_code,
         'site_name': getattr(settings, 'SITE_NAME', 'Undersun Estate'),
         'menu_services': menu_services,
+        'active_nav_section': _get_active_nav_section(request),
         'tailwind_use_cdn': getattr(settings, 'TAILWIND_USE_CDN', False),
         'default_og_image_url': default_og_image_url,
         'hero_og_images': hero_image_urls,

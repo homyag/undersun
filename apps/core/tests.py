@@ -4,6 +4,7 @@ import requests
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from apps.core.bot_detection import BotDetectionService
+from apps.core.context_processors import _get_active_nav_section
 from apps.core.services import TranslationService
 from apps.core.utils import truncate_meta
 
@@ -56,6 +57,60 @@ class SeoUtilsTests(SimpleTestCase):
         self.assertEqual(
             truncate_meta('Compare Phuket villas and condos with local context.'),
             'Compare Phuket villas and condos with local context.',
+        )
+
+
+class NavigationContextTests(SimpleTestCase):
+    def _request_for_view(self, *, namespace='', view_name='', url_name=''):
+        request = Mock()
+        request.resolver_match = Mock(
+            namespace=namespace,
+            app_name=namespace,
+            view_name=view_name,
+            url_name=url_name,
+        )
+        return request
+
+    def test_service_slug_with_property_does_not_activate_properties_nav(self):
+        request = self._request_for_view(
+            namespace='core',
+            view_name='core:service_detail',
+            url_name='service_detail',
+        )
+
+        self.assertEqual(_get_active_nav_section(request), 'services')
+
+    def test_blog_slug_with_property_does_not_activate_properties_nav(self):
+        request = self._request_for_view(
+            namespace='blog',
+            view_name='blog:detail',
+            url_name='detail',
+        )
+
+        self.assertEqual(_get_active_nav_section(request), 'blog')
+
+    def test_map_and_about_sections_are_not_properties_nav(self):
+        self.assertEqual(
+            _get_active_nav_section(self._request_for_view(namespace='core', view_name='core:map', url_name='map')),
+            'map',
+        )
+        self.assertEqual(
+            _get_active_nav_section(self._request_for_view(namespace='core', view_name='core:about', url_name='about')),
+            'about',
+        )
+
+    def test_property_and_location_views_activate_properties_nav(self):
+        self.assertEqual(
+            _get_active_nav_section(self._request_for_view(
+                namespace='properties',
+                view_name='properties:property_detail',
+                url_name='property_detail',
+            )),
+            'properties',
+        )
+        self.assertEqual(
+            _get_active_nav_section(self._request_for_view(view_name='district_detail', url_name='district_detail')),
+            'properties',
         )
 
 

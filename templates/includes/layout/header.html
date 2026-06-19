@@ -137,7 +137,7 @@
                     <div class="flex space-x-3 xl:space-x-6 nav-menu-container">
                         <!-- Property Dropdown -->
                         <div class="relative group">
-                            <button class="{% if request.resolver_match.url_name in 'property_sale,property_rent,property_list,property_detail' or 'property' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
+                            <button class="{% if active_nav_section == 'properties' %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
                                 {% if lang == 'en' %}Properties{% elif lang == 'th' %}อสังหาริมทรัพย์{% else %}
                                     Недвижимость{% endif %}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,12 +181,12 @@
                         </div>
 
                         <a href="{% url 'core:map' %}"
-                           class="{% if request.resolver_match.url_name == 'core:map' or 'map' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">
+                           class="{% if active_nav_section == 'map' %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">
                             {% if lang == 'en' %}Map{% elif lang == 'th' %}แผนที่{% else %}Карта{% endif %}</a>
 
                         <!-- Services Dropdown -->
                         <div class="relative group">
-                            <button class="{% if 'services' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
+                            <button class="{% if active_nav_section == 'services' %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
                                 {% if lang == 'en' %}Services{% elif lang == 'th' %}บริการ{% else %}Услуги{% endif %}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -212,7 +212,7 @@
 
                         <!-- About Dropdown -->
                         <div class="relative group">
-                            <button class="{% if request.resolver_match.url_name in 'core:about,core:contact' or 'about' in request.path or 'contact' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
+                            <button class="{% if active_nav_section == 'about' %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors flex items-center font-medium whitespace-nowrap text-lg nav-menu-item">
                                 {% if lang == 'en' %}About{% elif lang == 'th' %}เกี่ยวกับเรา{% else %}О нас{% endif %}
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -233,7 +233,7 @@
                         </div>
 
                         <a href="{% url 'blog:list' %}"
-                           class="{% if request.resolver_match.url_name in 'blog:list,blog:detail' or 'blog' in request.path %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">
+                           class="{% if active_nav_section == 'blog' %}text-accent{% else %}text-primary hover:text-accent{% endif %} transition-colors font-medium whitespace-nowrap text-lg nav-menu-item">
                             {% if lang == 'en' %}Blog{% elif lang == 'th' %}บล็อก{% else %}Блог{% endif %}
                         </a>
                     </div>
