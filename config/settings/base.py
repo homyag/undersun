@@ -228,6 +228,7 @@ BOT_PROTECTION = {
     'WHITELIST_IPS': [
         #'91.212.150.176',  # reverse proxy for RU traffic
         '95.161.221.91',   # admin IP
+        '46.191.181.174',  # trusted client/admin IP
         '5.45.192.0/18',
         '5.255.192.0/18',
         '37.9.64.0/18',
