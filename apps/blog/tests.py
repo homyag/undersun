@@ -4,6 +4,7 @@ import tempfile
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, SimpleTestCase, override_settings
@@ -86,6 +87,69 @@ class BlogTocTests(SimpleTestCase):
         )
         self.assertNotIn('&nbsp;', toc_items[0]['title'])
         self.assertIn('Ежегодное собрание&nbsp;P-REA &amp; Partners 2026', processed_content)
+
+
+class BlogSvgInlineTests(SimpleTestCase):
+    def setUp(self):
+        self.media_root = tempfile.mkdtemp()
+        self.settings_override = override_settings(MEDIA_ROOT=self.media_root)
+        self.settings_override.enable()
+        self.addCleanup(self.settings_override.disable)
+        self.addCleanup(shutil.rmtree, self.media_root, ignore_errors=True)
+
+    def test_local_editor_svg_is_inlined_with_accessible_text(self):
+        default_storage.save(
+            'blog/editor/keypoints.svg',
+            ContentFile('''
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" width="800" height="430">
+              <title>Ключевые выводы | Рынок недвижимости Таиланда 2026</title>
+              <script>alert(1)</script>
+              <text x="20" y="26">Ключевые выводы</text>
+              <text x="20" y="46">Рынок недвижимости Таиланда 2026</text>
+              <text x="32" y="77">Спрос на кондо сохраняется</text>
+            </svg>
+            '''.encode('utf-8')),
+        )
+        html = '<p><img src="../../../../media/blog/editor/keypoints.svg" alt="" width="800" height="430"></p>'
+
+        _, processed_content = _extract_blog_toc_and_content(html)
+
+        self.assertIn('<svg', processed_content)
+        self.assertIn('data-inline-blog-svg="true"', processed_content)
+        self.assertIn('role="img"', processed_content)
+        self.assertIn('aria-labelledby="blog-svg-title-1 blog-svg-desc-1"', processed_content)
+        self.assertIn('Ключевые выводы | Рынок недвижимости Таиланда 2026', processed_content)
+        self.assertIn('Спрос на кондо сохраняется', processed_content)
+        self.assertIn('class="blog-inline-svg"', processed_content)
+        self.assertNotIn('<img', processed_content)
+        self.assertNotIn('<script', processed_content)
+
+    def test_absolute_local_editor_svg_is_inlined_for_allowed_host(self):
+        default_storage.save(
+            'blog/editor/absolute.svg',
+            ContentFile('''
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430">
+              <title>Инфографика рынка Пхукета</title>
+              <text x="20" y="26">Данные рынка Пхукета</text>
+            </svg>
+            '''.encode('utf-8')),
+        )
+        html = '<p><img src="https://undersunestate.com/media/blog/editor/absolute.svg" alt=""></p>'
+
+        with override_settings(ALLOWED_HOSTS=['undersunestate.com']):
+            _, processed_content = _extract_blog_toc_and_content(html)
+
+        self.assertIn('<svg', processed_content)
+        self.assertIn('Инфографика рынка Пхукета', processed_content)
+        self.assertNotIn('<img', processed_content)
+
+    def test_external_svg_image_is_not_inlined(self):
+        html = '<p><img src="https://example.com/chart.svg" alt="External chart"></p>'
+
+        _, processed_content = _extract_blog_toc_and_content(html)
+
+        self.assertIn('<img src="https://example.com/chart.svg"', processed_content)
+        self.assertNotIn('data-inline-blog-svg', processed_content)
 
 
 class TinyMCEUploadTests(SimpleTestCase):

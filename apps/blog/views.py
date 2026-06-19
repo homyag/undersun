@@ -4,6 +4,7 @@ import re
 import xml.etree.ElementTree as ET
 from html import unescape as html_unescape
 
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -13,7 +14,7 @@ from django.http import JsonResponse, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 from django.templatetags.static import static
 from django.urls import reverse
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 from django.utils.text import slugify
 from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
@@ -134,8 +135,10 @@ BLOG_SEO_DEFAULTS = {
 
 HEADING_PATTERN = re.compile(r'<h([23])([^>]*)>(.*?)</h\1>', re.IGNORECASE | re.DOTALL)
 HEADING_ID_PATTERN = re.compile(r'\sid=(["\'])(.*?)\1', re.IGNORECASE)
+IMG_TAG_PATTERN = re.compile(r'<img\b[^>]*>', re.IGNORECASE)
 TINYMCE_ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
 TINYMCE_MAX_UPLOAD_SIZE = 5 * 1024 * 1024
+TINYMCE_INLINE_SVG_PREFIXES = ('blog/editor/',)
 SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink'
 SVG_BLOCKED_DECLARATION_PATTERN = re.compile(r'<!\s*(DOCTYPE|ENTITY)\b', re.IGNORECASE)
@@ -292,6 +295,11 @@ def _sanitize_svg_upload(uploaded_file):
     except UnicodeDecodeError as exc:
         raise ValueError('Invalid SVG encoding. Use UTF-8 SVG files.') from exc
 
+    root = _parse_and_sanitize_svg(svg_text)
+    return ET.tostring(root, encoding='utf-8', method='xml')
+
+
+def _parse_and_sanitize_svg(svg_text):
     if SVG_BLOCKED_DECLARATION_PATTERN.search(svg_text):
         raise ValueError('Invalid SVG content. DOCTYPE and ENTITY declarations are not allowed.')
 
@@ -304,7 +312,172 @@ def _sanitize_svg_upload(uploaded_file):
         raise ValueError('Invalid SVG file. Root element must be <svg>.')
 
     _sanitize_svg_element(root)
-    return ET.tostring(root, encoding='utf-8', method='xml')
+    return root
+
+
+def _normalize_svg_accessible_text(value):
+    return re.sub(r'\s+', ' ', html_unescape(str(value or ''))).strip()
+
+
+def _collect_svg_accessible_text(root):
+    title = ''
+    desc = ''
+    text_lines = []
+
+    for element in root.iter():
+        tag_name = _svg_local_name(element.tag).lower()
+        text_value = _normalize_svg_accessible_text(''.join(element.itertext()))
+        if not text_value:
+            continue
+        if tag_name == 'title' and not title:
+            title = text_value
+        elif tag_name == 'desc' and not desc:
+            desc = text_value
+        elif tag_name == 'text':
+            if not text_lines or text_lines[-1] != text_value:
+                text_lines.append(text_value)
+
+    return title, desc, text_lines
+
+
+def _resolve_local_blog_svg_path(src):
+    if not src:
+        return ''
+
+    parsed = urlparse(html_unescape(src))
+    if parsed.scheme and parsed.scheme not in {'http', 'https'}:
+        return ''
+    if parsed.netloc:
+        source_host = parsed.netloc.split(':', 1)[0].lower()
+        allowed_hosts = {
+            host.lstrip('.').lower()
+            for host in getattr(settings, 'ALLOWED_HOSTS', [])
+            if host and host != '*'
+        }
+        if not allowed_hosts or not any(
+            source_host == host or source_host.endswith(f'.{host}')
+            for host in allowed_hosts
+        ):
+            return ''
+
+    raw_path = unquote(parsed.path or src)
+    media_url_path = urlparse(settings.MEDIA_URL).path or '/media/'
+    media_rel_path = ''
+
+    if raw_path.startswith(media_url_path):
+        media_rel_path = raw_path[len(media_url_path):]
+    elif raw_path.startswith('media/'):
+        media_rel_path = raw_path[len('media/'):]
+    elif '/media/' in raw_path:
+        media_rel_path = raw_path.split('/media/', 1)[1]
+    elif 'media/' in raw_path:
+        media_rel_path = raw_path.split('media/', 1)[1]
+
+    media_rel_path = media_rel_path.lstrip('/').replace('\\', '/')
+    normalized_path = os.path.normpath(media_rel_path).replace('\\', '/')
+    if (
+        not normalized_path
+        or normalized_path.startswith('../')
+        or normalized_path == '..'
+        or not normalized_path.lower().endswith('.svg')
+        or not any(normalized_path.startswith(prefix) for prefix in TINYMCE_INLINE_SVG_PREFIXES)
+    ):
+        return ''
+
+    return normalized_path
+
+
+def _ensure_svg_child_text(root, tag_name, text_value, element_id, insert_index=0):
+    namespace_tag = f'{{{SVG_NAMESPACE}}}{tag_name}'
+    for child in list(root):
+        if _svg_local_name(child.tag).lower() == tag_name:
+            if text_value and not _normalize_svg_accessible_text(''.join(child.itertext())):
+                child.text = text_value
+            child.set('id', element_id)
+            return child
+
+    child = ET.Element(namespace_tag)
+    child.set('id', element_id)
+    child.text = text_value
+    root.insert(insert_index, child)
+    return child
+
+
+def _build_inline_blog_svg(svg_path, img_tag, index):
+    try:
+        if not default_storage.exists(svg_path):
+            return ''
+        if default_storage.size(svg_path) > TINYMCE_MAX_UPLOAD_SIZE:
+            return ''
+        with default_storage.open(svg_path, 'rb') as svg_file:
+            svg_text = svg_file.read().decode('utf-8-sig')
+        root = _parse_and_sanitize_svg(svg_text)
+    except (OSError, UnicodeDecodeError, ValueError):
+        return ''
+
+    title, desc, text_lines = _collect_svg_accessible_text(root)
+    img_alt = _normalize_svg_accessible_text(img_tag.get('alt', ''))
+    accessible_title = title or img_alt or (text_lines[0] if text_lines else '')
+    if not accessible_title:
+        return ''
+
+    desc_source = desc or ' '.join(line for line in text_lines if line != accessible_title)
+    accessible_desc = truncate_meta(desc_source, limit=1200) if desc_source else ''
+    title_id = f'blog-svg-title-{index}'
+    desc_id = f'blog-svg-desc-{index}'
+
+    _ensure_svg_child_text(root, 'title', accessible_title, title_id, insert_index=0)
+    labelled_by = [title_id]
+    if accessible_desc:
+        _ensure_svg_child_text(root, 'desc', accessible_desc, desc_id, insert_index=1)
+        labelled_by.append(desc_id)
+
+    root.set('role', 'img')
+    root.set('focusable', 'false')
+    root.set('aria-labelledby', ' '.join(labelled_by))
+    root.set('data-inline-blog-svg', 'true')
+
+    img_classes = img_tag.get('class') or []
+    if isinstance(img_classes, str):
+        img_classes = img_classes.split()
+    svg_classes = (root.get('class') or '').split()
+    class_names = []
+    for class_name in [*svg_classes, *img_classes, 'blog-inline-svg']:
+        if class_name and class_name not in class_names:
+            class_names.append(class_name)
+    root.set('class', ' '.join(class_names))
+
+    if img_tag.get('width') and not root.get('width'):
+        root.set('width', img_tag['width'])
+    if img_tag.get('height') and not root.get('height'):
+        root.set('height', img_tag['height'])
+
+    return ET.tostring(root, encoding='unicode', method='xml')
+
+
+def _inline_blog_svg_images(html_content):
+    if not html_content or '.svg' not in html_content.lower():
+        return html_content
+
+    inline_counter = 0
+
+    def _replace(match):
+        nonlocal inline_counter
+        img_html = match.group(0)
+        soup = BeautifulSoup(img_html, 'html.parser')
+        img_tag = soup.find('img')
+        if not img_tag:
+            return img_html
+
+        svg_path = _resolve_local_blog_svg_path(img_tag.get('src', ''))
+        if not svg_path:
+            return img_html
+
+        inline_counter += 1
+        inline_svg = _build_inline_blog_svg(svg_path, img_tag, inline_counter)
+        return inline_svg or img_html
+
+    return IMG_TAG_PATTERN.sub(_replace, html_content)
 
 
 def _extract_blog_toc_and_content(html_content):
@@ -345,6 +518,7 @@ def _extract_blog_toc_and_content(html_content):
         return f'<h{level}{attrs}>{inner_html}</h{level}>'
 
     processed_content = HEADING_PATTERN.sub(_replace, html_content)
+    processed_content = _inline_blog_svg_images(processed_content)
     return toc_items, processed_content
 
 
