@@ -2603,7 +2603,7 @@ msgstr "Thanks!"
 
 #: templates/base.html:390 templates/base.html:411
 msgid "Закрыть"
-msgstr "To close"
+msgstr "Close"
 
 #: templates/base.html:426 templates/core/map.html:1991
 #: templates/includes/list/list_data_injection.html:15
@@ -5566,3 +5566,37 @@ msgstr "Previous review"
 
 msgid "Следующий отзыв"
 msgstr "Next review"
+
+#: templates/includes/layout/header.html:388
+msgid "Открыть меню"
+msgstr "Open menu"
+
+#: templates/properties/includes/list/list_filters_card.html:120
+msgid "Минимальная цена"
+msgstr "Minimum price"
+
+#: templates/properties/includes/list/list_filters_card.html:134
+msgid "Максимальная цена"
+msgstr "Maximum price"
+
+#: templates/properties/includes/list/list_properties_map.html:21
+msgid "Легенда карты"
+msgstr "Map legend"
+
+#: templates/properties/includes/list/list_filters_card.html:260
+#: templates/properties/includes/list/list_filters_card.html:278
+msgid "Считаем..."
+msgstr "Calculating..."
+
+#: templates/properties/detail.html:209
+#, python-format
+msgid "Открыть фото %(number)s"
+msgstr "Open photo %(number)s"
+
+#: templates/properties/detail.html:1195 templates/properties/detail.html:1267
+msgid "Закрыть галерею"
+msgstr "Close gallery"
+
+#: templates/base.html:455
+msgid "Закрыть сообщение"
+msgstr "Close message"

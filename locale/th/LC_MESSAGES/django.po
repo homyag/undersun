@@ -2565,7 +2565,7 @@ msgstr "ขอบคุณ!"
 
 #: templates/base.html:390 templates/base.html:411
 msgid "Закрыть"
-msgstr "การปิด"
+msgstr "ปิด"
 
 #: templates/base.html:426 templates/core/map.html:1991
 #: templates/includes/list/list_data_injection.html:15
@@ -5489,3 +5489,37 @@ msgstr "รีวิวก่อนหน้า"
 
 msgid "Следующий отзыв"
 msgstr "รีวิวถัดไป"
+
+#: templates/includes/layout/header.html:388
+msgid "Открыть меню"
+msgstr "เปิดเมนู"
+
+#: templates/properties/includes/list/list_filters_card.html:120
+msgid "Минимальная цена"
+msgstr "ราคาต่ำสุด"
+
+#: templates/properties/includes/list/list_filters_card.html:134
+msgid "Максимальная цена"
+msgstr "ราคาสูงสุด"
+
+#: templates/properties/includes/list/list_properties_map.html:21
+msgid "Легенда карты"
+msgstr "คำอธิบายแผนที่"
+
+#: templates/properties/includes/list/list_filters_card.html:260
+#: templates/properties/includes/list/list_filters_card.html:278
+msgid "Считаем..."
+msgstr "กำลังคำนวณ..."
+
+#: templates/properties/detail.html:209
+#, python-format
+msgid "Открыть фото %(number)s"
+msgstr "เปิดรูปภาพ %(number)s"
+
+#: templates/properties/detail.html:1195 templates/properties/detail.html:1267
+msgid "Закрыть галерею"
+msgstr "ปิดแกลเลอรี"
+
+#: templates/base.html:455
+msgid "Закрыть сообщение"
+msgstr "ปิดข้อความ"

@@ -55,8 +55,14 @@
                     {% endif %}
                 </h1>
                 <!-- Описание -->
-                <p class="text-sm sm:text-base md:text-lg text-white font-medium max-w-4xl mx-auto leading-snug sm:leading-relaxed">
-                    {% trans "Undersun Estate — ваш ориентир в недвижимости Таиланда. Мы могли бы показать весь рынок, но порекомендуем только то, что действительно стоит вашего внимания." %}
+                <p class="text-sm sm:text-base md:text-lg text-white font-medium max-w-5xl mx-auto leading-snug sm:leading-relaxed">
+                    {% if LANGUAGE_CODE == 'en' %}
+                        Undersun Estate is a Phuket real estate agency and property advisory team helping international buyers, sellers, renters and investors compare villas, condos, land and commercial property. We shortlist properties, arrange viewings, coordinate negotiations and due diligence, and connect clients with licensed legal, tax or financial professionals when specialist advice is required.
+                    {% elif LANGUAGE_CODE == 'th' %}
+                        Undersun Estate คือเอเจนซี่อสังหาริมทรัพย์และทีมที่ปรึกษาในภูเก็ต ช่วยผู้ซื้อ ผู้ขาย ผู้เช่า และนักลงทุนต่างชาติเปรียบเทียบวิลล่า คอนโด ที่ดิน และอสังหาริมทรัพย์เชิงพาณิชย์ เราคัดเลือกทรัพย์ นัดชม ประสานการเจรจาและการตรวจสอบเบื้องต้น และเชื่อมต่อผู้เชี่ยวชาญด้านกฎหมาย ภาษี หรือการเงินเมื่อจำเป็น
+                    {% else %}
+                        Undersun Estate — агентство недвижимости и консультационная команда на Пхукете. Мы помогаем международным покупателям, продавцам, арендаторам и инвесторам сравнивать виллы, кондоминиумы, землю и коммерческие объекты, готовим подборки, организуем просмотры, координируем переговоры и due diligence, а при необходимости подключаем профильных юридических, налоговых или финансовых специалистов.
+                    {% endif %}
                 </p>
 
                 <!-- Catalog Button -->

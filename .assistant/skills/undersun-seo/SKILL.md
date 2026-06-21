@@ -1,6 +1,6 @@
 ---
 name: undersun-seo
-description: Use when implementing, auditing, or reviewing SEO for the Undersun Estate multilingual Django site. Focuses on indexability, hreflang/canonical, server-rendered metadata, schema, image SEO, property/catalog/blog SEO, programmatic landing safeguards, and Google generative AI search guidance.
+description: Use when implementing, auditing, or reviewing SEO for the Undersun Estate multilingual Django site. Focuses on indexability, hreflang/canonical, server-rendered metadata, schema, image SEO, property/catalog/blog SEO, programmatic landing safeguards, Google generative AI search guidance, and non-Google LLM/GEO visibility.
 ---
 
 # Undersun SEO Skill
@@ -58,6 +58,7 @@ Use an evidence-first workflow:
    - programmatic SEO landing;
    - private/admin/AJAX endpoint.
 2. Collect evidence:
+   - raw initial HTML and rendered HTML when JavaScript or lazy UI may affect SEO;
    - `title`;
    - `description`;
    - H1;
@@ -86,6 +87,8 @@ Use an evidence-first workflow:
    - then nice-to-have improvements.
 
 Do not give vague SEO advice without pointing to concrete page evidence.
+
+For repeat audits, record durable baselines in the active project plan or audit document with the tool name, URL, device, date, and source of data. Do not rely on memory or create hidden cache files unless the user explicitly wants an artifact workflow.
 
 ## Required Checks For Public Pages
 
@@ -127,6 +130,19 @@ Verify:
 - language switchers preserve the equivalent page when possible and avoid linking users to unrelated fallbacks without intent.
 
 Do not remove `hreflang` or language prefixes to simplify implementation.
+
+For each `hreflang` set, verify:
+
+- every localized URL has a self-reference that exactly matches its canonical URL, including protocol, host, path, and trailing slash;
+- every alternate relationship is bidirectional across `ru`, `en`, and `th`;
+- `x-default` is present only when the implementation intentionally supports a fallback page;
+- non-canonical, filtered, paginated, map-state, or redirected URLs are not included in the alternate set.
+
+For multilingual quality, check section-level parity and locale fit:
+
+- equivalent pages keep the same core property facts, service claims, dates, prices, availability, and schema facts;
+- localized pages do not leak Russian, English, or Thai UI microcopy into `aria-label`, placeholders, form labels, image alt text, schema, JSON bootstrap data, or hidden modal text;
+- dates, currencies, phone/contact formatting, legal references, and CTAs fit the target locale without changing the business facts.
 
 ## Private And Non-Indexable Boundaries
 
@@ -175,6 +191,10 @@ Avoid:
 
 For market, legal, investment, visa, tax, or financing-adjacent pages, keep wording informational and attribute uncertainty. Do not turn real estate SEO pages into professional legal, tax, or financial advice.
 
+Treat LLM misinterpretation risk as a content quality issue. Be especially careful with foreign ownership, freehold quota, leasehold renewals, Thai company ownership, Blue Book / Tabien Baan, land titles, Land Department registration, taxes and transfer fees, rental guarantees, ROI/yield/resale/liquidity, visa/residency/relocation claims, construction dates, developer reliability, and off-plan risks.
+
+For these topics, prefer safer wording such as "usually", "may", "depends on the project", "must be checked before purchase", "requires legal review", "as of the article update date", and "not legal, tax, financial, or immigration advice".
+
 ## E-E-A-T Evidence For Real Estate
 
 Treat E-E-A-T as an evaluation framework, not a tag, schema property, score, or single ranking switch. The practical goal is to make experience, expertise, authoritativeness, and trust visible in the page and site evidence.
@@ -219,7 +239,7 @@ When using AI tools to draft SEO copy, keep the output within Google Search Esse
 
 Do not:
 
-- create `llms.txt`, AI text files, Markdown mirrors, or special AI markup for Google Search visibility;
+- create `llms.txt`, AI text files, Markdown mirrors, or special AI markup as Google Search visibility or ranking shortcuts;
 - split pages into artificial "chunks" for AI consumption;
 - rewrite content in a special "AI style";
 - chase every long-tail wording variation with a new page;
@@ -228,6 +248,73 @@ Do not:
 - create pages primarily to manipulate rankings or AI responses.
 
 Structured data remains useful for rich results, but it is not a special requirement for generative AI search.
+
+For AI-search citation readiness, improve normal page evidence instead of adding artificial AI-only surfaces:
+
+- use answer-first paragraphs under clear H2/H3 headings for important questions;
+- make key facts self-contained enough to quote without losing context, especially on market, legal, investment, service, and district pages;
+- prefer specific data, source attribution, author/reviewer names, publication/update dates, and original Undersun observations;
+- use tables and lists for comparisons, transaction steps, cost components, district tradeoffs, and eligibility constraints;
+- keep infographic/SVG data accessible in real DOM text or inline SVG text, not only raster images or background graphics;
+- verify buttons, links, selects, forms, modals, maps, and cookie UI have accessible names so browser agents can navigate the page.
+
+Do not recommend `llms.txt`, AI-only Markdown mirrors, artificial content chunks, special "AI citation blocks", or crawler-policy changes as Google AI Search shortcuts. Google Search guidance says AI Overviews and AI Mode do not require new machine-readable files or special markup.
+
+`llms.txt` may still be useful as an optional agentic-browsing or non-Google LLM artifact: a concise source map that helps AI agents understand the site's purpose and key URLs. Treat it as optional, keep it synchronized with visible HTML/schema, and do not present it as a ranking factor or guaranteed AI-citation mechanism.
+
+Discuss AI crawler allow/block policy only when the user asks about non-Google AI visibility, licensing, data-use preferences, or `robots.txt`; distinguish search/browsing bots from training crawlers.
+
+## Non-Google LLM Visibility / GEO Audit
+
+Use this section when the user asks about GEO, LLM visibility, AI search visibility, ChatGPT Search, Perplexity, AI platform, Bing Copilot, browser agents, or how AI systems see the site. Do not confuse this with Google AI Search guidance.
+
+Treat LLM visibility as the ability of non-Google AI systems and browser agents to:
+
+- fetch the public page when allowed;
+- identify the page entity and Undersun Estate business entity;
+- extract accurate facts from normal visible HTML;
+- quote or summarize the page without losing context;
+- distinguish Undersun Estate's real estate services from legal, tax, financial, immigration, or investment advice;
+- recommend the right Undersun page for the right user intent.
+
+For important public pages, verify entity extraction from visible HTML:
+
+- business name, type, service area, languages, services, contact paths, and trust signals;
+- page-specific facts such as property type, deal type, location, price, currency, area, bedrooms, bathrooms, status, update date, author, reviewer, and sources.
+
+For answer suitability, identify the AI-answer intents each page can support. Check whether the page answers the intent near the top, whether the answer is quotable with enough context, whether caveats are present for risky topics, and whether the page links to a better internal source when it is not the best answer.
+
+For citation readiness, prefer concise answer-first paragraphs under clear H2/H3 headings, self-contained factual statements, visible publication/update dates, named author or reviewer where expertise matters, source links for legal/tax/visa/financing/official market facts, original Undersun observations, tables or lists for comparisons and risks, and no unsupported guarantees.
+
+For site-level GEO audits, produce an LLM source map:
+
+| User question | Best Undersun source page | Current readiness | Missing evidence | Recommended fix |
+|---|---|---|---|---|
+
+Include core questions around foreign ownership, freehold vs leasehold, best Phuket areas, villas, condos, rentals, off-plan risks, investment risks, taxes and transfer fees, and how to choose a Phuket real estate agent.
+
+Discuss AI crawler policy only when the task explicitly involves non-Google AI visibility, licensing, data-use preferences, or `robots.txt`. Distinguish search/browsing bots, training crawlers, and normal search crawlers such as Googlebot and Bingbot. Do not recommend opening all bots by default; explain the tradeoff between visibility, training restrictions, commercial AI restrictions, and default robots behavior.
+
+When `llms.txt` is explicitly requested or needed to address a Lighthouse Agentic Browsing / discoverability audit, keep it short and factual:
+
+- summarize Undersun Estate's business identity, languages, service area, and service boundaries;
+- link only to canonical, maintained public pages;
+- include legal/tax/financial/immigration caveats where relevant;
+- avoid duplicating volatile property inventory, prices, availability, or claims that can drift from the database;
+- verify it does not contradict visible HTML, schema, sitemap, robots policy, or localized page facts.
+
+When the user asks for GEO or LLM visibility, add these sections to the normal SEO review:
+
+1. LLM summary of the page/site
+2. Extracted entities and facts
+3. Best AI-answer intents
+4. Citation-ready sections
+5. Missing evidence
+6. Misinterpretation risks
+7. Recommended answer-first blocks
+8. Internal source map
+9. Schema and visible-content alignment
+10. Priority fixes
 
 ## Local Business And Agent-Friendly Readiness
 
@@ -268,6 +355,18 @@ Verify:
 - no thin doorway pages.
 
 If a programmatic page has weak unique value, flag it before implementation.
+
+Use these numeric gates for generated SEO landings, not for normal property detail inventory:
+
+- warn before publishing 100+ generated SEO pages without a sampling review;
+- require explicit justification before publishing 500+ generated SEO pages;
+- flag pages where less than 40% of the main body is genuinely unique to the page;
+- treat less than 30% unique main-body content as a hard stop until the template/data strategy changes;
+- review at least 5-10% of generated pages manually before release;
+- roll out large sets in batches of 50-100 pages, then monitor indexing, impressions, and quality signals for 2-4 weeks before expanding;
+- consolidate, noindex, or exclude pages whose source data cannot support standalone user value.
+
+The standalone value test is mandatory: would this page still deserve to exist if no similar generated page existed on the site?
 
 ## Schema And Metadata Rules
 
@@ -316,6 +415,13 @@ For catalog and location pages, verify:
 - pagination, load-more behavior, and map/grid state are crawlable or intentionally non-indexable;
 - internal links guide users to relevant districts, property types, services, and high-value properties.
 
+When a page is technically healthy but underperforms, check search intent and page-type fit before rewriting:
+
+- transactional queries should usually land on catalog, property-type, district, or property pages, not generic blog posts;
+- informational queries should usually land on guides, service pages, FAQs, or editorial content with clear next steps;
+- local queries should expose district/location context, inventory, service area, contact paths, and local proof;
+- do not force a page type that the current SERP clearly does not reward unless the user is intentionally testing a different strategy.
+
 ## Blog And Editorial SEO
 
 For blog pages, verify:
@@ -338,6 +444,15 @@ For public SEO pages, verify:
 - videos, virtual tours, and maps do not replace essential text facts;
 - no avoidable CLS from hero, gallery, cards, banners, or embedded media.
 
+For performance evidence:
+
+- prefer field data from PageSpeed Insights / CrUX when available;
+- use Lighthouse lab data when field data is unavailable and label it as lab data;
+- track LCP, CLS, and INP for Core Web Vitals;
+- report TBT only as a lab proxy for responsiveness when INP is unavailable; never infer INP from TBT;
+- compare mobile first because Google mobile-first indexing is the practical SEO baseline;
+- connect performance findings to concrete render-blocking CSS/JS, image sizing, caching, font, third-party, layout-shift, or main-thread causes.
+
 ## Output Format For Reviews
 
 When reviewing a page, prefer findings in this order:
@@ -347,6 +462,8 @@ When reviewing a page, prefer findings in this order:
 3. E-E-A-T evidence, trust, real estate accuracy, and content quality issues
 4. Programmatic SEO and duplicate/thin-page risks
 5. Image/video SEO, CLS, and mobile rendering issues
+
+For GEO or LLM visibility reviews, add an LLM-specific section after normal SEO findings. Include extracted entities, likely AI-answer intents, citation-ready passages, missing evidence, misinterpretation risks, source-map gaps, and visible-content/schema alignment.
 
 Keep findings concrete and page-specific.
 

@@ -213,6 +213,11 @@ CATALOG_LANDING_OVERRIDES = {
             'Compare %(count)s condo listings by area, budget, project status, ownership structure and fees. '
             'Undersun Estate helps shortlist Phuket units.'
         ),
+        'answer_first': (
+            'Foreign buyers may be able to own condominium units in Thailand as foreign freehold when the project '
+            'has available foreign quota. Before reserving a Phuket condo, confirm quota, title status, payment '
+            'schedule, common area fees, sinking fund, rental rules and transfer costs.'
+        ),
         'seo_heading': 'Buying a condo in Phuket',
         'intro': (
             'Compare condos and apartments for sale in Phuket with current listings from Undersun Estate. '
@@ -281,6 +286,11 @@ CATALOG_LANDING_OVERRIDES = {
         'page_description': (
             'Compare %(count)s villa listings by area, bedrooms, land, pool, project status and ownership terms. '
             'Undersun Estate helps shortlist Phuket homes.'
+        ),
+        'answer_first': (
+            'Villas in Phuket can suit private living, family use and rental-focused ownership, but each villa '
+            'requires project-specific checks. Before reserving, confirm land title, ownership structure, lease '
+            'terms, access road, utilities, estate fees, construction status and legal review requirements.'
         ),
         'seo_heading': 'Buying a villa in Phuket',
         'intro': (
@@ -477,6 +487,12 @@ CATALOG_LANDING_OVERRIDES = {
         'page_description': (
             'Сравните варианты по району, бюджету, спальням, участку, бассейну, стадии проекта '
             'и условиям владения. Undersun Estate помогает собрать шорт-лист.'
+        ),
+        'answer_first': (
+            'Виллы на Пхукете подходят для личного проживания, семейного использования и сценариев с арендой, '
+            'но каждая вилла требует проверки конкретного проекта. Перед резервированием нужно подтвердить титул '
+            'земли, структуру владения, условия leasehold, подъездную дорогу, коммуникации, платежи в комплексе, '
+            'статус строительства и необходимость юридической проверки.'
         ),
         'seo_heading': 'Как выбирать виллу на Пхукете',
         'intro': (
@@ -737,6 +753,11 @@ CATALOG_LANDING_OVERRIDES = {
             'Сравните варианты по району, бюджету, стадии проекта, форме владения '
             'и расходам. Undersun Estate помогает выбрать подходящие варианты.'
         ),
+        'answer_first': (
+            'Иностранные покупатели могут владеть квартирой в тайском кондоминиуме в формате foreign freehold, '
+            'если в проекте доступна иностранная квота. Перед резервированием квартиры на Пхукете нужно подтвердить '
+            'квоту, титул, график платежей, common area fees, sinking fund, правила аренды и расходы при регистрации сделки.'
+        ),
         'seo_heading': 'Как выбирать квартиру в кондоминиуме на Пхукете',
         'intro': (
             'В этой подборке собраны квартиры в кондоминиумах на Пхукете для жизни, отдыха и инвестиционных задач. '
@@ -804,6 +825,11 @@ CATALOG_LANDING_OVERRIDES = {
         'page_description': (
             'Сравните виллы, квартиры, дома и участки по районам, бюджету, цели покупки '
             'и условиям сделки.'
+        ),
+        'answer_first': (
+            'В этом каталоге собрана недвижимость на Пхукете для покупки: кондоминиумы, виллы, таунхаусы, земля '
+            'и отдельные инвестиционные объекты. Используйте его как отправную точку: доступность, структуру '
+            'владения, налоги, сборы и пункты due diligence нужно подтверждать по каждому объекту до резервирования или покупки.'
         ),
         'seo_heading': 'Покупка недвижимости на Пхукете',
         'intro': (
@@ -873,6 +899,11 @@ CATALOG_LANDING_OVERRIDES = {
             'เปรียบเทียบตัวเลือกตามทำเล งบประมาณ สถานะโครงการ รูปแบบการถือครอง '
             'และค่าใช้จ่าย เพื่อคัดเลือกตัวเลือกที่เหมาะสม.'
         ),
+        'answer_first': (
+            'ผู้ซื้อชาวต่างชาติอาจถือกรรมสิทธิ์ยูนิตคอนโดมิเนียมในไทยแบบ foreign freehold ได้ '
+            'เมื่อโครงการยังมีโควตาต่างชาติ ก่อนจองคอนโดในภูเก็ตควรยืนยันโควตา สถานะเอกสารสิทธิ์ '
+            'ตารางชำระเงิน ค่าส่วนกลาง เงินกองทุน กฎการปล่อยเช่า และค่าใช้จ่ายโอนกรรมสิทธิ์.'
+        ),
         'seo_heading': 'การเลือกซื้อคอนโดในภูเก็ต',
         'intro': (
             'หน้านี้รวบรวมคอนโดและอพาร์ตเมนต์ในภูเก็ตสำหรับอยู่อาศัย พักผ่อน และวางแผนลงทุน '
@@ -940,6 +971,11 @@ CATALOG_LANDING_OVERRIDES = {
         'page_description': (
             'เปรียบเทียบตัวเลือกตามทำเล ห้องนอน ที่ดิน สระว่ายน้ำ สถานะโครงการ '
             'และเงื่อนไขการถือครอง.'
+        ),
+        'answer_first': (
+            'วิลล่าในภูเก็ตอาจเหมาะกับการอยู่อาศัยส่วนตัว ครอบครัว หรือการถือครองเพื่อปล่อยเช่า '
+            'แต่ต้องตรวจสอบเป็นรายโครงการ ก่อนจองควรยืนยันเอกสารสิทธิ์ที่ดิน โครงสร้างการถือครอง '
+            'เงื่อนไข leasehold ถนนเข้าออก สาธารณูปโภค ค่าส่วนกลาง สถานะก่อสร้าง และความจำเป็นในการตรวจทางกฎหมาย.'
         ),
         'seo_heading': 'การเลือกซื้อวิลล่าในภูเก็ต',
         'intro': (
@@ -1261,6 +1297,11 @@ CATALOG_LANDING_OVERRIDES = {
             'Compare Phuket listings across villas, condos, townhouses and land. Shortlist by area, budget, '
             'purchase goal and deal terms.'
         ),
+        'answer_first': (
+            'This catalog lists Phuket properties for sale, including condos, villas, townhouses, land and selected '
+            'investment properties. Use it as a starting point: availability, ownership structure, taxes, fees and '
+            'due-diligence items must be confirmed for each property before reservation or purchase.'
+        ),
         'seo_heading': 'Buying property in Phuket',
         'intro': (
             'This section helps compare Phuket property for sale, including villas, condos, townhouses, land plots '
@@ -1327,6 +1368,11 @@ CATALOG_LANDING_OVERRIDES = {
         'page_description': (
             'เปรียบเทียบตัวเลือกทั้งวิลล่า คอนโด ทาวน์เฮาส์ และที่ดิน '
             'ตามทำเล งบประมาณ เป้าหมายการซื้อ และเงื่อนไขดีล.'
+        ),
+        'answer_first': (
+            'แค็ตตาล็อกนี้รวบรวมอสังหาริมทรัพย์ภูเก็ตสำหรับขาย รวมถึงคอนโด วิลล่า ทาวน์เฮาส์ ที่ดิน '
+            'และทรัพย์เพื่อการลงทุนบางรายการ ใช้เป็นจุดเริ่มต้นในการเปรียบเทียบ โดยต้องยืนยันสถานะว่าง '
+            'โครงสร้างการถือครอง ภาษี ค่าธรรมเนียม และรายการตรวจสอบ due diligence ของแต่ละทรัพย์ก่อนจองหรือซื้อ.'
         ),
         'seo_heading': 'การซื้ออสังหาริมทรัพย์ในภูเก็ต',
         'intro': (
@@ -2882,6 +2928,7 @@ class PropertyListView(ListView):
 
         context['page_title'] = meta.title
         context['page_description'] = meta.description
+        context['catalog_answer_first'] = ''
         landing_override = self.get_catalog_landing_override(context, language_code)
         if landing_override:
             context['page_title'] = self._format_catalog_override_text(
@@ -2892,6 +2939,10 @@ class PropertyListView(ListView):
                 landing_override.get('page_description', context['page_description']),
                 context,
             ))
+            context['catalog_answer_first'] = self._format_catalog_override_text(
+                landing_override.get('answer_first', ''),
+                context,
+            )
 
         page_number = self._get_catalog_page_number()
         if context.get('catalog_is_indexable') and page_number and page_number > 1:

@@ -83,6 +83,15 @@
                         Undersun Estate соединяет знание локального рынка, инвестиционную логику и сопровождение сделки: покупка, продажа, аренда и управление недвижимостью на Пхукете.
                     {% endif %}
                 </p>
+                <p class="mt-4 max-w-2xl border-l-2 border-accent/80 pl-4 text-sm leading-6 text-white/78">
+                    {% if lang == 'en' %}
+                        Undersun Estate is a Phuket property advisory team focused on residential, lifestyle and investment property decisions. The team combines local inventory knowledge with transaction coordination, while legal, tax, visa and financial questions are handled through appropriate professional review.
+                    {% elif lang == 'th' %}
+                        Undersun Estate คือทีมที่ปรึกษาอสังหาริมทรัพย์ในภูเก็ต โดยมุ่งเน้นการตัดสินใจเรื่องที่อยู่อาศัย ไลฟ์สไตล์ และการลงทุน ทีมผสานความรู้ทรัพย์ในตลาดท้องถิ่นกับการประสานงานธุรกรรม ส่วนคำถามด้านกฎหมาย ภาษี วีซ่า และการเงินจะส่งต่อให้ผู้เชี่ยวชาญที่เหมาะสมตรวจสอบ
+                    {% else %}
+                        Undersun Estate — консультационная команда по недвижимости Пхукета, которая помогает принимать решения о покупке для жизни, отдыха и инвестиций. Мы соединяем знание локального предложения с координацией сделки, а юридические, налоговые, визовые и финансовые вопросы передаем на профильную профессиональную проверку.
+                    {% endif %}
+                </p>
                 <div class="mt-5 flex flex-col gap-3 sm:flex-row">
                     <a href="{% url 'properties:property_list' %}" class="inline-flex items-center justify-center rounded-2xl bg-accent px-6 py-3 font-bold text-gray-950 shadow-[0_20px_44px_rgba(241,180,0,0.26)] transition-transform hover:-translate-y-0.5" data-ym-goal="about_catalog_click">
                         {% if lang == 'en' %}View properties{% elif lang == 'th' %}ดูรายการทรัพย์{% else %}Смотреть каталог{% endif %}
@@ -112,24 +121,88 @@
 </section>
 
 <section class="bg-[#f7f3ea] py-10">
-    <div class="mx-auto grid max-w-7xl gap-4 px-4 md:grid-cols-3">
-        <div class="border-b border-primary/10 py-5 md:border-b-0 md:border-r md:pr-8">
-            <p class="text-4xl font-bold tracking-[-0.04em] text-primary">500+</p>
-            <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
-                {% if lang == 'en' %}Curated listings{% elif lang == 'th' %}รายการที่คัดสรร{% else %}Актуальных объектов{% endif %}
-            </p>
+    <div class="mx-auto max-w-7xl px-4">
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div class="border-b border-primary/10 py-5 md:border-b-0 md:border-r md:pr-8">
+                <p class="text-4xl font-bold tracking-[-0.04em] text-primary">500+</p>
+                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
+                    {% if lang == 'en' %}Curated listings{% elif lang == 'th' %}รายการที่คัดสรร{% else %}Актуальных объектов{% endif %}
+                </p>
+            </div>
+            <div class="border-b border-primary/10 py-5 md:border-b-0 md:border-r md:px-8">
+                <p class="text-4xl font-bold tracking-[-0.04em] text-primary">RU / EN / TH</p>
+                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
+                    {% if lang == 'en' %}Client support{% elif lang == 'th' %}ดูแลลูกค้า{% else %}Языки сопровождения{% endif %}
+                </p>
+            </div>
+            <div class="border-b border-primary/10 py-5 md:border-b-0 md:border-r md:pr-8 lg:px-8">
+                <p class="text-4xl font-bold tracking-[-0.04em] text-primary">5+</p>
+                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
+                    {% if lang == 'en' %}Years in Phuket{% elif lang == 'th' %}ปีในภูเก็ต{% else %}Лет на рынке Пхукета{% endif %}
+                </p>
+            </div>
+            <div class="py-5 md:pl-8">
+                <p class="text-4xl font-bold tracking-[-0.04em] text-primary">PPA</p>
+                <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
+                    {% if lang == 'en' %}Phuket Property Association Co-Founder{% elif lang == 'th' %}ผู้ร่วมก่อตั้ง Phuket Property Association{% else %}Сооснователь Phuket Property Association{% endif %}
+                </p>
+            </div>
         </div>
-        <div class="border-b border-primary/10 py-5 md:border-b-0 md:border-r md:px-8">
-            <p class="text-4xl font-bold tracking-[-0.04em] text-primary">RU / EN / TH</p>
-            <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
-                {% if lang == 'en' %}Client support{% elif lang == 'th' %}ดูแลลูกค้า{% else %}Языки сопровождения{% endif %}
+        <p class="mt-6 max-w-4xl text-sm leading-6 text-tertiary">
+            {% if lang == 'en' %}
+                For transactions that require specialist review, Undersun Estate coordinates with legal partners instead of replacing qualified legal, tax, financial, or immigration advice.
+            {% elif lang == 'th' %}
+                เมื่อดีลต้องการการตรวจสอบเฉพาะทาง Undersun Estate จะประสานงานกับพาร์ทเนอร์กฎหมาย แต่ไม่แทนที่คำแนะนำจากผู้เชี่ยวชาญด้านกฎหมาย ภาษี การเงิน หรือการย้ายถิ่นฐานที่มีคุณสมบัติเหมาะสม
+            {% else %}
+                Если сделка требует профильной проверки, Undersun Estate координирует работу с юридическими партнерами, но не заменяет квалифицированную юридическую, налоговую, финансовую или иммиграционную консультацию.
+            {% endif %}
+        </p>
+    </div>
+</section>
+
+<section class="bg-white py-12">
+    <div class="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-[0.82fr_1.18fr]">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+                {% if lang == 'en' %}Why clients use Undersun Estate{% elif lang == 'th' %}เหตุผลที่ลูกค้าเลือก Undersun Estate{% else %}Почему клиенты обращаются в Undersun Estate{% endif %}
             </p>
+            <h2 class="mt-4 text-3xl font-bold leading-tight tracking-[-0.03em] text-primary">
+                {% if lang == 'en' %}Practical facts, not marketing claims.{% elif lang == 'th' %}ข้อเท็จจริงเชิงปฏิบัติ ไม่ใช่คำโฆษณา{% else %}Покупка недвижимости на Пхукете требует спокойной проверки, а не громких обещаний.{% endif %}
+            </h2>
         </div>
-        <div class="py-5 md:pl-8">
-            <p class="text-4xl font-bold tracking-[-0.04em] text-primary">5+</p>
-            <p class="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-tertiary">
-                {% if lang == 'en' %}Years in Phuket{% elif lang == 'th' %}ปีในภูเก็ต{% else %}Лет на рынке Пхукета{% endif %}
-            </p>
+        <div class="grid gap-6 sm:grid-cols-2">
+            <div class="border-t border-primary/10 pt-5">
+                <p class="text-base font-semibold text-gray-950">
+                    {% if lang == 'en' %}500+ curated Phuket listings{% elif lang == 'th' %}500+ รายการภูเก็ตที่คัดสรร{% else %}Более 500 объектов в базе, но в подборку попадает только релевантное{% endif %}
+                </p>
+                <p class="mt-2 text-sm leading-6 text-tertiary">
+                    {% if lang == 'en' %}Villas, condos, townhouses, land, and commercial property are compared by location, budget, status, and ownership terms.{% elif lang == 'th' %}วิลล่า คอนโด ทาวน์เฮาส์ ที่ดิน และอสังหาริมทรัพย์เชิงพาณิชย์เปรียบเทียบตามทำเล งบประมาณ สถานะ และเงื่อนไขการถือครอง{% else %}Мы не отправляем клиенту все, что есть на рынке. Сравниваем виллы, кондоминиумы, таунхаусы, землю и коммерческие объекты по району, бюджету, стадии готовности, формату владения и понятным альтернативам.{% endif %}
+                </p>
+            </div>
+            <div class="border-t border-primary/10 pt-5">
+                <p class="text-base font-semibold text-gray-950">
+                    {% if lang == 'en' %}English, Russian, and Thai support{% elif lang == 'th' %}ดูแลลูกค้าเป็นอังกฤษ รัสเซีย และไทย{% else %}Работаем на русском, английском и тайском{% endif %}
+                </p>
+                <p class="mt-2 text-sm leading-6 text-tertiary">
+                    {% if lang == 'en' %}Clients can discuss search criteria, viewings, negotiation details, and handover steps in the language that fits the transaction.{% elif lang == 'th' %}ลูกค้าสามารถพูดคุยเรื่องเกณฑ์การค้นหา การชมทรัพย์ รายละเอียดการเจรจา และขั้นตอนส่งมอบในภาษาที่เหมาะกับดีล{% else %}Это важно на просмотрах, переговорах и передаче объекта: клиент, продавец, застройщик и подрядчики обсуждают одни и те же условия без потери смысла в переводе.{% endif %}
+                </p>
+            </div>
+            <div class="border-t border-primary/10 pt-5">
+                <p class="text-base font-semibold text-gray-950">
+                    {% if lang == 'en' %}Phuket Property Association co-founder{% elif lang == 'th' %}ผู้ร่วมก่อตั้ง Phuket Property Association{% else %}Сооснователи Phuket Property Association{% endif %}
+                </p>
+                <p class="mt-2 text-sm leading-6 text-tertiary">
+                    {% if lang == 'en' %}The team participates in a local professional community connecting brokers, developers, lawyers, and market specialists.{% elif lang == 'th' %}ทีมมีส่วนร่วมในชุมชนวิชาชีพท้องถิ่นที่เชื่อมโยงโบรกเกอร์ ผู้พัฒนา ทนายความ และผู้เชี่ยวชาญตลาด{% else %}Ассоциация объединяет участников рынка недвижимости Пхукета: брокеров, застройщиков, юристов и профильных консультантов. Для команды это постоянная связь с профессиональной средой острова.{% endif %}
+                </p>
+            </div>
+            <div class="border-t border-primary/10 pt-5">
+                <p class="text-base font-semibold text-gray-950">
+                    {% if lang == 'en' %}Specialist checks stay with specialists{% elif lang == 'th' %}การตรวจสอบเฉพาะทางเป็นหน้าที่ผู้เชี่ยวชาญ{% else %}Юридические и финансовые вопросы не подменяем мнением агента{% endif %}
+                </p>
+                <p class="mt-2 text-sm leading-6 text-tertiary">
+                    {% if lang == 'en' %}When a deal needs legal, tax, financial, or immigration review, Undersun Estate coordinates with qualified partners instead of replacing their advice.{% elif lang == 'th' %}เมื่อดีลต้องการการตรวจสอบด้านกฎหมาย ภาษี การเงิน หรือการย้ายถิ่นฐาน Undersun Estate ประสานงานกับพาร์ทเนอร์ที่มีคุณสมบัติ แทนการให้คำแนะนำแทนผู้เชี่ยวชาญ{% else %}Если сделке нужна проверка документов, налоговых условий, финансирования или иммиграционного статуса, мы подключаем профильных партнеров и координируем процесс со стороны недвижимости.{% endif %}
+                </p>
+            </div>
         </div>
     </div>
 </section>
