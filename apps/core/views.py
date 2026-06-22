@@ -529,83 +529,36 @@ class TermsView(TemplateView):
     template_name = 'core/terms.html'
 
 
-class SitemapView(View):
+class SitemapBaseView(View):
     languages = ['ru', 'en', 'th']
-    static_names = ['core:home', 'core:about', 'core:contact', 'core:map', 'core:privacy', 'core:terms']
-    section_routes = [
-        ('blog:list', None),
-        ('properties:property_list', None),
-        ('properties:property_sale', None),
-        ('properties:property_rent', None),
-        ('location_list', None),
-    ]
-    property_type_slugs = ['condo', 'villa', 'townhouse', 'land']
+    max_property_images = 3
 
-    def get(self, request, *args, **kwargs):
-        from django.urls import reverse
+    @staticmethod
+    def _get_base_url(request):
+        return request.build_absolute_uri('/')[:-1]
 
-        base_url = request.build_absolute_uri('/')[:-1]
-        entries = []
-        stylesheet_url = f"{base_url}/static/core/sitemaps/sitemap.xsl"
+    @staticmethod
+    def _to_absolute_url(base_url, url):
+        if not url:
+            return ''
+        if url.startswith(('http://', 'https://')):
+            return url
+        if url.startswith('//'):
+            return f'https:{url}'
+        if url.startswith('/'):
+            return f'{base_url}{url}'
+        return f'{base_url}/{url.lstrip("/")}'
 
-        def build_alternates(resolve_func):
-            alternates = []
-            for lang in self.languages:
-                with translation.override(lang):
-                    path = resolve_func()
-                    alternates.append({
-                        'lang': lang,
-                        'url': f'{base_url}{path}'
-                    })
-            return alternates
-
-        # Static pages
-        for name in self.static_names:
-            alternates = build_alternates(lambda n=name: reverse(n))
-            entries.extend(self._expand_entries(alternates, None))
-
-        # Section landing pages without пагинации/фильтров
-        for route_name, route_kwargs in self.section_routes:
-            alternates = build_alternates(
-                lambda n=route_name, kw=route_kwargs: reverse(n, kwargs=kw) if kw else reverse(n)
-            )
-            entries.extend(self._expand_entries(alternates, None))
-
-        for slug in self.property_type_slugs:
-            alternates = build_alternates(
-                lambda type_slug=slug: reverse('properties:property_by_type', kwargs={'type_name': type_slug})
-            )
-            entries.extend(self._expand_entries(alternates, None))
-
-        # District and location detail pages
-        for district in District.objects.order_by('slug'):
-            alternates = build_alternates(district.get_absolute_url)
-            entries.extend(self._expand_entries(alternates, None))
-
-        for location in Location.objects.select_related('district').order_by('district__slug', 'slug'):
-            alternates = build_alternates(location.get_absolute_url)
-            entries.extend(self._expand_entries(alternates, None))
-
-        # Services
-        for service in Service.objects.filter(is_active=True):
-            alternates = build_alternates(service.get_absolute_url)
-            lastmod = service.updated_at.isoformat() if service.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod))
-
-        # Properties
-        for prop in Property.objects.filter(is_active=True, status='available'):
-            alternates = build_alternates(prop.get_absolute_url)
-            lastmod = prop.updated_at.isoformat() if prop.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod))
-
-        # Blog
-        for post in BlogPost.get_published():
-            alternates = build_alternates(post.get_absolute_url)
-            lastmod = post.updated_at.isoformat() if post.updated_at else None
-            entries.extend(self._expand_entries(alternates, lastmod))
-
-        xml_content = render_to_string('core/sitemaps/sitemap.xml', {'entries': entries})
-        return HttpResponse(xml_content, content_type='application/xml')
+    def _build_alternates(self, base_url, resolve_func):
+        alternates = []
+        for lang in self.languages:
+            with translation.override(lang):
+                path = resolve_func()
+                alternates.append({
+                    'lang': lang,
+                    'url': f'{base_url}{path}'
+                })
+        return alternates
 
     @staticmethod
     def _expand_entries(alternates, lastmod):
@@ -618,6 +571,163 @@ class SitemapView(View):
                 'alternates': alternates + [{'lang': 'x-default', 'url': x_default}],
             })
         return expanded
+
+    @staticmethod
+    def _render_urlset(entries):
+        xml_content = render_to_string('core/sitemaps/sitemap.xml', {'entries': entries})
+        return HttpResponse(xml_content, content_type='application/xml')
+
+    def _build_property_images(self, base_url, property_obj):
+        images = sorted(
+            property_obj.images.all(),
+            key=lambda image: (not image.is_main, image.order, image.id)
+        )
+        image_entries = []
+        seen = set()
+
+        for image in images:
+            if image.image_type == 'floorplan':
+                continue
+
+            image_url = self._to_absolute_url(base_url, image.original_url)
+            if not image_url or image_url in seen:
+                continue
+
+            image_entries.append({'loc': image_url})
+            seen.add(image_url)
+
+            if len(image_entries) >= self.max_property_images:
+                break
+
+        return image_entries
+
+
+class SitemapView(SitemapBaseView):
+    """Sitemap index entry point submitted in robots.txt and Search Console."""
+
+    sitemap_paths = [
+        'sitemap-static.xml',
+        'sitemap-properties.xml',
+        'sitemap-images.xml',
+    ]
+
+    def get(self, request, *args, **kwargs):
+        base_url = self._get_base_url(request)
+        sitemaps = [{'loc': f'{base_url}/{path}'} for path in self.sitemap_paths]
+        xml_content = render_to_string('core/sitemaps/sitemap_index.xml', {'sitemaps': sitemaps})
+        return HttpResponse(xml_content, content_type='application/xml')
+
+
+class StaticSitemapView(SitemapBaseView):
+    """Static, service, blog, catalog hub, district and location URLs."""
+
+    static_names = ['core:home', 'core:about', 'core:contact', 'core:map', 'core:privacy', 'core:terms']
+    section_routes = [
+        ('blog:list', None),
+        ('properties:property_list', None),
+        ('properties:property_sale', None),
+        ('properties:property_rent', None),
+        ('location_list', None),
+    ]
+    property_type_slugs = ['condo', 'villa', 'townhouse', 'land']
+
+    def get(self, request, *args, **kwargs):
+        base_url = self._get_base_url(request)
+        entries = []
+
+        # Static pages
+        for name in self.static_names:
+            alternates = self._build_alternates(base_url, lambda n=name: reverse(n))
+            entries.extend(self._expand_entries(alternates, None))
+
+        # Section landing pages without пагинации/фильтров
+        for route_name, route_kwargs in self.section_routes:
+            alternates = self._build_alternates(
+                base_url,
+                lambda n=route_name, kw=route_kwargs: reverse(n, kwargs=kw) if kw else reverse(n)
+            )
+            entries.extend(self._expand_entries(alternates, None))
+
+        for slug in self.property_type_slugs:
+            alternates = self._build_alternates(
+                base_url,
+                lambda type_slug=slug: reverse('properties:property_by_type', kwargs={'type_name': type_slug})
+            )
+            entries.extend(self._expand_entries(alternates, None))
+
+        # District and location detail pages
+        for district in District.objects.order_by('slug'):
+            alternates = self._build_alternates(base_url, district.get_absolute_url)
+            entries.extend(self._expand_entries(alternates, None))
+
+        for location in Location.objects.select_related('district').order_by('district__slug', 'slug'):
+            alternates = self._build_alternates(base_url, location.get_absolute_url)
+            entries.extend(self._expand_entries(alternates, None))
+
+        # Services
+        for service in Service.objects.filter(is_active=True):
+            alternates = self._build_alternates(base_url, service.get_absolute_url)
+            lastmod = service.updated_at.isoformat() if service.updated_at else None
+            entries.extend(self._expand_entries(alternates, lastmod))
+
+        # Blog
+        for post in BlogPost.get_published():
+            alternates = self._build_alternates(base_url, post.get_absolute_url)
+            lastmod = post.updated_at.isoformat() if post.updated_at else None
+            entries.extend(self._expand_entries(alternates, lastmod))
+
+        return self._render_urlset(entries)
+
+
+class PropertySitemapView(SitemapBaseView):
+    """Canonical active property detail URLs in every supported language."""
+
+    def get(self, request, *args, **kwargs):
+        base_url = self._get_base_url(request)
+        entries = []
+
+        for prop in Property.objects.filter(is_active=True, status='available').order_by('id'):
+            alternates = self._build_alternates(base_url, prop.get_absolute_url)
+            lastmod = prop.updated_at.isoformat() if prop.updated_at else None
+            entries.extend(self._expand_entries(alternates, lastmod))
+
+        return self._render_urlset(entries)
+
+
+class ImageSitemapView(SitemapBaseView):
+    """Property image sitemap with up to three crawlable images per localized property URL."""
+
+    def get(self, request, *args, **kwargs):
+        base_url = self._get_base_url(request)
+        entries = []
+
+        properties = (
+            Property.objects
+            .filter(is_active=True, status='available')
+            .select_related('district', 'location', 'property_type')
+            .prefetch_related('images')
+            .order_by('id')
+        )
+
+        for prop in properties:
+            images = self._build_property_images(base_url, prop)
+            if not images:
+                continue
+
+            alternates = self._build_alternates(base_url, prop.get_absolute_url)
+            x_default = next((alt['url'] for alt in alternates if alt['lang'] == 'en'), alternates[0]['url'])
+            lastmod = prop.updated_at.isoformat() if prop.updated_at else None
+            alternates_with_default = alternates + [{'lang': 'x-default', 'url': x_default}]
+
+            for alt in alternates:
+                entries.append({
+                    'loc': alt['url'],
+                    'lastmod': lastmod,
+                    'alternates': alternates_with_default,
+                    'images': images,
+                })
+
+        return self._render_urlset(entries)
 
 
 def custom_404(request, exception):

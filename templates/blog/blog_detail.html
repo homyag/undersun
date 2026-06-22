@@ -848,7 +848,7 @@
 
                     <p class="text-xs text-white text-opacity-75 text-center">
                         {% trans "Нажимая кнопку, вы соглашаетесь с" %}
-                        <a href="#" class="underline hover:text-accent transition-colors">{% trans "политикой конфиденциальности" %}</a>
+                        <a href="{% url 'core:privacy' %}" class="underline hover:text-accent transition-colors">{% trans "политикой конфиденциальности" %}</a>
                     </p>
                 </form>
 
