@@ -42,26 +42,34 @@
     <div class="relative z-10 w-full hero-content">
         <div class="max-w-7xl mx-auto px-3 sm:px-4 text-center">
             <div class="space-y-3 sm:space-y-4 lg:space-y-6 pt-1 sm:pt-24 pb-3 sm:pb-16">
-                <!-- Заголовок -->
-                <h1 class="font-normal text-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white leading-snug tracking-tight sm:tracking-normal">
+                <!-- Надзаголовок -->
+                <p class="block text-base sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white">
                     {% if LANGUAGE_CODE == 'en' %}
-                        <span class="block text-base sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white">Phuket real estate</span>
-                        <span class="block text-accent uppercase text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">Villas, condos and land</span>
-                        <span class="block text-accent uppercase text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">in one catalog</span>
+                        Phuket, Thailand
+                    {% elif LANGUAGE_CODE == 'th' %}
+                        ภูเก็ต ประเทศไทย
                     {% else %}
-                        <span class="block text-base sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-white">{% trans "Phuket, Thailand" %}</span>
-                        <span class="block text-accent uppercase text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "Вся недвижимость Пхукета" %}</span>
-                        <span class="block text-accent uppercase text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">{% trans "в одном каталоге" %}</span>
+                        Пхукет, Таиланд
+                    {% endif %}
+                </p>
+                <!-- Заголовок -->
+                <h1 class="block text-accent uppercase font-bold text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl" style="text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);">
+                    {% if LANGUAGE_CODE == 'en' %}
+                        Undersun Estate — Phuket Real Estate Agency
+                    {% elif LANGUAGE_CODE == 'th' %}
+                        Undersun Estate — เอเจนซีอสังหาริมทรัพย์ในภูเก็ต
+                    {% else %}
+                        Undersun Estate — агентство недвижимости на Пхукете
                     {% endif %}
                 </h1>
                 <!-- Описание -->
                 <p class="text-sm sm:text-base md:text-lg text-white font-medium max-w-5xl mx-auto leading-snug sm:leading-relaxed">
                     {% if LANGUAGE_CODE == 'en' %}
-                        Undersun Estate is a Phuket real estate agency and property advisory team helping international buyers, sellers, renters and investors compare villas, condos, land and commercial property. We shortlist properties, arrange viewings, coordinate negotiations and due diligence, and connect clients with licensed legal, tax or financial professionals when specialist advice is required.
+                        Phuket property that works for you — for holidays, rental income or capital growth. Undersun Estate is a real estate agency and co-founder of the Phuket Property Association: we match you with villas and condominiums that fit your goals and stay by your side at every step — from the first viewing to the keys.
                     {% elif LANGUAGE_CODE == 'th' %}
-                        Undersun Estate คือเอเจนซี่อสังหาริมทรัพย์และทีมที่ปรึกษาในภูเก็ต ช่วยผู้ซื้อ ผู้ขาย ผู้เช่า และนักลงทุนต่างชาติเปรียบเทียบวิลล่า คอนโด ที่ดิน และอสังหาริมทรัพย์เชิงพาณิชย์ เราคัดเลือกทรัพย์ นัดชม ประสานการเจรจาและการตรวจสอบเบื้องต้น และเชื่อมต่อผู้เชี่ยวชาญด้านกฎหมาย ภาษี หรือการเงินเมื่อจำเป็น
+                        อสังหาริมทรัพย์ในภูเก็ตที่ทำงานเพื่อคุณ — เพื่อการพักผ่อน รายได้จากค่าเช่า หรือการเติบโตของเงินทุน Undersun Estate คือเอเจนซีอสังหาริมทรัพย์และผู้ร่วมก่อตั้ง Phuket Property Association เราคัดสรรวิลล่าและคอนโดมิเนียมที่ตรงกับเป้าหมายของคุณ และอยู่เคียงข้างคุณในทุกขั้นตอน — ตั้งแต่การเข้าชมครั้งแรกจนถึงการรับกุญแจ
                     {% else %}
-                        Undersun Estate — агентство недвижимости и консультационная команда на Пхукете. Мы помогаем международным покупателям, продавцам, арендаторам и инвесторам сравнивать виллы, кондоминиумы, землю и коммерческие объекты, готовим подборки, организуем просмотры, координируем переговоры и due diligence, а при необходимости подключаем профильных юридических, налоговых или финансовых специалистов.
+                        Недвижимость на Пхукете, которая работает на вас, — для отдыха, аренды или роста капитала. Undersun Estate — агентство недвижимости и соучредитель Phuket Property Association: подбираем виллы и кондоминиумы под ваши цели и остаёмся рядом на каждом шаге — от первого просмотра до получения ключей.
                     {% endif %}
                 </p>
 

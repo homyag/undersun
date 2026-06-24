@@ -121,6 +121,11 @@ def build_business_schema_json(site_root_url, page_url=None, language_code='ru')
                     '@type': 'Place',
                     'name': profile['area_served'],
                 },
+                'memberOf': {
+                    '@type': 'Organization',
+                    'name': 'Phuket Property Association',
+                    'alternateName': 'PPA',
+                },
                 'sameAs': profile['same_as'],
             },
         ],
