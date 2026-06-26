@@ -1,6 +1,8 @@
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import requests
+from django.conf import settings
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from apps.core.bot_detection import BotDetectionService
@@ -58,6 +60,61 @@ class SeoUtilsTests(SimpleTestCase):
             truncate_meta('Compare Phuket villas and condos with local context.'),
             'Compare Phuket villas and condos with local context.',
         )
+
+
+class LlmsTxtEndpointTests(SimpleTestCase):
+    def test_llms_txt_is_plain_text_source_map(self):
+        response = self.client.get('/llms.txt')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/plain; charset=utf-8')
+
+        body = response.content.decode('utf-8')
+        normalized_body = ' '.join(body.split())
+
+        self.assertTrue(body.startswith('# Undersun Estate'))
+        self.assertIn('Canonical Site Sources', body)
+        self.assertIn('https://undersunestate.com/en/property/type/villa/', body)
+        self.assertIn(
+            'not be treated as legal, tax, financial, immigration, or investment advice',
+            normalized_body,
+        )
+        self.assertNotIn('<html', body.lower())
+
+
+class HomeFaqContentTests(SimpleTestCase):
+    def _read_project_file(self, relative_path):
+        return Path(settings.BASE_DIR, relative_path).read_text(encoding='utf-8')
+
+    def test_home_faq_schema_matches_visible_question_count(self):
+        template = self._read_project_file('templates/core/includes/home/home_faq_section.html')
+
+        self.assertEqual(template.count('"@type": "Question"'), 5)
+        self.assertEqual(template.count('<!-- FAQ Item '), 5)
+
+    def test_home_faq_avoids_legal_tax_and_fee_guarantees(self):
+        content = '\n'.join([
+            self._read_project_file('templates/core/includes/home/home_faq_section.html'),
+            self._read_project_file('locale/ru/LC_MESSAGES/django.po'),
+            self._read_project_file('locale/en/LC_MESSAGES/django.po'),
+            self._read_project_file('locale/th/LC_MESSAGES/django.po'),
+        ])
+
+        risky_phrases = [
+            'юридически безопасный',
+            '30+30+30',
+            '1,1%',
+            '6,8%',
+            '0 THB',
+            'legally secure',
+            'legally established practice',
+            '1.1%',
+            '6.8%',
+        ]
+
+        for phrase in risky_phrases:
+            with self.subTest(phrase=phrase):
+                self.assertNotIn(phrase, content)
 
 
 class NavigationContextTests(SimpleTestCase):

@@ -77,6 +77,8 @@ BLOG_META_STRINGS = {
     },
 }
 
+BUYING_GUIDE_BLOG_SLUG = 'chek-list-pokupatelya-nedvizhimosti-v-tailande-chto-proverit-pered-pokupkoj'
+
 BLOG_INTRO_STRINGS = {
     'ru': {
         'root_eyebrow': 'Экспертиза Undersun Estate',
@@ -1204,6 +1206,16 @@ def legacy_blog_article_redirect(request, legacy_slug):
     query_string = request.META.get('QUERY_STRING')
     if query_string:
         target_url = f"{target_url}?{query_string}"
+
+    return HttpResponsePermanentRedirect(target_url)
+
+
+def buying_guide_redirect(request):
+    """Permanent evergreen alias for the Thailand property buyer checklist."""
+    target_url = reverse('blog:detail', kwargs={'slug': BUYING_GUIDE_BLOG_SLUG})
+    query_string = request.META.get('QUERY_STRING')
+    if query_string:
+        target_url = f'{target_url}?{query_string}'
 
     return HttpResponsePermanentRedirect(target_url)
 

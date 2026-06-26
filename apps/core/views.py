@@ -41,6 +41,12 @@ def metrika_loaded_ping(request):
     return JsonResponse({'status': 'ok'})
 
 
+def llms_txt(request):
+    """Serve the AI-agent source map without DB-backed context processors."""
+    content = render_to_string('llms.txt')
+    return HttpResponse(content, content_type='text/plain; charset=utf-8')
+
+
 def serialize_properties_for_js(properties):
     """Сериализация объектов недвижимости для JavaScript"""
     result = []

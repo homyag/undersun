@@ -10,7 +10,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from .services import get_blog_post_translation_plan
-from .views import _extract_blog_toc_and_content, _sanitize_svg_upload, tinymce_upload
+from .views import (
+    BUYING_GUIDE_BLOG_SLUG,
+    _extract_blog_toc_and_content,
+    _sanitize_svg_upload,
+    tinymce_upload,
+)
 
 
 class BlogTranslationPlanTests(SimpleTestCase):
@@ -87,6 +92,29 @@ class BlogTocTests(SimpleTestCase):
         )
         self.assertNotIn('&nbsp;', toc_items[0]['title'])
         self.assertIn('Ежегодное собрание&nbsp;P-REA &amp; Partners 2026', processed_content)
+
+
+class BuyingGuideRedirectTests(SimpleTestCase):
+    def test_top_level_buying_guide_redirects_to_blog_article(self):
+        response = self.client.get('/en/buying-guide/')
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response['Location'], f'/en/blog/{BUYING_GUIDE_BLOG_SLUG}/')
+
+    def test_legacy_russian_short_slug_redirects_to_blog_article(self):
+        response = self.client.get('/ru/blog/thailand-property-buying-checklist/?utm_source=test')
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(
+            response['Location'],
+            f'/ru/blog/{BUYING_GUIDE_BLOG_SLUG}/?utm_source=test',
+        )
+
+    def test_legacy_english_checklist_slug_redirects_to_blog_article(self):
+        response = self.client.get('/en/blog/checklist-buyer-real-estate-thailand/')
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response['Location'], f'/en/blog/{BUYING_GUIDE_BLOG_SLUG}/')
 
 
 class BlogSvgInlineTests(SimpleTestCase):

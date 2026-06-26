@@ -371,6 +371,7 @@ BOT_PROTECTION = {
         '/sitemap-properties.xml',
         '/sitemap-images.xml',
         '/robots.txt',
+        '/llms.txt',
     ],
     'SKIP_METHODS': ['OPTIONS'],
     'BOUNCE_WINDOW_SECONDS': 5,

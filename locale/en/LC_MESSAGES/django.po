@@ -3153,17 +3153,21 @@ msgstr "Is it possible to buy a property remotely?"
 #: templates/core/includes/home/home_faq_section.html:16
 #: templates/core/includes/home/home_faq_section.html:91
 msgid ""
-"Да. Дистанционная покупка недвижимости — это привычный, отлаженный и "
-"юридически безопасный процесс во многих странах, и Таиланд здесь не "
-"исключение. Мы организуем онлайн-показы, согласуем условия с продавцом, "
-"поможем с оформлением документов и при необходимости примем объект от вашего "
-"имени по доверенности."
+"Да, часть процесса можно пройти удаленно: предварительный подбор, онлайн-"
+"показы, уточнение условий, переговоры и подготовку вопросов для проверки. "
+"Перед любым существенным платежом мы отдельно подтверждаем цену, статус, "
+"сроки передачи, структуру сделки и список документов. Если требуется "
+"подписание по доверенности или приемка объекта от имени клиента, порядок "
+"согласуется с юристом и зависит от конкретного объекта, продавца и формата "
+"сделки."
 msgstr ""
-"Yes. Remote purchase of real estate is a familiar, well—established and "
-"legally secure process in many countries, and Thailand is no exception here. "
-"We will organize online screenings, coordinate the terms with the seller, "
-"help with the paperwork and, if necessary, accept the object on your behalf "
-"by proxy."
+"Yes, part of the process can be handled remotely: initial shortlisting, "
+"online viewings, clarifying terms, negotiations, and preparing due-diligence "
+"questions. Before any major payment, we separately confirm the price, "
+"status, handover timing, deal structure, and document list. If signing by "
+"power of attorney or accepting the property on the client's behalf is "
+"required, the process must be agreed with a lawyer and depends on the "
+"specific property, seller, and transaction format."
 
 #: templates/core/includes/home/home_faq_section.html:21
 #: templates/core/includes/home/home_faq_section.html:101
@@ -3173,11 +3177,19 @@ msgstr "Is it possible for a foreigner to buy a property?"
 #: templates/core/includes/home/home_faq_section.html:24
 #: templates/core/includes/home/home_faq_section.html:110
 msgid ""
-"Да. В Таиланде существуют две формы собственности — freehold (полная) и "
-"leasehold (долгосрочная аренда)."
+"Да, иностранцы могут покупать недвижимость в Таиланде, но доступная "
+"структура зависит от типа объекта. Кондоминиумы могут оформляться в foreign "
+"freehold в пределах квоты проекта, которую нужно проверять по конкретному "
+"юниту. Для вилл, домов и земли обычно требуется leasehold или другая "
+"структура, которую стоит согласовать с профильным юристом до внесения "
+"платежей."
 msgstr ""
-"Yes. In Thailand, there are two forms of ownership — freehold (full) and "
-"leasehold (long-term lease)."
+"Yes, foreigners can buy property in Thailand, but the available ownership "
+"structure depends on the asset type. Condominiums may qualify for foreign "
+"freehold within the project quota, which must be checked for the exact unit. "
+"Villas, houses, and land usually require leasehold or another legally "
+"reviewed structure, which should be agreed with a specialist lawyer before "
+"any payment."
 
 #: templates/core/includes/home/home_faq_section.html:29
 #: templates/core/includes/home/home_faq_section.html:124
@@ -3185,45 +3197,43 @@ msgid "Есть ли рассрочка?"
 msgstr "Is there an installment plan?"
 
 #: templates/core/includes/home/home_faq_section.html:32
+#: templates/core/includes/home/home_faq_section.html:133
 msgid ""
-"Да. При покупке у застройщика рассрочка обычно беспроцентная и "
-"предоставляется на весь срок строительства. На вторичном рынке, как правило, "
-"требуется полная оплата."
+"Да, у многих застройщиков есть поэтапная оплата на период строительства, но "
+"график зависит от проекта, стадии готовности и условий договора. Перед "
+"бронированием важно проверить размер reservation fee, даты платежей, "
+"привязку к этапам строительства, условия возврата и штрафы за просрочку. На "
+"вторичном рынке чаще требуется полная оплата, хотя отдельные условия иногда "
+"обсуждаются индивидуально."
 msgstr ""
-"Yes. When buying from a developer, an interest-free installment plan is "
-"usually provided for the entire construction period. In the secondary "
-"market, full payment is usually required."
-
-#: templates/core/includes/home/home_faq_section.html:37
-msgid "Есть ли ограничения для иностранных покупателей?"
-msgstr "Are there any restrictions for foreign buyers?"
-
-#: templates/core/includes/home/home_faq_section.html:40
-#, python-format
-msgid ""
-"Иностранцы могут владеть кондоминиумами в Таиланде, но есть ограничения по "
-"доле иностранцев в проекте (не более 49%% площади). Виллы чаще оформляются "
-"через leasehold или структуры с тайскими компаниями."
-msgstr ""
-"Foreigners can own condominiums in Thailand, but the foreign share in a "
-"project is limited to 49%% of the total area. Villas are typically arranged "
-"through leasehold or Thai-company structures."
+"Yes, many developers offer staged payments during construction, but the "
+"schedule depends on the project, completion stage, and contract terms. "
+"Before reservation, it is important to check the reservation fee, payment "
+"dates, construction milestones, refund terms, and penalties for late "
+"payment. Resale properties more often require full payment, although "
+"individual terms are sometimes negotiated."
 
 #: templates/core/includes/home/home_faq_section.html:45
 #: templates/core/includes/home/home_faq_section.html:162
-msgid "Какие налоги есть при покупке недвижимости?"
-msgstr "What taxes are involved when buying property?"
+msgid "Какие налоги и расходы есть при покупке недвижимости?"
+msgstr "What taxes and costs apply when buying property?"
 
 #: templates/core/includes/home/home_faq_section.html:48
-#, python-format
 msgid ""
-"При покупке от застройщика основной налог — регистрационный сбор в Земельном "
-"департаменте (1,1%% от стоимости), обычно делится поровну между покупателем "
-"и продавцом."
+"Итоговые расходы зависят от типа объекта, продавца, структуры собственности "
+"и условий договора. В сделке могут быть регистрационные сборы Земельного "
+"департамента, налоги продавца, stamp duty, юридическая проверка, взносы в "
+"управляющую компанию, фонд обслуживания, мебель, переводы и банковские "
+"комиссии. До внесения депозита мы собираем расчет по конкретному объекту и "
+"отдельно отмечаем, какие платежи фиксированы, а какие нужно подтвердить у "
+"юриста или продавца."
 msgstr ""
-"When buying directly from a developer, the key tax is the registration fee "
-"at the Land Department (1.1%% of the price); it is usually split equally "
-"between buyer and seller."
+"Final costs depend on the property type, seller, ownership structure, and "
+"contract terms. A transaction may include Land Department registration fees, "
+"seller taxes, stamp duty, legal checks, management company payments, sinking "
+"fund, furniture, transfers, and bank fees. Before deposit, we prepare a "
+"property-specific cost estimate and mark which payments are fixed and which "
+"must be confirmed with a lawyer or seller."
 
 #: templates/core/includes/home/home_faq_section.html:53
 #: templates/core/includes/home/home_faq_section.html:143
@@ -3231,89 +3241,32 @@ msgid "Сколько стоят услуги агента?"
 msgstr "How much does an agent's service cost?"
 
 #: templates/core/includes/home/home_faq_section.html:56
+#: templates/core/includes/home/home_faq_section.html:152
 msgid ""
-"Для покупателя — 0 THB. Вознаграждение агентства выплачивается застройщиком "
-"из маркетингового бюджета, поэтому сопровождение сделки для вас бесплатное."
+"Для покупателя подбор через Undersun Estate обычно не требует отдельной "
+"агентской комиссии: в большинстве сделок с застройщиками и продавцами "
+"вознаграждение агентства уже заложено в структуру продажи. Мы заранее "
+"объясняем, какие услуги входят в сопровождение, а какие расходы могут "
+"оплачиваться отдельно, например юридическая проверка, перевод документов или "
+"специализированная экспертиза. Если по конкретному объекту условия "
+"отличаются, это обсуждается до бронирования."
 msgstr ""
-"For the buyer it is 0 THB. The agency fee is paid by the developer from the "
-"marketing budget, so deal support is free for you."
+"For buyers, shortlisting through Undersun Estate usually does not require a "
+"separate agency commission: in most developer and seller transactions, the "
+"agency fee is already included in the sale structure. We explain in advance "
+"which services are included in our support and which costs may be paid "
+"separately, such as legal checks, document translation, or specialist due "
+"diligence. If terms differ for a specific property, we discuss this before "
+"reservation."
 
 #: templates/core/includes/home/home_faq_section.html:71
 msgid "Найдите ответы на ключевые вопросы о покупке недвижимости на Пхукете"
 msgstr "Find answers to key questions about buying property in Phuket"
 
-#: templates/core/includes/home/home_faq_section.html:113
-msgid "Квартиры (кондоминиумы)"
-msgstr "Apartments (condominiums)"
-
-#: templates/core/includes/home/home_faq_section.html:113
-#, python-format
-msgid "иностранцам можно владеть до 49%% юнитов в freehold."
-msgstr "Foreigners can own up to 49%% of units in freehold."
-
-#: templates/core/includes/home/home_faq_section.html:114
 #: templates/core/includes/home/home_featured_properties_section.html:23
 #: templates/core/includes/home/home_featured_properties_section.html:71
 msgid "Виллы"
 msgstr "Villas"
-
-#: templates/core/includes/home/home_faq_section.html:114
-msgid ""
-"часто продаются с землёй в leasehold, при этом сама вилла может быть "
-"оформлена в полную собственность. При покупке у застройщика (юридического "
-"лица) нет проблем с продлением аренды на 30+30+30 лет — это стандартная и "
-"юридически закреплённая практика."
-msgstr ""
-"They are often sold with land in a leasehold, while the villa itself can be "
-"fully owned. When buying from a developer (a legal entity), there are no "
-"problems with extending the lease for 30+30+30 years is a standard and "
-"legally established practice."
-
-#: templates/core/includes/home/home_faq_section.html:133
-msgid ""
-"Да. При покупке у застройщика обычно предоставляется беспроцентная рассрочка "
-"на весь срок строительства. На вторичном рынке, как правило, требуется "
-"полная оплата."
-msgstr ""
-"Yes. When buying from a developer, an interest-free installment plan is "
-"usually provided for the entire construction period. In the secondary "
-"market, full payment is usually required."
-
-#: templates/core/includes/home/home_faq_section.html:152
-msgid ""
-"Для покупателя — 0 THB. Вознаграждение агентства выплачивается застройщиком "
-"из своего маркетингового бюджета. Это даёт вам сопровождение, защиту "
-"интересов и доступ к полной базе объектов без дополнительных расходов. При "
-"этом мы подбираем варианты объективно, без давления, которое может "
-"возникнуть при работе с отделом продаж застройщиков."
-msgstr ""
-"For the buyer — 0 THB. The agency's remuneration is paid by the developer "
-"from its marketing budget. This gives you support, protection of interests "
-"and access to a complete database of facilities at no additional cost. At "
-"the same time, we select options objectively, without the pressure that may "
-"arise when working with the developers' sales department."
-
-#: templates/core/includes/home/home_faq_section.html:171
-#, python-format
-msgid ""
-"налог при регистрации — 1,1%% от стоимости, делится поровну между "
-"покупателем и продавцом."
-msgstr ""
-"The registration tax is 1.1%% of the cost, divided equally between the buyer "
-"and seller."
-
-#: templates/core/includes/home/home_faq_section.html:172
-#, python-format
-msgid "налог при регистрации — 6,8%%, также делится пополам."
-msgstr "The registration tax is 6.8%%, also divided in half."
-
-#: templates/core/includes/home/home_faq_section.html:175
-msgid ""
-"Мы заранее рассчитываем все расходы, чтобы для вас не было неожиданных "
-"платежей."
-msgstr ""
-"We calculate all expenses in advance so that there are no unexpected "
-"payments for you."
 
 #: templates/core/includes/home/home_faq_section.html:187
 msgid "Не нашли ответ?"

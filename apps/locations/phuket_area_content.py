@@ -244,19 +244,63 @@ PHUKET_LOCATION_CONTENT = {
             },
         ],
     },
+    'cherng-talay': {
+        'district_slug': 'thalang',
+        'name_ru': 'Чернг Талай',
+        'name_en': 'Cherng Talay',
+        'name_th': 'เชิงทะเล',
+        'description_ru': (
+            'Чернг Талай - одна из ключевых локаций северо-запада Пхукета в районе Thalang. '
+            'В нашей структуре каталога именно здесь чаще всего оцениваются объекты рядом '
+            'с Laguna Phuket, Boat Avenue, Porto de Phuket, Bang Tao и Layan, потому что '
+            'покупательские сценарии и ежедневная инфраструктура сильно пересекаются.\n\n'
+            'Недвижимость в Чернг Талай может включать виллы, апартаменты, таунхаусы и '
+            'проекты resort-формата. Для объектов около Лагуны особенно важно проверять '
+            'точную микролокацию, доступ к пляжу, управляющую модель, расходы комплекса, '
+            'структуру собственности и реальные маршруты до школ, магазинов и аэропорта.\n\n'
+            'Локация может подойти для семейного проживания, сезонного отдыха, долгосрочной '
+            'аренды и премиального west-coast сценария. Финальное решение стоит принимать '
+            'по конкретному объекту: статус проекта, документы, обслуживание, шум, трафик '
+            'и конкуренция внутри выбранного сегмента могут заметно отличаться.'
+        ),
+        'faq_ru': [
+            {
+                'question': 'Как Лагуна связана с Чернг Талай?',
+                'answer': (
+                    'В нашей структуре каталога объекты рядом с Laguna Phuket обычно '
+                    'сравниваются внутри Cherng Talay и района Thalang. При подборе важно '
+                    'проверять не только слово "Лагуна", но и точный проект, расстояние до '
+                    'пляжа, расходы комплекса и условия управления.'
+                ),
+            },
+            {
+                'question': 'Чернг Талай подходит для покупки виллы?',
+                'answer': (
+                    'Потенциально да: в этой части Thalang много вилл и новых проектов. '
+                    'Перед покупкой нужно проверить документы, подъезд, окружение, расходы '
+                    'на обслуживание, управляющую компанию и реалистичный сценарий аренды '
+                    'или перепродажи.'
+                ),
+            },
+        ],
+    },
     'rawai': {
         'district_slug': 'mueang-phuket',
         'name_ru': 'Раваи',
         'name_en': 'Rawai',
         'name_th': 'ราไวย์',
         'description_ru': (
-            'Раваи часто рассматривают для долгосрочной жизни на Пхукете. Район подходит '
-            'тем, кто ищет более спокойную среду, выбор вилл и домов, локальную инфраструктуру '
-            'и экспатское окружение.\n\n'
+            'Раваи и соседнюю зону Най Харн часто рассматривают для долгосрочной жизни '
+            'на юге Пхукета. В нашей структуре каталога объекты рядом с Nai Harn Beach '
+            'обычно оцениваются внутри локации Rawai, потому что сценарии покупки, маршруты '
+            'и инфраструктура здесь тесно связаны. Район подходит тем, кто ищет более '
+            'спокойную среду, выбор вилл и домов, локальную инфраструктуру и экспатское '
+            'окружение.\n\n'
             'В недвижимости Раваи чаще смотрят виллы, дома, таунхаусы и апартаменты для жизни '
-            'или долгосрочной аренды. Важно учитывать, что не каждая часть района находится '
-            'рядом с купабельным пляжем, поэтому транспорт, точная локация и ежедневные '
-            'маршруты имеют большое значение.\n\n'
+            'или долгосрочной аренды. Объекты около Най Харн могут быть ближе к пляжному '
+            'сценарию, но не каждая часть района находится рядом с купабельным пляжем, '
+            'поэтому транспорт, точная микролокация и ежедневные маршруты имеют большое '
+            'значение.\n\n'
             'Инвестиционный сценарий может быть связан с долгосрочной арендой для экспатов, '
             'семей и удаленных специалистов. Для краткосрочной туристической аренды нужно '
             'отдельно оценивать объект, управление, доступность инфраструктуры и юридическую '
@@ -277,6 +321,15 @@ PHUKET_LOCATION_CONTENT = {
                     'Да, Раваи часто рассматривают для покупки вилл и домов. Перед сделкой '
                     'важно проверить документы, локацию, подъезд, инфраструктуру и потенциальный '
                     'арендный сценарий.'
+                ),
+            },
+            {
+                'question': 'Как Най Харн связан с Раваи?',
+                'answer': (
+                    'В нашей структуре каталога объекты рядом с Nai Harn Beach обычно '
+                    'сравниваются внутри Rawai и юга Mueang Phuket. При подборе важно смотреть '
+                    'не только название зоны, но и точное расстояние до пляжа, подъезд, окружение '
+                    'и ежедневную логистику.'
                 ),
             },
         ],
@@ -650,14 +703,54 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 },
             ],
         },
+        'cherng-talay': {
+            'description': (
+                'Cherng Talay is one of the key north-west Phuket locations in Thalang. In '
+                'our catalogue structure, properties near Laguna Phuket, Boat Avenue, Porto '
+                'de Phuket, Bang Tao and Layan are usually evaluated in this context because '
+                'buyer scenarios and daily infrastructure overlap strongly.\n\n'
+                'Property in Cherng Talay can include villas, apartments, townhouses and '
+                'resort-style projects. For properties around Laguna, it is especially '
+                'important to check the exact micro-location, beach access, management model, '
+                'project fees, ownership structure and real routes to schools, shops and the '
+                'airport.\n\n'
+                'The location may suit family living, seasonal stays, long-term rental and a '
+                'premium west-coast scenario. The final decision should be property-specific: '
+                'project status, documents, maintenance, noise, traffic and competition within '
+                'the segment can differ noticeably.'
+            ),
+            'faq': [
+                {
+                    'question': 'How does Laguna fit into Cherng Talay?',
+                    'answer': (
+                        'In our catalogue structure, properties near Laguna Phuket are usually '
+                        'compared within Cherng Talay and Thalang. When shortlisting, check not '
+                        'only the word "Laguna", but the exact project, beach distance, project '
+                        'fees and management terms.'
+                    ),
+                },
+                {
+                    'question': 'Is Cherng Talay suitable for buying a villa?',
+                    'answer': (
+                        'Potentially yes: this part of Thalang has many villas and new projects. '
+                        'Before buying, check documents, access road, surroundings, maintenance '
+                        'costs, the management company and a realistic rental or resale scenario.'
+                    ),
+                },
+            ],
+        },
         'rawai': {
             'description': (
-                'Rawai is often considered for long-term living in Phuket. It suits buyers '
+                'Rawai and the nearby Nai Harn zone are often considered for long-term living '
+                'in southern Phuket. In our catalogue structure, properties near Nai Harn Beach '
+                'are usually evaluated inside the Rawai context because buying scenarios, '
+                'daily routes and local infrastructure are closely connected. It suits buyers '
                 'looking for a calmer environment, a choice of villas and houses, local '
                 'infrastructure and an expat-oriented community.\n\n'
                 'In Rawai, buyers often compare villas, houses, townhouses and apartments for '
-                'living or long-term rental. Not every part of the area is close to a swimmable '
-                'beach, so transport, exact location and daily routes are important.\n\n'
+                'living or long-term rental. Properties near Nai Harn can be closer to a beach '
+                'scenario, but not every part of the area is close to a swimmable beach, so '
+                'transport, exact micro-location and daily routes are important.\n\n'
                 'An investment scenario can be connected with long-term rental demand from '
                 'expats, families and remote professionals. For short-term tourist rental, the '
                 'specific property, management, infrastructure access and legal structure of the '
@@ -678,6 +771,15 @@ PHUKET_LOCATION_TRANSLATIONS = {
                         'Yes, Rawai is often considered for villas and houses. Before a deal, '
                         'check documents, location, access road, infrastructure and the possible '
                         'rental scenario.'
+                    ),
+                },
+                {
+                    'question': 'How does Nai Harn fit into Rawai?',
+                    'answer': (
+                        'In our catalogue structure, properties near Nai Harn Beach are usually '
+                        'compared within Rawai and southern Mueang Phuket. When shortlisting, '
+                        'check the exact distance to the beach, access road, surroundings and '
+                        'daily logistics, not only the area name.'
                     ),
                 },
             ],
@@ -869,13 +971,45 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 },
             ],
         },
+        'cherng-talay': {
+            'description': (
+                'เชิงทะเลเป็นหนึ่งในทำเลสำคัญทางตะวันตกเฉียงเหนือของภูเก็ตในอำเภอถลาง '
+                'ในโครงสร้างแคตตาล็อกของเรา ทรัพย์ใกล้ Laguna Phuket, Boat Avenue, Porto de Phuket, '
+                'Bang Tao และ Layan มักถูกประเมินในบริบทนี้ เพราะเป้าหมายการซื้อและโครงสร้างพื้นฐานประจำวันเชื่อมโยงกันมาก\n\n'
+                'อสังหาริมทรัพย์ในเชิงทะเลอาจมีทั้งวิลล่า อพาร์ตเมนต์ ทาวน์เฮาส์ และโครงการแนวรีสอร์ต '
+                'สำหรับทรัพย์รอบลากูน่า ควรตรวจไมโครโลเคชันจริง การเข้าถึงชายหาด รูปแบบการบริหาร '
+                'ค่าใช้จ่ายโครงการ โครงสร้างกรรมสิทธิ์ และเส้นทางจริงไปโรงเรียน ร้านค้า และสนามบิน\n\n'
+                'ทำเลนี้อาจเหมาะกับการอยู่อาศัยแบบครอบครัว การพักตามฤดูกาล การเช่าระยะยาว '
+                'และสถานการณ์ระดับพรีเมียมบนชายฝั่งตะวันตก การตัดสินใจควรอิงกับทรัพย์จริง: '
+                'สถานะโครงการ เอกสาร การดูแล เสียงรบกวน การจราจร และการแข่งขันในเซกเมนต์อาจต่างกันมาก'
+            ),
+            'faq': [
+                {
+                    'question': 'ลากูน่าเกี่ยวข้องกับเชิงทะเลอย่างไร?',
+                    'answer': (
+                        'ในโครงสร้างแคตตาล็อกของเรา ทรัพย์ใกล้ Laguna Phuket มักถูกเปรียบเทียบภายใน '
+                        'Cherng Talay และ Thalang เมื่อตัดสินใจควรดูไม่ใช่แค่คำว่า "Laguna" '
+                        'แต่ต้องตรวจโครงการจริง ระยะถึงชายหาด ค่าใช้จ่ายโครงการ และเงื่อนไขการบริหาร'
+                    ),
+                },
+                {
+                    'question': 'เชิงทะเลเหมาะสำหรับซื้อวิลล่าหรือไม่?',
+                    'answer': (
+                        'อาจเหมาะได้ เพราะพื้นที่นี้ในถลางมีวิลล่าและโครงการใหม่จำนวนมาก ก่อนซื้อควรตรวจเอกสาร '
+                        'ทางเข้า สภาพแวดล้อม ค่าใช้จ่ายดูแล บริษัทบริหาร และสมมติฐานการเช่าหรือขายต่ออย่างสมจริง'
+                    ),
+                },
+            ],
+        },
         'rawai': {
             'description': (
-                'ราไวย์มักถูกพิจารณาสำหรับการอยู่อาศัยระยะยาวในภูเก็ต เหมาะกับผู้ซื้อที่ต้องการสภาพแวดล้อมสงบกว่า '
-                'มีตัวเลือกวิลล่า บ้าน โครงสร้างพื้นฐานท้องถิ่น และชุมชนชาวต่างชาติ\n\n'
+                'ราไวย์และโซนในหานใกล้เคียงมักถูกพิจารณาสำหรับการอยู่อาศัยระยะยาวทางตอนใต้ของภูเก็ต '
+                'ในโครงสร้างแคตตาล็อกของเรา ทรัพย์ใกล้ Nai Harn Beach มักถูกประเมินในบริบทของ Rawai '
+                'เพราะเป้าหมายการซื้อ เส้นทางประจำวัน และโครงสร้างพื้นฐานเชื่อมโยงกัน เหมาะกับผู้ซื้อที่ต้องการ '
+                'สภาพแวดล้อมสงบกว่า มีตัวเลือกวิลล่า บ้าน โครงสร้างพื้นฐานท้องถิ่น และชุมชนชาวต่างชาติ\n\n'
                 'ในราไวย์ ผู้ซื้อมักเปรียบเทียบวิลล่า บ้าน ทาวน์เฮาส์ และอพาร์ตเมนต์สำหรับอยู่อาศัยหรือปล่อยเช่าระยะยาว '
-                'ไม่ใช่ทุกส่วนของพื้นที่จะอยู่ใกล้ชายหาดที่เหมาะกับการว่ายน้ำ ดังนั้นการเดินทาง ตำแหน่งจริง '
-                'และเส้นทางในชีวิตประจำวันจึงสำคัญมาก\n\n'
+                'ทรัพย์ใกล้ในหานอาจใกล้กับการใช้งานแบบชายหาดมากกว่า แต่ไม่ใช่ทุกส่วนของพื้นที่จะอยู่ใกล้ชายหาดที่เหมาะกับการว่ายน้ำ '
+                'ดังนั้นการเดินทาง ไมโครโลเคชันจริง และเส้นทางในชีวิตประจำวันจึงสำคัญมาก\n\n'
                 'กรณีลงทุนอาจเกี่ยวข้องกับการเช่าระยะยาวจากชาวต่างชาติ ครอบครัว และผู้ทำงานทางไกล '
                 'สำหรับการเช่าระยะสั้น ควรตรวจสอบตัวทรัพย์ การบริหาร การเข้าถึงโครงสร้างพื้นฐาน '
                 'และโครงสร้างทางกฎหมายของที่ดินหรืออาคารแยกต่างหาก'
@@ -893,6 +1027,14 @@ PHUKET_LOCATION_TRANSLATIONS = {
                     'answer': (
                         'เหมาะได้ ราไวย์มักถูกพิจารณาสำหรับวิลล่าและบ้าน ก่อนทำสัญญาควรตรวจเอกสาร ทำเล ทางเข้า '
                         'โครงสร้างพื้นฐาน และแผนการปล่อยเช่าที่เป็นไปได้'
+                    ),
+                },
+                {
+                    'question': 'ในหานเกี่ยวข้องกับราไวย์อย่างไร?',
+                    'answer': (
+                        'ในโครงสร้างแคตตาล็อกของเรา ทรัพย์ใกล้ Nai Harn Beach มักถูกเปรียบเทียบภายใน Rawai '
+                        'และตอนใต้ของ Mueang Phuket เมื่อตัดสินใจควรดูระยะถึงชายหาด ทางเข้า สภาพแวดล้อม '
+                        'และการเดินทางประจำวัน ไม่ใช่ดูเพียงชื่อพื้นที่'
                     ),
                 },
             ],
