@@ -2,7 +2,7 @@ from decimal import Decimal, InvalidOperation
 import json
 
 from django.views.generic import TemplateView, DetailView, View
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Max
 from django.shortcuts import get_object_or_404
 from django.utils.safestring import mark_safe
 from django.utils.html import strip_tags
@@ -629,17 +629,32 @@ class StaticSitemapView(SitemapBaseView):
 
     static_names = ['core:home', 'core:about', 'core:contact', 'core:map', 'core:privacy', 'core:terms']
     section_routes = [
-        ('blog:list', None),
-        ('properties:property_list', None),
-        ('properties:property_sale', None),
-        ('properties:property_rent', None),
-        ('location_list', None),
+        ('blog:list', None, None),
+        ('properties:property_list', None, 'all'),
+        ('properties:property_sale', None, 'sale'),
+        ('properties:property_rent', None, 'rent'),
+        ('location_list', None, 'locations'),
     ]
     property_type_slugs = ['condo', 'villa', 'townhouse', 'land']
+
+    @staticmethod
+    def _format_lastmod(value):
+        return value.isoformat() if value else None
+
+    @classmethod
+    def _property_lastmod(cls, queryset):
+        return cls._format_lastmod(queryset.aggregate(lastmod=Max('updated_at'))['lastmod'])
 
     def get(self, request, *args, **kwargs):
         base_url = self._get_base_url(request)
         entries = []
+        active_properties = Property.objects.filter(is_active=True, status='available')
+        section_lastmods = {
+            'all': self._property_lastmod(active_properties),
+            'sale': self._property_lastmod(active_properties.filter(deal_type__in=['sale', 'both'])),
+            'rent': self._property_lastmod(active_properties.filter(deal_type__in=['rent', 'both'])),
+            'locations': self._property_lastmod(active_properties),
+        }
 
         # Static pages
         for name in self.static_names:
@@ -647,28 +662,50 @@ class StaticSitemapView(SitemapBaseView):
             entries.extend(self._expand_entries(alternates, None))
 
         # Section landing pages without пагинации/фильтров
-        for route_name, route_kwargs in self.section_routes:
+        for route_name, route_kwargs, lastmod_key in self.section_routes:
             alternates = self._build_alternates(
                 base_url,
                 lambda n=route_name, kw=route_kwargs: reverse(n, kwargs=kw) if kw else reverse(n)
             )
-            entries.extend(self._expand_entries(alternates, None))
+            entries.extend(self._expand_entries(alternates, section_lastmods.get(lastmod_key)))
 
         for slug in self.property_type_slugs:
             alternates = self._build_alternates(
                 base_url,
                 lambda type_slug=slug: reverse('properties:property_by_type', kwargs={'type_name': type_slug})
             )
-            entries.extend(self._expand_entries(alternates, None))
+            lastmod = self._property_lastmod(active_properties.filter(property_type__name=slug))
+            entries.extend(self._expand_entries(alternates, lastmod))
 
         # District and location detail pages
-        for district in District.objects.order_by('slug'):
+        districts = (
+            District.objects
+            .annotate(
+                sitemap_lastmod=Max(
+                    'property__updated_at',
+                    filter=Q(property__is_active=True, property__status='available'),
+                )
+            )
+            .order_by('slug')
+        )
+        for district in districts:
             alternates = self._build_alternates(base_url, district.get_absolute_url)
-            entries.extend(self._expand_entries(alternates, None))
+            entries.extend(self._expand_entries(alternates, self._format_lastmod(district.sitemap_lastmod)))
 
-        for location in Location.objects.select_related('district').order_by('district__slug', 'slug'):
+        locations = (
+            Location.objects
+            .select_related('district')
+            .annotate(
+                sitemap_lastmod=Max(
+                    'property__updated_at',
+                    filter=Q(property__is_active=True, property__status='available'),
+                )
+            )
+            .order_by('district__slug', 'slug')
+        )
+        for location in locations:
             alternates = self._build_alternates(base_url, location.get_absolute_url)
-            entries.extend(self._expand_entries(alternates, None))
+            entries.extend(self._expand_entries(alternates, self._format_lastmod(location.sitemap_lastmod)))
 
         # Services
         for service in Service.objects.filter(is_active=True):

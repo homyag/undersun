@@ -1,14 +1,18 @@
+import xml.etree.ElementTree as ET
+from datetime import datetime, timezone as dt_timezone
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import requests
 from django.conf import settings
 from django.test import RequestFactory, SimpleTestCase, override_settings
+from django.urls import reverse
 
 from apps.core.bot_detection import BotDetectionService
 from apps.core.context_processors import _get_active_nav_section
 from apps.core.services import TranslationService
 from apps.core.utils import truncate_meta
+from apps.core.views import StaticSitemapView
 
 
 BOT_PROTECTION_TEST_CONFIG = {
@@ -115,6 +119,79 @@ class HomeFaqContentTests(SimpleTestCase):
         for phrase in risky_phrases:
             with self.subTest(phrase=phrase):
                 self.assertNotIn(phrase, content)
+
+
+class StaticSitemapLastmodTests(SimpleTestCase):
+    sitemap_ns = {'sm': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+
+    def _sitemap_lastmods(self, response):
+        root = ET.fromstring(response.content)
+        entries = {}
+        for url_node in root.findall('sm:url', self.sitemap_ns):
+            loc_node = url_node.find('sm:loc', self.sitemap_ns)
+            lastmod_node = url_node.find('sm:lastmod', self.sitemap_ns)
+            entries[loc_node.text] = lastmod_node.text if lastmod_node is not None else None
+        return entries
+
+    def test_listing_category_and_location_pages_receive_property_inventory_lastmod(self):
+        expected_latest = datetime(2026, 6, 12, 14, 30, tzinfo=dt_timezone.utc)
+
+        property_queryset = Mock()
+        property_queryset.filter.return_value = property_queryset
+        property_queryset.aggregate.return_value = {'lastmod': expected_latest}
+
+        district = Mock()
+        district.sitemap_lastmod = expected_latest
+        district.get_absolute_url.side_effect = lambda: reverse(
+            'district_detail',
+            kwargs={'district_slug': 'sitemap-district'},
+        )
+
+        location = Mock()
+        location.sitemap_lastmod = expected_latest
+        location.get_absolute_url.side_effect = lambda: reverse(
+            'location_detail',
+            kwargs={
+                'district_slug': 'sitemap-district',
+                'location_slug': 'sitemap-location',
+            },
+        )
+
+        district_queryset = Mock()
+        district_queryset.order_by.return_value = [district]
+
+        location_queryset = Mock()
+        location_queryset.annotate.return_value.order_by.return_value = [location]
+
+        request = RequestFactory().get('/sitemap-static.xml', HTTP_HOST='localhost')
+
+        with (
+            patch('apps.core.views.Property.objects.filter', return_value=property_queryset),
+            patch('apps.core.views.District.objects.annotate', return_value=district_queryset),
+            patch('apps.core.views.Location.objects.select_related', return_value=location_queryset),
+            patch('apps.core.views.Service.objects.filter', return_value=[]),
+            patch('apps.core.views.BlogPost.get_published', return_value=[]),
+        ):
+            response = StaticSitemapView.as_view()(request)
+
+        self.assertEqual(response.status_code, 200)
+
+        lastmods = self._sitemap_lastmods(response)
+        expected_value = expected_latest.isoformat()
+
+        expected_urls = [
+            'http://localhost/en/property/',
+            'http://localhost/en/property/sale/',
+            'http://localhost/en/property/rent/',
+            'http://localhost/en/property/type/villa/',
+            'http://localhost/en/locations/',
+            'http://localhost/en/locations/sitemap-district/',
+            'http://localhost/en/locations/sitemap-district/sitemap-location/',
+        ]
+
+        for url in expected_urls:
+            with self.subTest(url=url):
+                self.assertEqual(lastmods[url], expected_value)
 
 
 class NavigationContextTests(SimpleTestCase):
