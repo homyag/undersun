@@ -36,11 +36,13 @@
                                 {% if property.main_image %}
                                     <img src="{{ property.main_image.medium_url }}"
                                          alt="{{ property.get_card_image_alt }}"
-                                         loading="lazy">
+                                         loading="lazy"
+                                         decoding="async">
                                 {% else %}
                                     <img src="{% static 'images/no-image.svg' %}"
                                          alt="{% trans 'Изображение недоступно' %}"
-                                         loading="lazy">
+                                         loading="lazy"
+                                         decoding="async">
                                 {% endif %}
                                 <div class="blog-linked-property-card__badges">
                                     {% if link.display_property_type %}

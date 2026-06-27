@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill, ResizeToFit
 from tinymce.models import HTMLField
 
 
@@ -89,6 +91,60 @@ class BlogPost(models.Model):
         upload_to='blog/featured/',
         blank=True,
         help_text=_('Локализованное изображение статьи для тайской версии')
+    )
+    featured_image_card = ImageSpecField(
+        source='featured_image',
+        processors=[ResizeToFill(720, 405)],
+        format='WEBP',
+        options={'quality': 76, 'method': 6},
+    )
+    featured_image_card_en = ImageSpecField(
+        source='featured_image_en',
+        processors=[ResizeToFill(720, 405)],
+        format='WEBP',
+        options={'quality': 76, 'method': 6},
+    )
+    featured_image_card_th = ImageSpecField(
+        source='featured_image_th',
+        processors=[ResizeToFill(720, 405)],
+        format='WEBP',
+        options={'quality': 76, 'method': 6},
+    )
+    featured_image_hero = ImageSpecField(
+        source='featured_image',
+        processors=[ResizeToFit(1200, 675)],
+        format='WEBP',
+        options={'quality': 80, 'method': 6},
+    )
+    featured_image_hero_en = ImageSpecField(
+        source='featured_image_en',
+        processors=[ResizeToFit(1200, 675)],
+        format='WEBP',
+        options={'quality': 80, 'method': 6},
+    )
+    featured_image_hero_th = ImageSpecField(
+        source='featured_image_th',
+        processors=[ResizeToFit(1200, 675)],
+        format='WEBP',
+        options={'quality': 80, 'method': 6},
+    )
+    featured_image_thumb = ImageSpecField(
+        source='featured_image',
+        processors=[ResizeToFill(320, 200)],
+        format='WEBP',
+        options={'quality': 74, 'method': 6},
+    )
+    featured_image_thumb_en = ImageSpecField(
+        source='featured_image_en',
+        processors=[ResizeToFill(320, 200)],
+        format='WEBP',
+        options={'quality': 74, 'method': 6},
+    )
+    featured_image_thumb_th = ImageSpecField(
+        source='featured_image_th',
+        processors=[ResizeToFill(320, 200)],
+        format='WEBP',
+        options={'quality': 74, 'method': 6},
     )
     featured_image_alt = models.CharField(_('Alt текст изображения'), max_length=200, blank=True)
     
@@ -297,6 +353,84 @@ class BlogPost(models.Model):
                     continue
 
         return None
+
+    @staticmethod
+    def _deduplicate_language_codes(language_code):
+        language_code = (language_code or translation.get_language() or settings.LANGUAGE_CODE or 'ru')[:2]
+        codes = [language_code, 'ru', 'en', 'th']
+        return list(dict.fromkeys(code for code in codes if code in {'ru', 'en', 'th'}))
+
+    @staticmethod
+    def _safe_image_url(file_field):
+        try:
+            return file_field.url
+        except Exception:
+            return ''
+
+    def _get_featured_image_variant_url(self, variant='card', language_code=None):
+        source_fields = {
+            'ru': 'featured_image',
+            'en': 'featured_image_en',
+            'th': 'featured_image_th',
+        }
+        variant_fields = {
+            'card': {
+                'ru': 'featured_image_card',
+                'en': 'featured_image_card_en',
+                'th': 'featured_image_card_th',
+            },
+            'hero': {
+                'ru': 'featured_image_hero',
+                'en': 'featured_image_hero_en',
+                'th': 'featured_image_hero_th',
+            },
+            'thumb': {
+                'ru': 'featured_image_thumb',
+                'en': 'featured_image_thumb_en',
+                'th': 'featured_image_thumb_th',
+            },
+        }.get(variant, {})
+
+        for code in self._deduplicate_language_codes(language_code):
+            source_field = getattr(self, source_fields[code], None)
+            if not source_field:
+                continue
+
+            try:
+                if not source_field.name or not source_field.storage.exists(source_field.name):
+                    continue
+            except Exception:
+                continue
+
+            spec_field_name = variant_fields.get(code)
+            spec_file = getattr(self, spec_field_name, None) if spec_field_name else None
+            if spec_file:
+                try:
+                    generate = getattr(spec_file, 'generate', None)
+                    if callable(generate):
+                        generate()
+                    storage = getattr(spec_file, 'storage', None)
+                    name = getattr(spec_file, 'name', None)
+                    if storage and name and storage.exists(name):
+                        return storage.url(name)
+                except Exception:
+                    pass
+
+            return self._safe_image_url(source_field)
+
+        return ''
+
+    def get_localized_featured_image_card_url(self):
+        """URL WebP-обложки для карточек блога."""
+        return self._get_featured_image_variant_url('card')
+
+    def get_localized_featured_image_hero_url(self):
+        """URL WebP-обложки для hero-изображения статьи."""
+        return self._get_featured_image_variant_url('hero')
+
+    def get_localized_featured_image_thumb_url(self):
+        """URL WebP-обложки для сайдбаров и компактных карточек."""
+        return self._get_featured_image_variant_url('thumb')
 
     def get_localized_featured_image(self):
         """Шаблонный helper: вернуть текущую локализованную обложку статьи."""

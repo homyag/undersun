@@ -108,7 +108,11 @@
                     <form method="GET" class="flex flex-wrap gap-4 items-center">
                         <!-- Search -->
                         <div class="flex-1 min-w-64">
-                            <input type="text" name="search" value="{{ search_query|default:'' }}" 
+                            <label for="blog-search-input" class="sr-only">{% trans "Поиск по статьям" %}</label>
+                            <input id="blog-search-input"
+                                   type="text"
+                                   name="search"
+                                   value="{{ search_query|default:'' }}"
                                    placeholder="{% trans 'Поиск по статьям...' %}"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
@@ -116,7 +120,10 @@
                         
                         <!-- Category Filter -->
                         <div>
-                            <select name="category" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <label for="blog-category-filter" class="sr-only">{% trans "Категория блога" %}</label>
+                            <select id="blog-category-filter"
+                                    name="category"
+                                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent">
                                 <option value="">{% trans "Все категории" %}</option>
                                 {% for category in categories %}
                                     <option value="{{ category.slug }}" {% if current_category.slug == category.slug %}selected{% endif %}>
@@ -127,14 +134,14 @@
                         </div>
                         
                         <button type="submit" style="background-color: var(--accent-color); color: var(--text-dark);" 
-                                class="hover:opacity-90 px-6 py-2 rounded-lg font-semibold transition-all duration-200">
+                                class="hover:opacity-90 px-6 py-2 rounded-lg font-semibold transition-opacity duration-150">
                             <i class="fas fa-search mr-2"></i>{% trans "Найти" %}
                         </button>
                         
                         {% if search_query or current_category %}
                             <a href="{% url 'blog:list' %}" 
                                style="background-color: var(--tertiary-color); color: white;" 
-                               class="hover:opacity-90 px-6 py-2 rounded-lg font-semibold transition-all duration-200">
+                               class="hover:opacity-90 px-6 py-2 rounded-lg font-semibold transition-opacity duration-150">
                                 <i class="fas fa-times mr-2"></i>{% trans "Сбросить" %}
                             </a>
                         {% endif %}
@@ -145,13 +152,17 @@
                 {% if posts %}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {% for post in posts %}
-                            <article class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col">
+                            <article class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col">
                                 <!-- Featured Image -->
                                 {% if post.get_localized_featured_image %}
                                     <div class="relative overflow-hidden flex-shrink-0">
-                                        <img src="{{ post.get_localized_featured_image.url }}"
+                                        <img src="{{ post.get_localized_featured_image_card_url }}"
                                              alt="{{ post.get_featured_image_alt_text }}"
-                                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                                             class="w-full h-48 object-cover"
+                                             loading="lazy"
+                                             decoding="async"
+                                             srcset="{{ post.get_localized_featured_image_thumb_url }} 320w, {{ post.get_localized_featured_image_card_url }} 720w"
+                                             sizes="(min-width: 768px) 50vw, 100vw">
                                         
                                         <!-- Category Badge -->
                                         <div class="absolute top-3 left-3">
@@ -221,7 +232,7 @@
                                     <!-- Read More -->
                                     <a href="{{ post.get_absolute_url }}"
                                        style="color: var(--accent-color);"
-                                       class="inline-flex items-center hover:opacity-80 font-semibold transition-all duration-200 mt-auto">
+                                       class="inline-flex items-center hover:opacity-80 font-semibold transition-opacity duration-150 mt-auto">
                                         {% trans "Читать далее" %}
                                         <i class="fas fa-arrow-right ml-2"></i>
                                     </a>
@@ -233,41 +244,51 @@
                     <!-- Pagination -->
                     {% if page_obj.has_other_pages %}
                         <div class="mt-12 flex justify-center">
-                            <nav class="flex items-center space-x-2">
+                            <nav class="flex items-center space-x-2" aria-label="{% trans 'Навигация по страницам блога' %}">
                                 {% if page_obj.has_previous %}
-                                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}" 
+                                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}"
+                                       aria-label="{% trans 'Первая страница' %}"
                                        style="background-color: var(--secondary-color); border-color: var(--border-color); color: var(--text-dark);"
-                                       class="px-3 py-2 border rounded-md hover:opacity-80 transition-all duration-200">
-                                        <i class="fas fa-angle-double-left"></i>
+                                       class="px-3 py-2 border rounded-md hover:opacity-80 transition-opacity duration-150">
+                                        <span class="sr-only">{% trans "Первая страница" %}</span>
+                                        <i class="fas fa-angle-double-left" aria-hidden="true"></i>
                                     </a>
-                                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}" 
+                                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}"
+                                       aria-label="{% trans 'Предыдущая страница' %}"
                                        style="background-color: var(--secondary-color); border-color: var(--border-color); color: var(--text-dark);"
-                                       class="px-3 py-2 border rounded-md hover:opacity-80 transition-all duration-200">
-                                        <i class="fas fa-angle-left"></i>
+                                       class="px-3 py-2 border rounded-md hover:opacity-80 transition-opacity duration-150">
+                                        <span class="sr-only">{% trans "Предыдущая страница" %}</span>
+                                        <i class="fas fa-angle-left" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                                 
                                 {% for page_num in page_obj.paginator.page_range %}
                                     {% if page_num == page_obj.number %}
-                                        <span style="background-color: var(--accent-color); color: var(--text-dark);" 
+                                        <span style="background-color: var(--accent-color); color: var(--text-dark);"
+                                              aria-current="page"
                                               class="px-4 py-2 rounded-md font-semibold">{{ page_num }}</span>
                                     {% elif page_num > page_obj.number|add:'-3' and page_num < page_obj.number|add:'3' %}
-                                        <a href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}" 
+                                        <a href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}"
+                                           aria-label="{% trans 'Страница' %} {{ page_num }}"
                                            style="background-color: var(--secondary-color); border-color: var(--border-color); color: var(--text-dark);"
-                                           class="px-4 py-2 border rounded-md hover:opacity-80 transition-all duration-200">{{ page_num }}</a>
+                                           class="px-4 py-2 border rounded-md hover:opacity-80 transition-opacity duration-150">{{ page_num }}</a>
                                     {% endif %}
                                 {% endfor %}
                                 
                                 {% if page_obj.has_next %}
-                                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}" 
+                                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}"
+                                       aria-label="{% trans 'Следующая страница' %}"
                                        style="background-color: var(--secondary-color); border-color: var(--border-color); color: var(--text-dark);"
-                                       class="px-3 py-2 border rounded-md hover:opacity-80 transition-all duration-200">
-                                        <i class="fas fa-angle-right"></i>
+                                       class="px-3 py-2 border rounded-md hover:opacity-80 transition-opacity duration-150">
+                                        <span class="sr-only">{% trans "Следующая страница" %}</span>
+                                        <i class="fas fa-angle-right" aria-hidden="true"></i>
                                     </a>
-                                    <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}" 
+                                    <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category.slug }}{% endif %}"
+                                       aria-label="{% trans 'Последняя страница' %}"
                                        style="background-color: var(--secondary-color); border-color: var(--border-color); color: var(--text-dark);"
-                                       class="px-3 py-2 border rounded-md hover:opacity-80 transition-all duration-200">
-                                        <i class="fas fa-angle-double-right"></i>
+                                       class="px-3 py-2 border rounded-md hover:opacity-80 transition-opacity duration-150">
+                                        <span class="sr-only">{% trans "Последняя страница" %}</span>
+                                        <i class="fas fa-angle-double-right" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
                             </nav>
@@ -290,7 +311,7 @@
                             </p>
                             <a href="{% url 'blog:list' %}" 
                                style="background-color: var(--accent-color); color: var(--text-dark);" 
-                               class="inline-flex items-center hover:opacity-90 font-bold py-3 px-6 rounded-lg transition-all duration-200">
+                               class="inline-flex items-center hover:opacity-90 font-bold py-3 px-6 rounded-lg transition-opacity duration-150">
                                 <i class="fas fa-arrow-left mr-2"></i>
                                 {% trans "Все статьи" %}
                             </a>
@@ -312,8 +333,10 @@
                                 <article class="flex space-x-3">
                                     <div class="flex-shrink-0">
                                         {% if post.get_localized_featured_image %}
-                                            <img src="{{ post.get_localized_featured_image.url }}" alt="{{ post.get_featured_image_alt_text }}" 
-                                                 class="w-16 h-16 object-cover rounded-lg">
+                                            <img src="{{ post.get_localized_featured_image_thumb_url }}" alt="{{ post.get_featured_image_alt_text }}"
+                                                 class="w-16 h-16 object-cover rounded-lg"
+                                                 loading="lazy"
+                                                 decoding="async">
                                         {% else %}
                                             <div class="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
                                                 <i class="fas fa-image text-white text-xl"></i>

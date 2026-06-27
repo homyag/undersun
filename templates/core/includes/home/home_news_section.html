@@ -11,7 +11,7 @@
       </h2>
       
       <a href="{% url 'blog:list' %}" 
-         class="inline-flex items-center px-8 py-3 border-2 border-accent text-accent hover:bg-accent hover:text-white font-bold rounded-md transition-all duration-300 transform hover:scale-105">
+         class="inline-flex items-center px-8 py-3 border-2 border-accent text-accent hover:bg-accent hover:text-white font-bold rounded-md transition-colors duration-150">
         <i class="fas fa-newspaper mr-2"></i>
         <span>{% trans "Все новости" %}</span>
       </a>
@@ -21,7 +21,7 @@
     {% if latest_news %}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         {% for news in latest_news %}
-          <article class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
+          <article class="bg-white rounded-xl shadow-md overflow-hidden group"
                    itemscope itemtype="https://schema.org/BlogPosting">
             <meta itemprop="mainEntityOfPage" content="{{ news.get_absolute_url }}">
             <div itemprop="author" itemscope itemtype="https://schema.org/Person" class="hidden">
@@ -35,15 +35,16 @@
               <a href="{{ news.get_absolute_url }}" class="block w-full h-full" itemprop="url"
                  aria-label="{{ news.title }}">
                 {% if news.get_localized_featured_image %}
-                  <img src="{{ news.get_localized_featured_image.url }}"
+                  <img src="{{ news.get_localized_featured_image_card_url }}"
                        alt="{{ news.title }}"
                        itemprop="image"
-                       width="{{ news.get_localized_featured_image.width|default_if_none:'1200' }}"
-                       height="{{ news.get_localized_featured_image.height|default_if_none:'800' }}"
+                       width="720"
+                       height="405"
                        loading="lazy"
                        decoding="async"
+                       srcset="{{ news.get_localized_featured_image_thumb_url }} 320w, {{ news.get_localized_featured_image_card_url }} 720w"
                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                       class="w-full h-full object-cover">
                 {% else %}
                   <div class="w-full h-full bg-gradient-to-br from-accent/20 to-yellow-100 flex items-center justify-center">
                     <i class="fas fa-newspaper text-4xl text-accent/60"></i>
@@ -85,7 +86,7 @@
                 <a href="{{ news.get_absolute_url }}" 
                    class="inline-flex items-center text-accent hover:text-yellow-500 font-medium text-sm transition-colors duration-300">
                   {% trans "Читать далее" %}
-                  <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+                  <i class="fas fa-arrow-right ml-2"></i>
                 </a>
               </div>
             </div>

@@ -81,7 +81,9 @@ class LlmsTxtEndpointTests(SimpleTestCase):
 
         self.assertTrue(body.startswith('# Undersun Estate'))
         self.assertIn('Canonical Site Sources', body)
-        self.assertIn('https://undersunestate.com/en/property/type/villa/', body)
+        self.assertIn('[Villas in Phuket](https://undersunestate.com/en/property/type/villa/)', body)
+        self.assertIn('[Sitemap index](https://undersunestate.com/sitemap.xml)', body)
+        self.assertRegex(body, r'\[[^\]]+\]\(https://undersunestate\.com/[^\)]*\)')
         self.assertIn(
             'not be treated as legal, tax, financial, immigration, or investment advice',
             normalized_body,

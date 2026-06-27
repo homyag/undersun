@@ -17,40 +17,40 @@ approval, or purchase approval.
 
 ## Canonical Site Sources
 
-- Home: https://undersunestate.com/en/
-- About: https://undersunestate.com/en/about/
-- Contact: https://undersunestate.com/en/contact/
-- Property catalog: https://undersunestate.com/en/property/
-- Properties for sale: https://undersunestate.com/en/property/sale/
-- Properties for rent: https://undersunestate.com/en/property/rent/
-- Phuket locations: https://undersunestate.com/en/locations/
-- Blog: https://undersunestate.com/en/blog/
-- Buyer guide: https://undersunestate.com/en/buying-guide/
-- Sitemap index: https://undersunestate.com/sitemap.xml
+- [Home](https://undersunestate.com/en/)
+- [About Undersun Estate](https://undersunestate.com/en/about/)
+- [Contact Undersun Estate](https://undersunestate.com/en/contact/)
+- [Property catalog](https://undersunestate.com/en/property/)
+- [Properties for sale](https://undersunestate.com/en/property/sale/)
+- [Properties for rent](https://undersunestate.com/en/property/rent/)
+- [Phuket locations](https://undersunestate.com/en/locations/)
+- [Blog](https://undersunestate.com/en/blog/)
+- [Buyer guide](https://undersunestate.com/en/buying-guide/)
+- [Sitemap index](https://undersunestate.com/sitemap.xml)
 
 ## Property Type Sources
 
-- Villas in Phuket: https://undersunestate.com/en/property/type/villa/
-- Condos in Phuket: https://undersunestate.com/en/property/type/condo/
-- Land in Phuket: https://undersunestate.com/en/property/type/land/
-- Townhouses in Phuket: https://undersunestate.com/en/property/type/townhouse/
+- [Villas in Phuket](https://undersunestate.com/en/property/type/villa/)
+- [Condos in Phuket](https://undersunestate.com/en/property/type/condo/)
+- [Land in Phuket](https://undersunestate.com/en/property/type/land/)
+- [Townhouses in Phuket](https://undersunestate.com/en/property/type/townhouse/)
 
 ## Location Sources
 
-- Thalang District: https://undersunestate.com/en/locations/thalang/
-- Bang Tao: https://undersunestate.com/en/locations/thalang/bangtao/
-- Cherng Talay: https://undersunestate.com/en/locations/thalang/cherng-talay/
-- Kathu District: https://undersunestate.com/en/locations/kathu-district/
-- Mueang Phuket: https://undersunestate.com/en/locations/mueang-phuket/
+- [Thalang District](https://undersunestate.com/en/locations/thalang/)
+- [Bang Tao](https://undersunestate.com/en/locations/thalang/bangtao/)
+- [Cherng Talay](https://undersunestate.com/en/locations/thalang/cherng-talay/)
+- [Kathu District](https://undersunestate.com/en/locations/kathu-district/)
+- [Mueang Phuket](https://undersunestate.com/en/locations/mueang-phuket/)
 
 ## Service Sources
 
-- Buying property: https://undersunestate.com/en/services/buying-property/
-- Selling property: https://undersunestate.com/en/services/selling-property/
-- Renting property: https://undersunestate.com/en/services/renting-property/
-- Land sale: https://undersunestate.com/en/services/land-sale/
-- Commercial real estate: https://undersunestate.com/en/services/commercial-real-estate/
-- Legal support coordination: https://undersunestate.com/en/services/legal-services/
+- [Buying property](https://undersunestate.com/en/services/buying-property/)
+- [Selling property](https://undersunestate.com/en/services/selling-property/)
+- [Renting property](https://undersunestate.com/en/services/renting-property/)
+- [Land sale](https://undersunestate.com/en/services/land-sale/)
+- [Commercial real estate](https://undersunestate.com/en/services/commercial-real-estate/)
+- [Legal support coordination](https://undersunestate.com/en/services/legal-services/)
 
 ## Contact
 

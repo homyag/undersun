@@ -1,14 +1,19 @@
 import json
 import shutil
 import tempfile
+from io import BytesIO
+from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, SimpleTestCase, override_settings
+from PIL import Image
 
+from .models import BlogPost
 from .services import get_blog_post_translation_plan
 from .views import (
     BUYING_GUIDE_BLOG_SLUG,
@@ -16,6 +21,62 @@ from .views import (
     _sanitize_svg_upload,
     tinymce_upload,
 )
+
+
+class BlogListAccessibilityTemplateTests(SimpleTestCase):
+    def _template_source(self):
+        return Path(settings.BASE_DIR, 'templates/blog/blog_list.html').read_text(encoding='utf-8')
+
+    def test_filter_controls_have_accessible_names(self):
+        template = self._template_source()
+
+        self.assertIn('for="blog-search-input"', template)
+        self.assertIn('id="blog-search-input"', template)
+        self.assertIn('for="blog-category-filter"', template)
+        self.assertIn('id="blog-category-filter"', template)
+
+    def test_icon_pagination_links_have_accessible_names(self):
+        template = self._template_source()
+
+        for label in (
+            'Первая страница',
+            'Предыдущая страница',
+            'Следующая страница',
+            'Последняя страница',
+        ):
+            self.assertIn(f"aria-label=\"{{% trans '{label}' %}}\"", template)
+            self.assertIn(f'<span class="sr-only">{{% trans "{label}" %}}</span>', template)
+
+        self.assertIn('aria-hidden="true"', template)
+        self.assertIn('aria-current="page"', template)
+
+
+class BlogPostImageVariantTests(SimpleTestCase):
+    def setUp(self):
+        self.media_root = tempfile.mkdtemp()
+        self.settings_override = override_settings(MEDIA_ROOT=self.media_root)
+        self.settings_override.enable()
+        self.addCleanup(self.settings_override.disable)
+        self.addCleanup(shutil.rmtree, self.media_root, ignore_errors=True)
+
+    def _image_content(self):
+        image = Image.new('RGB', (2400, 1600), (241, 180, 0))
+        buffer = BytesIO()
+        image.save(buffer, format='JPEG', quality=95)
+        return ContentFile(buffer.getvalue())
+
+    def test_featured_image_variants_use_cached_webp_files(self):
+        post = BlogPost()
+        post.featured_image.save('blog/featured/test-large.jpg', self._image_content(), save=False)
+
+        card_url = post.get_localized_featured_image_card_url()
+        hero_url = post.get_localized_featured_image_hero_url()
+        thumb_url = post.get_localized_featured_image_thumb_url()
+
+        for url in (card_url, hero_url, thumb_url):
+            self.assertTrue(url.startswith('/media/CACHE/'))
+            self.assertTrue(url.endswith('.webp'))
+            self.assertTrue((Path(self.media_root) / url.removeprefix('/media/')).exists())
 
 
 class BlogTranslationPlanTests(SimpleTestCase):
@@ -101,8 +162,8 @@ class BuyingGuideRedirectTests(SimpleTestCase):
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response['Location'], f'/en/blog/{BUYING_GUIDE_BLOG_SLUG}/')
 
-    def test_legacy_russian_short_slug_redirects_to_blog_article(self):
-        response = self.client.get('/ru/blog/thailand-property-buying-checklist/?utm_source=test')
+    def test_legacy_russian_transliterated_slug_redirects_to_blog_article(self):
+        response = self.client.get('/ru/blog/chek-list-pokupatelya-nedvizhimosti-v-tailande-chto-proverit-pered-pokupkoj/?utm_source=test')
 
         self.assertEqual(response.status_code, 301)
         self.assertEqual(
@@ -116,6 +177,30 @@ class BuyingGuideRedirectTests(SimpleTestCase):
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response['Location'], f'/en/blog/{BUYING_GUIDE_BLOG_SLUG}/')
 
+    def test_legacy_blog_slug_redirects_to_english_slug(self):
+        response = self.client.get('/en/blog/11-lovushek-v-dogovorah-zastrojshikov/?utm_source=test')
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(
+            response['Location'],
+            '/en/blog/eleven-traps-in-developers-contracts/?utm_source=test',
+        )
+
+    def test_legacy_blog_amp_slug_redirects_to_english_amp_slug(self):
+        response = self.client.get('/th/blog/investicionnaya-karta-phuketa/amp/')
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response['Location'], '/th/blog/phuket-investment-map/amp/')
+
+    def test_legacy_blog_articles_redirect_uses_new_english_slug(self):
+        response = self.client.get('/ru/blog/articles/999-doma-na-phukete-ot-475-mln-bat-unikalnoe-predlozhenie-ot-top-3-zastrojshika-tailanda/')
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(
+            response['Location'],
+            '/ru/blog/homes-in-phuket-from-thb-4-75-million-offer-from-top-thailand-developer/',
+        )
+
 
 class BlogSvgInlineTests(SimpleTestCase):
     def setUp(self):
@@ -124,6 +209,12 @@ class BlogSvgInlineTests(SimpleTestCase):
         self.settings_override.enable()
         self.addCleanup(self.settings_override.disable)
         self.addCleanup(shutil.rmtree, self.media_root, ignore_errors=True)
+
+    def _image_content(self):
+        image = Image.new('RGB', (1800, 1200), (71, 75, 87))
+        buffer = BytesIO()
+        image.save(buffer, format='JPEG', quality=95)
+        return ContentFile(buffer.getvalue())
 
     def test_local_editor_svg_is_inlined_with_accessible_text(self):
         default_storage.save(
@@ -176,8 +267,31 @@ class BlogSvgInlineTests(SimpleTestCase):
 
         _, processed_content = _extract_blog_toc_and_content(html)
 
-        self.assertIn('<img src="https://example.com/chart.svg"', processed_content)
+        self.assertIn('src="https://example.com/chart.svg"', processed_content)
+        self.assertIn('loading="lazy"', processed_content)
+        self.assertIn('decoding="async"', processed_content)
         self.assertNotIn('data-inline-blog-svg', processed_content)
+
+    def test_regular_content_image_is_deferred(self):
+        html = '<p><img src="/media/blog/editor/photo.jpg" alt="Photo"></p>'
+
+        _, processed_content = _extract_blog_toc_and_content(html)
+
+        self.assertIn('src="/media/blog/editor/photo.jpg"', processed_content)
+        self.assertIn('loading="lazy"', processed_content)
+        self.assertIn('decoding="async"', processed_content)
+        self.assertIn('sizes="(min-width: 1024px) 720px, 100vw"', processed_content)
+
+    def test_regular_local_content_image_uses_cached_webp(self):
+        default_storage.save('blog/editor/photo.jpg', self._image_content())
+        html = '<p><img src="/media/blog/editor/photo.jpg" alt="Photo"></p>'
+
+        _, processed_content = _extract_blog_toc_and_content(html)
+
+        self.assertIn('src="/media/blog/cache/content/', processed_content)
+        self.assertIn('.webp"', processed_content)
+        self.assertIn('loading="lazy"', processed_content)
+        self.assertIn('decoding="async"', processed_content)
 
 
 class TinyMCEUploadTests(SimpleTestCase):

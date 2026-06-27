@@ -1,8 +1,10 @@
+import hashlib
 import json
 import os
 import re
 import xml.etree.ElementTree as ET
 from html import unescape as html_unescape
+from io import BytesIO
 
 from bs4 import BeautifulSoup
 from django.conf import settings
@@ -20,6 +22,7 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from PIL import Image, UnidentifiedImageError
 
 from apps.core.models import SEOPage
 from apps.core.utils import truncate_meta
@@ -77,7 +80,18 @@ BLOG_META_STRINGS = {
     },
 }
 
-BUYING_GUIDE_BLOG_SLUG = 'chek-list-pokupatelya-nedvizhimosti-v-tailande-chto-proverit-pered-pokupkoj'
+BUYING_GUIDE_BLOG_SLUG = 'thailand-property-buying-checklist'
+
+BLOG_SLUG_REDIRECTS = {
+    'chek-list-pokupatelya-nedvizhimosti-v-tailande-chto-proverit-pered-pokupkoj': BUYING_GUIDE_BLOG_SLUG,
+    'chestnyj-dialog-na-phukete-kak-agenty-i-zastrojshiki-usilivayut-prozrachnost-rynka': 'honest-dialogue-in-phuket-how-agents-and-developers-enhance-market-transparency',
+    '11-lovushek-v-dogovorah-zastrojshikov': 'eleven-traps-in-developers-contracts',
+    'all-hands-phuket-real-estate-market-2026-lidery-rynka-phuketa-obsudili-strategiyu-otrasli-na-20252026-gody': 'all-hands-phuket-real-estate-market-2026-phuket-market-leaders-discuss-industry-strategy',
+    'investicionnaya-karta-phuketa': 'phuket-investment-map',
+    'undersun-estate-glavnye-sobytiya-marta-2026-i-trendy-rynka-nedvizhimosti-phuketa': 'undersun-estate-march-2026-events-and-phuket-real-estate-market-trends',
+    'undersun-estate-na-c9-sessions-kak-russkoyazychnoe-soobshestvo-menyaet-pravila-igry-na-rynke-nedvizhimosti-phuketa': 'undersun-estate-at-c9-sessions-russian-speaking-community-changing-phuket-real-estate-market',
+    'doma-na-phukete-ot-475-mln-bat-unikalnoe-predlozhenie-ot-top-3-zastrojshika-tailanda': 'homes-in-phuket-from-thb-4-75-million-offer-from-top-thailand-developer',
+}
 
 BLOG_INTRO_STRINGS = {
     'ru': {
@@ -141,6 +155,10 @@ IMG_TAG_PATTERN = re.compile(r'<img\b[^>]*>', re.IGNORECASE)
 TINYMCE_ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
 TINYMCE_MAX_UPLOAD_SIZE = 5 * 1024 * 1024
 TINYMCE_INLINE_SVG_PREFIXES = ('blog/editor/',)
+BLOG_CONTENT_IMAGE_PREFIXES = ('blog/editor/', 'blog/content/')
+BLOG_CONTENT_IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.webp')
+BLOG_CONTENT_IMAGE_MAX_WIDTH = 1200
+BLOG_CONTENT_IMAGE_WEBP_QUALITY = 78
 SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 XLINK_NAMESPACE = 'http://www.w3.org/1999/xlink'
 SVG_BLOCKED_DECLARATION_PATTERN = re.compile(r'<!\s*(DOCTYPE|ENTITY)\b', re.IGNORECASE)
@@ -342,7 +360,7 @@ def _collect_svg_accessible_text(root):
     return title, desc, text_lines
 
 
-def _resolve_local_blog_svg_path(src):
+def _resolve_local_blog_media_path(src, *, allowed_extensions, allowed_prefixes):
     if not src:
         return ''
 
@@ -381,12 +399,20 @@ def _resolve_local_blog_svg_path(src):
         not normalized_path
         or normalized_path.startswith('../')
         or normalized_path == '..'
-        or not normalized_path.lower().endswith('.svg')
-        or not any(normalized_path.startswith(prefix) for prefix in TINYMCE_INLINE_SVG_PREFIXES)
+        or not normalized_path.lower().endswith(tuple(allowed_extensions))
+        or not any(normalized_path.startswith(prefix) for prefix in allowed_prefixes)
     ):
         return ''
 
     return normalized_path
+
+
+def _resolve_local_blog_svg_path(src):
+    return _resolve_local_blog_media_path(
+        src,
+        allowed_extensions=('.svg',),
+        allowed_prefixes=TINYMCE_INLINE_SVG_PREFIXES,
+    )
 
 
 def _ensure_svg_child_text(root, tag_name, text_value, element_id, insert_index=0):
@@ -482,6 +508,103 @@ def _inline_blog_svg_images(html_content):
     return IMG_TAG_PATTERN.sub(_replace, html_content)
 
 
+def _resolve_local_blog_raster_path(src):
+    return _resolve_local_blog_media_path(
+        src,
+        allowed_extensions=BLOG_CONTENT_IMAGE_EXTENSIONS,
+        allowed_prefixes=BLOG_CONTENT_IMAGE_PREFIXES,
+    )
+
+
+def _get_optimized_blog_content_image_url(media_rel_path):
+    if not media_rel_path:
+        return ''
+
+    try:
+        if not default_storage.exists(media_rel_path):
+            return ''
+        source_size = default_storage.size(media_rel_path)
+    except (OSError, ValueError):
+        return ''
+
+    source_fingerprint = f'{media_rel_path}:{source_size}:{BLOG_CONTENT_IMAGE_MAX_WIDTH}'
+    cache_hash = hashlib.md5(source_fingerprint.encode('utf-8')).hexdigest()[:12]
+    base_name = os.path.splitext(os.path.basename(media_rel_path))[0]
+    safe_base_name = slugify(base_name) or 'image'
+    cache_path = f'blog/cache/content/{safe_base_name}-{cache_hash}.webp'
+
+    try:
+        if default_storage.exists(cache_path):
+            return default_storage.url(cache_path)
+    except (OSError, ValueError):
+        return ''
+
+    buffer = None
+    pil_image = None
+    try:
+        with default_storage.open(media_rel_path, 'rb') as source_file:
+            pil_image = Image.open(source_file)
+            pil_image.load()
+
+        image_format = (pil_image.format or '').upper()
+        if getattr(pil_image, 'is_animated', False) and image_format in {'GIF', 'WEBP'}:
+            return ''
+
+        if pil_image.mode not in ('RGB', 'RGBA'):
+            target_mode = 'RGBA' if pil_image.mode in ('LA', 'P') else 'RGB'
+            pil_image = pil_image.convert(target_mode)
+
+        width, height = pil_image.size
+        if width > BLOG_CONTENT_IMAGE_MAX_WIDTH:
+            target_height = max(1, round(height * (BLOG_CONTENT_IMAGE_MAX_WIDTH / width)))
+            pil_image = pil_image.resize((BLOG_CONTENT_IMAGE_MAX_WIDTH, target_height), Image.LANCZOS)
+
+        buffer = BytesIO()
+        pil_image.save(
+            buffer,
+            format='WEBP',
+            quality=BLOG_CONTENT_IMAGE_WEBP_QUALITY,
+            method=6,
+        )
+        buffer.seek(0)
+        saved_path = default_storage.save(cache_path, ContentFile(buffer.read()))
+        return default_storage.url(saved_path)
+    except (OSError, ValueError, UnidentifiedImageError):
+        return ''
+    finally:
+        if buffer is not None:
+            buffer.close()
+        if pil_image is not None:
+            pil_image.close()
+
+
+def _defer_blog_content_images(html_content):
+    if not html_content or '<img' not in html_content.lower():
+        return html_content
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    changed = False
+
+    for image in soup.find_all('img'):
+        if not image.get('loading'):
+            image['loading'] = 'lazy'
+            changed = True
+        if not image.get('decoding'):
+            image['decoding'] = 'async'
+            changed = True
+        if not image.get('sizes'):
+            image['sizes'] = '(min-width: 1024px) 720px, 100vw'
+            changed = True
+
+        media_rel_path = _resolve_local_blog_raster_path(image.get('src', ''))
+        optimized_url = _get_optimized_blog_content_image_url(media_rel_path)
+        if optimized_url:
+            image['src'] = optimized_url
+            changed = True
+
+    return str(soup) if changed else html_content
+
+
 def _extract_blog_toc_and_content(html_content):
     """Добавляет id к h2/h3 и возвращает TOC для статьи."""
     if not html_content:
@@ -521,6 +644,7 @@ def _extract_blog_toc_and_content(html_content):
 
     processed_content = HEADING_PATTERN.sub(_replace, html_content)
     processed_content = _inline_blog_svg_images(processed_content)
+    processed_content = _defer_blog_content_images(processed_content)
     return toc_items, processed_content
 
 
@@ -611,6 +735,22 @@ def _build_blog_listing_url(url_name, *, slug=None, page=None):
         if page_number > 1:
             return f'{url}?page={page_number}'
     return url
+
+
+def _append_query_string(request, target_url):
+    query_string = request.META.get('QUERY_STRING')
+    if query_string:
+        return f'{target_url}?{query_string}'
+    return target_url
+
+
+def _redirect_legacy_blog_slug(request, slug, url_name='blog:detail'):
+    target_slug = BLOG_SLUG_REDIRECTS.get((slug or '').strip('/').lower())
+    if not target_slug:
+        return None
+
+    target_url = reverse(url_name, kwargs={'slug': target_slug})
+    return HttpResponsePermanentRedirect(_append_query_string(request, target_url))
 
 
 def _set_blog_indexation(request, *, canonical_url='', meta_robots=''):
@@ -897,6 +1037,10 @@ def blog_list(request):
 
 def blog_detail(request, slug):
     """Детальная страница статьи"""
+    legacy_redirect = _redirect_legacy_blog_slug(request, slug)
+    if legacy_redirect:
+        return legacy_redirect
+
     post = get_object_or_404(
         BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related('tags'),
         slug=slug,
@@ -986,6 +1130,10 @@ def blog_detail(request, slug):
 
 
 def blog_detail_amp(request, slug):
+    legacy_redirect = _redirect_legacy_blog_slug(request, slug, 'blog:detail_amp')
+    if legacy_redirect:
+        return legacy_redirect
+
     post = get_object_or_404(
         BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related('tags'),
         slug=slug,
@@ -1202,22 +1350,16 @@ def legacy_blog_article_redirect(request, legacy_slug):
         if possible_id.isdigit() and remainder:
             slug_candidate = remainder
 
-    target_url = reverse('blog:detail', kwargs={'slug': slug_candidate})
-    query_string = request.META.get('QUERY_STRING')
-    if query_string:
-        target_url = f"{target_url}?{query_string}"
+    target_slug = BLOG_SLUG_REDIRECTS.get(slug_candidate, slug_candidate)
+    target_url = reverse('blog:detail', kwargs={'slug': target_slug})
 
-    return HttpResponsePermanentRedirect(target_url)
+    return HttpResponsePermanentRedirect(_append_query_string(request, target_url))
 
 
 def buying_guide_redirect(request):
     """Permanent evergreen alias for the Thailand property buyer checklist."""
     target_url = reverse('blog:detail', kwargs={'slug': BUYING_GUIDE_BLOG_SLUG})
-    query_string = request.META.get('QUERY_STRING')
-    if query_string:
-        target_url = f'{target_url}?{query_string}'
-
-    return HttpResponsePermanentRedirect(target_url)
+    return HttpResponsePermanentRedirect(_append_query_string(request, target_url))
 
 
 @csrf_exempt
