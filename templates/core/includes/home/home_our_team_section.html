@@ -13,24 +13,34 @@
                     <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
                         <div class="flex-grow">
                             <div class="relative mb-6">
-                                {% if member.photo %}
-                                    <img src="{{ member.photo.url }}" alt="{{ member.full_name }}"
-                                         width="{{ member.photo.width|default_if_none:'256' }}"
-                                         height="{{ member.photo.height|default_if_none:'256' }}"
-                                         loading="lazy"
-                                         decoding="async"
-                                         class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
-                                {% else %}
-                                    <div class="w-32 h-32 rounded-lg mx-auto bg-gray-300 flex items-center justify-center shadow-lg">
-                                        <i class="fas fa-user text-gray-500 text-4xl"></i>
-                                    </div>
-                                {% endif %}
+                                <a href="{{ member.get_absolute_url }}"
+                                   class="block rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-200"
+                                   data-ym-goal="home_team_profile_click"
+                                   data-ym-param-specialist="{{ member.slug }}"
+                                   aria-label="{% blocktrans with name=member.full_name %}Профиль специалиста {{ name }}{% endblocktrans %}">
+                                    {% if member.photo %}
+                                        <img src="{{ member.photo.url }}" alt="{{ member.full_name }}"
+                                             width="{{ member.photo.width|default_if_none:'256' }}"
+                                             height="{{ member.photo.height|default_if_none:'256' }}"
+                                             loading="lazy"
+                                             decoding="async"
+                                             class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                                    {% else %}
+                                        <div class="w-32 h-32 rounded-lg mx-auto bg-gray-300 flex items-center justify-center shadow-lg">
+                                            <i class="fas fa-user text-gray-500 text-4xl"></i>
+                                        </div>
+                                    {% endif %}
+                                </a>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ member.full_name }}</h3>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                <a href="{{ member.get_absolute_url }}"
+                                   class="transition-colors hover:text-accent"
+                                   data-ym-goal="home_team_profile_click"
+                                   data-ym-param-specialist="{{ member.slug }}">
+                                    {{ member.last_name }} {{ member.first_name }}
+                                </a>
+                            </h3>
                             <p class="text-primary font-medium mb-3">{{ member.position }}</p>
-                            {% if member.bio %}
-                                <p class="text-sm text-gray-600 mb-3">{{ member.bio|truncatewords:15 }}</p>
-                            {% endif %}
                         </div>
                         <div class="space-y-2 text-sm text-gray-600 mt-auto">
                             {% if member.phone %}
@@ -47,27 +57,10 @@
                             {% endif %}
                             {% if member.whatsapp_url %}
                                 <div class="flex items-center justify-center">
-                                    <i class="fab fa-whatsapp text-green-500 mr-2"></i>
-                                    <a href="{{ member.whatsapp_url }}" target="_blank" class="hover:text-green-500 transition-colors">WhatsApp</a>
+                                    <i class="fab fa-whatsapp text-primary mr-2"></i>
+                                    <a href="{{ member.whatsapp_url }}" target="_blank" class="hover:text-primary transition-colors">WhatsApp</a>
                                 </div>
                             {% endif %}
-                            
-                            <!-- Social Media Icons -->
-                            {% with member.get_social_media_list as social_media %}
-                                {% if social_media %}
-                                    <div class="flex items-center justify-center pt-2 space-x-2">
-                                        {% for social in social_media %}
-                                            <a href="{{ social.url }}" 
-                                               target="_blank" 
-                                               class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm hover:scale-110 transition-all duration-200"
-                                               style="background-color: {{ social.color }};"
-                                               title="{{ social.name }}">
-                                                <i class="{{ social.icon }}"></i>
-                                            </a>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            {% endwith %}
                         </div>
                     </div>
                 {% empty %}
@@ -97,24 +90,34 @@
                         {% for member in hidden_team %}
                             <div class="bg-gray-50 rounded-lg p-6 text-center hover:shadow-lg transition-shadow duration-300">
                                 <div class="relative mb-6">
-                                    {% if member.photo %}
-                                        <img src="{{ member.photo.url }}" alt="{{ member.full_name }}"
-                                             width="{{ member.photo.width|default_if_none:'256' }}"
-                                             height="{{ member.photo.height|default_if_none:'256' }}"
-                                             loading="lazy"
-                                             decoding="async"
-                                             class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
-                                    {% else %}
-                                        <div class="w-32 h-32 rounded-lg mx-auto bg-gray-300 flex items-center justify-center shadow-lg">
-                                            <i class="fas fa-user text-gray-500 text-4xl"></i>
-                                        </div>
-                                    {% endif %}
+                                    <a href="{{ member.get_absolute_url }}"
+                                       class="block rounded-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-200"
+                                       data-ym-goal="home_team_profile_click"
+                                       data-ym-param-specialist="{{ member.slug }}"
+                                       aria-label="{% blocktrans with name=member.full_name %}Профиль специалиста {{ name }}{% endblocktrans %}">
+                                        {% if member.photo %}
+                                            <img src="{{ member.photo.url }}" alt="{{ member.full_name }}"
+                                                 width="{{ member.photo.width|default_if_none:'256' }}"
+                                                 height="{{ member.photo.height|default_if_none:'256' }}"
+                                                 loading="lazy"
+                                                 decoding="async"
+                                                 class="w-32 h-32 rounded-lg mx-auto object-cover shadow-lg">
+                                        {% else %}
+                                            <div class="w-32 h-32 rounded-lg mx-auto bg-gray-300 flex items-center justify-center shadow-lg">
+                                                <i class="fas fa-user text-gray-500 text-4xl"></i>
+                                            </div>
+                                        {% endif %}
+                                    </a>
                                 </div>
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ member.full_name }}</h3>
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                    <a href="{{ member.get_absolute_url }}"
+                                       class="transition-colors hover:text-accent"
+                                       data-ym-goal="home_team_profile_click"
+                                       data-ym-param-specialist="{{ member.slug }}">
+                                        {{ member.last_name }} {{ member.first_name }}
+                                    </a>
+                                </h3>
                                 <p class="text-primary font-medium mb-3">{{ member.position }}</p>
-                                {% if member.bio %}
-                                    <p class="text-sm text-gray-600 mb-3">{{ member.bio|truncatewords:10 }}</p>
-                                {% endif %}
                                 <div class="space-y-2 text-sm text-gray-600">
                                     {% if member.phone %}
                                         <div class="flex items-center justify-center">
@@ -130,27 +133,10 @@
                                     {% endif %}
                                     {% if member.whatsapp_url %}
                                         <div class="flex items-center justify-center">
-                                            <i class="fab fa-whatsapp text-green-500 mr-2"></i>
-                                            <a href="{{ member.whatsapp_url }}" target="_blank" class="hover:text-green-500 transition-colors">WhatsApp</a>
+                                            <i class="fab fa-whatsapp text-primary mr-2"></i>
+                                            <a href="{{ member.whatsapp_url }}" target="_blank" class="hover:text-primary transition-colors">WhatsApp</a>
                                         </div>
                                     {% endif %}
-                                    
-                                    <!-- Social Media Icons -->
-                                    {% with member.get_social_media_list as social_media %}
-                                        {% if social_media %}
-                                            <div class="flex items-center justify-center pt-2 space-x-2">
-                                                {% for social in social_media %}
-                                                    <a href="{{ social.url }}" 
-                                                       target="_blank" 
-                                                       class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs hover:scale-110 transition-all duration-200"
-                                                       style="background-color: {{ social.color }};"
-                                                       title="{{ social.name }}">
-                                                        <i class="{{ social.icon }}"></i>
-                                                    </a>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    {% endwith %}
                                 </div>
                             </div>
                         {% endfor %}

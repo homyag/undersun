@@ -11,7 +11,7 @@ class ServiceTranslationOptions(TranslationOptions):
 
 @register(Team)
 class TeamTranslationOptions(TranslationOptions):
-    fields = ('first_name', 'last_name', 'position')
+    fields = ('first_name', 'last_name', 'position', 'bio', 'specialization', 'languages', 'prea_role')
     required_languages = ('ru',)
     fallback_languages = {
         'en': ('ru',),

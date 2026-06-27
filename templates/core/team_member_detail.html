@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+{% block og_type %}profile{% endblock %}
+
+{% block structured_data %}
+{{ block.super }}
+{% if team_member_schema_json %}
+<script type="application/ld+json">{{ team_member_schema_json|safe }}</script>
+{% endif %}
+{% if team_member_breadcrumb_schema_json %}
+<script type="application/ld+json">{{ team_member_breadcrumb_schema_json|safe }}</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% with profile=team_profile lang=LANGUAGE_CODE|default:'ru' %}
+<section class="bg-[#f7f3ea]">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:py-10">
+        <nav class="mb-6 flex flex-wrap items-center gap-2 text-sm text-tertiary" aria-label="{% trans 'Хлебные крошки' %}">
+            <a href="{% url 'core:home' %}" class="font-medium transition-colors hover:text-primary">{{ profile.labels.home }}</a>
+            <span class="text-primary/35">/</span>
+            <a href="{% url 'core:about' %}" class="font-medium transition-colors hover:text-primary">{{ profile.labels.team }}</a>
+            <span class="text-primary/35">/</span>
+            <span class="text-primary">{{ profile.name }}</span>
+        </nav>
+
+        <div class="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+            <div class="relative mx-auto w-full max-w-sm lg:mx-0">
+                <div class="overflow-hidden rounded-[2rem] bg-primary shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
+                    {% if profile.photo_url %}
+                        <img src="{{ profile.photo_url }}"
+                             alt="{{ profile.name }}"
+                             width="{{ profile.photo_width }}"
+                             height="{{ profile.photo_height }}"
+                             class="aspect-[4/5] w-full object-cover"
+                             loading="eager"
+                             decoding="async">
+                    {% else %}
+                        <div class="flex aspect-[4/5] w-full items-center justify-center bg-primary text-7xl font-bold text-white">
+                            {{ profile.name|slice:":1" }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mt-5 flex flex-wrap gap-3">
+                    {% if member.phone %}
+                        <a href="tel:{{ member.phone }}"
+                           class="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-accent"
+                           data-ym-goal="team_profile_phone_click"
+                           data-ym-param-specialist="{{ member.slug }}">
+                            <i class="fas fa-phone text-xs"></i>
+                            {{ member.phone_display|default:member.phone }}
+                        </a>
+                    {% endif %}
+                    {% if member.whatsapp_url %}
+                        <a href="{{ member.whatsapp_url }}"
+                           target="_blank"
+                           rel="noopener"
+                           class="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-accent"
+                           data-ym-goal="team_profile_whatsapp_click"
+                           data-ym-param-specialist="{{ member.slug }}">
+                            <i class="fab fa-whatsapp text-xs"></i>
+                            WhatsApp
+                        </a>
+                    {% endif %}
+                    {% if member.email %}
+                        <a href="mailto:{{ member.email }}"
+                           class="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-accent"
+                           data-ym-goal="team_profile_email_click"
+                           data-ym-param-specialist="{{ member.slug }}">
+                            <i class="fas fa-envelope text-xs"></i>
+                            Email
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="pb-2">
+                <p class="mb-4 inline-flex items-center rounded-full border border-primary/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-tertiary">
+                    {{ profile.labels.profile }}
+                </p>
+                <h1 class="max-w-4xl text-4xl font-bold leading-[1.03] text-primary sm:text-5xl">
+                    {{ profile.name }}
+                </h1>
+                {% if profile.position %}
+                    <p class="mt-4 text-xl font-semibold text-gray-950">{{ profile.position }}</p>
+                {% endif %}
+                <p class="mt-5 max-w-3xl text-base leading-7 text-tertiary">
+                    {{ profile.visible_intro }}
+                </p>
+
+                <div class="mt-8 grid gap-5 sm:grid-cols-2">
+                    {% if profile.specialization %}
+                        <section class="border-t border-primary/10 pt-5">
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-accent">{{ profile.labels.specialization }}</h2>
+                            <p class="mt-3 text-base leading-7 text-primary">{{ profile.specialization }}</p>
+                        </section>
+                    {% endif %}
+                    {% if profile.languages %}
+                        <section class="border-t border-primary/10 pt-5">
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-accent">{{ profile.labels.languages }}</h2>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                {% for language in profile.languages %}
+                                    <span class="rounded-full bg-white px-3 py-1 text-sm font-medium text-primary shadow-sm">{{ language }}</span>
+                                {% endfor %}
+                            </div>
+                        </section>
+                    {% endif %}
+                    {% if profile.market_since_year %}
+                        <section class="border-t border-primary/10 pt-5">
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-accent">{{ profile.labels.market_since }}</h2>
+                            <p class="mt-3 text-base leading-7 text-primary">
+                                {{ profile.market_since_year }}
+                                {% if profile.years_in_market %}
+                                    <span class="text-tertiary">- {{ profile.years_in_market }}+ {{ profile.labels.years }}</span>
+                                {% endif %}
+                            </p>
+                        </section>
+                    {% endif %}
+                    {% if profile.prea_role %}
+                        <section class="border-t border-primary/10 pt-5">
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-accent">{{ profile.labels.prea }}</h2>
+                            <p class="mt-3 text-base leading-7 text-primary">{{ profile.prea_role }}</p>
+                        </section>
+                    {% endif %}
+                </div>
+
+                {% if profile.social_media %}
+                    <div class="mt-8 flex flex-wrap gap-3" aria-label="{% trans 'Социальные профили' %}">
+                        {% for social in profile.social_media %}
+                            <a href="{{ social.url }}"
+                               target="_blank"
+                               rel="noopener"
+                               class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-primary/15 bg-white text-primary shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent hover:bg-accent hover:text-gray-950 focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-200"
+                               title="{{ social.name }}"
+                               aria-label="{{ social.name }}">
+                                <i class="{{ social.icon }}"></i>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-white py-12">
+    <div class="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-[0.72fr_1.28fr]">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{{ profile.labels.contact }}</p>
+            <h2 class="mt-3 text-3xl font-bold leading-tight text-primary">{{ profile.labels.team_cta }}</h2>
+            <p class="mt-4 max-w-md text-sm leading-6 text-tertiary">{{ profile.labels.contact_copy }}</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-3">
+            {% if member.phone %}
+                <a href="tel:{{ member.phone }}"
+                   class="rounded-lg border border-primary/10 p-5 transition-colors hover:border-accent"
+                   data-ym-goal="team_profile_contact_phone_click"
+                   data-ym-param-specialist="{{ member.slug }}">
+                    <i class="fas fa-phone text-accent"></i>
+                    <p class="mt-3 text-sm font-semibold text-primary">{{ member.phone_display|default:member.phone }}</p>
+                </a>
+            {% endif %}
+            {% if member.email %}
+                <a href="mailto:{{ member.email }}"
+                   class="rounded-lg border border-primary/10 p-5 transition-colors hover:border-accent"
+                   data-ym-goal="team_profile_contact_email_click"
+                   data-ym-param-specialist="{{ member.slug }}">
+                    <i class="fas fa-envelope text-accent"></i>
+                    <p class="mt-3 break-all text-sm font-semibold text-primary">{{ member.email }}</p>
+                </a>
+            {% endif %}
+            <a href="{% url 'core:contact' %}"
+               class="rounded-lg border border-primary/10 bg-primary p-5 text-white transition-colors hover:bg-primaryDark"
+               data-ym-goal="team_profile_contact_form_click"
+               data-ym-param-specialist="{{ member.slug }}">
+                <i class="fas fa-paper-plane text-accent"></i>
+                <p class="mt-3 text-sm font-semibold">{{ profile.labels.team_cta }}</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+{% if related_posts %}
+<section class="bg-[#f7f3ea] py-12">
+    <div class="mx-auto max-w-7xl px-4">
+        <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent">{{ profile.labels.articles }}</p>
+                <h2 class="mt-3 text-3xl font-bold text-primary">{{ profile.name }}</h2>
+            </div>
+            <a href="{% url 'blog:list' %}" class="text-sm font-semibold text-primary transition-colors hover:text-accent">
+                {{ profile.labels.view_all_posts }}
+            </a>
+        </div>
+        <div class="grid gap-5 md:grid-cols-3">
+            {% for post in related_posts %}
+                <article class="rounded-lg bg-white p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-tertiary">{{ post.published_at|date:"d.m.Y" }}</p>
+                    <h3 class="mt-3 text-lg font-bold leading-snug text-primary">
+                        <a href="{{ post.get_absolute_url }}" class="transition-colors hover:text-accent">{{ post.title }}</a>
+                    </h3>
+                    {% if post.excerpt %}
+                        <p class="mt-3 text-sm leading-6 text-tertiary">{{ post.excerpt|truncatewords:18 }}</p>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endwith %}
+{% endblock %}

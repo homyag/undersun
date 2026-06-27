@@ -5479,3 +5479,14 @@ msgstr "ปิดแกลเลอรี"
 #: templates/base.html:455
 msgid "Закрыть сообщение"
 msgstr "ปิดข้อความ"
+
+#: templates/core/includes/home/home_our_team_section.html:20
+#: templates/core/includes/home/home_our_team_section.html:123
+#, python-format
+msgid "Профиль специалиста %(name)s"
+msgstr "โปรไฟล์ผู้เชี่ยวชาญ %(name)s"
+
+#: templates/core/includes/home/home_our_team_section.html:88
+#: templates/core/includes/home/home_our_team_section.html:190
+msgid "Профиль специалиста"
+msgstr "โปรไฟล์ผู้เชี่ยวชาญ"

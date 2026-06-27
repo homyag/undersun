@@ -1,8 +1,11 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 from django.utils.html import strip_tags
-from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _, get_language
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 import re
@@ -511,6 +514,8 @@ class Team(models.Model):
     ]
     
     # Основная информация
+    slug = models.SlugField(_('URL-адрес'), max_length=160, unique=True, blank=True,
+                            help_text=_('Стабильный URL сотрудника, например bogdan-dyachuk'))
     first_name = models.CharField(_('Имя'), max_length=100)
     last_name = models.CharField(_('Фамилия'), max_length=100)
     position = models.CharField(_('Должность'), max_length=200)
@@ -553,6 +558,10 @@ class Team(models.Model):
                           help_text=_('Краткая информация о сотруднике'))
     specialization = models.TextField(_('Специализация'), blank=True,
                                     help_text=_('Основные направления работы'))
+    market_since_year = models.PositiveSmallIntegerField(_('Год начала работы на рынке'), blank=True, null=True,
+                                                        help_text=_('Например 2018. Используется для отображения опыта на публичной странице'))
+    prea_role = models.CharField(_('Роль в Phuket Property Association'), max_length=255, blank=True,
+                                help_text=_('Фактическая роль или участие в профессиональной ассоциации, если применимо'))
     
     # Языки
     languages = models.CharField(_('Языки'), max_length=200, blank=True,
@@ -578,11 +587,72 @@ class Team(models.Model):
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self._generate_unique_slug()
+        super().save(*args, **kwargs)
+
+    def _generate_unique_slug(self):
+        candidates = [
+            f"{self.first_name_en or ''} {self.last_name_en or ''}",
+            f"{self.first_name or ''} {self.last_name or ''}",
+            f"{self.first_name_ru or ''} {self.last_name_ru or ''}",
+        ]
+        base_slug = ''
+        for candidate in candidates:
+            base_slug = slugify(candidate)
+            if base_slug:
+                break
+
+        if not base_slug:
+            base_slug = 'team-member'
+
+        slug = base_slug[:150].strip('-') or 'team-member'
+        counter = 2
+        while Team.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            suffix = f'-{counter}'
+            slug = f'{base_slug[:150 - len(suffix)].strip("-")}{suffix}'
+            counter += 1
+
+        return slug
+
+    def get_absolute_url(self):
+        return reverse('core:team_member_detail', kwargs={'slug': self.slug})
+
+    def get_localized_field(self, field_name, language_code=None, allow_fallback=True):
+        language_code = (language_code or get_language() or settings.LANGUAGE_CODE or 'ru')[:2]
+        candidates = [getattr(self, f'{field_name}_{language_code}', '')]
+
+        if allow_fallback:
+            candidates.extend([
+                getattr(self, f'{field_name}_en', ''),
+                getattr(self, f'{field_name}_ru', ''),
+                getattr(self, field_name, ''),
+            ])
+
+        return next((value for value in candidates if value), '')
     
     @property
     def full_name(self):
         """Полное имя сотрудника"""
         return f"{self.first_name} {self.last_name}"
+
+    def get_full_name(self, language_code=None):
+        first_name = self.get_localized_field('first_name', language_code)
+        last_name = self.get_localized_field('last_name', language_code)
+        return f'{first_name} {last_name}'.strip() or self.full_name
+
+    @property
+    def years_in_market(self):
+        if not self.market_since_year:
+            return None
+
+        current_year = timezone.now().year
+        if self.market_since_year > current_year:
+            return None
+
+        return current_year - self.market_since_year
 
     @property
     def photo_avatar_url(self):
@@ -659,79 +729,44 @@ class Team(models.Model):
         """Получить всех активных сотрудников"""
         return cls.objects.filter(is_active=True).order_by('display_order', 'last_name')
     
-    def get_languages_list(self):
+    def get_languages_list(self, language_code=None):
         """Получить список языков как массив"""
-        if self.languages:
-            return [lang.strip() for lang in self.languages.split(',') if lang.strip()]
+        languages = self.get_localized_field('languages', language_code)
+        if languages:
+            return [lang.strip() for lang in languages.split(',') if lang.strip()]
         return []
     
     @property
     def telegram_url(self):
         """URL для Telegram ссылки"""
-        if self.telegram:
-            username = self.telegram.lstrip('@')  # Убираем @ если есть
+        username = (self.telegram or '').strip().lstrip('@')
+        if username:
             return f"https://t.me/{username}"
         return None
     
     def get_social_media_list(self):
         """Получить список всех социальных сетей с данными"""
         social_media = []
-        
-        if self.facebook:
+
+        def add_social(name, url, icon, color):
+            normalized_url = (url or '').strip()
+            if not normalized_url:
+                return
+
             social_media.append({
-                'name': 'Facebook',
-                'url': self.facebook,
-                'icon': 'fab fa-facebook-f',
-                'color': '#1877F2'
+                'name': name,
+                'url': normalized_url,
+                'icon': icon,
+                'color': color,
             })
         
-        if self.instagram:
-            social_media.append({
-                'name': 'Instagram', 
-                'url': self.instagram,
-                'icon': 'fab fa-instagram',
-                'color': '#E4405F'
-            })
-        
-        if self.linkedin:
-            social_media.append({
-                'name': 'LinkedIn',
-                'url': self.linkedin,
-                'icon': 'fab fa-linkedin-in',
-                'color': '#0A66C2'
-            })
-        
-        if self.twitter:
-            social_media.append({
-                'name': 'Twitter',
-                'url': self.twitter,
-                'icon': 'fab fa-twitter',
-                'color': '#1DA1F2'
-            })
-        
-        if self.telegram_url:
-            social_media.append({
-                'name': 'Telegram',
-                'url': self.telegram_url,
-                'icon': 'fab fa-telegram-plane',
-                'color': '#0088CC'
-            })
-        
-        if self.youtube:
-            social_media.append({
-                'name': 'YouTube',
-                'url': self.youtube,
-                'icon': 'fab fa-youtube',
-                'color': '#FF0000'
-            })
-        
-        if self.tiktok:
-            social_media.append({
-                'name': 'TikTok',
-                'url': self.tiktok,
-                'icon': 'fab fa-tiktok',
-                'color': '#000000'
-            })
+        add_social('Facebook', self.facebook, 'fab fa-facebook-f', '#1877F2')
+        add_social('Instagram', self.instagram, 'fab fa-instagram', '#E4405F')
+        add_social('LinkedIn', self.linkedin, 'fab fa-linkedin-in', '#0A66C2')
+        add_social('Twitter', self.twitter, 'fab fa-twitter', '#1DA1F2')
+        add_social('Telegram', self.telegram_url, 'fab fa-telegram-plane', '#0088CC')
+        add_social('YouTube', self.youtube, 'fab fa-youtube', '#FF0000')
+        add_social('TikTok', self.tiktok, 'fab fa-tiktok', '#000000')
         
         return social_media
 

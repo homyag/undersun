@@ -647,20 +647,44 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ('get_full_name', 'position', 'role', 'phone_display', 'email', 'is_active', 'show_on_homepage', 'display_order')
+    list_display = ('get_full_name', 'position', 'role', 'slug', 'phone_display', 'email', 'is_active', 'show_on_homepage', 'display_order')
     list_filter = ('role', 'is_active', 'show_on_homepage', 'hire_date', 'created_at')
-    search_fields = ('first_name', 'last_name', 'position', 'email', 'phone', 'languages', 'bio', 'specialization')
+    search_fields = (
+        'slug',
+        'first_name_ru', 'first_name_en', 'first_name_th',
+        'last_name_ru', 'last_name_en', 'last_name_th',
+        'position_ru', 'position_en', 'position_th',
+        'bio_ru', 'bio_en', 'bio_th',
+        'specialization_ru', 'specialization_en', 'specialization_th',
+        'languages_ru', 'languages_en', 'languages_th',
+        'prea_role_ru', 'prea_role_en', 'prea_role_th',
+        'email', 'phone',
+    )
     readonly_fields = ('created_at', 'updated_at')
     list_editable = ('is_active', 'show_on_homepage', 'display_order')
-    ordering = ['display_order', 'last_name', 'first_name']
+    ordering = ['display_order', 'last_name_ru', 'first_name_ru']
     
     fieldsets = (
-        ('Личная информация', {
-            'fields': ('first_name', 'last_name', 'photo'),
-            'description': 'Основная информация о сотруднике'
+        ('Фото', {
+            'fields': ('slug', 'photo'),
+            'description': 'Публичное фото сотрудника'
         }),
-        ('Должность и роль', {
-            'fields': ('position', 'role', 'hire_date'),
+        ('Имя и должность — RU', {
+            'fields': ('first_name_ru', 'last_name_ru', 'position_ru'),
+            'description': 'Русская версия имени, фамилии и должности'
+        }),
+        ('Имя и должность — EN', {
+            'fields': ('first_name_en', 'last_name_en', 'position_en'),
+            'classes': ('collapse',),
+            'description': 'Английская версия имени, фамилии и должности'
+        }),
+        ('Имя и должность — TH', {
+            'fields': ('first_name_th', 'last_name_th', 'position_th'),
+            'classes': ('collapse',),
+            'description': 'Тайская версия имени, фамилии и должности'
+        }),
+        ('Роль и опыт', {
+            'fields': ('role', 'hire_date', 'market_since_year'),
             'description': 'Профессиональная информация'
         }),
         ('Контактная информация', {
@@ -672,10 +696,20 @@ class TeamAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'description': 'Профили в социальных сетях'
         }),
-        ('Дополнительная информация', {
-            'fields': ('bio', 'specialization', 'languages'),
+        ('Биография и специализация — RU', {
+            'fields': ('bio_ru', 'specialization_ru', 'languages_ru', 'prea_role_ru'),
             'classes': ('collapse',),
-            'description': 'Подробная информация о сотруднике и его навыках'
+            'description': 'Русская версия биографии, специализации и списка языков'
+        }),
+        ('Биография и специализация — EN', {
+            'fields': ('bio_en', 'specialization_en', 'languages_en', 'prea_role_en'),
+            'classes': ('collapse',),
+            'description': 'Английская версия биографии, специализации и списка языков'
+        }),
+        ('Биография и специализация — TH', {
+            'fields': ('bio_th', 'specialization_th', 'languages_th', 'prea_role_th'),
+            'classes': ('collapse',),
+            'description': 'Тайская версия биографии, специализации и списка языков'
         }),
         ('Настройки отображения', {
             'fields': ('is_active', 'show_on_homepage', 'display_order'),
@@ -691,7 +725,7 @@ class TeamAdmin(admin.ModelAdmin):
         """Полное имя для отображения в списке"""
         return obj.full_name
     get_full_name.short_description = 'ФИО'
-    get_full_name.admin_order_field = 'last_name'
+    get_full_name.admin_order_field = 'last_name_ru'
     
     def get_form(self, request, obj=None, **kwargs):
         """Настройка формы с подсказками"""
@@ -701,6 +735,7 @@ class TeamAdmin(admin.ModelAdmin):
             'first_name': 'Имя сотрудника',
             'last_name': 'Фамилия сотрудника',
             'position': 'Должность на английском языке (как указано в оригинале)',
+            'slug': 'Стабильный URL сотрудника. Если оставить пустым, будет создан автоматически.',
             'role': 'Выберите роль из предложенных вариантов',
             'phone': 'Основной телефон в любом формате',
             'email': 'Рабочий email адрес',
@@ -709,11 +744,24 @@ class TeamAdmin(admin.ModelAdmin):
             'bio': 'Краткая биография или описание сотрудника',
             'specialization': 'Основные направления работы и специализации',
             'languages': 'Языки, которыми владеет сотрудник (через запятую)',
+            'market_since_year': 'Год начала работы на рынке недвижимости, например 2018',
+            'prea_role': 'Роль или участие в Phuket Property Association, если применимо',
             'hire_date': 'Дата приема на работу',
             'is_active': 'Отображать ли сотрудника на сайте',
             'show_on_homepage': 'Показывать в блоке "Наша команда" на главной странице',
             'display_order': 'Порядок отображения (меньше = выше в списке)',
         }
+
+        for lang_code, lang_label in (('ru', 'RU'), ('en', 'EN'), ('th', 'TH')):
+            help_texts.update({
+                f'first_name_{lang_code}': f'Имя сотрудника ({lang_label})',
+                f'last_name_{lang_code}': f'Фамилия сотрудника ({lang_label})',
+                f'position_{lang_code}': f'Должность сотрудника ({lang_label})',
+                f'bio_{lang_code}': f'Краткая биография сотрудника ({lang_label})',
+                f'specialization_{lang_code}': f'Основные направления работы ({lang_label})',
+                f'languages_{lang_code}': f'Языки сотрудника через запятую ({lang_label})',
+                f'prea_role_{lang_code}': f'Роль или участие в Phuket Property Association ({lang_label})',
+            })
         
         for field_name, help_text in help_texts.items():
             if field_name in form.base_fields:
@@ -722,7 +770,7 @@ class TeamAdmin(admin.ModelAdmin):
         return form
     
     def get_queryset(self, request):
-        return super().get_queryset(request).order_by('display_order', 'last_name', 'first_name')
+        return super().get_queryset(request).order_by('display_order', 'last_name_ru', 'first_name_ru')
     
     actions = ['activate_employees', 'deactivate_employees', 'add_to_homepage', 'remove_from_homepage', 'duplicate_employees']
     
@@ -754,6 +802,7 @@ class TeamAdmin(admin.ModelAdmin):
         """Дублировать выбранных сотрудников"""
         for employee in queryset:
             employee.pk = None
+            employee.slug = ''
             employee.first_name = f"{employee.first_name} (копия)"
             employee.is_active = False  # Копии создаются неактивными
             employee.show_on_homepage = False

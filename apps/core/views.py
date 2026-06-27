@@ -535,6 +535,192 @@ class TermsView(TemplateView):
     template_name = 'core/terms.html'
 
 
+class TeamMemberDetailView(DetailView):
+    model = Team
+    template_name = 'core/team_member_detail.html'
+    context_object_name = 'member'
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
+
+    labels = {
+        'ru': {
+            'profile': 'Профиль специалиста',
+            'home': 'Главная',
+            'team': 'Команда',
+            'specialization': 'Специализация',
+            'languages': 'Языки',
+            'market_since': 'На рынке с',
+            'years': 'лет опыта',
+            'prea': 'Профессиональная роль',
+            'contact': 'Связаться',
+            'articles': 'Материалы автора',
+            'view_all_posts': 'Все статьи',
+            'default_intro': 'Специалист команды Undersun Estate помогает клиентам с подбором недвижимости на Пхукете и координацией следующих шагов сделки.',
+            'meta_fallback': 'Профиль специалиста Undersun Estate: роль, специализация, языки, контакты и материалы о недвижимости на Пхукете.',
+            'contact_copy': 'Обсудите задачу напрямую со специалистом или оставьте заявку команде Undersun Estate.',
+            'team_cta': 'Обсудить задачу',
+        },
+        'en': {
+            'profile': 'Specialist profile',
+            'home': 'Home',
+            'team': 'Team',
+            'specialization': 'Specialization',
+            'languages': 'Languages',
+            'market_since': 'In the market since',
+            'years': 'years of experience',
+            'prea': 'Professional role',
+            'contact': 'Contact',
+            'articles': 'Articles by this author',
+            'view_all_posts': 'All articles',
+            'default_intro': 'A member of the Undersun Estate team helping clients compare Phuket property options and coordinate practical next steps.',
+            'meta_fallback': 'Undersun Estate specialist profile: role, specialization, languages, contacts and Phuket real estate articles.',
+            'contact_copy': 'Discuss your brief directly with the specialist or leave a request for the Undersun Estate team.',
+            'team_cta': 'Discuss your brief',
+        },
+        'th': {
+            'profile': 'โปรไฟล์ผู้เชี่ยวชาญ',
+            'home': 'หน้าแรก',
+            'team': 'ทีมงาน',
+            'specialization': 'ความเชี่ยวชาญ',
+            'languages': 'ภาษา',
+            'market_since': 'อยู่ในตลาดตั้งแต่',
+            'years': 'ปีประสบการณ์',
+            'prea': 'บทบาทวิชาชีพ',
+            'contact': 'ติดต่อ',
+            'articles': 'บทความโดยผู้เขียนนี้',
+            'view_all_posts': 'บทความทั้งหมด',
+            'default_intro': 'สมาชิกทีม Undersun Estate ช่วยลูกค้าเปรียบเทียบตัวเลือกอสังหาริมทรัพย์ในภูเก็ตและประสานขั้นตอนถัดไปอย่างเป็นระบบ',
+            'meta_fallback': 'โปรไฟล์ผู้เชี่ยวชาญ Undersun Estate: บทบาท ความเชี่ยวชาญ ภาษา ช่องทางติดต่อ และบทความอสังหาริมทรัพย์ภูเก็ต',
+            'contact_copy': 'พูดคุยรายละเอียดกับผู้เชี่ยวชาญโดยตรงหรือฝากคำขอไว้กับทีม Undersun Estate',
+            'team_cta': 'ปรึกษาความต้องการ',
+        },
+    }
+
+    def get_queryset(self):
+        return Team.objects.filter(is_active=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        member = self.object
+        language_code = (getattr(self.request, 'LANGUAGE_CODE', None) or get_language() or settings.LANGUAGE_CODE or 'ru')[:2]
+        labels = self.labels.get(language_code, self.labels['ru'])
+
+        name = member.get_full_name(language_code)
+        position = member.get_localized_field('position', language_code)
+        bio = member.get_localized_field('bio', language_code, allow_fallback=False)
+        specialization = member.get_localized_field('specialization', language_code, allow_fallback=False)
+        prea_role = member.get_localized_field('prea_role', language_code, allow_fallback=False)
+        languages = member.get_languages_list(language_code)
+        has_localized_profile_content = bool(bio or specialization or prea_role or languages)
+        visible_intro = bio or labels['default_intro']
+        canonical_url = self.request.build_absolute_uri(member.get_absolute_url())
+
+        photo_url = ''
+        photo_width = 320
+        photo_height = 320
+        if member.photo:
+            try:
+                photo_url = self.request.build_absolute_uri(member.photo.url)
+                photo_width = member.photo.width or photo_width
+                photo_height = member.photo.height or photo_height
+            except Exception:
+                photo_url = ''
+
+        social_media = member.get_social_media_list()
+        same_as = [item['url'] for item in social_media if item.get('url')]
+        person_schema = {
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            '@id': f'{canonical_url}#person',
+            'name': name,
+            'url': canonical_url,
+            'worksFor': {
+                '@type': 'Organization',
+                '@id': f"{self.request.build_absolute_uri('/')}#real-estate-agent",
+                'name': 'Undersun Estate',
+            },
+        }
+
+        if position:
+            person_schema['jobTitle'] = position
+        if visible_intro:
+            person_schema['description'] = strip_tags(visible_intro)
+        if photo_url:
+            person_schema['image'] = photo_url
+        if member.email:
+            person_schema['email'] = member.email
+        if member.phone:
+            person_schema['telephone'] = member.phone
+        if languages:
+            person_schema['knowsLanguage'] = languages
+        if specialization:
+            person_schema['knowsAbout'] = specialization
+        if same_as:
+            person_schema['sameAs'] = same_as
+        if prea_role:
+            person_schema['memberOf'] = {
+                '@type': 'Organization',
+                'name': 'Phuket Property Association',
+            }
+
+        breadcrumb_schema = {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+                {
+                    '@type': 'ListItem',
+                    'position': 1,
+                    'name': labels['home'],
+                    'item': self.request.build_absolute_uri(reverse('core:home')),
+                },
+                {
+                    '@type': 'ListItem',
+                    'position': 2,
+                    'name': labels['team'],
+                    'item': self.request.build_absolute_uri(reverse('core:about')),
+                },
+                {
+                    '@type': 'ListItem',
+                    'position': 3,
+                    'name': name,
+                    'item': canonical_url,
+                },
+            ],
+        }
+
+        page_title = f'{name} - {position} | Undersun Estate' if position else f'{name} | Undersun Estate'
+        context.update({
+            'team_profile': {
+                'name': name,
+                'position': position,
+                'bio': bio,
+                'visible_intro': visible_intro,
+                'specialization': specialization,
+                'prea_role': prea_role,
+                'languages': languages,
+                'photo_url': photo_url,
+                'photo_width': photo_width,
+                'photo_height': photo_height,
+                'social_media': social_media,
+                'years_in_market': member.years_in_market,
+                'market_since_year': member.market_since_year,
+                'labels': labels,
+            },
+            'page_title': page_title,
+            'page_description': truncate_meta(strip_tags(visible_intro or labels['meta_fallback'])),
+            'canonical_url': canonical_url,
+            'og_image_url': photo_url or context.get('og_image_url'),
+            'team_member_schema_json': json.dumps(person_schema, ensure_ascii=False),
+            'team_member_breadcrumb_schema_json': json.dumps(breadcrumb_schema, ensure_ascii=False),
+            'related_posts': BlogPost.get_published().filter(team_author=member).order_by('-published_at')[:3],
+        })
+
+        if not has_localized_profile_content:
+            context['meta_robots'] = 'noindex, follow'
+
+        return context
+
+
 class SitemapBaseView(View):
     languages = ['ru', 'en', 'th']
     max_property_images = 3
@@ -713,6 +899,12 @@ class StaticSitemapView(SitemapBaseView):
             lastmod = service.updated_at.isoformat() if service.updated_at else None
             entries.extend(self._expand_entries(alternates, lastmod))
 
+        # Team member profile pages
+        for member in Team.objects.filter(is_active=True).exclude(slug='').order_by('display_order', 'slug'):
+            alternates = self._build_alternates(base_url, member.get_absolute_url)
+            lastmod = member.updated_at.isoformat() if member.updated_at else None
+            entries.extend(self._expand_entries(alternates, lastmod))
+
         # Blog
         for post in BlogPost.get_published():
             alternates = self._build_alternates(base_url, post.get_absolute_url)
@@ -799,8 +991,13 @@ def legacy_real_estate_redirect(request, *args, **kwargs):
 
 
 def legacy_team_member_redirect(request, *args, **kwargs):
-    """Командные страницы из старого сайта перенаправляем на текущий раздел «О компании»"""
-    target_url = reverse('core:about')
+    """Старые командные URL ведем на актуальный профиль, если slug совпадает."""
+    legacy_slug = (kwargs.get('legacy_slug') or '').strip('/').split('/')[-1]
+    member = None
+    if legacy_slug:
+        member = Team.objects.filter(is_active=True, slug=legacy_slug).first()
+
+    target_url = member.get_absolute_url() if member else reverse('core:about')
     return HttpResponsePermanentRedirect(target_url)
 
 

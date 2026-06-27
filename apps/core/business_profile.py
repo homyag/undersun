@@ -19,6 +19,13 @@ BUSINESS_PROFILE = {
     'closes': '20:00',
     'opening_hours_compact': 'Mo-Fr 10:00-20:00',
     'google_maps_cid_url': 'https://maps.google.com/maps?cid=15686779743811846375',
+    'google_maps_embed_url': (
+        'https://www.google.com/maps/embed?pb='
+        '!1m14!1m8!1m3!1d927.4941666554396!2d98.3417095!3d7.9138837'
+        '!3m2!1i1024!2i768!4f13.1'
+        '!3m3!1m2!1s0x60e8893a2e97b515%3A0xd9b2a3109bb2c0e7'
+        '!2sUndersun%20Estate!5e1!3m2!1sru!2snl!4v1761220030003!5m2!1sru!2snl'
+    ),
     'same_as': [
         'https://maps.google.com/maps?cid=15686779743811846375',
         'https://www.facebook.com/mr.undersunestate/',

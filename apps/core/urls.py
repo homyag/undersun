@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
     path('bot/metrika-loaded/', views.metrika_loaded_ping, name='metrika_loaded'),
     path('about-us/team/<path:legacy_slug>/', views.legacy_team_member_redirect, name='legacy_team_member'),
+    path('team/<slug:slug>/', views.TeamMemberDetailView.as_view(), name='team_member_detail'),
     path('about/', views.AboutView.as_view(), name='about'),
     path('contact/', views.ContactView.as_view(), name='contact'),
     path('contacts/', RedirectView.as_view(pattern_name='core:contact', permanent=True), name='contacts_redirect'),

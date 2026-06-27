@@ -5,11 +5,14 @@ from unittest.mock import Mock, patch
 
 import requests
 from django.conf import settings
-from django.test import RequestFactory, SimpleTestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
+from django.utils.translation import override
 
 from apps.core.bot_detection import BotDetectionService
+from apps.core.business_profile import get_business_profile
 from apps.core.context_processors import _get_active_nav_section
+from apps.core.models import Team
 from apps.core.services import TranslationService
 from apps.core.utils import truncate_meta
 from apps.core.views import StaticSitemapView
@@ -121,6 +124,170 @@ class HomeFaqContentTests(SimpleTestCase):
                 self.assertNotIn(phrase, content)
 
 
+class ContactPageMapEmbedTests(SimpleTestCase):
+    def _read_project_file(self, relative_path):
+        return Path(settings.BASE_DIR, relative_path).read_text(encoding='utf-8')
+
+    def test_business_profile_exposes_google_maps_cid_and_embed_urls(self):
+        profile = get_business_profile('en')
+
+        self.assertEqual(
+            profile['google_maps_url'],
+            'https://maps.google.com/maps?cid=15686779743811846375',
+        )
+        self.assertTrue(profile['google_maps_embed_url'].startswith('https://www.google.com/maps/embed?pb='))
+        self.assertIn('Undersun%20Estate', profile['google_maps_embed_url'])
+
+    def test_contact_template_uses_business_profile_google_maps_embed(self):
+        template = self._read_project_file('templates/core/contact.html')
+
+        self.assertIn('src="{{ business_profile.google_maps_embed_url }}"', template)
+        self.assertIn('href="{{ business_profile.google_maps_url }}"', template)
+        self.assertNotIn('src="https://www.google.com/maps/embed?pb=', template)
+
+
+class TeamTranslationTests(SimpleTestCase):
+    def test_team_bio_specialization_and_languages_are_language_specific(self):
+        member = Team()
+
+        with override('ru'):
+            member.bio = 'RU bio'
+            member.specialization = 'RU specialization'
+            member.languages = 'Русский, Английский'
+
+        with override('en'):
+            member.bio = 'EN bio'
+            member.specialization = 'EN specialization'
+            member.languages = 'Russian, English'
+
+        with override('th'):
+            member.bio = 'TH bio'
+            member.specialization = 'TH specialization'
+            member.languages = 'รัสเซีย, อังกฤษ'
+
+        self.assertEqual(member.bio_ru, 'RU bio')
+        self.assertEqual(member.bio_en, 'EN bio')
+        self.assertEqual(member.bio_th, 'TH bio')
+        self.assertEqual(member.specialization_ru, 'RU specialization')
+        self.assertEqual(member.specialization_en, 'EN specialization')
+        self.assertEqual(member.specialization_th, 'TH specialization')
+        self.assertEqual(member.languages_ru, 'Русский, Английский')
+        self.assertEqual(member.languages_en, 'Russian, English')
+        self.assertEqual(member.languages_th, 'รัสเซีย, อังกฤษ')
+
+        with override('en'):
+            self.assertEqual(member.bio, 'EN bio')
+            self.assertEqual(member.get_languages_list(), ['Russian', 'English'])
+
+        with override('th'):
+            self.assertEqual(member.bio, 'TH bio')
+            self.assertEqual(member.get_languages_list(), ['รัสเซีย', 'อังกฤษ'])
+
+    def test_social_media_list_ignores_empty_values(self):
+        member = Team(
+            facebook='',
+            instagram='   ',
+            linkedin='https://www.linkedin.com/company/undersun-estate/',
+            telegram='   ',
+            youtube='',
+            tiktok='',
+        )
+
+        social_media = member.get_social_media_list()
+
+        self.assertEqual(len(social_media), 1)
+        self.assertEqual(social_media[0]['name'], 'LinkedIn')
+        self.assertEqual(social_media[0]['url'], 'https://www.linkedin.com/company/undersun-estate/')
+
+
+class TeamProfilePageTests(TestCase):
+    def create_member(self, **overrides):
+        defaults = {
+            'first_name': 'Bogdan',
+            'last_name': 'Dyachuk',
+            'position': 'CEO',
+            'role': 'other',
+            'bio_ru': 'Помогает клиентам сравнивать объекты недвижимости на Пхукете.',
+            'bio_en': 'Helps clients compare Phuket property options before the next step.',
+            'specialization_en': 'Residential and investment property in Phuket',
+            'languages_en': 'English, Russian',
+            'prea_role_en': 'Phuket Property Association co-founder',
+            'market_since_year': 2018,
+            'phone': '+66827268615',
+            'email': 'bd@undersunestate.com',
+            'linkedin': 'https://www.linkedin.com/company/undersun-estate/',
+            'is_active': True,
+            'show_on_homepage': True,
+            'display_order': 1,
+        }
+        defaults.update(overrides)
+        return Team.objects.create(**defaults)
+
+    def test_active_team_member_profile_is_public_and_schema_backed(self):
+        member = self.create_member()
+
+        self.assertEqual(member.slug, 'bogdan-dyachuk')
+
+        response = self.client.get(f'/en/team/{member.slug}/', HTTP_HOST='localhost')
+
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode('utf-8')
+
+        self.assertIn('<h1', html)
+        self.assertIn('Bogdan Dyachuk', html)
+        self.assertIn('Residential and investment property in Phuket', html)
+        self.assertIn('Phuket Property Association co-founder', html)
+        self.assertIn(f'<link rel="canonical" href="http://localhost/en/team/{member.slug}/">', html)
+        self.assertIn('"@type": "Person"', html)
+        self.assertIn('"sameAs"', html)
+        self.assertNotIn('noindex, follow', html)
+
+    def test_missing_localized_profile_content_is_noindexed(self):
+        member = self.create_member(
+            first_name='Tatiana',
+            last_name='Korostyleva',
+            bio_en='',
+            specialization_en='',
+            languages_en='',
+            prea_role_en='',
+        )
+
+        response = self.client.get(f'/en/team/{member.slug}/', HTTP_HOST='localhost')
+
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode('utf-8')
+        self.assertIn('<meta name="robots" content="noindex, follow">', html)
+
+    def test_homepage_team_cards_link_to_profiles(self):
+        member = self.create_member()
+
+        with patch('apps.core.views.get_homepage_google_reviews', return_value=[]):
+            response = self.client.get('/en/', HTTP_HOST='localhost')
+
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode('utf-8')
+        self.assertIn(f'href="/en/team/{member.slug}/"', html)
+        self.assertIn('home_team_profile_click', html)
+
+    def test_team_profiles_are_in_static_sitemap(self):
+        member = self.create_member()
+
+        response = self.client.get('/sitemap-static.xml', HTTP_HOST='localhost')
+
+        self.assertEqual(response.status_code, 200)
+        xml = response.content.decode('utf-8')
+        self.assertIn(f'http://localhost/en/team/{member.slug}/', xml)
+        self.assertIn(f'http://localhost/ru/team/{member.slug}/', xml)
+        self.assertIn(f'http://localhost/th/team/{member.slug}/', xml)
+
+    def test_inactive_team_member_profile_returns_404(self):
+        member = self.create_member(is_active=False)
+
+        response = self.client.get(f'/en/team/{member.slug}/', HTTP_HOST='localhost')
+
+        self.assertEqual(response.status_code, 404)
+
+
 class StaticSitemapLastmodTests(SimpleTestCase):
     sitemap_ns = {'sm': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
 
@@ -163,6 +330,9 @@ class StaticSitemapLastmodTests(SimpleTestCase):
         location_queryset = Mock()
         location_queryset.annotate.return_value.order_by.return_value = [location]
 
+        team_queryset = Mock()
+        team_queryset.exclude.return_value.order_by.return_value = []
+
         request = RequestFactory().get('/sitemap-static.xml', HTTP_HOST='localhost')
 
         with (
@@ -170,6 +340,7 @@ class StaticSitemapLastmodTests(SimpleTestCase):
             patch('apps.core.views.District.objects.annotate', return_value=district_queryset),
             patch('apps.core.views.Location.objects.select_related', return_value=location_queryset),
             patch('apps.core.views.Service.objects.filter', return_value=[]),
+            patch('apps.core.views.Team.objects.filter', return_value=team_queryset),
             patch('apps.core.views.BlogPost.get_published', return_value=[]),
         ):
             response = StaticSitemapView.as_view()(request)
