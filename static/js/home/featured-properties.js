@@ -84,11 +84,18 @@
         });
 
         // Carousel state
+        const INITIAL_AUTOPLAY_DELAY = 2000;
+        const AUTOPLAY_DELAY = 5000;
+        const INTERACTION_RESUME_DELAY = 12000;
+        const CURRENCY_RESUME_DELAY = 15000;
+        const reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
         let currentIndex = 0;
         let isTransitioning = false;
-        let autoplayInterval;
+        let autoplayInterval = null;
+        let autoplayResumeTimeout = null;
         let swipeStartX = 0;
         let isMouseSwiping = false;
+        let isCurrencyDropdownOpen = false;
 
         // Render properties with consultation forms
         function renderProperties(properties) {
@@ -133,6 +140,7 @@
             // Initialize carousel controls
             initializeCarouselControls();
             initializeSwipeSupport();
+            initializeInteractionPauseSupport();
 
             // Update all prices to current header currency
             updateAllPricesToHeaderCurrency();
@@ -237,7 +245,7 @@
             const offset = isMobile ? Math.max((parentRect.width - itemRect.width) / 2 - gap / 2, 0) : 0;
             const translateX = -(currentIndex * slideWidth) + offset;
 
-            if (animate) {
+            if (animate && !prefersReducedMotion()) {
                 container.style.transition = 'transform 1s ease-in-out';
             } else {
                 container.style.transition = 'none';
@@ -295,6 +303,112 @@
             }
         }
 
+        function getCarouselItems() {
+            const container = document.getElementById('properties-carousel');
+            if (!container) {
+                return [];
+            }
+            return Array.from(container.querySelectorAll('.carousel-item'));
+        }
+
+        function getPropertyIdFromCarouselItem(item) {
+            if (!item) {
+                return null;
+            }
+
+            const propertyNode = item.querySelector('[data-featured-property-id], .currency-toggle-btn[data-property-id], [data-property-id]');
+            return propertyNode ? (propertyNode.dataset.featuredPropertyId || propertyNode.dataset.propertyId || null) : null;
+        }
+
+        function getCurrentVisiblePropertyId() {
+            const items = getCarouselItems();
+            if (!items.length) {
+                return null;
+            }
+
+            const index = ((currentIndex % items.length) + items.length) % items.length;
+            return getPropertyIdFromCarouselItem(items[index]);
+        }
+
+        function restoreCarouselToProperty(propertyId) {
+            if (!propertyId) {
+                updateCarouselPosition(false);
+                return;
+            }
+
+            const items = getCarouselItems();
+            if (!items.length) {
+                return;
+            }
+
+            const itemsPerSet = items.length / 3;
+            const middleStart = Math.floor(itemsPerSet);
+            const middleEnd = Math.floor(itemsPerSet * 2);
+            let bestIndex = -1;
+            let bestDistance = Infinity;
+
+            for (let index = middleStart; index < middleEnd; index++) {
+                if (getPropertyIdFromCarouselItem(items[index]) !== String(propertyId)) {
+                    continue;
+                }
+
+                const distance = Math.abs(index - currentIndex);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestIndex = index;
+                }
+            }
+
+            if (bestIndex !== -1) {
+                currentIndex = bestIndex;
+            }
+
+            updateCarouselPosition(false);
+        }
+
+        function prefersReducedMotion() {
+            return reducedMotionQuery ? reducedMotionQuery.matches : false;
+        }
+
+        function hasActiveCarouselInteraction() {
+            return isCurrencyDropdownOpen;
+        }
+
+        function canRunAutoplay() {
+            return !hasActiveCarouselInteraction();
+        }
+
+        function clearAutoplayInterval() {
+            if (autoplayInterval) {
+                clearInterval(autoplayInterval);
+                autoplayInterval = null;
+            }
+        }
+
+        function clearAutoplayResume() {
+            if (autoplayResumeTimeout) {
+                clearTimeout(autoplayResumeTimeout);
+                autoplayResumeTimeout = null;
+            }
+        }
+
+        function pauseAutoplay() {
+            clearAutoplayInterval();
+            clearAutoplayResume();
+        }
+
+        function scheduleAutoplayResume(delay = INTERACTION_RESUME_DELAY) {
+            clearAutoplayInterval();
+            clearAutoplayResume();
+
+            autoplayResumeTimeout = setTimeout(() => {
+                autoplayResumeTimeout = null;
+                if (canRunAutoplay()) {
+                    startAutoplay();
+                }
+            }, delay);
+        }
+
         // Initialize carousel controls
         function initializeCarouselControls() {
             const prevBtn = document.getElementById('featured-prev');
@@ -304,7 +418,7 @@
                 prevBtn.onclick = () => {
                     hideCarouselHint();
                     prevSlide();
-                    resetAutoplay();
+                    resetAutoplay(INTERACTION_RESUME_DELAY);
                 };
             }
 
@@ -312,11 +426,11 @@
                 nextBtn.onclick = () => {
                     hideCarouselHint();
                     nextSlide();
-                    resetAutoplay();
+                    resetAutoplay(INTERACTION_RESUME_DELAY);
                 };
             }
 
-            startAutoplay();
+            startAutoplay(INITIAL_AUTOPLAY_DELAY);
         }
 
         function initializeSwipeSupport() {
@@ -352,33 +466,33 @@
         function onTouchStart(event) {
             swipeStartX = event.changedTouches[0].clientX;
             hideCarouselHint();
-            stopAutoplay();
+            pauseAutoplay();
         }
 
         function onTouchEnd(event) {
             const touchEndX = event.changedTouches[0].clientX;
             handleSwipe(touchEndX - swipeStartX);
-            resetAutoplay();
+            resetAutoplay(INTERACTION_RESUME_DELAY);
         }
 
         function onMouseDown(event) {
             swipeStartX = event.clientX;
             isMouseSwiping = true;
             hideCarouselHint();
-            stopAutoplay();
+            pauseAutoplay();
         }
 
         function onMouseUp(event) {
             if (!isMouseSwiping) return;
             isMouseSwiping = false;
             handleSwipe(event.clientX - swipeStartX);
-            resetAutoplay();
+            resetAutoplay(INTERACTION_RESUME_DELAY);
         }
 
         function onMouseLeave(event) {
             if (!isMouseSwiping) return;
             isMouseSwiping = false;
-            resetAutoplay();
+            resetAutoplay(INTERACTION_RESUME_DELAY);
         }
 
         function handleSwipe(deltaX) {
@@ -394,20 +508,74 @@
             }
         }
 
+        function initializeInteractionPauseSupport() {
+            const section = document.querySelector('[data-home-featured-section]');
+            if (!section || section.dataset.featuredAutoplayPauseBound === 'true') {
+                return;
+            }
+
+            section.dataset.featuredAutoplayPauseBound = 'true';
+
+            section.addEventListener('focusin', () => {
+                pauseAutoplay();
+                scheduleAutoplayResume(INTERACTION_RESUME_DELAY);
+            });
+
+            section.addEventListener('focusout', (event) => {
+                if (section.contains(event.relatedTarget)) {
+                    return;
+                }
+
+                if (!hasActiveCarouselInteraction()) {
+                    scheduleAutoplayResume(INTERACTION_RESUME_DELAY);
+                }
+            });
+
+            section.addEventListener('pointerdown', () => {
+                hideCarouselHint();
+                pauseAutoplay();
+                scheduleAutoplayResume(INTERACTION_RESUME_DELAY);
+            });
+        }
+
         // Autoplay functions
-        function startAutoplay() {
-            autoplayInterval = setInterval(() => {
-                nextSlide();
-            }, 8000); // Slower autoplay - every 8 seconds
+        function startAutoplay(firstDelay = AUTOPLAY_DELAY) {
+            clearAutoplayInterval();
+            clearAutoplayResume();
+
+            if (!canRunAutoplay()) {
+                return;
+            }
+
+            autoplayResumeTimeout = setTimeout(() => {
+                autoplayResumeTimeout = null;
+
+                if (canRunAutoplay()) {
+                    nextSlide();
+                }
+
+                autoplayInterval = setInterval(() => {
+                    if (canRunAutoplay()) {
+                        nextSlide();
+                    }
+                }, AUTOPLAY_DELAY);
+            }, firstDelay);
         }
 
-        function resetAutoplay() {
-            stopAutoplay();
-            startAutoplay();
+        function resetAutoplay(delay = INTERACTION_RESUME_DELAY) {
+            scheduleAutoplayResume(delay);
         }
 
-        function stopAutoplay() {
-            clearInterval(autoplayInterval);
+        if (reducedMotionQuery) {
+            const handleReducedMotionChange = () => {
+                updateCarouselPosition(false);
+            };
+
+            if (typeof reducedMotionQuery.addEventListener === 'function') {
+                reducedMotionQuery.addEventListener('change', handleReducedMotionChange);
+            } else if (typeof reducedMotionQuery.addListener === 'function') {
+                reducedMotionQuery.addListener(handleReducedMotionChange);
+            }
         }
 
         // cache in-flight exchange rate request to avoid spamming API
@@ -701,6 +869,22 @@
             return dropdownContainer;
         }
 
+        function hasVisibleCurrencyDropdown() {
+            return Array.from(document.querySelectorAll('.currency-dropdown')).some(dropdown => {
+                return dropdown.style.display === 'block' && dropdown.style.visibility !== 'hidden';
+            });
+        }
+
+        function syncCurrencyDropdownAutoplayState(resumeDelay = INTERACTION_RESUME_DELAY) {
+            isCurrencyDropdownOpen = hasVisibleCurrencyDropdown();
+
+            if (isCurrencyDropdownOpen) {
+                pauseAutoplay();
+            } else if (!hasActiveCarouselInteraction()) {
+                scheduleAutoplayResume(resumeDelay);
+            }
+        }
+
         // Initialize currency dropdowns for all property cards
         function initializeCurrencyDropdowns() {
             const carouselContainer = document.getElementById('properties-carousel');
@@ -783,6 +967,8 @@
 
                     e.preventDefault();
                     e.stopPropagation();
+                    hideCarouselHint();
+                    pauseAutoplay();
 
                     // Close other dropdowns first
                     document.querySelectorAll('.currency-dropdown').forEach(d => {
@@ -804,10 +990,13 @@
                         dropdown.style.transform = 'scale(0.95)';
                         setTimeout(() => {
                             dropdown.style.display = 'none';
+                            syncCurrencyDropdownAutoplayState(INTERACTION_RESUME_DELAY);
                         }, 200);
                     } else {
                         // Position dropdown relative to button
                         positionDropdown();
+                        isCurrencyDropdownOpen = true;
+                        pauseAutoplay();
 
                         // Show dropdown
                         dropdown.style.display = 'block';
@@ -839,9 +1028,11 @@
                         e.preventDefault();
                         e.stopPropagation();
 
+                        const visiblePropertyId = getCurrentVisiblePropertyId();
                         const currency = option.dataset.currency;
                         const symbol = option.dataset.symbol;
                         const dealType = option.dataset.dealType;
+                        pauseAutoplay();
 
                         // Update ALL currency button displays for this property (since carousel has multiple copies)
                         const allCurrencyButtons = document.querySelectorAll(`[data-property-id="${propertyId}"].currency-toggle-btn`);
@@ -854,6 +1045,7 @@
 
                         // Update price
                         convertAndUpdateCardPrice(propertyId, currency, symbol, dealType);
+                        restoreCarouselToProperty(visiblePropertyId);
 
                         // Close dropdown
                         dropdown.style.opacity = '0';
@@ -861,6 +1053,7 @@
                         dropdown.style.transform = 'scale(0.95)';
                         setTimeout(() => {
                             dropdown.style.display = 'none';
+                            syncCurrencyDropdownAutoplayState(CURRENCY_RESUME_DELAY);
                         }, 200);
                     };
 
@@ -880,6 +1073,7 @@
                         dropdown.style.transform = 'scale(0.95)';
                         setTimeout(() => {
                             dropdown.style.display = 'none';
+                            syncCurrencyDropdownAutoplayState(INTERACTION_RESUME_DELAY);
                         }, 200);
                     });
                 }
@@ -1136,7 +1330,7 @@
             const heartClass = isFav ? 'fas text-red-500' : 'far text-gray-600';
 
             return `
-            <div class="property-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden w-full h-full">
+            <div class="property-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden w-full h-full" data-featured-property-id="${property.id}">
                 <div class="relative h-48">
                     <a href="${property.url}" class="block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent" aria-label="${property.title}" ${buildYmAttributes('image')}>
                         <img src="${imageUrl}"${imageSrcset}${imageSizes} class="w-full h-full object-cover" alt="${property.title}" width="800" height="600" loading="lazy" decoding="async">
@@ -1257,6 +1451,9 @@
         // Listen for currency changes from header
         window.addEventListener('currencyChanged', function(event) {
             const { currency, symbol } = event.detail || {};
+            const visiblePropertyId = getCurrentVisiblePropertyId();
+            pauseAutoplay();
+
             if (currency) {
                 updateHeroSearchPlaceholders(symbol, currency);
             }
@@ -1276,6 +1473,9 @@
                         if (currencyCode) currencyCode.textContent = currency;
                     });
                 }
+
+                restoreCarouselToProperty(visiblePropertyId);
+                scheduleAutoplayResume(CURRENCY_RESUME_DELAY);
             }, 100);
         });
 
