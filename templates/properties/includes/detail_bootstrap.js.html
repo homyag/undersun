@@ -21,6 +21,12 @@ const PROPERTY_IMAGE_ALTS = [
     {% endfor %}
 ];
 
+const PROPERTY_IMAGE_SRCSETS = [
+    {% for image in gallery_images %}
+        "{% if image.thumbnail_url %}{{ image.thumbnail_url|escapejs }} 300w, {{ image.url|escapejs }} 800w{% if image.full_url and image.width %}, {{ image.full_url|escapejs }} {{ image.width }}w{% endif %}{% endif %}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
 const PROPERTY_IMAGE_DIMENSIONS = [
     {% for image in gallery_images %}
         {

@@ -89,6 +89,14 @@ function applyDesktopImage(frameElement, imageElement, imageIndex) {
     }
 
     const src = PROPERTY_IMAGES[imageIndex] || '';
+    const srcset = typeof PROPERTY_IMAGE_SRCSETS !== 'undefined' && Array.isArray(PROPERTY_IMAGE_SRCSETS)
+        ? PROPERTY_IMAGE_SRCSETS[imageIndex]
+        : '';
+    if (srcset) {
+        imageElement.srcset = srcset;
+    } else {
+        imageElement.removeAttribute('srcset');
+    }
     imageElement.src = src;
     imageElement.alt = PROPERTY_IMAGE_ALTS[imageIndex] || PROPERTY_TITLE;
     updateDesktopFrameMode(frameElement, imageIndex);

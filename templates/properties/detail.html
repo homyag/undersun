@@ -30,20 +30,6 @@
     {% if amp_url %}
         <link rel="amphtml" href="{{ amp_url }}">
     {% endif %}
-    {% if gallery_images and gallery_images.0.url %}
-        <link rel="preload" as="image"
-              href="{{ gallery_images.0.url }}"
-              {% if gallery_images.0.thumbnail_url %}imagesrcset="{{ gallery_images.0.thumbnail_url }} 300w, {{ gallery_images.0.url }} 800w{% if gallery_images.0.full_url and gallery_images.0.width %}, {{ gallery_images.0.full_url }} {{ gallery_images.0.width }}w{% endif %}"{% endif %}
-              imagesizes="100vw"
-              fetchpriority="high"
-              media="(max-width: 1023px)">
-        <link rel="preload" as="image"
-              href="{{ gallery_images.0.url }}"
-              {% if gallery_images.0.thumbnail_url %}imagesrcset="{{ gallery_images.0.thumbnail_url }} 300w, {{ gallery_images.0.url }} 800w{% if gallery_images.0.full_url and gallery_images.0.width %}, {{ gallery_images.0.full_url }} {{ gallery_images.0.width }}w{% endif %}"{% endif %}
-              imagesizes="(min-width: 1280px) 58vw, 100vw"
-              fetchpriority="high"
-              media="(min-width: 1024px)">
-    {% endif %}
     <style>
         #gallery-thumbs-track::-webkit-scrollbar {
             display: none;
