@@ -85,6 +85,10 @@ Thumbs.db
 
 # Misc
 docs/
+!docs/
+docs/*
+!docs/MAP_REBUILD_PLAN_2026_07.md
+!docs/MAP_ROLLOUT_RUNBOOK_2026_07.md
 .gitignore_migration
 
 # AI platform related files
@@ -122,6 +126,8 @@ coverage.xml
 
 # Node modules (if using npm/yarn)
 node_modules/
+frontend/map/dist/
+static/map-app/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

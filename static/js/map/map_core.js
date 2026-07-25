@@ -1,6 +1,6 @@
 (function () {
-    const DEFAULT_CENTER = [98.3381, 7.9519];
-    const DEFAULT_ZOOM = 11;
+    const DEFAULT_CENTER = [98.3923, 7.8804];
+    const DEFAULT_ZOOM = 10;
     const SOURCE_ID = 'properties';
     const HOVER_SOURCE_ID = 'property-hover';
     const SELECTED_SOURCE_ID = 'property-selected';
@@ -10,6 +10,10 @@
     const CLUSTER_GLOW_LAYER_ID = 'property-clusters-glow';
     const CLUSTER_RING_LAYER_ID = 'property-clusters-ring';
     const CLUSTER_LAYER_ID = 'property-clusters';
+    const AGGREGATE_GLOW_LAYER_ID = 'property-aggregates-glow';
+    const AGGREGATE_RING_LAYER_ID = 'property-aggregates-ring';
+    const AGGREGATE_LAYER_ID = 'property-aggregates';
+    const AGGREGATE_LABEL_LAYER_ID = 'property-aggregates-label';
     const SPIDER_LEG_LAYER_ID = 'property-spider-legs';
     const POINT_GLOW_LAYER_ID = 'property-points-glow';
     const POINT_RING_LAYER_ID = 'property-points-ring';
@@ -33,6 +37,11 @@
         CLUSTER_RING_LAYER_ID,
         CLUSTER_GLOW_LAYER_ID,
         HOVER_CLUSTER_LAYER_ID,
+    ];
+    const AGGREGATE_INTERACTIVE_LAYER_IDS = [
+        AGGREGATE_LAYER_ID,
+        AGGREGATE_RING_LAYER_ID,
+        AGGREGATE_GLOW_LAYER_ID,
     ];
     const POINT_INTERACTIVE_LAYER_IDS = [
         SPIDER_POINT_ICON_LAYER_ID,
@@ -68,6 +77,7 @@
         popup: null,
         loaded: false,
         pendingProperties: [],
+        aggregateMarkers: [],
         districtMarkers: [],
         lastGeoJson: createEmptyFeatureCollection(),
         districtGeoJson: createEmptyFeatureCollection(),
@@ -243,6 +253,56 @@
         state.districtMarkers = [];
     }
 
+    function clearAggregateMarkers() {
+        state.aggregateMarkers.forEach((marker) => marker.remove());
+        state.aggregateMarkers = [];
+    }
+
+    function renderAggregateMarkers(properties) {
+        if (!state.map || typeof maplibregl === 'undefined') {
+            return;
+        }
+
+        clearAggregateMarkers();
+
+        properties
+            .filter((property) => property?.is_aggregate === true)
+            .forEach((aggregate) => {
+                const lat = Number(aggregate.lat);
+                const lng = Number(aggregate.lng);
+                const count = Number(aggregate.count);
+                if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(count)) {
+                    return;
+                }
+
+                const element = document.createElement('button');
+                const size = Math.min(58, Math.max(38, 34 + Math.log10(Math.max(count, 1)) * 14));
+                element.type = 'button';
+                element.className = 'catalog-map-aggregate-marker';
+                element.style.setProperty('--aggregate-marker-size', `${Math.round(size)}px`);
+                element.setAttribute('aria-label', `${count}`);
+                element.textContent = String(count);
+                element.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    state.map.once('zoomend', () => {
+                        emitMapEvent('catalog-map:aggregate-selected');
+                    });
+                    state.map.easeTo({
+                        center: [lng, lat],
+                        zoom: Math.min(state.map.getZoom() + 2, 15),
+                        duration: 500,
+                    });
+                });
+
+                const marker = new maplibregl.Marker({
+                    element,
+                    anchor: 'center',
+                }).setLngLat([lng, lat]).addTo(state.map);
+                state.aggregateMarkers.push(marker);
+            });
+    }
+
     function syncDistrictMarkersVisibility() {
         if (!state.map || !state.districtMarkers.length) {
             return;
@@ -414,67 +474,27 @@
     }
 
     function createSvgIconMarkup(type, color, darkColor) {
-        const iconMarkup = {
-            condo: `
-                <rect x="15" y="10.5" width="18" height="25" rx="3.2" fill="#fff"/>
-                <rect x="18.5" y="15" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
-                <rect x="26.1" y="15" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
-                <rect x="18.5" y="21.2" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
-                <rect x="26.1" y="21.2" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
-                <rect x="18.5" y="27.4" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
-                <rect x="26.1" y="27.4" width="3.4" height="3.4" rx="0.8" fill="${color}" fill-opacity="0.78"/>
-                <rect x="22.2" y="30.2" width="3.8" height="5.3" rx="1" fill="${color}" fill-opacity="0.9"/>
-            `,
-            townhouse: `
-                <path d="M11.2 22.7 24 11.7l12.8 11v12.8h-8.3v-8.9h-9v8.9h-8.3V22.7Z" fill="#fff"/>
-                <path d="M16.2 22.6 24 16l7.8 6.6v1.9H16.2v-1.9Z" fill="${color}" fill-opacity="0.78"/>
-                <rect x="20.2" y="28.1" width="7.6" height="7.4" rx="1.2" fill="${color}" fill-opacity="0.86"/>
-            `,
-            villa: `
-                <path d="M10.5 19.3 24 11.5l13.5 7.8v3.5h-27v-3.5Z" fill="#fff"/>
-                <rect x="12.2" y="24.6" width="23.6" height="3.1" rx="1.1" fill="#fff"/>
-                <rect x="13.2" y="33.2" width="21.6" height="3.4" rx="1.2" fill="#fff"/>
-                <rect x="15" y="27.2" width="3.2" height="7.1" rx="1" fill="#fff"/>
-                <rect x="22.4" y="27.2" width="3.2" height="7.1" rx="1" fill="#fff"/>
-                <rect x="29.8" y="27.2" width="3.2" height="7.1" rx="1" fill="#fff"/>
-                <path d="M16.4 19.2 24 15l7.6 4.2H16.4Z" fill="${color}" fill-opacity="0.78"/>
-            `,
-            land: `
-                <path d="M11.8 33.7c4.6-7.8 11.7-12.5 21.4-14.1" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>
-                <path d="M13.2 34.2c3.3-3.7 7.7-5.5 13.2-5.3 4 .1 7-1.1 9.1-3.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
-                <circle cx="33.8" cy="19.5" r="4.3" fill="#fff"/>
-                <path d="M14.1 35.5c3.5-2.8 8.1-4.1 13.7-3.8" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-opacity="0.74"/>
-            `,
-            default: `
-                <circle cx="24" cy="22.5" r="10.5" fill="#fff"/>
-                <circle cx="24" cy="22.5" r="4.2" fill="${color}" fill-opacity="0.88"/>
-                <path d="M24 10.6c6.4 0 11.6 4.9 11.6 11.2 0 7.7-9.7 15.9-10.7 16.7a1.4 1.4 0 0 1-1.8 0c-1-.8-10.7-9-10.7-16.7 0-6.3 5.2-11.2 11.6-11.2Z" fill="#fff" fill-opacity="0.2"/>
-            `,
-        };
-
+        const pinColor = '#474b57';
+        const pinDarkColor = '#333847';
         return `
-            <svg xmlns="http://www.w3.org/2000/svg" width="96" height="112" viewBox="0 0 48 56">
+            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 40 40">
                 <defs>
-                    <linearGradient id="markerGradient" x1="10" y1="4" x2="38" y2="50" gradientUnits="userSpaceOnUse">
-                        <stop offset="0" stop-color="${color}"/>
-                        <stop offset="1" stop-color="${darkColor}"/>
-                    </linearGradient>
-                    <filter id="markerShadow" x="-30%" y="-20%" width="160%" height="160%">
-                        <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#111827" flood-opacity="0.28"/>
+                    <filter id="pinShadow" x="-40%" y="-40%" width="180%" height="180%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${pinDarkColor}" flood-opacity="0.24"/>
                     </filter>
                 </defs>
-                <path d="M24 2.6c-11.5 0-20 8.2-20 19.4 0 14.9 16.9 29.6 18.8 31.2a1.9 1.9 0 0 0 2.4 0C27.1 51.6 44 36.9 44 22 44 10.8 35.5 2.6 24 2.6Z" fill="url(#markerGradient)" filter="url(#markerShadow)"/>
-                <path d="M24 5.2c-10 0-17.2 7.1-17.2 16.8 0 13.2 14.4 26.3 17.2 28.7C26.8 48.3 41.2 35.2 41.2 22 41.2 12.3 34 5.2 24 5.2Z" fill="none" stroke="#fff" stroke-opacity="0.28" stroke-width="1.4"/>
-                <circle cx="24" cy="22.5" r="16" fill="#fff" fill-opacity="0.14"/>
-                ${iconMarkup[type] || iconMarkup.default}
-                <circle cx="24" cy="50.4" r="2.3" fill="#fff" fill-opacity="0.9"/>
+                <circle cx="20" cy="20" r="16" fill="#fff" filter="url(#pinShadow)"/>
+                <circle cx="20" cy="20" r="14" fill="#fff" stroke="${pinColor}" stroke-width="3"/>
+                <circle cx="20" cy="20" r="10.5" fill="${pinColor}" fill-opacity="0.12"/>
+                <path d="M12.5 19.1 20 12.9l7.5 6.2v8.2h-4.7v-5.4h-5.6v5.4h-4.7v-8.2Z" fill="none" stroke="${pinColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10.8 20.1 20 12l9.2 8.1" fill="none" stroke="${pinColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         `.trim();
     }
 
     function loadMapImage(map, name, svgMarkup) {
         return new Promise((resolve, reject) => {
-            const image = new Image(96, 112);
+        const image = new Image(80, 80);
             image.onload = () => {
                 if (!map.hasImage(name)) {
                     map.addImage(name, image, { pixelRatio: 2 });
@@ -903,6 +923,7 @@
                 },
                 properties: {
                     ...property,
+                    is_aggregate: property.is_aggregate === true,
                     icon_name: getPropertyIconName(property.property_type, property.deal_type),
                 },
             })),
@@ -1006,6 +1027,60 @@
             },
         });
 
+        // Overview aggregates are rendered as DOM markers to avoid relying on
+        // legacy GeoJSON style-layer state during dynamic catalog loading.
+        const aggregateFilter = ['==', ['get', 'aggregate_render_mode'], 'maplibre'];
+        state.map.addLayer({
+            id: AGGREGATE_GLOW_LAYER_ID,
+            type: 'circle',
+            source: SOURCE_ID,
+            filter: aggregateFilter,
+            paint: {
+                'circle-radius': ['interpolate', ['linear'], ['get', 'count'], 1, 24, 50, 38],
+                'circle-color': '#F1B400',
+                'circle-opacity': 0.2,
+                'circle-blur': 0.8,
+            },
+        });
+        state.map.addLayer({
+            id: AGGREGATE_RING_LAYER_ID,
+            type: 'circle',
+            source: SOURCE_ID,
+            filter: aggregateFilter,
+            paint: {
+                'circle-radius': ['interpolate', ['linear'], ['get', 'count'], 1, 16, 50, 30],
+                'circle-color': '#ffffff',
+                'circle-opacity': 0.98,
+            },
+        });
+        state.map.addLayer({
+            id: AGGREGATE_LAYER_ID,
+            type: 'circle',
+            source: SOURCE_ID,
+            filter: aggregateFilter,
+            paint: {
+                'circle-radius': ['interpolate', ['linear'], ['get', 'count'], 1, 12, 50, 24],
+                'circle-color': '#F1B400',
+                'circle-stroke-color': 'rgba(51, 56, 71, 0.1)',
+                'circle-stroke-width': 2,
+            },
+        });
+        state.map.addLayer({
+            id: AGGREGATE_LABEL_LAYER_ID,
+            type: 'symbol',
+            source: SOURCE_ID,
+            filter: aggregateFilter,
+            layout: {
+                'text-field': ['get', 'count'],
+                'text-size': 12,
+            },
+            paint: {
+                'text-color': '#333847',
+            },
+        });
+
+        const propertyFilter = ['==', ['get', 'is_aggregate'], false];
+
         if (behavior.enablePropertyClusters) {
             state.map.addLayer({
                 id: CLUSTER_GLOW_LAYER_ID,
@@ -1096,13 +1171,12 @@
             id: POINT_GLOW_LAYER_ID,
             type: 'circle',
             source: SOURCE_ID,
-            filter: ['!', ['has', 'point_count']],
+            filter: propertyFilter,
             paint: {
                 'circle-radius': 19,
-                'circle-color': getDealColorExpression(),
-                'circle-opacity': 0.14,
+                'circle-color': '#474b57',
+                'circle-opacity': 0.12,
                 'circle-blur': 0.85,
-                'circle-translate': [0, -23],
             },
         });
 
@@ -1110,12 +1184,11 @@
             id: POINT_RING_LAYER_ID,
             type: 'circle',
             source: SOURCE_ID,
-            filter: ['!', ['has', 'point_count']],
+            filter: propertyFilter,
             paint: {
                 'circle-radius': 13,
                 'circle-color': '#ffffff',
                 'circle-opacity': 0.2,
-                'circle-translate': [0, -23],
             },
         });
 
@@ -1123,14 +1196,13 @@
             id: POINT_LAYER_ID,
             type: 'circle',
             source: SOURCE_ID,
-            filter: ['!', ['has', 'point_count']],
+            filter: propertyFilter,
             paint: {
                 'circle-radius': 11,
                 'circle-color': getDealColorExpression(),
                 'circle-stroke-width': 0,
                 'circle-stroke-color': 'rgba(17,24,39,0)',
                 'circle-opacity': 0.01,
-                'circle-translate': [0, -23],
             },
         });
 
@@ -1143,7 +1215,6 @@
                 'circle-color': getDealColorExpression(),
                 'circle-opacity': 0.14,
                 'circle-blur': 0.82,
-                'circle-translate': [0, -23],
             },
         });
 
@@ -1155,7 +1226,6 @@
                 'circle-radius': 13,
                 'circle-color': '#ffffff',
                 'circle-opacity': 0.2,
-                'circle-translate': [0, -23],
             },
         });
 
@@ -1169,7 +1239,6 @@
                 'circle-stroke-width': 0,
                 'circle-stroke-color': 'rgba(17,24,39,0)',
                 'circle-opacity': 0.01,
-                'circle-translate': [0, -23],
             },
         });
 
@@ -1179,10 +1248,9 @@
             source: HOVER_SOURCE_ID,
             paint: {
                 'circle-radius': 25,
-                'circle-color': getDealColorExpression(),
+                'circle-color': '#F1B400',
                 'circle-opacity': 0.2,
                 'circle-blur': 0.8,
-                'circle-translate': [0, -23],
             },
         });
 
@@ -1192,10 +1260,9 @@
             source: SELECTED_SOURCE_ID,
             paint: {
                 'circle-radius': 29,
-                'circle-color': getDealColorExpression(),
-                'circle-opacity': 0.22,
+                'circle-color': '#F1B400',
+                'circle-opacity': 0.3,
                 'circle-blur': 0.78,
-                'circle-translate': [0, -23],
             },
         });
 
@@ -1203,19 +1270,11 @@
             id: POINT_ICON_LAYER_ID,
             type: 'symbol',
             source: SOURCE_ID,
-            filter: ['!', ['has', 'point_count']],
+            filter: propertyFilter,
             layout: {
                 'icon-image': ['get', 'icon_name'],
-                'icon-size': [
-                    'interpolate',
-                    ['linear'],
-                    ['zoom'],
-                    8, 0.56,
-                    11, 0.68,
-                    14, 0.82
-                ],
-                'icon-anchor': 'bottom',
-                'icon-offset': [0, 2],
+                'icon-size': 1,
+                'icon-anchor': 'center',
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
             },
@@ -1228,8 +1287,7 @@
             layout: {
                 'icon-image': ['get', 'icon_name'],
                 'icon-size': 0.78,
-                'icon-anchor': 'bottom',
-                'icon-offset': [0, 2],
+                'icon-anchor': 'center',
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true,
             },
@@ -1452,10 +1510,12 @@
         }
 
         const propertyInteractiveLayerIds = getExistingLayerIds(POINT_INTERACTIVE_LAYER_IDS);
+        const aggregateInteractiveLayerIds = getExistingLayerIds(AGGREGATE_INTERACTIVE_LAYER_IDS);
         const clusterInteractiveLayerIds = isPropertyClusteringEnabled()
             ? getExistingLayerIds(CLUSTER_INTERACTIVE_LAYER_IDS)
             : [];
         const cursorLayerIds = getExistingLayerIds([
+            ...aggregateInteractiveLayerIds,
             ...clusterInteractiveLayerIds,
             ...propertyInteractiveLayerIds,
             ...DISTRICT_INTERACTIVE_LAYER_IDS,
@@ -1469,7 +1529,11 @@
         };
 
         state.map.on('click', (event) => {
-            const propertyClickLayerIds = [...propertyInteractiveLayerIds, ...clusterInteractiveLayerIds];
+            const propertyClickLayerIds = [
+                ...aggregateInteractiveLayerIds,
+                ...propertyInteractiveLayerIds,
+                ...clusterInteractiveLayerIds,
+            ];
             const interactiveFeatures = propertyClickLayerIds.length
                 ? state.map.queryRenderedFeatures(event.point, { layers: propertyClickLayerIds })
                 : [];
@@ -1488,6 +1552,19 @@
                 clearSpiderfy();
                 clearHoverState();
                 closePropertyPopup({ clearPinned: true });
+                return;
+            }
+
+            if (targetFeature.properties?.is_aggregate === true || targetFeature.properties?.is_aggregate === 'true') {
+                clearSpiderfy();
+                state.map.once('zoomend', () => {
+                    emitMapEvent('catalog-map:aggregate-selected');
+                });
+                state.map.easeTo({
+                    center: targetFeature.geometry.coordinates,
+                    zoom: Math.min(state.map.getZoom() + 2, 15),
+                    duration: 500,
+                });
                 return;
             }
 
@@ -1679,6 +1756,10 @@
         };
     }
 
+    function getZoom() {
+        return state.map ? state.map.getZoom() : DEFAULT_ZOOM;
+    }
+
     function renderProperties({ fit = false } = {}) {
         if (!state.loaded || !state.map || !state.map.getSource(SOURCE_ID)) {
             return;
@@ -1687,6 +1768,7 @@
         const geoJson = propertiesToGeoJson(state.pendingProperties);
         state.lastGeoJson = geoJson;
         state.map.getSource(SOURCE_ID).setData(geoJson);
+        renderAggregateMarkers(state.pendingProperties);
 
         if (fit) {
             fitToProperties(geoJson);
@@ -1781,6 +1863,7 @@
         refreshSize,
         resetView,
         getBoundsParams,
+        getZoom,
         getMap() {
             return state.map;
         },

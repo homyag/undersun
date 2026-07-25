@@ -131,8 +131,14 @@ class BotDetectionService:
         missing_accept_lang = not headers.get('HTTP_ACCEPT_LANGUAGE')
         missing_accept_encoding = not headers.get('HTTP_ACCEPT_ENCODING')
 
-        # Minimal anti-bot policy: block only truly headerless browser-like
-        # traffic and clients that keep requesting HTML without running JS.
+        # Known automation clients must not receive the page shell or analytics.
+        # Search and audit tools that legitimately use a headless runtime are
+        # exempted by WHITELIST_USER_AGENTS in BotDetectionMiddleware first.
+        if any(pattern.search(user_agent) for pattern in self.suspicious_user_agents):
+            score += self._add_match(matches, 'suspicious_user_agent', 'user_agent')
+
+        # Block truly headerless browser-like traffic and clients that keep
+        # requesting HTML without running JS.
         if not user_agent or user_agent == '-' or (missing_accept_lang and missing_accept_encoding):
             score += self._add_match(matches, 'missing_headers_critical', 'noheader')
 

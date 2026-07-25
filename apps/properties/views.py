@@ -1,8 +1,12 @@
 import json
+import logging
+import math
 import re
+import uuid
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
+from time import perf_counter
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from urllib.parse import quote_plus, urlencode
@@ -12,10 +16,10 @@ from django.views.generic import ListView, DetailView, View
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse, HttpResponsePermanentRedirect
 # login_required decorator removed
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.db.models import Q, Count, Case, When, Value, IntegerField, F, Avg
+from django.db.models import Q, Count, Case, When, Value, IntegerField, F, Avg, Prefetch
 from django.db.models.functions import Coalesce
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.urls import reverse
@@ -29,11 +33,40 @@ from apps.core.amp_utils import convert_html_to_amp
 from apps.core.models import SEOContentBlock, Team
 from apps.core.seo_utils import build_property_meta
 from apps.core.business_profile import BUSINESS_PROFILE
+from .map_serialization import serialize_map_aggregates, serialize_map_markers, serialize_map_properties
 from .seo_landings import resolve_landing_signature, build_candidate_slugs
-from .models import Property, PropertyType
+from .models import Property, PropertyImage, PropertyType
 from apps.locations.models import District, Location
 from apps.users.models import PropertyInquiry
 from .yml_feed import YandexYmlFeedGenerator
+
+
+logger = logging.getLogger(__name__)
+MAP_PROPERTIES_LIMIT = 1000
+MAP_CARD_PAGE_SIZE = 30
+MAP_CARD_MAX_PAGE = 100
+MAP_AGGREGATE_MAX_ZOOM = 11
+MAP_SORT_VALUES = {'recommended', 'price_asc', 'price_desc', 'newest'}
+MAP_SORT_ALIASES = {
+    '-created_at': 'newest',
+    'created_at': 'newest',
+    'price_sale_usd': 'price_asc',
+    '-price_sale_usd': 'price_desc',
+    'price_sale_thb': 'price_asc',
+    '-price_sale_thb': 'price_desc',
+    'price_rent_monthly': 'price_asc',
+    '-price_rent_monthly': 'price_desc',
+    'area_total': 'recommended',
+    '-area_total': 'recommended',
+}
+MAP_FILTER_VALUE_LIMITS = {
+    'property_type': 12,
+    'bedrooms': 8,
+    'bathrooms': 8,
+    'amenities': 16,
+}
+MAP_FILTER_TEXT_LIMIT = 160
+MAP_PROXY_MAX_RANGE_BYTES = 2 * 1024 * 1024
 
 
 LEGACY_PROPERTY_SLUG_REDIRECTS = {
@@ -95,6 +128,13 @@ PHUKET_DISTRICT_BOUNDARIES_PATH = Path(settings.BASE_DIR) / 'data' / 'geoBoundar
 PHUKET_DISTRICT_BOUNDARY_SLUG_ALIASES = {
     'kathu-district': 'kathu',
     'phuket': 'mueang-phuket',
+}
+PHUKET_DISTRICT_BOUNDARY_PROVENANCE = {
+    'dataset': 'geoBoundaries Thailand ADM2',
+    'source_url': 'https://www.geoboundaries.org/',
+    'license': 'CC BY 4.0',
+    'admin_level': 'ADM2',
+    'scope': 'Phuket administrative districts only',
 }
 
 CATALOG_SEO_TEXTS = {
@@ -1626,7 +1666,12 @@ def _load_phuket_district_boundaries():
     for feature in payload.get('features', []):
         properties = feature.get('properties') or {}
         slug = properties.get('slug')
-        if not slug:
+        geometry_type = (feature.get('geometry') or {}).get('type')
+        if (
+            not slug
+            or properties.get('province') != 'Phuket'
+            or geometry_type not in {'Polygon', 'MultiPolygon'}
+        ):
             continue
         boundaries[slug] = feature
 
@@ -2377,6 +2422,9 @@ class PropertyListView(ListView):
         'min_price': 'single',
         'max_price': 'single',
         'bedrooms': 'multi',
+        'bathrooms': 'multi',
+        'min_area': 'single',
+        'max_area': 'single',
         'amenities': 'multi',
         'q': 'single',
         'build_status': 'single',
@@ -2390,6 +2438,9 @@ class PropertyListView(ListView):
         'min_price',
         'max_price',
         'bedrooms',
+        'bathrooms',
+        'min_area',
+        'max_area',
         'amenities',
         'q',
         'sort',
@@ -2397,20 +2448,22 @@ class PropertyListView(ListView):
         'build_status',
     )
 
-    NON_INDEX_FILTER_KEYS = ('min_price', 'max_price', 'bedrooms', 'amenities', 'q', 'build_status')
+    NON_INDEX_FILTER_KEYS = ('min_price', 'max_price', 'bedrooms', 'bathrooms', 'min_area', 'max_area', 'amenities', 'q', 'build_status')
     SINGLE_VALUE_QUERY_PARAMS = {
         'deal_type',
         'district',
         'location',
         'min_price',
         'max_price',
+        'min_area',
+        'max_area',
         'q',
         'sort',
         'map_view',
         'build_status',
         'page',
     }
-    MULTI_VALUE_QUERY_PARAMS = {'property_type', 'bedrooms', 'amenities'}
+    MULTI_VALUE_QUERY_PARAMS = {'property_type', 'bedrooms', 'bathrooms', 'amenities'}
     CATALOG_QUERY_PARAM_ORDER = (
         'deal_type',
         'property_type',
@@ -2419,6 +2472,9 @@ class PropertyListView(ListView):
         'min_price',
         'max_price',
         'bedrooms',
+        'bathrooms',
+        'min_area',
+        'max_area',
         'amenities',
         'q',
         'sort',
@@ -2817,6 +2873,35 @@ class PropertyListView(ListView):
                         pass
             if bedroom_filters:
                 queryset = queryset.filter(bedroom_filters)
+
+        # Количество ванных
+        bathrooms = self.request.GET.getlist('bathrooms')
+        if bathrooms:
+            bathroom_filters = Q()
+            for bathroom in bathrooms:
+                if bathroom == '4+':
+                    bathroom_filters |= Q(bathrooms__gte=4)
+                else:
+                    try:
+                        bathroom_filters |= Q(bathrooms=int(bathroom))
+                    except ValueError:
+                        pass
+            if bathroom_filters:
+                queryset = queryset.filter(bathroom_filters)
+
+        # Общая площадь объекта в квадратных метрах.
+        min_area = self.request.GET.get('min_area')
+        max_area = self.request.GET.get('max_area')
+        if min_area:
+            try:
+                queryset = queryset.filter(area_total__gte=Decimal(min_area))
+            except (InvalidOperation, ValueError):
+                pass
+        if max_area:
+            try:
+                queryset = queryset.filter(area_total__lte=Decimal(max_area))
+            except (InvalidOperation, ValueError):
+                pass
         
         # Удобства/особенности (динамические)
         amenities = self.request.GET.getlist('amenities')
@@ -5319,33 +5404,62 @@ def get_locations_for_district(request):
     })
 
 
+def _validate_map_filter_input(request):
+    for key, limit in MAP_FILTER_VALUE_LIMITS.items():
+        values = request.GET.getlist(key)
+        if len(values) > limit or any(len(value) > MAP_FILTER_TEXT_LIMIT for value in values):
+            raise ValueError('invalid_filter_input')
+
+    for key in ('deal_type', 'build_status', 'district', 'location', 'min_price', 'max_price', 'min_area', 'max_area', 'sort'):
+        value = request.GET.get(key, '')
+        if len(value) > MAP_FILTER_TEXT_LIMIT:
+            raise ValueError('invalid_filter_input')
+
+    if len(request.GET.get('q', '')) > MAP_FILTER_TEXT_LIMIT:
+        raise ValueError('invalid_filter_input')
+
+
+@require_GET
+@rate_limit('map-properties', limit=90, timeout=60)
 def map_properties_json(request):
     """Optimized AJAX endpoint для получения всех отфильтрованных объектов для карты"""
+    request_id = uuid.uuid4().hex
+
     def _get_bounds_param(name):
         raw_value = request.GET.get(name)
         if raw_value in (None, ''):
             return None
 
         try:
-            return float(raw_value)
+            value = float(raw_value)
         except (TypeError, ValueError):
-            return None
+            raise ValueError('invalid_bounds')
+
+        if not math.isfinite(value):
+            raise ValueError('invalid_bounds')
+
+        return value
 
     def _get_requested_bounds():
+        bound_names = ('bounds_north', 'bounds_south', 'bounds_east', 'bounds_west')
+        has_any_bounds = any(request.GET.get(name) not in (None, '') for name in bound_names)
+        if not has_any_bounds:
+            return None
+
         north = _get_bounds_param('bounds_north')
         south = _get_bounds_param('bounds_south')
         east = _get_bounds_param('bounds_east')
         west = _get_bounds_param('bounds_west')
 
         if None in (north, south, east, west):
-            return None
+            raise ValueError('invalid_bounds')
 
         if north < south:
             north, south = south, north
         if not (-90 <= south <= 90 and -90 <= north <= 90):
-            return None
+            raise ValueError('invalid_bounds')
         if not (-180 <= west <= 180 and -180 <= east <= 180):
-            return None
+            raise ValueError('invalid_bounds')
 
         return {
             'north': north,
@@ -5354,21 +5468,82 @@ def map_properties_json(request):
             'west': west,
         }
 
+    def _get_requested_zoom():
+        raw_value = request.GET.get('zoom')
+        if raw_value in (None, ''):
+            return None
+
+        try:
+            zoom = float(raw_value)
+        except (TypeError, ValueError):
+            raise ValueError('invalid_zoom')
+
+        if not math.isfinite(zoom) or not 0 <= zoom <= 24:
+            raise ValueError('invalid_zoom')
+
+        return zoom
+
+    def _get_requested_map_mode():
+        map_mode = request.GET.get('map_mode', 'properties')
+        if map_mode not in {'auto', 'properties', 'aggregates'}:
+            raise ValueError('invalid_map_mode')
+        return map_mode
+
+    def _get_requested_sort():
+        raw_sort = request.GET.get('sort', 'recommended')
+        sort = MAP_SORT_ALIASES.get(raw_sort, raw_sort)
+        if sort not in MAP_SORT_VALUES:
+            raise ValueError('invalid_sort')
+        return sort
+
+    def _get_selected_property_id():
+        raw_value = request.GET.get('selected')
+        if raw_value in (None, ''):
+            return None
+
+        try:
+            property_id = int(raw_value)
+        except (TypeError, ValueError):
+            raise ValueError('invalid_selected_property')
+
+        if property_id < 1:
+            raise ValueError('invalid_selected_property')
+
+        return property_id
+
+    started_at = perf_counter()
     try:
         language_code = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
         # Создаем временный объект view для использования фильтров
         view = PropertyListView()
         view.request = request
         requested_bounds = _get_requested_bounds()
+        requested_zoom = _get_requested_zoom()
+        requested_map_mode = _get_requested_map_mode()
+        requested_sort = _get_requested_sort()
+        selected_property_id = _get_selected_property_id()
+        include_details = request.GET.get('include_details') == '1'
+        _validate_map_filter_input(request)
         
         # Получаем базовый queryset с минимальными данными для карты
-        queryset = Property.objects.filter(
+        map_queryset = Property.objects.filter(
             is_active=True,
-            status='available'
-        ).select_related('district', 'location', 'property_type', 'agent').prefetch_related('images')
+            status='available',
+            latitude__isnull=False,
+            longitude__isnull=False,
+        ).select_related('district', 'location', 'property_type', 'agent')
+        map_images_prefetch = Prefetch(
+            'images',
+            queryset=PropertyImage.objects.only(
+                'id', 'property_id', 'image', 'is_main', 'order'
+            ).order_by('order', 'id'),
+            to_attr='map_images',
+        )
+        map_property_queryset = map_queryset.prefetch_related(map_images_prefetch)
         
         # Применяем все фильтры
-        queryset = view.apply_filters(queryset)
+        queryset = view.apply_filters(map_queryset)
+        total_count = queryset.count()
 
         if requested_bounds:
             queryset = queryset.filter(
@@ -5386,142 +5561,206 @@ def map_properties_json(request):
                     Q(longitude__gte=requested_bounds['west']) |
                     Q(longitude__lte=requested_bounds['east'])
                 )
-        
-        # Ограничиваем количество для производительности (максимум 1000 объектов)
-        queryset = queryset[:1000]
-        
-        # Подготавливаем минимальные данные для маркеров карты
+
+        viewport_count = queryset.count()
+        if requested_sort == 'recommended':
+            queryset = queryset.order_by('-featured_priority', '-is_featured', '-created_at', '-id')
+        elif requested_sort == 'newest':
+            queryset = queryset.order_by('-created_at', '-id')
+        else:
+            queryset = queryset.order_by(
+                view.get_catalog_price_sort_expression(
+                    descending=requested_sort == 'price_desc'
+                ),
+                '-id',
+            )
+        use_aggregates = (
+            requested_map_mode == 'aggregates' or
+            (
+                requested_map_mode == 'auto' and
+                requested_zoom is not None and
+                requested_zoom <= MAP_AGGREGATE_MAX_ZOOM
+            )
+        )
+        truncated = not use_aggregates and viewport_count > MAP_PROPERTIES_LIMIT
         properties_data = []
-        for prop in queryset:
-            # Пропускаем объекты без координат
-            if not prop.latitude or not prop.longitude:
-                continue
-                
-            # Получаем главное изображение
-            main_image = prop.images.filter(is_main=True).first()
-            if not main_image:
-                main_image = prop.images.first()
-            
-            image_url = main_image.thumbnail_url if main_image else ''
-                
-            # Определяем цену для отображения
-            price_display = ''
-            if prop.deal_type == 'rent' and prop.price_rent_monthly:
-                price_display = f"${prop.price_rent_monthly:,.0f}/мес"
-            elif prop.deal_type in ['sale', 'both'] and prop.price_sale_usd:
-                price_display = f"${prop.price_sale_usd:,.0f}"
-            else:
-                price_display = "Цена по запросу"
-            
-            # Generate language-aware URL
-            from django.utils.translation import get_language
-            
-            current_language = get_language() or 'ru'
-            # Всегда используем языковой префикс, так как prefix_default_language=True
-            property_url = f'/{current_language}/property/{prop.slug}/'
-            
-            agent_phone = ''
-            if prop.agent and prop.agent.phone:
-                agent_phone = prop.agent.phone
-            properties_data.append({
-                'id': prop.id,
-                'title': _get_translated_attr(prop, 'title', language_code, prop.title),
-                'slug': prop.slug,
-                'lat': float(prop.latitude),
-                'lng': float(prop.longitude),
-                'property_type': prop.property_type.name if prop.property_type else '',
-                'property_type_label': (
-                    _get_translated_attr(prop.property_type, 'name_display', language_code, prop.property_type.name_display)
-                    if prop.property_type else ''
-                ),
-                'deal_type': prop.deal_type,
-                'price': price_display,
-                'location': (
-                    _get_translated_attr(prop.location, 'name', language_code, prop.location.name)
-                    if prop.location else (
-                        _get_translated_attr(prop.district, 'name', language_code, prop.district.name)
-                        if prop.district else ''
-                    )
-                ),
-                'url': property_url,
-                'image_url': image_url,
-                'bedrooms': prop.bedrooms or 0,
-                'bathrooms': prop.bathrooms or 0,
-                'area': float(prop.area_total) if prop.area_total else 0,
-                'agent_phone': agent_phone or BUSINESS_PROFILE['phone_e164']
-            })
-        
-        return JsonResponse({
+        aggregates_data = []
+        selected_property_data = None
+
+        if use_aggregates:
+            aggregates_data = serialize_map_aggregates(queryset, requested_zoom or MAP_AGGREGATE_MAX_ZOOM)
+        elif include_details:
+            properties_data = serialize_map_properties(
+                queryset.prefetch_related(map_images_prefetch)[:MAP_PROPERTIES_LIMIT],
+                request,
+                language_code,
+            )
+        else:
+            properties_data = serialize_map_markers(queryset[:MAP_PROPERTIES_LIMIT])
+
+        # A direct selected-property link must survive a reload at any map zoom
+        # or viewport. It intentionally bypasses filters and bounds: an explicit
+        # public listing URL has stronger intent than the current map context.
+        if selected_property_id:
+            selected_property_data = next(iter(serialize_map_properties(
+                map_property_queryset.filter(pk=selected_property_id)[:1], request, language_code
+            )), None)
+
+        server_timing_ms = round((perf_counter() - started_at) * 1000, 2)
+        response = JsonResponse({
             'success': True,
+            'request_id': request_id,
+            'server_timing_ms': server_timing_ms,
+            'mode': 'aggregates' if use_aggregates else 'properties',
+            'sort': requested_sort,
             'properties': properties_data,
-            'total_count': len(properties_data),
+            'selected_property_id': selected_property_id,
+            'selected_property': selected_property_data,
+            'aggregates': aggregates_data,
+            'aggregate_count': len(aggregates_data),
+            'total_count': total_count,
+            'viewport_count': viewport_count,
+            'visible_count': len(properties_data),
+            'truncated': truncated,
+            'next_action': 'zoom_in' if truncated or use_aggregates else 'none',
+            'max_results': MAP_PROPERTIES_LIMIT,
+            'aggregate_max_zoom': MAP_AGGREGATE_MAX_ZOOM,
             'bounds_applied': bool(requested_bounds),
             'bounds': requested_bounds,
+            'zoom': requested_zoom,
         })
-        
-    except Exception as e:
+        response['Server-Timing'] = f'app;dur={server_timing_ms}'
+        return response
+
+    except ValueError as error:
         return JsonResponse({
             'success': False,
-            'error': str(e)
+            'request_id': request_id,
+            'error': str(error),
+        }, status=400)
+    except Exception:
+        logger.exception('Map properties request failed: request_id=%s', request_id)
+        return JsonResponse({
+            'success': False,
+            'request_id': request_id,
+            'error': 'map_properties_unavailable',
+        }, status=500)
+
+
+@require_GET
+@rate_limit('map-cards', limit=120, timeout=60)
+def map_property_cards_json(request):
+    """Return a small, paginated card payload for the current map search."""
+    request_id = uuid.uuid4().hex
+    started_at = perf_counter()
+
+    def get_bound(name):
+        value = request.GET.get(name)
+        if value in (None, ''):
+            return None
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            raise ValueError('invalid_bounds')
+        if not math.isfinite(value):
+            raise ValueError('invalid_bounds')
+        return value
+
+    try:
+        language_code = getattr(request, 'LANGUAGE_CODE', 'ru')[:2]
+        raw_page = request.GET.get('page', '1')
+        if len(raw_page) > 6:
+            raise ValueError('invalid_page')
+        page = int(raw_page)
+        if page < 1 or page > MAP_CARD_MAX_PAGE:
+            raise ValueError('invalid_page')
+        _validate_map_filter_input(request)
+        raw_ids = request.GET.getlist('ids')
+        try:
+            requested_ids = list(dict.fromkeys(int(value) for value in raw_ids if int(value) > 0))
+        except (TypeError, ValueError):
+            raise ValueError('invalid_property_ids')
+        if len(requested_ids) > MAP_CARD_PAGE_SIZE:
+            raise ValueError('too_many_property_ids')
+
+        queryset = Property.objects.filter(
+            is_active=True,
+            status='available',
+            latitude__isnull=False,
+            longitude__isnull=False,
+        ).select_related('district', 'location', 'property_type', 'agent').prefetch_related(
+            Prefetch(
+                'images',
+                queryset=PropertyImage.objects.only(
+                    'id', 'property_id', 'image', 'is_main', 'order'
+                ).order_by('order', 'id'),
+                to_attr='map_images',
+            )
+        )
+
+        if requested_ids:
+            ordering = Case(*[When(pk=property_id, then=index) for index, property_id in enumerate(requested_ids)])
+            queryset = queryset.filter(pk__in=requested_ids).order_by(ordering)
+            properties = serialize_map_properties(queryset, request, language_code)
+            has_next = False
+        else:
+            view = PropertyListView()
+            view.request = request
+            queryset = view.apply_filters(queryset)
+
+            bound_names = ('bounds_north', 'bounds_south', 'bounds_east', 'bounds_west')
+            if any(request.GET.get(name) not in (None, '') for name in bound_names):
+                north, south, east, west = (get_bound(name) for name in bound_names)
+                if None in (north, south, east, west) or not (-90 <= south <= 90 and -90 <= north <= 90) or not (-180 <= west <= 180 and -180 <= east <= 180):
+                    raise ValueError('invalid_bounds')
+                if north < south:
+                    north, south = south, north
+                queryset = queryset.filter(latitude__gte=south, latitude__lte=north)
+                queryset = queryset.filter(
+                    longitude__gte=west,
+                    longitude__lte=east,
+                ) if west <= east else queryset.filter(Q(longitude__gte=west) | Q(longitude__lte=east))
+
+            requested_sort = request.GET.get('sort', 'recommended')
+            if requested_sort not in MAP_SORT_VALUES:
+                raise ValueError('invalid_sort')
+            if requested_sort == 'recommended':
+                queryset = queryset.order_by('-featured_priority', '-is_featured', '-created_at', '-id')
+            elif requested_sort == 'newest':
+                queryset = queryset.order_by('-created_at', '-id')
+            else:
+                queryset = queryset.order_by(
+                    view.get_catalog_price_sort_expression(descending=requested_sort == 'price_desc'),
+                    '-id',
+                )
+            offset = (page - 1) * MAP_CARD_PAGE_SIZE
+            properties = serialize_map_properties(queryset[offset:offset + MAP_CARD_PAGE_SIZE], request, language_code)
+            has_next = queryset[offset + MAP_CARD_PAGE_SIZE:offset + MAP_CARD_PAGE_SIZE + 1].exists()
+
+        server_timing_ms = round((perf_counter() - started_at) * 1000, 2)
+        response = JsonResponse({
+            'success': True,
+            'request_id': request_id,
+            'properties': properties,
+            'page': page,
+            'page_size': MAP_CARD_PAGE_SIZE,
+            'has_next': has_next,
+            'next_page': page + 1 if has_next else None,
+            'server_timing_ms': server_timing_ms,
         })
+        response['Server-Timing'] = f'app;dur={server_timing_ms}'
+        return response
+    except ValueError as error:
+        return JsonResponse({'success': False, 'request_id': request_id, 'error': str(error)}, status=400)
+    except Exception:
+        logger.exception('Map cards request failed: request_id=%s', request_id)
+        return JsonResponse({'success': False, 'request_id': request_id, 'error': 'map_cards_unavailable'}, status=500)
 
 
+@require_GET
+@rate_limit('map-districts', limit=30, timeout=60)
 def map_districts_json(request):
-    """District overlay payload for the catalog map."""
-
-    def _build_centroid(points):
-        lng = sum(point[0] for point in points) / len(points)
-        lat = sum(point[1] for point in points) / len(points)
-        return [lng, lat]
-
-    def _build_padded_bounds_polygon(points):
-        lng_values = [point[0] for point in points]
-        lat_values = [point[1] for point in points]
-        min_lng = min(lng_values)
-        max_lng = max(lng_values)
-        min_lat = min(lat_values)
-        max_lat = max(lat_values)
-
-        lng_span = max_lng - min_lng
-        lat_span = max_lat - min_lat
-        lng_padding = max(0.008, lng_span * 0.22)
-        lat_padding = max(0.006, lat_span * 0.22)
-
-        return [
-            [min_lng - lng_padding, min_lat - lat_padding],
-            [max_lng + lng_padding, min_lat - lat_padding],
-            [max_lng + lng_padding, max_lat + lat_padding],
-            [min_lng - lng_padding, max_lat + lat_padding],
-            [min_lng - lng_padding, min_lat - lat_padding],
-        ]
-
-    def _cross(o, a, b):
-        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
-
-    def _build_convex_hull_polygon(points):
-        unique_points = sorted({(float(lng), float(lat)) for lng, lat in points})
-        if len(unique_points) < 3:
-            return _build_padded_bounds_polygon(unique_points)
-
-        lower = []
-        for point in unique_points:
-            while len(lower) >= 2 and _cross(lower[-2], lower[-1], point) <= 0:
-                lower.pop()
-            lower.append(point)
-
-        upper = []
-        for point in reversed(unique_points):
-            while len(upper) >= 2 and _cross(upper[-2], upper[-1], point) <= 0:
-                upper.pop()
-            upper.append(point)
-
-        hull = lower[:-1] + upper[:-1]
-        if len(hull) < 3:
-            return _build_padded_bounds_polygon(unique_points)
-
-        polygon = [[float(lng), float(lat)] for lng, lat in hull]
-        polygon.append(polygon[0])
-        return polygon
+    """Return only verified administrative district polygons for the map overlay."""
 
     def _iter_geometry_points(geometry):
         geometry_type = (geometry or {}).get('type')
@@ -5595,12 +5834,11 @@ def map_districts_json(request):
         district_features = []
 
         for district in grouped.values():
-            points = district['points']
-            if not points:
+            boundary_feature = district_boundaries.get(district['boundary_slug'])
+            if not boundary_feature:
                 continue
 
-            properties_count = len(points)
-            boundary_feature = district_boundaries.get(district['boundary_slug'])
+            properties_count = len(district['points'])
             source_slugs = district['source_slugs']
             preferred_slug = (
                 district['boundary_slug']
@@ -5613,15 +5851,10 @@ def map_districts_json(request):
                 or district['boundary_slug'].replace('-', ' ').title()
             )
 
-            if boundary_feature:
-                geometry = boundary_feature.get('geometry') or {}
-                center = _build_geometry_center(geometry) or _build_centroid(points)
-            else:
-                center = _build_centroid(points)
-                geometry = {
-                    'type': 'Polygon',
-                    'coordinates': [_build_convex_hull_polygon(points)],
-                }
+            geometry = boundary_feature.get('geometry') or {}
+            center = _build_geometry_center(geometry)
+            if not center:
+                continue
 
             district_payload = {
                 'slug': preferred_slug,
@@ -5630,6 +5863,8 @@ def map_districts_json(request):
                 'lng': center[0],
                 'properties_count': properties_count,
                 'polygon': geometry.get('coordinates', []),
+                'boundary_source': PHUKET_DISTRICT_BOUNDARY_PROVENANCE['dataset'],
+                'is_approximate': False,
             }
             districts_payload.append(district_payload)
             district_feature = {
@@ -5641,6 +5876,8 @@ def map_districts_json(request):
                     'properties_count': properties_count,
                     'center_lat': center[1],
                     'center_lng': center[0],
+                    'boundary_source': PHUKET_DISTRICT_BOUNDARY_PROVENANCE['dataset'],
+                    'is_approximate': False,
                 },
             }
             district_features.append(district_feature)
@@ -5649,16 +5886,18 @@ def map_districts_json(request):
 
         return JsonResponse({
             'success': True,
+            'boundary_provenance': PHUKET_DISTRICT_BOUNDARY_PROVENANCE,
             'districts': districts_payload,
             'geojson': {
                 'type': 'FeatureCollection',
                 'features': district_features,
             },
         })
-    except Exception as e:
+    except Exception:
+        logger.exception('Map districts request failed')
         return JsonResponse({
             'success': False,
-            'error': str(e),
+            'error': 'map_districts_unavailable',
             'districts': [],
             'geojson': {
                 'type': 'FeatureCollection',
@@ -5668,12 +5907,12 @@ def map_districts_json(request):
 
 
 @require_http_methods(["GET", "HEAD"])
+@rate_limit('map-basemap-proxy', limit=120, timeout=60)
 def map_protomaps_basemap_proxy(request):
     """Same-origin proxy for PMTiles basemap to avoid browser CORS failures."""
     if not PROTOMAPS_BASEMAP_URL:
         response = HttpResponse(status=204)
         response['X-Robots-Tag'] = 'noindex, nofollow'
-        response['Access-Control-Allow-Origin'] = '*'
         return response
 
     try:
@@ -5687,7 +5926,16 @@ def map_protomaps_basemap_proxy(request):
             'Accept-Encoding': 'identity',
         }
         range_header = request.headers.get('Range')
-        if range_header:
+        if request.method == 'GET':
+            if not range_header:
+                return HttpResponse(status=416)
+            range_match = re.fullmatch(r'bytes=(\d+)-(\d*)', range_header)
+            if not range_match:
+                return HttpResponse(status=416)
+            range_start = int(range_match.group(1))
+            range_end = int(range_match.group(2)) if range_match.group(2) else None
+            if range_end is not None and (range_end < range_start or range_end - range_start + 1 > MAP_PROXY_MAX_RANGE_BYTES):
+                return HttpResponse(status=416)
             upstream_headers['Range'] = range_header
 
         upstream_request = Request(
@@ -5699,8 +5947,18 @@ def map_protomaps_basemap_proxy(request):
         with urlopen(upstream_request, timeout=20) as upstream_response:
             status_code = getattr(upstream_response, 'status', 200)
             content_type = upstream_response.headers.get('Content-Type', 'application/octet-stream')
+            content_length = upstream_response.headers.get('Content-Length')
+            if request.method == 'GET' and content_length:
+                try:
+                    if int(content_length) > MAP_PROXY_MAX_RANGE_BYTES:
+                        return HttpResponse(status=502)
+                except (TypeError, ValueError):
+                    return HttpResponse(status=502)
+            body = b'' if request.method == 'HEAD' else upstream_response.read(MAP_PROXY_MAX_RANGE_BYTES + 1)
+            if len(body) > MAP_PROXY_MAX_RANGE_BYTES:
+                return HttpResponse(status=502)
             response = HttpResponse(
-                b'' if request.method == 'HEAD' else upstream_response.read(),
+                body,
                 status=status_code,
                 content_type=content_type,
             )
@@ -5718,7 +5976,6 @@ def map_protomaps_basemap_proxy(request):
                 if header_value:
                     response[header_name] = header_value
 
-            response['Access-Control-Allow-Origin'] = '*'
             return response
 
     except HTTPError as error:
@@ -5732,12 +5989,12 @@ def map_protomaps_basemap_proxy(request):
             if header_value:
                 response[header_name] = header_value
         response['X-Robots-Tag'] = 'noindex, nofollow'
-        response['Access-Control-Allow-Origin'] = '*'
         return response
-    except URLError as error:
+    except URLError:
+        logger.warning('Map basemap upstream is unavailable')
         response = JsonResponse({
             'success': False,
-            'error': str(error),
+            'error': 'map_basemap_unavailable',
         }, status=502)
         response['X-Robots-Tag'] = 'noindex, nofollow'
         return response

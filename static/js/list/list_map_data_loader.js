@@ -15,6 +15,13 @@ function getMapUiElements() {
 let mapBoundsRefreshTimer = null;
 let lastLoadedMapBounds = null;
 let mapUiControlsBound = false;
+let skipNextMapBoundsRefresh = false;
+const CATALOG_AGGREGATE_MAX_ZOOM = 11;
+
+function getCatalogMapZoom() {
+    const zoom = window.propertiesMapBridge?.getZoom?.();
+    return Number.isFinite(Number(zoom)) ? Number(zoom) : 10;
+}
 
 function isBoundsBasedMapLoadingEnabled() {
     return window.mapConfig?.enableBoundsBasedLoading === true;
@@ -42,6 +49,13 @@ function appendMapBoundsParams(params) {
     });
 
     return bounds;
+}
+
+function appendMapModeParams(params) {
+    const normalizedZoom = getCatalogMapZoom();
+    params.set('zoom', normalizedZoom.toFixed(2));
+    params.set('map_mode', normalizedZoom <= CATALOG_AGGREGATE_MAX_ZOOM ? 'aggregates' : 'properties');
+    params.set('include_details', '1');
 }
 
 function boundsContain(container, inner) {
@@ -174,6 +188,21 @@ function collectMapFilterParams() {
         }
     }
 
+    const legacySortAliases = {
+        '-created_at': 'newest',
+        created_at: 'newest',
+        price_sale_usd: 'price_asc',
+        '-price_sale_usd': 'price_desc',
+        price_sale_thb: 'price_asc',
+        '-price_sale_thb': 'price_desc',
+        price_rent_monthly: 'price_asc',
+        '-price_rent_monthly': 'price_desc',
+    };
+    const requestedSort = params.get('sort');
+    if (requestedSort && legacySortAliases[requestedSort]) {
+        params.set('sort', legacySortAliases[requestedSort]);
+    }
+
     return params;
 }
 
@@ -198,6 +227,7 @@ function updateMapMarkers(options = {}) {
         showLoading = true,
     } = options;
     const params = collectMapFilterParams();
+    appendMapModeParams(params);
     const requestedBounds = includeBounds ? appendMapBoundsParams(params) : null;
 
     if (showLoading) {
@@ -217,10 +247,20 @@ function updateMapMarkers(options = {}) {
                 return;
             }
 
-            const properties = data.properties || [];
-            setMapProperties(properties, { fit });
+            const mapItems = data.mode === 'aggregates'
+                ? (data.aggregates || []).map((aggregate) => ({
+                    ...aggregate,
+                    is_aggregate: true,
+                }))
+                : (data.properties || []);
+            // Aggregates already represent the current viewport. Fitting to their
+            // grid centroids can zoom past the aggregation threshold immediately.
+            setMapProperties(mapItems, { fit: data.mode !== 'aggregates' && fit });
             lastLoadedMapBounds = requestedBounds || null;
-            setMapStatus(properties.length ? 'ready' : 'empty', properties.length);
+            const summaryCount = Number.isFinite(Number(data.viewport_count))
+                ? Number(data.viewport_count)
+                : mapItems.length;
+            setMapStatus(mapItems.length ? 'ready' : 'empty', summaryCount);
         })
         .catch((error) => {
             console.error('Map properties request failed:', error);
@@ -230,6 +270,11 @@ function updateMapMarkers(options = {}) {
 
 document.addEventListener('catalog-map:bounds-changed', () => {
     if (!isBoundsBasedMapLoadingEnabled()) {
+        return;
+    }
+
+    if (skipNextMapBoundsRefresh) {
+        skipNextMapBoundsRefresh = false;
         return;
     }
 
@@ -246,6 +291,16 @@ document.addEventListener('catalog-map:bounds-changed', () => {
             showLoading: false,
         });
     }, getMapBoundsRefreshDelay());
+});
+
+document.addEventListener('catalog-map:aggregate-selected', () => {
+    skipNextMapBoundsRefresh = true;
+    window.clearTimeout(mapBoundsRefreshTimer);
+    updateMapMarkers({
+        fit: false,
+        includeBounds: true,
+        showLoading: false,
+    });
 });
 
 function loadCurrentPageProperties(fromError = false) {
@@ -302,6 +357,40 @@ function loadCurrentPageProperties(fromError = false) {
         });
     });
 
-    setMapProperties(properties);
-    setMapStatus(properties.length ? 'ready' : (fromError ? 'error' : 'empty'), properties.length);
+    const zoom = getCatalogMapZoom();
+    const mapItems = zoom <= CATALOG_AGGREGATE_MAX_ZOOM
+        ? aggregateFallbackProperties(properties, zoom)
+        : properties;
+    setMapProperties(mapItems, { fit: false });
+    setMapStatus(mapItems.length ? 'ready' : (fromError ? 'error' : 'empty'), properties.length);
+}
+
+function aggregateFallbackProperties(properties, zoom) {
+    const tileSize = 512;
+    const gridSizePx = 80;
+    const gridSizeDegrees = (360 * gridSizePx) / (tileSize * (2 ** Math.floor(zoom)));
+    const buckets = new Map();
+
+    properties.forEach((property) => {
+        const lat = Number(property.lat);
+        const lng = Number(property.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+            return;
+        }
+
+        const key = `${Math.floor(lat / gridSizeDegrees)}:${Math.floor(lng / gridSizeDegrees)}`;
+        const bucket = buckets.get(key) || { count: 0, latSum: 0, lngSum: 0 };
+        bucket.count += 1;
+        bucket.latSum += lat;
+        bucket.lngSum += lng;
+        buckets.set(key, bucket);
+    });
+
+    return Array.from(buckets.entries()).map(([key, bucket]) => ({
+        id: `fallback-grid:${zoom.toFixed(2)}:${key}`,
+        lat: bucket.latSum / bucket.count,
+        lng: bucket.lngSum / bucket.count,
+        count: bucket.count,
+        is_aggregate: true,
+    }));
 }

@@ -1439,6 +1439,14 @@ msgstr "ห้องนอน"
 msgid "Ванные"
 msgstr "ห้องน้ำ"
 
+#: apps/core/views.py
+msgid "Площадь от, м²"
+msgstr "พื้นที่เริ่มต้น, ตร.ม."
+
+#: apps/core/views.py
+msgid "Площадь до, м²"
+msgstr "พื้นที่สูงสุด, ตร.ม."
+
 #: apps/properties/models.py:124
 msgid "Общая площадь, м²"
 msgstr "พื้นที่ทั้งหมดม.2"
@@ -5490,3 +5498,88 @@ msgstr "โปรไฟล์ผู้เชี่ยวชาญ %(name)s"
 #: templates/core/includes/home/home_our_team_section.html:190
 msgid "Профиль специалиста"
 msgstr "โปรไฟล์ผู้เชี่ยวชาญ"
+
+msgid "Загрузка карты"
+msgstr "กำลังโหลดแผนที่"
+
+msgid "Карта временно недоступна"
+msgstr "แผนที่ไม่พร้อมใช้งานชั่วคราว"
+
+msgid "ID, район, проект"
+msgstr "รหัส, พื้นที่, โครงการ"
+
+msgid "Найти удобство"
+msgstr "ค้นหาสิ่งอำนวยความสะดวก"
+
+msgid "Найдено объектов"
+msgstr "รายการ"
+
+msgid "В списке"
+msgstr "ในรายการ"
+
+msgid "Увеличьте масштаб, чтобы увидеть все объекты"
+msgstr "ซูมเข้าเพื่อดูทรัพย์ทั้งหมด"
+
+msgid "Выбранный объект больше недоступен"
+msgstr "อสังหาริมทรัพย์ที่เลือกไม่พร้อมให้บริการแล้ว"
+
+msgid "Новые"
+msgstr "ใหม่ล่าสุด"
+
+msgid "Показать объекты"
+msgstr "แสดงรายการ"
+
+msgid "По этим условиям объектов не найдено"
+msgstr "ไม่พบรายการตามเงื่อนไขนี้"
+
+msgid "Повторить"
+msgstr "ลองอีกครั้ง"
+
+msgid "Моё местоположение"
+msgstr "ตำแหน่งของฉัน"
+
+msgid "Определяем местоположение"
+msgstr "กำลังระบุตำแหน่ง"
+
+msgid "Доступ к геолокации не предоставлен"
+msgstr "ไม่ได้รับอนุญาตให้เข้าถึงตำแหน่ง"
+
+msgid "Геолокация недоступна"
+msgstr "ไม่สามารถระบุตำแหน่งได้"
+
+msgid "Искать в этой области"
+msgstr "ค้นหาในพื้นที่นี้"
+
+msgid "Сбросить вид карты"
+msgstr "รีเซ็ตมุมมองแผนที่"
+
+msgid "Ванные комнаты"
+msgstr "ห้องน้ำ"
+
+#: templates/includes/list/list_data_injection.html:46
+msgid "Загружаем карту"
+msgstr "กำลังโหลดแผนที่"
+
+#: templates/includes/list/list_data_injection.html:47
+msgid "Подбираем объекты и расставляем маркеры на карте."
+msgstr "กำลังโหลดอสังหาริมทรัพย์และวางหมุดบนแผนที่"
+
+#: templates/includes/list/list_data_injection.html:48
+msgid "На карте пока нет объектов"
+msgstr "ยังไม่มีอสังหาริมทรัพย์บนแผนที่"
+
+#: templates/includes/list/list_data_injection.html:49
+msgid "Попробуйте смягчить фильтры или перейти к списку объектов."
+msgstr "ลองปรับเงื่อนไขการค้นหาหรือไปที่รายการอสังหาริมทรัพย์"
+
+#: templates/includes/list/list_data_injection.html:50
+msgid "Не удалось обновить карту"
+msgstr "ไม่สามารถอัปเดตแผนที่ได้"
+
+#: templates/includes/list/list_data_injection.html:51
+msgid "Проверьте фильтры или попробуйте обновить страницу."
+msgstr "ตรวจสอบเงื่อนไขการค้นหาหรือลองรีเฟรชหน้าอีกครั้ง"
+
+#: apps/core/views.py:638
+msgid "В этой области"
+msgstr "ในพื้นที่นี้"

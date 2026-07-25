@@ -1,12 +1,18 @@
+import logging
 import re
+from ipaddress import ip_address, ip_network
 import time
 from functools import wraps
 from urllib.parse import urlencode
 
 from django.core.cache import cache
+from django.conf import settings
 from django.http import JsonResponse
 from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
+
+
+logger = logging.getLogger(__name__)
 
 
 def build_query_string(querydict, allowed_keys):
@@ -69,6 +75,36 @@ def truncate_meta(value, limit=155, ellipsis=''):
     return f"{truncated}{suffix}" if suffix else truncated
 
 
+def get_client_ip(request):
+    """Return a client IP without trusting a spoofed forwarding header."""
+    remote_addr = (request.META.get('REMOTE_ADDR') or '').strip()
+    try:
+        remote_ip = ip_address(remote_addr)
+    except ValueError:
+        return remote_addr or 'unknown'
+
+    trusted_networks = []
+    for value in getattr(settings, 'TRUSTED_PROXY_CIDRS', []):
+        try:
+            trusted_networks.append(ip_network(value))
+        except ValueError:
+            logger.warning('Ignoring invalid TRUSTED_PROXY_CIDRS value: %s', value)
+
+    if not any(remote_ip in network for network in trusted_networks):
+        return remote_addr
+
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    candidates = [item.strip() for item in forwarded.split(',') if item.strip()]
+    for candidate in reversed(candidates):
+        try:
+            candidate_ip = ip_address(candidate)
+        except ValueError:
+            continue
+        if not any(candidate_ip in network for network in trusted_networks):
+            return candidate
+    return remote_addr
+
+
 def rate_limit(key_prefix, limit=5, timeout=60):
     """Простой декоратор для ограничения числа запросов с одного IP."""
 
@@ -78,12 +114,18 @@ def rate_limit(key_prefix, limit=5, timeout=60):
             if request.user.is_authenticated and request.user.is_staff:
                 return view_func(request, *args, **kwargs)
 
-            forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
-            client_ip = forwarded_for or request.META.get('REMOTE_ADDR', '') or 'unknown'
+            client_ip = get_client_ip(request)
             cache_key = f'rate-limit:{key_prefix}:{client_ip}'
 
-            count = cache.get(cache_key, 0) + 1
-            cache.set(cache_key, count, timeout)
+            if cache.add(cache_key, 1, timeout):
+                count = 1
+            else:
+                try:
+                    count = cache.incr(cache_key)
+                except ValueError:
+                    # A concurrent expiry is harmless; start a fresh window.
+                    cache.set(cache_key, 1, timeout)
+                    count = 1
 
             if count > limit:
                 return JsonResponse(

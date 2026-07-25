@@ -480,8 +480,8 @@ class Property(models.Model):
     
     # Контактное лицо (связь с командой)
     contact_person = models.ForeignKey('core.Team', on_delete=models.SET_NULL, null=True, blank=True,
-                                      default=1, verbose_name=_('Контактное лицо'),
-                                      help_text=_('Сотрудник компании, ответственный за данный объект (по умолчанию: Bogdan)'))
+                                      verbose_name=_('Контактное лицо'),
+                                      help_text=_('Сотрудник компании, ответственный за данный объект'))
     
     # Связь с агентом (из дампа Joomla field_id=26) - оставляем для совместимости
     agent = models.ForeignKey('Agent', on_delete=models.SET_NULL, null=True, blank=True,

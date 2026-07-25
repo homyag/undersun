@@ -37,7 +37,12 @@
 - [METRIKA_GOALS_CATALOG.md](./METRIKA_GOALS_CATALOG.md) — цели каталога.
 - [METRIKA_GOALS_PROPERTY_DETAIL.md](./METRIKA_GOALS_PROPERTY_DETAIL.md) — цели карточки объекта.
 
-## 5. Historical Documents
+## 5. Product Plans
+
+- [MAP_REBUILD_PLAN_2026_07.md](./MAP_REBUILD_PLAN_2026_07.md) — актуальный план map-first переработки публичной страницы `/map/`.
+- [MAP_ROLLOUT_RUNBOOK_2026_07.md](./MAP_ROLLOUT_RUNBOOK_2026_07.md) — условия internal/canary rollout, dashboard schema, stop conditions и rollback новой карты.
+
+## 6. Historical Documents
 
 Эти файлы оставлены как история изменений и контекста прошлых итераций. Они полезны для понимания эволюции проекта, но не являются описанием текущей архитектуры:
 

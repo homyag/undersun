@@ -241,7 +241,8 @@
                             }));
 
                             // If no dynamic update handler exists, reload page
-                            if (typeof updateAllPricesToHeaderCurrency !== 'function' && typeof updatePricePerSqm !== 'function') {
+                            const mapHandlesCurrencyChange = document.getElementById('property-map-app')?.dataset.currencyHandler === 'true';
+                            if (typeof updateAllPricesToHeaderCurrency !== 'function' && typeof updatePricePerSqm !== 'function' && !mapHandlesCurrencyChange) {
                                 // On other pages (like property details), reload to update prices
                                 window.location.reload();
                             }

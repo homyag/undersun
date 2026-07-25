@@ -15,7 +15,8 @@
 - `SearchView`
   - серверный search flow поверх фильтров недвижимости
 - `MapView`
-  - брендированная страница карты
+  - брендированная страница карты; legacy shell остаётся default, React/Vite shell включается `MAP_REBUILD_ENABLED` и по умолчанию ограничен `MAP_REBUILD_STAFF_ONLY`
+  - bootstrap нового shell: язык, валюта, endpoints, OpenFreeMap style URL, фильтры и локализованные UI strings
 - `SitemapView`
   - отдаёт sitemap XML
 - legacy redirect helpers
@@ -187,6 +188,8 @@
   - универсальная AJAX-отправка форм и popup feedback
 - `static/js/analytics/metrika-goals.js`
   - declarative/imparative integration с Яндекс.Метрикой
+  - React map вызывает этот bridge через `frontend/map/src/analytics.ts`: `map_rebuild_filters_changed`, `map_rebuild_viewport_search`, `map_rebuild_property_selected`, `map_rebuild_favorite_changed`, `map_rebuild_map_error` и `map_rebuild_timing`
+  - параметры событий содержат только агрегированные технические значения; не передавать ID/slug объекта, query text, координаты или PII
 - `static/js/main.js`
   - legacy/shared client utilities
 
@@ -253,6 +256,7 @@
 ## 4. Operational Commands
 
 - `python manage.py update_exchange_rates`
+- `python manage.py benchmark_map_endpoint --requests 10` — повторяемый in-process baseline JSON endpoint карты: fixed bounds, объём ответа, p50/p95, SQL query count, количество объектов и дубли координат.
 - `python manage.py parse_properties ...`
 - `python manage.py parse_blog ...`
 - `python manage.py analyze_bad_requests ...`

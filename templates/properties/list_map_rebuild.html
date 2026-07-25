@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load vite_assets %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .map-app-shell {
+        min-height: calc(100vh - 5rem);
+        background: #f6f6f4;
+    }
+
+    #property-map-app {
+        min-height: calc(100vh - 5rem);
+    }
+
+    .map-app-fallback {
+        display: grid;
+        min-height: calc(100vh - 5rem);
+        place-items: center;
+        padding: 2rem;
+        color: #474b57;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="map-app-shell">
+    <div id="property-map-app" aria-busy="true">
+        <div class="map-app-fallback" role="status">{{ map_app_bootstrap.translations.loading }}</div>
+    </div>
+    {{ map_app_bootstrap|json_script:'map-app-bootstrap' }}
+    <noscript>
+        <div class="map-app-fallback">
+            <a href="{{ map_app_bootstrap.catalog.url }}">{{ map_app_bootstrap.catalog.label }}</a>
+        </div>
+    </noscript>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+{% vite_assets 'src/main.tsx' %}
+{% endblock %}

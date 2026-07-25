@@ -18,11 +18,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='promotionalbanner',
-            name='language_code',
-            field=models.CharField(choices=[('ru', 'Русский'), ('en', 'Английский'), ('th', 'Тайский')], default='ru', help_text='Создавайте отдельные баннеры для каждого языка (RU / EN / TH).', max_length=2, verbose_name='Язык'),
-        ),
         migrations.AlterField(
             model_name='promotionalbanner',
             name='desktop_image',

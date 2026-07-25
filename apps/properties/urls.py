@@ -10,6 +10,7 @@ urlpatterns = [
     path('favorites/', views.favorites_view, name='property_favorites'),
     path('ajax/list/', views.property_list_ajax, name='property_list_ajax'),
     path('ajax/map/', views.map_properties_json, name='map_properties_json'),
+    path('ajax/map/cards/', views.map_property_cards_json, name='map_property_cards_json'),
     path('ajax/map-districts/', views.map_districts_json, name='map_districts_json'),
     path('ajax/map-basemap.pmtiles', views.map_protomaps_basemap_proxy, name='map_protomaps_basemap_proxy'),
     path('ajax/locations/', views.get_locations_for_district, name='get_locations_for_district'),

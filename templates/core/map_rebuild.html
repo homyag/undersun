@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load l10n %}
+{% load vite_assets %}
+
+{% block title %}{{ page_title|default:_('Карта недвижимости') }}{% endblock %}
+
+{% block structured_data %}
+{{ block.super }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Map",
+  "name": "{% trans 'Интерактивная карта недвижимости Undersun Estate' %}",
+  "description": "{% trans 'Живые данные по объектам недвижимости Пхукета: виллы, квартиры, таунхаусы с фильтрами и актуальными ценами' %}",
+  "url": "{{ request.build_absolute_uri }}",
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "Phuket, Thailand",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 7.9519,
+      "longitude": 98.3381
+    }
+  }
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .map-app-shell {
+        min-height: calc(100vh - 5rem);
+        background: #f6f6f4;
+    }
+
+    #property-map-app {
+        min-height: calc(100vh - 5rem);
+    }
+
+    .map-app-fallback {
+        display: grid;
+        min-height: calc(100vh - 5rem);
+        place-items: center;
+        padding: 2rem;
+        color: #474b57;
+        text-align: center;
+    }
+
+    .map-editorial {
+        border-top: 1px solid #dedede;
+        background: #ffffff;
+    }
+
+    .map-editorial__inner {
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 3.5rem 1.5rem;
+    }
+
+    .map-editorial h1 {
+        max-width: 48rem;
+        margin: 0;
+        color: #333847;
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.15;
+    }
+
+    .map-editorial p {
+        max-width: 48rem;
+        margin: 1rem 0 0;
+        color: #616677;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .map-editorial__facts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0 0;
+    }
+
+    .map-editorial__facts p {
+        margin: 0;
+        padding-left: 1rem;
+        border-left: 3px solid #f1b400;
+    }
+
+    @media (max-width: 767px) {
+        .map-app-shell {
+            margin-bottom: -4rem;
+        }
+
+        .map-editorial__inner {
+            padding: 2.5rem 1rem;
+        }
+
+        .map-editorial h1 {
+            font-size: 1.65rem;
+        }
+
+        .map-editorial__facts {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="map-app-shell">
+    <div id="property-map-app" aria-busy="true">
+        <div class="map-app-fallback" role="status">{{ map_app_bootstrap.translations.loading }}</div>
+    </div>
+    {{ map_app_bootstrap|json_script:'map-app-bootstrap' }}
+    <noscript>
+        <div class="map-app-fallback">
+            <a href="{% url 'properties:property_list' %}">{{ map_app_bootstrap.translations.viewCatalog }}</a>
+        </div>
+    </noscript>
+</main>
+<section class="map-editorial" aria-labelledby="map-editorial-title">
+    <div class="map-editorial__inner">
+        {% if LANGUAGE_CODE == 'en' %}
+            <h1 id="map-editorial-title">Phuket property on an interactive map</h1>
+            <p>Explore available villas, condos, townhouses, and land across Phuket in the context of their districts and nearby locations. The map makes it easier to compare a property's setting before arranging a viewing or contacting the team.</p>
+            <div class="map-editorial__facts">
+                <p>Compare available homes across Phuket's key districts.</p>
+                <p>Review price, location, and core property facts in one place.</p>
+                <p>Move from the map to a detailed property page when a listing matches your brief.</p>
+            </div>
+        {% elif LANGUAGE_CODE == 'th' %}
+            <h1 id="map-editorial-title">อสังหาริมทรัพย์ภูเก็ตบนแผนที่แบบโต้ตอบ</h1>
+            <p>สำรวจวิลล่า คอนโด ทาวน์เฮาส์ และที่ดินที่พร้อมเสนอขายหรือเช่าในภูเก็ต พร้อมดูบริบทของแต่ละพื้นที่และทำเลใกล้เคียง แผนที่ช่วยให้เปรียบเทียบสภาพแวดล้อมของทรัพย์ได้ก่อนนัดชมหรือพูดคุยกับทีมงาน</p>
+            <div class="map-editorial__facts">
+                <p>เปรียบเทียบทรัพย์ที่มีอยู่ในพื้นที่สำคัญของภูเก็ต</p>
+                <p>ดูราคา ทำเล และข้อมูลหลักของทรัพย์ในที่เดียว</p>
+                <p>ไปยังหน้ารายละเอียดของทรัพย์ได้เมื่อพบรายการที่ตรงกับความต้องการ</p>
+            </div>
+        {% else %}
+            <h1 id="map-editorial-title">Недвижимость Пхукета на интерактивной карте</h1>
+            <p>Изучайте доступные виллы, квартиры, таунхаусы и земельные участки Пхукета в контексте районов и ближайших локаций. Карта помогает сравнить окружение объекта до просмотра и обращения к команде.</p>
+            <div class="map-editorial__facts">
+                <p>Сравнивайте доступные объекты в ключевых районах Пхукета.</p>
+                <p>Смотрите цену, локацию и основные характеристики в одном месте.</p>
+                <p>Переходите к детальной странице, когда объект соответствует вашему запросу.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% vite_assets 'src/main.tsx' %}
+{% endblock %}

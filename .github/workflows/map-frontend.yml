@@ -1,0 +1,46 @@
+name: Map frontend
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/map/**'
+      - 'apps/core/templatetags/vite_assets.py'
+      - '.github/workflows/map-frontend.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/map/**'
+      - 'apps/core/templatetags/vite_assets.py'
+      - '.github/workflows/map-frontend.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/map/package-lock.json
+      - name: Install dependencies
+        working-directory: frontend/map
+        run: npm ci
+      - name: Lint
+        working-directory: frontend/map
+        run: npm run lint
+      - name: Unit tests
+        working-directory: frontend/map
+        run: npm test
+      - name: Install Playwright browser
+        working-directory: frontend/map
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests
+        working-directory: frontend/map
+        run: npm run test:e2e
+      - name: Production build
+        working-directory: frontend/map
+        run: npm run build
+      - name: Verify Vite manifest
+        run: test -f static/map-app/manifest.json

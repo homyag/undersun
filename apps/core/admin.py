@@ -730,6 +730,9 @@ class TeamAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         """Настройка формы с подсказками"""
         form = super().get_form(request, obj, **kwargs)
+
+        if 'prea_role_ru' in form.base_fields:
+            form.base_fields['prea_role_ru'].required = False
         
         help_texts = {
             'first_name': 'Имя сотрудника',

@@ -185,6 +185,19 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+VITE_DEV_SERVER_URL = env('VITE_DEV_SERVER_URL', default='')
+MAP_REBUILD_ENABLED = env.bool('MAP_REBUILD_ENABLED', default=False)
+MAP_REBUILD_STAFF_ONLY = env.bool('MAP_REBUILD_STAFF_ONLY', default=True)
+MAP_VECTOR_STYLE_URL = env(
+    'MAP_VECTOR_STYLE_URL',
+    default='https://tiles.openfreemap.org/styles/liberty',
+)
+# Only these reverse proxies may supply X-Forwarded-For. Add every proxy CIDR
+# in production; direct clients must never be able to choose their own IP key.
+TRUSTED_PROXY_CIDRS = env.list(
+    'TRUSTED_PROXY_CIDRS',
+    default=['127.0.0.1/32', '::1/128'],
+)
 
 # Media files
 MEDIA_URL = '/media/'
@@ -230,6 +243,7 @@ BOT_PROTECTION = {
         '95.161.221.91',   # admin IP
         '46.191.181.174',  # trusted client/admin IP
         '171.6.245.82', # IP Алексея
+        '89.18.195.16',  # approved outsourcing automation tool
         '5.45.192.0/18',
         '5.255.192.0/18',
         '37.9.64.0/18',

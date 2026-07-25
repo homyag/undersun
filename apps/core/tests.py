@@ -472,7 +472,6 @@ class BotDetectionServiceTests(SimpleTestCase):
         self.assertEqual(result.score, 40)
         self.assertEqual([match.key for match in result.matched_rules], ['js_challenge_missing'])
 
-
 class TranslationServiceTests(SimpleTestCase):
     @override_settings(
         YANDEX_TRANSLATE_API_KEY='test-key',

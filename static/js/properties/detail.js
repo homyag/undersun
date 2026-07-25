@@ -972,6 +972,33 @@ function closeConsultationModal() {
     if (message) message.classList.add('hidden');
 }
 
+function openCallbackModal() {
+    const modal = document.getElementById('callback-modal');
+    if (!modal) return;
+
+    firePropertyGoal('property_callback_modal_open');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    window.setTimeout(() => document.getElementById('callback-name')?.focus(), 0);
+}
+
+function closeCallbackModal() {
+    const modal = document.getElementById('callback-modal');
+    if (!modal) return;
+
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+
+    const form = document.getElementById('callbackRequestForm');
+    const message = document.getElementById('callback-message');
+    if (form) form.reset();
+    if (message) message.classList.add('hidden');
+}
+
+// Detail templates retain inline handlers for these modal controls.
+window.openCallbackModal = openCallbackModal;
+window.closeCallbackModal = closeCallbackModal;
+
 // Form submission handler
 function handleFormSubmit(formId, endpoint, successCallback) {
     const form = document.getElementById(formId);
@@ -1114,6 +1141,7 @@ document.addEventListener('DOMContentLoaded', function () {
         handleFormSubmit('inquiry-form', INQUIRY_ENDPOINT);
         handleFormSubmit('viewingRequestForm', INQUIRY_ENDPOINT, closeViewingModal);
         handleFormSubmit('consultationRequestForm', INQUIRY_ENDPOINT, closeConsultationModal);
+        handleFormSubmit('callbackRequestForm', INQUIRY_ENDPOINT, closeCallbackModal);
     }
 
     // Newsletter form (если нужно)
@@ -1160,12 +1188,16 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('click', function (e) {
         const viewingModal = document.getElementById('viewing-modal');
         const consultationModal = document.getElementById('consultation-modal');
+        const callbackModal = document.getElementById('callback-modal');
 
         if (e.target === consultationModal) {
             closeDetailsModal();
         }
         if (e.target === viewingModal) {
             closeViewingModal();
+        }
+        if (e.target === callbackModal) {
+            closeCallbackModal();
         }
     });
 
@@ -1174,11 +1206,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Escape') {
             const viewingModal = document.getElementById('viewing-modal');
             const consultationModal = document.getElementById('consultation-modal');
+            const callbackModal = document.getElementById('callback-modal');
 
             if (!consultationModal.classList.contains('hidden')) {
                 closeDetailsModal();
             } else if (!viewingModal.classList.contains('hidden')) {
                 closeViewingModal();
+            } else if (callbackModal && !callbackModal.classList.contains('hidden')) {
+                closeCallbackModal();
             }
         }
     });

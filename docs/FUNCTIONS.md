@@ -15,7 +15,8 @@ This document is an architecture-oriented reference for the current codebase. It
 - `SearchView`
   - server-rendered search page using property filters
 - `MapView`
-  - dedicated branded map page
+  - dedicated branded map page; the legacy shell remains default, while the React/Vite shell is gated by `MAP_REBUILD_ENABLED` and defaults to `MAP_REBUILD_STAFF_ONLY`
+  - new-shell bootstrap: language, currency, endpoints, OpenFreeMap style URL, filters and localized UI strings
 - `SitemapView`
   - renders sitemap XML
 - legacy redirect helpers
@@ -187,6 +188,8 @@ Common behavior:
   - generic AJAX form submission helpers and popup feedback
 - `static/js/analytics/metrika-goals.js`
   - declarative and imperative Yandex Metrika event dispatch
+  - the React map calls this bridge through `frontend/map/src/analytics.ts`: `map_rebuild_filters_changed`, `map_rebuild_viewport_search`, `map_rebuild_property_selected`, `map_rebuild_favorite_changed`, `map_rebuild_map_error` and `map_rebuild_timing`
+  - event params are aggregate technical values only; never send property IDs/slugs, query text, coordinates or PII
 - `static/js/main.js`
   - global legacy utilities and shared page behavior
 
@@ -253,6 +256,7 @@ Provides:
 ## 4. Operational Commands
 
 - `python manage.py update_exchange_rates`
+- `python manage.py benchmark_map_endpoint --requests 10` — repeatable in-process baseline for the map JSON endpoint: fixed bounds, payload size, p50/p95, SQL query count, property counts, and duplicate coordinates.
 - `python manage.py parse_properties ...`
 - `python manage.py parse_blog ...`
 - `python manage.py analyze_bad_requests ...`

@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='property',
             name='contact_person',
-            field=models.ForeignKey(blank=True, default=1, help_text='Сотрудник компании, ответственный за данный объект (по умолчанию: Bogdan)', null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.team', verbose_name='Контактное лицо'),
+            field=models.ForeignKey(blank=True, help_text='Сотрудник компании, ответственный за данный объект', null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.team', verbose_name='Контактное лицо'),
         ),
     ]

@@ -23,7 +23,7 @@ from apps.core.legacy_redirects import (
     build_legacy_real_estate_target,
 )
 from apps.core.utils import build_query_string, truncate_meta
-from apps.properties.models import Property, PropertyType, PROPERTY_FALLBACK_LABELS
+from apps.properties.models import Property, PropertyFeature, PropertyType, PROPERTY_FALLBACK_LABELS
 from apps.properties.views import PropertyListView
 from apps.locations.models import District, Location
 from apps.blog.models import BlogPost
@@ -404,8 +404,23 @@ class SearchView(TemplateView):
 class MapView(TemplateView):
     template_name = 'core/map.html'
 
+    def get_template_names(self):
+        if self._is_rebuild_enabled():
+            return ['core/map_rebuild.html']
+        return [self.template_name]
+
+    def _is_rebuild_enabled(self):
+        if not settings.MAP_REBUILD_ENABLED:
+            return False
+        if not settings.MAP_REBUILD_STAFF_ONLY:
+            return True
+        return self.request.user.is_authenticated and self.request.user.is_staff
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        if self._is_rebuild_enabled():
+            return self._get_rebuild_context(context)
 
         properties_qs = Property.objects.filter(
             is_active=True,
@@ -507,6 +522,149 @@ class MapView(TemplateView):
         context.update(filter_context)
         context['show_build_status_filter'] = property_list_view.should_show_build_status_filter(context)
 
+        return context
+
+    def _get_rebuild_context(self, context):
+        language_code = (translation.get_language() or 'ru')[:2]
+        if language_code not in {'ru', 'en', 'th'}:
+            language_code = 'ru'
+
+        properties_qs = Property.objects.filter(
+            is_active=True,
+            status='available',
+            latitude__isnull=False,
+            longitude__isnull=False,
+        ).select_related('district', 'location', 'property_type')
+        property_list_view = PropertyListView()
+        property_list_view.request = self.request
+        properties = list(property_list_view.apply_filters(properties_qs)[:10])
+
+        selected_currency_code = CurrencyService.get_selected_currency_code(self.request)
+        selected_currency = CurrencyService.get_currency_by_code(selected_currency_code)
+        property_types = PropertyType.ordered_for_navigation()
+        districts = District.objects.prefetch_related('locations').order_by('name')
+        amenities = (
+            PropertyFeature.objects
+            .annotate(property_count=Count('propertyfeaturerelation'))
+            .filter(property_count__gte=1)
+            .order_by('-property_count', 'name')
+        )
+        context.update({
+            'properties': properties,
+            'map_rebuild_enabled': True,
+            'map_app_bootstrap': {
+                'schemaVersion': 1,
+                'language': language_code,
+                'currency': {
+                    'code': selected_currency_code,
+                    'symbol': selected_currency.symbol if selected_currency else selected_currency_code,
+                    'decimalPlaces': selected_currency.decimal_places if selected_currency else 0,
+                },
+                'endpoints': {
+                    'properties': reverse('properties:map_properties_json'),
+                    'cards': reverse('properties:map_property_cards_json'),
+                    'districts': reverse('properties:map_districts_json'),
+                },
+                'map': {
+                    'center': [98.3923, 7.8804],
+                    'zoom': 10,
+                    'aggregateMaxZoom': 11,
+                    'styleUrl': settings.MAP_VECTOR_STYLE_URL,
+                },
+                'featureFlags': {
+                    'mapRebuild': True,
+                },
+                'filters': {
+                    'propertyTypes': [
+                        {
+                            'value': property_type.name,
+                            'label': self._get_localized_value(property_type, 'name_display', language_code),
+                        }
+                        for property_type in property_types
+                    ],
+                    'districts': [
+                        {
+                            'value': district.slug,
+                            'label': self._get_localized_value(district, 'name', language_code),
+                            'locations': [
+                                {
+                                    'value': location.slug,
+                                    'label': self._get_localized_value(location, 'name', language_code),
+                                }
+                                for location in district.locations.all()
+                            ],
+                        }
+                        for district in districts
+                    ],
+                    'buildStatuses': [
+                        {'value': value, 'label': str(label)}
+                        for value, label in Property.BUILD_STATUS_CHOICES
+                    ],
+                    'amenities': [
+                        {
+                            'value': str(amenity.id),
+                            'label': self._get_localized_value(amenity, 'name', language_code),
+                        }
+                        for amenity in amenities
+                    ],
+                },
+                'translations': {
+                    'loading': str(gettext('Загрузка карты')),
+                    'unavailable': str(gettext('Карта временно недоступна')),
+                    'viewCatalog': str(gettext('Смотреть каталог')),
+                    'filters': str(gettext('Фильтры')),
+                    'all': str(gettext('Все')),
+                    'sale': str(gettext('Продажа')),
+                    'rent': str(gettext('Аренда')),
+                    'propertyType': str(gettext('Тип недвижимости')),
+                    'buildStatus': str(gettext('Стадия готовности')),
+                    'district': str(gettext('Район')),
+                    'location': str(gettext('Локация')),
+                    'search': str(gettext('Поиск')),
+                    'searchPlaceholder': str(gettext('ID, район, проект')),
+                    'bedrooms': str(gettext('Спальни')),
+                    'bathrooms': str(gettext('Ванные')),
+                    'area': str(gettext('Площадь')),
+                    'areaFrom': str(gettext('Площадь от, м²')),
+                    'areaTo': str(gettext('Площадь до, м²')),
+                    'amenities': str(gettext('Удобства')),
+                    'amenitiesSearch': str(gettext('Найти удобство')),
+                    'priceFrom': str(gettext('Цена от')),
+                    'priceTo': str(gettext('Цена до')),
+                    'reset': str(gettext('Сбросить')),
+                    'results': str(gettext('Найдено объектов')),
+                    'inList': str(gettext('В списке')),
+                    'onMap': str(gettext('На карте')),
+                    'inArea': str(gettext('В этой области')),
+                    'total': str(gettext('Всего')),
+                    'zoomToSeeAll': str(gettext('Увеличьте масштаб, чтобы увидеть все объекты')),
+                    'selectedPropertyUnavailable': str(gettext('Выбранный объект больше недоступен')),
+                    'mapView': str(gettext('Карта')),
+                    'listView': str(gettext('Список')),
+                    'sort': str(gettext('Сортировка')),
+                    'recommended': str(gettext('Рекомендуемые')),
+                    'priceLowToHigh': str(gettext('Цена: по возрастанию')),
+                    'priceHighToLow': str(gettext('Цена: по убыванию')),
+                    'newest': str(gettext('Новые')),
+                    'close': str(gettext('Закрыть')),
+                    'showResults': str(gettext('Показать объекты')),
+                    'noResults': str(gettext('По этим условиям объектов не найдено')),
+                    'retry': str(gettext('Повторить')),
+                    'findLocation': str(gettext('Моё местоположение')),
+                    'locating': str(gettext('Определяем местоположение')),
+                    'locationDenied': str(gettext('Доступ к геолокации не предоставлен')),
+                    'locationUnavailable': str(gettext('Геолокация недоступна')),
+                    'searchThisArea': str(gettext('Искать в этой области')),
+                    'resetView': str(gettext('Сбросить вид карты')),
+                    'addFavorite': str(gettext('Добавить в избранное')),
+                    'removeFavorite': str(gettext('Удалить из избранного')),
+                    'moreDetails': str(gettext('Подробнее')),
+                    'bedroomsLabel': str(gettext('Спальни')),
+                    'bathroomsLabel': str(gettext('Ванные комнаты')),
+                    'areaLabel': str(gettext('Площадь')),
+                },
+            },
+        })
         return context
 
     @staticmethod

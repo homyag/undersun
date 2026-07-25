@@ -1461,6 +1461,14 @@ msgstr "Bedrooms"
 msgid "Ванные"
 msgstr "Bathrooms"
 
+#: apps/core/views.py
+msgid "Площадь от, м²"
+msgstr "Area from, m²"
+
+#: apps/core/views.py
+msgid "Площадь до, м²"
+msgstr "Area to, m²"
+
 #: apps/properties/models.py:124
 msgid "Общая площадь, м²"
 msgstr "Total area, m²"
@@ -5564,3 +5572,88 @@ msgstr "Specialist profile: %(name)s"
 #: templates/core/includes/home/home_our_team_section.html:190
 msgid "Профиль специалиста"
 msgstr "Specialist profile"
+
+msgid "Загрузка карты"
+msgstr "Loading map"
+
+msgid "Карта временно недоступна"
+msgstr "Map is temporarily unavailable"
+
+msgid "ID, район, проект"
+msgstr "ID, district, project"
+
+msgid "Найти удобство"
+msgstr "Find an amenity"
+
+msgid "Найдено объектов"
+msgstr "Properties"
+
+msgid "В списке"
+msgstr "In list"
+
+msgid "Увеличьте масштаб, чтобы увидеть все объекты"
+msgstr "Zoom in to see all properties"
+
+msgid "Выбранный объект больше недоступен"
+msgstr "The selected property is no longer available"
+
+msgid "Новые"
+msgstr "Newest"
+
+msgid "Показать объекты"
+msgstr "Show properties"
+
+msgid "По этим условиям объектов не найдено"
+msgstr "No properties match these criteria"
+
+msgid "Повторить"
+msgstr "Retry"
+
+msgid "Моё местоположение"
+msgstr "My location"
+
+msgid "Определяем местоположение"
+msgstr "Finding your location"
+
+msgid "Доступ к геолокации не предоставлен"
+msgstr "Location access was not granted"
+
+msgid "Геолокация недоступна"
+msgstr "Geolocation is unavailable"
+
+msgid "Искать в этой области"
+msgstr "Search this area"
+
+msgid "Сбросить вид карты"
+msgstr "Reset map view"
+
+msgid "Ванные комнаты"
+msgstr "Bathrooms"
+
+#: templates/includes/list/list_data_injection.html:46
+msgid "Загружаем карту"
+msgstr "Loading map"
+
+#: templates/includes/list/list_data_injection.html:47
+msgid "Подбираем объекты и расставляем маркеры на карте."
+msgstr "Loading properties and placing markers on the map."
+
+#: templates/includes/list/list_data_injection.html:48
+msgid "На карте пока нет объектов"
+msgstr "There are no properties on the map yet"
+
+#: templates/includes/list/list_data_injection.html:49
+msgid "Попробуйте смягчить фильтры или перейти к списку объектов."
+msgstr "Try adjusting the filters or switch to the property list."
+
+#: templates/includes/list/list_data_injection.html:50
+msgid "Не удалось обновить карту"
+msgstr "Could not update the map"
+
+#: templates/includes/list/list_data_injection.html:51
+msgid "Проверьте фильтры или попробуйте обновить страницу."
+msgstr "Check the filters or try refreshing the page."
+
+#: apps/core/views.py:638
+msgid "В этой области"
+msgstr "In this area"

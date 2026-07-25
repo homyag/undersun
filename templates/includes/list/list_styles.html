@@ -65,6 +65,30 @@
         color: var(--primary-color, #474B57);
         box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
     }
+
+    .catalog-map-aggregate-marker {
+        width: var(--aggregate-marker-size, 42px);
+        height: var(--aggregate-marker-size, 42px);
+        display: grid;
+        place-items: center;
+        margin: 0;
+        padding: 0;
+        border: 4px solid #fff;
+        border-radius: 50%;
+        background: #f1b400;
+        color: #333847;
+        font: 700 0.8rem/1 Arial, sans-serif;
+        box-shadow: 0 0 0 5px rgba(241, 180, 0, 0.2), 0 4px 10px rgba(51, 56, 71, 0.2);
+        cursor: pointer;
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .catalog-map-aggregate-marker:hover,
+    .catalog-map-aggregate-marker:focus-visible {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 7px rgba(241, 180, 0, 0.24), 0 6px 14px rgba(51, 56, 71, 0.26);
+        outline: 0;
+    }
 </style>
 <link rel="preload" as="style"
       href="{% static 'css/list/list_styles.css' %}"
