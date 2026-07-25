@@ -1,4 +1,0 @@
-interface:
-  display_name: "Undersun Frontend"
-  short_description: "Django/Tailwind frontend workflow"
-  default_prompt: "Use $undersun-frontend to modify the Undersun Estate frontend safely."

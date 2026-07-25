@@ -92,7 +92,7 @@ docs/*
 .gitignore_migration
 
 # AI platform related files
-.assistant/
+.codex/
 assistant_context/
 *.assistant
 assistant_files/
@@ -175,3 +175,4 @@ cleanup.log
 /logs/
 /seo/
 /tmp/ip2asn.tsv
+/.claude/
