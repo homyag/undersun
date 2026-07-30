@@ -607,6 +607,38 @@ class BlogPostPropertyLink(models.Model):
         return f'{self.post} → {self.property}'
 
 
+class BlogPostFAQ(models.Model):
+    """Вопросы и ответы, которые редактор добавляет в конце статьи."""
+
+    post = models.ForeignKey(
+        BlogPost,
+        on_delete=models.CASCADE,
+        related_name='faq_items',
+        verbose_name=_('Статья'),
+    )
+    question = models.CharField(_('Вопрос'), max_length=300)
+    answer = models.TextField(_('Ответ'))
+    order = models.PositiveIntegerField(
+        _('Порядок'),
+        default=100,
+        help_text=_('Чем меньше число, тем выше вопрос в блоке FAQ'),
+    )
+    is_active = models.BooleanField(
+        _('Показывать на странице'),
+        default=True,
+    )
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Обновлено'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('Вопрос и ответ статьи')
+        verbose_name_plural = _('FAQ статьи')
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.question
+
+
 class BlogTranslationJob(models.Model):
     """Очередь переводов статей блога для выполнения вне HTTP-запроса."""
 

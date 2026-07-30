@@ -16,7 +16,7 @@ from django.urls import path, reverse
 from django.utils.safestring import mark_safe
 from tinymce.widgets import TinyMCE
 # from modeltranslation.admin import TranslationAdmin, TranslationTabularInline
-from .models import BlogCategory, BlogPost, BlogPostPropertyLink, BlogTag, BlogTranslationJob
+from .models import BlogCategory, BlogPost, BlogPostFAQ, BlogPostPropertyLink, BlogTag, BlogTranslationJob
 from .services import queue_blog_translation_job, translate_blog_category
 
 
@@ -152,6 +152,20 @@ class BlogPostPropertyLinkInline(admin.TabularInline):
         if db_field.name == 'property':
             kwargs['widget'] = BlogPropertyPickerWidget()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class BlogPostFAQInline(admin.StackedInline):
+    model = BlogPostFAQ
+    extra = 0
+    fields = (
+        'question', 'answer',
+        'question_en', 'answer_en',
+        'question_th', 'answer_th',
+        'order', 'is_active',
+    )
+    ordering = ('order', 'id')
+    verbose_name = _('Вопрос и ответ')
+    verbose_name_plural = _('FAQ после статьи')
 
 
 class BlogTranslationJobInline(admin.TabularInline):
@@ -310,26 +324,11 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
     prepopulated_fields = {'slug': ('title',)}
     date_hierarchy = 'published_at'
     ordering = ('-created_at',)
-    inlines = [BlogPostPropertyLinkInline, BlogTranslationJobInline]
+    inlines = [BlogPostFAQInline, BlogPostPropertyLinkInline, BlogTranslationJobInline]
     
     fieldsets = (
         (_('Основная информация (Русский)'), {
-            'fields': ('title', 'slug', 'excerpt', 'content', 'category', 'team_author', 'author')
-        }),
-        (_('Дополнительные поля для событий'), {
-            'fields': ('event_date', 'event_location', 'event_price'),
-            'classes': ('collapse',),
-            'description': _('Заполняется только для мероприятий')
-        }),
-        (_('Дополнительные поля для кейсов и обзоров'), {
-            'fields': ('project_url', 'rating'),
-            'classes': ('collapse',),
-            'description': _('Заполняется для кейсов (ссылка) и обзоров (рейтинг 1-5)')
-        }),
-        (_('Поля миграции'), {
-            'fields': ('original_url', 'original_id'),
-            'classes': ('collapse',),
-            'description': _('Автоматически заполняется при импорте')
+            'fields': ('title', 'slug', 'excerpt', 'content', 'category', 'team_author')
         }),
         (_('Переводы - English'), {
             'fields': ('title_en', 'excerpt_en', 'content_en'),
@@ -356,7 +355,7 @@ class BlogPostAdmin(BaseAdminWithRequiredFields):
             'classes': ('collapse',)
         }),
         (_('Настройки публикации'), {
-            'fields': ('status', 'is_featured', 'allow_comments', 'published_at')
+            'fields': ('status', 'is_featured', 'published_at')
         }),
     )
     

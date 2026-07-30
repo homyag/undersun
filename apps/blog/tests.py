@@ -51,6 +51,26 @@ class BlogListAccessibilityTemplateTests(SimpleTestCase):
         self.assertIn('aria-current="page"', template)
 
 
+class BlogPostFAQTemplateTests(SimpleTestCase):
+    def test_faq_is_rendered_after_the_article_body(self):
+        template = Path(settings.BASE_DIR, 'templates/blog/blog_detail.html').read_text(encoding='utf-8')
+
+        self.assertIn('{% if faq_items %}', template)
+        self.assertIn('article-faq-title', template)
+        self.assertIn('<details', template)
+        self.assertGreater(
+            template.index('{% if faq_items %}'),
+            template.index('{{ processed_content|safe }}'),
+        )
+
+    def test_amp_version_contains_the_same_faq_content(self):
+        template = Path(settings.BASE_DIR, 'templates/blog/blog_detail_amp.html').read_text(encoding='utf-8')
+
+        self.assertIn('{% if faq_items %}', template)
+        self.assertIn('{{ faq.question }}', template)
+        self.assertIn('{{ faq.answer }}', template)
+
+
 class BlogPostImageVariantTests(SimpleTestCase):
     def setUp(self):
         self.media_root = tempfile.mkdtemp()
@@ -139,6 +159,32 @@ class BlogTranslationPlanTests(SimpleTestCase):
 
         self.assertEqual([item['translated_field_name'] for item in plan], ['title_en'])
         self.assertEqual(skipped_count, 6)
+
+    def test_plan_includes_missing_faq_translations(self):
+        faq = SimpleNamespace(
+            pk=17,
+            question='Можно ли купить квартиру иностранцу?',
+            question_en='Can a foreigner buy an apartment?',
+            answer='Да, при соблюдении требований к форме владения.',
+            answer_en='',
+        )
+        post = SimpleNamespace(
+            title='',
+            excerpt='',
+            content='',
+            meta_title='',
+            meta_description='',
+            meta_keywords='',
+            featured_image_alt='',
+            faq_items=SimpleNamespace(all=lambda: [faq]),
+        )
+
+        plan, skipped_count = get_blog_post_translation_plan(post, target_languages=['en'])
+
+        self.assertEqual([item['translated_field_name'] for item in plan], ['answer_en'])
+        self.assertEqual(plan[0]['display_name'], 'FAQ #17: answer_en')
+        self.assertIs(plan[0]['target'], faq)
+        self.assertEqual(skipped_count, 8)
 
 
 class BlogTocTests(SimpleTestCase):

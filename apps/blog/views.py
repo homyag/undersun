@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.http import JsonResponse, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 from django.templatetags.static import static
@@ -29,7 +29,7 @@ from apps.core.utils import truncate_meta
 from apps.core.amp_utils import convert_html_to_amp
 from apps.currency.services import CurrencyService
 
-from .models import BlogPost, BlogCategory, BlogTag
+from .models import BlogPost, BlogCategory, BlogPostFAQ, BlogTag
 from .services import (
     build_blog_item_list_schema,
     build_blog_post_schema,
@@ -1042,7 +1042,14 @@ def blog_detail(request, slug):
         return legacy_redirect
 
     post = get_object_or_404(
-        BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related('tags'),
+        BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related(
+            'tags',
+            Prefetch(
+                'faq_items',
+                queryset=BlogPostFAQ.objects.filter(is_active=True),
+                to_attr='active_faq_items',
+            ),
+        ),
         slug=slug,
         status='published'
     )
@@ -1084,6 +1091,7 @@ def blog_detail(request, slug):
         'article_toc': article_toc,
         'processed_content': processed_content,
         'linked_property_links': linked_property_links,
+        'faq_items': post.active_faq_items,
         'meta_title': meta_title,
         'meta_description': meta_description,
         'meta_keywords': meta_keywords,
@@ -1135,7 +1143,14 @@ def blog_detail_amp(request, slug):
         return legacy_redirect
 
     post = get_object_or_404(
-        BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related('tags'),
+        BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related(
+            'tags',
+            Prefetch(
+                'faq_items',
+                queryset=BlogPostFAQ.objects.filter(is_active=True),
+                to_attr='active_faq_items',
+            ),
+        ),
         slug=slug,
         status='published'
     )
@@ -1161,6 +1176,7 @@ def blog_detail_amp(request, slug):
         'post': post,
         'related_posts': related_posts,
         'linked_property_links': linked_property_links,
+        'faq_items': post.active_faq_items,
         'meta_title': meta_title,
         'meta_description': meta_description,
         'meta_keywords': meta_keywords,

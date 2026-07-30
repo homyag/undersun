@@ -33,6 +33,11 @@
     .amp-content h3 { font-size: 1.3rem; margin: 24px 0 12px; }
     .amp-content p { margin-bottom: 1.4rem; }
     .amp-content ul { padding-left: 20px; margin-bottom: 1.4rem; }
+    .faq { margin-top: 40px; padding-top: 24px; border-top: 1px solid #e2e8f0; }
+    .faq h2 { font-size: 1.5rem; margin: 0 0 16px; }
+    .faq-item { border: 1px solid #e2e8f0; border-radius: 12px; margin-top: 12px; padding: 16px; }
+    .faq-item h3 { font-size: 1.05rem; margin: 0 0 8px; }
+    .faq-item p { margin: 0; color: #475569; line-height: 1.65; white-space: pre-line; }
     .linked-properties { margin-top: 40px; padding-top: 24px; border-top: 1px solid #e2e8f0; }
     .linked-properties h3 { font-size: 1.35rem; margin: 0 0 10px; }
     .linked-properties p { color: #475569; line-height: 1.6; }
@@ -82,6 +87,18 @@
       <div class="amp-content">
         {{ amp_content|safe }}
       </div>
+
+      {% if faq_items %}
+      <section class="faq" aria-labelledby="article-faq-title">
+        <h2 id="article-faq-title">{% trans "Часто задаваемые вопросы" %}</h2>
+        {% for faq in faq_items %}
+        <article class="faq-item">
+          <h3>{{ faq.question }}</h3>
+          <p>{{ faq.answer }}</p>
+        </article>
+        {% endfor %}
+      </section>
+      {% endif %}
 
       {% if linked_property_links %}
       <section class="linked-properties">
