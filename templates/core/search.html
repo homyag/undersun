@@ -70,7 +70,6 @@
                         <select id="deal_type" name="deal_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                             <option value="">{% trans "Продажа/Аренда" %}</option>
                             <option value="sale" {% if request.GET.deal_type == 'sale' %}selected{% endif %}>{% trans "Продажа" %}</option>
-                            <option value="rent" {% if request.GET.deal_type == 'rent' %}selected{% endif %}>{% trans "Аренда" %}</option>
                         </select>
                     </div>
                     

@@ -150,9 +150,6 @@
                                     <a href="{% url 'properties:property_sale' %}"
                                        class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}
                                         Buy{% elif lang == 'th' %}ซื้อ{% else %}Продажа{% endif %}</a>
-                                    <a href="{% url 'properties:property_rent' %}"
-                                       class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}
-                                        Rent{% elif lang == 'th' %}เช่า{% else %}Аренда{% endif %}</a>
                                     <div class="border-t border-gray-200 my-1"></div>
                                     <div class="relative nav-area-trigger">
                                         <button type="button"
@@ -173,8 +170,10 @@
                                     </div>
                                     <div class="border-t border-gray-200 my-1"></div>
                                     {% for type in property_types %}
+                                        {% if type.name != 'land' %}
                                         <a href="{% url 'properties:property_by_type' type.name %}"
                                            class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{{ type.name_display }}</a>
+                                        {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>

@@ -2411,7 +2411,7 @@ class PropertyListView(ListView):
     template_name = 'properties/list.html'
     context_object_name = 'properties'
     paginate_by = 12
-    PROPERTY_TYPE_PRIORITY = ['condo', 'villa', 'townhouse', 'land']
+    PROPERTY_TYPE_PRIORITY = ['condo', 'villa', 'townhouse']
     BUILD_STATUS_ALLOWED_PROPERTY_TYPES = {'condo', 'villa', 'townhouse'}
 
     FILTER_PARAM_NAMES = {
@@ -2708,7 +2708,10 @@ class PropertyListView(ListView):
     def get_queryset(self):
         queryset = Property.objects.filter(
             is_active=True,
-            status='available'
+            status='available',
+            deal_type='sale',
+        ).exclude(
+            property_type__name='land',
         ).select_related('district', 'property_type').prefetch_related('images')
         
         # Применяем фильтры из GET параметров
@@ -3134,6 +3137,7 @@ class PropertyListView(ListView):
 
         property_types = (
             PropertyType.objects
+            .exclude(name='land')
             .annotate(_type_priority=priority_case)
             .order_by('_type_priority', 'name_display')
         )
@@ -4217,6 +4221,7 @@ class PropertyListView(ListView):
         property_types = (
             PropertyType.objects
             .annotate(property_count=Count('property', filter=base_query))
+            .exclude(name='land')
             .filter(property_count__gt=0)
             .order_by('-property_count', 'name_display')[:4]
         )
@@ -4458,6 +4463,9 @@ class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
         '': 'properties:property_list',
     }
 
+    def dispatch(self, request, *args, **kwargs):
+        raise Http404('Rental listings are not available')
+
     def get_queryset(self):
         return super().get_queryset().filter(deal_type__in=['rent', 'both'])
     
@@ -4487,6 +4495,8 @@ class PropertyByTypeView(PropertyListView):
     template_name = 'properties/list.html'
 
     def dispatch(self, request, *args, **kwargs):
+        if kwargs.get('type_name') == 'land':
+            raise Http404('Land listings are not available')
         redirect_response = self._maybe_redirect_redundant_sale_deal_type(request)
         if redirect_response:
             return redirect_response
@@ -4603,9 +4613,11 @@ class PropertyDetailView(DetailView):
             raise Http404("Недвижимость не найдена")
         
         # Увеличиваем счетчик просмотров только для активных объектов
-        if obj.is_active:
+        if obj.is_active and obj.deal_type == 'sale' and obj.property_type.name != 'land':
             obj.views_count += 1
             obj.save(update_fields=['views_count'])
+        elif not obj.is_active or obj.deal_type != 'sale' or obj.property_type.name == 'land':
+            raise Http404("Недвижимость недоступна")
         
         return obj
     
@@ -4623,16 +4635,15 @@ class PropertyDetailView(DetailView):
         # 1. Пытаемся редиректить на тип недвижимости + тип сделки
         if property_obj.property_type and property_obj.deal_type:
             # Формируем URL вида /properties/sale/ или /properties/rent/
-            if property_obj.deal_type in ['sale', 'both']:
+            if property_obj.deal_type == 'sale' and property_obj.property_type.name != 'land':
                 redirect_url = reverse('properties:property_sale')
-            elif property_obj.deal_type == 'rent':
-                redirect_url = reverse('properties:property_rent')
             
             # Добавляем фильтры в query params
             if redirect_url:
                 params = []
                 # Добавляем тип недвижимости
-                params.append(f'property_type={property_obj.property_type.name}')
+                if property_obj.property_type.name != 'land':
+                    params.append(f'property_type={property_obj.property_type.name}')
                 # Добавляем район если есть
                 if property_obj.district:
                     params.append(f'district={property_obj.district.slug}')
@@ -5129,7 +5140,11 @@ def get_favorite_properties(request):
         ids = [int(id) for id in property_ids if id.isdigit()]
         
         # Получаем объекты
-        properties = Property.objects.filter(id__in=ids).select_related(
+        properties = Property.objects.filter(
+            id__in=ids,
+            is_active=True,
+            deal_type='sale',
+        ).exclude(property_type__name='land').select_related(
             'district', 'property_type'
         ).prefetch_related('images')
         

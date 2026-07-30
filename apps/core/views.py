@@ -976,10 +976,9 @@ class StaticSitemapView(SitemapBaseView):
         ('blog:list', None, None),
         ('properties:property_list', None, 'all'),
         ('properties:property_sale', None, 'sale'),
-        ('properties:property_rent', None, 'rent'),
         ('location_list', None, 'locations'),
     ]
-    property_type_slugs = ['condo', 'villa', 'townhouse', 'land']
+    property_type_slugs = ['condo', 'villa', 'townhouse']
 
     @staticmethod
     def _format_lastmod(value):
@@ -996,7 +995,6 @@ class StaticSitemapView(SitemapBaseView):
         section_lastmods = {
             'all': self._property_lastmod(active_properties),
             'sale': self._property_lastmod(active_properties.filter(deal_type__in=['sale', 'both'])),
-            'rent': self._property_lastmod(active_properties.filter(deal_type__in=['rent', 'both'])),
             'locations': self._property_lastmod(active_properties),
         }
 
