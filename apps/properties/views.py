@@ -20,7 +20,6 @@ from django.views.decorators.http import require_GET, require_POST, require_http
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models import Q, Count, Case, When, Value, IntegerField, F, Avg, Prefetch
-from django.db.models.functions import Coalesce
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.urls import reverse
 from django.utils.translation import gettext, ngettext, override
@@ -33,6 +32,7 @@ from apps.core.amp_utils import convert_html_to_amp
 from apps.core.models import SEOContentBlock, Team
 from apps.core.seo_utils import build_property_meta
 from apps.core.business_profile import BUSINESS_PROFILE
+from .catalog_pricing import apply_catalog_price_filters, build_catalog_price_expression
 from .map_serialization import serialize_map_aggregates, serialize_map_markers, serialize_map_properties
 from .public_inventory import exclude_public_rental_slugs, public_sale_queryset
 from .seo_landings import resolve_landing_signature, build_candidate_slugs
@@ -2766,27 +2766,7 @@ class PropertyListView(ListView):
         return sale_expression.desc(nulls_last=True) if descending else sale_expression.asc(nulls_last=True)
 
     def _build_catalog_price_expression(self, currency_code, deal_type):
-        price_field_map = {
-            'sale': {
-                'USD': ['price_sale_usd', 'price_sale_thb', 'price_sale_rub'],
-                'THB': ['price_sale_thb', 'price_sale_usd', 'price_sale_rub'],
-                'RUB': ['price_sale_rub', 'price_sale_thb', 'price_sale_usd'],
-            },
-            'rent': {
-                'USD': ['price_rent_monthly', 'price_rent_monthly_thb', 'price_rent_monthly_rub'],
-                'THB': ['price_rent_monthly_thb', 'price_rent_monthly', 'price_rent_monthly_rub'],
-                'RUB': ['price_rent_monthly_rub', 'price_rent_monthly_thb', 'price_rent_monthly'],
-            },
-        }
-
-        normalized_currency = (currency_code or 'USD').upper()
-        field_candidates = price_field_map.get(deal_type, {}).get(normalized_currency) or price_field_map[deal_type]['USD']
-        ordered_fields = []
-        for field_name in field_candidates:
-            if field_name not in ordered_fields:
-                ordered_fields.append(field_name)
-
-        return Coalesce(*[F(field_name) for field_name in ordered_fields])
+        return build_catalog_price_expression(currency_code, deal_type)
 
     def apply_filters(self, queryset):
         """Применяет фильтры на основе GET параметров"""
@@ -2811,25 +2791,13 @@ class PropertyListView(ListView):
         if location:
             queryset = queryset.filter(location__slug=location)
         
-        currency_code = CurrencyService.get_selected_currency_code(self.request)
-        sale_field, _rent_field = CurrencyService.get_price_field_names(currency_code)
-
-        min_price = self.request.GET.get('min_price')
-        max_price = self.request.GET.get('max_price')
-
-        if min_price:
-            try:
-                min_val = Decimal(min_price)
-                queryset = queryset.filter(**{f"{sale_field}__gte": min_val})
-            except (InvalidOperation, ValueError):
-                pass
-
-        if max_price:
-            try:
-                max_val = Decimal(max_price)
-                queryset = queryset.filter(**{f"{sale_field}__lte": max_val})
-            except (InvalidOperation, ValueError):
-                pass
+        queryset = apply_catalog_price_filters(
+            queryset,
+            min_price=self.request.GET.get('min_price'),
+            max_price=self.request.GET.get('max_price'),
+            currency_code=CurrencyService.get_selected_currency_code(self.request),
+            deal_type=self.get_effective_catalog_deal_type(),
+        )
         
         # Количество спален
         bedrooms = self.request.GET.getlist('bedrooms')
@@ -6057,25 +6025,13 @@ def apply_search_filters(queryset, filters, currency_code='USD'):
         else:
             queryset = queryset.filter(location__slug=location)
     
-    # Ценовые фильтры (в USD по умолчанию)
-    min_price = filters.get('min_price')
-    max_price = filters.get('max_price')
-    
-    sale_field, _rent_field = CurrencyService.get_price_field_names(currency_code)
-
-    if min_price:
-        try:
-            min_val = Decimal(min_price)
-            queryset = queryset.filter(**{f"{sale_field}__gte": min_val})
-        except (InvalidOperation, ValueError):
-            pass
-            
-    if max_price:
-        try:
-            max_val = Decimal(max_price)
-            queryset = queryset.filter(**{f"{sale_field}__lte": max_val})
-        except (InvalidOperation, ValueError):
-            pass
+    queryset = apply_catalog_price_filters(
+        queryset,
+        min_price=filters.get('min_price'),
+        max_price=filters.get('max_price'),
+        currency_code=currency_code,
+        deal_type='sale',
+    )
     
     # Количество спален
     bedrooms = get_values('bedrooms')

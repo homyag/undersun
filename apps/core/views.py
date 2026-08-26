@@ -1,4 +1,3 @@
-from decimal import Decimal, InvalidOperation
 import json
 
 from django.views.generic import TemplateView, DetailView, View
@@ -24,6 +23,7 @@ from apps.core.legacy_redirects import (
 )
 from apps.core.utils import build_query_string, truncate_meta
 from apps.properties.models import Property, PropertyFeature, PropertyType, PROPERTY_FALLBACK_LABELS
+from apps.properties.catalog_pricing import apply_catalog_price_filters
 from apps.properties.public_inventory import public_sale_queryset
 from apps.properties.views import PropertyListView
 from apps.locations.models import District, Location
@@ -323,21 +323,13 @@ class SearchView(TemplateView):
         # Получаем текущую валюту (аналогично context_processor)
         selected_currency_code = CurrencyService.get_selected_currency_code(self.request)
         current_currency = CurrencyService.get_currency_by_code(selected_currency_code)
-        sale_field, _rent_field = CurrencyService.get_price_field_names(selected_currency_code)
-
-        if min_price:
-            try:
-                min_val = Decimal(min_price)
-                properties = properties.filter(**{f"{sale_field}__gte": min_val})
-            except (InvalidOperation, ValueError):
-                pass
-
-        if max_price:
-            try:
-                max_val = Decimal(max_price)
-                properties = properties.filter(**{f"{sale_field}__lte": max_val})
-            except (InvalidOperation, ValueError):
-                pass
+        properties = apply_catalog_price_filters(
+            properties,
+            min_price=min_price,
+            max_price=max_price,
+            currency_code=selected_currency_code,
+            deal_type=deal_type,
+        )
 
         if bedrooms:
             properties = properties.filter(bedrooms=bedrooms)

@@ -209,6 +209,50 @@ class MapPropertiesEndpointTests(TestCase):
         self.assertEqual(payload['viewport_count'], 1)
         self.assertEqual([item['id'] for item in payload['properties']], [self.second_property.id])
 
+    def test_usd_price_filter_converts_thb_when_saved_usd_price_is_missing(self):
+        self._set_currency('USD')
+
+        marker_response = self.client.get('/en/property/ajax/map/', {'max_price': '4'})
+        cards_response = self.client.get('/en/property/ajax/map/cards/', {'max_price': '4'})
+        count_response = self.client.get('/en/property/ajax/search-count/', {'max_price': '4'})
+        list_response = self.client.get('/en/property/', {'max_price': '4'})
+        home_search_response = self.client.get(
+            '/en/search/',
+            {'type': 'villa', 'max_price': '4'},
+        )
+
+        self.assertEqual(marker_response.status_code, 200)
+        self.assertEqual(
+            [item['id'] for item in marker_response.json()['properties']],
+            [self.property.id],
+        )
+        self.assertEqual(
+            [item['id'] for item in cards_response.json()['properties']],
+            [self.property.id],
+        )
+        self.assertEqual(count_response.json()['count'], 1)
+        self.assertEqual(
+            [property_obj.id for property_obj in list_response.context['properties']],
+            [self.property.id],
+        )
+        self.assertEqual(
+            [property_obj.id for property_obj in home_search_response.context['properties']],
+            [self.property.id],
+        )
+
+    def test_usd_price_sort_converts_thb_when_saved_usd_price_is_missing(self):
+        self._set_currency('USD')
+        self.property.price_sale_usd = Decimal('7')
+        self.property.save(update_fields=['price_sale_usd'])
+
+        response = self.client.get('/en/property/ajax/map/', {'sort': 'price_asc'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [item['id'] for item in response.json()['properties']],
+            [self.second_property.id, self.property.id],
+        )
+
     def test_rejects_partial_or_invalid_viewport_parameters(self):
         partial_response = self.client.get(
             '/ru/property/ajax/map/',
