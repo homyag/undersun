@@ -355,13 +355,14 @@ class SearchView(TemplateView):
             'district': district,
             'location': location,
             'deal_type': deal_type,
+            'currency': selected_currency_code,
             'min_price': min_price,
             'max_price': max_price,
             'bedrooms': bedrooms,
             'sort': sort_param or '-created_at',
         }
 
-        allowed_keys = ['q', 'type', 'district', 'location', 'deal_type', 'min_price', 'max_price', 'bedrooms', 'sort']
+        allowed_keys = ['q', 'type', 'district', 'location', 'deal_type', 'currency', 'min_price', 'max_price', 'bedrooms', 'sort']
         context['pagination_query_string'] = build_query_string(self.request.GET, allowed_keys)
 
         context['results_count_i18n'] = {

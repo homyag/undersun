@@ -16,6 +16,7 @@
 {% with type_prefix='/'|add:lang_code|add:'/property/type/' %}
     <form method="get" action="{{ filter_form_action|default:'' }}" id="{{ filter_form_id|default:'filter-form' }}" class="p-6 pb-24 lg:pb-6" data-type-url-prefix="{{ filter_type_url_prefix|default:type_prefix }}" data-current-property-type="{{ current_property_type|default:'' }}" data-route-deal-type="{{ deal_type|default:'' }}">
         <input type="hidden" name="sort" value="{{ request.GET.sort|default:'-created_at' }}">
+        <input type="hidden" name="currency" value="{{ selected_currency.code|default:'USD' }}" data-price-filter-currency>
 
         <div class="mb-6">
             <h4 class="font-semibold text-gray-900 mb-3">

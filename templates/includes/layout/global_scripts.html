@@ -187,11 +187,15 @@
                 const currency = this.dataset.currency;
                 const symbol = this.dataset.symbol;
                 const dropdownContainerId = this.dataset.dropdownContainer;
+                const nextUrl = new URL(window.location.href);
+                if (nextUrl.searchParams.has('currency') || nextUrl.searchParams.has('min_price') || nextUrl.searchParams.has('max_price')) {
+                    nextUrl.searchParams.set('currency', currency);
+                }
 
                 // Отправляем запрос на смену валюты
                 const formData = new FormData();
                 formData.append('currency', currency);
-                formData.append('next', window.location.href);
+                formData.append('next', nextUrl.toString());
 
                 fetch('/currency/change/', {
                     method: 'POST',
@@ -204,6 +208,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            window.history.replaceState({}, '', nextUrl.toString());
                             const previousActive = document.querySelectorAll('.mobile-currency-option.font-semibold');
                             previousActive.forEach(btn => btn.classList.remove('font-semibold', 'text-accent', 'bg-gray-50'));
 
@@ -256,6 +261,16 @@
                         window.location.reload();
                     });
             });
+        });
+    });
+
+    window.addEventListener('currencyChanged', function (event) {
+        const currency = event.detail?.currency;
+        if (!currency) {
+            return;
+        }
+        document.querySelectorAll('[data-price-filter-currency]').forEach(input => {
+            input.value = currency;
         });
     });
 </script>

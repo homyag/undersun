@@ -32,6 +32,21 @@ class CurrencyService:
     @staticmethod
     def get_selected_currency_code(request):
         """Определить выбранную пользователем валюту с учетом языка"""
+        query_params = getattr(request, 'GET', None) if request else None
+        query_code = query_params.get('currency') if query_params is not None else None
+        if query_code:
+            normalized_query_code = query_code.upper()
+            if CurrencyService.get_currency_by_code(normalized_query_code):
+                return normalized_query_code
+
+        # Старые ссылки с ценой не содержали валюту. Исторически значение в
+        # таких ссылках было в USD, поэтому сохраняем однозначное поведение.
+        if query_params is not None and any(
+            query_params.get(param_name) not in (None, '')
+            for param_name in ('min_price', 'max_price')
+        ):
+            return 'USD'
+
         code = request.session.get('currency') if request else None
 
         if not code:

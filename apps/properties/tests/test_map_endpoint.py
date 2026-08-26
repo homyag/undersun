@@ -215,7 +215,10 @@ class MapPropertiesEndpointTests(TestCase):
         marker_response = self.client.get('/en/property/ajax/map/', {'max_price': '4'})
         cards_response = self.client.get('/en/property/ajax/map/cards/', {'max_price': '4'})
         count_response = self.client.get('/en/property/ajax/search-count/', {'max_price': '4'})
-        list_response = self.client.get('/en/property/', {'max_price': '4'})
+        list_response = self.client.get(
+            '/en/property/',
+            {'currency': 'USD', 'max_price': '4'},
+        )
         home_search_response = self.client.get(
             '/en/search/',
             {'type': 'villa', 'max_price': '4'},
@@ -237,6 +240,42 @@ class MapPropertiesEndpointTests(TestCase):
         )
         self.assertEqual(
             [property_obj.id for property_obj in home_search_response.context['properties']],
+            [self.property.id],
+        )
+
+    def test_price_filter_url_makes_currency_explicit_and_shareable(self):
+        self._set_currency('RUB')
+
+        legacy_response = self.client.get(
+            '/ru/property/type/villa/',
+            {'max_price': '4'},
+        )
+
+        self.assertEqual(legacy_response.status_code, 301)
+        self.assertEqual(
+            legacy_response['Location'],
+            '/ru/property/type/villa/?currency=USD&max_price=4',
+        )
+
+        shared_usd_response = self.client.get(legacy_response['Location'])
+        shared_rub_response = self.client.get(
+            '/ru/property/type/villa/',
+            {'currency': 'RUB', 'max_price': '250'},
+        )
+
+        self.assertEqual(shared_usd_response.status_code, 200)
+        self.assertEqual(
+            [property_obj.id for property_obj in shared_usd_response.context['properties']],
+            [self.property.id],
+        )
+        self.assertContains(
+            shared_usd_response,
+            'name="currency" value="USD" data-price-filter-currency',
+            html=False,
+        )
+        self.assertEqual(shared_rub_response.status_code, 200)
+        self.assertEqual(
+            [property_obj.id for property_obj in shared_rub_response.context['properties']],
             [self.property.id],
         )
 

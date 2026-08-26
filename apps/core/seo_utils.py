@@ -20,6 +20,7 @@ PROPERTY_ALLOWED_PARAMS: Tuple[str, ...] = (
     'property_type',
     'district',
     'location',
+    'currency',
     'min_price',
     'max_price',
     'bedrooms',

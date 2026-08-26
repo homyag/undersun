@@ -2436,6 +2436,7 @@ class PropertyListView(ListView):
         'property_type',
         'district',
         'location',
+        'currency',
         'min_price',
         'max_price',
         'bedrooms',
@@ -2454,6 +2455,7 @@ class PropertyListView(ListView):
         'deal_type',
         'district',
         'location',
+        'currency',
         'min_price',
         'max_price',
         'min_area',
@@ -2470,6 +2472,7 @@ class PropertyListView(ListView):
         'property_type',
         'district',
         'location',
+        'currency',
         'min_price',
         'max_price',
         'bedrooms',
@@ -2552,6 +2555,23 @@ class PropertyListView(ListView):
                 normalized[key] = deduped_values
             else:
                 normalized[key] = values
+
+        currency_values = normalized.get('currency') or []
+        if currency_values:
+            normalized_currency = currency_values[-1].upper()
+            if CurrencyService.get_currency_by_code(normalized_currency):
+                if currency_values != [normalized_currency]:
+                    changed = True
+                normalized['currency'] = [normalized_currency]
+            else:
+                normalized.pop('currency', None)
+                changed = True
+
+        if (
+            normalized.get('min_price') or normalized.get('max_price')
+        ) and not normalized.get('currency'):
+            normalized['currency'] = ['USD']
+            changed = True
 
         forced_deal_type = getattr(self, 'forced_deal_type', '')
         deal_type_values = normalized.get('deal_type') or []
