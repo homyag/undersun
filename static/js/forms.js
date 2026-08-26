@@ -79,6 +79,25 @@ function getCSRFToken() {
 }
 
 /**
+ * Проверяет встроенные ограничения формы, включая обязательное согласие.
+ * Нужна также для программных submit-событий после reCAPTCHA.
+ */
+function validateFormBeforeSubmit(form) {
+    if (!form) {
+        return false;
+    }
+
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+        if (typeof form.reportValidity === 'function') {
+            form.reportValidity();
+        }
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Универсальный обработчик отправки формы
  * @param {HTMLFormElement} form - Форма для отправки
  * @param {string} url - URL endpoint
@@ -86,6 +105,10 @@ function getCSRFToken() {
  * @param {Function} errorCallback - Callback при ошибке (опционально)
  */
 function submitFormAjax(form, url, successCallback = null, errorCallback = null) {
+    if (!validateFormBeforeSubmit(form)) {
+        return;
+    }
+
     const formData = new FormData(form);
     const submitButton = form.querySelector('[type="submit"]');
     const originalButtonText = submitButton?.textContent || 'Отправить';
@@ -278,4 +301,5 @@ document.addEventListener('DOMContentLoaded', function() {
 // Экспортируем для использования в других скриптах
 window.FormsPopup = FormsPopup;
 window.submitFormAjax = submitFormAjax;
+window.validateFormBeforeSubmit = validateFormBeforeSubmit;
 window.getCSRFToken = getCSRFToken;

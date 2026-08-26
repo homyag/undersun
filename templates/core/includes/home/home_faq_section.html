@@ -22,7 +22,7 @@
           "name": "{% trans "Можно ли иностранцу купить недвижимость в собственность?" %}",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "{% trans "Да, иностранцы могут покупать недвижимость в Таиланде, но доступная структура зависит от типа объекта. Кондоминиумы могут оформляться в foreign freehold в пределах квоты проекта, которую нужно проверять по конкретному юниту. Для вилл, домов и земли обычно требуется leasehold или другая структура, которую стоит согласовать с профильным юристом до внесения платежей." %}"
+            "text": "{% if LANGUAGE_CODE == 'en' %}Yes, foreigners can purchase property in Thailand, but the available legal structure depends on the property type. Condominiums may qualify for foreign freehold within the project's quota, which must be checked for the specific unit. Villas, houses, and land require a suitable long-term legal structure that should be reviewed by a specialist lawyer before payment.{% elif LANGUAGE_CODE == 'th' %}ชาวต่างชาติสามารถซื้ออสังหาริมทรัพย์ในประเทศไทยได้ แต่โครงสร้างทางกฎหมายขึ้นอยู่กับประเภททรัพย์ คอนโดมิเนียมอาจถือครองแบบ foreign freehold ภายในโควตาของโครงการ ซึ่งต้องตรวจสอบเป็นรายยูนิต ส่วนวิลล่า บ้าน และที่ดินต้องใช้โครงสร้างสิทธิระยะยาวที่เหมาะสมและควรให้ทนายผู้เชี่ยวชาญตรวจสอบก่อนชำระเงิน{% else %}Да, иностранцы могут покупать недвижимость в Таиланде, но доступная юридическая структура зависит от типа объекта. Кондоминиумы могут оформляться в foreign freehold в пределах квоты проекта, которую нужно проверять по конкретному юниту. Для вилл, домов и земли требуется подходящая долгосрочная юридическая структура, которую стоит согласовать с профильным юристом до внесения платежей.{% endif %}"
           }
         },
         {
@@ -100,7 +100,7 @@
         <div class="faq-answer max-h-0 overflow-hidden transition-all duration-300">
           <div class="px-8 pb-8 border-t border-accent/10">
             <p class="text-gray-700 leading-relaxed pt-6">
-              {% trans "Да, иностранцы могут покупать недвижимость в Таиланде, но доступная структура зависит от типа объекта. Кондоминиумы могут оформляться в foreign freehold в пределах квоты проекта, которую нужно проверять по конкретному юниту. Для вилл, домов и земли обычно требуется leasehold или другая структура, которую стоит согласовать с профильным юристом до внесения платежей." %}
+              {% if LANGUAGE_CODE == 'en' %}Yes, foreigners can purchase property in Thailand, but the available legal structure depends on the property type. Condominiums may qualify for foreign freehold within the project's quota, which must be checked for the specific unit. Villas, houses, and land require a suitable long-term legal structure that should be reviewed by a specialist lawyer before payment.{% elif LANGUAGE_CODE == 'th' %}ชาวต่างชาติสามารถซื้ออสังหาริมทรัพย์ในประเทศไทยได้ แต่โครงสร้างทางกฎหมายขึ้นอยู่กับประเภททรัพย์ คอนโดมิเนียมอาจถือครองแบบ foreign freehold ภายในโควตาของโครงการ ซึ่งต้องตรวจสอบเป็นรายยูนิต ส่วนวิลล่า บ้าน และที่ดินต้องใช้โครงสร้างสิทธิระยะยาวที่เหมาะสมและควรให้ทนายผู้เชี่ยวชาญตรวจสอบก่อนชำระเงิน{% else %}Да, иностранцы могут покупать недвижимость в Таиланде, но доступная юридическая структура зависит от типа объекта. Кондоминиумы могут оформляться в foreign freehold в пределах квоты проекта, которую нужно проверять по конкретному юниту. Для вилл, домов и земли требуется подходящая долгосрочная юридическая структура, которую стоит согласовать с профильным юристом до внесения платежей.{% endif %}
             </p>
           </div>
         </div>
@@ -231,16 +231,7 @@
                     class="w-full border-2 border-gray-200 focus:outline-none focus:border-accent rounded-lg px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 resize-none"></textarea>
         </div>
 
-        <div class="flex items-start space-x-3">
-          <input type="checkbox" 
-                 id="question_privacy_consent" 
-                 name="privacy_consent"
-                 required
-                 class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent mt-1" />
-          <label for="question_privacy_consent" class="text-sm text-gray-600 leading-relaxed">
-            {% trans "Я согласен(на) с" %} <a href="{% url 'core:privacy' %}" class="text-accent underline hover:text-yellow-500 transition-colors">{% trans "политикой конфиденциальности" %}</a>
-          </label>
-        </div>
+        {% include 'core/includes/privacy_consent_checkbox.html' with privacy_consent_id='question-privacy-consent' %}
 
         <button type="submit" 
                 class="w-full bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-8 rounded-md transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">

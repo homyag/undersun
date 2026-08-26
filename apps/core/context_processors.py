@@ -14,9 +14,9 @@ import re
 
 
 HERO_OG_IMAGE_PATHS = [
-    'images/home_page/homepage_hero_section/thailand_hero_section_1.webp',
-    'images/home_page/homepage_hero_section/thailand_hero_section_2.webp',
-    'images/home_page/homepage_hero_section/thailand_hero_section_3.webp',
+    'images/home_page/homepage_hero_section/thailand_hero_section_1.jpg',
+    'images/home_page/homepage_hero_section/thailand_hero_section_2.jpg',
+    'images/home_page/homepage_hero_section/thailand_hero_section_3.jpg',
 ]
 
 
@@ -147,7 +147,7 @@ def site_context(request):
     business_profile = get_business_profile(language_code)
     business_schema_json = build_business_schema_json(site_root_url, canonical_absolute_url, language_code)
 
-    menu_services = list(Service.get_menu_services())
+    menu_services = list(Service.get_menu_services().exclude(slug='renting-property'))
     for service in menu_services:
         page_copy = get_service_page_copy(service.slug, language_code)
         service.navigation_title = page_copy.get('title') or service.title
@@ -178,7 +178,6 @@ def site_context(request):
 PAGINATED_VIEW_NAMES = {
     'properties:property_list',
     'properties:property_sale',
-    'properties:property_rent',
     'properties:property_by_type',
     'core:search',
     'blog:list',
@@ -310,17 +309,17 @@ def seo_context(request):
         defaults = {
             'ru': {
                 'title': 'Undersun Estate - Недвижимость на Пхукете',
-                'description': 'Продажа и аренда недвижимости на Пхукете. Виллы, апартаменты, кондоминиумы от надежного агентства.',
+                'description': 'Продажа недвижимости на Пхукете. Виллы, апартаменты и кондоминиумы от надежного агентства.',
                 'keywords': 'недвижимость пхукет, виллы пхукет, апартаменты пхукет, продажа недвижимости'
             },
             'en': {
                 'title': 'Undersun Estate - Phuket Real Estate',
-                'description': 'Sale and rental of real estate in Phuket. Villas, apartments, condominiums from a reliable agency.',
+                'description': 'Real estate for sale in Phuket. Villas, apartments and condominiums from a reliable agency.',
                 'keywords': 'phuket real estate, phuket villas, phuket apartments, property sale'
             },
             'th': {
                 'title': 'Undersun Estate - อสังหาริมทรัพย์ในภูเก็ต',
-                'description': 'ขายและให้เช่าอสังหาริมทรัพย์ในภูเก็ต วิลล่า อพาร์ตเมนต์ คอนโดมิเนียม',
+                'description': 'ขายอสังหาริมทรัพย์ในภูเก็ต วิลล่า อพาร์ตเมนต์ และคอนโดมิเนียม',
                 'keywords': 'อสังหาริมทรัพย์ภูเก็ต, วิลล่าภูเก็ต, อพาร์ตเมนต์ภูเก็ต'
             }
         }

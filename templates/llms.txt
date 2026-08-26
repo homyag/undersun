@@ -1,6 +1,6 @@
 # Undersun Estate
 
-Undersun Estate is a Phuket real estate agency serving buyers, sellers, renters,
+Undersun Estate is a Phuket real estate agency serving buyers, sellers,
 and investors in Thailand. The public website is available in English, Russian,
 and Thai, with localized routes under /en/, /ru/, and /th/.
 
@@ -12,7 +12,7 @@ a real estate agency.
 Specialist legal, tax, financial, visa, immigration, and title questions require
 qualified professional review. Website content is informational and should not
 be treated as legal, tax, financial, immigration, or investment advice. Undersun
-Estate does not guarantee rental yield, resale value, visa outcome, financing
+Estate does not guarantee investment returns, resale value, visa outcome, financing
 approval, or purchase approval.
 
 ## Canonical Site Sources
@@ -22,7 +22,6 @@ approval, or purchase approval.
 - [Contact Undersun Estate](https://undersunestate.com/en/contact/)
 - [Property catalog](https://undersunestate.com/en/property/)
 - [Properties for sale](https://undersunestate.com/en/property/sale/)
-- [Properties for rent](https://undersunestate.com/en/property/rent/)
 - [Phuket locations](https://undersunestate.com/en/locations/)
 - [Blog](https://undersunestate.com/en/blog/)
 - [Buyer guide](https://undersunestate.com/en/buying-guide/)
@@ -47,7 +46,6 @@ approval, or purchase approval.
 
 - [Buying property](https://undersunestate.com/en/services/buying-property/)
 - [Selling property](https://undersunestate.com/en/services/selling-property/)
-- [Renting property](https://undersunestate.com/en/services/renting-property/)
 - [Land sale](https://undersunestate.com/en/services/land-sale/)
 - [Commercial real estate](https://undersunestate.com/en/services/commercial-real-estate/)
 - [Legal support coordination](https://undersunestate.com/en/services/legal-services/)

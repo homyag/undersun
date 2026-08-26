@@ -18,10 +18,10 @@ PHUKET_LOCATION_CONTENT = {
             'С точки зрения недвижимости Патонг может быть интересен для объектов рядом '
             'с туристическим потоком: апартаментов, кондоминиумов и компактных объектов '
             'в пешей доступности от инфраструктуры. Инвестиционный сценарий обычно связан '
-            'с краткосрочной арендой, но результат зависит от цены входа, состояния здания, '
+            'с краткосрочной перепродажей, но результат зависит от цены входа, состояния здания, '
             'управления, конкуренции и сезонности.\n\n'
             'Перед покупкой в Патонге важно отдельно проверить уровень шума, трафик, '
-            'состояние дома, правила аренды и реальное окружение объекта. Для спокойной '
+            'состояние дома, правила владения и реальное окружение объекта. Для спокойной '
             'семейной жизни район подходит не всем, но для активного туристического формата '
             'он остается одной из самых узнаваемых локаций острова.'
         ),
@@ -37,7 +37,7 @@ PHUKET_LOCATION_CONTENT = {
             {
                 'question': 'Патонг интересен для инвестиций?',
                 'answer': (
-                    'Патонг может быть интересен для краткосрочной аренды за счет туристического '
+                    'Патонг может быть интересен для краткосрочной владения за счет туристического '
                     'потока, но результат зависит от цены входа, объекта, управления, состояния '
                     'здания и конкуренции.'
                 ),
@@ -56,7 +56,7 @@ PHUKET_LOCATION_CONTENT = {
             'с Патонгом.\n\n'
             'Для недвижимости в Кату важны конкретная улица, подъезд, трафик, состояние '
             'проекта и удобство маршрутов к пляжам, школам, магазинам и рабочим точкам. '
-            'Инвестиционный сценарий чаще нужно считать через долгосрочную аренду, ликвидность '
+            'Инвестиционный сценарий чаще нужно считать через долгосрочную перепродажу, ликвидность '
             'и реальный спрос в конкретной части района.\n\n'
             'Локация может подойти для жизни, релокации и покупки объекта с понятной ценой '
             'входа. Перед сделкой стоит отдельно проверить шум, окружение, расходы на '
@@ -95,15 +95,15 @@ PHUKET_LOCATION_CONTENT = {
             'важны не только расстояние до моря, но и дороги, школы, медицина, магазины, '
             'спортзалы, пирс и связь с соседними локациями.\n\n'
             'Для недвижимости в Чалонге чаще рассматривают виллы, дома, таунхаусы, '
-            'кондоминиумы и апартаменты для жизни или долгосрочной аренды. Пирс Чалонг '
+            'кондоминиумы и апартаменты для жизни или долгосрочной владения. Пирс Чалонг '
             'и лодочная инфраструктура могут быть плюсом для тех, кто часто выходит в море, '
             'занимается дайвингом или хочет быстро добираться до островов. Но близость к '
             'пирсу не равна близости к купабельному пляжу, поэтому конкретную часть района '
             'нужно проверять отдельно.\n\n'
             'Перед покупкой в Чалонге важно уточнить транспорт в часы пик, шум от дорог или '
-            'туристических точек, состояние объекта, расходы на обслуживание, правила аренды '
+            'туристических точек, состояние объекта, расходы на обслуживание, правила владения '
             'и юридическую структуру. Инвестиционный сценарий стоит считать по конкретному '
-            'объекту: цена входа, управление, спрос на долгосрочную или краткосрочную аренду '
+            'объекту: цена входа, управление, спрос на долгосрочную или краткосрочную перепродажу '
             'и конкуренция в выбранной микролокации.'
         ),
         'faq_ru': [
@@ -120,7 +120,7 @@ PHUKET_LOCATION_CONTENT = {
                 'question': 'Чалонг подходит для инвестиций в недвижимость?',
                 'answer': (
                     'Потенциально да, но объект нужно оценивать по конкретной локации, '
-                    'цене входа, управлению, расходам, сезонности и спросу на аренду. '
+                    'цене входа, управлению, расходам, сезонности и спросу на перепродажу. '
                     'Нельзя полагаться на общие обещания доходности.'
                 ),
             },
@@ -128,7 +128,7 @@ PHUKET_LOCATION_CONTENT = {
                 'question': 'Что проверить перед покупкой недвижимости в Чалонге?',
                 'answer': (
                     'Документы, локацию, транспорт, шум, состояние объекта, платежи за '
-                    'обслуживание, управляющую компанию, правила аренды и реальный спрос '
+                    'обслуживание, управляющую компанию, правила владения и реальный спрос '
                     'в конкретной части района.'
                 ),
             },
@@ -144,11 +144,11 @@ PHUKET_LOCATION_CONTENT = {
             'покупатели, которым важно жить или отдыхать у моря, но не в самом активном '
             'ритме Патонга.\n\n'
             'Недвижимость на Кароне стоит оценивать через доступность пляжа, состояние '
-            'здания, инфраструктуру вокруг объекта и формат управления. Для арендного '
+            'здания, инфраструктуру вокруг объекта и формат управления. Для инвестиционного '
             'сценария важны сезонность, конкуренция и то, насколько объект понятен для '
             'туристов, которые ищут более размеренный отдых.\n\n'
             'Карон может подойти семьям, покупателям для сезонного отдыха и инвесторам, '
-            'которые рассматривают пляжную аренду. При выборе объекта стоит сравнивать '
+            'которые рассматривают пляжную перепродажу. При выборе объекта стоит сравнивать '
             'Карон с соседними локациями и Патонгом по инфраструктуре, транспортной '
             'доступности и уровню шума в конкретной части локации.'
         ),
@@ -185,7 +185,7 @@ PHUKET_LOCATION_CONTENT = {
             'реальную цену владения. Для вилл и апартаментов важны не только вид или близость '
             'к морю, но и ликвидность при перепродаже.\n\n'
             'Инвестиционный сценарий может быть связан с семейным отдыхом, более спокойной '
-            'арендой и объектами приватного формата. Доходность и спрос зависят от самого '
+            'перепродажей и объектами приватного формата. Доходность и спрос зависят от самого '
             'объекта, управляющей модели, сезонности и конкуренции внутри района.'
         ),
         'faq_ru': [
@@ -221,7 +221,7 @@ PHUKET_LOCATION_CONTENT = {
             'вид, подъезд, доступ к пляжу, юридическая структура и ликвидность. Цена входа, '
             'расходы на обслуживание и управляющая модель могут заметно отличаться даже '
             'внутри одной локации.\n\n'
-            'Инвестиционный интерес связан не только с арендой, но и с качеством западного '
+            'Инвестиционный интерес связан не только с перепродажей, но и с качеством западного '
             'побережья, статусом окружения и долгосрочной привлекательностью района. Спрос '
             'нужно оценивать по конкретному объекту, сезону, управлению и конкуренции.'
         ),
@@ -259,7 +259,7 @@ PHUKET_LOCATION_CONTENT = {
             'точную микролокацию, доступ к пляжу, управляющую модель, расходы комплекса, '
             'структуру собственности и реальные маршруты до школ, магазинов и аэропорта.\n\n'
             'Локация может подойти для семейного проживания, сезонного отдыха, долгосрочной '
-            'аренды и премиального west-coast сценария. Финальное решение стоит принимать '
+            'владения и премиального west-coast сценария. Финальное решение стоит принимать '
             'по конкретному объекту: статус проекта, документы, обслуживание, шум, трафик '
             'и конкуренция внутри выбранного сегмента могут заметно отличаться.'
         ),
@@ -278,7 +278,7 @@ PHUKET_LOCATION_CONTENT = {
                 'answer': (
                     'Потенциально да: в этой части Thalang много вилл и новых проектов. '
                     'Перед покупкой нужно проверить документы, подъезд, окружение, расходы '
-                    'на обслуживание, управляющую компанию и реалистичный сценарий аренды '
+                    'на обслуживание, управляющую компанию и реалистичный сценарий владения '
                     'или перепродажи.'
                 ),
             },
@@ -297,12 +297,12 @@ PHUKET_LOCATION_CONTENT = {
             'спокойную среду, выбор вилл и домов, локальную инфраструктуру и экспатское '
             'окружение.\n\n'
             'В недвижимости Раваи чаще смотрят виллы, дома, таунхаусы и апартаменты для жизни '
-            'или долгосрочной аренды. Объекты около Най Харн могут быть ближе к пляжному '
+            'или долгосрочной владения. Объекты около Най Харн могут быть ближе к пляжному '
             'сценарию, но не каждая часть района находится рядом с купабельным пляжем, '
             'поэтому транспорт, точная микролокация и ежедневные маршруты имеют большое '
             'значение.\n\n'
-            'Инвестиционный сценарий может быть связан с долгосрочной арендой для экспатов, '
-            'семей и удаленных специалистов. Для краткосрочной туристической аренды нужно '
+            'Инвестиционный сценарий может быть связан с долгосрочной перепродажей для экспатов, '
+            'семей и удаленных специалистов. Для краткосрочной туристической владения нужно '
             'отдельно оценивать объект, управление, доступность инфраструктуры и юридическую '
             'структуру земли или здания.'
         ),
@@ -320,7 +320,7 @@ PHUKET_LOCATION_CONTENT = {
                 'answer': (
                     'Да, Раваи часто рассматривают для покупки вилл и домов. Перед сделкой '
                     'важно проверить документы, локацию, подъезд, инфраструктуру и потенциальный '
-                    'арендный сценарий.'
+                    'инвестиционный сценарий.'
                 ),
             },
             {
@@ -354,9 +354,9 @@ PHUKET_DISTRICT_CONTENT = {
             'управление объектом и ликвидность.\n\n'
             'Краби может быть полезной альтернативой для сравнения, но не прямой заменой '
             'Пхукету. Пхукет обычно сильнее по глубине рынка, выбору объектов, международной '
-            'инфраструктуре и арендному спросу. Краби имеет смысл рассматривать через '
+            'инфраструктуре и инвестиционному спросу. Краби имеет смысл рассматривать через '
             'конкретную цель покупки: постоянная жизнь, сезонное проживание, долгосрочная '
-            'аренда или спокойная база у моря.'
+            'владение или спокойная база у моря.'
         ),
         'faq_ru': [
             {
@@ -390,14 +390,14 @@ PHUKET_DISTRICT_CONTENT = {
             'Kathu District объединяет разные сценарии покупки: активный Патонг, более '
             'спокойную Камалу и повседневную инфраструктуру Кату. Это район, где особенно '
             'важно не оценивать недвижимость только по названию локации: соседние части '
-            'района могут сильно отличаться по шуму, трафику, арендному спросу и ликвидности.\n\n'
+            'района могут сильно отличаться по шуму, трафику, инвестиционному спросу и ликвидности.\n\n'
             'Для инвестиций здесь чаще смотрят туристический поток, близость к западному '
             'побережью, управление объектом и конкуренцию в конкретном сегменте. Для жизни '
             'важнее ежедневные маршруты, доступ к магазинам, школам, медицине и качество '
             'окружения вокруг дома или комплекса.\n\n'
             'Перед покупкой в Kathu District стоит отдельно проверить подъезд, уровень шума, '
-            'состояние проекта, расходы на обслуживание, правила аренды и реальный сценарий '
-            'владения: постоянная жизнь, сезонный отдых, краткосрочная аренда или перепродажа.'
+            'состояние проекта, расходы на обслуживание, правила владения и реальный сценарий '
+            'владения: постоянная жизнь, сезонный отдых, краткосрочная владение или перепродажа.'
         ),
         'faq_ru': [
             {
@@ -413,7 +413,7 @@ PHUKET_DISTRICT_CONTENT = {
                 'answer': (
                     'Важно проверить конкретную локацию, шум, трафик, дорогу к пляжам, '
                     'состояние объекта, управление, расходы на обслуживание и ограничения '
-                    'по арендному сценарию.'
+                    'по инвестиционному сценарию.'
                 ),
             },
         ],
@@ -421,17 +421,17 @@ PHUKET_DISTRICT_CONTENT = {
     'mueang-phuket': {
         'description_ru': (
             'Mueang Phuket - район с городскими и южными локациями, где покупатели часто '
-            'сравнивают жизнь, долгосрочную аренду, семейные маршруты и доступ к базовой '
+            'сравнивают жизнь, долгосрочную перепродажу, семейные маршруты и доступ к базовой '
             'инфраструктуре. Внутри района сценарии отличаются: Карон больше связан с '
             'пляжным отдыхом, Раваи - с долгосрочной жизнью, а городские части района - с '
             'ежедневной логистикой.\n\n'
             'Для покупки недвижимости здесь важно сначала определить цель: жить постоянно, '
-            'купить виллу, подобрать апартаменты для аренды или сравнить объекты для '
+            'купить виллу, подобрать апартаменты для владения или сравнить объекты для '
             'будущей перепродажи. После этого уже имеет смысл смотреть конкретную локацию, '
             'тип объекта, документы, управление и расходы.\n\n'
             'Mueang Phuket не стоит оценивать как одну однородную зону. Важно проверять '
             'маршруты, доступность магазинов, школ и медицины, расстояние до нужных пляжей, '
-            'а также реальный спрос на аренду именно в выбранной части района.'
+            'а также реальный спрос на перепродажу именно в выбранной части района.'
         ),
         'faq_ru': [
             {
@@ -465,7 +465,7 @@ PHUKET_DISTRICT_CONTENT = {
             'внутренних зон.\n\n'
             'Район может подойти для вилл, семейного отдыха, долгосрочной жизни и объектов '
             'с инвестиционным потенциалом. Перед покупкой важно проверить документы, '
-            'форму владения, инфраструктуру проекта и реалистичный сценарий аренды или '
+            'форму владения, инфраструктуру проекта и реалистичный сценарий владения или '
             'перепродажи.'
         ),
         'faq_ru': [
@@ -499,10 +499,10 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'busy seaside environment matter more than privacy.\n\n'
                 'For real estate, Patong is mostly evaluated through properties close to '
                 'tourist demand: apartments, condominiums and compact units within practical '
-                'reach of the main infrastructure. A rental scenario is often short-stay '
+                'reach of the main infrastructure. A resale scenario is often short-stay '
                 'oriented, but the outcome depends on entry price, building condition, '
                 'management, competition and seasonality.\n\n'
-                'Before buying in Patong, check noise, traffic, the building itself, rental '
+                'Before buying in Patong, check noise, traffic, the building itself, investment '
                 'rules and the real surroundings of the unit. It is not the calmest choice '
                 'for every family, but it remains one of the strongest names on the island '
                 'for an active tourist format.'
@@ -519,7 +519,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 {
                     'question': 'Is Patong interesting for investment?',
                     'answer': (
-                        'Patong can be interesting for short-term rental because of tourist '
+                        'Patong can be interesting for seasonal use because of tourist '
                         'traffic, but the result depends on the entry price, property quality, '
                         'management, building condition and competition.'
                     ),
@@ -534,7 +534,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'For property in Kathu, the exact street, access road, traffic, project condition '
                 'and routes to beaches, schools, shops and work points matter more than the '
                 'district name alone. The investment case is usually assessed through long-term '
-                'rental demand, liquidity and the real demand in the specific part of the area.\n\n'
+                'buyer demand, liquidity and the real demand in the specific part of the area.\n\n'
                 'Kathu can work for living, relocation and buying with a clear entry budget. '
                 'Before a deal, check noise, surroundings, service fees, legal documents and '
                 'whether the property fits the chosen ownership scenario.'
@@ -566,13 +566,13 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'Roads, schools, healthcare, shops, gyms, the pier and nearby locations can '
                 'matter more than distance to the sea alone.\n\n'
                 'In Chalong, buyers often look at villas, houses, townhouses, condominiums '
-                'and apartments for living or long-term rental. Chalong Pier and the boat '
+                'and apartments for living or long-term living. Chalong Pier and the boat '
                 'infrastructure may be useful for people who go out to sea, dive or travel '
                 'to nearby islands. At the same time, being close to the pier does not mean '
                 'being close to a swimmable beach, so the exact part of the area should be '
                 'checked separately.\n\n'
                 'Before buying in Chalong, check traffic at peak hours, road or tourist noise, '
-                'property condition, service costs, rental rules and the legal structure. '
+                'property condition, service costs, project rules and the legal structure. '
                 'An investment scenario should be calculated for the specific property: entry '
                 'price, management, long-term or short-term demand and competition in the '
                 'chosen micro-location.'
@@ -591,7 +591,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                     'question': 'Is Chalong suitable for real estate investment?',
                     'answer': (
                         'Potentially yes, but the property should be evaluated by exact location, '
-                        'entry price, management, expenses, seasonality and rental demand. Do '
+                        'entry price, management, expenses, seasonality and buyer demand. Do '
                         'not rely on generic yield claims.'
                     ),
                 },
@@ -599,7 +599,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                     'question': 'What should be checked before buying in Chalong?',
                     'answer': (
                         'Check documents, location, transport, noise, property condition, service '
-                        'fees, the management company, rental rules and real demand in that part '
+                        'fees, the management company, project rules and real demand in that part '
                         'of the district.'
                     ),
                 },
@@ -611,10 +611,10 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'it when they want to live or spend holidays by the sea without the busiest '
                 'pace of Patong.\n\n'
                 'Property in Karon should be assessed through beach access, building condition, '
-                'surrounding infrastructure and management format. For rental use, seasonality, '
+                'surrounding infrastructure and management format. For investment use, seasonality, '
                 'competition and how clearly the property fits travelers looking for a quieter '
                 'beach stay are important.\n\n'
-                'Karon may suit families, seasonal stays and buyers considering beach rental. '
+                'Karon may suit families, seasonal stays and buyers considering beach investment. '
                 'When choosing a property, compare Karon with nearby locations and Patong by '
                 'infrastructure, transport access and noise in the exact part of the area.'
             ),
@@ -646,7 +646,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'access, views, road access, road quality, project maintenance and the real '
                 'cost of ownership. For villas and apartments, resale liquidity matters as much '
                 'as the view or distance to the sea.\n\n'
-                'The investment scenario can be connected with family holidays, quieter rental '
+                'The investment scenario can be connected with family holidays, quieter investment '
                 'demand and private-format properties. Demand and return depend on the property '
                 'itself, management model, seasonality and competition within the area.'
             ),
@@ -679,7 +679,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'road access, beach access, legal structure and liquidity are especially '
                 'important. Entry price, service costs and the management model can differ '
                 'significantly even within the same location.\n\n'
-                'Investment interest is not only about rental income. It is also linked to the '
+                'Investment interest is not only about capital growth. It is also linked to the '
                 'quality of the west coast, the status of the surroundings and the long-term '
                 'appeal of the area. Demand should be evaluated by property, season, management '
                 'and competition.'
@@ -714,7 +714,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'important to check the exact micro-location, beach access, management model, '
                 'project fees, ownership structure and real routes to schools, shops and the '
                 'airport.\n\n'
-                'The location may suit family living, seasonal stays, long-term rental and a '
+                'The location may suit family living, seasonal stays, long-term living and a '
                 'premium west-coast scenario. The final decision should be property-specific: '
                 'project status, documents, maintenance, noise, traffic and competition within '
                 'the segment can differ noticeably.'
@@ -734,7 +734,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                     'answer': (
                         'Potentially yes: this part of Thalang has many villas and new projects. '
                         'Before buying, check documents, access road, surroundings, maintenance '
-                        'costs, the management company and a realistic rental or resale scenario.'
+                        'costs, the management company and a realistic investment or resale scenario.'
                     ),
                 },
             ],
@@ -748,11 +748,11 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'looking for a calmer environment, a choice of villas and houses, local '
                 'infrastructure and an expat-oriented community.\n\n'
                 'In Rawai, buyers often compare villas, houses, townhouses and apartments for '
-                'living or long-term rental. Properties near Nai Harn can be closer to a beach '
+                'living or long-term living. Properties near Nai Harn can be closer to a beach '
                 'scenario, but not every part of the area is close to a swimmable beach, so '
                 'transport, exact micro-location and daily routes are important.\n\n'
-                'An investment scenario can be connected with long-term rental demand from '
-                'expats, families and remote professionals. For short-term tourist rental, the '
+                'An investment scenario can be connected with long-term buyer demand from '
+                'expats, families and remote professionals. For short-term tourist investment, the '
                 'specific property, management, infrastructure access and legal structure of the '
                 'land or building should be checked separately.'
             ),
@@ -770,7 +770,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                     'answer': (
                         'Yes, Rawai is often considered for villas and houses. Before a deal, '
                         'check documents, location, access road, infrastructure and the possible '
-                        'rental scenario.'
+                        'resale scenario.'
                     ),
                 },
                 {
@@ -793,9 +793,9 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'และบรรยากาศเมืองท่องเที่ยวริมทะเลมากกว่าความเป็นส่วนตัว\n\n'
                 'ในมุมมองอสังหาริมทรัพย์ ป่าตองเหมาะกับการประเมินผ่านคอนโด อพาร์ตเมนต์ '
                 'และยูนิตขนาดกะทัดรัดที่อยู่ใกล้กระแสนักท่องเที่ยวและโครงสร้างพื้นฐานหลัก '
-                'กรณีลงทุนมักเกี่ยวข้องกับการเช่าระยะสั้น แต่ผลลัพธ์ขึ้นอยู่กับราคาซื้อเข้า '
+                'กรณีลงทุนมักเกี่ยวข้องกับการพักตามฤดูกาล แต่ผลลัพธ์ขึ้นอยู่กับราคาซื้อเข้า '
                 'สภาพอาคาร การบริหารจัดการ คู่แข่ง และฤดูกาล\n\n'
-                'ก่อนซื้อในป่าตองควรตรวจสอบเสียงรบกวน การจราจร สภาพอาคาร กฎการปล่อยเช่า '
+                'ก่อนซื้อในป่าตองควรตรวจสอบเสียงรบกวน การจราจร สภาพอาคาร กฎการขายต่อ '
                 'และสภาพแวดล้อมจริงของห้องหรือโครงการ พื้นที่นี้อาจไม่เหมาะกับครอบครัวที่ต้องการ '
                 'ความสงบมาก แต่ยังเป็นหนึ่งในทำเลท่องเที่ยวที่แข็งแรงและจดจำง่ายที่สุดของเกาะ'
             ),
@@ -811,7 +811,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 {
                     'question': 'ป่าตองน่าสนใจสำหรับการลงทุนหรือไม่?',
                     'answer': (
-                        'ป่าตองอาจน่าสนใจสำหรับการเช่าระยะสั้นเพราะมีนักท่องเที่ยวจำนวนมาก '
+                        'ป่าตองอาจน่าสนใจสำหรับการพักตามฤดูกาลเพราะมีนักท่องเที่ยวจำนวนมาก '
                         'แต่ผลลัพธ์ขึ้นอยู่กับราคาซื้อ คุณภาพทรัพย์ การบริหารจัดการ สภาพอาคาร '
                         'และคู่แข่ง'
                     ),
@@ -825,7 +825,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'และสภาพแวดล้อมที่สงบกว่าป่าตอง\n\n'
                 'สำหรับอสังหาริมทรัพย์ในกะทู้ ถนนจริง ทางเข้า การจราจร สภาพโครงการ และเส้นทางไปยัง '
                 'ชายหาด โรงเรียน ร้านค้า หรือจุดทำงานมีความสำคัญมากกว่าชื่อทำเลเพียงอย่างเดียว '
-                'กรณีลงทุนมักควรประเมินจากความต้องการเช่าระยะยาว สภาพคล่อง และดีมานด์จริงในส่วนย่อยของพื้นที่\n\n'
+                'กรณีลงทุนมักควรประเมินจากความต้องการอยู่อาศัยระยะยาว สภาพคล่อง และดีมานด์จริงในส่วนย่อยของพื้นที่\n\n'
                 'กะทู้อาจเหมาะกับการอยู่อาศัย การย้ายมาอยู่ภูเก็ต และการซื้อในงบประมาณที่ชัดเจน '
                 'ก่อนทำสัญญาควรตรวจสอบเสียงรบกวน สภาพแวดล้อม ค่าส่วนกลาง เอกสารทางกฎหมาย '
                 'และความเหมาะสมของทรัพย์กับแผนการถือครอง'
@@ -855,12 +855,12 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'ทางตอนใต้ของเกาะ ถนน โรงเรียน การแพทย์ ร้านค้า ฟิตเนส ท่าเรือ และทำเลใกล้เคียง '
                 'อาจสำคัญกว่าระยะถึงทะเลเพียงอย่างเดียว\n\n'
                 'ในฉลอง ผู้ซื้อมักพิจารณาวิลล่า บ้าน ทาวน์เฮาส์ คอนโด และอพาร์ตเมนต์สำหรับอยู่อาศัย '
-                'หรือปล่อยเช่าระยะยาว ท่าเรือฉลองและโครงสร้างพื้นฐานเรืออาจเป็นข้อดีสำหรับผู้ที่ออกทะเล '
+                'หรือขายต่อระยะยาว ท่าเรือฉลองและโครงสร้างพื้นฐานเรืออาจเป็นข้อดีสำหรับผู้ที่ออกทะเล '
                 'ดำน้ำ หรือเดินทางไปเกาะใกล้เคียง แต่การอยู่ใกล้ท่าเรือไม่ได้แปลว่าอยู่ใกล้ชายหาดที่เหมาะกับการว่ายน้ำ '
                 'จึงต้องตรวจสอบส่วนย่อยของพื้นที่ให้ชัดเจน\n\n'
                 'ก่อนซื้อในฉลองควรตรวจสอบการจราจรช่วงเร่งด่วน เสียงจากถนนหรือจุดท่องเที่ยว สภาพทรัพย์ '
-                'ค่าใช้จ่าย กฎการปล่อยเช่า และโครงสร้างทางกฎหมาย กรณีลงทุนควรคำนวณจากทรัพย์เฉพาะ: '
-                'ราคาซื้อเข้า การบริหารจัดการ ดีมานด์เช่าระยะยาวหรือระยะสั้น และคู่แข่งในไมโครโลเคชันนั้น'
+                'ค่าใช้จ่าย กฎการขายต่อ และโครงสร้างทางกฎหมาย กรณีลงทุนควรคำนวณจากทรัพย์เฉพาะ: '
+                'ราคาซื้อเข้า การบริหารจัดการ ดีมานด์อยู่อาศัยระยะยาวหรือระยะสั้น และคู่แข่งในไมโครโลเคชันนั้น'
             ),
             'faq': [
                 {
@@ -875,14 +875,14 @@ PHUKET_LOCATION_TRANSLATIONS = {
                     'question': 'ฉลองเหมาะสำหรับลงทุนอสังหาริมทรัพย์หรือไม่?',
                     'answer': (
                         'อาจเหมาะ แต่ต้องประเมินจากทำเลจริง ราคาซื้อเข้า การบริหารจัดการ ค่าใช้จ่าย '
-                        'ฤดูกาล และดีมานด์เช่า ไม่ควรอ้างอิงคำกล่าวทั่วไปเรื่องผลตอบแทน'
+                        'ฤดูกาล และดีมานด์ของผู้ซื้อ ไม่ควรอ้างอิงคำกล่าวทั่วไปเรื่องผลตอบแทน'
                     ),
                 },
                 {
                     'question': 'ควรตรวจอะไรบ้างก่อนซื้อในฉลอง?',
                     'answer': (
                         'ควรตรวจเอกสาร ทำเล การเดินทาง เสียงรบกวน สภาพทรัพย์ ค่าส่วนกลาง บริษัทบริหาร '
-                        'กฎการปล่อยเช่า และดีมานด์จริงในส่วนนั้นของพื้นที่'
+                        'กฎการขายต่อ และดีมานด์จริงในส่วนนั้นของพื้นที่'
                     ),
                 },
             ],
@@ -892,9 +892,9 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'กะรนเป็นทำเลชายหาดที่สงบกว่าหลายพื้นที่ทางตอนใต้ของภูเก็ต ผู้ซื้อมักพิจารณาเมื่อ '
                 'ต้องการอยู่อาศัยหรือพักผ่อนใกล้ทะเล แต่ไม่ต้องการจังหวะที่คึกคักมากแบบป่าตอง\n\n'
                 'อสังหาริมทรัพย์ในกะรนควรประเมินจากการเข้าถึงชายหาด สภาพอาคาร โครงสร้างพื้นฐานรอบทรัพย์ '
-                'และรูปแบบการบริหาร หากเป็นแผนปล่อยเช่า ควรดูฤดูกาล คู่แข่ง และความชัดเจนของทรัพย์สำหรับ '
+                'และรูปแบบการบริหาร หากเป็นแผนขายต่อ ควรดูฤดูกาล คู่แข่ง และความชัดเจนของทรัพย์สำหรับ '
                 'นักท่องเที่ยวที่ต้องการพักผ่อนแบบสงบกว่า\n\n'
-                'กะรนอาจเหมาะกับครอบครัว การพักอาศัยตามฤดูกาล และผู้ซื้อที่มองการเช่าริมชายหาด '
+                'กะรนอาจเหมาะกับครอบครัว การพักอาศัยตามฤดูกาล และผู้ซื้อที่มองการซื้อริมชายหาด '
                 'เมื่อเลือกทรัพย์ควรเปรียบเทียบกับทำเลใกล้เคียงและป่าตองในด้านโครงสร้างพื้นฐาน '
                 'การเดินทาง และระดับเสียงในส่วนจริงของพื้นที่'
             ),
@@ -923,7 +923,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'ในกมลาควรเปรียบเทียบส่วนย่อยของพื้นที่อย่างละเอียด: การเข้าถึงชายหาด วิว ทางเข้า '
                 'คุณภาพถนน การดูแลโครงการ และต้นทุนการถือครองจริง สำหรับวิลล่าและอพาร์ตเมนต์ '
                 'สภาพคล่องเมื่อขายต่อสำคัญไม่แพ้วิวหรือระยะถึงทะเล\n\n'
-                'แผนลงทุนอาจเกี่ยวข้องกับการพักผ่อนแบบครอบครัว ดีมานด์เช่าที่สงบกว่า และทรัพย์ที่มีความเป็นส่วนตัว '
+                'แผนลงทุนอาจเกี่ยวข้องกับการพักผ่อนแบบครอบครัว ดีมานด์ของผู้ซื้อที่สงบกว่า และทรัพย์ที่มีความเป็นส่วนตัว '
                 'แต่ดีมานด์และผลลัพธ์ขึ้นอยู่กับตัวทรัพย์ รูปแบบการบริหาร ฤดูกาล และคู่แข่งในพื้นที่'
             ),
             'faq': [
@@ -951,7 +951,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'สำหรับทรัพย์ในบางเทาและโซนสุรินทร์ ไมโครโลเคชัน วิว ทางเข้า การเข้าถึงชายหาด โครงสร้างทางกฎหมาย '
                 'และสภาพคล่องมีความสำคัญเป็นพิเศษ ราคาซื้อเข้า ค่าใช้จ่าย และรูปแบบการบริหารอาจต่างกันมาก '
                 'แม้อยู่ในทำเลเดียวกัน\n\n'
-                'ความน่าสนใจด้านการลงทุนไม่ได้มีแค่ค่าเช่า แต่ยังเกี่ยวกับคุณภาพของชายฝั่งตะวันตก ระดับของสภาพแวดล้อม '
+                'ความน่าสนใจด้านการลงทุนไม่ได้มีแค่มูลค่าทรัพย์ แต่ยังเกี่ยวกับคุณภาพของชายฝั่งตะวันตก ระดับของสภาพแวดล้อม '
                 'และความน่าดึงดูดระยะยาวของพื้นที่ ดีมานด์ควรประเมินจากทรัพย์ ฤดูกาล การบริหาร และคู่แข่ง'
             ),
             'faq': [
@@ -979,7 +979,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'อสังหาริมทรัพย์ในเชิงทะเลอาจมีทั้งวิลล่า อพาร์ตเมนต์ ทาวน์เฮาส์ และโครงการแนวรีสอร์ต '
                 'สำหรับทรัพย์รอบลากูน่า ควรตรวจไมโครโลเคชันจริง การเข้าถึงชายหาด รูปแบบการบริหาร '
                 'ค่าใช้จ่ายโครงการ โครงสร้างกรรมสิทธิ์ และเส้นทางจริงไปโรงเรียน ร้านค้า และสนามบิน\n\n'
-                'ทำเลนี้อาจเหมาะกับการอยู่อาศัยแบบครอบครัว การพักตามฤดูกาล การเช่าระยะยาว '
+                'ทำเลนี้อาจเหมาะกับการอยู่อาศัยแบบครอบครัว การพักตามฤดูกาล การอยู่อาศัยระยะยาว '
                 'และสถานการณ์ระดับพรีเมียมบนชายฝั่งตะวันตก การตัดสินใจควรอิงกับทรัพย์จริง: '
                 'สถานะโครงการ เอกสาร การดูแล เสียงรบกวน การจราจร และการแข่งขันในเซกเมนต์อาจต่างกันมาก'
             ),
@@ -996,7 +996,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                     'question': 'เชิงทะเลเหมาะสำหรับซื้อวิลล่าหรือไม่?',
                     'answer': (
                         'อาจเหมาะได้ เพราะพื้นที่นี้ในถลางมีวิลล่าและโครงการใหม่จำนวนมาก ก่อนซื้อควรตรวจเอกสาร '
-                        'ทางเข้า สภาพแวดล้อม ค่าใช้จ่ายดูแล บริษัทบริหาร และสมมติฐานการเช่าหรือขายต่ออย่างสมจริง'
+                        'ทางเข้า สภาพแวดล้อม ค่าใช้จ่ายดูแล บริษัทบริหาร และสมมติฐานการซื้อหรือขายต่ออย่างสมจริง'
                     ),
                 },
             ],
@@ -1007,11 +1007,11 @@ PHUKET_LOCATION_TRANSLATIONS = {
                 'ในโครงสร้างแคตตาล็อกของเรา ทรัพย์ใกล้ Nai Harn Beach มักถูกประเมินในบริบทของ Rawai '
                 'เพราะเป้าหมายการซื้อ เส้นทางประจำวัน และโครงสร้างพื้นฐานเชื่อมโยงกัน เหมาะกับผู้ซื้อที่ต้องการ '
                 'สภาพแวดล้อมสงบกว่า มีตัวเลือกวิลล่า บ้าน โครงสร้างพื้นฐานท้องถิ่น และชุมชนชาวต่างชาติ\n\n'
-                'ในราไวย์ ผู้ซื้อมักเปรียบเทียบวิลล่า บ้าน ทาวน์เฮาส์ และอพาร์ตเมนต์สำหรับอยู่อาศัยหรือปล่อยเช่าระยะยาว '
+                'ในราไวย์ ผู้ซื้อมักเปรียบเทียบวิลล่า บ้าน ทาวน์เฮาส์ และอพาร์ตเมนต์สำหรับอยู่อาศัยหรือขายต่อระยะยาว '
                 'ทรัพย์ใกล้ในหานอาจใกล้กับการใช้งานแบบชายหาดมากกว่า แต่ไม่ใช่ทุกส่วนของพื้นที่จะอยู่ใกล้ชายหาดที่เหมาะกับการว่ายน้ำ '
                 'ดังนั้นการเดินทาง ไมโครโลเคชันจริง และเส้นทางในชีวิตประจำวันจึงสำคัญมาก\n\n'
-                'กรณีลงทุนอาจเกี่ยวข้องกับการเช่าระยะยาวจากชาวต่างชาติ ครอบครัว และผู้ทำงานทางไกล '
-                'สำหรับการเช่าระยะสั้น ควรตรวจสอบตัวทรัพย์ การบริหาร การเข้าถึงโครงสร้างพื้นฐาน '
+                'กรณีลงทุนอาจเกี่ยวข้องกับการอยู่อาศัยระยะยาวจากชาวต่างชาติ ครอบครัว และผู้ทำงานทางไกล '
+                'สำหรับการพักตามฤดูกาล ควรตรวจสอบตัวทรัพย์ การบริหาร การเข้าถึงโครงสร้างพื้นฐาน '
                 'และโครงสร้างทางกฎหมายของที่ดินหรืออาคารแยกต่างหาก'
             ),
             'faq': [
@@ -1026,7 +1026,7 @@ PHUKET_LOCATION_TRANSLATIONS = {
                     'question': 'ราไวย์เหมาะสำหรับซื้อวิลล่าหรือไม่?',
                     'answer': (
                         'เหมาะได้ ราไวย์มักถูกพิจารณาสำหรับวิลล่าและบ้าน ก่อนทำสัญญาควรตรวจเอกสาร ทำเล ทางเข้า '
-                        'โครงสร้างพื้นฐาน และแผนการปล่อยเช่าที่เป็นไปได้'
+                        'โครงสร้างพื้นฐาน และแผนการขายต่อที่เป็นไปได้'
                     ),
                 },
                 {
@@ -1059,9 +1059,9 @@ PHUKET_DISTRICT_TRANSLATIONS = {
                 'shops, legal structure, property management and liquidity all need to be checked.\n\n'
                 'Krabi can be a useful alternative for comparison, but not a direct replacement '
                 'for Phuket. Phuket is usually stronger in market depth, property choice, '
-                'international infrastructure and rental demand. Krabi should be evaluated '
+                'international infrastructure and buyer demand. Krabi should be evaluated '
                 'through the exact purchase goal: permanent living, seasonal stays, long-term '
-                'rental or a quieter seaside base.'
+                'investment or a quieter seaside base.'
             ),
             'faq': [
                 {
@@ -1095,13 +1095,13 @@ PHUKET_DISTRICT_TRANSLATIONS = {
                 'Kathu District combines several purchase scenarios: active Patong, calmer Kamala '
                 'and the everyday infrastructure of Kathu. This is a district where property should '
                 'not be judged by the location name alone: neighboring parts can differ strongly in '
-                'noise, traffic, rental demand and liquidity.\n\n'
+                'noise, traffic, buyer demand and liquidity.\n\n'
                 'For investment, buyers usually look at tourist flow, west-coast access, property '
                 'management and competition in the specific segment. For living, daily routes, shops, '
                 'schools, healthcare and the quality of the surroundings matter more.\n\n'
                 'Before buying in Kathu District, check access road, noise level, project condition, '
-                'service costs, rental rules and the real ownership scenario: permanent living, '
-                'seasonal use, short-term rental or resale.'
+                'service costs, project rules and the real ownership scenario: permanent living, '
+                'seasonal use, seasonal use or resale.'
             ),
             'faq': [
                 {
@@ -1115,7 +1115,7 @@ PHUKET_DISTRICT_TRANSLATIONS = {
                     'question': 'What should be checked before buying in Kathu District?',
                     'answer': (
                         'Check the exact location, noise, traffic, routes to beaches, property '
-                        'condition, management, service costs and limits on the rental scenario.'
+                        'condition, management, service costs and limits on the resale scenario.'
                     ),
                 },
             ],
@@ -1123,15 +1123,15 @@ PHUKET_DISTRICT_TRANSLATIONS = {
         'mueang-phuket': {
             'description': (
                 'Mueang Phuket includes urban and southern locations where buyers often compare '
-                'living, long-term rental, family routes and access to basic infrastructure. '
+                'living, long-term living, family routes and access to basic infrastructure. '
                 'Scenarios differ inside the district: Karon is more connected with beach holidays, '
                 'Rawai with long-term living, and the urban parts with daily logistics.\n\n'
                 'For buying property here, first define the goal: permanent living, buying a villa, '
-                'choosing apartments for rental or comparing properties for future resale. After that, '
+                'choosing apartments for investment or comparing properties for future resale. After that, '
                 'it makes sense to assess the exact location, property type, documents, management '
                 'and costs.\n\n'
                 'Mueang Phuket should not be treated as one uniform zone. Check routes, access to '
-                'shops, schools and healthcare, distance to the needed beaches and real rental demand '
+                'shops, schools and healthcare, distance to the needed beaches and real buyer demand '
                 'in the chosen part of the district.'
             ),
             'faq': [
@@ -1165,7 +1165,7 @@ PHUKET_DISTRICT_TRANSLATIONS = {
                 'liquidity expectations can differ noticeably from inland zones.\n\n'
                 'The district can suit villas, family holidays, long-term living and properties with '
                 'investment potential. Before buying, check documents, ownership form, project '
-                'infrastructure and a realistic rental or resale scenario.'
+                'infrastructure and a realistic investment or resale scenario.'
             ),
             'faq': [
                 {
@@ -1197,8 +1197,8 @@ PHUKET_DISTRICT_TRANSLATIONS = {
                 'และการอยู่อาศัยระยะยาวมากกว่า จังหวะชีวิตที่สงบหรือค่าใช้จ่ายที่อาจต่ำกว่าไม่ควรเป็นเหตุผลเดียวในการตัดสินใจ '
                 'ต้องตรวจสอบการเดินทาง การแพทย์ ร้านค้า โครงสร้างทางกฎหมาย การบริหารทรัพย์ และสภาพคล่องด้วย\n\n'
                 'กระบี่เป็นทางเลือกที่มีประโยชน์สำหรับการเปรียบเทียบ แต่ไม่ใช่ตัวแทนโดยตรงของภูเก็ต โดยทั่วไปภูเก็ตแข็งแรงกว่า '
-                'ในด้านความลึกของตลาด ตัวเลือกทรัพย์ โครงสร้างพื้นฐานนานาชาติ และดีมานด์เช่า ควรประเมินกระบี่ตามเป้าหมายการซื้อจริง: '
-                'อยู่อาศัยถาวร พักตามฤดูกาล เช่าระยะยาว หรือเป็นฐานริมทะเลที่สงบกว่า'
+                'ในด้านความลึกของตลาด ตัวเลือกทรัพย์ โครงสร้างพื้นฐานนานาชาติ และดีมานด์ของผู้ซื้อ ควรประเมินกระบี่ตามเป้าหมายการซื้อจริง: '
+                'อยู่อาศัยถาวร พักตามฤดูกาล อยู่อาศัยระยะยาว หรือเป็นฐานริมทะเลที่สงบกว่า'
             ),
             'faq': [
                 {
@@ -1229,12 +1229,12 @@ PHUKET_DISTRICT_TRANSLATIONS = {
             'description': (
                 'Kathu District รวมหลายสถานการณ์การซื้อไว้ด้วยกัน: ป่าตองที่คึกคัก กมลาที่สงบกว่า '
                 'และโครงสร้างพื้นฐานประจำวันของกะทู้ ในอำเภอนี้ไม่ควรประเมินทรัพย์จากชื่อทำเลเพียงอย่างเดียว '
-                'เพราะพื้นที่ใกล้กันอาจต่างกันมากด้านเสียง การจราจร ดีมานด์เช่า และสภาพคล่อง\n\n'
+                'เพราะพื้นที่ใกล้กันอาจต่างกันมากด้านเสียง การจราจร ดีมานด์ของผู้ซื้อ และสภาพคล่อง\n\n'
                 'สำหรับการลงทุน ผู้ซื้อมักดูปริมาณนักท่องเที่ยว การเข้าถึงชายฝั่งตะวันตก การบริหารทรัพย์ '
                 'และคู่แข่งในเซกเมนต์เฉพาะ สำหรับการอยู่อาศัย เส้นทางประจำวัน ร้านค้า โรงเรียน การแพทย์ '
                 'และคุณภาพสภาพแวดล้อมรอบบ้านหรือโครงการสำคัญกว่า\n\n'
-                'ก่อนซื้อใน Kathu District ควรตรวจสอบทางเข้า ระดับเสียง สภาพโครงการ ค่าใช้จ่าย กฎการปล่อยเช่า '
-                'และสถานการณ์ถือครองจริง: อยู่อาศัยถาวร พักตามฤดูกาล เช่าระยะสั้น หรือขายต่อ'
+                'ก่อนซื้อใน Kathu District ควรตรวจสอบทางเข้า ระดับเสียง สภาพโครงการ ค่าใช้จ่าย กฎการขายต่อ '
+                'และสถานการณ์ถือครองจริง: อยู่อาศัยถาวร พักตามฤดูกาล พักตามฤดูกาล หรือขายต่อ'
             ),
             'faq': [
                 {
@@ -1248,7 +1248,7 @@ PHUKET_DISTRICT_TRANSLATIONS = {
                     'question': 'ควรตรวจอะไรบ้างก่อนซื้อใน Kathu District?',
                     'answer': (
                         'ควรตรวจทำเลจริง เสียง การจราจร เส้นทางไปชายหาด สภาพทรัพย์ การบริหาร ค่าใช้จ่าย '
-                        'และข้อจำกัดของแผนการปล่อยเช่า'
+                        'และข้อจำกัดของแผนการขายต่อ'
                     ),
                 },
             ],
@@ -1256,12 +1256,12 @@ PHUKET_DISTRICT_TRANSLATIONS = {
         'mueang-phuket': {
             'description': (
                 'Mueang Phuket รวมทำเลเมืองและทำเลตอนใต้ที่ผู้ซื้อมักเปรียบเทียบเรื่องการอยู่อาศัย '
-                'การเช่าระยะยาว เส้นทางสำหรับครอบครัว และการเข้าถึงโครงสร้างพื้นฐานหลัก ภายในอำเภอนี้สถานการณ์แตกต่างกัน: '
+                'การอยู่อาศัยระยะยาว เส้นทางสำหรับครอบครัว และการเข้าถึงโครงสร้างพื้นฐานหลัก ภายในอำเภอนี้สถานการณ์แตกต่างกัน: '
                 'กะรนเชื่อมกับการพักผ่อนริมชายหาดมากกว่า ราไวย์เชื่อมกับการอยู่ระยะยาว และส่วนเมืองเชื่อมกับโลจิสติกส์ประจำวัน\n\n'
-                'ก่อนซื้ออสังหาริมทรัพย์ในพื้นที่นี้ ควรกำหนดเป้าหมายก่อน: อยู่อาศัยถาวร ซื้อวิลล่า เลือกอพาร์ตเมนต์เพื่อปล่อยเช่า '
+                'ก่อนซื้ออสังหาริมทรัพย์ในพื้นที่นี้ ควรกำหนดเป้าหมายก่อน: อยู่อาศัยถาวร ซื้อวิลล่า เลือกอพาร์ตเมนต์เพื่อขายต่อ '
                 'หรือเปรียบเทียบทรัพย์เพื่อขายต่อในอนาคต จากนั้นจึงประเมินทำเลจริง ประเภททรัพย์ เอกสาร การบริหาร และค่าใช้จ่าย\n\n'
                 'ไม่ควรมอง Mueang Phuket เป็นพื้นที่เดียวที่เหมือนกันทั้งหมด ควรตรวจเส้นทาง การเข้าถึงร้านค้า โรงเรียน การแพทย์ '
-                'ระยะถึงชายหาดที่ต้องการ และดีมานด์เช่าจริงในส่วนที่เลือกของอำเภอ'
+                'ระยะถึงชายหาดที่ต้องการ และดีมานด์ของผู้ซื้อจริงในส่วนที่เลือกของอำเภอ'
             ),
             'faq': [
                 {
@@ -1289,7 +1289,7 @@ PHUKET_DISTRICT_TRANSLATIONS = {
                 'สภาพแวดล้อม คุณภาพผู้พัฒนา ค่าใช้จ่าย และรูปแบบการบริหารมีความสำคัญทั้งหมด ในฝั่งตะวันตกของอำเภอ '
                 'ราคาซื้อเข้าและความคาดหวังเรื่องสภาพคล่องอาจต่างจากโซนด้านในอย่างชัดเจน\n\n'
                 'อำเภอนี้อาจเหมาะกับวิลล่า การพักผ่อนของครอบครัว การอยู่อาศัยระยะยาว และทรัพย์ที่มีศักยภาพด้านการลงทุน '
-                'ก่อนซื้อควรตรวจเอกสาร รูปแบบการถือครอง โครงสร้างพื้นฐานของโครงการ และแผนเช่าหรือขายต่อที่เป็นจริง'
+                'ก่อนซื้อควรตรวจเอกสาร รูปแบบการถือครอง โครงสร้างพื้นฐานของโครงการ และแผนซื้อหรือขายต่อที่เป็นจริง'
             ),
             'faq': [
                 {

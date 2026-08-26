@@ -34,6 +34,7 @@ from apps.core.models import SEOContentBlock, Team
 from apps.core.seo_utils import build_property_meta
 from apps.core.business_profile import BUSINESS_PROFILE
 from .map_serialization import serialize_map_aggregates, serialize_map_markers, serialize_map_properties
+from .public_inventory import exclude_public_rental_slugs, public_sale_queryset
 from .seo_landings import resolve_landing_signature, build_candidate_slugs
 from .models import Property, PropertyImage, PropertyType
 from apps.locations.models import District, Location
@@ -2554,7 +2555,7 @@ class PropertyListView(ListView):
 
         forced_deal_type = getattr(self, 'forced_deal_type', '')
         deal_type_values = normalized.get('deal_type') or []
-        if forced_deal_type and deal_type_values == [forced_deal_type]:
+        if deal_type_values:
             normalized.pop('deal_type', None)
             changed = True
 
@@ -2706,11 +2707,10 @@ class PropertyListView(ListView):
         return False
 
     def get_queryset(self):
-        queryset = Property.objects.filter(
+        queryset = public_sale_queryset(Property.objects.filter(
             is_active=True,
             status='available',
-            deal_type='sale',
-        ).exclude(
+        )).exclude(
             property_type__name='land',
         ).select_related('district', 'property_type').prefetch_related('images')
         
@@ -2724,7 +2724,6 @@ class PropertyListView(ListView):
             'price_asc', 'price_desc',
             'price_sale_usd', '-price_sale_usd',
             'price_sale_thb', '-price_sale_thb',
-            'price_rent_monthly', '-price_rent_monthly',
             'area_total', '-area_total',
             'created_at', '-created_at'
         ]
@@ -2746,11 +2745,7 @@ class PropertyListView(ListView):
         return queryset
 
     def get_effective_catalog_deal_type(self):
-        request_deal_type = self.request.GET.get('deal_type')
-        if request_deal_type in {'sale', 'rent'}:
-            return request_deal_type
-
-        return getattr(self, 'forced_deal_type', '') or ''
+        return 'sale'
 
     def _is_price_sort(self, sort_value):
         return sort_value in {
@@ -2760,30 +2755,15 @@ class PropertyListView(ListView):
             '-price_sale_usd',
             'price_sale_thb',
             '-price_sale_thb',
-            'price_rent_monthly',
-            '-price_rent_monthly',
         }
 
     def _is_descending_price_sort(self, sort_value):
-        return sort_value in {'price_desc', '-price_sale_usd', '-price_sale_thb', '-price_rent_monthly'}
+        return sort_value in {'price_desc', '-price_sale_usd', '-price_sale_thb'}
 
     def get_catalog_price_sort_expression(self, descending=False):
         currency_code = CurrencyService.get_selected_currency_code(self.request)
         sale_expression = self._build_catalog_price_expression(currency_code, 'sale')
-        rent_expression = self._build_catalog_price_expression(currency_code, 'rent')
-        effective_deal_type = self.get_effective_catalog_deal_type()
-
-        if effective_deal_type == 'sale':
-            expression = sale_expression
-        elif effective_deal_type == 'rent':
-            expression = rent_expression
-        else:
-            expression = Case(
-                When(deal_type='rent', then=rent_expression),
-                default=Coalesce(sale_expression, rent_expression),
-            )
-
-        return expression.desc(nulls_last=True) if descending else expression.asc(nulls_last=True)
+        return sale_expression.desc(nulls_last=True) if descending else sale_expression.asc(nulls_last=True)
 
     def _build_catalog_price_expression(self, currency_code, deal_type):
         price_field_map = {
@@ -2810,11 +2790,6 @@ class PropertyListView(ListView):
 
     def apply_filters(self, queryset):
         """Применяет фильтры на основе GET параметров"""
-        # Тип сделки (deal_type)
-        deal_type = self.request.GET.get('deal_type')
-        if deal_type and deal_type in ['sale', 'rent']:
-            queryset = queryset.filter(deal_type__in=[deal_type, 'both'])
-        
         # Тип недвижимости (множественный выбор)
         property_types = self.request.GET.getlist('property_type')
         if property_types:
@@ -2837,7 +2812,7 @@ class PropertyListView(ListView):
             queryset = queryset.filter(location__slug=location)
         
         currency_code = CurrencyService.get_selected_currency_code(self.request)
-        sale_field, rent_field = CurrencyService.get_price_field_names(currency_code)
+        sale_field, _rent_field = CurrencyService.get_price_field_names(currency_code)
 
         min_price = self.request.GET.get('min_price')
         max_price = self.request.GET.get('max_price')
@@ -2845,20 +2820,14 @@ class PropertyListView(ListView):
         if min_price:
             try:
                 min_val = Decimal(min_price)
-                price_filter = Q(**{f"{sale_field}__gte": min_val})
-                if rent_field:
-                    price_filter |= Q(**{f"{rent_field}__gte": min_val})
-                queryset = queryset.filter(price_filter)
+                queryset = queryset.filter(**{f"{sale_field}__gte": min_val})
             except (InvalidOperation, ValueError):
                 pass
 
         if max_price:
             try:
                 max_val = Decimal(max_price)
-                price_filter = Q(**{f"{sale_field}__lte": max_val})
-                if rent_field:
-                    price_filter |= Q(**{f"{rent_field}__lte": max_val})
-                queryset = queryset.filter(price_filter)
+                queryset = queryset.filter(**{f"{sale_field}__lte": max_val})
             except (InvalidOperation, ValueError):
                 pass
         
@@ -2989,7 +2958,6 @@ class PropertyListView(ListView):
         self.apply_catalog_indexation_strategy(context, language_code)
 
         self.update_page_meta(context, language_code)
-
         return context
 
     def update_page_meta(self, context, language_code=None):
@@ -4407,7 +4375,7 @@ class PropertySaleView(DealTypeRedirectMixin, PropertyListView):
     template_name = 'properties/list.html'
     forced_deal_type = 'sale'
     deal_type_redirects = {
-        'rent': 'properties:property_rent',
+        'rent': 'properties:property_sale',
         '': 'properties:property_list',
     }
 
@@ -4464,7 +4432,7 @@ class PropertyRentView(DealTypeRedirectMixin, PropertyListView):
     }
 
     def dispatch(self, request, *args, **kwargs):
-        raise Http404('Rental listings are not available')
+        return HttpResponsePermanentRedirect(reverse('properties:property_sale'))
 
     def get_queryset(self):
         return super().get_queryset().filter(deal_type__in=['rent', 'both'])
@@ -4601,9 +4569,9 @@ class PropertyDetailView(DetailView):
 
     def get_queryset(self):
         # Возвращаем ВСЕ объекты, не фильтруем по is_active здесь
-        return Property.objects.select_related(
+        return exclude_public_rental_slugs(Property.objects.select_related(
             'district', 'location', 'property_type', 'developer', 'contact_person'
-        ).prefetch_related('images', 'features__feature')
+        ).prefetch_related('images', 'features__feature'))
 
     def get_object(self):
         try:
@@ -4778,10 +4746,10 @@ class PropertyDetailView(DetailView):
         if not project_keys:
             return []
 
-        queryset = Property.objects.filter(
+        queryset = public_sale_queryset(Property.objects.filter(
             is_active=True,
             status='available',
-        ).exclude(id=self.object.id)
+        )).exclude(id=self.object.id)
 
         if self.object.district_id:
             queryset = queryset.filter(district=self.object.district)
@@ -4808,7 +4776,8 @@ class PropertyDetailView(DetailView):
         base_filter = {
             'property_type': self.object.property_type,
             'is_active': True,
-            'status': 'available'
+            'status': 'available',
+            'deal_type': 'sale',
         }
         same_project_keys = _get_property_project_keys(self.object)
         
@@ -4816,10 +4785,10 @@ class PropertyDetailView(DetailView):
         
         # 1. Приоритет: та же конкретная локация (если есть)
         if self.object.location:
-            same_location = Property.objects.filter(
+            same_location = exclude_public_rental_slugs(Property.objects.filter(
                 location=self.object.location,
                 **base_filter
-            ).exclude(id=self.object.id)
+            )).exclude(id=self.object.id)
             same_location = same_location.select_related(
                 'district', 'location', 'property_type'
             ).prefetch_related('images')[:8]
@@ -4830,10 +4799,10 @@ class PropertyDetailView(DetailView):
         
         # 2. Тот же район (но другая локация или без локации)
         if len(similar_properties) < 4:
-            same_district = Property.objects.filter(
+            same_district = exclude_public_rental_slugs(Property.objects.filter(
                 district=self.object.district,
                 **base_filter
-            ).exclude(id=self.object.id)
+            )).exclude(id=self.object.id)
             
             # Исключаем уже добавленные объекты
             if similar_properties:
@@ -4851,9 +4820,9 @@ class PropertyDetailView(DetailView):
         
         # 3. Тот же тип недвижимости (любая локация)
         if len(similar_properties) < 4:
-            same_type = Property.objects.filter(
+            same_type = exclude_public_rental_slugs(Property.objects.filter(
                 **base_filter
-            ).exclude(id=self.object.id)
+            )).exclude(id=self.object.id)
             
             # Исключаем уже добавленные объекты
             if similar_properties:
@@ -5021,9 +4990,11 @@ def _build_property_image_sets(property_obj, language_code='ru'):
 
 
 def property_detail_amp(request, slug):
-    queryset = Property.objects.select_related(
+    queryset = public_sale_queryset(Property.objects.select_related(
         'district', 'location', 'property_type', 'developer', 'contact_person'
-    ).prefetch_related('images', 'features__feature')
+    ).prefetch_related('images', 'features__feature').filter(
+        is_active=True,
+    )).exclude(property_type__name='land')
 
     property_obj = get_object_or_404(queryset, slug=slug)
 
@@ -5140,11 +5111,10 @@ def get_favorite_properties(request):
         ids = [int(id) for id in property_ids if id.isdigit()]
         
         # Получаем объекты
-        properties = Property.objects.filter(
+        properties = public_sale_queryset(Property.objects.filter(
             id__in=ids,
             is_active=True,
-            deal_type='sale',
-        ).exclude(property_type__name='land').select_related(
+        )).exclude(property_type__name='land').select_related(
             'district', 'property_type'
         ).prefetch_related('images')
         
@@ -5313,10 +5283,10 @@ def property_list_ajax(request):
     view.request = request
     
     # Получаем базовый queryset
-    queryset = Property.objects.filter(
+    queryset = public_sale_queryset(Property.objects.filter(
         is_active=True,
         status='available'
-    ).select_related('district', 'property_type').prefetch_related('images')
+    )).select_related('district', 'property_type').prefetch_related('images')
     
     # Применяем фильтры
     queryset = view.apply_filters(queryset)
@@ -5541,12 +5511,12 @@ def map_properties_json(request):
         _validate_map_filter_input(request)
         
         # Получаем базовый queryset с минимальными данными для карты
-        map_queryset = Property.objects.filter(
+        map_queryset = public_sale_queryset(Property.objects.filter(
             is_active=True,
             status='available',
             latitude__isnull=False,
             longitude__isnull=False,
-        ).select_related('district', 'location', 'property_type', 'agent')
+        )).select_related('district', 'location', 'property_type', 'agent')
         map_images_prefetch = Prefetch(
             'images',
             queryset=PropertyImage.objects.only(
@@ -5698,12 +5668,12 @@ def map_property_cards_json(request):
         if len(requested_ids) > MAP_CARD_PAGE_SIZE:
             raise ValueError('too_many_property_ids')
 
-        queryset = Property.objects.filter(
+        queryset = public_sale_queryset(Property.objects.filter(
             is_active=True,
             status='available',
             latitude__isnull=False,
             longitude__isnull=False,
-        ).select_related('district', 'location', 'property_type', 'agent').prefetch_related(
+        )).select_related('district', 'location', 'property_type', 'agent').prefetch_related(
             Prefetch(
                 'images',
                 queryset=PropertyImage.objects.only(
@@ -6019,10 +5989,10 @@ def ajax_search_count(request):
     """AJAX endpoint для подсчета количества объектов по фильтрам"""
     try:
         # Получаем базовый queryset
-        queryset = Property.objects.filter(
+        queryset = public_sale_queryset(Property.objects.filter(
             is_active=True,
             status='available'
-        )
+        ))
         
         # Применяем фильтры (используем POST или GET данные)
         filters = request.POST if request.method == 'POST' else request.GET
@@ -6046,6 +6016,8 @@ def ajax_search_count(request):
 
 def apply_search_filters(queryset, filters, currency_code='USD'):
     """Применяет поисковые фильтры к queryset (работает с POST и GET данными)"""
+
+    queryset = public_sale_queryset(queryset)
 
     def get_values(key):
         if hasattr(filters, 'getlist'):
@@ -6089,25 +6061,19 @@ def apply_search_filters(queryset, filters, currency_code='USD'):
     min_price = filters.get('min_price')
     max_price = filters.get('max_price')
     
-    sale_field, rent_field = CurrencyService.get_price_field_names(currency_code)
+    sale_field, _rent_field = CurrencyService.get_price_field_names(currency_code)
 
     if min_price:
         try:
             min_val = Decimal(min_price)
-            price_filter = Q(**{f"{sale_field}__gte": min_val})
-            if rent_field:
-                price_filter |= Q(**{f"{rent_field}__gte": min_val})
-            queryset = queryset.filter(price_filter)
+            queryset = queryset.filter(**{f"{sale_field}__gte": min_val})
         except (InvalidOperation, ValueError):
             pass
             
     if max_price:
         try:
             max_val = Decimal(max_price)
-            price_filter = Q(**{f"{sale_field}__lte": max_val})
-            if rent_field:
-                price_filter |= Q(**{f"{rent_field}__lte": max_val})
-            queryset = queryset.filter(price_filter)
+            queryset = queryset.filter(**{f"{sale_field}__lte": max_val})
         except (InvalidOperation, ValueError):
             pass
     
@@ -6125,11 +6091,6 @@ def apply_search_filters(queryset, filters, currency_code='USD'):
                 continue
         if bedroom_filters:
             queryset = queryset.filter(bedroom_filters)
-    
-    # Тип сделки
-    deal_type = filters.get('deal_type')
-    if deal_type and deal_type in ['sale', 'rent']:
-        queryset = queryset.filter(deal_type__in=[deal_type, 'both'])
     
     # Удобства/особенности
     amenities = get_values('amenities')

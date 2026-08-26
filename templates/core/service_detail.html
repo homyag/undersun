@@ -429,12 +429,9 @@
                             <input type="email" name="email" placeholder="{{ service_landing.labels.email_placeholder }}" required>
                             <textarea name="message" rows="4" placeholder="{{ service_landing.labels.message_placeholder }}" required></textarea>
 
-                            <button type="submit">{{ service_landing.labels.submit }}</button>
+                            {% include 'core/includes/privacy_consent_checkbox.html' with privacy_consent_id='service-contact-privacy-consent' privacy_consent_dark=True %}
 
-                            <small>
-                                {{ service_landing.labels.privacy_prefix }}
-                                <a href="{% url 'core:privacy' %}">{{ service_landing.labels.privacy_label }}</a>
-                            </small>
+                            <button type="submit">{{ service_landing.labels.submit }}</button>
                         </form>
                     </section>
                 </div>
@@ -467,7 +464,7 @@
                 </a>
                 <div class="service-property-body">
                     <h3>{{ property.get_display_title }}</h3>
-                    <p>{{ property.description|truncatewords:15 }}</p>
+                    <p>{{ property.description|striptags|truncatewords:15 }}</p>
                     <div>
                         {% if property.bedrooms %}<span><i class="fas fa-bed"></i>{{ property.bedrooms }}</span>{% endif %}
                         {% if property.bathrooms %}<span><i class="fas fa-bath"></i>{{ property.bathrooms }}</span>{% endif %}
@@ -1427,7 +1424,7 @@
     margin-top: 1rem;
 }
 
-.service-contact-card input,
+.service-contact-card input:not([type="checkbox"]),
 .service-contact-card textarea {
     width: 100%;
     border: 1px solid rgba(255, 255, 255, 0.16);
@@ -1438,7 +1435,7 @@
     outline: none;
 }
 
-.service-contact-card input:focus,
+.service-contact-card input:not([type="checkbox"]):focus,
 .service-contact-card textarea:focus {
     border-color: #F1B400;
     box-shadow: 0 0 0 3px rgba(241, 180, 0, 0.28);

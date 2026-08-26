@@ -8,15 +8,12 @@
      data-latitude="{{ property.latitude|unlocalize }}"
      data-longitude="{{ property.longitude|unlocalize }}"
      data-property-type="{{ property.property_type.name }}"
-     data-deal-type="{{ property.deal_type }}"
+     data-deal-type="sale"
      data-property-type-label="{{ property.property_type.name_display }}"
      data-title="{{ property.get_display_title }}"
      data-price-sale-usd="{{ property.price_sale_usd|default:0|unlocalize }}"
-     data-price-rent-usd="{{ property.price_rent_usd|default:0|unlocalize }}"
      data-price-sale-thb="{{ property.price_sale_thb|default:0|unlocalize }}"
-     data-price-rent-thb="{{ property.price_rent_thb|default:0|unlocalize }}"
      data-price-sale-rub="{{ property.price_sale_rub|default:0|unlocalize }}"
-     data-price-rent-rub="{{ property.price_rent_rub|default:0|unlocalize }}"
      data-location="{% if property.localized_location_label %}{{ property.localized_location_label }}{% else %}{{ property.get_display_location_label }}{% endif %}"
      data-url="{{ property.get_absolute_url }}"
      data-bedrooms="{{ property.bedrooms|default:'' }}"
@@ -155,14 +152,14 @@
                 <div class="flex items-center justify-center space-x-3">
                     <!-- Price -->
                     <span class="text-2xl font-bold text-primary group-hover:text-accent transition-colors card-price-{{ property.id }}">
-                        {% price_number_only property property.deal_type %}
+                        {% price_number_only property 'sale' %}
                     </span>
                     
                     <!-- Currency Dropdown -->
                     <div class="relative">
                         <button class="currency-toggle-btn bg-gray-100 hover:bg-primary hover:text-white text-gray-500 transition-all duration-200 px-3 py-1.5 rounded-md text-sm border border-gray-200 hover:border-primary flex items-center"
                                 data-property-id="{{ property.id }}"
-                                data-deal-type="{{ property.deal_type }}"
+                                data-deal-type="sale"
                                 title="{% trans 'Изменить валюту' %}">
                             <span class="current-currency-{{ property.id }} font-mono mr-1">{{ selected_currency.symbol|default:"$" }}</span>
                             <span class="current-currency-code-{{ property.id }} font-medium mr-1">{{ selected_currency.code|default:"USD" }}</span>
@@ -181,7 +178,7 @@
                                             data-currency="{{ currency.code }}"
                                             data-symbol="{{ currency.symbol }}"
                                             data-property-id="{{ property.id }}"
-                                            data-deal-type="{{ property.deal_type }}">
+                                            data-deal-type="sale">
                                         <span class="font-mono mr-2 w-4">{{ currency.symbol }}</span>
                                         <span class="font-medium">{{ currency.code }}</span>
                                     </button>
@@ -192,7 +189,7 @@
                                             class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-t-lg"
                                             data-currency="USD" data-symbol="$"
                                             data-property-id="{{ property.id }}"
-                                            data-deal-type="{{ property.deal_type }}">
+                                            data-deal-type="sale">
                                         <span class="font-mono mr-2 w-4">$</span>
                                         <span class="font-medium">USD</span>
                                     </button>
@@ -200,7 +197,7 @@
                                             class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center"
                                             data-currency="THB" data-symbol="฿"
                                             data-property-id="{{ property.id }}"
-                                            data-deal-type="{{ property.deal_type }}">
+                                            data-deal-type="sale">
                                         <span class="font-mono mr-2 w-4">฿</span>
                                         <span class="font-medium">THB</span>
                                     </button>
@@ -208,7 +205,7 @@
                                             class="card-currency-option w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-primary hover:text-white transition-all duration-150 flex items-center rounded-b-lg"
                                             data-currency="RUB" data-symbol="₽"
                                             data-property-id="{{ property.id }}"
-                                            data-deal-type="{{ property.deal_type }}">
+                                            data-deal-type="sale">
                                         <span class="font-mono mr-2 w-4">₽</span>
                                         <span class="font-medium">RUB</span>
                                     </button>
@@ -242,8 +239,6 @@
     <!-- Property Status Badge -->
     {% if property.deal_type == 'sale' %}
         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">{% trans "Продажа" %}</span>
-    {% elif property.deal_type == 'rent' %}
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{% trans "Аренда" %}</span>
     {% endif %}
 
     <!-- Property Type -->
@@ -268,9 +263,7 @@
     const propertyData = {
         property_id: propertyId,
         price_sale_usd: {{ property.price_sale_usd|default:0|floatformat:0 }},
-        price_rent_usd: {{ property.price_rent_usd|default:0|floatformat:0 }},
         price_sale_thb: {{ property.price_sale_thb|default:0|floatformat:0 }},
-        price_rent_thb: {{ property.price_rent_thb|default:0|floatformat:0 }},
     };
 
     function formatPrice(amount) {
@@ -290,13 +283,8 @@
         let basePrice = 0;
         let fromCurrency = 'USD';
 
-        if (dealType === 'sale') {
-            basePrice = propertyData.price_sale_usd || propertyData.price_sale_thb;
-            fromCurrency = propertyData.price_sale_usd ? 'USD' : 'THB';
-        } else {
-            basePrice = propertyData.price_rent_usd || propertyData.price_rent_thb;
-            fromCurrency = propertyData.price_rent_usd ? 'USD' : 'THB';
-        }
+        basePrice = propertyData.price_sale_usd || propertyData.price_sale_thb;
+        fromCurrency = propertyData.price_sale_usd ? 'USD' : 'THB';
 
         if (!basePrice) {
             priceElement.textContent = '{% trans "Цена по запросу" %}';

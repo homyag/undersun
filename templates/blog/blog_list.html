@@ -10,6 +10,11 @@
 {% block keywords %}{{ page_keywords }}{% endblock %}
 {% endif %}
 
+{% block og_title %}{{ meta_title }}{% endblock %}
+{% block og_description %}{{ meta_description }}{% endblock %}
+{% block twitter_title %}{{ meta_title }}{% endblock %}
+{% block twitter_description %}{{ meta_description }}{% endblock %}
+
 {% block extra_meta %}
     {{ block.super }}
     {% if schema_blog_list_json %}

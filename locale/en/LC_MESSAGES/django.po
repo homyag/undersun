@@ -5657,3 +5657,7 @@ msgstr "Check the filters or try refreshing the page."
 #: apps/core/views.py:638
 msgid "В этой области"
 msgstr "In this area"
+
+#: apps/core/utils.py
+msgid "Подтвердите согласие на обработку персональных данных."
+msgstr "Please confirm your consent to the processing of personal data."

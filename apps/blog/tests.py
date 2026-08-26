@@ -17,6 +17,7 @@ from .models import BlogPost
 from .services import get_blog_post_translation_plan
 from .views import (
     BUYING_GUIDE_BLOG_SLUG,
+    _build_blog_post_meta,
     _extract_blog_toc_and_content,
     _sanitize_svg_upload,
     tinymce_upload,
@@ -199,6 +200,60 @@ class BlogTocTests(SimpleTestCase):
         )
         self.assertNotIn('&nbsp;', toc_items[0]['title'])
         self.assertIn('Ежегодное собрание&nbsp;P-REA &amp; Partners 2026', processed_content)
+
+    def test_rental_copy_is_preserved_in_toc_and_article_content(self):
+        html = '<h2>Аренда и rental income</h2><p>Long-term lease options.</p>'
+
+        toc_items, processed_content = _extract_blog_toc_and_content(html)
+
+        self.assertEqual(toc_items[0]['title'], 'Аренда и rental income')
+        self.assertIn('Аренда и rental income', processed_content)
+        self.assertIn('Long-term lease options.', processed_content)
+
+
+class BlogEditorialCopyPolicyTests(SimpleTestCase):
+    template_paths = (
+        'templates/blog/blog_list.html',
+        'templates/blog/blog_detail.html',
+        'templates/blog/blog_detail_amp.html',
+        'templates/blog/includes/linked_properties.html',
+        'templates/core/includes/home/home_news_section.html',
+        'templates/core/team_member_detail.html',
+    )
+
+    def test_blog_copy_templates_do_not_apply_sale_only_replacements(self):
+        replacement_tokens = (
+            'sale_' + 'only_' + 'text',
+            'sale_' + 'only_' + 'html',
+        )
+        for relative_path in self.template_paths:
+            with self.subTest(template=relative_path):
+                source = Path(settings.BASE_DIR, relative_path).read_text(encoding='utf-8')
+                for token in replacement_tokens:
+                    self.assertNotIn(token, source)
+
+    def test_blog_meta_preserves_rental_copy(self):
+        post = SimpleNamespace(
+            title='Rental guide',
+            meta_title='Rental guide for Phuket',
+            meta_description='Аренда недвижимости на Пхукете.',
+            meta_keywords='аренда, rental, lease',
+            _get_translated_value=lambda field_name, language_code: 'Rental guide',
+            get_meta_description=lambda language_code: 'Аренда недвижимости на Пхукете.',
+            get_meta_keywords=lambda language_code: 'аренда, rental, lease',
+        )
+
+        meta_title, meta_description, meta_keywords = _build_blog_post_meta(post, 'ru')
+
+        self.assertEqual(meta_title, 'Rental guide for Phuket')
+        self.assertEqual(meta_description, 'Аренда недвижимости на Пхукете.')
+        self.assertEqual(meta_keywords, 'аренда, rental, lease')
+
+    def test_blog_views_do_not_sanitize_editorial_or_schema_copy(self):
+        source = Path(settings.BASE_DIR, 'apps/blog/views.py').read_text(encoding='utf-8')
+
+        self.assertNotIn('sanitize_' + 'public_' + 'text', source)
+        self.assertNotIn('sanitize_' + 'public_' + 'content', source)
 
 
 class BuyingGuideRedirectTests(SimpleTestCase):

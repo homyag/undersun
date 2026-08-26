@@ -6,16 +6,15 @@
 {% load url_utils %}
 
 {% block title %}{{ page_title }}{% endblock %}
+{% block description %}{{ page_description }}{% endblock %}
+{% block og_description %}{{ page_description }}{% endblock %}
+{% block twitter_description %}{{ page_description }}{% endblock %}
 
 {% block og_type %}product{% endblock %}
 
 {% block structured_data %}
     {{ block.super }}
-    {% if property.deal_type == 'rent' and property.price_rent_monthly_thb %}
-        {% include 'properties/includes/detail_structured_data_product.html' with final_price=property.price_rent_monthly_thb %}
-    {% else %}
-        {% include 'properties/includes/detail_structured_data_product.html' with final_price=property.price_sale_thb|default:property.price_rent_monthly_thb %}
-    {% endif %}
+    {% include 'properties/includes/detail_structured_data_product.html' with final_price=property.price_sale_thb %}
     {% include 'properties/includes/detail_structured_data_place.html' %}
     {% if property_faq.has_items %}
         {% include 'properties/includes/detail_structured_data_faq.html' %}
@@ -394,7 +393,7 @@
 
                             <div class="flex flex-col items-end sm:text-right">
                                 <div class="flex items-center gap-3 mb-2">
-                                    <div id="main-price" class="text-2xl sm:text-3xl font-bold text-primary">{% price_in_currency property property.deal_type %}</div>
+                                    <div id="main-price" class="text-2xl sm:text-3xl font-bold text-primary">{% price_in_currency property 'sale' %}</div>
                                     <button type="button"
                                             class="bg-gray-100 hover:bg-gray-200 text-gray-600 w-10 h-10 rounded-full transition-colors favorite-btn flex-shrink-0 flex items-center justify-center"
                                             data-property-id="{{ property.id }}"
@@ -958,6 +957,8 @@
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200"></textarea>
                         </div>
 
+                        {% include 'core/includes/privacy_consent_checkbox.html' with privacy_consent_id='custom-selection-privacy-consent' %}
+
                         <button type="submit"
                                 class="w-full bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-gray-900 font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl">
                             <i class="fas fa-paper-plane mr-2"></i>
@@ -1053,7 +1054,7 @@
 
                             <!-- Newsletter Form -->
                             <form id="newsletterForm"
-                                  class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto lg:mx-0 js-recaptcha-form"
+                                  class="max-w-md mx-auto space-y-3 lg:mx-0 js-recaptcha-form"
                                   data-recaptcha-action="newsletter_subscribe"
                                   data-ym-goal="property_newsletter_submit"
                                   data-ym-event="submit"
@@ -1062,16 +1063,19 @@
                                 {% csrf_token %}
                                 {% include 'core/includes/recaptcha_token_field.html' %}
                                 {% include 'core/includes/form_security_fields.html' with honeypot_id='property-newsletter-website' %}
-                                <input type="email"
-                                       name="email"
-                                       aria-label="{% trans 'Email для подписки' %}"
-                                       placeholder="{% trans 'Введите ваш email' %}"
-                                       required
-                                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm">
-                                <button type="submit"
-                                        class="bg-accent hover:bg-yellow-500 text-white font-semibold py-2 px-5 rounded-lg transition-colors duration-300 hover:scale-105 transform text-sm">
-                                    {% trans "Подписаться" %}
-                                </button>
+                                <div class="flex flex-col gap-3 sm:flex-row">
+                                    <input type="email"
+                                           name="email"
+                                           aria-label="{% trans 'Email для подписки' %}"
+                                           placeholder="{% trans 'Введите ваш email' %}"
+                                           required
+                                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm">
+                                    <button type="submit"
+                                            class="bg-accent hover:bg-yellow-500 text-white font-semibold py-2 px-5 rounded-lg transition-colors duration-300 hover:scale-105 transform text-sm">
+                                        {% trans "Подписаться" %}
+                                    </button>
+                                </div>
+                                {% include 'core/includes/privacy_consent_checkbox.html' with privacy_consent_id='newsletter-privacy-consent' %}
                             </form>
 
                             <div id="newsletter-message" class="hidden mt-3 p-2 rounded-md text-xs"></div>
@@ -1335,6 +1339,8 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
+                        {% include 'core/includes/privacy_consent_checkbox.html' with privacy_consent_id='viewing-privacy-consent' %}
+
                         <div class="flex space-x-3 pt-4">
                             <button type="submit"
                                     class="flex-1 bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg">
@@ -1438,7 +1444,6 @@
                                 <option value="documents">{% trans "Документы и оформление" %}</option>
                                 <option value="area">{% trans "Район и инфраструктура" %}</option>
                                 <option value="financing">{% trans "Финансирование покупки" %}</option>
-                                <option value="rental">{% trans "Сдача в аренду" %}</option>
                                 <option value="other">{% trans "Другое" %}</option>
                             </select>
                         </div>
@@ -1470,6 +1475,8 @@
                                 </label>
                             </div>
                         </div>
+
+                        {% include 'core/includes/privacy_consent_checkbox.html' with privacy_consent_id='property-consultation-privacy-consent' %}
 
                         <div class="flex space-x-3 pt-4">
                             <button type="submit"
@@ -1554,6 +1561,8 @@
                             <input type="tel" name="phone" id="callback-phone" required
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
+
+                        {% include 'core/includes/privacy_consent_checkbox.html' with privacy_consent_id='callback-privacy-consent' %}
 
                         <div class="flex space-x-3 pt-4">
                             <button type="submit"

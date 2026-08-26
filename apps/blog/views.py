@@ -25,6 +25,7 @@ from django.views.decorators.http import require_POST
 from PIL import Image, UnidentifiedImageError
 
 from apps.core.models import SEOPage
+from apps.properties.public_inventory import PUBLIC_RENTAL_SLUG_PATTERN
 from apps.core.utils import truncate_meta
 from apps.core.amp_utils import convert_html_to_amp
 from apps.currency.services import CurrencyService
@@ -812,7 +813,8 @@ def _get_blog_linked_property_links(post, request):
     currency_code = CurrencyService.get_selected_currency_code(request)
     links = list(
         post.property_links
-        .filter(property__is_active=True)
+        .filter(property__is_active=True, property__deal_type='sale')
+        .exclude(property__slug__iregex=PUBLIC_RENTAL_SLUG_PATTERN)
         .select_related(
             'property',
             'property__property_type',
@@ -828,9 +830,8 @@ def _get_blog_linked_property_links(post, request):
         property_obj = link.property
         if language_code in {'en', 'th'} and not getattr(property_obj, f'title_{language_code}', ''):
             continue
-        deal_type = 'sale' if property_obj.deal_type in {'sale', 'both'} else 'rent'
-        link.display_deal_type = deal_type
-        link.display_price = property_obj.get_formatted_price(currency_code, deal_type)
+        link.display_deal_type = 'sale'
+        link.display_price = property_obj.get_formatted_price(currency_code, 'sale')
         link.display_property_type = property_obj._get_translated_type_name(language_code)
         visible_links.append(link)
 
@@ -1042,7 +1043,7 @@ def blog_detail(request, slug):
         return legacy_redirect
 
     post = get_object_or_404(
-        BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related(
+        BlogPost.get_published().prefetch_related(
             'tags',
             Prefetch(
                 'faq_items',
@@ -1051,7 +1052,6 @@ def blog_detail(request, slug):
             ),
         ),
         slug=slug,
-        status='published'
     )
     
     # Увеличиваем счетчик просмотров
@@ -1143,7 +1143,7 @@ def blog_detail_amp(request, slug):
         return legacy_redirect
 
     post = get_object_or_404(
-        BlogPost.objects.select_related('category', 'author', 'team_author').prefetch_related(
+        BlogPost.get_published().prefetch_related(
             'tags',
             Prefetch(
                 'faq_items',
@@ -1152,7 +1152,6 @@ def blog_detail_amp(request, slug):
             ),
         ),
         slug=slug,
-        status='published'
     )
 
     related_posts = BlogPost.get_published().filter(

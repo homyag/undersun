@@ -19,6 +19,9 @@
     const TAB_TELEGRAM = translate('tabTelegram', 'Telegram');
     const PHONE_PLACEHOLDER = translate('phonePlaceholder', '+66 XXX XXX XXX');
     const PHONE_SUBMIT = translate('phoneSubmit', 'Заказать звонок');
+    const PRIVACY_CONSENT_PREFIX = translate('privacyConsentPrefix', 'Я даю согласие на обработку персональных данных и принимаю');
+    const PRIVACY_POLICY_LABEL = translate('privacyPolicyLabel', 'Политику конфиденциальности');
+    const PRIVACY_POLICY_URL = translate('privacyPolicyUrl', '/ru/privacy/');
     const WHATSAPP_DESCRIPTION = translate('whatsappDescription', 'Напишите нам в WhatsApp для быстрой консультации');
     const WHATSAPP_MESSAGE = translate('whatsappMessage', 'Здравствуйте! Меня интересует консультация по недвижимости');
     const WHATSAPP_BUTTON = translate('whatsappButton', 'Написать в WhatsApp');
@@ -1211,6 +1214,7 @@
             const consultationId = Math.random().toString(36).substr(2, 9); // Unique ID for each card
             const renderTimestamp = Math.floor(Date.now() / 1000);
             const honeypotId = `consultation-website-${consultationId}`;
+            const privacyConsentId = `consultation-privacy-consent-${consultationId}`;
             return `
             <div class="consultation-card bg-gradient-to-br from-primary to-tertiary rounded-lg p-4 text-white shadow-lg w-full h-full flex flex-col">
                 <div class="text-center mb-4">
@@ -1259,6 +1263,19 @@
                                        title="${PHONE_PLACEHOLDER}"
                                        class="consultation-form-input w-full px-3 py-2 rounded-md bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                                        required>
+                            </div>
+                            <div class="flex items-start space-x-2 text-left">
+                                <input type="checkbox"
+                                       id="${privacyConsentId}"
+                                       name="privacy_consent"
+                                       value="1"
+                                       required
+                                       data-privacy-consent
+                                       class="mt-1 h-4 w-4 shrink-0 rounded border-white/40 text-accent focus:ring-accent">
+                                <label for="${privacyConsentId}" class="text-xs leading-relaxed text-white/80">
+                                    ${PRIVACY_CONSENT_PREFIX}
+                                    <a href="${PRIVACY_POLICY_URL}" class="font-medium text-accent underline hover:text-yellow-300">${PRIVACY_POLICY_LABEL}</a>.
+                                </label>
                             </div>
                             <button type="submit"
                                     class="w-full bg-accent hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-md transition-all duration-200 text-sm">

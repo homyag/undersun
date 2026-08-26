@@ -313,6 +313,44 @@ class MapPropertiesEndpointTests(TestCase):
         self.assertEqual(response.json()['selected_property_id'], 999999)
         self.assertIsNone(response.json()['selected_property'])
 
+    def test_sale_only_endpoints_exclude_rent_and_mixed_deal_properties(self):
+        hidden_properties = [
+            Property.objects.create(
+                title=f'Hidden {deal_type} map property',
+                slug=f'hidden-{deal_type}-map-property',
+                property_type=self.property.property_type,
+                district=self.property.district,
+                description='',
+                deal_type=deal_type,
+                latitude=Decimal('7.920000000000000'),
+                longitude=Decimal('98.320000000000000'),
+                price_sale_thb=Decimal('250'),
+                price_rent_monthly_thb=Decimal('25'),
+            )
+            for deal_type in ('rent', 'both')
+        ]
+        hidden_properties.append(Property.objects.create(
+            title='Legacy sale property with a stale URL',
+            slug='legacy-sale-property-for-rent',
+            property_type=self.property.property_type,
+            district=self.property.district,
+            description='',
+            deal_type='sale',
+            latitude=Decimal('7.930000000000000'),
+            longitude=Decimal('98.330000000000000'),
+            price_sale_thb=Decimal('275'),
+        ))
+
+        marker_payload = self.client.get('/ru/property/ajax/map/').json()
+        card_payload = self.client.get('/ru/property/ajax/map/cards/').json()
+        visible_ids = {
+            item['id']
+            for item in marker_payload['properties'] + card_payload['properties']
+        }
+
+        for property_obj in hidden_properties:
+            self.assertNotIn(property_obj.id, visible_ids)
+
     def test_rejects_invalid_selected_property_id(self):
         response = self.client.get('/ru/property/ajax/map/', {'selected': 'not-an-id'})
 

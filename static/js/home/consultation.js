@@ -36,6 +36,11 @@ window.handlePhoneCallback = function (event, consultationId) {
     event.preventDefault();
 
     const form = event.target;
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
     const honeypotField = form.querySelector('input[name="website"]');
     if (honeypotField && honeypotField.value.trim() !== '') {
         showConsultationMessage('Обнаружена подозрительная активность. Попробуйте другой способ связи.', 'error');

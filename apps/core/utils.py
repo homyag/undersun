@@ -146,7 +146,7 @@ def rate_limit(key_prefix, limit=5, timeout=60):
 
 
 def validate_form_security(request, min_delay_seconds=2):
-    """Проверяем honeypot и минимальное время до отправки формы."""
+    """Проверяем согласие, honeypot и минимальное время до отправки формы."""
 
     honeypot_value = (request.POST.get('website') or '').strip()
     if honeypot_value:
@@ -155,6 +155,17 @@ def validate_form_security(request, min_delay_seconds=2):
                 'success': False,
                 'error': 'suspected_bot',
                 'message': _('Обнаружена подозрительная активность. Попробуйте другой способ связи.'),
+            },
+            status=400,
+        )
+
+    privacy_consent = (request.POST.get('privacy_consent') or '').strip().lower()
+    if privacy_consent not in {'1', 'true', 'on', 'yes', 'accepted'}:
+        return JsonResponse(
+            {
+                'success': False,
+                'error': 'privacy_consent_required',
+                'message': _('Подтвердите согласие на обработку персональных данных.'),
             },
             status=400,
         )

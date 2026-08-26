@@ -1,0 +1,24 @@
+{% with consent_id=privacy_consent_id|default:'privacy-consent' lang=LANGUAGE_CODE|default:'ru' %}
+<div class="flex items-start space-x-3" data-privacy-consent-field>
+    <input type="checkbox"
+           id="{{ consent_id }}"
+           name="privacy_consent"
+           value="1"
+           required
+           data-privacy-consent
+           class="mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-accent focus:ring-accent">
+    <label for="{{ consent_id }}"
+           class="text-sm leading-relaxed {% if privacy_consent_dark %}text-white/80{% else %}text-gray-600{% endif %}">
+        {% if lang == 'en' %}
+            I consent to the processing of my personal data and accept the
+            <a href="{% url 'core:privacy' %}" class="font-medium text-accent underline transition-colors hover:text-yellow-500">Privacy Policy</a>.
+        {% elif lang == 'th' %}
+            ฉันยินยอมให้ประมวลผลข้อมูลส่วนบุคคลและยอมรับ
+            <a href="{% url 'core:privacy' %}" class="font-medium text-accent underline transition-colors hover:text-yellow-500">นโยบายความเป็นส่วนตัว</a>
+        {% else %}
+            Я даю согласие на обработку персональных данных и принимаю
+            <a href="{% url 'core:privacy' %}" class="font-medium text-accent underline transition-colors hover:text-yellow-500">Политику конфиденциальности</a>.
+        {% endif %}
+    </label>
+</div>
+{% endwith %}

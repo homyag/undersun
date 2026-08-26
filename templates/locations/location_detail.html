@@ -433,7 +433,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.4em] text-tertiary mb-2">{% trans "каталог" %}</p>
                     <h2 class="text-3xl font-bold text-gray-900">{% trans "Недвижимость в" %} {{ location.name }}</h2>
-                    <p class="text-gray-500 mt-2">{% trans "Только актуальные предложения в продаже или аренде." %}</p>
+                    <p class="text-gray-500 mt-2">{% if LANGUAGE_CODE == 'en' %}Only current properties for sale.{% elif LANGUAGE_CODE == 'th' %}เฉพาะรายการขายที่เป็นปัจจุบัน{% else %}Только актуальные предложения о продаже.{% endif %}</p>
                 </div>
                 <a href="{% url 'properties:property_list' %}?district={{ location.district.slug }}&location={{ location.slug }}"
                    class="inline-flex items-center px-5 py-3 rounded-2xl border border-gray-200 font-semibold text-gray-900 hover:border-gray-300">

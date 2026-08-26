@@ -8,7 +8,6 @@ const preloadedGalleryImages = new Set();
 
 const PROPERTY_I18N = window.propertyDetailTranslations || {};
 const LABEL_PRICE_ON_REQUEST = PROPERTY_I18N.priceOnRequest || 'По запросу';
-const LABEL_PER_MONTH = PROPERTY_I18N.perMonth || 'мес';
 const LABEL_PER_SQM = PROPERTY_I18N.perSqm || 'м²';
 
 let propertyMapAssetPromise = null;
@@ -782,23 +781,14 @@ function goBackToCatalog() {
         // Navigate to the catalog with preserved filters
         window.location.href = catalogUrl;
     } else {
-        // Fallback to default catalog page
-        const dealType = PROPERTY_DEAL_TYPE;
-        if (dealType === 'sale') {
-            window.location.href = '/property/sale/';
-        } else if (dealType === 'rent') {
-            window.location.href = '/property/rent/';
-        } else {
-            // For 'both' type, go to sale catalog as default
-            window.location.href = '/property/sale/';
-        }
+        window.location.href = '/property/sale/';
     }
 }
 
 // Save current page referrer when coming from catalog
 function saveCatalogReferrer() {
     const referrer = document.referrer;
-    if (referrer && (referrer.includes('/property/sale/') || referrer.includes('/property/rent/'))) {
+    if (referrer && referrer.includes('/property/sale/')) {
         const catalogState = {
             url: referrer,
             timestamp: Date.now()
@@ -859,23 +849,19 @@ function updatePrices() {
     const currentCurrency = localStorage.getItem('selectedCurrency') || 'THB';
 
     let salePrice = null;
-    let rentPrice = null;
     let currencySymbol = '';
 
     switch(currentCurrency) {
         case 'USD':
             salePrice = PROPERTY_DATA.price_sale_usd;
-            rentPrice = PROPERTY_DATA.price_rent_monthly_usd;
             currencySymbol = '$';
             break;
         case 'THB':
             salePrice = PROPERTY_DATA.price_sale_thb;
-            rentPrice = PROPERTY_DATA.price_rent_monthly_thb;
             currencySymbol = '฿';
             break;
         case 'RUB':
             salePrice = PROPERTY_DATA.price_sale_rub;
-            rentPrice = PROPERTY_DATA.price_rent_monthly_rub;
             currencySymbol = '₽';
             break;
     }
@@ -885,16 +871,8 @@ function updatePrices() {
     if (mainPriceEl) {
         let priceText = '';
 
-        if (PROPERTY_DATA.deal_type === 'sale' && salePrice) {
+        if (salePrice) {
             priceText = `${currencySymbol}${Math.round(salePrice).toLocaleString()}`;
-        } else if (PROPERTY_DATA.deal_type === 'rent' && rentPrice) {
-            priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/${LABEL_PER_MONTH}`;
-        } else if (PROPERTY_DATA.deal_type === 'both') {
-            if (salePrice) {
-                priceText = `${currencySymbol}${Math.round(salePrice).toLocaleString()}`;
-            } else if (rentPrice) {
-                priceText = `${currencySymbol}${Math.round(rentPrice).toLocaleString()}/${LABEL_PER_MONTH}`;
-            }
         }
 
         if (priceText) {
@@ -908,13 +886,9 @@ function updatePrices() {
     const pricePerSqmEl = document.getElementById('price-per-sqm');
 
     if (pricePerSqmEl && PROPERTY_DATA.area_total && salePrice) {
-        if (PROPERTY_DATA.deal_type !== 'rent') {
-            const pricePerSqm = Math.round(salePrice / PROPERTY_DATA.area_total);
-            const pricePerSqmText = `${pricePerSqm.toLocaleString()} ${currencySymbol}/${LABEL_PER_SQM}`;
-            pricePerSqmEl.textContent = pricePerSqmText;
-        } else {
-            pricePerSqmEl.textContent = '';
-        }
+        const pricePerSqm = Math.round(salePrice / PROPERTY_DATA.area_total);
+        const pricePerSqmText = `${pricePerSqm.toLocaleString()} ${currencySymbol}/${LABEL_PER_SQM}`;
+        pricePerSqmEl.textContent = pricePerSqmText;
     } else if (pricePerSqmEl) {
         pricePerSqmEl.textContent = '';
     }
@@ -1006,6 +980,11 @@ function handleFormSubmit(formId, endpoint, successCallback) {
 
     form.addEventListener('submit', function (e) {
         e.preventDefault();
+
+        if (!this.checkValidity()) {
+            this.reportValidity();
+            return;
+        }
 
         const formData = new FormData(this);
         const submitBtn = this.querySelector('button[type="submit"]');
@@ -1139,6 +1118,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize all forms
     if (INQUIRY_ENDPOINT) {
         handleFormSubmit('inquiry-form', INQUIRY_ENDPOINT);
+        handleFormSubmit('customSelectionForm', INQUIRY_ENDPOINT);
         handleFormSubmit('viewingRequestForm', INQUIRY_ENDPOINT, closeViewingModal);
         handleFormSubmit('consultationRequestForm', INQUIRY_ENDPOINT, closeConsultationModal);
         handleFormSubmit('callbackRequestForm', INQUIRY_ENDPOINT, closeCallbackModal);

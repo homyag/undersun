@@ -526,15 +526,7 @@ function createPropertyCard(property) {
     const imageUrl = property.main_image_thumbnail_url || property.main_image_url || '/static/images/no-image.jpg';
     const propertyUrl = `/property/${property.slug}/`;
     
-    // Определяем тип сделки и соответствующий badge
-    let dealTypeBadge = '';
-    if (property.deal_type === 'sale') {
-        dealTypeBadge = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent text-gray-900 shadow-sm">Продажа</span>';
-    } else if (property.deal_type === 'rent') {
-        dealTypeBadge = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary text-white shadow-sm">Аренда</span>';
-    } else {
-        dealTypeBadge = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-tertiary text-white shadow-sm">Продажа/Аренда</span>';
-    }
+    const dealTypeBadge = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent text-gray-900 shadow-sm">Продажа</span>';
     
     // Определяем состояние кнопки избранного
     const isFav = isFavorite(property.id);

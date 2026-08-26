@@ -53,10 +53,6 @@
                                 {% if property.price_sale_usd %}
                                     <span class="text-xl font-bold text-accent" itemprop="price">${{ property.price_sale_usd|floatformat:0 }}</span>
                                     <meta itemprop="priceCurrency" content="USD">
-                                {% elif property.price_rent_monthly %}
-                                    <span class="text-xl font-bold text-accent" itemprop="price">${{ property.price_rent_monthly|floatformat:0 }}</span>
-                                    <span class="text-sm text-gray-500">/{% trans "мес" %}</span>
-                                    <meta itemprop="priceCurrency" content="USD">
                                 {% else %}
                                     <span class="text-sm text-gray-500">{% trans "Цена по запросу" %}</span>
                                 {% endif %}

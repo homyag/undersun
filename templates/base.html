@@ -593,6 +593,19 @@
         };
 
         form.addEventListener('submit', function handleRecaptcha(event) {
+          if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+            event.preventDefault();
+            if (typeof event.stopImmediatePropagation === 'function') {
+              event.stopImmediatePropagation();
+            }
+            form.dataset.recaptchaVerified = '';
+            tokenInput.value = '';
+            if (typeof form.reportValidity === 'function') {
+              form.reportValidity();
+            }
+            return;
+          }
+
           if (!siteKey) {
             return;
           }

@@ -153,8 +153,8 @@ function displayGridView(properties) {
 
                     <!-- Deal Type Badge -->
                     <div class="absolute top-3 left-3">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${property.deal_type === 'sale' ? 'bg-accent text-gray-900' : 'bg-primary text-white'} shadow-sm">
-                            ${property.deal_type === 'sale' ? TRANSLATIONS.sale : TRANSLATIONS.rent}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent text-gray-900 shadow-sm">
+                            ${TRANSLATIONS.sale}
                         </span>
                     </div>
                 </div>
@@ -253,9 +253,6 @@ function displayTableView(properties) {
             label: TRANSLATIONS.pricePerSqm,
             icon: 'fas fa-calculator',
             getValue: (p) => {
-                if (p.deal_type === 'rent') {
-                    return `<span class="text-gray-400">${TRANSLATIONS.onlyForSale}</span>`;
-                }
                 if (p.price_per_sqm) {
                     return `${p.currency_symbol}${p.price_per_sqm.toLocaleString('ru-RU', {maximumFractionDigits: 0})}/м²`;
                 }
@@ -271,10 +268,7 @@ function displayTableView(properties) {
             label: TRANSLATIONS.dealType,
             icon: 'fas fa-handshake',
             getValue: (p) => {
-                if (p.deal_type === 'sale') return TRANSLATIONS.sale;
-                if (p.deal_type === 'rent') return TRANSLATIONS.rent;
-                if (p.deal_type === 'both') return TRANSLATIONS.saleRent;
-                return TRANSLATIONS.notSpecified;
+                return TRANSLATIONS.sale;
             }
         },
         {

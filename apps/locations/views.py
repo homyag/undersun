@@ -16,6 +16,7 @@ from .phuket_area_content import (
     get_location_faq_items,
 )
 from apps.properties.models import Property, PropertyType
+from apps.properties.public_inventory import public_sale_queryset
 from apps.currency.services import CurrencyService
 from apps.core.models import Team
 from apps.core.utils import truncate_meta
@@ -28,10 +29,10 @@ LOCATION_PAGE_COPY = {
     'ru': {
         'list_title': 'Районы и локации Пхукета для покупки недвижимости | Undersun Estate',
         'list_description': 'Гид по районам Пхукета: {district_count} районов и {property_count} активных объектов. Сравните локации, инфраструктуру, типы недвижимости и подберите объект с Undersun Estate.',
-        'list_intro': 'Сравните районы, локации и активные предложения, чтобы выбрать место под жизнь, аренду или инвестиционный сценарий.',
+        'list_intro': 'Сравните районы, локации и активные предложения, чтобы выбрать место под жизнь, отдых или инвестиционный сценарий.',
         'decision_kicker': 'как выбирать',
         'decision_heading': 'Локация на Пхукете зависит от сценария покупки',
-        'decision_text': 'Для постоянной жизни важны школы, медицина и ежедневная логистика. Для аренды — близость к пляжам, сезонность и управление объектом. Для земли — титул, подъезд, ограничения и инфраструктура участка.',
+        'decision_text': 'Для постоянной жизни важны школы, медицина и ежедневная логистика. Для отдыха — близость к пляжам, окружение и управление объектом. Для земли — титул, подъезд, ограничения и инфраструктура участка.',
         'overview_kicker': 'ориентир по локации',
         'district_context_heading': 'Что важно знать о районе',
         'location_context_heading': 'Что важно знать о локации',
@@ -47,14 +48,12 @@ LOCATION_PAGE_COPY = {
         'location_description': 'Недвижимость в {location}, район {district}: {property_count} активных объектов, цены, карта, соседние локации и подбор объектов на Пхукете с Undersun Estate.',
         'all_properties': 'Все объекты',
         'sale': 'Купить недвижимость',
-        'rent': 'Арендовать недвижимость',
         'villa': 'Виллы',
         'condo': 'Апартаменты и кондо',
         'townhouse': 'Таунхаусы',
         'land': 'Земельные участки',
         'all_description': 'Полный каталог активных объектов в этой локации.',
         'sale_description': 'Объекты на продажу с актуальными ценами и статусом.',
-        'rent_description': 'Объекты для аренды, если они есть в активном каталоге.',
         'villa_description': 'Отдельные дома и виллы для жизни, отдыха или инвестиций.',
         'condo_description': 'Квартиры и кондоминиумы в проектах рядом с инфраструктурой.',
         'townhouse_description': 'Таунхаусы и компактные дома для жизни на Пхукете.',
@@ -85,15 +84,15 @@ LOCATION_PAGE_COPY = {
         'faq_viewing_q': 'Можно ли организовать просмотр объектов в этой локации?',
         'faq_viewing_a': 'Да. Мы согласуем очный или онлайн-показ, подготовим короткий список объектов и заранее уточним условия сделки у владельца или застройщика.',
         'faq_caveat_q': 'На что обратить внимание при выборе района?',
-        'faq_caveat_a': 'Важно проверить транспортную доступность, дорогу до пляжей и школ, состояние проекта, юридические документы, расходы на обслуживание и реалистичный сценарий аренды или перепродажи.',
+        'faq_caveat_a': 'Важно проверить транспортную доступность, дорогу до пляжей и школ, состояние проекта, юридические документы, расходы на обслуживание и реалистичный сценарий владения или перепродажи.',
     },
     'en': {
         'list_title': 'Phuket Districts and Locations for Property Buyers | Undersun Estate',
         'list_description': 'Guide to Phuket districts: {district_count} areas and {property_count} active listings. Compare locations, infrastructure, property types and shortlist Phuket real estate with Undersun Estate.',
-        'list_intro': 'Compare Phuket districts, locations and active listings to choose the right area for living, rental demand or an investment scenario.',
+        'list_intro': 'Compare Phuket districts, locations and active listings to choose the right area for living, holidays or an investment scenario.',
         'decision_kicker': 'how to choose',
         'decision_heading': 'The right Phuket location depends on the buying scenario',
-        'decision_text': 'For everyday living, schools, healthcare and daily logistics matter. For rental demand, beach access, seasonality and property management are key. For land, title, access, restrictions and infrastructure should be checked first.',
+        'decision_text': 'For everyday living, schools, healthcare and daily logistics matter. For holiday use, beach access, surroundings and property management are key. For land, title, access, restrictions and infrastructure should be checked first.',
         'overview_kicker': 'location context',
         'district_context_heading': 'What to know about',
         'location_context_heading': 'What to know about',
@@ -109,14 +108,12 @@ LOCATION_PAGE_COPY = {
         'location_description': 'Property in {location}, {district}: {property_count} active listings, prices, map, nearby locations and Phuket property shortlisting by Undersun Estate.',
         'all_properties': 'All properties',
         'sale': 'Property for sale',
-        'rent': 'Property for rent',
         'villa': 'Villas',
         'condo': 'Apartments and condos',
         'townhouse': 'Townhouses',
         'land': 'Land plots',
         'all_description': 'Full list of active properties in this location.',
         'sale_description': 'For-sale listings with current prices and status.',
-        'rent_description': 'Rental listings when active rental stock is available.',
         'villa_description': 'Detached homes and villas for living, holidays or investment.',
         'condo_description': 'Apartments and condominiums near daily infrastructure.',
         'townhouse_description': 'Townhouses and compact homes for Phuket living.',
@@ -133,7 +130,7 @@ LOCATION_PAGE_COPY = {
         'district_selection_heading': 'How we use this district in the shortlist',
         'district_selection_text': 'In {district}, it is important to compare not only price and property type, but also the exact part of the district: access to beaches, schools and shops, density, noise and future liquidity. We first define the buying scenario, then shortlist properties in the locations that fit it.',
         'location_selection_heading': 'How this location fits into the district',
-        'location_selection_text': '{location} should be assessed within {district}: nearby parts of the same district can differ in traffic, rental demand, surroundings and resale speed. This helps compare a property not only by layout and price, but by the real ownership scenario.',
+        'location_selection_text': '{location} should be assessed within {district}: nearby parts of the same district can differ in traffic, buyer demand, surroundings and resale speed. This helps compare a property not only by layout and price, but by the real ownership scenario.',
         'related_kicker': 'nearby',
         'related_heading': 'Nearby locations with active listings',
         'faq_kicker': 'questions',
@@ -147,15 +144,15 @@ LOCATION_PAGE_COPY = {
         'faq_viewing_q': 'Can I arrange a viewing in this location?',
         'faq_viewing_a': 'Yes. We can arrange an in-person or remote viewing, prepare a shortlist and confirm the current deal terms with the owner or developer in advance.',
         'faq_caveat_q': 'What should I check when choosing an area?',
-        'faq_caveat_a': 'Check transport access, distance to beaches and schools, project condition, legal documents, maintenance costs and a realistic rental or resale scenario.',
+        'faq_caveat_a': 'Check transport access, distance to beaches and schools, project condition, legal documents, maintenance costs and a realistic ownership or resale scenario.',
     },
     'th': {
         'list_title': 'ย่านและทำเลในภูเก็ตสำหรับซื้ออสังหาริมทรัพย์ | Undersun Estate',
         'list_description': 'คู่มือย่านในภูเก็ต: {district_count} พื้นที่และ {property_count} รายการที่พร้อมอยู่ เปรียบเทียบทำเล โครงสร้างพื้นฐาน และประเภทอสังหาริมทรัพย์กับ Undersun Estate',
-        'list_intro': 'เปรียบเทียบย่าน ทำเล และรายการที่พร้อมอยู่ เพื่อเลือกพื้นที่ที่เหมาะกับการอยู่อาศัย การปล่อยเช่า หรือการลงทุน',
+        'list_intro': 'เปรียบเทียบย่าน ทำเล และรายการที่พร้อมอยู่ เพื่อเลือกพื้นที่ที่เหมาะกับการอยู่อาศัย การพักผ่อน หรือการลงทุน',
         'decision_kicker': 'วิธีเลือกทำเล',
         'decision_heading': 'ทำเลที่เหมาะสมในภูเก็ตขึ้นอยู่กับเป้าหมายการซื้อ',
-        'decision_text': 'สำหรับการอยู่อาศัย ควรดูโรงเรียน การแพทย์ และการเดินทางประจำวัน สำหรับการเช่า ควรดูการเข้าถึงชายหาด ฤดูกาล และการจัดการทรัพย์ สำหรับที่ดิน ควรตรวจเอกสารสิทธิ์ ทางเข้า ข้อจำกัด และโครงสร้างพื้นฐานก่อน',
+        'decision_text': 'สำหรับการอยู่อาศัย ควรดูโรงเรียน การแพทย์ และการเดินทางประจำวัน สำหรับการพักผ่อน ควรดูการเข้าถึงชายหาด สภาพแวดล้อม และการจัดการทรัพย์ สำหรับที่ดิน ควรตรวจเอกสารสิทธิ์ ทางเข้า ข้อจำกัด และโครงสร้างพื้นฐานก่อน',
         'overview_kicker': 'บริบทของทำเล',
         'district_context_heading': 'สิ่งที่ควรรู้เกี่ยวกับย่าน',
         'location_context_heading': 'สิ่งที่ควรรู้เกี่ยวกับทำเล',
@@ -171,14 +168,12 @@ LOCATION_PAGE_COPY = {
         'location_description': 'อสังหาริมทรัพย์ใน {location}, {district}: {property_count} รายการที่พร้อมอยู่ ราคา แผนที่ ทำเลใกล้เคียง และบริการคัดเลือกอสังหาริมทรัพย์ในภูเก็ต',
         'all_properties': 'อสังหาริมทรัพย์ทั้งหมด',
         'sale': 'อสังหาริมทรัพย์สำหรับขาย',
-        'rent': 'อสังหาริมทรัพย์ให้เช่า',
         'villa': 'วิลล่า',
         'condo': 'อพาร์ตเมนต์และคอนโด',
         'townhouse': 'ทาวน์เฮาส์',
         'land': 'ที่ดิน',
         'all_description': 'รายการอสังหาริมทรัพย์ที่พร้อมอยู่ทั้งหมดในทำเลนี้',
         'sale_description': 'รายการขายพร้อมราคาและสถานะล่าสุด',
-        'rent_description': 'รายการเช่าเมื่อมีทรัพย์ให้เช่าที่พร้อมอยู่',
         'villa_description': 'บ้านเดี่ยวและวิลล่าสำหรับอยู่อาศัย พักผ่อน หรือการลงทุน',
         'condo_description': 'อพาร์ตเมนต์และคอนโดใกล้โครงสร้างพื้นฐานประจำวัน',
         'townhouse_description': 'ทาวน์เฮาส์และบ้านขนาดกะทัดรัดสำหรับชีวิตในภูเก็ต',
@@ -195,7 +190,7 @@ LOCATION_PAGE_COPY = {
         'district_selection_heading': 'เราใช้ย่านนี้ในการคัดเลือกอย่างไร',
         'district_selection_text': 'ในย่าน {district} ไม่ควรดูเพียงราคาและประเภททรัพย์ แต่ควรดูพื้นที่ย่อยของย่านนั้นด้วย เช่น การเดินทางไปชายหาด โรงเรียน ร้านค้า ความหนาแน่น เสียงรบกวน และสภาพคล่องในอนาคต เราจึงเริ่มจากเป้าหมายการซื้อ แล้วจึงคัดเลือกทรัพย์ในทำเลที่เหมาะสม',
         'location_selection_heading': 'ทำเลนี้สัมพันธ์กับย่านอย่างไร',
-        'location_selection_text': 'ควรประเมิน {location} ภายในบริบทของย่าน {district} เพราะพื้นที่ใกล้เคียงในย่านเดียวกันอาจต่างกันมากทั้งเรื่องการจราจร ความต้องการเช่า สภาพแวดล้อม และความเร็วในการขายต่อ วิธีนี้ช่วยเปรียบเทียบทรัพย์จากทั้งราคา แปลน และสถานการณ์การถือครองจริง',
+        'location_selection_text': 'ควรประเมิน {location} ภายในบริบทของย่าน {district} เพราะพื้นที่ใกล้เคียงในย่านเดียวกันอาจต่างกันมากทั้งเรื่องการจราจร ความต้องการของผู้ซื้อ สภาพแวดล้อม และความเร็วในการขายต่อ วิธีนี้ช่วยเปรียบเทียบทรัพย์จากทั้งราคา แปลน และสถานการณ์การถือครองจริง',
         'related_kicker': 'ใกล้เคียง',
         'related_heading': 'ทำเลใกล้เคียงที่มีรายการพร้อมอยู่',
         'faq_kicker': 'คำถาม',
@@ -209,7 +204,7 @@ LOCATION_PAGE_COPY = {
         'faq_viewing_q': 'สามารถนัดชมทรัพย์ในทำเลนี้ได้หรือไม่?',
         'faq_viewing_a': 'ได้ เราสามารถจัดนัดชมจริงหรือวิดีโอทัวร์ เตรียมรายการคัดเลือก และยืนยันเงื่อนไขล่าสุดกับเจ้าของหรือผู้พัฒนาโครงการล่วงหน้า',
         'faq_caveat_q': 'ควรตรวจอะไรเมื่อเลือกทำเล?',
-        'faq_caveat_a': 'ควรตรวจการเดินทาง ระยะทางถึงชายหาดและโรงเรียน สภาพโครงการ เอกสารทางกฎหมาย ค่าใช้จ่ายดูแลรักษา และสมมติฐานการเช่าหรือขายต่ออย่างสมจริง',
+        'faq_caveat_a': 'ควรตรวจการเดินทาง ระยะทางถึงชายหาดและโรงเรียน สภาพโครงการ เอกสารทางกฎหมาย ค่าใช้จ่ายดูแลรักษา และสมมติฐานการถือครองหรือขายต่ออย่างสมจริง',
     },
 }
 
@@ -374,16 +369,6 @@ def _build_catalog_links(base_queryset, language_code, district=None, location=N
             'icon': 'fas fa-key',
         })
 
-    rent_count = base_queryset.filter(deal_type__in=['rent', 'both']).count()
-    if rent_count:
-        links.append({
-            'label': copy['rent'],
-            'description': copy['rent_description'],
-            'url': _catalog_url('properties:property_rent', params),
-            'count': rent_count,
-            'icon': 'fas fa-calendar-check',
-        })
-
     type_counts = {
         item['property_type__name']: item['count']
         for item in (
@@ -424,7 +409,11 @@ def _build_related_location_links(district, current_location=None, limit=6):
         .annotate(
             active_property_count=Count(
                 'property',
-                filter=Q(property__is_active=True, property__status='available'),
+                filter=Q(
+                    property__is_active=True,
+                    property__status='available',
+                    property__deal_type='sale',
+                ),
             )
         )
         .filter(active_property_count__gt=0)
@@ -457,7 +446,7 @@ DISTRICT_MARKET_INFO = {
         'krabi': {
             'profile': 'Спокойная альтернатива Пхукету',
             'focus': 'Долгосрочная жизнь, пляжные зоны и городская инфраструктура',
-            'note': 'Краби стоит сравнивать с Пхукетом по цели покупки: жизнь у моря, релокация, долгосрочная аренда или спокойный lifestyle. Перед сделкой важны транспорт, медицина, ликвидность и реальный выбор объектов.',
+            'note': 'Краби стоит сравнивать с Пхукетом по цели покупки: жизнь у моря, релокация, сезонный отдых или спокойный lifestyle. Перед сделкой важны транспорт, медицина, ликвидность и реальный выбор объектов.',
         },
         'thalang': {
             'profile': 'Курортный и семейный спрос',
@@ -477,7 +466,7 @@ DISTRICT_MARKET_INFO = {
         'phuket': {
             'profile': 'Широкий островной поиск',
             'focus': 'Сравнение районов и форматов объектов',
-            'note': 'Подбор по всему Пхукету лучше начинать с сценария: жизнь, аренда, перепродажа, земля или релокация. После этого район и тип объекта становятся намного понятнее.',
+            'note': 'Подбор по всему Пхукету лучше начинать со сценария: жизнь, отдых, перепродажа, земля или релокация. После этого район и тип объекта становятся намного понятнее.',
         },
         'default': {
             'profile': 'Локальный спрос и практичная логистика',
@@ -489,7 +478,7 @@ DISTRICT_MARKET_INFO = {
         'krabi': {
             'profile': 'A calmer alternative to Phuket',
             'focus': 'Long-term living, beach areas and town infrastructure',
-            'note': 'Krabi should be compared with Phuket by buying scenario: seaside living, relocation, long-term rental or a quieter lifestyle. Transport, healthcare, liquidity and real inventory depth should be checked before buying.',
+            'note': 'Krabi should be compared with Phuket by buying scenario: seaside living, relocation, seasonal use or a quieter lifestyle. Transport, healthcare, liquidity and real inventory depth should be checked before buying.',
         },
         'thalang': {
             'profile': 'Resort and family demand',
@@ -509,7 +498,7 @@ DISTRICT_MARKET_INFO = {
         'phuket': {
             'profile': 'Island-wide property search',
             'focus': 'Comparing areas and property formats',
-            'note': 'An island-wide search should start from the scenario: living, rental income, resale, land or relocation. After that, the area and property type become much clearer.',
+            'note': 'An island-wide search should start from the scenario: living, holidays, resale, land or relocation. After that, the area and property type become much clearer.',
         },
         'default': {
             'profile': 'Local demand and practical logistics',
@@ -521,7 +510,7 @@ DISTRICT_MARKET_INFO = {
         'krabi': {
             'profile': 'ทางเลือกที่สงบกว่าภูเก็ต',
             'focus': 'การอยู่อาศัยระยะยาว พื้นที่ชายหาด และโครงสร้างเมือง',
-            'note': 'ควรเปรียบเทียบ Krabi กับภูเก็ตตามเป้าหมายการซื้อ เช่น อยู่อาศัยริมทะเล ย้ายถิ่นฐาน เช่าระยะยาว หรือไลฟ์สไตล์ที่สงบกว่า ก่อนซื้อควรตรวจการเดินทาง การแพทย์ สภาพคล่อง และตัวเลือกทรัพย์จริง',
+            'note': 'ควรเปรียบเทียบ Krabi กับภูเก็ตตามเป้าหมายการซื้อ เช่น อยู่อาศัยริมทะเล ย้ายถิ่นฐาน พักผ่อนตามฤดูกาล หรือไลฟ์สไตล์ที่สงบกว่า ก่อนซื้อควรตรวจการเดินทาง การแพทย์ สภาพคล่อง และตัวเลือกทรัพย์จริง',
         },
         'thalang': {
             'profile': 'ความต้องการแบบรีสอร์ตและครอบครัว',
@@ -536,12 +525,12 @@ DISTRICT_MARKET_INFO = {
         'kathu-district': {
             'profile': 'สมดุลระหว่างเมืองและโซนท่องเที่ยว',
             'focus': 'คอนโด วิลล่า และบ้านใกล้ Patong/Kamala',
-            'note': 'Kathu District เชื่อมต่อชายหาด โครงสร้างเมือง และความต้องการท่องเที่ยว ก่อนซื้อควรตรวจเรื่องเสียง ถนนทางเข้า และฤดูกาลของความต้องการเช่า',
+            'note': 'Kathu District เชื่อมต่อชายหาด โครงสร้างเมือง และความต้องการท่องเที่ยว ก่อนซื้อควรตรวจเรื่องเสียง ถนนทางเข้า และฤดูกาลของความต้องการจากผู้ซื้อ',
         },
         'phuket': {
             'profile': 'ค้นหาอสังหาริมทรัพย์ทั่วเกาะ',
             'focus': 'เปรียบเทียบพื้นที่และรูปแบบทรัพย์',
-            'note': 'การค้นหาทั่วภูเก็ตควรเริ่มจากเป้าหมาย: อยู่อาศัย เช่า ขายต่อ ที่ดิน หรือย้ายถิ่นฐาน จากนั้นทำเลและประเภททรัพย์จะชัดเจนขึ้น',
+            'note': 'การค้นหาทั่วภูเก็ตควรเริ่มจากเป้าหมาย: อยู่อาศัย พักผ่อน ขายต่อ ที่ดิน หรือย้ายถิ่นฐาน จากนั้นทำเลและประเภททรัพย์จะชัดเจนขึ้น',
         },
         'default': {
             'profile': 'ความต้องการในพื้นที่และการเดินทางจริง',
@@ -671,7 +660,11 @@ class LocationListView(ListView):
 
     def get_queryset(self):
         return District.objects.annotate(
-            properties_count=Count('property', filter=Q(property__is_active=True, property__status='available'))
+            properties_count=Count('property', filter=Q(
+                property__is_active=True,
+                property__status='available',
+                property__deal_type='sale',
+            ))
         ).filter(properties_count__gt=0)
 
     def get_context_data(self, **kwargs):
@@ -715,11 +708,11 @@ class DistrictDetailView(DetailView):
         copy = _copy_for(language_code)
 
         # Недвижимость в районе
-        base_queryset = Property.objects.filter(
+        base_queryset = public_sale_queryset(Property.objects.filter(
             district=self.object,
             is_active=True,
-            status='available'
-        ).select_related('property_type').prefetch_related('images')
+            status='available',
+        )).select_related('property_type').prefetch_related('images')
 
         currency_code = CurrencyService.get_selected_currency_code(self.request)
         median_price, median_currency = _median_sale_price_for_currency(
@@ -759,7 +752,11 @@ class DistrictDetailView(DetailView):
             .annotate(
                 active_property_count=Count(
                     'property',
-                    filter=Q(property__is_active=True, property__status='available'),
+                    filter=Q(
+                        property__is_active=True,
+                        property__status='available',
+                        property__deal_type='sale',
+                    ),
                 )
             )
             .filter(active_property_count__gt=0)
@@ -868,11 +865,11 @@ class LocationDetailView(DetailView):
         copy = _copy_for(language_code)
 
         # Недвижимость в локации
-        base_queryset = Property.objects.filter(
+        base_queryset = public_sale_queryset(Property.objects.filter(
             location=self.object,
             is_active=True,
-            status='available'
-        ).select_related('property_type').prefetch_related('images')
+            status='available',
+        )).select_related('property_type').prefetch_related('images')
 
         currency_code = CurrencyService.get_selected_currency_code(self.request)
         median_price, median_currency = _median_sale_price_for_currency(

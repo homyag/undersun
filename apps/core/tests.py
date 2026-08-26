@@ -355,7 +355,6 @@ class StaticSitemapLastmodTests(SimpleTestCase):
         expected_urls = [
             'http://localhost/en/property/',
             'http://localhost/en/property/sale/',
-            'http://localhost/en/property/rent/',
             'http://localhost/en/property/type/villa/',
             'http://localhost/en/locations/',
             'http://localhost/en/locations/sitemap-district/',
@@ -365,6 +364,8 @@ class StaticSitemapLastmodTests(SimpleTestCase):
         for url in expected_urls:
             with self.subTest(url=url):
                 self.assertEqual(lastmods[url], expected_value)
+
+        self.assertNotIn('http://localhost/en/property/rent/', lastmods)
 
 
 class NavigationContextTests(SimpleTestCase):

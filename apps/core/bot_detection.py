@@ -139,7 +139,13 @@ class BotDetectionService:
 
         # Block truly headerless browser-like traffic and clients that keep
         # requesting HTML without running JS.
-        if not user_agent or user_agent == '-' or (missing_accept_lang and missing_accept_encoding):
+        # Meta's company URL validator can probe the public site root without
+        # a User-Agent. Permit that one harmless read while retaining the
+        # headerless-client block for every other HTML endpoint.
+        is_public_site_root = path in ('/', '/ru/', '/en/', '/th/')
+        if not is_public_site_root and (
+            not user_agent or user_agent == '-' or (missing_accept_lang and missing_accept_encoding)
+        ):
             score += self._add_match(matches, 'missing_headers_critical', 'noheader')
 
         cookie_token = request.COOKIES.get(self.challenge_cookie)

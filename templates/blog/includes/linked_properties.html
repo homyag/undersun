@@ -50,15 +50,9 @@
                                             {{ link.display_property_type }}
                                         </span>
                                     {% endif %}
-                                    {% if property.deal_type == 'rent' %}
-                                        <span class="blog-linked-property-card__badge blog-linked-property-card__badge--rent">
-                                            {% trans "Аренда" %}
-                                        </span>
-                                    {% else %}
-                                        <span class="blog-linked-property-card__badge blog-linked-property-card__badge--sale">
-                                            {% trans "Продажа" %}
-                                        </span>
-                                    {% endif %}
+                                    <span class="blog-linked-property-card__badge blog-linked-property-card__badge--sale">
+                                        {% trans "Продажа" %}
+                                    </span>
                                 </div>
                             </a>
 

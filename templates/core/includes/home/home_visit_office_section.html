@@ -165,16 +165,7 @@
                     class="w-full border-2 border-gray-200 focus:outline-none focus:border-accent rounded-lg px-4 py-3 text-gray-900 placeholder-gray-500 transition-all duration-200 resize-none"></textarea>
         </div>
 
-        <div class="flex items-start space-x-3">
-          <input type="checkbox" 
-                 id="meeting_privacy_consent" 
-                 name="privacy_consent"
-                 required
-                 class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent mt-1" />
-          <label for="meeting_privacy_consent" class="text-sm text-gray-600 leading-relaxed">
-            {% trans "Я согласен(на) с" %} <a href="{% url 'core:privacy' %}" class="text-accent underline hover:text-yellow-500 transition-colors">{% trans "политикой конфиденциальности" %}</a>
-          </label>
-        </div>
+        {% include 'core/includes/privacy_consent_checkbox.html' with privacy_consent_id='meeting-privacy-consent' %}
 
         <button type="submit" 
                 class="w-full bg-accent hover:bg-yellow-500 text-gray-900 font-bold py-3 px-8 rounded-md transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">

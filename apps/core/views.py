@@ -24,6 +24,7 @@ from apps.core.legacy_redirects import (
 )
 from apps.core.utils import build_query_string, truncate_meta
 from apps.properties.models import Property, PropertyFeature, PropertyType, PROPERTY_FALLBACK_LABELS
+from apps.properties.public_inventory import public_sale_queryset
 from apps.properties.views import PropertyListView
 from apps.locations.models import District, Location
 from apps.blog.models import BlogPost
@@ -52,13 +53,6 @@ def serialize_properties_for_js(properties):
     result = []
     language_code = (get_language() or 'ru')[:2]
 
-    def get_price_deal_type(prop):
-        if prop.deal_type == 'rent':
-            return 'rent'
-        if prop.deal_type == 'both' and not prop.price_sale_thb and prop.price_rent_monthly_thb:
-            return 'rent'
-        return 'sale'
-
     def format_home_price(prop, currency_code, deal_type):
         labels = PROPERTY_FALLBACK_LABELS.get(language_code, PROPERTY_FALLBACK_LABELS['ru'])
         price = prop.get_price_in_currency(currency_code, deal_type)
@@ -67,8 +61,6 @@ def serialize_properties_for_js(properties):
 
         symbols = {'USD': '$', 'THB': '฿', 'RUB': '₽'}
         price_display = f"{symbols.get(currency_code, currency_code)}{float(price):,.0f}"
-        if deal_type == 'rent':
-            price_display += labels['per_month']
         return price_display
 
     def get_price_amount(prop, currency_code, deal_type):
@@ -82,7 +74,7 @@ def serialize_properties_for_js(properties):
             main_image_url = prop.main_image.medium_url
             main_image_thumbnail_url = prop.main_image.thumbnail_url
 
-        price_deal_type = get_price_deal_type(prop)
+        price_deal_type = 'sale'
         price_formatted = format_home_price(prop, 'USD', price_deal_type)
         
         result.append({
@@ -98,7 +90,7 @@ def serialize_properties_for_js(properties):
             'property_type': prop._get_translated_type_name(language_code),
             'property_type_name': prop._get_translated_type_name(language_code),
             'property_type_key': prop.property_type.name if prop.property_type else '',
-            'deal_type': prop.deal_type,
+            'deal_type': 'sale',
             'bedrooms': prop.bedrooms or 0,
             'bathrooms': prop.bathrooms or 0,
             'area': float(prop.area_total) if prop.area_total else 0,
@@ -106,9 +98,6 @@ def serialize_properties_for_js(properties):
             'price_sale_usd': get_price_amount(prop, 'USD', 'sale'),
             'price_sale_thb': get_price_amount(prop, 'THB', 'sale'),
             'price_sale_rub': get_price_amount(prop, 'RUB', 'sale'),
-            'price_rent_usd': get_price_amount(prop, 'USD', 'rent'),
-            'price_rent_thb': get_price_amount(prop, 'THB', 'rent'),
-            'price_rent_rub': get_price_amount(prop, 'RUB', 'rent'),
             # Цены за квадратный метр
             'price_per_sqm_thb': prop.get_formatted_price_per_sqm('THB', prop.deal_type),
             'price_per_sqm_usd': prop.get_formatted_price_per_sqm('USD', prop.deal_type), 
@@ -126,11 +115,11 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         # Рекомендуемая недвижимость по типам недвижимости
-        base_featured = Property.objects.filter(
+        base_featured = public_sale_queryset(Property.objects.filter(
             is_featured=True,
             is_active=True,
-            status='available'
-        ).select_related('district', 'property_type').prefetch_related('images').order_by('-featured_priority', '-updated_at')
+            status='available',
+        )).select_related('district', 'property_type').prefetch_related('images').order_by('-featured_priority', '-updated_at')
         
         featured_villa = list(base_featured.filter(property_type__name='villa')[:9])
         featured_condo = list(base_featured.filter(property_type__name='condo')[:9])
@@ -143,9 +132,6 @@ class HomeView(TemplateView):
                 ('price_sale_thb', 'THB'),
                 ('price_sale_usd', 'USD'),
                 ('price_sale_rub', 'RUB'),
-                ('price_rent_monthly_thb', 'THB'),
-                ('price_rent_monthly', 'USD'),
-                ('price_rent_monthly_rub', 'RUB'),
             ]
             for field, currency in candidates:
                 value = getattr(prop, field, None)
@@ -189,12 +175,20 @@ class HomeView(TemplateView):
 
         # Статистика по типам
         context['property_stats'] = PropertyType.objects.annotate(
-            count=Count('property', filter=Q(property__is_active=True, property__status='available'))
+            count=Count('property', filter=Q(
+                property__is_active=True,
+                property__status='available',
+                property__deal_type='sale',
+            ))
         ).filter(count__gt=0)
 
         # Районы с количеством объектов
         context['districts'] = District.objects.annotate(
-            properties_count=Count('property', filter=Q(property__is_active=True, property__status='available'))
+            properties_count=Count('property', filter=Q(
+                property__is_active=True,
+                property__status='available',
+                property__deal_type='sale',
+            ))
         ).filter(properties_count__gt=0)
 
         # Активный рекламный баннер
@@ -205,16 +199,16 @@ class HomeView(TemplateView):
         context['property_types'] = PropertyType.ordered_for_navigation()
         
         # Общее количество активных объектов
-        context['total_properties_count'] = Property.objects.filter(
+        context['total_properties_count'] = public_sale_queryset(Property.objects.filter(
             is_active=True,
-            status='available'
-        ).count()
+            status='available',
+        )).count()
         
         # Новые поступления (до 4 объектов)
-        context['recent_properties'] = Property.objects.filter(
+        context['recent_properties'] = public_sale_queryset(Property.objects.filter(
             is_active=True,
-            status='available'
-        ).select_related('district', 'location', 'property_type').prefetch_related('images').order_by('-created_at')[:4]
+            status='available',
+        )).select_related('district', 'location', 'property_type').prefetch_related('images').order_by('-created_at')[:4]
         
         # Последние новости (3 новости для главной страницы)
         context['latest_news'] = BlogPost.get_published().select_related('category', 'author').order_by('-published_at')[:3]
@@ -258,7 +252,7 @@ class AboutView(TemplateView):
         context = super().get_context_data(**kwargs)
         
         # Добавляем услуги для меню
-        context['menu_services'] = Service.get_menu_services()
+        context['menu_services'] = Service.get_menu_services().exclude(slug='renting-property')
         
         return context
 
@@ -278,16 +272,16 @@ class SearchView(TemplateView):
         property_type = self.request.GET.get('type', '')
         district = self.request.GET.get('district', '')
         location = self.request.GET.get('location', '')
-        deal_type = self.request.GET.get('deal_type', '')
+        deal_type = 'sale'
         min_price = self.request.GET.get('min_price', '')
         max_price = self.request.GET.get('max_price', '')
         bedrooms = self.request.GET.get('bedrooms', '')
 
         # Базовый запрос
-        properties = Property.objects.filter(
+        properties = public_sale_queryset(Property.objects.filter(
             is_active=True,
-            status='available'
-        ).select_related('district', 'property_type').prefetch_related('images')
+            status='available',
+        )).select_related('district', 'property_type').prefetch_related('images')
 
         # Фильтрация
         if query:
@@ -306,15 +300,11 @@ class SearchView(TemplateView):
         if location:
             properties = properties.filter(location__id=location)
 
-        if deal_type:
-            properties = properties.filter(deal_type=deal_type)
-
         sort_param = self.request.GET.get('sort')
         sort_by = sort_param or '-created_at'
         allowed_sorts = [
             'price_sale_usd', '-price_sale_usd',
             'price_sale_thb', '-price_sale_thb',
-            'price_rent_monthly', '-price_rent_monthly',
             'area_total', '-area_total',
             'created_at', '-created_at'
         ]
@@ -333,25 +323,19 @@ class SearchView(TemplateView):
         # Получаем текущую валюту (аналогично context_processor)
         selected_currency_code = CurrencyService.get_selected_currency_code(self.request)
         current_currency = CurrencyService.get_currency_by_code(selected_currency_code)
-        sale_field, rent_field = CurrencyService.get_price_field_names(selected_currency_code)
+        sale_field, _rent_field = CurrencyService.get_price_field_names(selected_currency_code)
 
         if min_price:
             try:
                 min_val = Decimal(min_price)
-                price_filter = Q(**{f"{sale_field}__gte": min_val})
-                if rent_field:
-                    price_filter |= Q(**{f"{rent_field}__gte": min_val})
-                properties = properties.filter(price_filter)
+                properties = properties.filter(**{f"{sale_field}__gte": min_val})
             except (InvalidOperation, ValueError):
                 pass
 
         if max_price:
             try:
                 max_val = Decimal(max_price)
-                price_filter = Q(**{f"{sale_field}__lte": max_val})
-                if rent_field:
-                    price_filter |= Q(**{f"{rent_field}__lte": max_val})
-                properties = properties.filter(price_filter)
+                properties = properties.filter(**{f"{sale_field}__lte": max_val})
             except (InvalidOperation, ValueError):
                 pass
 
@@ -422,12 +406,12 @@ class MapView(TemplateView):
         if self._is_rebuild_enabled():
             return self._get_rebuild_context(context)
 
-        properties_qs = Property.objects.filter(
+        properties_qs = public_sale_queryset(Property.objects.filter(
             is_active=True,
             status='available',
             latitude__isnull=False,
             longitude__isnull=False
-        ).select_related('district', 'property_type', 'agent', 'contact_person').prefetch_related('images')
+        )).select_related('district', 'property_type', 'agent', 'contact_person').prefetch_related('images')
 
         property_list_view = PropertyListView()
         property_list_view.request = self.request
@@ -458,18 +442,17 @@ class MapView(TemplateView):
 
         context['total_properties'] = len(properties)
         context['sale_properties'] = sum(1 for prop in properties if prop.deal_type in ['sale', 'both'])
-        context['rent_properties'] = sum(1 for prop in properties if prop.deal_type in ['rent', 'both'])
         context['districts_count'] = District.objects.filter(
             property__is_active=True,
             property__status='available'
         ).distinct().count()
 
         # Featured properties data reused on map page
-        featured_base = Property.objects.filter(
+        featured_base = public_sale_queryset(Property.objects.filter(
             is_featured=True,
             is_active=True,
-            status='available'
-        ).select_related('district', 'property_type').prefetch_related('images')
+            status='available',
+        )).select_related('district', 'property_type').prefetch_related('images')
 
         context['featured_properties_villa'] = mark_safe(serialize_properties_for_js(
             featured_base.filter(property_type__name='villa')[:9]
@@ -529,12 +512,12 @@ class MapView(TemplateView):
         if language_code not in {'ru', 'en', 'th'}:
             language_code = 'ru'
 
-        properties_qs = Property.objects.filter(
+        properties_qs = public_sale_queryset(Property.objects.filter(
             is_active=True,
             status='available',
             latitude__isnull=False,
             longitude__isnull=False,
-        ).select_related('district', 'location', 'property_type')
+        )).select_related('district', 'location', 'property_type')
         property_list_view = PropertyListView()
         property_list_view.request = self.request
         properties = list(property_list_view.apply_filters(properties_qs)[:10])
@@ -615,7 +598,6 @@ class MapView(TemplateView):
                     'filters': str(gettext('Фильтры')),
                     'all': str(gettext('Все')),
                     'sale': str(gettext('Продажа')),
-                    'rent': str(gettext('Аренда')),
                     'propertyType': str(gettext('Тип недвижимости')),
                     'buildStatus': str(gettext('Стадия готовности')),
                     'district': str(gettext('Район')),
@@ -991,7 +973,7 @@ class StaticSitemapView(SitemapBaseView):
     def get(self, request, *args, **kwargs):
         base_url = self._get_base_url(request)
         entries = []
-        active_properties = Property.objects.filter(is_active=True, status='available')
+        active_properties = public_sale_queryset(Property.objects.filter(is_active=True, status='available'))
         section_lastmods = {
             'all': self._property_lastmod(active_properties),
             'sale': self._property_lastmod(active_properties.filter(deal_type__in=['sale', 'both'])),
@@ -1050,7 +1032,7 @@ class StaticSitemapView(SitemapBaseView):
             entries.extend(self._expand_entries(alternates, self._format_lastmod(location.sitemap_lastmod)))
 
         # Services
-        for service in Service.objects.filter(is_active=True):
+        for service in Service.objects.filter(is_active=True).exclude(slug='renting-property'):
             alternates = self._build_alternates(base_url, service.get_absolute_url)
             lastmod = service.updated_at.isoformat() if service.updated_at else None
             entries.extend(self._expand_entries(alternates, lastmod))
@@ -1077,7 +1059,7 @@ class PropertySitemapView(SitemapBaseView):
         base_url = self._get_base_url(request)
         entries = []
 
-        for prop in Property.objects.filter(is_active=True, status='available').order_by('id'):
+        for prop in public_sale_queryset(Property.objects.filter(is_active=True, status='available')).order_by('id'):
             alternates = self._build_alternates(base_url, prop.get_absolute_url)
             lastmod = prop.updated_at.isoformat() if prop.updated_at else None
             entries.extend(self._expand_entries(alternates, lastmod))
@@ -1093,8 +1075,7 @@ class ImageSitemapView(SitemapBaseView):
         entries = []
 
         properties = (
-            Property.objects
-            .filter(is_active=True, status='available')
+            public_sale_queryset(Property.objects.filter(is_active=True, status='available'))
             .select_related('district', 'location', 'property_type')
             .prefetch_related('images')
             .order_by('id')
@@ -1171,9 +1152,14 @@ class ServiceDetailView(DetailView):
     slug_field = 'slug'
     slug_url_kwarg = 'slug'
 
+    def dispatch(self, request, *args, **kwargs):
+        if kwargs.get(self.slug_url_kwarg) == 'renting-property':
+            return HttpResponsePermanentRedirect(reverse('properties:property_sale'))
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         """Получить только активные услуги"""
-        return Service.objects.filter(is_active=True)
+        return Service.objects.filter(is_active=True).exclude(slug='renting-property')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1185,7 +1171,7 @@ class ServiceDetailView(DetailView):
         localized_meta_description = getattr(service, f'meta_description_{language_code}', '') if language_code != 'ru' else service.meta_description
 
         # Добавляем все услуги для меню
-        context['all_services'] = Service.get_menu_services()
+        context['all_services'] = Service.get_menu_services().exclude(slug='renting-property')
         context['localized_menu_services'] = [
             {
                 'slug': menu_service.slug,
@@ -1203,7 +1189,9 @@ class ServiceDetailView(DetailView):
             language_code=language_code,
             localized_meta_title=localized_meta_title,
         )
-        context['page_description'] = truncate_meta(localized_meta_description or page_copy.get('description') or service.description)
+        context['page_description'] = truncate_meta(
+            localized_meta_description or page_copy.get('description') or service.description
+        )
         context['page_keywords'] = service.meta_keywords
         context['service_landing'] = service_landing
         context['service_display_title'] = page_copy.get('title') or service_landing.get('badge') or service.title
@@ -1572,11 +1560,11 @@ class ServiceDetailView(DetailView):
         from apps.properties.models import Property, PropertyType
         
         # Базовый queryset для рекомендуемых объектов
-        base_queryset = Property.objects.filter(
+        base_queryset = public_sale_queryset(Property.objects.filter(
             is_featured=True,
             is_active=True,
-            status='available'
-        ).select_related('district', 'property_type').prefetch_related('images').order_by('-featured_priority', '-updated_at')
+            status='available',
+        )).select_related('district', 'property_type').prefetch_related('images').order_by('-featured_priority', '-updated_at')
         
         # Фильтруем по типу услуги
         if service.slug == 'buying-property':
@@ -1585,9 +1573,6 @@ class ServiceDetailView(DetailView):
         elif service.slug == 'selling-property':
             # Продажа недвижимости: не показывать блок
             return Property.objects.none()
-        elif service.slug == 'renting-property':
-            # Аренда недвижимости: объекты для аренды
-            return base_queryset.filter(deal_type__in=['rent', 'both'])
         elif service.slug == 'commercial-real-estate':
             # Коммерческая недвижимость: готовый бизнес
             return base_queryset.filter(property_type__name='business')

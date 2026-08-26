@@ -107,7 +107,7 @@ def serialize_map_properties(properties, request, language_code):
                 language_code,
                 property_obj.property_type.name_display if property_obj.property_type else '',
             ),
-            'deal_type': property_obj.deal_type,
+            'deal_type': 'sale',
             'price': price_formatter.format(property_obj),
             'location': _get_localized_value(
                 property_obj.location,

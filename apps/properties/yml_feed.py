@@ -15,6 +15,7 @@ from django.utils.translation import override
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 from apps.properties.models import Property, PropertyImage
+from apps.properties.public_inventory import public_sale_queryset
 
 
 class YandexYmlFeedGenerator:
@@ -30,13 +31,6 @@ class YandexYmlFeedGenerator:
         | Q(price_sale_usd__gt=0)
         | Q(price_sale_thb__gt=0)
     )
-    PRICE_RENT_FILTER = (
-        Q(price_rent_monthly_rub__gt=0)
-        | Q(price_rent_monthly__gt=0)
-        | Q(price_rent_monthly_thb__gt=0)
-    )
-    PRICE_ANY_FILTER = PRICE_SALE_FILTER | PRICE_RENT_FILTER
-
     def __init__(self, base_url: str, language_code: str = 'ru') -> None:
         self.base_url = (base_url or '').rstrip('/')
         self.language_code = language_code or 'ru'
@@ -52,10 +46,10 @@ class YandexYmlFeedGenerator:
     def generate(self) -> bytes:
         """Return rendered XML payload."""
 
-        base_queryset = Property.objects.filter(
+        base_queryset = public_sale_queryset(Property.objects.filter(
             is_active=True,
-            status='available'
-        ).filter(self.PRICE_ANY_FILTER)
+            status='available',
+        )).filter(self.PRICE_SALE_FILTER)
 
         sets = self._build_sets(base_queryset)
         properties = self._prepare_properties_queryset(base_queryset)
@@ -126,7 +120,6 @@ class YandexYmlFeedGenerator:
 
         with override(self.language_code):
             sale_url = self._build_absolute_url(reverse('properties:property_sale'))
-            rent_url = self._build_absolute_url(reverse('properties:property_rent'))
 
             sale_count = queryset.filter(self.PRICE_SALE_FILTER).count()
             if sale_count >= self.MIN_SET_SIZE:
@@ -135,16 +128,6 @@ class YandexYmlFeedGenerator:
                     'name': 'Недвижимость на продажу',
                     'url': sale_url,
                     'description': f'Каталог объектов на продажу ({sale_count} предложений)',
-                    'picture': '',
-                }
-
-            rent_count = queryset.filter(self.PRICE_RENT_FILTER).count()
-            if rent_count >= self.MIN_SET_SIZE:
-                sets['deal-rent'] = {
-                    'id': 'deal-rent',
-                    'name': 'Недвижимость в аренду',
-                    'url': rent_url,
-                    'description': f'Недвижимость для аренды ({rent_count} предложений)',
                     'picture': '',
                 }
 
@@ -241,7 +224,7 @@ class YandexYmlFeedGenerator:
 
         # Mandatory params in the specification
         self._append_param(offer_element, 'Конверсия', str(self._calculate_conversion_score(property_obj)))
-        self._append_param(offer_element, 'Тип предложения', 'Продажа' if active_deal_type == 'sale' else 'Аренда')
+        self._append_param(offer_element, 'Тип предложения', 'Продажа')
 
         # Optional params that we can currently populate
         self._append_param(offer_element, 'Посуточно', self._format_bool(False))
@@ -280,9 +263,6 @@ class YandexYmlFeedGenerator:
         self._append_param(offer_element, 'Размещено агентом', self._format_bool(True))
         self._append_param(offer_element, 'Проверено в ЕГРН', self._format_bool(False))
 
-        if active_deal_type == 'rent':
-            self._append_param(offer_element, 'Включая коммунальные услуги', self._format_bool(False))
-
         if property_obj.developer and property_obj.developer.website:
             self._append_param(offer_element, 'Сайт застройщика', property_obj.developer.website)
 
@@ -309,9 +289,6 @@ class YandexYmlFeedGenerator:
 
         if active_deal_type == 'sale' and 'deal-sale' in sets:
             set_ids.append('deal-sale')
-        if active_deal_type == 'rent' and 'deal-rent' in sets:
-            set_ids.append('deal-rent')
-
         return set_ids
 
     def _extract_price(self, property_obj: Property) -> Tuple[Optional[Decimal], Optional[str], Optional[str]]:
@@ -320,27 +297,9 @@ class YandexYmlFeedGenerator:
             ('price_sale_usd', 'USD'),
             ('price_sale_thb', 'THB'),
         ]
-        rent_priorities = [
-            ('price_rent_monthly_rub', 'RUB'),
-            ('price_rent_monthly', 'USD'),
-            ('price_rent_monthly_thb', 'THB'),
-        ]
-
-        if property_obj.deal_type in ('sale', 'both'):
-            price = self._resolve_price_from_fields(property_obj, sale_priorities)
-            if price:
-                return price[0], price[1], 'sale'
-
-        if property_obj.deal_type in ('rent', 'both'):
-            price = self._resolve_price_from_fields(property_obj, rent_priorities)
-            if price:
-                return price[0], price[1], 'rent'
-
-        # Fallback: try any available price regardless of declared deal type.
-        price = self._resolve_price_from_fields(property_obj, sale_priorities + rent_priorities)
+        price = self._resolve_price_from_fields(property_obj, sale_priorities)
         if price:
-            inferred_deal = 'sale' if price[2] == 'sale' else 'rent'
-            return price[0], price[1], inferred_deal
+            return price[0], price[1], 'sale'
 
         return None, None, None
 
@@ -352,8 +311,7 @@ class YandexYmlFeedGenerator:
         for field_name, currency in fields:
             value = getattr(property_obj, field_name)
             if value:
-                deal = 'sale' if 'sale' in field_name else 'rent'
-                return Decimal(value), currency, deal
+                return Decimal(value), currency, 'sale'
         return None
 
     def _get_picture_urls(self, property_obj: Property) -> List[str]:

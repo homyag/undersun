@@ -44,3 +44,29 @@ class BotDetectionServiceTests(SimpleTestCase):
         self.assertEqual(result.action, 'block')
         self.assertEqual(result.score, 25)
         self.assertEqual([match.key for match in result.matched_rules], ['suspicious_user_agent'])
+
+    def test_headerless_request_to_public_site_root_is_allowed(self):
+        request = RequestFactory().get('/')
+
+        result = BotDetectionService().evaluate(request, '203.0.113.10', '127.0.0.1')
+
+        self.assertEqual(result.action, 'allow')
+        self.assertEqual(result.score, 0)
+
+    def test_headerless_request_to_catalog_remains_blocked(self):
+        request = RequestFactory().get('/en/property/')
+
+        result = BotDetectionService().evaluate(request, '203.0.113.10', '127.0.0.1')
+
+        self.assertEqual(result.action, 'block')
+        self.assertEqual(result.score, 120)
+
+
+class MetaCrawlerWhitelistTests(SimpleTestCase):
+    def test_meta_crawlers_are_whitelisted(self):
+        service = BotDetectionService()
+
+        self.assertTrue(service.is_user_agent_whitelisted('Facebot'))
+        self.assertTrue(service.is_user_agent_whitelisted('meta-externalfetcher/1.1'))
+        self.assertTrue(service.is_user_agent_whitelisted('meta-webindexer/1.1'))
+        self.assertTrue(service.is_user_agent_whitelisted('WhatsApp/2.24.0 A'))
