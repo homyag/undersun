@@ -10,10 +10,24 @@
     <p>Найдите комплекс, получите его предложения, затем укажите, каким карточкам Undersun они соответствуют.</p>
     <p class="muted">Вы сами выбираете изменения перед сохранением. Получение списка не добавляет объекты на сайт.</p>
     {% if can_sync %}<form method="post" action="{% url 'admin:arealisting_arealistingproject_sync_projects' %}" data-loading="Получаем список комплексов…">
-      {% csrf_token %}<button type="submit" class="secondary">Обновить список проектов</button>
+      {% csrf_token %}<button type="submit" class="secondary"{% if sync_running %} disabled{% endif %}>Обновить список проектов</button>
       <span class="muted">Начните здесь, если нужного комплекса ещё нет.</span>
     </form>{% endif %}
   </section>
+  {% if latest_sync_job %}
+  <section class="sync-dashboard" aria-labelledby="manual-sync-title">
+    <h2 id="manual-sync-title">Последнее обновление по кнопке</h2>
+    <p>Запуск от {{ latest_sync_job.created_at|date:"d.m.Y H:i T" }} · {{ latest_sync_job.get_status_display }}.</p>
+    {% if latest_sync_job.status == 'PENDING' or latest_sync_job.status == 'RUNNING' %}
+      <p class="dashboard-notice">Обновление идёт в фоне. Можно закрыть страницу и вернуться позже. <a href="{{ request.get_full_path }}">Обновить статус</a>.</p>
+    {% elif latest_sync_job.status == 'SUCCESS' %}
+      {% if latest_sync_job.summary.projects %}<p>Проверено проектов: {{ latest_sync_job.summary.projects.seen|default:0 }}; ошибок: {{ latest_sync_job.summary.projects.errors|default:0 }}.</p>{% endif %}
+      {% if latest_sync_job.summary.units %}<p>Проверено предложений: {{ latest_sync_job.summary.units.seen|default:0 }}; ошибок: {{ latest_sync_job.summary.units.errors|default:0 }}.</p>{% endif %}
+    {% elif latest_sync_job.status == 'FAILED' %}
+      <p class="dashboard-alert">Обновление не выполнено: {{ latest_sync_job.error }} Повторите запуск после проверки ошибки.</p>
+    {% endif %}
+  </section>
+  {% endif %}
   {% if can_view_review_queue %}
   <section class="work-queue" aria-labelledby="review-queue-link-title">
     <div class="dashboard-heading">

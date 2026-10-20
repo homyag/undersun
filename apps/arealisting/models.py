@@ -568,6 +568,49 @@ class ArealistingSyncRun(models.Model):
         return f'{self.get_mode_display()} — {self.started_at:%Y-%m-%d %H:%M:%S}'
 
 
+class ArealistingSyncJob(models.Model):
+    """Admin request queued for a short-lived worker outside the HTTP process."""
+
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', _('Ожидает')
+        RUNNING = 'RUNNING', _('Выполняется')
+        SUCCESS = 'SUCCESS', _('Завершено')
+        FAILED = 'FAILED', _('Ошибка')
+
+    queue_key = models.CharField(max_length=16, default='admin', editable=False)
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name=_('Запустил'),
+    )
+    status = models.CharField(
+        _('Статус'), max_length=12, choices=Status.choices,
+        default=Status.PENDING, db_index=True,
+    )
+    resources = models.JSONField(_('Ресурсы'), default=list)
+    project_ids = models.JSONField(_('Project IDs'), default=list, blank=True)
+    full = models.BooleanField(_('Полная синхронизация'), default=True)
+    summary = models.JSONField(_('Итог'), default=dict, blank=True)
+    error = models.TextField(_('Ошибка'), blank=True)
+    created_at = models.DateTimeField(_('Создано'), auto_now_add=True)
+    started_at = models.DateTimeField(_('Начато'), null=True, blank=True)
+    finished_at = models.DateTimeField(_('Завершено'), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('Фоновое обновление AREALISTING')
+        verbose_name_plural = _('Фоновые обновления AREALISTING')
+        ordering = ('-created_at', '-pk')
+        constraints = [
+            models.UniqueConstraint(
+                fields=('queue_key',),
+                condition=models.Q(status__in=('PENDING', 'RUNNING')),
+                name='uniq_active_arealisting_sync_job',
+            ),
+        ]
+
+    def __str__(self):
+        return f'Обновление AREALISTING #{self.pk} — {self.get_status_display()}'
+
+
 class ArealistingPropertyChange(models.Model):
     class Kind(models.TextChoices):
         MATCH = 'MATCH', _('Сопоставление')

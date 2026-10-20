@@ -19,7 +19,6 @@ from django.utils import timezone
 from urllib.parse import urlencode
 from urllib.parse import urlsplit
 
-from .client import ArealistingClient
 from .exceptions import ArealistingError
 from .models import (
     ArealistingAsset,
@@ -34,11 +33,13 @@ from .models import (
     ArealistingMediaJob,
     ArealistingSkippedUnit,
     ArealistingSyncRun,
+    ArealistingSyncJob,
     ArealistingSyncEvent,
     ArealistingSyncState,
     ArealistingUnit,
 )
 from .services.sync import ArealistingSyncService
+from .services.sync_jobs import queue_sync_job, recover_stale_sync_jobs, start_sync_worker
 from .services.matching import (FIELDS, PROJECT_FIELD_KEYS, project_proposals,
                                 proposals, unavailable_reason, save_links, unit_preview)
 from .services.drafts import create_draft, preview_draft, restore_units, skip_units
@@ -288,10 +289,13 @@ def _sync_event_detail(event):
 
 def dashboard_context(request):
     """Build a concise operational snapshot for the integration workspace."""
+    recover_stale_sync_jobs()
     latest_run = ArealistingSyncRun.objects.filter(
         status=ArealistingSyncRun.Status.SUCCESS,
     ).first()
     latest_attempt = ArealistingSyncRun.objects.first()
+    latest_sync_job = ArealistingSyncJob.objects.first()
+    sync_lock = ArealistingSyncState.objects.filter(key=ArealistingSyncService.LOCK_KEY).first()
     summary = latest_run.summary if latest_run and isinstance(latest_run.summary, dict) else {}
     unit_stats = summary.get('units') if isinstance(summary.get('units'), dict) else {}
     project_stats = (
@@ -443,9 +447,16 @@ def dashboard_context(request):
     return {
         'latest_successful_run': latest_run,
         'latest_sync_error': latest_error,
+        'latest_sync_job': latest_sync_job,
         'sync_running': bool(
-            latest_attempt
-            and latest_attempt.status == ArealistingSyncRun.Status.RUNNING
+            (sync_lock and sync_lock.status == ArealistingSyncState.Status.RUNNING
+             and sync_lock.current_started_at
+             and sync_lock.current_started_at >= timezone.now() - ArealistingSyncService.LOCK_STALE_AFTER)
+            or (latest_attempt and latest_attempt.status == ArealistingSyncRun.Status.RUNNING
+                and latest_attempt.started_at >= timezone.now() - ArealistingSyncService.LOCK_STALE_AFTER)
+            or (latest_sync_job and latest_sync_job.status in (
+                ArealistingSyncJob.Status.PENDING, ArealistingSyncJob.Status.RUNNING,
+            ))
         ),
         'recent_changes': {
             'new_projects': project_stats.get('created', 0),
@@ -1240,22 +1251,35 @@ class ArealistingProjectAdmin(SourceReadOnlyAdmin):
         return confirmed == len(external_ids)
 
     def _run_sync(self, request, *, resources, project_ids=None, full=True):
-        client = None
         try:
-            client = ArealistingClient()
-            summary = ArealistingSyncService(client=client).sync(
-                resources=resources,
-                full=full,
-                project_ids=project_ids,
+            job, created = queue_sync_job(
+                resources=resources, project_ids=project_ids, full=full,
+                actor=request.user,
             )
+            if created:
+                try:
+                    start_sync_worker(job.pk)
+                except OSError:
+                    job.status = ArealistingSyncJob.Status.FAILED
+                    job.error = 'Не удалось запустить фоновый обработчик. Повторите обновление.'
+                    job.finished_at = timezone.now()
+                    job.save(update_fields=('status', 'error', 'finished_at'))
+                    raise ArealistingError(job.error)
         except (ArealistingError, ValueError) as exc:
             self.message_user(request, f'Ошибка AREALISTING: {exc}', messages.ERROR)
             return False
-        finally:
-            if client is not None:
-                client.close()
-        total = sum(stats['seen'] for stats in summary.values() if isinstance(stats, dict) and 'seen' in stats)
-        self.message_user(request, f'Данные получены. Проверено записей: {total}. Теперь можно подобрать карточки Undersun.', messages.SUCCESS)
+        if created:
+            self.message_user(
+                request,
+                'Обновление AREALISTING запущено в фоне. Статус и результат появятся на этой странице.',
+                messages.SUCCESS,
+            )
+        else:
+            self.message_user(
+                request,
+                f'Обновление AREALISTING уже ожидает или выполняется (задание №{job.pk}).',
+                messages.INFO,
+            )
         return True
 
     def sync_projects_view(self, request):
