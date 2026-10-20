@@ -14,6 +14,7 @@ from apps.arealisting.models import (
     ArealistingPriceReview,
     ArealistingPropertyChange,
     ArealistingSyncRun,
+    ArealistingSyncJob,
     ArealistingSyncEvent,
     ArealistingUnit,
 )
@@ -47,6 +48,35 @@ class ArealistingAdminTests(TestCase):
         self.assertContains(response, 'Обновить список проектов')
         self.assertContains(response, 'Lavisco Living')
         self.assertContains(response, 'Nai Yang')
+
+    def test_sync_projects_button_queues_background_job_without_duplicate(self):
+        url = reverse('admin:arealisting_arealistingproject_sync_projects')
+        with patch('apps.arealisting.admin.start_sync_worker') as worker:
+            response = self.client.post(url)
+            repeated = self.client.post(url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(repeated.status_code, 302)
+        job = ArealistingSyncJob.objects.get()
+        self.assertEqual(job.status, ArealistingSyncJob.Status.PENDING)
+        self.assertEqual(job.resources, ['projects'])
+        self.assertTrue(job.full)
+        self.assertEqual(job.requested_by, self.user)
+        worker.assert_called_once_with(job.pk)
+
+        page = self.client.get(reverse('admin:arealisting_arealistingproject_changelist'))
+        self.assertContains(page, 'Обновление идёт в фоне')
+        self.assertTrue(page.context['sync_running'])
+
+    def test_sync_projects_reports_worker_start_failure(self):
+        url = reverse('admin:arealisting_arealistingproject_sync_projects')
+        with patch('apps.arealisting.admin.start_sync_worker', side_effect=OSError('spawn failed')):
+            response = self.client.post(url, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        job = ArealistingSyncJob.objects.get()
+        self.assertEqual(job.status, ArealistingSyncJob.Status.FAILED)
+        self.assertContains(response, 'Не удалось запустить фоновый обработчик')
 
     def test_integration_has_one_menu_entry_and_internal_pages_remain_accessible(self):
         response = self.client.get(reverse('admin:index'))
