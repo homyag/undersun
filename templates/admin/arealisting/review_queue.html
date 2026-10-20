@@ -1,0 +1,55 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261020-1">{% endblock %}
+{% block content %}
+<div class="matching review-queue-page">
+  <p><a href="{% url 'admin:arealisting_arealistingproject_changelist' %}">← К комплексам</a></p>
+  <section class="workspace-intro">
+    <h2>Очередь изменений AREALISTING</h2>
+    <p>Здесь собраны изменения предложений и карточек, которые ещё не отмечены как проверенные. Откройте карточку, сверьте данные и отметьте событие после проверки.</p>
+    <p>Для характеристик сравнение показывает значения конкретного предложения и текущее значение карточки. Если карточка объединяет несколько предложений, её значение может рассчитываться по всей группе.</p>
+  </section>
+  {% if pending_reviews %}<section class="work-queue">
+    <div class="dashboard-heading"><div><h2>Цены ждут решения</h2><p class="muted">Пока решение не принято, прежняя цена остаётся в карточке.</p></div></div>
+    <div class="work-queue-list">{% for review in pending_reviews %}<article class="work-queue-item">
+      <div><span class="meta-badge">{{ review.change_percent }}%</span><h3>{{ review.property }}</h3><p class="muted">{{ review.before.price_sale_thb|default:"—" }} → {{ review.after.price_sale_thb|default:"—" }} THB · {{ review.created_at|date:"d.m.Y H:i" }}</p></div>
+      <a href="{% url 'admin:arealisting_arealistingpricereview_review' review.pk %}">Проверить цену →</a>
+    </article>{% endfor %}</div>
+    {% if pending_reviews|length == 20 %}<p><a href="{% url 'admin:arealisting_arealistingpricereview_changelist' %}?status__exact=PENDING">Все предложения цен →</a></p>{% endif %}
+  </section>{% endif %}
+  {% if group_errors %}<section class="work-queue">
+    <div class="dashboard-heading"><div><h2>Почему данные не обновились</h2><p class="muted">Замечания последней проверки связанных карточек и следующий шаг для каждого случая. После исправления обновите данные, чтобы проверить результат.</p></div></div>
+    <div class="work-queue-list">{% for entry in group_errors %}<article class="work-queue-item">
+      <div><span class="meta-badge">Карточка</span><h3>{{ entry.group.property }}</h3><p class="muted">{{ entry.group.project }}</p>
+        {% for issue in entry.issues %}<div class="review-issue"><strong>{{ issue.reason }}</strong><p>{{ issue.next_step }}</p>{% if issue.intentional %}<small>Оставлено намеренно</small>{% endif %}{% if issue.action %}<a href="{{ issue.action.url }}">{{ issue.action.label }} →</a>{% endif %}</div>{% endfor %}
+      </div>
+      <a href="{% url 'admin:arealisting_arealistinglistinggroup_change' entry.group.pk %}">Открыть группу →</a>
+    </article>{% endfor %}</div>
+  </section>{% endif %}
+  <section class="work-queue">
+    <div class="dashboard-heading"><div><h2>События синхронизации · {{ page.paginator.count }}</h2><p class="muted">Новые предложения, продажи, изменения характеристик и цен. Проверенные события остаются в истории.</p></div></div>
+    <form method="get" class="review-queue-filters">
+      <label>Статус <select name="state"><option value="open"{% if state == 'open' %} selected{% endif %}>Открытые</option><option value="checked"{% if state == 'checked' %} selected{% endif %}>Проверенные</option></select></label>
+      <label>Тип <select name="kind"><option value="">Все изменения</option>{% for value, label in kinds %}<option value="{{ value }}"{% if kind == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <button type="submit">Показать</button>
+    </form>
+    {% if rows %}<div class="work-queue-list">{% for row in rows %}<article class="work-queue-item" id="event-{{ row.event.pk }}">
+      <div><span class="meta-badge">{{ row.event.get_kind_display }}</span><h3>{% if row.event.property %}{{ row.event.property }}{% elif row.event.project %}{{ row.event.project }}{% else %}Предложение AREALISTING{% endif %}</h3>
+        <p class="muted">{{ row.event.created_at|date:"d.m.Y H:i" }}{% if row.event.unit %} · {{ row.event.unit }}{% endif %}</p>
+        {% if row.detail and not row.guidance %}<p>{{ row.detail }}</p>{% endif %}
+        {% if row.guidance %}<div class="review-issue"><strong>{{ row.guidance.reason }}</strong><p>{{ row.guidance.next_step }}</p><small>{% if row.guidance.is_current %}Причина всё ещё актуальна{% else %}Причина последнего события; текущее состояние проверьте заново{% endif %}{% if row.guidance.intentional %} · Оставлено намеренно{% endif %}</small>{% if row.guidance.action %}<a href="{{ row.guidance.action.url }}">{{ row.guidance.action.label }} →</a>{% endif %}</div>{% endif %}
+        {% if row.field_changes %}<div class="review-comparison-scroll"><table class="review-comparison"><thead><tr><th>Поле</th><th>Было в AREALISTING</th><th>Стало в AREALISTING</th><th>Сейчас в Undersun</th><th>Состояние</th></tr></thead><tbody>
+          {% for change in row.field_changes %}<tr><th scope="row">{{ change.label }}</th><td>{{ change.before|default_if_none:"—" }}</td><td>{{ change.after|default_if_none:"—" }}</td><td>{% if change.has_card_field %}{{ change.card_value|default_if_none:"—" }}{% else %}—{% endif %}</td><td>{{ change.status }}{% if change.action %}<p><a href="{{ change.action.url }}">{{ change.action.label }} →</a></p>{% endif %}
+            {% if change.can_lock and not row.event.reviewed_at %}<form method="post" action="{% url 'admin:arealisting_keep_card_value' row.event.pk %}">{% csrf_token %}<input type="hidden" name="source_field" value="{{ change.source_field }}"><input type="hidden" name="expected_card_value" value="{{ change.expected_card_value }}"><input type="hidden" name="expected_source_value" value="{{ change.expected_source_value }}"><button type="submit" class="secondary">Сохранить значение Undersun</button></form>{% endif %}
+          </td></tr>{% endfor %}</tbody></table></div>{% endif %}
+        {% if row.event.reviewed_at %}<p class="muted">Проверено {{ row.event.reviewed_at|date:"d.m.Y H:i" }}{% if row.event.reviewed_by %} · {{ row.event.reviewed_by }}{% endif %}</p>{% endif %}
+      </div>
+      <div class="review-queue-actions"><a href="{{ row.url }}">{{ row.action }} →</a>
+        {% if can_mark_checked and not row.event.reviewed_at %}<form method="post" action="{% url 'admin:arealisting_review_event' row.event.pk %}">{% csrf_token %}<button type="submit" class="secondary">Отметить проверенным</button></form>{% endif %}
+      </div>
+    </article>{% endfor %}</div>
+    {% else %}<p>Событий с такими фильтрами нет.</p>{% endif %}
+    {% if page.has_other_pages %}<nav class="review-queue-pagination" aria-label="Страницы очереди">{% if page.has_previous %}<a href="?state={{ state }}&kind={{ kind }}&page={{ page.previous_page_number }}">← Назад</a>{% endif %}<span>{{ page.number }} / {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?state={{ state }}&kind={{ kind }}&page={{ page.next_page_number }}">Далее →</a>{% endif %}</nav>{% endif %}
+  </section>
+</div>
+{% endblock %}

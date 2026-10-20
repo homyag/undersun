@@ -1,0 +1,31 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+  {% if original %}
+    <div class="module" style="padding: 16px; margin-bottom: 20px;">
+      <h2 style="margin-top: 0;">Фотографии этой группы</h2>
+      {% if original.property_id %}
+        <p>Карточка: <a href="{% url 'admin:properties_property_change' original.property_id %}">{{ original.property }}</a> · <a href="{% url 'admin:arealisting_arealistinglistinggroup_readiness' original.pk %}">Проверить перед публикацией</a> · <a href="{% url 'admin:arealisting_arealistingpropertychange_changelist' %}?card={{ original.property_id }}">История изменений</a>. Подходящих материалов: {{ media_candidate_count }}; уже добавлено в карточку: {{ media_link_count }}; с ошибками: {{ media_error_count }}.</p>
+        {% if latest_media_job %}<p><a href="{% url 'admin:arealisting_arealistinglistinggroup_media_job' original.pk latest_media_job.pk %}">Последний импорт фото #{{ latest_media_job.pk }} — {{ latest_media_job.get_status_display }} →</a></p>{% endif %}
+        {% if can_import_group_media %}
+          <p><a class="button" href="{% url 'admin:arealisting_arealistinglistinggroup_preview_media' original.pk %}">Проверить и импортировать фотографии и планировки</a></p>
+          <p>Импорт обновит фото, которыми управляет AREALISTING, и удалит из карточки ранее импортированные фото, отсутствующие в источнике. На следующем экране можно исключить неподходящие фото; ранее импортированные исключённые фото также будут удалены из карточки. Защищённые поля карточки не изменятся.</p>
+        {% else %}
+          <p>Импорт сейчас недоступен: нет подходящих изображений или фотографии и планировки защищены от обновления.</p>
+        {% endif %}
+      {% else %}
+        <p>Сначала свяжите группу с карточкой Undersun, затем импортируйте фото.</p>
+      {% endif %}
+      {% if media_error_count and can_view_media_assets %}
+        <p><strong>Материалы с ошибками:</strong></p>
+        <ul>
+          {% for asset in media_error_assets %}
+            <li><a href="{% url 'admin:arealisting_arealistingasset_change' asset.pk %}">{{ asset }}</a> — {{ asset.last_error|truncatechars:160 }}</li>
+          {% endfor %}
+        </ul>
+        {% if media_error_count > 10 %}<p>Показаны первые 10 из {{ media_error_count }} ошибок.</p>{% endif %}
+      {% endif %}
+    </div>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

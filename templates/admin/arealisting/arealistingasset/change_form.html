@@ -1,0 +1,34 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+  <div class="module" style="padding: 16px; margin-bottom: 20px;">
+    <h2 style="margin-top: 0;">Что делать с этим материалом</h2>
+    {% if original.last_error %}
+      <p><strong>Ошибка:</strong> {{ original.last_error }}</p>
+    {% elif original.downloaded_at %}
+      <p>Изображение скачано. Если оно не видно в карточке, запустите импорт фотографий для связанной группы.</p>
+    {% else %}
+      <p>Есть только ссылка на источник. Фото скачиваются в фоне после подтверждения импорта группы; документы остаются ссылками.</p>
+    {% endif %}
+    {% if can_retry_asset %}
+      <form method="post" action="{% url 'admin:arealisting_arealistingasset_retry_download' original.pk %}" style="margin-bottom: 12px;">
+        {% csrf_token %}
+        <button type="submit" class="button">Повторить скачивание изображения</button>
+      </form>
+    {% endif %}
+    {% if can_view_asset_groups %}
+      {% if asset_groups %}
+        <p><strong>Подходящие группы:</strong> выберите карточку и запустите импорт фотографий на странице группы.</p>
+        <ul>
+          {% for group in asset_groups %}
+            <li><a href="{% url 'admin:arealisting_arealistinglistinggroup_change' group.pk %}">{{ group }}</a>{% if group.property_id %} — {{ group.property }}{% else %} — карточка ещё не связана{% endif %}</li>
+          {% endfor %}
+        </ul>
+        {% if asset_group_count > 20 %}<p>Показаны первые 20 из {{ asset_group_count }} групп. <a href="{% url 'admin:arealisting_arealistinglistinggroup_changelist' %}">Все связи с карточками</a>.</p>{% endif %}
+      {% else %}
+        <p>Связанная группа для этого материала пока не найдена. Проверьте <a href="{% url 'admin:arealisting_arealistinglistinggroup_changelist' %}">«Связи с карточками»</a>.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+  {{ block.super }}
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h2>Фото поставлены в очередь</h2>
+  <p>Загрузка продолжится в фоне. Откройте задание, чтобы увидеть прогресс и результат по каждому фото.</p>
+  <ul>
+    {% for job in jobs %}
+      <li><a href="{% url 'admin:arealisting_arealistinglistinggroup_media_job' job.group_id job.pk %}">{{ job.group }} — импорт #{{ job.pk }}</a></li>
+    {% endfor %}
+  </ul>
+  <p><a href="{% url 'admin:arealisting_arealistinglistinggroup_changelist' %}">← К списку групп</a></p>
+{% endblock %}

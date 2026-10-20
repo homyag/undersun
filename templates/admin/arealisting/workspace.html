@@ -1,0 +1,149 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261019-1">{% endblock %}
+{% block content %}
+<div class="matching workspace">
+  {% if perms.properties.change_property %}<p><a class="primary-action" href="{% url 'admin:arealisting_unlinked' %}">Объекты Undersun без связи →</a></p>{% endif %}
+  <div class="workflow-steps" aria-label="Этапы работы"><strong>1. Выберите комплекс</strong><span>2. Подберите карточки</span><span>3. Проверьте и сохраните</span></div>
+  <section class="workspace-intro">
+    <h2>Дополните ваши карточки данными застройщика</h2>
+    <p>Найдите комплекс, получите его предложения, затем укажите, каким карточкам Undersun они соответствуют.</p>
+    <p class="muted">Вы сами выбираете изменения перед сохранением. Получение списка не добавляет объекты на сайт.</p>
+    {% if can_sync %}<form method="post" action="{% url 'admin:arealisting_arealistingproject_sync_projects' %}" data-loading="Получаем список комплексов…">
+      {% csrf_token %}<button type="submit" class="secondary">Обновить список проектов</button>
+      <span class="muted">Начните здесь, если нужного комплекса ещё нет.</span>
+    </form>{% endif %}
+  </section>
+  {% if can_view_review_queue %}
+  <section class="work-queue" aria-labelledby="review-queue-link-title">
+    <div class="dashboard-heading">
+      <div><h2 id="review-queue-link-title">Очередь изменений{% if review_queue_count or pending_price_review_count %} · {{ review_queue_count|add:pending_price_review_count }}{% endif %}</h2>
+        <p class="muted">Изменения характеристик, цен и предложений, которые ещё не проверены. Предложения цен ждут отдельного решения.</p></div>
+      <a class="primary-action" href="{{ review_queue_url }}">Открыть очередь →</a>
+    </div>
+  </section>
+  {% endif %}
+  <section class="work-queue" aria-labelledby="work-queue-title">
+    <div class="dashboard-heading">
+      <div><h2 id="work-queue-title">Рекомендуется проверить</h2><p class="muted">Перечень карточек без связей, черновиков, локаций и фото с ошибками.</p></div>
+    </div>
+    {% if work_items %}
+    <div class="work-queue-list">
+      {% for item in work_items %}
+      <article class="work-queue-item">
+        <div><span class="meta-badge">{{ item.kind }}</span><h3>{{ item.title }}</h3><p class="muted">{{ item.detail }}</p></div>
+        <a href="{{ item.url }}">{{ item.action }} →</a>
+      </article>
+      {% endfor %}
+    </div>
+    <p class="muted">Показаны первые записи каждого типа.</p>
+    <nav class="work-queue-links" aria-label="Полные списки">
+      {% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}">Все карточки без связи →</a>{% endif %}
+      {% if can_view_groups %}<a href="{{ dashboard_links.groups }}?catalog_origin__exact=AREALISTING_DRAFT">Все черновики →</a>{% endif %}
+      {% if can_view_mappings %}<a href="{{ dashboard_links.mappings }}">Все локации →</a>{% endif %}
+      {% if can_view_assets %}<a href="{{ dashboard_links.assets }}">Все материалы →</a>{% endif %}
+    </nav>
+    {% else %}<p>Сейчас нет записей, требующих действий с вашими правами доступа.</p>{% endif %}
+  </section>
+  {% if can_view_price_reviews %}
+  <section class="work-queue" aria-labelledby="price-review-title">
+    <div class="dashboard-heading">
+      <div><h2 id="price-review-title">Цены на подтверждении{% if pending_price_review_count %} · {{ pending_price_review_count }}{% endif %}</h2>
+        <p class="muted">При изменении цены продажи на {{ price_review_percent }}% и больше прежняя цена сохраняется до решения администратора.</p></div>
+      {% if pending_price_review_count %}<a href="{{ price_reviews_url }}?status__exact=PENDING">Все предложения цен →</a>{% endif %}
+    </div>
+    {% if pending_price_reviews %}<div class="work-queue-list">
+      {% for review in pending_price_reviews %}<article class="work-queue-item">
+        <div><span class="meta-badge">{{ review.change_percent }}%</span><h3>{{ review.property }}</h3>
+          <p class="muted">{{ review.before.price_sale_thb|default:"Цена не указана" }} → {{ review.after.price_sale_thb }} THB · {{ review.project }}</p></div>
+        <a href="{% url 'admin:arealisting_arealistingpricereview_review' review.pk %}">Проверить цену →</a>
+      </article>{% endfor %}
+    </div>{% else %}<p>Сейчас нет изменений цены, ожидающих подтверждения.</p>{% endif %}
+  </section>
+  {% endif %}
+  {% if can_view_sync_events %}
+  <section class="work-queue" aria-labelledby="sync-events-title">
+    <div class="dashboard-heading">
+      <div><h2 id="sync-events-title">Что изменилось после синхронизации</h2>
+        <p class="muted">Новые и проданные предложения, изменения цен и карточки, которым требуется проверка.{% if latest_successful_run %} Запуск от {{ latest_successful_run.finished_at|date:"d.m.Y H:i T" }}.{% endif %}</p></div>
+      {% if sync_event_count %}<a href="{{ sync_events_url }}">Все события этого запуска ({{ sync_event_count }}) →</a>{% endif %}
+    </div>
+    {% if sync_events %}
+      <div class="work-queue-list">
+        {% for event in sync_events %}
+          <article class="work-queue-item">
+            <div><span class="meta-badge">{{ event.kind }}</span><h3>{{ event.title }}</h3>{% if event.detail %}<p class="muted">{{ event.detail }}</p>{% endif %}</div>
+            <a href="{{ event.url }}">{{ event.action }} →</a>
+          </article>
+        {% endfor %}
+      </div>
+      {% if sync_event_count > 8 %}<p class="muted">Показаны первые 8 событий по важности. Полный список доступен по ссылке выше.</p>{% endif %}
+    {% elif latest_successful_run %}<p>Для этого запуска отдельных событий нет. Общие результаты показаны ниже.</p>
+    {% else %}<p>После первой успешной синхронизации здесь появятся события по предложениям и карточкам.</p>{% endif %}
+  </section>
+  {% endif %}
+  <section class="sync-dashboard" aria-labelledby="sync-dashboard-title">
+    <div class="dashboard-heading">
+      <div>
+        <h2 id="sync-dashboard-title">Состояние интеграции</h2>
+        {% if latest_successful_run %}
+          <p class="muted">Последняя успешная синхронизация: {{ latest_successful_run.finished_at|date:"d.m.Y H:i T" }}</p>
+        {% else %}
+          <p class="muted">Успешных синхронизаций пока нет.</p>
+        {% endif %}
+      </div>
+      {% if can_view_runs %}<a href="{{ dashboard_links.runs }}">История обновлений →</a>{% endif %}
+    </div>
+    {% if sync_running %}<p class="dashboard-notice">Синхронизация выполняется. Обновите страницу позже, чтобы увидеть итог.</p>{% endif %}
+    {% if latest_sync_error %}<p class="dashboard-alert"><strong>Последняя попытка завершилась ошибкой.</strong> {{ latest_sync_error }}</p>{% endif %}
+    <div class="dashboard-groups"><div class="dashboard-group">
+      <h3>Последний успешный запуск</h3>
+      <dl class="dashboard-grid">
+        <div><dt>Новые проекты</dt><dd>{{ recent_changes.new_projects }}</dd></div>
+        <div><dt>Новые AVAILABLE units</dt><dd>{{ recent_changes.new_available_units }}</dd></div>
+        <div><dt>Изменились цены units</dt><dd>{{ recent_changes.price_changed }}</dd></div>
+        <div><dt>Стали SOLD</dt><dd>{{ recent_changes.became_sold }}</dd></div>
+        <div><dt>Цены карточек обновлены</dt><dd>{{ recent_changes.property_prices_updated }}</dd></div>
+      </dl>
+    </div>
+    <div class="dashboard-group">
+      <h3>Сейчас в локальной базе</h3>
+      <dl class="dashboard-grid">
+        <div><dt>Проекты</dt><dd>{{ source_totals.projects }}</dd></div>
+        <div><dt>AVAILABLE units</dt><dd>{{ source_totals.available_units }}</dd></div>
+        <div><dt>SOLD units</dt><dd>{{ source_totals.sold_units }}</dd></div>
+        <div><dt>Связанные карточки</dt><dd>{{ source_totals.linked_properties }}</dd></div>
+      </dl>
+    </div>
+    <div class="dashboard-group">
+      <h3>Требуют внимания</h3>
+      <dl class="dashboard-grid attention-grid">
+        <div><dt>{% if can_view_mappings %}<a href="{{ dashboard_links.mappings }}?is_confirmed__exact=0">Локации без подтверждения</a>{% else %}Локации без подтверждения{% endif %}</dt><dd>{{ attention.mapping_required }}</dd></div>
+        <div><dt>{% if can_view_assets %}<a href="{{ dashboard_links.assets }}">Ошибки материалов</a>{% else %}Ошибки материалов{% endif %}</dt><dd>{{ attention.asset_errors }}</dd></div>
+        <div><dt>{% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}">Карточки без связи</a>{% else %}Карточки без связи{% endif %}</dt><dd>{{ attention.unlinked_pending }}</dd></div>
+        <div><dt>{% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}?state=manual">На ручном ведении</a>{% else %}На ручном ведении{% endif %}</dt><dd>{{ attention.manual_properties }}</dd></div>
+      </dl>
+    </div></div>
+  </section>
+  <form method="get" class="matching-toolbar"><label>Найти комплекс или застройщика<input type="search" name="q" value="{{ query }}" placeholder="Например, Lavisco" /></label><button type="submit">Найти</button>{% if query %}<a href="{% url 'admin:arealisting_arealistingproject_changelist' %}">Все комплексы</a>{% endif %}</form>
+  <div class="project-grid">
+    {% for card in cards %}
+    <article class="project-card" id="project-{{ card.project.pk }}">
+      {% if card.photo %}<img class="project-photo" src="{{ card.photo }}" alt="{{ card.project }}" loading="lazy" referrerpolicy="no-referrer">{% endif %}
+      <div class="card-badges"><span class="meta-badge">{% if card.project.project_type == 'HOUSE' %}Таунхаус{% else %}{{ card.project.get_project_type_display|default:"Тип не указан" }}{% endif %}</span>{% if card.loaded %}<span class="status-badge is-available">Предложения загружены</span>{% endif %}</div>
+      <h2>{{ card.project }}</h2><p>{{ card.project.developer_name }} · {{ card.location }}</p>
+      {% if card.loaded %}<dl class="inventory-counters"><div class="is-available"><dt>Доступно</dt><dd>{{ card.available }}</dd></div><div class="is-sold"><dt>Продано</dt><dd>{{ card.sold }}</dd></div></dl><p class="muted">Связано с карточками Undersun: {{ card.linked }}</p>
+        <a class="primary-action" href="{% url 'admin:arealisting_matching' %}?project={{ card.project.pk }}">Подобрать карточки →</a>
+        {% if can_load %}<form method="post" action="{% url 'admin:arealisting_load_inventory' card.project.pk %}" data-loading="Обновляем предложения…">{% csrf_token %}<input type="hidden" name="return_q" value="{{ query }}"><input type="hidden" name="return_page" value="{{ page.number }}"><button type="submit" class="secondary">Обновить предложения</button></form>{% endif %}
+      {% else %}<p>Сначала получите список предложений этого комплекса.</p>
+        {% if can_load %}<form method="post" action="{% url 'admin:arealisting_load_inventory' card.project.pk %}" data-loading="Получаем предложения…">{% csrf_token %}<input type="hidden" name="return_q" value="{{ query }}"><input type="hidden" name="return_page" value="{{ page.number }}"><button type="submit">Загрузить предложения</button></form>{% else %}<p>Для загрузки обратитесь к администратору с правом обновления данных.</p>{% endif %}
+      {% endif %}
+      <small class="muted">Комплекс обновлён: {{ card.project.synced_at|date:"d.m.Y H:i" }}</small>
+    </article>
+    {% empty %}<section class="workspace-intro"><h2>{% if query %}Комплекс не найден{% else %}Начнём с получения комплексов{% endif %}</h2><p>{% if query %}Попробуйте другое название или обновите список проектов кнопкой выше.{% else %}Нажмите «Обновить список проектов». После загрузки выберите комплекс, с которым хотите работать.{% endif %}</p></section>{% endfor %}
+  </div>
+  {% if page.has_other_pages %}<nav class="matching-toolbar" aria-label="Страницы комплексов">{% if page.has_previous %}<a href="?q={{ query|urlencode }}&page={{ page.previous_page_number }}">← Назад</a>{% endif %}<span>{{ page.number }} / {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?q={{ query|urlencode }}&page={{ page.next_page_number }}">Далее →</a>{% endif %}</nav>{% endif %}
+  {% if arealisting_sections %}<details class="technical-sections"><summary>Настройки и данные интеграции</summary><ul>{% for section in arealisting_sections %}<li><a href="{{ section.url }}">{{ section.label }}</a></li>{% endfor %}</ul></details>{% endif %}
+  <script src="{% static 'js/admin/arealisting-workspace.js' %}" defer></script>
+</div>
+{% endblock %}

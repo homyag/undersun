@@ -1,0 +1,16 @@
+{% if price_report %}
+<section class="workspace-intro" aria-label="Результат обновления цен">
+  <h2>Результат последнего обновления цен</h2>
+  <p>Проверено {{ price_report_run.started_at|date:"d.m.Y H:i" }}. Сравнение относится к этому обновлению; последующие ручные правки здесь не отражаются.</p>
+  {% if price_report_run.status == 'failed' %}<p>Запуск завершился с ошибкой. Ниже показаны уже выполненные проверки карточек.</p>{% endif %}
+  {% for row in price_report %}
+  <article>
+    <h3><a href="{{ row.url }}">{{ row.title }}</a></h3>
+    <p>{% if row.status == 'updated' %}Цена обновлена{% elif row.status == 'unchanged' %}Цена актуальна — изменений нет{% elif row.status == 'review' %}Цена сохранена: {{ row.reason }} <a href="{{ row.review_url }}">Проверить предложение →</a>{% else %}Цена не обновлена: {{ row.reason }}{% endif %} <small>· {{ row.checked_at|date:"d.m.Y H:i" }}</small></p>
+    <table><thead><tr><th scope="col">Валюта</th><th scope="col">Текущая цена</th><th scope="col">{% if row.status == 'review' %}Предложено{% else %}После проверки{% endif %}</th></tr></thead>
+      <tbody>{% for price in row.prices %}<tr><th scope="row">{{ price.currency }}</th><td>{% if price.before != None %}{{ price.before|floatformat:"2g" }}{% else %}Не указана{% endif %}</td><td>{% if price.after != None %}{{ price.after|floatformat:"2g" }}{% else %}Не указана{% endif %}</td></tr>{% endfor %}</tbody>
+    </table>
+  </article>
+  {% endfor %}
+</section>
+{% endif %}

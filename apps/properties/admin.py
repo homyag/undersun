@@ -163,6 +163,9 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
         'price_sale_thb', 'special_offer', 'is_active', 'is_featured',
         'featured_priority', 'views_count', 'created_at', 'translation_status'
     )
+    # Новые черновики из AREALISTING ещё не имеют legacy_id.  Оставляем ссылку
+    # и на ID, и на название, чтобы такую карточку всегда можно было открыть.
+    list_display_links = ('legacy_id', 'title')
     list_filter = (
         'is_active', 'property_type', 'district', 'deal_type',
         'status', 'is_featured', 'furnished', TranslationStatusFilter
@@ -176,7 +179,71 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
     
     actions = ['make_active', 'make_inactive', 'make_featured', 'make_not_featured', 'auto_translate', 'force_retranslate']
 
-    readonly_fields = ('translation_status_note',)
+    readonly_fields = ('translation_status_note', 'arealisting_sync_note')
+
+    def arealisting_sync_note(self, obj):
+        if not obj or not obj.pk:
+            return 'Связь появится после создания карточки.'
+        from django.urls import reverse
+        from apps.arealisting.models import ArealistingListingGroup, ArealistingPriceReview
+
+        try:
+            group = obj.arealisting_group
+        except ArealistingListingGroup.DoesNotExist:
+            picker_url = reverse('admin:arealisting_unlinked')
+            history_url = reverse('admin:arealisting_arealistingpropertychange_changelist')
+            return format_html(
+                'Карточка не связана с AREALISTING. '
+                '<a href="{}?property={}">Подобрать комплекс</a> · '
+                '<a href="{}?card={}">История изменений</a>',
+                picker_url,
+                obj.pk,
+                history_url,
+                obj.pk,
+            )
+
+        from apps.arealisting.services.field_ownership import (
+            SOURCE_FIELD_LABELS,
+            ordered_source_fields,
+        )
+
+        managed = ordered_source_fields(group.source_owned_fields)
+        locked = ordered_source_fields(group.locked_fields)
+        managed_text = ', '.join(SOURCE_FIELD_LABELS.get(field, field) for field in managed) or 'нет'
+        locked_text = ', '.join(SOURCE_FIELD_LABELS.get(field, field) for field in locked) or 'нет'
+        url = reverse('admin:arealisting_arealistinglistinggroup_change', args=[group.pk])
+        detach_url = reverse('admin:arealisting_detach_property', args=[obj.pk])
+        history_url = reverse('admin:arealisting_arealistingpropertychange_changelist')
+        readiness_url = reverse('admin:arealisting_arealistinglistinggroup_readiness', args=[group.pk])
+        readiness_link = (
+            format_html('<a href="{}">Проверить перед публикацией</a> · ', readiness_url)
+            if group.catalog_origin == ArealistingListingGroup.CatalogOrigin.AREALISTING_DRAFT else ''
+        )
+        pending_price = ArealistingPriceReview.objects.filter(
+            group=group, status=ArealistingPriceReview.Status.PENDING,
+        ).first()
+        price_link = (
+            format_html('<a href="{}">Проверить новую цену</a> · ',
+                        reverse('admin:arealisting_arealistingpricereview_review', args=[pending_price.pk]))
+            if pending_price else ''
+        )
+        return format_html(
+            '<div><strong>Управляет AREALISTING:</strong> {}<br>'
+            '<strong>Защищено вручную:</strong> {}<br>'
+            '{}{}<a href="{}">Настроить защиту полей</a> · '
+            '<a href="{}">Отвязать от AREALISTING</a> · '
+            '<a href="{}?card={}">История изменений</a></div>',
+            managed_text,
+            locked_text,
+            readiness_link,
+            price_link,
+            url,
+            detach_url,
+            history_url,
+            obj.pk,
+        )
+
+    arealisting_sync_note.short_description = 'Синхронизация AREALISTING'
     
     def make_active(self, request, queryset):
         """Сделать недвижимость активной (опубликованной)"""
@@ -331,6 +398,55 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                 except Team.DoesNotExist:
                     pass  # Если сотрудник не найден, оставляем пустым
         super().save_model(request, obj, form, change)
+        if change:
+            from apps.arealisting.services.field_ownership import (
+                SOURCE_FIELD_LABELS,
+                protect_property_manual_changes,
+            )
+
+            protected = protect_property_manual_changes(obj, form.changed_data)
+            if protected:
+                labels = ', '.join(SOURCE_FIELD_LABELS.get(field, field) for field in protected)
+                self.message_user(
+                    request,
+                    f'Ручные изменения защищены от AREALISTING: {labels}.',
+                    level=messages.INFO,
+                )
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        if not change:
+            return
+        feature_changed = any(
+            formset.model is PropertyFeatureRelation and formset.has_changed()
+            for formset in formsets
+        )
+        if feature_changed:
+            from apps.arealisting.services.field_ownership import (
+                protect_property_manual_changes,
+            )
+
+            if protect_property_manual_changes(form.instance, {'features'}):
+                self.message_user(
+                    request,
+                    'Ручные изменения характеристик защищены от AREALISTING.',
+                    level=messages.INFO,
+                )
+        images_changed = any(
+            formset.model is PropertyImage and formset.has_changed()
+            for formset in formsets
+        )
+        if images_changed:
+            from apps.arealisting.services.field_ownership import (
+                protect_property_manual_changes,
+            )
+
+            if protect_property_manual_changes(form.instance, {'images', 'floorplans'}):
+                self.message_user(
+                    request,
+                    'Ручные изменения фотографий и планировок защищены от AREALISTING.',
+                    level=messages.INFO,
+                )
 
     def get_queryset(self, request):
         """Переопределяем queryset для отображения количества просмотров"""
@@ -342,7 +458,7 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
             from django.urls import reverse
             from django.utils.safestring import mark_safe
             
-            upload_url = reverse('properties:bulk_upload_images')
+            upload_url = reverse('admin_bulk_upload_images')
             
             html = f"""
             <div id="bulk-image-upload-section">
@@ -394,7 +510,6 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                 const statusModal = document.getElementById('bulk-upload-status-modal');
                 const statusTextEl = document.getElementById('upload-status-text');
                 const statusHintEl = document.getElementById('upload-status-hint');
-                let statusUpdateTimer = null;
                 
                 // Drag & Drop функциональность
                 uploadArea.addEventListener('dragover', function(e) {{
@@ -494,76 +609,70 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
                     if (statusModal) {{
                         statusModal.style.display = 'flex';
                     }}
-                    if (statusUpdateTimer) {{
-                        clearTimeout(statusUpdateTimer);
-                    }}
-                    statusUpdateTimer = setTimeout(() => {{
-                        if (statusTextEl) {{
-                            statusTextEl.textContent = 'Конвертируем изображения в WebP...';
-                        }}
-                        if (statusHintEl) {{
-                            statusHintEl.textContent = 'Это займёт чуть дольше обычной загрузки. Просто дождитесь завершения.';
-                        }}
-                    }}, 4000);
                 }}
 
                 function hideUploadStatus() {{
-                    if (statusUpdateTimer) {{
-                        clearTimeout(statusUpdateTimer);
-                        statusUpdateTimer = null;
-                    }}
                     if (statusModal) {{
                         statusModal.style.display = 'none';
                     }}
                 }}
                 
-                function uploadSelectedImages() {{
+                async function uploadSelectedImages() {{
                     if (selectedFiles.length === 0) {{
                         alert('Пожалуйста, выберите изображения для загрузки');
                         return;
                     }}
                     
-                    const formData = new FormData();
-                    formData.append('property_id', '{obj.pk}');
-                    
-                    selectedFiles.forEach(file => {{
-                        formData.append('images', file);
-                    }});
-                    
-                    // Показать прогресс
+                    const files = [...selectedFiles];
+                    const failedFiles = [];
+                    const errors = [];
+                    let uploadedCount = 0;
                     showUploadStatus(
-                        `Передаём ${{selectedFiles.length}} файл(ов) на сервер...`,
-                        'Этот процесс может занять до нескольких минут — не закрывайте страницу.'
+                        `Загружаем 1 из ${{files.length}}...`,
+                        'Пожалуйста, не закрывайте страницу до завершения загрузки.'
                     );
                     uploadBtn.disabled = true;
-                    
-                    fetch('{upload_url}', {{
-                        method: 'POST',
-                        body: formData,
-                        headers: {{
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+
+                    for (const [index, file] of files.entries()) {{
+                        statusTextEl.textContent = `Загружаем ${{index + 1}} из ${{files.length}}: ${{file.name}}`;
+                        const formData = new FormData();
+                        formData.append('property_id', '{obj.pk}');
+                        formData.append('images', file);
+                        try {{
+                            const response = await fetch('{upload_url}', {{
+                                method: 'POST',
+                                body: formData,
+                                headers: {{
+                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                                }}
+                            }});
+                            const contentType = response.headers.get('content-type') || '';
+                            if (!contentType.includes('application/json')) {{
+                                throw new Error(`Сервер вернул HTTP ${{response.status}} вместо ответа загрузчика.`);
+                            }}
+                            const data = await response.json();
+                            if (!response.ok || !data.success || !data.images?.length) {{
+                                throw new Error(data.errors?.join('; ') || data.message || `HTTP ${{response.status}}`);
+                            }}
+                            uploadedCount += data.images.length;
+                        }} catch (error) {{
+                            failedFiles.push(file);
+                            errors.push(`${{file.name}}: ${{error.message}}`);
+                            console.error('Error uploading image:', file.name, error);
                         }}
-                    }})
-                    .then(response => response.json())
-                    .then(data => {{
-                        hideUploadStatus();
-                        uploadBtn.disabled = false;
-                        
-                        if (data.success) {{
-                            alert(`Успешно загружено ${{data.images.length}} изображений!`);
-                            clearSelectedImages();
-                            // Перезагружаем страницу чтобы увидеть новые изображения в inline
-                            location.reload();
-                        }} else {{
-                            alert(`Ошибка: ${{data.message}}`);
-                        }}
-                    }})
-                    .catch(error => {{
-                        hideUploadStatus();
-                        uploadBtn.disabled = false;
-                        console.error('Error:', error);
-                        alert('Произошла ошибка при загрузке изображений');
-                    }});
+                    }}
+
+                    hideUploadStatus();
+                    uploadBtn.disabled = false;
+                    if (failedFiles.length) {{
+                        selectedFiles = failedFiles;
+                        displaySelectedImages();
+                        alert(`Загружено: ${{uploadedCount}} из ${{files.length}}. Не удалось загрузить:\n${{errors.join(String.fromCharCode(10))}}\nПроверьте галерею перед повторной отправкой: при таймауте файл мог сохраниться.`);
+                    }} else {{
+                        alert(`Успешно загружено ${{uploadedCount}} изображений!`);
+                        clearSelectedImages();
+                        location.reload();
+                    }}
                 }}
             </script>
             """
@@ -634,6 +743,11 @@ class PropertyAdmin(BaseAdminWithRequiredFields):
         
         # Добавляем секцию массовой загрузки только если объект уже существует
         if obj and obj.pk:
+            fieldsets.insert(1, (
+                'Синхронизация AREALISTING', {
+                    'fields': ('arealisting_sync_note',),
+                }
+            ))
             fieldsets.insert(-1, (
                 'Массовая загрузка изображений', {
                     'fields': ('bulk_image_upload_widget',),

@@ -1,0 +1,27 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+  <p>Получите проекты, выберите нужные и загрузите их юниты. Затем перейдите к сопоставлению с карточками Undersun.</p>
+  {% if arealisting_sections %}
+    <details>
+      <summary>Настройки и данные интеграции</summary>
+      <ul>
+        {% for section in arealisting_sections %}
+          <li><a href="{{ section.url }}">{{ section.label }}</a></li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
+
+{% block object-tools-items %}
+  <li><a href="{% url 'admin:arealisting_matching' %}">Сопоставление с AREALISTING</a></li>
+  <li>
+    <form method="post" action="{% url 'admin:arealisting_arealistingproject_sync_projects' %}">
+      {% csrf_token %}
+      <button type="submit" class="button">Обновить список проектов</button>
+    </form>
+  </li>
+  {{ block.super }}
+{% endblock %}

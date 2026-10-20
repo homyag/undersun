@@ -1,0 +1,12 @@
+[Unit]
+Description=Update Undersun currency exchange rates
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Match these paths and User to the site's deployment before installation.
+User=ubuntu
+WorkingDirectory=/home/ubuntu/undersun
+ExecStart=/home/ubuntu/venv/bin/python manage.py update_exchange_rates
+TimeoutStartSec=30min

@@ -1,0 +1,11 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<p>Карточка <strong>{{ property }}</strong> (#{{ property.pk }}) сейчас связана с комплексом <strong>{{ group.project }}</strong>.</p>
+<p>После отвязки выбранные предложения AREALISTING освободятся. Карточка, её поля и фотографии сохранятся. Затем вы сможете выбрать другой комплекс.</p>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="group_id" value="{{ group.pk }}">
+  <button type="submit" class="button default">Отвязать карточку</button>
+  <a href="{% url 'admin:properties_property_change' property.pk %}">Отмена</a>
+</form>
+{% endblock %}

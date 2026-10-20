@@ -1,0 +1,83 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261019-7">{% endblock %}
+{% block extrahead %}{{ block.super }}<script src="{% static 'js/admin/arealisting-media-preview.js' %}" defer></script>{% endblock %}
+{% block content %}
+<div class="matching media-preview-page">
+  <p><a href="{{ back_url }}">← Вернуться</a></p>
+  <section class="workspace-intro">
+    <h2>Проверьте изменения фотографий</h2>
+    <p>Импорт обновит фото, которыми управляет AREALISTING, и удалит из карточки ранее импортированные фото, отсутствующие в источнике. Ручные фото и защищённые разделы останутся в карточке.</p>
+    {% if not bulk %}<p><strong>Снимите галочки с неподходящих фото, при желании выберите главное и нажмите «Пересчитать изменения».</strong> Нажмите на миниатюру, чтобы открыть оригинал в полном размере. Исключения сохранятся для следующих импортов; ранее импортированное фото с пометкой «Удалится» будет удалено после подтверждения.</p>{% endif %}
+    <p>После подтверждения загрузка продолжится в фоне. Вы увидите прогресс и результат каждого фото; страницу можно будет закрыть.</p>
+  </section>
+  {% for preview in previews %}
+    <section class="sync-dashboard media-preview-group">
+      <div class="dashboard-heading"><div>
+        <h2>{{ preview.group.name }}</h2>
+        <p class="muted">Карточка: <a href="{% url 'admin:properties_property_change' preview.group.property_id %}">{{ preview.group.property }}</a></p>
+        {% if bulk %}<p><a href="{% url 'admin:arealisting_arealistinglistinggroup_preview_media' preview.group.pk %}">Просмотреть фото этой группы →</a></p>{% endif %}
+      </div></div>
+      {% if not bulk and preview.available %}
+        <h3>Какие фото импортировать</h3>
+        <div class="media-selection-list">
+          {% for item in preview.available %}
+            <div class="media-selection-item">
+              <input id="media-{{ item.asset.pk }}" type="checkbox" name="asset" value="{{ item.asset.pk }}" form="media-selection"{% if item.selected %} checked{% endif %}>
+              <a href="{{ item.asset.source_url }}" target="_blank" rel="noopener noreferrer" aria-label="Открыть фото {{ item.asset }} в полном размере" title="Открыть в полном размере"><img src="{{ item.asset.source_url }}" alt="" loading="lazy"></a>
+              <div><label for="media-{{ item.asset.pk }}">{{ item.asset }} · {% if item.role == 'FLOOR_PLAN' %}Планировка{% else %}Галерея{% endif %}</label><small class="media-selection-state{% if not item.selected and item.image %} will-remove{% endif %}">{% if item.selected %}{% if item.image %}Обновится{% else %}Добавится{% endif %}{% elif item.image %}Удалится из карточки{% else %}Исключено{% endif %}</small>{% if item.asset.last_error %}<small>Предыдущая ошибка: {{ item.asset.last_error|truncatechars:120 }}</small>{% endif %}{% if item.role == 'GALLERY' %}<label class="media-main-choice" for="main-{{ item.asset.pk }}"><input id="main-{{ item.asset.pk }}" type="radio" name="preferred_main_asset_id" value="{{ item.asset.pk }}" form="media-selection" data-asset-checkbox="media-{{ item.asset.pk }}"{% if not item.selected %} disabled{% endif %}{% if preview.preferred_main_asset_id == item.asset.pk %} checked{% endif %}> Сделать главным</label>{% endif %}</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if preview.can_import %}
+        <p><strong>Добавится: {{ preview.additions|length }} · Обновится: {{ preview.updates|length }} · Удалится: {{ preview.removals|length }}</strong> · Ручных фото: {{ preview.manual_count }}</p>
+      {% else %}
+        {% if preview.available %}<p class="dashboard-alert">Фото не выбраны. Сохраните выбор, чтобы они не добавлялись при следующих импортах.</p>{% else %}<p class="dashboard-alert">Для этой группы сейчас нет доступных изменений: проверьте связь с карточкой, исходные материалы и защиту фото.</p>{% endif %}
+      {% endif %}
+      <h3>Главное фото</h3>
+      {% if not bulk and preview.available %}<label class="media-main-auto" for="main-auto"><input id="main-auto" type="radio" name="preferred_main_asset_id" value="" form="media-selection"{% if not preview.preferred_main_asset_id %} checked{% endif %}> Сохранить текущее главное, если оно останется в карточке</label>{% endif %}
+      {% if preview.preferred_main_asset_id %}
+        <p>Выбрано главное фото из источника: {{ preview.main_asset }}. Оно станет главным после успешной загрузки. При ошибке сохранится текущее главное фото.</p>
+      {% elif preview.main_image and not preview.main_changes %}
+        <p>Сохранится текущее главное фото: {{ preview.main_image.title|default:"без названия" }}.</p>
+      {% elif preview.main_image %}
+        <p>После импорта главным станет {{ preview.main_image.title|default:"первое оставшееся фото" }}.</p>
+      {% elif preview.main_asset %}
+        <p>Если загрузка пройдёт успешно, первым главным станет фото из источника: {{ preview.main_asset }}. Проверьте результат после импорта.</p>
+      {% else %}
+        <p>Главное фото пока не определено. Проверьте галерею после импорта.</p>
+      {% endif %}
+      {% if preview.missing_removals %}
+        <p class="dashboard-alert"><strong>Также удалятся фото, исчезнувшие из источника: {{ preview.missing_removals|length }}.</strong> Они больше не доступны для выбора.{% for item in preview.missing_removals %} {{ item.image.title|default:item.asset }}{% if not forloop.last %},{% else %}.{% endif %}{% endfor %}</p>
+      {% endif %}
+    </section>
+  {% endfor %}
+  {% if bulk %}
+    <form method="post" action="{% url 'admin:arealisting_arealistinglistinggroup_changelist' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="import_media">
+      <input type="hidden" name="confirm_media_import" value="1">
+      {% for preview in previews %}
+        <input type="hidden" name="_selected_action" value="{{ preview.group.pk }}">
+        <input type="hidden" name="fingerprint_{{ preview.group.pk }}" value="{{ preview.fingerprint }}">
+      {% endfor %}
+      <button type="submit" class="primary-action">Подтвердить импорт</button>
+      <a href="{{ back_url }}">Отмена</a>
+    </form>
+  {% else %}
+    {% with preview=previews.0 %}
+        <form id="media-selection" method="post" action="{{ confirm_url }}">
+          {% csrf_token %}
+          <input type="hidden" name="selection_confirmed" value="1">
+          <input type="hidden" name="preview_fingerprint" value="{{ preview.fingerprint }}">
+          {% if preview.available %}<button type="submit" class="secondary" formaction="{{ preview_url }}">Пересчитать изменения</button>{% endif %}
+          {% if preview.can_import or preview.available %}
+          <button type="submit" class="primary-action">{% if preview.can_import %}Применить изменения фото{% else %}Сохранить выбор{% endif %}</button>
+          {% endif %}
+          <a href="{{ back_url }}">Отмена</a>
+        </form>
+    {% endwith %}
+  {% endif %}
+</div>
+{% endblock %}

@@ -16,7 +16,7 @@ BOT_PROTECTION_TEST_CONFIG = {
     'SKIP_METHODS': [],
     'JS_CHALLENGE_GRACE_SECONDS': 10,
     'JS_CHALLENGE_MAX_MISSES': 3,
-    'JS_CHALLENGE_EXEMPT_PATH_PREFIXES': ['/admin/'],
+    'JS_CHALLENGE_EXEMPT_PATH_PREFIXES': ['/admin/', '/admin-ajax/bulk-upload-images/'],
     'CHALLENGE_COOKIE': 'bot_challenge',
     'RULE_WEIGHTS': {
         'missing_headers_critical': 120,
@@ -60,6 +60,19 @@ class BotDetectionServiceTests(SimpleTestCase):
 
         self.assertEqual(result.action, 'block')
         self.assertEqual(result.score, 120)
+
+    def test_admin_ajax_post_does_not_require_public_site_challenge_cookie(self):
+        request = RequestFactory().post(
+            '/admin-ajax/bulk-upload-images/',
+            HTTP_USER_AGENT='Mozilla/5.0',
+            HTTP_ACCEPT_LANGUAGE='ru-RU',
+            HTTP_ACCEPT_ENCODING='gzip',
+        )
+
+        result = BotDetectionService().evaluate(request, '203.0.113.10', '127.0.0.1')
+
+        self.assertEqual(result.action, 'allow')
+        self.assertEqual(result.score, 0)
 
 
 class MetaCrawlerWhitelistTests(SimpleTestCase):

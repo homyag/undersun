@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh linked Undersun AREALISTING prices
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Match these paths and User to the site's deployment before installation.
+User=ubuntu
+WorkingDirectory=/home/ubuntu/undersun
+ExecStart=/home/ubuntu/venv/bin/python manage.py update_arealisting_prices
+TimeoutStartSec=2h

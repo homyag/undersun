@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261019-7">{% endblock %}
+{% block extrahead %}{{ block.super }}{% if job.status == 'PENDING' or job.status == 'RUNNING' %}<meta http-equiv="refresh" content="3">{% endif %}{% endblock %}
+{% block content %}
+<div class="matching media-preview-page media-job-page">
+  <p><a href="{% url 'admin:arealisting_arealistinglistinggroup_change' group.pk %}">← К группе</a></p>
+  <section class="workspace-intro">
+    <h2>Импорт фото: {{ job.get_status_display }}</h2>
+    <p>{{ group }} · Карточка <a href="{% url 'admin:properties_property_change' group.property_id %}">{{ group.property }}</a></p>
+    {% if job.status == 'PENDING' or job.status == 'RUNNING' %}
+      <p>Можно закрыть страницу: загрузка продолжится в фоне. Страница обновляется каждые 3 секунды.</p>
+      {% if job.total %}<progress value="{{ job.processed }}" max="{{ job.total }}">{{ job.processed }} / {{ job.total }}</progress><p>Обработано {{ job.processed }} из {{ job.total }}.</p>{% else %}<p>Ожидаем начала обработки…</p>{% endif %}
+    {% else %}
+      <p><strong>Добавлено: {{ job.totals.created|default:0 }} · Обновлено: {{ job.totals.updated|default:0 }} · Удалено: {{ job.totals.deleted|default:0 }} · Ошибок: {{ job.totals.errors|default:0 }}</strong></p>
+      {% if job.error %}<p class="dashboard-alert">{{ job.error }}</p>{% endif %}
+      {% if job.preferred_main_asset_id %}{% if preferred_main_failed %}<p class="dashboard-alert">Выбранное главное фото не загрузилось. Проверьте текущее главное в карточке.</p>{% elif job.status != 'FAILED' %}<p>Выбранное фото установлено главным. Проверьте результат в карточке.</p>{% endif %}{% endif %}
+      <a class="primary-action" href="{% url 'admin:properties_property_change' group.property_id %}">Проверить фото в карточке →</a>
+      <a href="{% url 'admin:arealisting_arealistinglistinggroup_preview_media' group.pk %}">Изменить выбор фото</a>
+    {% endif %}
+  </section>
+  {% if job.results %}
+    <section class="sync-dashboard">
+      <h2>Результат по фотографиям</h2>
+      <div class="media-job-results">
+        {% for row in job.results %}
+          <article class="media-job-result{% if row.status == 'error' %} has-error{% endif %}">
+            <a href="{{ row.source_url }}" target="_blank" rel="noopener noreferrer" aria-label="Открыть {{ row.title }} в полном размере"><img src="{{ row.source_url }}" alt="" loading="lazy"></a>
+            <div><strong>{{ row.title }}</strong><p>{% if row.status == 'created' %}Добавлено{% elif row.status == 'updated' %}Обновлено{% elif row.status == 'deleted' %}Удалено из карточки{% else %}Ошибка загрузки{% endif %} · {% if row.role == 'FLOOR_PLAN' %}Планировка{% else %}Галерея{% endif %}</p>{% if row.error %}<p class="dashboard-alert">{{ row.error }}</p>{% endif %}</div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+  {% if can_retry %}
+    <form method="post" action="{% url 'admin:arealisting_arealistinglistinggroup_retry_media_job' group.pk job.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="primary-action">Повторить только фото с ошибками</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

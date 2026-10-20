@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261019-2">{% endblock %}
+{% block content %}
+<div class="matching readiness-page">
+  <p><a href="{% url 'admin:arealisting_arealistingproject_changelist' %}">← К рабочей странице AREALISTING</a></p>
+  <section class="workspace-intro">
+    <h2>{{ property }}</h2>
+    <p class="muted">{{ group.project }} · Карточка №{{ property.pk }} · {% if property.is_active %}Уже опубликована{% else %}Черновик{% endif %}</p>
+    {% if report.ready %}
+      <p><strong>Основные пункты выполнены.</strong> {% if property.is_active %}Проверьте предупреждения ниже и содержание опубликованной карточки.{% else %}Проверьте карточку целиком, затем включите «Активно», когда она будет готова к публикации.{% endif %}</p>
+    {% else %}
+      <p class="dashboard-alert"><strong>Не пройдены обязательные проверки: {{ report.required_missing }}.</strong> Перед публикацией исправьте замечания ниже.</p>
+    {% endif %}
+    {% if property_url %}<a class="primary-action" href="{{ property_url }}">Открыть карточку →</a>{% endif %}
+  </section>
+  <section class="sync-dashboard" aria-labelledby="readiness-checks-title">
+    <div class="dashboard-heading"><div><h2 id="readiness-checks-title">Проверка перед публикацией</h2><p class="muted">Проверены данные, сохранённые в Undersun. Для фотографий проверяется наличие записи в карточке.</p></div></div>
+    <div class="readiness-list">
+      {% for check in report.checks %}
+        <article class="readiness-item{% if not check.ok %} needs-attention{% endif %}">
+          <div><span class="meta-badge">{% if check.ok %}Готово{% elif check.required %}Нужно исправить{% else %}Рекомендуется проверить{% endif %}</span><h3>{{ check.title }}</h3><p>{{ check.detail }}</p></div>
+          {% if not check.ok and check.action_url %}<a href="{{ check.action_url }}">{{ check.action_label }} →</a>{% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

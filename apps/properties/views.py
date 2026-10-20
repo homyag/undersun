@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 from urllib.parse import quote_plus, urlencode
 
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic import ListView, DetailView, View
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse, HttpResponsePermanentRedirect
@@ -6094,11 +6095,17 @@ def apply_search_filters(queryset, filters, currency_code='USD'):
 
 
 @require_POST
-@csrf_exempt
+@staff_member_required
 def bulk_upload_images(request):
     """AJAX endpoint для массовой загрузки изображений для объекта недвижимости"""
     from .models import PropertyImage
     from django.db import models
+
+    if not request.user.has_perm('properties.change_property'):
+        return JsonResponse({
+            'success': False,
+            'message': 'Недостаточно прав для загрузки изображений',
+        }, status=403)
     
     try:
         property_id = request.POST.get('property_id')
@@ -6177,7 +6184,9 @@ def bulk_upload_images(request):
                     'id': property_image.id,
                     'title': property_image.title,
                     'image_url': property_image.original_url,
-                    'thumbnail_url': property_image.thumbnail_url,
+                    # The admin reloads after upload. Generating an imagekit
+                    # thumbnail here keeps the request open for no benefit.
+                    'thumbnail_url': property_image.original_url,
                     'is_main': property_image.is_main,
                     'order': property_image.order
                 })
@@ -6186,7 +6195,7 @@ def bulk_upload_images(request):
                 errors.append(f'Ошибка при загрузке файла {file.name}: {str(e)}')
         
         return JsonResponse({
-            'success': True,
+            'success': bool(created_images),
             'message': f'Успешно загружено {len(created_images)} изображений',
             'images': created_images,
             'errors': errors if errors else None

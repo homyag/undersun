@@ -1,0 +1,10 @@
+[Unit]
+Description=Update Undersun currency exchange rates at midnight
+
+[Timer]
+OnCalendar=*-*-* 00:00:00 Asia/Bangkok
+Persistent=true
+Unit=undersun-exchange-rates.service
+
+[Install]
+WantedBy=timers.target

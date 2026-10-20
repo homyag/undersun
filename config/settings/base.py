@@ -27,6 +27,26 @@ SITE_NAME = env('SITE_NAME', default='Undersun Estate')
 SITE_COMPANY_NAME = env('SITE_COMPANY_NAME', default='Undersun Estate Co., Ltd.')
 SITE_URL = env('SITE_URL', default='https://undersunestate.com')
 
+AREALISTING_API_KEY = env('AREALISTING_API_KEY', default='')
+AREALISTING_API_URL = env(
+    'AREALISTING_API_URL',
+    default='https://arealisting.com/api/v1',
+)
+AREALISTING_TIMEOUT = env.int('AREALISTING_TIMEOUT', default=30)
+AREALISTING_MAX_RETRIES = env.int('AREALISTING_MAX_RETRIES', default=3)
+AREALISTING_PRICE_REVIEW_PERCENT = env.int('AREALISTING_PRICE_REVIEW_PERCENT', default=30)
+AREALISTING_MEDIA_TIMEOUT = env.int('AREALISTING_MEDIA_TIMEOUT', default=30)
+AREALISTING_MEDIA_MAX_BYTES = env.int(
+    'AREALISTING_MEDIA_MAX_BYTES', default=15 * 1024 * 1024
+)
+AREALISTING_MEDIA_HOSTS = env.list(
+    'AREALISTING_MEDIA_HOSTS',
+    default=[
+        'pub-d067b620bdf54076bffcdab939e4d1f6.r2.dev',
+        'orqesotfkbouxvu7.public.blob.vercel-storage.com',
+    ],
+)
+
 # Google reCAPTCHA v3
 RECAPTCHA_SITE_KEY = env('RECAPTCHA_SITE_KEY', default='')
 RECAPTCHA_SECRET_KEY = env('RECAPTCHA_SECRET_KEY', default='')
@@ -65,6 +85,7 @@ LOCAL_APPS = [
     'apps.users.apps.UsersConfig',
     'apps.currency.apps.CurrencyConfig',
     'apps.blog.apps.BlogConfig',
+    'apps.arealisting.apps.ArealistingConfig',
     'modeltranslation',  # Перемещаем после наших приложений
 ]
 
@@ -374,7 +395,7 @@ BOT_PROTECTION = {
     'RESPECT_MANUAL_IP_BANS': False,
     'JS_CHALLENGE_GRACE_SECONDS': 10,
     'JS_CHALLENGE_MAX_MISSES': 3,
-    'JS_CHALLENGE_EXEMPT_PATH_PREFIXES': ['/admin/'],
+    'JS_CHALLENGE_EXEMPT_PATH_PREFIXES': ['/admin/', '/admin-ajax/bulk-upload-images/'],
     'ACTION_THRESHOLDS': {
         'monitor': 30,
         'challenge': 60,

@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261019-2">{% endblock %}
+{% block content %}
+<div class="matching readiness-page">
+  <p><a href="{% url 'admin:arealisting_arealistingpricereview_changelist' %}?status__exact=PENDING">← К предложениям цен</a></p>
+  <section class="workspace-intro">
+    <h2><a href="{{ property_url }}">{{ review.property }}</a></h2>
+    <p class="muted">{{ review.project }} · Изменение {{ review.change_percent }}% · {{ review.get_status_display }} · {{ review.created_at|date:"d.m.Y H:i" }}</p>
+    {% if can_decide %}<p>До вашего решения цена карточки остаётся прежней. Перед подтверждением система заново проверит выбранные предложения, цену и курсы валют.</p>
+    {% elif review.reviewed_at %}<p>Решение принято {{ review.reviewed_at|date:"d.m.Y H:i" }}{% if review.reviewed_by %} · {{ review.reviewed_by }}{% endif %}.</p>{% endif %}
+  </section>
+  <section class="sync-dashboard">
+    <h2>Текущая и предложенная цена</h2>
+    <table><thead><tr><th scope="col">Валюта</th><th scope="col">Сейчас в карточке</th><th scope="col">Предложено</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">THB</th><td>{{ review.before.price_sale_thb|default:"Не указана" }}</td><td>{{ review.after.price_sale_thb }}</td></tr>
+        <tr><th scope="row">USD</th><td>{{ review.before.price_sale_usd|default:"Не указана" }}</td><td>{{ review.after.price_sale_usd }}</td></tr>
+        <tr><th scope="row">RUB</th><td>{{ review.before.price_sale_rub|default:"Не указана" }}</td><td>{{ review.after.price_sale_rub }}</td></tr>
+      </tbody>
+    </table>
+    <h3>Выбранные доступные предложения</h3>
+    <p class="muted">В цену карточки попадёт минимальная стоимость в THB из списка ниже.</p>
+    <table><thead><tr><th scope="col">Предложение</th><th scope="col">Цена в источнике</th><th scope="col">После пересчёта в THB</th></tr></thead>
+      <tbody>{% for unit in review.units %}<tr><td>{{ unit.number|default:unit.external_id }}</td><td>{{ unit.source_price }} {{ unit.currency }}</td><td>{{ unit.price_thb }}</td></tr>{% endfor %}</tbody>
+    </table>
+    {% if can_decide %}<div class="review-decisions">
+      <form method="post">{% csrf_token %}<input type="hidden" name="decision" value="approve"><button type="submit">Подтвердить новую цену</button></form>
+      <form method="post">{% csrf_token %}<input type="hidden" name="decision" value="reject"><button type="submit" class="secondary">Отклонить изменение</button></form>
+    </div>{% endif %}
+  </section>
+</div>
+{% endblock %}
