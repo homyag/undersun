@@ -1,0 +1,47 @@
+/* Shared pager for AREALISTING list screens. */
+.matching .review-queue-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 9px 12px;
+  border: 1px solid #dfe2e6;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.matching .review-queue-pagination a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid #dfe2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #273149;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.matching .review-queue-pagination a:hover {
+  border-color: #d9a400;
+  background: #fff7dc;
+  color: #182239;
+}
+
+.matching .review-queue-pagination > span {
+  min-width: 74px;
+  padding: 8px 11px;
+  border-radius: 6px;
+  background: #fff7dc;
+  color: #182239;
+  font-size: 13px;
+  font-weight: 750;
+  text-align: center;
+  white-space: nowrap;
+}

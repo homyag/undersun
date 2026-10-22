@@ -7,6 +7,7 @@
   <p><a href="{% url 'admin:arealisting_arealistinglistinggroup_change' group.pk %}">← К группе</a></p>
   <section class="workspace-intro">
     <h2>Импорт фото: {{ job.get_status_display }}</h2>
+    {% if vue_job_url %}<p><a href="{{ vue_job_url }}">Открыть новый экран загрузки фото →</a></p>{% endif %}
     <p>{{ group }} · Карточка <a href="{% url 'admin:properties_property_change' group.property_id %}">{{ group.property }}</a></p>
     {% if job.status == 'PENDING' or job.status == 'RUNNING' %}
       <p>Можно закрыть страницу: загрузка продолжится в фоне. Страница обновляется каждые 3 секунды.</p>

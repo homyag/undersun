@@ -1,0 +1,10 @@
+{% extends "admin/arealisting/base_workspace.html" %}
+{% load static arealisting_vite %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261020-1">{% endblock %}
+{% block arealisting_content %}
+<div class="matching unit-list-page">
+  <div id="arealisting-unit-list-root"></div>
+  {{ unit_list_data|json_script:"unit-list-data" }}
+  {% arealisting_vite_assets %}
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "admin/arealisting/base_workspace.html" %}
+{% load static arealisting_vite %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261019-3">{% endblock %}
+{% block arealisting_content %}
+<div class="matching">
+  <a href="{% url 'admin:arealisting_arealistingproject_changelist' %}{% if vue_preview %}?vue=1{% endif %}">← Все комплексы</a>
+  <header class="page-heading matching-page-heading">
+    <div><span class="meta-badge">{% if project.project_type == 'HOUSE' %}Таунхаус{% else %}{{ project.get_project_type_display|default:"Тип не указан" }}{% endif %}</span><h2>{{ project }}</h2><p class="muted">{{ project.developer_name|default:"Застройщик не указан" }}</p></div>
+  </header>
+  {% if selected_property %}<section class="selected-context"><span class="publication-state {% if selected_property.is_active %}is-active{% else %}is-inactive{% endif %}">{% if selected_property.is_active %}Активна на сайте{% else %}Неактивна{% endif %}</span><p>Подбираем предложения для карточки «{{ selected_property }}» (#{{ selected_property.pk }}).</p><a href="{{ unlinked_back_url }}">← Вернуться к выбору комплекса</a></section>{% endif %}
+  {% if price_report %}
+  <details class="price-report-panel">
+    <summary>
+      <span class="price-report-panel-icon" aria-hidden="true">↗</span>
+      <span class="price-report-panel-title"><strong>Результат последнего обновления цен</strong><small>Проверено {{ price_report_run.started_at|date:"d.m.Y H:i" }}</small></span>
+      <span class="price-report-panel-count">Карточек: {{ price_report|length }}{% if price_report_review_count %} · Требуют решения: {{ price_report_review_count }}{% endif %}</span>
+      <span class="price-report-panel-chevron" aria-hidden="true">⌄</span>
+    </summary>
+    {% include 'admin/arealisting/price_report.html' %}
+  </details>
+  {% endif %}
+  {% if not selected_property %}<details class="matching-search-panel"{% if search or not matching_data.properties %} open{% endif %}>
+    <summary>Не видите нужную карточку? Найдите её по названию</summary>
+    <form method="get" class="matching-toolbar">
+      <input type="hidden" name="project" value="{{ project.pk }}">{% if vue_preview %}<input type="hidden" name="vue" value="1">{% endif %}
+      <label>Название карточки Undersun<input type="search" name="q" value="{{ search }}" placeholder="Например, квартира в Atelier Residence"></label>
+      <button type="submit">Найти карточки</button>
+    </form>
+  </details>{% endif %}
+  <div id="arealisting-vue-root" data-unlinked-url="{% if unlinked_done_url %}{{ unlinked_done_url }}{% else %}{% url 'admin:arealisting_unlinked' %}{% if vue_preview %}?vue=1{% endif %}{% endif %}" data-projects-url="{% url 'admin:arealisting_arealistingproject_changelist' %}{% if vue_preview %}?vue=1{% endif %}"></div>
+  {% csrf_token %}
+  {{ matching_data|json_script:"matching-data" }}
+  {% arealisting_vite_assets %}
+</div>
+{% endblock %}

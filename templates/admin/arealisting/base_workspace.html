@@ -1,0 +1,70 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block bodyclass %}{{ block.super }} arealisting-shell-page{% endblock %}
+{% block branding %}
+  <div class="undersun-admin-brand">
+    <a href="{% url 'admin:arealisting_arealistingproject_changelist' %}{% if vue_preview %}?vue=1{% endif %}" aria-label="Undersun Estate — AREALISTING">
+      <img src="{% static 'images/logo_fullscreen.svg' %}" alt="Undersun Estate" width="170" height="23">
+    </a>
+  </div>
+  <div class="undersun-admin-topbar">
+    <span class="undersun-admin-topbar-location"><a href="{% url 'admin:index' %}">Главная</a><span aria-hidden="true">/</span><span>AREALISTING</span></span>
+    <a class="undersun-admin-site-link" href="/" target="_blank" rel="noopener noreferrer">Открыть сайт <span aria-hidden="true">↗</span></a>
+  </div>
+{% endblock %}
+{% block userlinks %}
+  {% if user.has_usable_password %}<a href="{% url 'admin:password_change' %}">Сменить пароль</a> / {% endif %}
+  <form id="logout-form" method="post" action="{% url 'admin:logout' %}">{% csrf_token %}<button type="submit">Выйти</button></form>
+  {% include "admin/color_theme_toggle.html" %}
+{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block extrastyle %}{{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/arealisting-shell.css' %}?v=20261021-4">
+  <link rel="stylesheet" href="{% static 'css/admin/arealisting-pagination.css' %}?v=20261021-1">
+{% endblock %}
+
+{% block content %}
+<div class="undersun-admin-shell">
+  <aside class="undersun-admin-sidebar">
+    <div class="undersun-admin-sidebar-title">Рабочие разделы</div>
+    <nav class="undersun-admin-nav" aria-label="Разделы AREALISTING">
+      {% if perms.arealisting.view_arealistingproject or perms.arealisting.change_arealistingproject %}
+        <a href="{% url 'admin:arealisting_arealistingproject_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'overview' %} aria-current="page"{% endif %}>Обзор</a>
+        <a href="{% url 'admin:arealisting_arealistingproject_changelist' %}{% if vue_preview %}?vue=1{% endif %}#project-search"{% if shell_active == 'project' %} aria-current="page"{% endif %}>Комплексы</a>
+      {% endif %}
+      {% if perms.arealisting.view_arealistingproject and perms.arealisting.change_arealistingunit and perms.arealisting.add_arealistinglistinggroup and perms.arealisting.change_arealistinglistinggroup and perms.properties.change_property %}
+        <a href="{% url 'admin:arealisting_matching' %}{% if project %}?project={{ project.pk }}{% if vue_preview %}&amp;vue=1{% endif %}{% elif vue_preview %}?vue=1{% endif %}"{% if shell_active == 'matching' %} aria-current="page"{% endif %}>Сопоставление</a>
+      {% endif %}
+      {% if perms.properties.change_property and perms.arealisting.view_arealistingproject or perms.properties.change_property and perms.arealisting.change_arealistingproject %}<a href="{% url 'admin:arealisting_unlinked' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'unlinked' %} aria-current="page"{% endif %}>Карточки без связи</a>{% endif %}
+      {% if perms.arealisting.view_arealistinglistinggroup %}<a href="{% url 'admin:arealisting_arealistinglistinggroup_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'groups' %} aria-current="page"{% endif %}>Связи с карточками</a>{% endif %}
+      {% if perms.arealisting.view_arealistingunit %}<a href="{% url 'admin:arealisting_arealistingunit_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'units' %} aria-current="page"{% endif %}>Предложения</a>{% endif %}
+      {% if perms.arealisting.view_arealistingskippedunit %}<a href="{% url 'admin:arealisting_arealistingskippedunit_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'skipped' %} aria-current="page"{% endif %}>Пропущенные предложения</a>{% endif %}
+      {% if perms.arealisting.view_arealistingpropertychange %}<a href="{% url 'admin:arealisting_arealistingpropertychange_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'changes' %} aria-current="page"{% endif %}>Изменения карточек</a>{% endif %}
+      {% if perms.arealisting.view_arealistinglocationmapping %}<a href="{% url 'admin:arealisting_arealistinglocationmapping_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'locations' %} aria-current="page"{% endif %}>Локации</a>{% endif %}
+      {% if perms.arealisting.view_arealistingpaymentplan %}<a href="{% url 'admin:arealisting_arealistingpaymentplan_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'payment' %} aria-current="page"{% endif %}>Планы оплаты</a>{% endif %}
+      {% if perms.arealisting.view_arealistingsyncevent %}<a href="{% url 'admin:arealisting_review_queue' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'review' %} aria-current="page"{% endif %}>Очередь изменений</a>{% endif %}
+      {% if perms.arealisting.view_arealistingsyncevent %}<a href="{% url 'admin:arealisting_arealistingsyncevent_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'events' %} aria-current="page"{% endif %}>Журнал событий</a>{% endif %}
+      {% if perms.arealisting.view_arealistingpricereview %}<a href="{% url 'admin:arealisting_arealistingpricereview_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'price' %} aria-current="page"{% endif %}>Проверка цен</a>{% endif %}
+      {% if perms.arealisting.view_arealistingasset %}<a href="{% url 'admin:arealisting_arealistingasset_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'assets' %} aria-current="page"{% endif %}>Материалы</a>{% endif %}
+      {% if perms.arealisting.view_arealistingpropertyasset %}<a href="{% url 'admin:arealisting_arealistingpropertyasset_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'property_assets' %} aria-current="page"{% endif %}>Фото в карточках</a>{% endif %}
+      {% if perms.arealisting.view_arealistingsyncrun %}<a href="{% url 'admin:arealisting_arealistingsyncrun_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'history' %} aria-current="page"{% endif %}>История обновлений</a>{% endif %}
+      {% if perms.arealisting.view_arealistingsyncstate %}<a href="{% url 'admin:arealisting_arealistingsyncstate_changelist' %}{% if vue_preview %}?vue=1{% endif %}"{% if shell_active == 'state' %} aria-current="page"{% endif %}>Состояние синхронизации</a>{% endif %}
+    </nav>
+    <div class="undersun-admin-sidebar-foot">Данные AREALISTING<br>для карточек Undersun</div>
+  </aside>
+  <div class="undersun-admin-main">
+    <div class="undersun-admin-heading">
+      <div>
+        <p class="undersun-admin-eyebrow">Рабочее пространство / AREALISTING</p>
+        <h1>{% if shell_active == 'matching' %}Сопоставление карточек{% elif shell_active == 'project' %}Комплекс AREALISTING{% elif shell_active == 'unlinked' %}Карточки без связи{% elif shell_active == 'groups' %}Связи с карточками{% elif shell_active == 'units' %}Предложения{% elif shell_active == 'skipped' %}Пропущенные предложения{% elif shell_active == 'changes' %}Изменения карточек{% elif shell_active == 'locations' %}Локации{% elif shell_active == 'payment' %}Планы оплаты{% elif shell_active == 'media' %}Проверка фотографий{% elif shell_active == 'assets' %}Материалы{% elif shell_active == 'property_assets' %}Фото в карточках{% elif shell_active == 'review' %}Очередь изменений{% elif shell_active == 'events' %}Журнал событий{% elif shell_active == 'price' %}Проверка цены{% elif shell_active == 'history' %}История обновлений{% elif shell_active == 'state' %}Состояние синхронизации{% else %}Обзор интеграции{% endif %}</h1>
+      </div>
+      {% if project %}<span class="undersun-admin-context">Комплекс: {{ project }}</span>{% endif %}
+    </div>
+    {% block arealisting_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

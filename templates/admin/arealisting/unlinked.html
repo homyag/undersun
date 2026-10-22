@@ -1,10 +1,11 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}">{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261021-2">{% endblock %}
 {% block content %}
 <div class="matching workspace">
   <header class="page-heading">
     <a href="{% url 'admin:arealisting_arealistingproject_changelist' %}">← Комплексы AREALISTING</a>
+    {% if vue_preview_url %}<p><a href="{{ vue_preview_url }}">Открыть новый интерфейс карточек без связи →</a></p>{% endif %}
     <div>
       <h2>Карточки Undersun без связи</h2>
       <p class="muted">Найдите для карточки комплекс AREALISTING или явно отметьте, что она ведётся вручную. Неопубликованные карточки тоже включены.</p>
@@ -68,9 +69,9 @@
     </div>
     {% if project_page.has_other_pages %}
     <nav class="pagination-bar" aria-label="Страницы комплексов">
-      {% if project_page.has_previous %}<a href="?state={{ state }}&amp;activity={{ activity }}&amp;q={{ query|urlencode }}&amp;property={{ selected.pk }}&amp;project_q={{ project_query|urlencode }}&amp;project_page={{ project_page.previous_page_number }}">← Назад</a>{% else %}<span></span>{% endif %}
-      <span>Страница {{ project_page.number }} из {{ project_page.paginator.num_pages }}</span>
-      {% if project_page.has_next %}<a href="?state={{ state }}&amp;activity={{ activity }}&amp;q={{ query|urlencode }}&amp;property={{ selected.pk }}&amp;project_q={{ project_query|urlencode }}&amp;project_page={{ project_page.next_page_number }}">Далее →</a>{% else %}<span></span>{% endif %}
+      {% if project_page.has_previous %}<a class="pagination-action" href="?state={{ state }}&amp;activity={{ activity }}&amp;q={{ query|urlencode }}&amp;property={{ selected.pk }}&amp;project_q={{ project_query|urlencode }}&amp;project_page={{ project_page.previous_page_number }}">← Назад</a>{% else %}<span class="pagination-action is-disabled" aria-disabled="true">← Назад</span>{% endif %}
+      <span class="pagination-current" aria-current="page">Страница {{ project_page.number }} из {{ project_page.paginator.num_pages }}</span>
+      {% if project_page.has_next %}<a class="pagination-action" href="?state={{ state }}&amp;activity={{ activity }}&amp;q={{ query|urlencode }}&amp;property={{ selected.pk }}&amp;project_q={{ project_query|urlencode }}&amp;project_page={{ project_page.next_page_number }}">Далее →</a>{% else %}<span class="pagination-action is-disabled" aria-disabled="true">Далее →</span>{% endif %}
     </nav>{% endif %}
     {% else %}<p class="muted">Введите название комплекса или застройщика и нажмите «Найти комплекс».</p>{% endif %}
   </section>
@@ -86,9 +87,9 @@
   </form>
 
   {% if page.has_other_pages %}<nav class="pagination-bar" aria-label="Страницы карточек">
-    {% if page.has_previous %}<a href="?state={{ state }}&amp;activity={{ activity }}&amp;q={{ query|urlencode }}&amp;page={{ page.previous_page_number }}">← Назад</a>{% else %}<span></span>{% endif %}
-    <span>Страница {{ page.number }} из {{ page.paginator.num_pages }}</span>
-    {% if page.has_next %}<a href="?state={{ state }}&amp;activity={{ activity }}&amp;q={{ query|urlencode }}&amp;page={{ page.next_page_number }}">Далее →</a>{% else %}<span></span>{% endif %}
+    {% if page.has_previous %}<a class="pagination-action" href="?state={{ state }}&amp;activity={{ activity }}&amp;q={{ query|urlencode }}&amp;page={{ page.previous_page_number }}">← Назад</a>{% else %}<span class="pagination-action is-disabled" aria-disabled="true">← Назад</span>{% endif %}
+    <span class="pagination-current" aria-current="page">Страница {{ page.number }} из {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a class="pagination-action" href="?state={{ state }}&amp;activity={{ activity }}&amp;q={{ query|urlencode }}&amp;page={{ page.next_page_number }}">Далее →</a>{% else %}<span class="pagination-action is-disabled" aria-disabled="true">Далее →</span>{% endif %}
   </nav>{% endif %}
 
   <div class="project-grid property-queue-grid">

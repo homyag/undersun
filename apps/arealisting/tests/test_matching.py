@@ -219,6 +219,56 @@ class MatchingTests(TestCase):
             'Введите название комплекса или застройщика',
         )
 
+    @override_settings(DEBUG=True, AREALISTING_VUE_ENABLED=False)
+    @patch('apps.arealisting.templatetags.arealisting_vite.matching_vue_available', return_value=True)
+    def test_vue_unlinked_selection_search_and_manual_roundtrip(self, _available):
+        self.login_unlinked_admin()
+        url = reverse('admin:arealisting_unlinked')
+        response = self.client.get(url, {'vue': '1', 'activity': 'active', 'q': 'Example',
+                                         'property': self.prop.pk})
+        self.assertTemplateUsed(response, 'admin/arealisting/unlinked_vue.html')
+        data = response.context['unlinked_data']
+        self.assertEqual(data['cards'][0]['id'], self.prop.pk)
+        self.assertIsNone(data['selected']['project_page'])
+        self.assertIn('vue=1', data['cards'][0]['select_url'])
+
+        response = self.client.get(url, {'vue': '1', 'property': self.prop.pk,
+                                         'project_q': 'Example', 'activity': 'active'})
+        data = response.context['unlinked_data']
+        self.assertEqual(data['selected']['projects'][0]['id'], self.project.pk)
+        matching_url = data['selected']['projects'][0]['matching_url']
+        self.assertIn('source_vue=1', matching_url)
+        self.assertIn('vue=1', matching_url)
+        with patch('apps.arealisting.admin.price_report_context', return_value={}):
+            matching = self.client.get(matching_url)
+        self.assertTemplateUsed(matching, 'admin/arealisting/matching_vue.html')
+        self.assertIn('vue=1', matching.context['unlinked_back_url'])
+        self.assertIn('vue=1', matching.context['unlinked_done_url'])
+        self.assertNotIn('property=', matching.context['unlinked_done_url'])
+
+        manual = self.client.post(reverse('admin:arealisting_manual_property', args=[self.prop.pk]), {
+            'action': 'manual', 'activity': 'active', 'q': 'Example', 'page': '1', 'vue': '1',
+        })
+        self.assertIn('vue=1', manual['Location'])
+        self.assertIn('activity=active', manual['Location'])
+        self.assertTemplateUsed(self.client.get(manual['Location']), 'admin/arealisting/unlinked_vue.html')
+
+        with patch('apps.arealisting.admin.ArealistingProjectAdmin._run_sync', return_value=True):
+            loaded = self.client.post(reverse('admin:arealisting_load_inventory', args=[self.project.pk]), {
+                'property': self.prop.pk, 'source_state': 'pending', 'source_activity': 'active',
+                'source_q': 'Example', 'source_page': '1', 'source_project_q': 'Example',
+                'source_vue': '1',
+            })
+        self.assertIn('property=', loaded['Location'])
+        self.assertIn('vue=1', loaded['Location'])
+
+    @override_settings(DEBUG=True, AREALISTING_VUE_ENABLED=False)
+    @patch('apps.arealisting.templatetags.arealisting_vite.matching_vue_available', return_value=False)
+    def test_unlinked_falls_back_when_vue_bundle_unavailable(self, _available):
+        self.login_unlinked_admin()
+        response = self.client.get(reverse('admin:arealisting_unlinked'), {'vue': '1'})
+        self.assertTemplateUsed(response, 'admin/arealisting/unlinked.html')
+
     def test_unlinked_filters_by_property_activity(self):
         self.login_unlinked_admin()
         inactive = Property.objects.create(
@@ -1121,6 +1171,43 @@ class MatchingTests(TestCase):
         user.is_superuser = False
         user.save()
         self.assertEqual(self.client.get(url).status_code, 403)
+
+    @override_settings(DEBUG=True)
+    def test_vue_matching_is_opt_in_and_uses_same_server_data(self):
+        user = User.objects.create_superuser('vue-matcher', 'vue@example.test', 'password')
+        self.client.force_login(user)
+        url = reverse('admin:arealisting_matching')
+        with patch('apps.arealisting.templatetags.arealisting_vite.matching_vue_available', return_value=True):
+            legacy = self.client.get(url, {'project': self.project.pk})
+            vue = self.client.get(url, {'project': self.project.pk, 'vue': '1'})
+        self.assertTemplateUsed(legacy, 'admin/arealisting/matching.html')
+        self.assertContains(legacy, 'Открыть новую версию экрана на Vue')
+        self.assertTemplateUsed(vue, 'admin/arealisting/matching_vue.html')
+        self.assertContains(vue, 'arealisting-vue-root')
+        self.assertEqual(vue.context['matching_data']['project'], self.project.pk)
+
+    @override_settings(DEBUG=True)
+    def test_vue_matching_without_project_opens_project_picker(self):
+        user = User.objects.create_superuser('matching-picker', 'picker@example.test', 'password')
+        self.client.force_login(user)
+        url = reverse('admin:arealisting_matching')
+        with patch('apps.arealisting.templatetags.arealisting_vite.matching_vue_available', return_value=True):
+            response = self.client.get(url, {'vue': '1'})
+        self.assertTemplateUsed(response, 'admin/arealisting/matching_select_vue.html')
+        self.assertContains(response, 'arealisting-matching-select-root')
+        rows = response.context['matching_select_data']['rows']
+        self.assertEqual(next(row['url'] for row in rows if row['id'] == self.project.pk),
+                         f'{url}?project={self.project.pk}&vue=1')
+
+    @override_settings(DEBUG=True)
+    def test_vue_matching_falls_back_without_built_assets(self):
+        user = User.objects.create_superuser('vue-fallback', 'fallback@example.test', 'password')
+        self.client.force_login(user)
+        with patch('apps.arealisting.templatetags.arealisting_vite.matching_vue_available', return_value=False):
+            response = self.client.get(reverse('admin:arealisting_matching'), {
+                'project': self.project.pk, 'vue': '1',
+            })
+        self.assertTemplateUsed(response, 'admin/arealisting/matching.html')
 
     def test_admin_preview_and_create_draft_actions(self):
         self.prepare_draft_source()

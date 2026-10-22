@@ -5,6 +5,7 @@
 <div class="matching readiness-page">
   <p><a href="{% url 'admin:arealisting_arealistingpricereview_changelist' %}?status__exact=PENDING">← К предложениям цен</a></p>
   <section class="workspace-intro">
+    {% if vue_preview_url %}<p><a href="{{ vue_preview_url }}">Открыть новый экран проверки цены →</a></p>{% endif %}
     <h2><a href="{{ property_url }}">{{ review.property }}</a></h2>
     <p class="muted">{{ review.project }} · Изменение {{ review.change_percent }}% · {{ review.get_status_display }} · {{ review.created_at|date:"d.m.Y H:i" }}</p>
     {% if can_decide %}<p>До вашего решения цена карточки остаётся прежней. Перед подтверждением система заново проверит выбранные предложения, цену и курсы валют.</p>

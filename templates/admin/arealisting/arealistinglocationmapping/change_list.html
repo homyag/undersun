@@ -1,0 +1,6 @@
+{% extends "admin/change_list.html" %}
+{% block content %}
+  <div class="module" style="padding: 12px 16px; margin-bottom: 16px;">Новые локации создаются при обновлении комплексов AREALISTING. Откройте полученную запись, чтобы выбрать район или локацию Undersun.</div>
+  {% if vue_preview_url %}<div class="module" style="padding: 12px 16px; margin-bottom: 16px;"><a href="{{ vue_preview_url }}">Открыть новое сопоставление локаций →</a></div>{% endif %}
+  {{ block.super }}
+{% endblock %}

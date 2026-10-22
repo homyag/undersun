@@ -207,6 +207,8 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 VITE_DEV_SERVER_URL = env('VITE_DEV_SERVER_URL', default='')
+AREALISTING_VITE_DEV_SERVER_URL = env('AREALISTING_VITE_DEV_SERVER_URL', default='')
+AREALISTING_VUE_ENABLED = env.bool('AREALISTING_VUE_ENABLED', default=False)
 MAP_REBUILD_ENABLED = env.bool('MAP_REBUILD_ENABLED', default=False)
 MAP_REBUILD_STAFF_ONLY = env.bool('MAP_REBUILD_STAFF_ONLY', default=True)
 MAP_VECTOR_STYLE_URL = env(
@@ -395,7 +397,11 @@ BOT_PROTECTION = {
     'RESPECT_MANUAL_IP_BANS': False,
     'JS_CHALLENGE_GRACE_SECONDS': 10,
     'JS_CHALLENGE_MAX_MISSES': 3,
-    'JS_CHALLENGE_EXEMPT_PATH_PREFIXES': ['/admin/', '/admin-ajax/bulk-upload-images/'],
+    'JS_CHALLENGE_EXEMPT_PATH_PREFIXES': [
+        '/admin/',
+        '/admin-ajax/bulk-upload-images/',
+        '/i18n/setlang/',  # Admin language selector posts outside /admin/.
+    ],
     'ACTION_THRESHOLDS': {
         'monitor': 30,
         'challenge': 60,

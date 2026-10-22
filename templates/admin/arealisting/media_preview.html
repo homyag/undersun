@@ -7,9 +7,11 @@
   <p><a href="{{ back_url }}">← Вернуться</a></p>
   <section class="workspace-intro">
     <h2>Проверьте изменения фотографий</h2>
+    {% if vue_preview_url %}<p><a href="{{ vue_preview_url }}">Открыть новый интерфейс проверки фото →</a></p>{% endif %}
     <p>Импорт обновит фото, которыми управляет AREALISTING, и удалит из карточки ранее импортированные фото, отсутствующие в источнике. Ручные фото и защищённые разделы останутся в карточке.</p>
     {% if not bulk %}<p><strong>Снимите галочки с неподходящих фото, при желании выберите главное и нажмите «Пересчитать изменения».</strong> Нажмите на миниатюру, чтобы открыть оригинал в полном размере. Исключения сохранятся для следующих импортов; ранее импортированное фото с пометкой «Удалится» будет удалено после подтверждения.</p>{% endif %}
     <p>После подтверждения загрузка продолжится в фоне. Вы увидите прогресс и результат каждого фото; страницу можно будет закрыть.</p>
+    {% if bulk and vue_bulk_available %}<form method="post" action="{% url 'admin:arealisting_arealistinglistinggroup_changelist' %}">{% csrf_token %}<input type="hidden" name="action" value="import_media"><input type="hidden" name="vue" value="1">{% for preview in previews %}<input type="hidden" name="_selected_action" value="{{ preview.group.pk }}">{% endfor %}<button type="submit" class="secondary">Открыть новый массовый предпросмотр →</button></form>{% endif %}
   </section>
   {% for preview in previews %}
     <section class="sync-dashboard media-preview-group">

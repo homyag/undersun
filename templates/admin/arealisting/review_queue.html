@@ -1,11 +1,12 @@
 {% extends "admin/base_site.html" %}
 {% load static %}
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261020-1">{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261021-3"><link rel="stylesheet" href="{% static 'css/admin/arealisting-pagination.css' %}?v=20261021-1">{% endblock %}
 {% block content %}
 <div class="matching review-queue-page">
   <p><a href="{% url 'admin:arealisting_arealistingproject_changelist' %}">← К комплексам</a></p>
   <section class="workspace-intro">
     <h2>Очередь изменений AREALISTING</h2>
+    {% if vue_preview_url %}<p><a href="{{ vue_preview_url }}">Открыть новый интерфейс очереди →</a></p>{% endif %}
     <p>Здесь собраны изменения предложений и карточек, которые ещё не отмечены как проверенные. Откройте карточку, сверьте данные и отметьте событие после проверки.</p>
     <p>Для характеристик сравнение показывает значения конкретного предложения и текущее значение карточки. Если карточка объединяет несколько предложений, её значение может рассчитываться по всей группе.</p>
   </section>

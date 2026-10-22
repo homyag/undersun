@@ -1,0 +1,432 @@
+/* AREALISTING workspace: Undersun's light canvas, graphite top bar and yellow actions. */
+body.arealisting-shell-page {
+  --primary: #484d57;
+  --secondary: #616677;
+  --accent: #f8bd00;
+  --primary-fg: #fff;
+  --body-bg: #fff;
+  --body-fg: #273149;
+  --body-quiet-color: #616677;
+  --hairline-color: #dfe2e6;
+  --darkened-bg: #f5f7fa;
+  --selected-bg: #fff7dc;
+  --link-fg: #705300;
+  --link-hover-color: #4d3900;
+  --button-bg: #f8bd00;
+  --button-fg: #182239;
+  --default-button-bg: #f8bd00;
+  --default-button-hover-bg: #e5ad00;
+  --border-color: #dfe2e6;
+  background: #f4f6f8;
+  color: #273149;
+  font-family: Gilroy, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body.arealisting-shell-page #header {
+  min-height: 58px;
+  padding: 0 20px 0 0;
+  background: #484d57;
+  color: #fff;
+  border: 0;
+  box-shadow: none;
+}
+
+body.arealisting-shell-page #header a,
+body.arealisting-shell-page #header button {
+  color: #fff;
+}
+
+body.arealisting-shell-page #header a:hover,
+body.arealisting-shell-page #header button:hover {
+  color: #ffe492;
+}
+
+body.arealisting-shell-page #branding {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.undersun-admin-brand {
+  display: flex;
+  flex: 0 0 238px;
+  align-items: center;
+  box-sizing: border-box;
+  height: 58px;
+  padding: 0 22px;
+  background: #fff;
+}
+
+.undersun-admin-brand img {
+  display: block;
+  width: 164px;
+  height: auto;
+}
+
+.undersun-admin-topbar {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-width: 0;
+  padding: 0 30px;
+}
+
+.undersun-admin-topbar-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: #e4e7ed;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+body.arealisting-shell-page #header .undersun-admin-site-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 11px;
+  border: 1px solid #8b929f;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+body.arealisting-shell-page #header .undersun-admin-site-link:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, .1);
+}
+
+body.arealisting-shell-page #user-tools {
+  color: #e4e7ed;
+  font-size: 12px;
+  white-space: nowrap;
+}
+body.arealisting-shell-page #main { display: block; }
+body.arealisting-shell-page #content-start { padding: 0; margin: 0; }
+body.arealisting-shell-page #content { width: 100%; max-width: none; padding: 0; margin: 0; }
+body.arealisting-shell-page #footer { padding: 0; }
+
+.undersun-admin-shell {
+  display: grid;
+  grid-template-columns: 238px minmax(0, 1fr);
+  min-height: calc(100vh - 58px);
+  background: #f4f6f8;
+}
+
+.undersun-admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 8px 24px;
+  border-right: 1px solid #e5e8ee;
+  background: #fff;
+  color: #273149;
+}
+
+.undersun-admin-sidebar-title {
+  padding: 0 18px;
+  color: #8290a5;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.undersun-admin-nav {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+
+.undersun-admin-nav a {
+  display: block;
+  padding: 10px 14px 10px 18px;
+  border-left: 4px solid transparent;
+  border-radius: 5px;
+  color: #43516a;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.undersun-admin-nav a:hover {
+  color: #182239;
+  background: #f5f7fa;
+}
+
+.undersun-admin-nav a[aria-current="page"] {
+  border-left-color: #f8bd00;
+  color: #182239;
+  background: #fff6d9;
+  font-weight: 700;
+}
+
+.undersun-admin-sidebar-foot {
+  margin-top: auto;
+  padding: 16px 18px 0;
+  border-top: 1px solid #e5e8ee;
+  color: #8290a5;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.undersun-admin-main {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 1780px;
+  width: 100%;
+  padding: 28px clamp(18px, 2.5vw, 40px) 48px;
+}
+
+.undersun-admin-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 20px;
+}
+
+.undersun-admin-eyebrow {
+  margin: 0 0 4px;
+  color: #7a8497;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.undersun-admin-heading h1 {
+  margin: 0;
+  color: #111b35;
+  font-size: clamp(26px, 2.3vw, 34px);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.undersun-admin-context {
+  max-width: min(100%, 420px);
+  padding: 8px 12px;
+  border: 1px solid #dfe2e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #616677;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.undersun-admin-shell .matching { max-width: none; }
+
+.undersun-admin-shell .matching a:where(:not(.primary-action, .secondary, .pagination-action, .overview-metric-link, .segmented-control a, .price-review-statuses a, .review-queue-pagination a)) {
+  color: #34425b;
+  font-weight: 650;
+  text-decoration-line: underline;
+  text-decoration-color: #f8bd00;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: color .15s ease, background-color .15s ease, text-decoration-color .15s ease;
+}
+
+.undersun-admin-shell .matching a:where(:not(.primary-action, .secondary, .pagination-action, .overview-metric-link, .segmented-control a, .price-review-statuses a, .review-queue-pagination a)):hover {
+  border-radius: 2px;
+  background: #fff7dc;
+  color: #182239;
+  text-decoration-color: #d9a400;
+}
+
+.undersun-admin-shell .matching article,
+.undersun-admin-shell .workspace-intro,
+.undersun-admin-shell .sync-dashboard,
+.undersun-admin-shell .work-queue {
+  border-radius: 7px;
+  box-shadow: 0 2px 9px rgba(38, 49, 69, .035);
+}
+
+.undersun-admin-shell .workspace-intro,
+.undersun-admin-shell .selected-context { background: #fff; }
+
+.undersun-admin-shell .matching button,
+.undersun-admin-shell .matching .primary-action {
+  border-radius: 6px;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.undersun-admin-shell .matching button:hover:not(:disabled),
+.undersun-admin-shell .matching .primary-action:hover {
+  filter: brightness(.94);
+}
+
+.undersun-admin-shell .matching :is(a, button, input, select, summary):focus-visible,
+.undersun-admin-nav a:focus-visible {
+  outline: 3px solid #f8bd00;
+  outline-offset: 2px;
+}
+
+.undersun-admin-shell .matching .workflow-steps [aria-current="step"] {
+  color: #705300;
+  border-bottom: 3px solid #f8bd00;
+}
+
+.undersun-admin-shell .matching .unit-choice:has(input:checked),
+.undersun-admin-shell .matching .match-row.has-selection {
+  border-color: #d4a000;
+}
+
+.undersun-admin-shell .matching .matching-footer {
+  border-top: 3px solid #f8bd00;
+}
+
+.undersun-admin-shell .matching .primary-action,
+.undersun-admin-shell .matching button:not(.secondary):not(.danger) {
+  box-shadow: none;
+}
+
+.undersun-admin-shell .matching input[type="checkbox"],
+.undersun-admin-shell .matching input[type="radio"] {
+  accent-color: #e3aa00;
+}
+
+.undersun-admin-shell .matching :is(input, select, textarea) {
+  border-radius: 6px;
+}
+
+
+.undersun-admin-shell #needs-attention,
+.undersun-admin-shell #project-search { scroll-margin-top: 20px; }
+
+.undersun-admin-shell .price-report-panel {
+  margin: 18px 0 20px;
+  border: 1px solid #dfe2e6;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 14px rgba(71, 75, 87, .045);
+}
+
+.undersun-admin-shell .price-report-panel > summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 14px 18px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.undersun-admin-shell .price-report-panel > summary::-webkit-details-marker { display: none; }
+.undersun-admin-shell .price-report-panel > summary:focus-visible { outline: 3px solid #f1b400; outline-offset: 2px; }
+.undersun-admin-shell .price-report-panel-icon {
+  display: grid;
+  flex: 0 0 38px;
+  place-items: center;
+  height: 38px;
+  border-radius: 10px;
+  background: #fff4ce;
+  color: #705300;
+  font-size: 21px;
+  font-weight: 700;
+}
+.undersun-admin-shell .price-report-panel-title { display: grid; gap: 3px; }
+.undersun-admin-shell .price-report-panel-title strong { color: #333847; font-size: 15px; }
+.undersun-admin-shell .price-report-panel-title small { color: #616677; font-size: 12px; }
+.undersun-admin-shell .price-report-panel-count {
+  margin-left: auto;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #f5f6f8;
+  color: #474b57;
+  font-size: 12px;
+  font-weight: 700;
+}
+.undersun-admin-shell .price-report-panel-chevron { color: #616677; font-size: 20px; transition: transform .15s ease; }
+.undersun-admin-shell .price-report-panel[open] .price-report-panel-chevron { transform: rotate(180deg); }
+.undersun-admin-shell .price-report-panel .workspace-intro {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid #dfe2e6;
+  box-shadow: none;
+  background: #fff;
+}
+
+.undersun-admin-shell .matching-search-panel { margin: 10px 0 22px; }
+.undersun-admin-shell .matching-search-panel > summary {
+  width: fit-content;
+  color: #705300;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.undersun-admin-shell .matching-search-panel > summary:focus-visible { outline: 3px solid #f1b400; outline-offset: 2px; }
+.undersun-admin-shell .matching-search-panel .matching-toolbar {
+  margin: 12px 0 0;
+  padding: 14px;
+  border: 1px solid #dfe2e6;
+  border-radius: 10px;
+  background: #fff;
+}
+.undersun-admin-shell .matching-search-panel .matching-toolbar label { flex: 1 1 330px; }
+
+@media (max-width: 1050px) {
+  .undersun-admin-shell { grid-template-columns: 190px minmax(0, 1fr); }
+  .undersun-admin-brand { flex-basis: 190px; padding-inline: 15px; }
+  .undersun-admin-brand img { width: 150px; }
+  .undersun-admin-topbar { padding-inline: 20px; }
+  body.arealisting-shell-page #user-tools { font-size: 11px; }
+  .undersun-admin-main { padding: 24px; }
+}
+
+@media (max-width: 760px) {
+  body.arealisting-shell-page #header {
+    height: auto;
+    min-height: 98px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 0 0 10px;
+  }
+  body.arealisting-shell-page #branding { width: 100%; }
+  .undersun-admin-brand {
+    flex: 0 0 auto;
+    height: 50px;
+    padding-inline: 14px;
+  }
+  .undersun-admin-brand img { width: 116px; }
+  .undersun-admin-topbar { gap: 8px; padding-inline: 12px; }
+  .undersun-admin-topbar-location { gap: 5px; font-size: 11px; }
+  body.arealisting-shell-page #header .undersun-admin-site-link {
+    padding: 5px 7px;
+    font-size: 11px;
+  }
+  body.arealisting-shell-page #user-tools {
+    max-width: 100%;
+    margin: 6px 12px 0;
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .undersun-admin-shell { display: block; }
+  .undersun-admin-sidebar { padding: 8px 12px; border-right: 0; border-bottom: 1px solid #e5e8ee; }
+  .undersun-admin-sidebar-title,
+  .undersun-admin-sidebar-foot { display: none; }
+  .undersun-admin-nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin; }
+  .undersun-admin-nav a { flex: 0 0 auto; padding: 9px 12px; border-left: 0; border-bottom: 3px solid transparent; white-space: nowrap; }
+  .undersun-admin-nav a[aria-current="page"] { border-bottom-color: #f8bd00; }
+  .undersun-admin-main { padding: 22px 16px 44px; }
+  .undersun-admin-heading { margin-bottom: 18px; }
+  .undersun-admin-shell .price-report-panel > summary { flex-wrap: wrap; gap: 8px 12px; padding: 12px; }
+  .undersun-admin-shell .price-report-panel-title { flex: 1 1 calc(100% - 70px); }
+  .undersun-admin-shell .price-report-panel-count { margin-left: 0; }
+  .undersun-admin-shell .price-report-panel-chevron { margin-left: auto; }
+}
+
+@media (max-width: 490px) {
+  .undersun-admin-topbar-location { display: none; }
+  .undersun-admin-topbar { justify-content: flex-end; }
+}

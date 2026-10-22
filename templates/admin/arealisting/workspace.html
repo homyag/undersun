@@ -1,18 +1,43 @@
-{% extends "admin/base_site.html" %}
-{% load static %}
+{% extends "admin/arealisting/base_workspace.html" %}
+{% load static arealisting_vite %}
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261019-1">{% endblock %}
-{% block content %}
+{% block arealisting_content %}
 <div class="matching workspace">
-  {% if perms.properties.change_property %}<p><a class="primary-action" href="{% url 'admin:arealisting_unlinked' %}">Объекты Undersun без связи →</a></p>{% endif %}
+  <div id="arealisting-overview-root"></div>
+  {{ source_totals|json_script:"arealisting-overview-totals" }}
+  {{ attention_actionable_count|json_script:"arealisting-overview-actionable" }}
+  {% if can_view_unlinked %}<p><a class="primary-action" href="{% url 'admin:arealisting_unlinked' %}{% if vue_preview %}?vue=1{% endif %}">Объекты Undersun без связи →</a></p>{% endif %}
   <div class="workflow-steps" aria-label="Этапы работы"><strong>1. Выберите комплекс</strong><span>2. Подберите карточки</span><span>3. Проверьте и сохраните</span></div>
   <section class="workspace-intro">
     <h2>Дополните ваши карточки данными застройщика</h2>
     <p>Найдите комплекс, получите его предложения, затем укажите, каким карточкам Undersun они соответствуют.</p>
     <p class="muted">Вы сами выбираете изменения перед сохранением. Получение списка не добавляет объекты на сайт.</p>
     {% if can_sync %}<form method="post" action="{% url 'admin:arealisting_arealistingproject_sync_projects' %}" data-loading="Получаем список комплексов…">
-      {% csrf_token %}<button type="submit" class="secondary"{% if sync_running %} disabled{% endif %}>Обновить список проектов</button>
+      {% csrf_token %}{% if vue_preview %}<input type="hidden" name="vue" value="1">{% endif %}<button type="submit" class="secondary"{% if sync_running %} disabled{% endif %}>Обновить список проектов</button>
       <span class="muted">Начните здесь, если нужного комплекса ещё нет.</span>
     </form>{% endif %}
+  </section>
+  <section class="work-queue" id="needs-attention" aria-labelledby="work-queue-title">
+    <div class="dashboard-heading">
+      <div><h2 id="work-queue-title">Рекомендуется проверить</h2><p class="muted">Перечень карточек без связей, черновиков, локаций и фото с ошибками.</p></div>
+    </div>
+    {% if work_items %}
+    <div class="work-queue-list">
+      {% for item in work_items %}
+      <article class="work-queue-item">
+        <div><span class="meta-badge">{{ item.kind }}</span><h3>{{ item.title }}</h3><p class="muted">{{ item.detail }}</p></div>
+        <a href="{{ item.url }}">{{ item.action }} →</a>
+      </article>
+      {% endfor %}
+    </div>
+    <p class="muted">Показаны первые записи каждого типа.</p>
+    <nav class="work-queue-links" aria-label="Полные списки">
+      {% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}{% if vue_preview %}?vue=1{% endif %}">Все карточки без связи →</a>{% endif %}
+      {% if can_view_groups %}<a href="{{ dashboard_links.groups }}?catalog_origin__exact=AREALISTING_DRAFT{% if vue_preview %}&amp;vue=1{% endif %}">Все черновики →</a>{% endif %}
+      {% if can_view_mappings %}<a href="{{ dashboard_links.mappings }}{% if vue_preview %}?vue=1{% endif %}">Все локации →</a>{% endif %}
+      {% if can_view_assets %}<a href="{{ dashboard_links.assets }}{% if vue_preview %}?vue=1{% endif %}">Все материалы →</a>{% endif %}
+    </nav>
+    {% else %}<p>Сейчас нет записей, требующих действий с вашими правами доступа.</p>{% endif %}
   </section>
   {% if latest_sync_job %}
   <section class="sync-dashboard" aria-labelledby="manual-sync-title">
@@ -33,44 +58,22 @@
     <div class="dashboard-heading">
       <div><h2 id="review-queue-link-title">Очередь изменений{% if review_queue_count or pending_price_review_count %} · {{ review_queue_count|add:pending_price_review_count }}{% endif %}</h2>
         <p class="muted">Изменения характеристик, цен и предложений, которые ещё не проверены. Предложения цен ждут отдельного решения.</p></div>
-      <a class="primary-action" href="{{ review_queue_url }}">Открыть очередь →</a>
+      <a class="primary-action" href="{{ review_queue_url }}{% if vue_preview %}?vue=1{% endif %}">Открыть очередь →</a>
     </div>
   </section>
   {% endif %}
-  <section class="work-queue" aria-labelledby="work-queue-title">
-    <div class="dashboard-heading">
-      <div><h2 id="work-queue-title">Рекомендуется проверить</h2><p class="muted">Перечень карточек без связей, черновиков, локаций и фото с ошибками.</p></div>
-    </div>
-    {% if work_items %}
-    <div class="work-queue-list">
-      {% for item in work_items %}
-      <article class="work-queue-item">
-        <div><span class="meta-badge">{{ item.kind }}</span><h3>{{ item.title }}</h3><p class="muted">{{ item.detail }}</p></div>
-        <a href="{{ item.url }}">{{ item.action }} →</a>
-      </article>
-      {% endfor %}
-    </div>
-    <p class="muted">Показаны первые записи каждого типа.</p>
-    <nav class="work-queue-links" aria-label="Полные списки">
-      {% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}">Все карточки без связи →</a>{% endif %}
-      {% if can_view_groups %}<a href="{{ dashboard_links.groups }}?catalog_origin__exact=AREALISTING_DRAFT">Все черновики →</a>{% endif %}
-      {% if can_view_mappings %}<a href="{{ dashboard_links.mappings }}">Все локации →</a>{% endif %}
-      {% if can_view_assets %}<a href="{{ dashboard_links.assets }}">Все материалы →</a>{% endif %}
-    </nav>
-    {% else %}<p>Сейчас нет записей, требующих действий с вашими правами доступа.</p>{% endif %}
-  </section>
   {% if can_view_price_reviews %}
   <section class="work-queue" aria-labelledby="price-review-title">
     <div class="dashboard-heading">
       <div><h2 id="price-review-title">Цены на подтверждении{% if pending_price_review_count %} · {{ pending_price_review_count }}{% endif %}</h2>
         <p class="muted">При изменении цены продажи на {{ price_review_percent }}% и больше прежняя цена сохраняется до решения администратора.</p></div>
-      {% if pending_price_review_count %}<a href="{{ price_reviews_url }}?status__exact=PENDING">Все предложения цен →</a>{% endif %}
+      {% if pending_price_review_count %}<a href="{{ price_reviews_url }}?status__exact=PENDING{% if vue_preview %}&amp;vue=1{% endif %}">Все предложения цен →</a>{% endif %}
     </div>
     {% if pending_price_reviews %}<div class="work-queue-list">
       {% for review in pending_price_reviews %}<article class="work-queue-item">
         <div><span class="meta-badge">{{ review.change_percent }}%</span><h3>{{ review.property }}</h3>
           <p class="muted">{{ review.before.price_sale_thb|default:"Цена не указана" }} → {{ review.after.price_sale_thb }} THB · {{ review.project }}</p></div>
-        <a href="{% url 'admin:arealisting_arealistingpricereview_review' review.pk %}">Проверить цену →</a>
+        <a href="{% url 'admin:arealisting_arealistingpricereview_review' review.pk %}{% if vue_preview %}?vue=1{% endif %}">Проверить цену →</a>
       </article>{% endfor %}
     </div>{% else %}<p>Сейчас нет изменений цены, ожидающих подтверждения.</p>{% endif %}
   </section>
@@ -106,7 +109,7 @@
           <p class="muted">Успешных синхронизаций пока нет.</p>
         {% endif %}
       </div>
-      {% if can_view_runs %}<a href="{{ dashboard_links.runs }}">История обновлений →</a>{% endif %}
+      {% if can_view_runs %}<a href="{{ dashboard_links.runs }}{% if vue_preview %}?vue=1{% endif %}">История обновлений →</a>{% endif %}
     </div>
     {% if sync_running %}<p class="dashboard-notice">Синхронизация выполняется. Обновите страницу позже, чтобы увидеть итог.</p>{% endif %}
     {% if latest_sync_error %}<p class="dashboard-alert"><strong>Последняя попытка завершилась ошибкой.</strong> {{ latest_sync_error }}</p>{% endif %}
@@ -132,32 +135,34 @@
     <div class="dashboard-group">
       <h3>Требуют внимания</h3>
       <dl class="dashboard-grid attention-grid">
-        <div><dt>{% if can_view_mappings %}<a href="{{ dashboard_links.mappings }}?is_confirmed__exact=0">Локации без подтверждения</a>{% else %}Локации без подтверждения{% endif %}</dt><dd>{{ attention.mapping_required }}</dd></div>
-        <div><dt>{% if can_view_assets %}<a href="{{ dashboard_links.assets }}">Ошибки материалов</a>{% else %}Ошибки материалов{% endif %}</dt><dd>{{ attention.asset_errors }}</dd></div>
-        <div><dt>{% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}">Карточки без связи</a>{% else %}Карточки без связи{% endif %}</dt><dd>{{ attention.unlinked_pending }}</dd></div>
-        <div><dt>{% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}?state=manual">На ручном ведении</a>{% else %}На ручном ведении{% endif %}</dt><dd>{{ attention.manual_properties }}</dd></div>
+        <div><dt>{% if can_view_mappings %}<a href="{{ dashboard_links.mappings }}?is_confirmed__exact=0{% if vue_preview %}&amp;vue=1{% endif %}">Локации без подтверждения</a>{% else %}Локации без подтверждения{% endif %}</dt><dd>{{ attention.mapping_required }}</dd></div>
+        <div><dt>{% if can_view_assets %}<a href="{{ dashboard_links.assets }}{% if vue_preview %}?vue=1{% endif %}">Ошибки материалов</a>{% else %}Ошибки материалов{% endif %}</dt><dd>{{ attention.asset_errors }}</dd></div>
+        <div><dt>{% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}{% if vue_preview %}?vue=1{% endif %}">Карточки без связи</a>{% else %}Карточки без связи{% endif %}</dt><dd>{{ attention.unlinked_pending }}</dd></div>
+        <div><dt>{% if can_view_unlinked %}<a href="{{ dashboard_links.unlinked }}?state=manual{% if vue_preview %}&amp;vue=1{% endif %}">На ручном ведении</a>{% else %}На ручном ведении{% endif %}</dt><dd>{{ attention.manual_properties }}</dd></div>
       </dl>
     </div></div>
   </section>
-  <form method="get" class="matching-toolbar"><label>Найти комплекс или застройщика<input type="search" name="q" value="{{ query }}" placeholder="Например, Lavisco" /></label><button type="submit">Найти</button>{% if query %}<a href="{% url 'admin:arealisting_arealistingproject_changelist' %}">Все комплексы</a>{% endif %}</form>
-  <div class="project-grid">
+  <form method="get" class="matching-toolbar" id="project-search">{% if vue_preview %}<input type="hidden" name="vue" value="1">{% endif %}<label>Найти комплекс или застройщика<input type="search" name="q" value="{{ query }}" placeholder="Например, Lavisco" /></label><button type="submit">Найти</button>{% if query %}<a href="{% url 'admin:arealisting_arealistingproject_changelist' %}{% if vue_preview %}?vue=1{% endif %}">Все комплексы</a>{% endif %}</form>
+  <div class="project-grid" id="project-list">
     {% for card in cards %}
     <article class="project-card" id="project-{{ card.project.pk }}">
       {% if card.photo %}<img class="project-photo" src="{{ card.photo }}" alt="{{ card.project }}" loading="lazy" referrerpolicy="no-referrer">{% endif %}
       <div class="card-badges"><span class="meta-badge">{% if card.project.project_type == 'HOUSE' %}Таунхаус{% else %}{{ card.project.get_project_type_display|default:"Тип не указан" }}{% endif %}</span>{% if card.loaded %}<span class="status-badge is-available">Предложения загружены</span>{% endif %}</div>
       <h2>{{ card.project }}</h2><p>{{ card.project.developer_name }} · {{ card.location }}</p>
+      <p><a href="{% url 'admin:arealisting_arealistingproject_change' card.project.pk %}?return_q={{ query|urlencode }}&amp;return_page={{ page.number }}{% if vue_preview %}&amp;vue=1{% endif %}">Подробнее о комплексе →</a></p>
       {% if card.loaded %}<dl class="inventory-counters"><div class="is-available"><dt>Доступно</dt><dd>{{ card.available }}</dd></div><div class="is-sold"><dt>Продано</dt><dd>{{ card.sold }}</dd></div></dl><p class="muted">Связано с карточками Undersun: {{ card.linked }}</p>
-        <a class="primary-action" href="{% url 'admin:arealisting_matching' %}?project={{ card.project.pk }}">Подобрать карточки →</a>
-        {% if can_load %}<form method="post" action="{% url 'admin:arealisting_load_inventory' card.project.pk %}" data-loading="Обновляем предложения…">{% csrf_token %}<input type="hidden" name="return_q" value="{{ query }}"><input type="hidden" name="return_page" value="{{ page.number }}"><button type="submit" class="secondary">Обновить предложения</button></form>{% endif %}
+        <a class="primary-action" href="{% url 'admin:arealisting_matching' %}?project={{ card.project.pk }}{% if vue_preview %}&amp;vue=1{% endif %}">Подобрать карточки →</a>
+        {% if can_load %}<form method="post" action="{% url 'admin:arealisting_load_inventory' card.project.pk %}" data-loading="Обновляем предложения…">{% csrf_token %}{% if vue_preview %}<input type="hidden" name="vue" value="1">{% endif %}<input type="hidden" name="return_q" value="{{ query }}"><input type="hidden" name="return_page" value="{{ page.number }}"><button type="submit" class="secondary">Обновить предложения</button></form>{% endif %}
       {% else %}<p>Сначала получите список предложений этого комплекса.</p>
-        {% if can_load %}<form method="post" action="{% url 'admin:arealisting_load_inventory' card.project.pk %}" data-loading="Получаем предложения…">{% csrf_token %}<input type="hidden" name="return_q" value="{{ query }}"><input type="hidden" name="return_page" value="{{ page.number }}"><button type="submit">Загрузить предложения</button></form>{% else %}<p>Для загрузки обратитесь к администратору с правом обновления данных.</p>{% endif %}
+        {% if can_load %}<form method="post" action="{% url 'admin:arealisting_load_inventory' card.project.pk %}" data-loading="Получаем предложения…">{% csrf_token %}{% if vue_preview %}<input type="hidden" name="vue" value="1">{% endif %}<input type="hidden" name="return_q" value="{{ query }}"><input type="hidden" name="return_page" value="{{ page.number }}"><button type="submit">Загрузить предложения</button></form>{% else %}<p>Для загрузки обратитесь к администратору с правом обновления данных.</p>{% endif %}
       {% endif %}
       <small class="muted">Комплекс обновлён: {{ card.project.synced_at|date:"d.m.Y H:i" }}</small>
     </article>
     {% empty %}<section class="workspace-intro"><h2>{% if query %}Комплекс не найден{% else %}Начнём с получения комплексов{% endif %}</h2><p>{% if query %}Попробуйте другое название или обновите список проектов кнопкой выше.{% else %}Нажмите «Обновить список проектов». После загрузки выберите комплекс, с которым хотите работать.{% endif %}</p></section>{% endfor %}
   </div>
-  {% if page.has_other_pages %}<nav class="matching-toolbar" aria-label="Страницы комплексов">{% if page.has_previous %}<a href="?q={{ query|urlencode }}&page={{ page.previous_page_number }}">← Назад</a>{% endif %}<span>{{ page.number }} / {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?q={{ query|urlencode }}&page={{ page.next_page_number }}">Далее →</a>{% endif %}</nav>{% endif %}
+  {% if page.has_other_pages %}<nav class="matching-toolbar" aria-label="Страницы комплексов">{% if page.has_previous %}<a href="?q={{ query|urlencode }}&amp;page={{ page.previous_page_number }}{% if vue_preview %}&amp;vue=1{% endif %}">← Назад</a>{% endif %}<span>{{ page.number }} / {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?q={{ query|urlencode }}&amp;page={{ page.next_page_number }}{% if vue_preview %}&amp;vue=1{% endif %}">Далее →</a>{% endif %}</nav>{% endif %}
   {% if arealisting_sections %}<details class="technical-sections"><summary>Настройки и данные интеграции</summary><ul>{% for section in arealisting_sections %}<li><a href="{{ section.url }}">{{ section.label }}</a></li>{% endfor %}</ul></details>{% endif %}
   <script src="{% static 'js/admin/arealisting-workspace.js' %}" defer></script>
+  {% arealisting_vite_assets %}
 </div>
 {% endblock %}

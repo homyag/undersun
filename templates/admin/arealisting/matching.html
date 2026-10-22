@@ -4,6 +4,7 @@
 {% block content %}
 <div class="matching">
   <a href="{% url 'admin:arealisting_arealistingproject_changelist' %}">← Все комплексы</a>
+  {% if vue_preview_url %}<p><a href="{{ vue_preview_url }}">Открыть новую версию экрана на Vue →</a></p>{% endif %}
   <div class="workflow-steps" aria-label="Этапы работы"><span>1. Выберите комплекс</span><span id="step-two" aria-current="step">2. Подберите карточки</span><span id="step-three">3. Проверьте и сохраните</span><span id="step-done" hidden>✓ Готово</span></div>
   <header class="page-heading matching-page-heading">
     <div><span class="meta-badge">{% if project.project_type == 'HOUSE' %}Таунхаус{% else %}{{ project.get_project_type_display|default:"Тип не указан" }}{% endif %}</span><h2>{{ project }}</h2><p class="muted">{{ project.developer_name|default:"Застройщик не указан" }}</p></div>

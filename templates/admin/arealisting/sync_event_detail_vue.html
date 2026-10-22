@@ -1,0 +1,10 @@
+{% extends "admin/arealisting/base_workspace.html" %}
+{% load static arealisting_vite %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261020-1">{% endblock %}
+{% block arealisting_content %}
+<div class="matching sync-event-detail-page">
+  <div id="arealisting-sync-event-detail-root"></div>
+  {{ sync_event_detail_data|json_script:"sync-event-detail-data" }}
+  {% arealisting_vite_assets %}
+</div>
+{% endblock %}

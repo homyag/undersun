@@ -1,0 +1,10 @@
+{% extends "admin/arealisting/base_workspace.html" %}
+{% load static arealisting_vite %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261020-1">{% endblock %}
+{% block arealisting_content %}
+<div class="matching property-change-list-page">
+  <div id="arealisting-property-change-list-root"></div>
+  {{ property_change_list_data|json_script:"property-change-list-data" }}
+  {% arealisting_vite_assets %}
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "admin/arealisting/base_workspace.html" %}
+{% load static arealisting_vite %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261020-1">{% endblock %}
+{% block arealisting_content %}
+<div class="matching review-queue-page">
+  <div id="arealisting-review-queue-root"></div>
+  {% csrf_token %}
+  {{ review_queue_data|json_script:"review-queue-data" }}
+  {% arealisting_vite_assets %}
+</div>
+{% endblock %}

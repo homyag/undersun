@@ -162,6 +162,7 @@ data/geoBoundaries-THA-ADM2_full.geojson
 migration.log
 cleanup.log
 /node_modules/
+/static/arealisting-app/
 /update_rates.sh
 /undersun_data.json
 /underson_bd_dump.json

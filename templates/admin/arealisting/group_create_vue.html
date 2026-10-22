@@ -1,0 +1,11 @@
+{% extends "admin/arealisting/base_workspace.html" %}
+{% load static arealisting_vite %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin/arealisting-matching.css' %}?v=20261020-1">{% endblock %}
+{% block arealisting_content %}
+<div class="matching group-create-page">
+  {% csrf_token %}
+  <div id="arealisting-group-create-root"></div>
+  {{ group_create_data|json_script:"group-create-data" }}
+  {% arealisting_vite_assets %}
+</div>
+{% endblock %}

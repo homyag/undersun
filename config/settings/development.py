@@ -2,6 +2,10 @@ from .base import *
 
 DEBUG = True
 
+# Локально открываем готовые экраны AREALISTING на Vue и по прямым ссылкам.
+# При отсутствии сборки Django автоматически использует прежние шаблоны.
+AREALISTING_VUE_ENABLED = env.bool('AREALISTING_VUE_ENABLED', default=True)
+
 ALLOWED_HOSTS = ['51.79.173.21','localhost','127.0.0.1', '72.60.194.3']
 
 # Database для разработки (PostgreSQL)
