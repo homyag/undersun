@@ -73,6 +73,7 @@ class SeaViewLandingTests(TestCase):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, heading)
+                self.assertNotContains(response, 'AREALISTING')
                 self.assertContains(response, f'<link rel="canonical" href="http://testserver{url}">', html=True)
                 for alternate in ('ru', 'en', 'th'):
                     self.assertContains(
