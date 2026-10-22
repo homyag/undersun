@@ -175,6 +175,9 @@
                                            class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{{ type.name_display }}</a>
                                         {% endif %}
                                     {% endfor %}
+                                    <div class="border-t border-gray-200 my-1"></div>
+                                    <a href="{% url 'properties:property_sea_view' %}"
+                                       class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{% if lang == 'en' %}Sea-view properties{% elif lang == 'th' %}อสังหาริมทรัพย์วิวทะเล{% else %}Недвижимость с видом на море{% endif %}</a>
                                 </div>
                             </div>
                         </div>

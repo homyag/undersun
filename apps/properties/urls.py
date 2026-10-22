@@ -1,11 +1,12 @@
 from django.urls import path
-from . import views
+from . import views, sea_view
 
 app_name = 'properties'
 
 urlpatterns = [
     path('', views.PropertyListView.as_view(), name='property_list'),
     path('sale/', views.PropertySaleView.as_view(), name='property_sale'),
+    path('sea-view/', sea_view.SeaViewListView.as_view(), name='property_sea_view'),
     path('rent/', views.PropertyRentView.as_view(), name='property_rent'),
     path('favorites/', views.favorites_view, name='property_favorites'),
     path('ajax/list/', views.property_list_ajax, name='property_list_ajax'),

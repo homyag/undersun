@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static currency_tags url_utils %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block structured_data %}
+{{ block.super }}
+{% if properties %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "{{ copy.heading|escapejs }}",
+  "numberOfItems": {{ results_count }},
+  "itemListElement": [
+    {% for property in properties %}
+    {"@type": "ListItem", "position": {{ page_obj.start_index|add:forloop.counter0 }}, "url": "{{ property.get_absolute_url|absolute_url:request|escapejs }}"}{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<main class="bg-gray-50">
+    <section class="relative overflow-hidden border-b border-gray-200 bg-primary pt-24 text-white lg:pt-32">
+        <div class="absolute inset-y-0 right-0 w-2/3 bg-gradient-to-l from-slate-600/70 to-transparent" aria-hidden="true"></div>
+        <div class="absolute -bottom-28 -right-20 h-80 w-80 rounded-full border border-white/10" aria-hidden="true"></div>
+        <div class="absolute -bottom-40 -right-8 h-80 w-80 rounded-full border border-white/10" aria-hidden="true"></div>
+        <div class="relative mx-auto max-w-7xl px-4 pb-14 pt-8 lg:pb-20">
+            <nav class="mb-12 flex flex-wrap items-center gap-2 text-sm text-white/70" aria-label="Breadcrumb">
+                <a href="{{ catalog_url }}" class="underline decoration-white/30 underline-offset-4 hover:text-white">{{ copy.catalog_label }}</a>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page" class="text-white">{{ copy.heading }}</span>
+            </nav>
+            <div class="max-w-3xl">
+                <p class="mb-5 text-xs font-bold uppercase tracking-widest text-accent">{{ copy.eyebrow }} · {{ copy.area }}</p>
+                <h1 class="text-4xl font-semibold leading-tight tracking-tight md:text-5xl lg:text-6xl">{{ copy.heading }}</h1>
+                <p class="mt-7 max-w-2xl text-base leading-7 text-white/85 md:text-lg">{{ copy.intro }}</p>
+            </div>
+            <div class="mt-10 flex flex-wrap items-center gap-4 border-t border-white/20 pt-6">
+                <div class="flex items-baseline gap-3">
+                    <span class="text-3xl font-semibold text-accent">{{ results_count }}</span>
+                    <span class="text-sm text-white/75">{{ copy.count }}</span>
+                </div>
+                <a href="{{ contact_url }}" class="ml-auto inline-flex items-center rounded-lg bg-accent px-5 py-3 text-sm font-bold text-primary transition hover:bg-yellow-300" data-ym-goal="sea_view_contact_click">{{ copy.contact_label }} <span class="ml-3" aria-hidden="true">↗</span></a>
+            </div>
+        </div>
+    </section>
+
+    <div class="mx-auto max-w-7xl px-4 py-12 lg:py-16">
+        <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
+            <h2 class="text-2xl font-semibold text-primary md:text-3xl">{{ copy.list_heading }}</h2>
+            <a href="{{ catalog_url }}" class="text-sm font-semibold text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-tertiary">{{ copy.catalog_label }} ↗</a>
+        </div>
+
+        {% if properties %}
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {% for property in properties %}
+            <article class="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:border-accent hover:shadow-lg">
+                <a href="{{ property.get_absolute_url }}" class="relative block aspect-[4/3] overflow-hidden bg-gray-200" data-ym-goal="sea_view_card_click" data-ym-param-id="{{ property.id }}">
+                    {% if property.main_image %}
+                    <img src="{{ property.main_image.medium_url }}" alt="{{ property.get_card_image_alt }}" width="800" height="600" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}" decoding="async">
+                    {% else %}
+                    <img src="{% static 'images/no-image.svg' %}" alt="" width="800" height="600" class="h-full w-full object-cover" loading="lazy">
+                    {% endif %}
+                </a>
+                <div class="flex flex-1 flex-col p-5">
+                    <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-tertiary">{{ property.get_display_location_label }}</p>
+                    <h3 class="text-lg font-semibold leading-snug text-primary">
+                        <a href="{{ property.get_absolute_url }}" class="hover:underline hover:decoration-accent hover:underline-offset-4" data-ym-goal="sea_view_card_click" data-ym-param-id="{{ property.id }}">{{ property.get_display_title }}</a>
+                    </h3>
+                    <div class="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-tertiary">
+                        {% if property.bedrooms %}<span>{{ property.bedrooms }} {{ copy.bedrooms_label }}</span>{% endif %}
+                        {% if property.area_total %}<span>{{ property.area_total }} m²</span>{% endif %}
+                    </div>
+                    <div class="mt-auto flex items-center justify-between gap-3 border-t border-gray-100 pt-5">
+                        <span class="text-lg font-bold text-primary">{% price_in_currency property 'sale' %}</span>
+                        <a href="{{ property.get_absolute_url }}" class="text-sm font-semibold text-primary underline decoration-accent decoration-2 underline-offset-4 hover:text-tertiary" data-ym-goal="sea_view_card_click" data-ym-param-id="{{ property.id }}">{{ copy.details }}</a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% if is_paginated %}
+        <nav class="mt-10 flex items-center justify-center gap-3" aria-label="Pagination">
+            {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" rel="prev" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-primary hover:border-accent">{{ copy.previous }}</a>{% endif %}
+            <span class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">{{ copy.page_label }} {{ page_obj.number }} / {{ paginator.num_pages }}</span>
+            {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" rel="next" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-primary hover:border-accent">{{ copy.next }}</a>{% endif %}
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="rounded-xl border border-gray-200 bg-white p-8 text-base leading-7 text-tertiary">
+            <p>{{ copy.empty }}</p>
+            <a href="{{ catalog_url }}" class="mt-4 inline-block font-semibold text-primary underline decoration-accent decoration-2 underline-offset-4">{{ copy.catalog_label }} ↗</a>
+        </div>
+        {% endif %}
+
+        <section class="mt-14 grid gap-8 border-t border-gray-200 pt-12 lg:grid-cols-3">
+            <div>
+                <p class="mb-3 h-1 w-12 bg-accent" aria-hidden="true"></p>
+                <h2 class="text-2xl font-semibold text-primary">{{ copy.check_heading }}</h2>
+            </div>
+            <ol class="grid gap-4 text-base leading-7 text-gray-700 lg:col-span-2">
+                {% for check in copy.checks %}
+                <li class="flex gap-4 rounded-lg border border-gray-200 bg-white p-5"><span class="font-bold text-accent">0{{ forloop.counter }}</span><span>{{ check }}</span></li>
+                {% endfor %}
+            </ol>
+        </section>
+
+        <section class="mt-12 border-t border-gray-200 pt-10">
+            <h2 class="mb-4 text-xl font-semibold text-primary">{{ copy.related_heading }}</h2>
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ villa_url }}" class="rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-primary hover:border-accent">{{ copy.villa_label }} ↗</a>
+                <a href="{{ condo_url }}" class="rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-primary hover:border-accent">{{ copy.condo_label }} ↗</a>
+                <a href="{{ catalog_url }}" class="rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-primary hover:border-accent">{{ copy.catalog_label }} ↗</a>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

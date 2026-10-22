@@ -994,6 +994,17 @@ class StaticSitemapView(SitemapBaseView):
             lastmod = self._property_lastmod(active_properties.filter(property_type__name=slug))
             entries.extend(self._expand_entries(alternates, lastmod))
 
+        from apps.properties.sea_view import sea_view_property_queryset
+
+        sea_view_properties = sea_view_property_queryset()
+        if sea_view_properties.exists():
+            alternates = self._build_alternates(
+                base_url, lambda: reverse('properties:property_sea_view')
+            )
+            entries.extend(self._expand_entries(
+                alternates, self._property_lastmod(sea_view_properties)
+            ))
+
         # District and location detail pages
         districts = (
             District.objects

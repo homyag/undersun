@@ -43,6 +43,8 @@
                     <li><a href="{% url 'properties:property_by_type' 'townhouse' %}"
                            class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}
                         Townhouses{% elif LANGUAGE_CODE == 'th' %}ทาวน์เฮาส์{% else %}Таунхаусы{% endif %}</a></li>
+                    <li><a href="{% url 'properties:property_sea_view' %}"
+                           class="text-gray-300 hover:text-white transition-colors">{% if LANGUAGE_CODE == 'en' %}Sea-view properties{% elif LANGUAGE_CODE == 'th' %}อสังหาริมทรัพย์วิวทะเล{% else %}Недвижимость с видом на море{% endif %}</a></li>
                 </ul>
             </div>
 

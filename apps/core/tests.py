@@ -344,6 +344,7 @@ class StaticSitemapLastmodTests(SimpleTestCase):
             patch('apps.core.views.Service.objects.filter', return_value=[]),
             patch('apps.core.views.Team.objects.filter', return_value=team_queryset),
             patch('apps.core.views.BlogPost.get_published', return_value=[]),
+            patch('apps.properties.sea_view.sea_view_property_queryset', return_value=property_queryset),
         ):
             response = StaticSitemapView.as_view()(request)
 
@@ -356,6 +357,7 @@ class StaticSitemapLastmodTests(SimpleTestCase):
             'http://localhost/en/property/',
             'http://localhost/en/property/sale/',
             'http://localhost/en/property/type/villa/',
+            'http://localhost/en/property/sea-view/',
             'http://localhost/en/locations/',
             'http://localhost/en/locations/sitemap-district/',
             'http://localhost/en/locations/sitemap-district/sitemap-location/',
